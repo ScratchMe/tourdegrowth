@@ -5,12 +5,16 @@ import { NightSurface, ResumePrompt } from "tour-de-growth";
  * played is found on the device: a question, what happened before (one line
  * per quarter), and two actions — resume is the primary, start over the
  * secondary. Nothing is stored anywhere but this browser.
+ *
+ * Each story is `resumeContent(ctx, saved)` (_island/island-view.ts) for a
+ * save a reference year leaves (lib/game/__tests__/paths.ts), as
+ * GameIsland.tsx passes it: `title`, `previously`, and the two labels.
  */
 
 const noop = () => {};
 const box = { padding: 24, maxWidth: 620 } as const;
 
-/** Two quarters played: resume or start over. */
+/** Two quarters played: resume or start over. Reference year A saved after its second quarter. */
 export const MidYear = () => (
   <NightSurface as="div" style={box}>
     <ResumePrompt
@@ -18,8 +22,8 @@ export const MidYear = () => (
       previously={{
         heading: "Previously at Flixo",
         lines: [
-          "Quarter 1: Pause offer, Exit survey. Churn at 5.7%.",
-          "Quarter 2: Data review with the CEO, Pre-billing reminder. Churn at 5.0%.",
+          "Quarter 1: Pause offer, Exit survey. Churn at 5.8%.",
+          "Quarter 2: Onboarding project, Data review with the CEO. Churn at 5.7%.",
         ],
       }}
       accept={{ label: "Resume", onClick: noop }}
@@ -28,7 +32,7 @@ export const MidYear = () => (
   </NightSurface>
 );
 
-/** A finished year, in French: the last headline, and the review offered again. */
+/** A finished year, in French: the last headline, and the review offered again. Reference year A, whole (ending `applause`). */
 export const FinishedYearFrench = () => (
   <NightSurface as="div" style={box}>
     <ResumePrompt

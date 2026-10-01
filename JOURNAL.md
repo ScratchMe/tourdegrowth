@@ -1031,3 +1031,32 @@ Points pour le bon à tirer A14.d : le rôle placé dans la phrase (« Relance
 - sur un build `ENGINE_ENABLED=true`, avec l'émulateur : les specs des portes, de la porte du résultat (`result-real.spec.ts`), des rappels, du fond blanc, du canari et du retour à l'accueil, 42, toutes passées ;
 - neuf specs neuves : `e2e/engine-deck-theme.spec.ts` (la couleur peinte d'une slide à l'écran et un pixel du PNG, dans les deux thèmes, en français et en anglais), `e2e/engine-reminders.spec.ts` (les deux `.ics` téléchargés, leur jour, leur nom, sans valeur ni nom d'entreprise), `e2e/engine-entries.spec.ts` (la ligne de l'accueil et le code qu'elle charge, selon le build) et une de plus dans `result-real.spec.ts` ;
 - captures relues : l'accueil en français à 1 280 px (le moteur seul) et en anglais à 390 px (sous le dernier score), la demande copiée avec « Me le rappeler », le rappel du mois sous les comptes, et la slide en blanc à 1 280 et 390 px.
+
+
+## Design sync B6 : Claude Design à jour d'A15 et de C33, et les douze aperçus du jeu rejoués (2026-10-01, #265)
+
+**Ce qui est parti** : les cinq contrats qui avaient changé depuis l'ancre de B4 (`fee6cc7084fe`). Ce sont `ErrorScreen` (`retry`), `LoadingScreen` (la variante `deep` racontée par l'horloge), `Button` (la bande de 44 px de `sm`), `MetaLabel` (`as`) et `GameEntry` (le surtitre de C33). La synchro passe par le chemin atomique, celui d'un projet épinglé : sentinelle d'abord, le contenu en quatre appels (96, 5, 180, 180), aucune suppression, la sentinelle de nouveau, puis `_ds_sync.json` seul et en dernier. `list_files` confirme les 463 fichiers, et `design/` (le brief 04 et son retour) n'a pas bougé. Ancre `edc539adcbbf`, 14 composants téléversés, 76 reportés avec leur note.
+
+**Une seconde passe, le même soir** : A14 T6 (#264) a été mergé pendant la relecture de cette PR. Il ajoute deux jetons, `--paper-white` et `--surface-white` (le fond blanc du deck), et les confiait à B6. Le pilote, relancé sur la branche rebasée et contre l'ancre que la première passe venait de poser, ne trouve aucun composant changé : sources et rendus sont identiques. Seuls partent les fichiers partagés (101 : aperçus compilés, `_vendor/`, polices, bundle, CSS, README), entre les deux sentinelles, puis `_ds_sync.json`. Le rendu est revérifié (90 sur 90, aucun mauvais), et l'ancre devient `6da5e42a15ef`.
+
+**Trois méthodes, trois trouvailles** :
+- **la recherche de dérive** (chaque aperçu relu contre la copie qu'il cite) : `NumberField` et `FieldRow` citaient encore les deux messages du moteur qu'A15.2 et A15.3 ont réécrits. Une erreur de saisie ne se rend pas dans une image fixe, donc aucune capture ne pouvait le montrer : la phrase partait vers l'agent de design par les exemples du `.prompt.md` ;
+- **le contrôle ponctuel** des composants dont le code avait changé sans leur aperçu (`Button`, `MetaLabel`, `SpaceBand`, `WordmarkLink`) : les rendus sont justes, mais la doc de `MetaLabel` disait « ce n'est pas un titre », faux depuis A15.13. Son histoire `Tracking` dessine maintenant les deux titres du résultat comme `ResultView` (`as="h2" wide`) ;
+- **la régénération des douze aperçus du jeu que B4 avait laissés** (Antoine : « Tout maintenant »). Chaque chiffre est rejoué par `playPath`, `finalState` et `endingState` et les fonctions de l'îlot, chaque feuille comparée octet par octet. Sept étaient justes. Cinq ne l'étaient pas, tous notés « bon » depuis le 2026-09-29 :
+  - `ShareRow` : un texte de partage tapé à la main, que le modèle ne produit pas ;
+  - `ResumePrompt` : deux taux qu'aucune année n'atteint, la même paire inventée que `QuarterTimeline` en B4 ;
+  - `PatternCatalogue` : 4 et 3 entrées sous « les huit ficelles », et des répartitions qu'aucune année ne donne. `ThreeGroups` vient maintenant d'une année trouvée par une marche aléatoire, nommée dans l'histoire ;
+  - `EventClipping` : une seule des deux coupures du trimestre en français ;
+  - `VideoCall` : `Ringing` passait un message vide, alors que l'îlot passe toujours `bossMessage`.
+
+**Dans le produit** :
+- la JSDoc de `framing` dans `DgFace` plaçait l'avatar dans « le journal », qui ne dessine aucun visage : c'est le rapport et l'écran des nouvelles. Corrigé. Elle n'avait jamais atteint Claude Design, parce que le `.d.ts` émis coupe une JSDoc vers 120 caractères, avant ce membre de phrase ;
+- **A12.i**, ouvert dans `CHANTIERS.md` : rien ne passe `refId` à `TourLoop`. Le lien de fin de niveau « Où en est ta croissance ? » ne porte donc jamais `?ref=`, contre GAME-BRIEF 13.3 D. Le jeu est fermé, rien ne fuit ;
+- noté sans y toucher : « 83 / 100 » garde des espaces simples autour de la barre en français.
+
+**Vérifié** :
+- `dist/types` n'a pas été reconstruit après la correction de `DgFace` (`cfg.buildCmd` se lance à la main, le pilote ne le fait pas). C'est sans effet ici : le `.d.ts` émis coupe avant la phrase corrigée. Mais une correction de JSDoc plus courte, elle, ne partirait qu'après `cfg.buildCmd` ;
+- trois passes du pilote ;
+- `package-validate` : 90 aperçus rendus sur 90, aucun mauvais, mince ou identique (`report_validate` envoyé), 303 cellules, et seulement les quatre avertissements permanents ;
+- les 13 composants modifiés sont notés « bon », cellule par cellule, sur leurs captures ;
+- `conventions.md` relu contre le build : tous les noms qu'il cite existent, rien à changer.

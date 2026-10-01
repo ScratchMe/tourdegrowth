@@ -310,7 +310,8 @@ story alone at 900×700 (`fullPage: false`), and the review sheet caps a cell at
   `ContentHeader` InTheEngine and `ProsePage` NightIntro show the band in its
   narrow form at card width, and say so.
 - Tall cells lose their bottom (`ProsePage` Page and NightIntro, all three
-  `QuarterReport` cells, `PatternCatalogue` ThreeGroups, `PhoneMock` Dark):
+  `QuarterReport` cells, both `PatternCatalogue` cells since B6 showed all eight
+  tricks, `PhoneMock` Dark):
   graded from the render-check shots or a scratch full-page shot, never from
   the cut sheet alone.
 - `Hand` shows 6 of its cards for the same reason; its doc says which.
@@ -330,23 +331,24 @@ doc comment says why the layout uses an auto margin rather than
 ## Synced
 
 Project `23b9671c-a55b-452e-aa41-39906ee71ba8` ("Tour de Growth"), pinned as
-`projectId` in `config.json`. **Last upload: 2026-10-01, B4 (the game's
-level 2, and A7.3.c's engine)**, from a claude.ai/code cloud session — **90
-components, 303 story cells**, all graded good. A12.d renamed level 1's
-slots in six game contracts (`Dashboard`: `metric`, `customers`, `revenue`;
-`EndingCharts` and `RevealCells`: `metric`; `QuarterReport`'s figure keys;
-`ActionBar`: `pill`; `GameEntry`: `band.metric`), A12.e added `ShopPhone`
-(pinned in `dtsPropsFor`) and `BasketPill` and moved the phone frame into
-`PhoneFrame.module.css`, A12.f.1 gave `NextLevel` an `href`, A12.f.2 gave
-`GameEntry` its `levels`. The driver queued those nine plus the two new ones;
-the drift search and the regeneration added `ZoneNav`, `Choices`,
-`Checkbox`, `HubMountain`, `Tag`, `RevealCells`, `QuarterTimeline` and
-`PhoneMock` (see "Found in the 2026-10-01 re-sync (B4)"); 19 components
-uploaded, 71 carried forward. 463 files (360 component files, 90 compiled
-previews, `_vendor/`, `fonts/`, bundle, CSS, README, the sentinel and the
-anchor), no delete, `design/` untouched. Eight driver runs; `report_validate`:
-90 total, 0 bad, 0 thin, 0 identical; anchor `bundleSha12` `fee6cc7084fe`.
-Earlier uploads: 2026-09-30 after A11 (88, 292, `8235f4e6de01`),
+`projectId` in `config.json`. **Last upload: 2026-10-01, B6 (A15 and
+C33)**, from a claude.ai/code cloud session — **90 components, 303 story
+cells**, all graded good. The driver keyed 13 components as changed
+(`ErrorScreen`, `LoadingScreen`, `MetaLabel`, `GameEntry`, `NumberField`,
+`FieldRow`, and the seven game previews regenerated from the model, see
+"Found in the 2026-10-01 re-sync (B6)"), all regraded. `NightSurface` went up
+with them: its emitted `.d.ts` and `.prompt.md` differed from the anchor's
+while its sources and render hash did not (not chased further). 14
+components uploaded, 76 carried forward. 463 files, no delete, `design/` untouched. Three driver
+runs; `report_validate`: 90 total, 0 bad, 0 thin, 0 identical; anchor
+`bundleSha12` `edc539adcbbf`. **A second pass the same evening** carried the
+two tokens A14 T6 (#264) added while B6 was in review, `--paper-white` and
+`--surface-white`: no component changed (0 changed, sources and render hashes
+identical), so only the shared files went up (`_preview/`, `_vendor/`,
+`fonts/`, bundle, CSS, README: 101 files), between the two sentinels, then
+`_ds_sync.json`. Render check 90/0/0/0; anchor `6da5e42a15ef`. Earlier uploads: 2026-10-01 B4, the game's
+level 2 and A7.3.c's engine (90, 303, 19 components uploaded, eight driver
+runs, `fee6cc7084fe`), 2026-09-30 after A11 (88, 292, `8235f4e6de01`),
 2026-09-30 B3 (88, 292, `d1835d51cffd`), 2026-09-30 before A10 (79
 components, 244 cells, anchor `f3b4bf9eb3c5`), 2026-09-29 (77, 238,
 `17cca5e0909b`), 2026-09-11 (34, 116).
@@ -626,7 +628,7 @@ added. Two methods found more, and neither was reading a sheet:
   1 test of 11 fails without the rule).
 
 What to take from it: **a carried grade says the sheet looked right, not that
-its numbers are the model's.** The game previews B4 did NOT regenerate —
+its numbers are the model's.** (Done in B6, below.) The game previews B4 did NOT regenerate —
 `ActionCard`, `DgFace`, `DgMail`, `EndingHero`, `EventClipping`, `Hand`,
 `PatternCatalogue`, `Playbook`, `ResumePrompt`, `ShareRow`, `TourLoop`,
 `VideoCall` — are the next sync's first job, with the same scripts: bundle a
@@ -638,6 +640,47 @@ and check that every string it returns is in the preview byte for byte. A
 story whose doc names no path, or names one that does not produce it, gets a
 real one: a random walk over the reducer (`handIds` + `toggle` + `run`)
 finds a year with the wanted shape in seconds.
+
+### Found in the 2026-10-01 re-sync (B6), by the drift search and by regenerating
+
+B6 carried A15 (`ErrorScreen` `retry`, `LoadingScreen` told by the clock,
+`Button` `sm`'s 44px strip, `MetaLabel` `as`) and C33 (`GameEntry` `eyebrow`).
+What the three methods found beyond that:
+
+- **The drift search** found `NumberField` and `FieldRow` still quoting the two
+  engine messages A15.2 and A15.3 rewrote (« Ce n'est pas un nombre lisible »,
+  « Le minimum dépasse le maximum »). Parse errors never render in a still, so
+  no sheet could show it: the strings were going to the design agent through
+  the `.prompt.md` examples.
+- **The spot check** of components whose code changed without their preview
+  (`Button`, `MetaLabel`, `SpaceBand`, `WordmarkLink`) rendered as graded, but
+  `MetaLabel`'s doc said « It is not a heading », false since A15.13; its
+  `Tracking` story now draws the result's two titles as `ResultView` does
+  (`as="h2" wide`, default size).
+- **Regenerating the twelve game previews B4 left** (three agents in parallel,
+  `playPath` / `finalState` / `endingState` and the island's builders, every
+  leaf compared byte for byte, then the lists by length): seven matched
+  (`Playbook` 38/38, `EndingHero`, `DgMail`, `Hand` 96/96, `TourLoop`;
+  `ActionCard` and `DgFace` right but with comments naming no year, or a wrong
+  place), five did not, all graded good since 2026-09-29:
+  `ShareRow` (a share text typed by hand, « 3.9 %, trust at 71 »: the model says
+  « 4.0 %, trust at 83 / 100 »), `ResumePrompt` (5.7 % then 5.0 %, which no
+  year reaches: the same invented pair as `QuarterTimeline` in B4),
+  `PatternCatalogue` (4 and 3 entries under « the eight tricks », pre-2026-09-25
+  cases, splits no year produces; `ThreeGroups` now comes from a year found by
+  a random walk, named in the story), `EventClipping` (one of the quarter's two
+  clippings in French) and `VideoCall` (`Ringing` passed `message=""`, the
+  island always passes `bossMessage`).
+- **A product doc defect**, fixed in the same PR: `DgFace`'s `framing` JSDoc
+  placed the avatar in « the journal », which draws no face (it is the report
+  and the news screen). It never reached Claude Design: the emitted `.d.ts`
+  cuts a JSDoc at about 120 characters, before that clause. A long JSDoc is
+  read in full only in the repo.
+- **Seen, left to the product** (`CHANTIERS.md`): nothing passes
+  `TourLoop.refId`, so the end-of-level « Où en est ta croissance ? » link never
+  carries `?ref=` though GAME-BRIEF 13.3 D says it should when a result id is
+  known; and « 83 / 100 » keeps plain spaces around the slash in French
+  (`december.cells.outOf`), outside the NBSP list above.
 
 ## Re-sync risks
 

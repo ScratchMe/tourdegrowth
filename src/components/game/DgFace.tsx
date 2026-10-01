@@ -19,7 +19,7 @@ export interface DgFaceProps {
   /**
    * `call` = the whole call, 16:9, with the office behind him. `avatar` =
    * the head alone, cropped by the viewBox, for the CEO's line in the quarter
-   * report and the journal (40px). What is in the picture, not how big it
+   * report and on the news screen (40px). What is in the picture, not how big it
    * is: so `framing`, not `size` (the variant names, S-16).
    */
   framing?: "call" | "avatar";

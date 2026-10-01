@@ -69,7 +69,7 @@ export const AmountOutOfACount = () => (
         locale="fr"
         suffix={" €"}
         unitName="euros"
-        parseError="Ce n'est pas un nombre lisible."
+        parseError="Écris un nombre, par exemple 1 250 ou 18,5."
       />
       <Count
         initial={42}
@@ -87,8 +87,8 @@ export const AmountOutOfACount = () => (
 export const AtLeastAtMost = () => (
   <div style={{ maxWidth: 760 }}>
     <FieldRow>
-      <Count initial={6} size="sm" label="At least" locale="en" suffix="%" unitName="per cent" parseError="That isn't a readable number." />
-      <Count initial={9} size="sm" label="At most" locale="en" suffix="%" unitName="per cent" parseError="That isn't a readable number." />
+      <Count initial={6} size="sm" label="At least" locale="en" suffix="%" unitName="per cent" parseError="Type a number, such as 1,250 or 18.5." />
+      <Count initial={9} size="sm" label="At most" locale="en" suffix="%" unitName="per cent" parseError="Type a number, such as 1,250 or 18.5." />
     </FieldRow>
   </div>
 );
@@ -100,7 +100,7 @@ export const AtLeastAtMost = () => (
  */
 export const RangeWithItsMessage = () => (
   <div style={{ maxWidth: 760 }}>
-    <FieldRow error="Le minimum dépasse le maximum.">
+    <FieldRow error="Échange les deux : le minimum dépasse le maximum.">
       <Count
         initial={9}
         size="sm"
@@ -108,7 +108,7 @@ export const RangeWithItsMessage = () => (
         locale="fr"
         suffix={" %"}
         unitName="pour cent"
-        parseError="Ce n'est pas un nombre lisible."
+        parseError="Écris un nombre, par exemple 1 250 ou 18,5."
       />
       <Count
         initial={6}
@@ -117,7 +117,7 @@ export const RangeWithItsMessage = () => (
         locale="fr"
         suffix={" %"}
         unitName="pour cent"
-        parseError="Ce n'est pas un nombre lisible."
+        parseError="Écris un nombre, par exemple 1 250 ou 18,5."
       />
     </FieldRow>
   </div>

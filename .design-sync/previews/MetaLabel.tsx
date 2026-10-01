@@ -2,8 +2,9 @@ import { MetaLabel } from "tour-de-growth";
 
 /*
  * The mono voice of the system — every eyebrow, counter and micro-label on
- * the site is this component. It is not a heading: a section title is a real
- * <h2>, and MetaLabel is the small line above it.
+ * the site is this component. A `div` by default; where the eyebrow IS the
+ * section's title, `as="h2"` (or `h3`) makes it the heading a screen reader
+ * goes to, and it looks the same (A15.13: the result's sections).
  */
 
 const row = { display: "flex", flexDirection: "column", gap: 10 } as const;
@@ -27,13 +28,15 @@ export const Tones = () => (
 );
 
 /**
- * `wide` (0.12em) is for section eyebrows. `uppercase={false}` is for the rare
- * line read as a sentence rather than scanned as a label.
+ * `wide` (0.12em) is for section eyebrows. The first two are the result's
+ * section titles as `ResultView` draws them: `as="h2" wide`, at the default
+ * size. `uppercase={false}` is for the rare line read as a sentence rather
+ * than scanned as a label.
  */
 export const Tracking = () => (
   <div style={row}>
-    <MetaLabel size="xs" wide>Strengths</MetaLabel>
-    <MetaLabel size="xs" wide>Where you're losing time</MetaLabel>
+    <MetaLabel as="h2" wide>Strengths</MetaLabel>
+    <MetaLabel as="h2" wide>Where you're losing time</MetaLabel>
     <MetaLabel size="xs" uppercase={false}>A quick estimate, not an audit.</MetaLabel>
   </div>
 );

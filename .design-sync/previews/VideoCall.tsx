@@ -10,9 +10,13 @@ import { NightSurface, VideoCall } from "tour-de-growth";
  * Every word arrives resolved and every number (typing pace, voice) computed:
  * the component imports nothing but types from the game engine.
  *
- * Messages and moods are the ones the island computes for real states
- * (lib/game/__tests__/paths.ts, `bossMessage`, `moodNow`); labels and pace
- * are content/game/retention.ts (`visio`) and lib/game/ui-timing.ts. Every
+ * Every prop is what GameIsland.tsx passes for a state a reference year
+ * reaches (lib/game/__tests__/paths.ts, named on each story): `state` from
+ * `callViewFor(phase)`, `mood` from `moodNow(level, desk)` (lib/game/model.ts),
+ * `message` from `bossMessage(ctx, desk)` and `ringingEyebrow` from
+ * `quarterPeriod(ctx, q)` (_island/island-view.ts), `labels` from
+ * content/game/retention.ts (`visio`), pace from lib/game/ui-timing.ts
+ * (`TYPE_CHARS_PER_TICK`, `TYPE_TICK_MS[mood]`, `VOICES_WAIT_MS`). Every
  * story passes `animateCaption={false}` and `voice={null}`: the caption is
  * printed whole and there is no "Listen" button. The typing, the ring and
  * the running clock are motion — a still shows the first second of a call,
@@ -42,14 +46,16 @@ const box = { padding: 20, maxWidth: 560 } as const;
 /**
  * Between two quarters: the eyebrow says which quarter is calling, the one
  * action is to pick up. After a first quarter that hit its target, the CEO
- * is calm.
+ * is calm: reference year C after its first quarter (5.3%, target 5.6%), on
+ * report 1's "next". The island already passes the call's message, which
+ * the ringing state does not print: it appears once he is picked up.
  */
 export const Ringing = () => (
   <NightSurface as="div" style={box}>
     <VideoCall
       state="ringing"
       mood="calm"
-      message=""
+      message="5.3%, that's good. March was the warm-up. End of June, 5.1%. And this quarter, cancellations go through the phone, Monday to Friday, like the competition. Their numbers are outrageous. That's not an idea. It's a request."
       ringingEyebrow="Quarter 2 · April to June"
       labels={LABELS}
       animateCaption={false}
@@ -64,7 +70,8 @@ export const Ringing = () => (
  * Open, on the year's first call (the CEO is firm): the caption band holds
  * the whole message, and "Hang up and choose your projects" is the primary —
  * the hand of cards waits behind it. The clock chip counts from 00:00; the
- * still shows it at its start.
+ * still shows it at its start. A fresh year (`fresh(level)`, every reference
+ * year's first state), phase `call`.
  */
 export const Open = () => (
   <NightSurface as="div" style={box}>
@@ -84,7 +91,9 @@ export const Open = () => (
 /**
  * Angry, in French, after two missed quarters — the longest captions (the
  * third call, with the CEO's order), and the mood the brows and mouth say
- * (never the only carrier). Angry types faster (18 ms a tick).
+ * (never the only carrier). Angry types faster (18 ms a tick). Reference
+ * year A after its second quarter (5.8% then 5.7%, both targets missed;
+ * the order is `call`), picked up.
  */
 export const OpenAngryFrench = () => (
   <NightSurface as="div" style={box}>
@@ -111,7 +120,11 @@ export const OpenAngryFrench = () => (
   </NightSurface>
 );
 
-/** Hung up: the picture stays, the timer says so in words, and the message can be reread. The cards are live now. */
+/**
+ * Hung up: the picture stays, the timer says so in words, and the message can
+ * be reread. The cards are live now. The first call of a fresh year after
+ * `hangup` (phase `hand`): the CEO is still firm.
+ */
 export const HungUp = () => (
   <NightSurface as="div" style={box}>
     <VideoCall
@@ -127,7 +140,10 @@ export const HungUp = () => (
   </NightSurface>
 );
 
-/** Ended: the year cut short, grey, and his last word — the CEO is cold once he has fired you. */
+/**
+ * Ended: the year cut short, grey, and his last word — the CEO is cold once
+ * he has fired you. Reference year D, fired in June (phase `december`).
+ */
 export const Ended = () => (
   <NightSurface as="div" style={box}>
     <VideoCall
