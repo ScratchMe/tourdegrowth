@@ -328,15 +328,18 @@ doc comment says why the layout uses an auto margin rather than
 
 ## Synced
 
-**Stale since 2026-10-01 (A12.d), on purpose until A12.e lands** — six game
+**Stale since 2026-10-01 (A12.d, then A12.e), ready to re-sync** — six game
 components renamed level 1's slots in their props: `Dashboard` (`churn`,
 `subs`, `mrr` → `metric`, `customers`, `revenue`), `EndingCharts` and
 `RevealCells` (`churn` → `metric`), `QuarterReport` (figure keys), `ActionBar`
 (`clicks` → `pill`), `GameEntry` (`band.churn` → `band.metric`). Their previews
 here are already renamed and type-checked against the components; the
-uploaded project still shows the old contracts. `CHANTIERS.md` B4 re-syncs
-them together with A12.e's new component (Pédalix's phone): recapture these
-six, do not carry their grades forward.
+uploaded project still shows the old contracts. A12.e then added two
+components — `ShopPhone` (Pédalix's phone, pinned in `dtsPropsFor` like
+`PhoneMock`) and `BasketPill` (its pill, drawn with `ClickPill`'s styles) —
+and moved `PhoneMock`'s frame into `PhoneFrame.module.css`, shared by both
+phones. `CHANTIERS.md` B4 re-syncs all of it at once: 90 components, recapture
+the six renamed ones and `PhoneMock`, do not carry their grades forward.
 
 Project `23b9671c-a55b-452e-aa41-39906ee71ba8` ("Tour de Growth"), pinned as
 `projectId` in `config.json`. **Last upload: 2026-09-30, after A11, C28 and
@@ -433,10 +436,11 @@ alone because both previews pass the literal shape (`{ pillar, score }`,
 so the agent has the shape from the code that actually runs. Hand-writing the
 bodies would duplicate the contract and silently rot.
 
-Seven components **are** pinned in `cfg.dtsPropsFor`: `NotFoundScreen`
+Eight components **are** pinned in `cfg.dtsPropsFor`: `NotFoundScreen`
 (below), `ProseText`, `ProseActions`, `StatTile` (a union of known / unknown /
-hidden), `Sparkline`, `EventClipping` (a discriminated union on `kind`) and
-`PhoneMock`. Other named object types (`HandCard`, `DashboardChurnTile`,
+hidden), `Sparkline`, `EventClipping` (a discriminated union on `kind`),
+`PhoneMock` and `ShopPhone` (both phones' element unions live in `lib/game/`).
+Other named object types (`HandCard`, `DashboardMetricTile`,
 `DataTableColumn`, `ChartLegendItem`, `TypingPace`, …) still print as bare
 names; their previews pass the literal shape. Each pin is a drift risk.
 

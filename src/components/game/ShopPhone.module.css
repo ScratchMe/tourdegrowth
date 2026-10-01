@@ -1,0 +1,233 @@
+/*
+ * Pédalix's phone: the contents of its screen. The frame — caption, bezel,
+ * screen, app bar, flash — is PhoneFrame.module.css, shared with Flixo's
+ * phone. The screen is another company's app: it reads only the --app-*
+ * island and its own brand green (game.css). Every text pairing below is one
+ * game-token-contrast.test.ts measures.
+ */
+
+/* Pédalix's brand, for the frame's dot. */
+.shop {
+  --phone-brand: var(--shop-brand);
+}
+
+/* A creator's video, as it shows in a feed: no mention that it was paid for. */
+.video {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border-radius: var(--radius-panel);
+  background: var(--app-push-bg);
+  color: var(--app-push-text);
+}
+
+.play {
+  flex: none;
+  width: 13px;
+  height: 16px;
+  background: var(--app-push-text);
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+}
+
+.videoText {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.videoTitle {
+  font-weight: 600;
+}
+
+.videoBy {
+  font: var(--app-text-sm);
+  overflow-wrap: anywhere;
+}
+
+.results {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.search {
+  font: var(--app-text-sm);
+  color: var(--app-muted);
+}
+
+.result {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: var(--border-width-hairline) solid var(--app-line);
+  border-radius: var(--radius-panel);
+}
+
+.thumb {
+  flex: none;
+  width: 28px;
+  height: 20px;
+  border-radius: var(--space-1);
+  background: var(--app-line);
+}
+
+.resultName {
+  font-weight: 600;
+}
+
+.meta {
+  font: var(--app-text-sm);
+  color: var(--app-muted);
+}
+
+.good {
+  font: var(--app-text-sm);
+  color: var(--app-ok-text);
+}
+
+.product {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+/* A drawn bike, not a photo: two wheels on a grey ground, decorative. */
+.photo {
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+  height: 72px;
+  margin-bottom: var(--space-2);
+  padding: var(--space-3) var(--space-6);
+  border-radius: var(--radius-panel);
+  background: var(--app-modal-bg);
+  border: var(--border-width-hairline) solid var(--app-line);
+}
+
+.wheel {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-round);
+  border: var(--border-width) solid var(--app-muted);
+}
+
+.productName {
+  font-weight: 700;
+}
+
+.priceRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-3);
+}
+
+.struck {
+  font: var(--app-text-sm);
+  color: var(--app-muted);
+}
+
+.price {
+  font: var(--app-text-price);
+}
+
+.discount {
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-button);
+  background: var(--app-danger-bg);
+  color: var(--app-danger-text);
+  font: var(--app-text-sm);
+  font-weight: 700;
+}
+
+.rating {
+  font: var(--app-text-sm);
+}
+
+.verified {
+  color: var(--app-ok-text);
+}
+
+/* One line per pressure card, the way a shop's urgency banners stack. */
+.pressure {
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-panel);
+  background: var(--app-warn-bg);
+  color: var(--app-warn-text);
+  font: var(--app-text-sm);
+  font-weight: 600;
+}
+
+.notice {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-panel);
+  font: var(--app-text-sm);
+}
+
+.ok {
+  background: var(--app-ok-bg);
+  color: var(--app-ok-text);
+}
+
+.guide {
+  font: var(--app-text-sm);
+  color: var(--shop-brand);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* The basket sits at the bottom of the screen, where checkout lives. */
+.basket {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin-top: auto;
+  padding: var(--space-4) var(--space-5);
+  border: var(--border-width-hairline) solid var(--app-line);
+  border-radius: var(--radius-panel);
+  background: var(--app-modal-bg);
+}
+
+.basketTitle {
+  font-weight: 700;
+}
+
+.basketLine {
+  font: var(--app-text-sm);
+  color: var(--app-muted);
+}
+
+.total {
+  font-weight: 700;
+}
+
+.modal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5);
+  border: var(--border-width-hairline) solid var(--app-line);
+  border-radius: var(--radius-panel);
+  background: var(--app-modal-bg);
+}
+
+.modalTitle {
+  font: var(--app-text-sm);
+  font-weight: 600;
+}
+
+.answers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.answer {
+  font: var(--app-text-sm);
+  color: var(--app-muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
