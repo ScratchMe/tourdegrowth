@@ -269,7 +269,8 @@ test("a typo in a target keeps the stored target, on the step screen and in a sh
   await step.fill("25");
   await step.blur();
   await expect.poll(target).toBe(25);
-  await step.fill("25 %%");
+  // Not « 25 %% » any more: since A15.10 a unit sign is read, and that reads as 25.
+  await step.fill("25 kg");
   await step.blur();
   await expect(page.getByText(ENGINE_COPY.workbench.notANumber.en)).toBeVisible();
   expect(await target()).toBe(25);
@@ -291,4 +292,54 @@ test("a typo in a target keeps the stored target, on the step screen and in a sh
   await box.fill("");
   await box.blur();
   await expect.poll(target).toBeUndefined();
+});
+
+/*
+ * A15.9 and A15.10 (2026-10-01). The base step skipped a count that was not
+ * a whole number above zero and went on, so the person never saw it was not
+ * kept: it now stays, says why, and puts the focus on the count. And a box
+ * that shows « % » accepts « 25 % » (Postel): a spreadsheet's cell, pasted.
+ *
+ * Non-vacuity: see A15's sabotage build, recorded in the journal.
+ */
+for (const locale of ["en", "fr"] as const) {
+  test(`the base step keeps nothing in silence: zero or a decimal stops it, on the count (${locale})`, async ({ page }) => {
+    await open(page, locale);
+    await page.getByTestId("engine-setup-start").click();
+    const steps = page.getByTestId("engine-steps");
+    await page.getByTestId("engine-steps-next").click();
+    await expect(steps).toHaveAttribute("data-phase", "base");
+
+    const cohort = page.locator("#engine-base-cohort");
+    await cohort.fill("0");
+    await page.getByTestId("engine-steps-next").click();
+    await expect(steps).toHaveAttribute("data-phase", "base");
+    await expect(page.getByText(ENGINE_COPY.steps.countPositive[locale])).toBeVisible();
+    await expect(cohort).toBeFocused();
+
+    await cohort.fill("800");
+    const month = page.locator("#engine-base-month");
+    await month.fill(locale === "fr" ? "12,5" : "12.5");
+    // Left first: its message appears as the box loses focus and moves the
+    // button down — a click begun before that lands on nothing.
+    await month.blur();
+    await page.getByTestId("engine-steps-next").click();
+    await expect(steps).toHaveAttribute("data-phase", "base");
+    await expect(month).toBeFocused();
+
+    await month.fill("1000");
+    await page.getByTestId("engine-steps-next").click();
+    await expect(steps).toHaveAttribute("data-phase", "number");
+    expect((await stored(page))?.state.snapshots[0]?.base).toEqual({ cohortSignups: 800, monthSignups: 1000 });
+  });
+}
+
+test("a target typed with its percent sign is read, the sign dropped from the box", async ({ page }) => {
+  await open(page);
+  await page.getByTestId("engine-setup-start").click();
+  const target = page.locator("#engine-step-target-act-rate");
+  await target.fill("25 %");
+  await target.blur();
+  await expect.poll(async () => (await stored(page))?.state.snapshots[0]?.targets["act.rate"]).toBe(25);
+  await expect(target).toHaveValue("25");
 });

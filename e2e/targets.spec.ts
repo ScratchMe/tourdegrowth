@@ -485,6 +485,8 @@ test.describe("the small button on the owner's result", () => {
     await page.goto(`/r/${clear.id}?lang=en`);
     await seedOwnedResult(page, clear.id, clear.total, clear.answers);
     await page.reload();
+    // Folded since A15.17: opened first, the way an owner reaches it.
+    await openFold(page.getByTestId("badge-fold"));
     await expect(page.getByTestId("badge-copy")).toBeVisible();
     await expectTapTargets(page, `[data-testid="badge-snippet"] ${SMALL}`, 1, SMALL_LOOK);
   });

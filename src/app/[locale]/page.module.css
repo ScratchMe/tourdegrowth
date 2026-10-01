@@ -104,6 +104,13 @@
 }
 
 /* Design I + B: the founder's line is a pull quote, not a footnote. */
+/* A15.15: the closing « Start your Tour » exists on a phone only (below). A
+   wrapper carries the display, never the Button: its own `display` would tie
+   on specificity, decided by stylesheet order (the note on .headerCta). */
+.closingCta {
+  display: none;
+}
+
 .founder {
   margin-top: var(--space-14);
   padding-top: 26px;
@@ -215,6 +222,11 @@
   .nav .navLink,
   .nav .headerCta {
     display: none;
+  }
+
+  .closingCta {
+    display: block;
+    margin-top: 40px;
   }
 
   .main {

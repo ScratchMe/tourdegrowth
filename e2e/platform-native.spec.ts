@@ -27,7 +27,8 @@ import { writeEngineSeed } from "./engine-helpers";
  * `command` taken off the skip button; `Segmented`'s anchor block removed;
  * `color-scheme` removed from the night world. Two tests hold what stays and
  * pass on the old code too: a Disclosure under reduced motion, and a folded
- * row dropping an unsaved edit. So does the PNG half of the deck's: a lift of
+ * row dropping an unsaved edit (keeping it since A15.12, 2026-10-01: see the
+ * test). So does the PNG half of the deck's: a lift of
  * the skip during the export was written, measured useless (the off-screen
  * slide came out byte for byte the same without it) and taken out.
  */
@@ -329,7 +330,12 @@ test.describe("the engine", () => {
     await expect(body).not.toHaveAttribute("hidden");
   });
 
-  test("folding a row drops what was typed and not saved, as closing it always did", async ({ page }) => {
+  // Until A15.12 (2026-10-01) this test held the opposite: folding dropped
+  // the typing, « as closing it always did » — kept when the folded row
+  // stayed in the page, not decided. The laws of UX review found it (a fold
+  // or a tab change lost a sheet's typing without a word) and Antoine took
+  // the fix: what was typed comes back, on screen only (`sheet-drafts.ts`).
+  test("folding a row keeps what was typed and not saved, and writes none of it to the device", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await openExample(page);
     const toggle = page.getByTestId("engine-metric-act-event");
@@ -341,7 +347,15 @@ test.describe("the engine", () => {
     await toggle.click();
     await expect(page.getByTestId("engine-sheet-act-event")).toBeHidden();
     await toggle.click();
-    await expect(page.getByTestId("engine-sheet-act-event").getByRole("textbox").first()).toHaveValue(saved);
+    await expect(page.getByTestId("engine-sheet-act-event").getByRole("textbox").first()).toHaveValue("typed, never saved");
+    // Every key on the device: since A14.c T0 an engine lives under its own.
+    const stored = await page.evaluate(() =>
+      Object.keys(window.localStorage)
+        .map((key) => window.localStorage.getItem(key) ?? "")
+        .join("\n"),
+    );
+    expect(stored).toContain(JSON.stringify(saved).slice(1, -1));
+    expect(stored).not.toContain("typed, never saved");
   });
 
   test("on a phone the strip says which way more tabs are, and scrolls exactly as far as before", async ({ page }) => {

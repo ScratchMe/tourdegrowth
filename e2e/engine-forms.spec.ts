@@ -213,3 +213,93 @@ for (const locale of ["en", "fr"] as const) {
     await expect(page.getByTestId("engine-save-act-rate")).not.toBeFocused();
   });
 }
+
+/** The board, on a stage's tab, with one number's sheet unfolded. */
+async function openSheet(page: Page, locale: "en" | "fr", stage: string, metric: string): Promise<Locator> {
+  await openEngine(page, locale);
+  const board = page.getByTestId("engine-setup-board");
+  if (await board.count()) await board.click();
+  const tab = page.getByTestId(`engine-tab-${stage}`);
+  if ((await tab.getAttribute("aria-selected")) !== "true") await tab.click();
+  const toggle = page.getByTestId(`engine-metric-${metric}`);
+  if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.click();
+  return page.getByTestId(`engine-sheet-${metric}`);
+}
+
+/*
+ * A15.8, A15.12 and A15.20 (2026-10-01). A gross margin is money over money,
+ * and its two boxes were whole-number boxes refusing « 12 450,80 » with
+ * « these are people ». A sheet folded or left for another tab lost what was
+ * typed in it. And Enter, in a box, did nothing.
+ *
+ * Non-vacuity: see A15's sabotage build, recorded in the journal.
+ */
+for (const locale of ["en", "fr"] as const) {
+  test(`a margin's two amounts take their cents (${locale})`, async ({ page }) => {
+    const sheet = await openSheet(page, locale, "revenue", "rev-gross-margin");
+    await sheet.getByRole("radio", { name: ENGINE_COPY.sheet.haveIt[locale] }).check();
+    const num = page.locator("#engine-rev-gross-margin-num");
+    const den = page.locator("#engine-rev-gross-margin-den");
+    await num.fill(locale === "fr" ? "12 450,80" : "12,450.80");
+    await den.fill(locale === "fr" ? "40 000,50" : "40,000.50");
+    await den.blur();
+    await expect(sheet.getByText(ENGINE_COPY.workbench.notAWholeNumber[locale])).toHaveCount(0);
+    await expect(num).not.toHaveAttribute("aria-invalid", "true");
+    await expect(den).not.toHaveAttribute("aria-invalid", "true");
+  });
+}
+
+test("what was typed in a sheet comes back after another tab, unsaved", async ({ page }) => {
+  const sheet = await openSheet(page, "en", "activation", "act-rate");
+  await sheet.getByRole("radio", { name: ENGINE_COPY.sheet.haveIt.en }).check();
+  await page.locator("#engine-act-rate-num").fill("144");
+  await page.getByTestId("engine-tab-acquisition").click();
+  await page.getByTestId("engine-tab-activation").click();
+  const toggle = page.getByTestId("engine-metric-act-rate");
+  if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.click();
+  await expect(page.locator("#engine-act-rate-num")).toHaveValue("144");
+  // Nothing was saved: the device holds no entry for it yet.
+  expect((await storedState(page))?.snapshots[0]?.metrics["act.rate"]).toBeUndefined();
+});
+
+/*
+ * The security review of A15 (2026-10-01): the drafts went only with an
+ * import over an unreadable store. An import from the board kept them, and a
+ * metric the new engine had not filled keys its draft `id@new` too — so the
+ * other company's typing came back in its sheet, one Enter from its file.
+ * Non-vacuity: with `dropAllDrafts()` under `replace` only, as before, this
+ * test fails on the radio, checked again (recorded in the journal).
+ */
+test("an engine imported from the board opens with no half-typed sheet of the one before", async ({ page }) => {
+  const sheet = await openSheet(page, "en", "activation", "act-rate");
+  await sheet.getByRole("radio", { name: ENGINE_COPY.sheet.haveIt.en }).check();
+  await page.locator("#engine-act-rate-num").fill("144");
+  // Another engine, with nothing saved for this metric either.
+  const other = await storedState(page);
+  expect(other?.snapshots[0]?.metrics["act.rate"]).toBeUndefined();
+  await page.getByTestId("engine-import-open-screen").click();
+  await page.getByTestId("engine-import-file").setInputFiles({ name: "other.json", mimeType: "application/json", buffer: Buffer.from(JSON.stringify(other)) });
+  await page.getByTestId("engine-import-open").click();
+  // Back on the board in the same page: `openSheet` navigates, and a reload
+  // empties the drafts on its own (they live in memory) — the test would pass
+  // on the bug. Measured: it did, until this line stopped reloading.
+  await page.getByTestId("engine-tab-activation").click();
+  const toggle = page.getByTestId("engine-metric-act-rate");
+  if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.click();
+  const reopened = page.getByTestId("engine-sheet-act-rate");
+  await expect(reopened.getByRole("radio", { name: ENGINE_COPY.sheet.haveIt.en })).not.toBeChecked();
+  await reopened.getByRole("radio", { name: ENGINE_COPY.sheet.haveIt.en }).check();
+  await expect(page.locator("#engine-act-rate-num")).toHaveValue("");
+});
+
+test("Enter in a box saves the sheet, like any form", async ({ page }) => {
+  const sheet = await openSheet(page, "en", "activation", "act-rate");
+  await sheet.getByRole("radio", { name: ENGINE_COPY.sheet.haveIt.en }).check();
+  await page.locator("#engine-act-rate-num").fill("144");
+  await page.locator("#engine-act-rate-source").selectOption({ label: "Amplitude" });
+  const den = page.locator("#engine-act-rate-den");
+  await den.fill("800");
+  await den.press("Enter");
+  await expect(page.getByTestId("engine-saved-act-rate")).toHaveText(ENGINE_COPY.workbench.saved.en);
+  expect((await storedState(page))?.snapshots[0]?.metrics["act.rate"]).toMatchObject({ status: "measured", value: { kind: "ratio", numerator: 144, denominator: 800 } });
+});

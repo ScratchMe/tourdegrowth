@@ -316,7 +316,17 @@ export default function QuizPage() {
               {tc(t.errorHeaderLabel, locale)}
             </MetaLabel>
           ) : (
-            <MetaLabel size="sm">{tc(UI_STRINGS.toneSelector.headerLabel, locale)}</MetaLabel>
+            // What is left, not « 15 / 15 answered » over two screens still to pass (A15.7).
+            <MetaLabel size="sm">
+              {tc(
+                phase === "segment"
+                  ? UI_STRINGS.toneSelector.headerTwoLeft
+                  : phase === "tone"
+                    ? UI_STRINGS.toneSelector.headerLast
+                    : UI_STRINGS.toneSelector.headerLabel,
+                locale,
+              )}
+            </MetaLabel>
           )}
         </div>
       </SiteHeader>
@@ -397,6 +407,11 @@ export default function QuizPage() {
               trackEvent("segment_answered", segmentDetail(segment));
               setPhase("tone");
             }}
+            onBack={() => {
+              setCurrentIndex(QUESTION_COUNT - 1);
+              setPhase("answering");
+            }}
+            backLabel={tc(t.backButton, locale)}
           />
         )}
 
@@ -412,6 +427,8 @@ export default function QuizPage() {
               trackEvent("tone_selected", tone);
               void handleGetScore();
             }}
+            onBack={() => setPhase("segment")}
+            backLabel={tc(t.backButton, locale)}
           />
         )}
 

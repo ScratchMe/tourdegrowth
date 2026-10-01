@@ -96,6 +96,18 @@ export const REAL_RESULTS = {
     answers: answersFor({ acquisition: 2, activation: 0, retention: 2, referral: 1, revenue: 0 }),
     total: 47,
   },
+  /**
+   * Every stage at its weakest (A15.14, 2026-10-01): « Strengths » lists the
+   * two highest stages, and here both are weak — the case its title turns
+   * relative for.
+   */
+  low: {
+    id: "7d3c9e2a-0b1f-4c5d-8e6f-1a2b3c4d5e06",
+    tone: "neutral",
+    locale: "fr",
+    answers: answersFor({ acquisition: 2, activation: 2, retention: 2, referral: 2, revenue: 2 }),
+    total: 0,
+  },
 } as const satisfies Record<string, RealResult>;
 
 /**

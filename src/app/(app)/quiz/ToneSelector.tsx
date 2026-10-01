@@ -15,10 +15,14 @@ interface ToneSelectorProps {
   tone: Tone;
   onSelectTone: (tone: Tone) => void;
   onSubmit: () => void;
+  /** Back to the profile screen (A15.7). */
+  onBack: () => void;
+  /** The quiz's own « ← Back », from the page. */
+  backLabel: string;
 }
 
 /** Tone selector — DESIGN-BRIEF.md §06a. "Straight up" (neutral) is the SPEC.md §6bis default. */
-export function ToneSelector({ locale, tone, onSelectTone, onSubmit }: ToneSelectorProps) {
+export function ToneSelector({ locale, tone, onSelectTone, onSubmit, onBack, backLabel }: ToneSelectorProps) {
   const t = UI_STRINGS.toneSelector;
   // This screen only mounts once the 15th question is answered, so focusing
   // on mount is exactly the transition a keyboard user needs following
@@ -58,6 +62,10 @@ export function ToneSelector({ locale, tone, onSelectTone, onSubmit }: ToneSelec
       <MetaLabel size="xs" uppercase={false} className={styles.hint}>
         {tc(t.switchHint, locale)}
       </MetaLabel>
+
+      <Button variant="quiet" className={styles.back} data-testid="tone-back" onClick={onBack}>
+        {backLabel}
+      </Button>
     </div>
   );
 }

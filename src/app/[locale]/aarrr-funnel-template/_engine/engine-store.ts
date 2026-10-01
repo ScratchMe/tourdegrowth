@@ -1,6 +1,7 @@
 import { clearEngine, loadEngine, saveEngine, type LoadResult, type SaveResult } from "@/lib/engine/storage";
 import type { EngineState } from "@/lib/engine/types";
 import { loadStoredResults, type StoredResult } from "@/lib/quiz/storage";
+import { dropAllDrafts } from "./sheet-drafts";
 
 /**
  * The engine's one source of truth on this device, read through
@@ -83,6 +84,11 @@ export type CommitResult = SaveResult;
  */
 export function commit(state: EngineState, options: { fresh?: boolean; replace?: boolean } = {}): CommitResult {
   if (options.replace) clearEngine();
+  // An engine that arrives (setup, an import, over a store or not): no
+  // half-typed sheet of the one before survives it (A15.12). A metric the new
+  // engine has not filled keys its draft `id@new` too, and would come back
+  // pre-filled with the other company's figures.
+  if (options.fresh || options.replace) dropAllDrafts();
   const current = getClientSnapshot();
   snapshot = { ...current, result: { kind: "ok", state }, returningFrom: options.fresh ? null : current.returningFrom };
   notify();
@@ -92,6 +98,7 @@ export function commit(state: EngineState, options: { fresh?: boolean; replace?:
 /** "Erase everything": the device and the screen, together. */
 export function erase(): void {
   clearEngine();
+  dropAllDrafts();
   const current = getClientSnapshot();
   snapshot = { ...current, result: { kind: "empty" }, returningFrom: null };
   notify();
