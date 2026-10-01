@@ -21,13 +21,14 @@ en fin de document). `CLAUDE.md` garde l'état courant, `JOURNAL.md` l'histoire.
 
 | Groupe | Qui | Où | Quand |
 |---|---|---|---|
-| **A. Le travail autonome**, en quatre lots | Une session seule, une PR par lot (A7 : une PR par item) | Session cloud | A1 à A6 livrés le 2026-09-29, A7 et A8 le 2026-09-30. **Reste d'A7** : A7.3.c (le code), **prêt depuis C25** (2026-09-30), A7.3.d après A7.3.c, A7.4 après A7.3, et A7.12.c à l'ouverture. A10 (S-15), A11 et A7.3.e (les quatre termes du glossaire) livrés le 2026-09-30 |
+| **A. Le travail autonome**, en quatre lots | Une session seule, une PR par lot (A7 : une PR par item) | Session cloud | A1 à A6 livrés le 2026-09-29, A7 et A8 le 2026-09-30. **Reste d'A7** : A7.3.c (le code), **prêt depuis C25** (2026-09-30), A7.3.d après A7.3.c, A7.4 après A7.3, et A7.12.c à l'ouverture. A10 (S-15), A11 et A7.3.e (les quatre termes du glossaire) livrés le 2026-09-30. **A12** (trois alertes de dépendances, dont une critique sur `next`), ouvert le 2026-10-01, passe en premier |
 | **B. Design sync** | Une session, cloud ou locale | N'importe où : une session cloud pousse vers Claude Design depuis le 2026-09-29 | **À jour le 2026-09-30, après A7.10, A10 et A11** (B3, puis la re-synchro d'A11 le soir même : 88 composants, 292 cellules, 88 aperçus sur 88 rendus). Rien à lancer tant qu'un composant, ou une copie qu'un aperçu reprend, ne change pas |
 | **C. Tes décisions**, une par une | Toi, guidé, avec une recommandation par question | N'importe quelle session | **Tranchées le 2026-09-29** (C18 close à part, par la session D). C23 à C29 tranchées le 2026-09-30, C26 à C29 livrées le même jour, **C25** (la spécification de A7.3, `ENGINE.md` §18) dans sa propre session. **Rien n'est ouvert** |
 | **D. Tes actions**, pas à pas | Toi, accompagné | Session cloud | Selon ce qui est prêt. D10 (l'indexation) est prêt tout de suite. D2 attend les bons à tirer nº7 et nº8, la recette (D9) et, pour le moteur, tout A7.3 |
 | **E. La veille** | Personne | — | Rien à lancer avant un déclencheur |
 
-**L'ordre conseillé** : A7.3.c (prompt A sur « le lot A7.3.c », dans l'ordre
+**L'ordre conseillé** : A12 d'abord (une alerte critique sur `next`, merge
+avec l'accord d'Antoine), A7.3.c (prompt A sur « le lot A7.3.c », dans l'ordre
 du §18.11), puis D. A7.3.e, qui se menait en parallèle, est livré le
 2026-09-30. Rien n'attend dans la section C : C25 est tranchée le 2026-09-30.
 
@@ -201,6 +202,24 @@ qui les suit.
 | A11.2 | **Un jour qui n'existe pas n'avait pas de bord rouge** | **Livré le 2026-09-30.** `DayField` : quand les trois parties sont choisies et que la date est refusée, les trois boîtes passent en invalide (bord de 3 px, `aria-invalid`) ; une date incomplète ne marque que ses parties vides. Test : le 31 février donne trois `aria-invalid` (`form-primitives.test.ts`) |
 | A11.3 | **Le joint d'une `FieldRow` s'écartait de sa boîte** | **Livré le 2026-09-30.** Le premier champ couvre aussi la colonne du joint, et son libellé et son indice ne dimensionnent plus les colonnes (`contain: inline-size`) : « sur » se pose contre la boîte, un libellé long passe au-dessus des deux. Garde e2e sur la fiche du CAC en français : 9 px entre la boîte et « sur » (l'écart de colonne est de 12), contre 114 px avant (`engine-forms.spec.ts`) |
 | A11.4 | **Une espace ordinaire entre un nombre et son mot** dans la copie du moteur | **Clos sans changement : ce n'est pas un défaut isolé.** La copie validée n'a pas de convention unique, mesuré le 2026-09-30 sur les chaînes françaises évaluées : « {n} jours » s'écrit avec une espace ordinaire dans 25 chaînes (glossaire, catalogue d'audit, jeu, moteur) et avec l'insécable dans 16 ; « mois » et « min » sont partagés de même, et un compte de choses (« 15 questions », « 42 inscrits ») prend partout l'espace ordinaire. La garde proposée rougirait sur de la copie validée par Antoine. Harmoniser serait une passe de copie à lui faire relire, pas un correctif |
+
+### A12 — Trois alertes de dépendances, dont une critique sur `next` (vues le 2026-10-01)
+
+Trouvées par la session d'A7.3.e en se vérifiant : `npm audit --omit=dev`,
+à zéro le 2026-09-30, ne l'est plus sur `main`. A7.3.e ne touche aucune
+dépendance et ne les a pas corrigées : c'est une PR à part.
+
+| Paquet (installé) | Gravité | Avis | Corrigé dans |
+|---|---|---|---|
+| `next` (16.3.4) | **critique** | [GHSA-vcvr-r3jv-pc5j](https://github.com/advisories/GHSA-vcvr-r3jv-pc5j) : exécution de code à distance dans `ImageResponse` de `next/og`, dont le site se sert pour toutes ses images de partage (`src/lib/og/`) | 16.3.6 |
+| `@grpc/grpc-js` | haute | [GHSA-m9gg-hp2v-232j](https://github.com/advisories/GHSA-m9gg-hp2v-232j), [GHSA-f596-whhp-79r4](https://github.com/advisories/GHSA-f596-whhp-79r4) | 1.14.5 |
+| `brace-expansion` | haute | [GHSA-q2hr-2g5m-vwhr](https://github.com/advisories/GHSA-q2hr-2g5m-vwhr) et deux autres | 2.1.7 |
+
+**À faire, en premier** : une branche depuis `origin/main`, `npm audit fix`
+(les trois corrections restent dans leurs plages semver), `NEXTJS.md` lu avant
+de monter Next, puis toute la vérification de `/livrer`. **Le merge touche une
+dépendance : il attend l'accord d'Antoine** (`/livrer` §0), avec le poids des
+bundles serveur mesuré avant et après (`VERCEL.md` §1.2).
 
 ---
 

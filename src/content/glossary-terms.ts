@@ -271,7 +271,7 @@ export const GLOSSARY_TERMS: Record<GlossaryTermId, { term: Translatable; defini
     definition: {
       // TODO: à relire (convention 6).
       fr: "La part des leads d'une période qui deviennent une opportunité qualifiée dans un délai fixé. Le chiffre de la vente assistée qui dépend le plus des définitions.",
-      en: "The conversion rate from lead to sales opportunity: the share of a period's leads that a salesperson turns into a qualified deal within a set window.",
+      en: "The conversion rate of a period's leads into qualified opportunities within a set window. The sales-assisted number that depends most on definitions.",
     },
   },
 };

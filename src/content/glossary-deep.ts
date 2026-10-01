@@ -3161,7 +3161,7 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
   // "Orders of magnitude" of these pages are either internal (what one deal
   // weighs on the rate) or cited to a public primary source, as context that
   // never designates (C1). `glossary.test.ts` holds the exclusion.
-  // TODO: à relire (convention 6) — les quatre entrées, copie neuve du 2026-09-30.
+  // TODO: à relire (convention 6) — terme neuf, A7.3.e (2026-09-30).
   "win-rate": {
     formula: {
       expression: t(
@@ -3292,6 +3292,7 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
     ],
   },
 
+  // TODO: à relire (convention 6) — terme neuf, A7.3.e (2026-09-30).
   "sales-cycle": {
     formula: {
       expression: t(
@@ -3371,8 +3372,8 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
         "Trouve où partent les jours. Découpe le cycle par étape — premier rendez-vous, proposition, revue de sécurité, juridique — et travaille l'étape la plus longue, pas celle dont on se plaint le plus.",
       ),
       t(
-        "Prepare what every buyer asks for: the security questionnaire, the standard contract, the price list. A document sent the same day instead of drafted over two weeks takes two weeks off every deal that needs it.",
-        "Prépare ce que tous les acheteurs demandent : le questionnaire de sécurité, le contrat type, la grille tarifaire. Un document envoyé le jour même au lieu d'être rédigé en deux semaines retire deux semaines à chaque affaire qui en a besoin.",
+        "Prepare what every buyer asks for: the security questionnaire, the standard contract, the price list. A document sent the same day instead of drafted on request takes that wait off every deal that needs it.",
+        "Prépare ce que tous les acheteurs demandent : le questionnaire de sécurité, le contrat type, la grille tarifaire. Un document envoyé le jour même au lieu d'être rédigé à la demande retire cette attente à chaque affaire qui en a besoin.",
       ),
       t(
         "Close out the deals that no longer move. They do not lengthen the median of won deals, but they eat the time that would shorten it.",
@@ -3422,6 +3423,7 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
     ],
   },
 
+  // TODO: à relire (convention 6) — terme neuf, A7.3.e (2026-09-30). Source du cadrage de Janz, relue le 2026-09-30 : https://christophjanz.blogspot.com/2014/10/five-ways-to-build-100-million-business.html
   acv: {
     formula: {
       expression: t(
@@ -3453,7 +3455,7 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
       ],
       note: t(
         "ACV is a per-contract value. ARR — annual recurring revenue — is the sum over every active contract, and TCV — total contract value — is one contract over its whole length. Three acronyms that look alike and answer three different questions.",
-        "L'ACV est une valeur par contrat. L'ARR — annual recurring revenue, le revenu récurrent annuel — est la somme sur tous les contrats actifs, et la TCV — total contract value, la valeur totale du contrat — est un contrat sur toute sa durée. Trois sigles qui se ressemblent et répondent à trois questions différentes.",
+        "L'ACV est une valeur par contrat. L'ARR — annual recurring revenue, le revenu récurrent annuel — est la somme sur tous les contrats actifs, et le TCV — total contract value, la valeur totale du contrat — est un contrat sur toute sa durée. Trois sigles qui se ressemblent et répondent à trois questions différentes.",
       ),
     },
     example: {
@@ -3552,6 +3554,7 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
     ],
   },
 
+  // TODO: à relire (convention 6) — terme neuf, A7.3.e (2026-09-30).
   "lead-to-opportunity": {
     formula: {
       expression: t(
@@ -3647,7 +3650,7 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
       questionId: "acq-1",
       body: t(
         "The Tour asks whether you have a primary acquisition channel that is identified and measured — 20 points for yes and tracked, 7 for one you do not track closely, 0 for scattered. In sales-assisted selling, \"measured\" means more than lead volume: a channel is measured when you know how many of its leads became opportunities. A team that can say \"our main channel brings 160 MQLs a month, and 15 in 100 become opportunities\" answers 20 points with a straight face; a team that can quote only the leads is closer to 7, because volume alone does not say whether the channel feeds sales or just the database.",
-        "Le Tour demande si tu as un canal d'acquisition principal identifié et mesuré — 20 points s'il est clairement identifié et suivi, 7 si vous en avez un sans le suivre de près, 0 si c'est dispersé. En vente assistée, « mesuré » veut dire plus que le volume de leads : un canal est mesuré quand on sait combien de ses leads sont devenus des opportunités. Une équipe qui peut dire « notre canal principal amène 160 MQL par mois, et 15 sur 100 deviennent des opportunités » répond 20 points sans rougir ; une équipe qui ne cite que les leads est plus près des 7, parce que le volume seul ne dit pas si le canal nourrit les ventes ou seulement la base de contacts.",
+        "Le Tour demande si tu as un canal d'acquisition principal identifié et mesuré — 20 points s'il est clairement identifié et suivi, 7 si tu en as un sans le suivre de près, 0 si c'est dispersé. En vente assistée, « mesuré » veut dire plus que le volume de leads : un canal est mesuré quand on sait combien de ses leads sont devenus des opportunités. Une équipe qui peut dire « notre canal principal amène 160 MQL par mois, et 15 sur 100 deviennent des opportunités » répond 20 points sans rougir ; une équipe qui ne cite que les leads est plus près des 7, parce que le volume seul ne dit pas si le canal nourrit les ventes ou seulement la base de contacts.",
       ),
     },
     faq: [
