@@ -1,4 +1,5 @@
 // TODO: à relire — copie neuve (convention 6), rédigée par la session de code
+import { ENGINE_HEADLINE } from "@/content/engine-share";
 import type { Translatable } from "@/lib/i18n/translatable";
 import type { Pillar } from "@/lib/scoring/pillars";
 import type { CandidateId, LeverId, SlideTitleKey, ToolId, UnitInputId } from "@/lib/engine/types";
@@ -80,9 +81,9 @@ export const ENGINE_COPY = {
   },
 
   page: {
-    eyebrow: { fr: "Le moteur", en: "The engine" },
-    // TODO: à relire (convention 6) — renommé le 2026-09-30 (A7.2, C2 : « Moteur de growth »).
-    title: { fr: "Ton moteur de growth", en: "Your growth engine" },
+    // The headline is `engine-share.ts`'s: the share image draws it too.
+    eyebrow: ENGINE_HEADLINE.eyebrow,
+    title: ENGINE_HEADLINE.title,
     positioning: {
       fr: "Ton Tour dit si tu mesures. Le moteur montre ce que disent tes chiffres.",
       en: "Your Tour tells you whether you measure. The engine shows what your numbers say.",

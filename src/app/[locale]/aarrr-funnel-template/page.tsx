@@ -48,6 +48,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     // The brand as a suffix, like the other content pages' titles (spec §11.3).
     `${tc(ENGINE_COPY.meta.title, resolved)} — Tour de Growth`,
     tc(ENGINE_COPY.meta.description, resolved),
+    // Its own picture (`opengraph-image.tsx`, design brief 06), not the landing's.
+    { ownShareImage: true },
   );
   // Prerendered, so this is decided at BUILD time: the page stays noindex
   // until a build runs with ENGINE_ENABLED open. The proxy 404s it per
