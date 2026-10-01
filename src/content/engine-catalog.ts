@@ -921,7 +921,7 @@ export const ENGINE_CATALOG: Record<MetricId, EngineCatalogEntry> = {
   // --- Sales-assisted (A7.3.c S2, ENGINE.md §18.4) ---------------------------
   // TODO: à relire (convention 6) — neuf le 2026-10-01 : les quinze chiffres de l'assisté, puis la liaison.
   "slg.acq.lead-to-opp": {
-    name: { fr: "Leads passés en opportunité", en: "Lead-to-opportunity rate" },
+    name: { fr: "Passage des leads en opportunités", en: "Lead-to-opportunity rate" },
     oneLiner: { fr: "La part des leads d'une période qui deviennent une opportunité qualifiée.", en: "The share of a period's leads that become a qualified opportunity." },
     formula: { fr: "leads créés {period} devenus une opportunité qualifiée sous {n} jours ÷ leads créés {period}", en: "leads created {period} that became a qualified opportunity within {n} days ÷ leads created {period}" },
     inputs: { numerator: { fr: "Leads devenus opportunités sous {n} jours", en: "Leads turned opportunities within {n} days" }, denominator: { fr: "Leads créés {period}", en: "Leads created {period}" } },
@@ -994,7 +994,7 @@ export const ENGINE_CATALOG: Record<MetricId, EngineCatalogEntry> = {
       { source: tool("hubspot"), label: { fr: "HubSpot ou Salesforce", en: "HubSpot or Salesforce" }, path: { fr: "un pipeline d'onboarding, ou un champ date « en production » sur le compte, s'il existe", en: "an onboarding pipeline, or a \"live\" date field on the account, if there is one" } },
       { source: tool("spreadsheet"), label: { fr: "Tableur du Customer Success", en: "Customer success spreadsheet" }, path: { fr: "souvent le seul endroit où la date est notée", en: "often the only place the date is written down" } },
     ],
-    trap: { fr: "Compter les comptes déployés plutôt qu'en production double le taux. Et lis la cohorte mûre : un client signé le mois dernier n'a pas eu ses {n} jours.", en: "Counting deployed accounts instead of live ones doubles the rate. And read the mature cohort: a customer signed last month hasn't had its {n} days." },
+    trap: { fr: "Compter les comptes déployés plutôt qu'en production double le taux. Et lis la cohorte mûre : un client signé il y a moins de {n} jours n'a pas eu sa fenêtre.", en: "Counting deployed accounts instead of live ones doubles the rate. And read the mature cohort: a customer signed less than {n} days ago hasn't had its window." },
     request: { fr: "les nouveaux clients signés {period}, et combien étaient « en production » sous {n} jours après la signature", en: "the new customers signed {period}, and how many were \"live\" within {n} days of signature" },
     noReferenceReason: { fr: "la mise en production dépend de ce que l'offre demande d'installer : elle se suit contre sa propre cible", en: "go-live depends on what the offer needs set up: it is followed against its own target" },
   },
@@ -1043,7 +1043,7 @@ export const ENGINE_CATALOG: Record<MetricId, EngineCatalogEntry> = {
     inputs: { numerator: { fr: "ARR aujourd'hui de ces clients", en: "Those customers' ARR today" }, denominator: { fr: "Leur ARR il y a douze mois", en: "Their ARR twelve months ago" } },
     where: [
       { source: tool("chartmogul"), label: { fr: "ChartMogul", en: "ChartMogul" }, path: { fr: "la rétention nette de revenu par cohorte, selon l'offre", en: "net revenue retention by cohort, depending on the plan" } },
-      { source: role("finance"), label: { fr: "Finance", en: "Finance" }, path: { fr: "le reporting de la direction, souvent trimestriel", en: "the board reporting, often quarterly" } },
+      { source: role("finance"), label: { fr: "Finance", en: "Finance" }, path: { fr: "le reporting au board", en: "the board reporting" } },
       { source: tool("salesforce"), label: { fr: "Salesforce", en: "Salesforce" }, path: { fr: "la somme des contrats actifs par compte à deux dates, si les contrats y vivent", en: "the sum of active contracts per account at two dates, if contracts live there" } },
     ],
     trap: { fr: "Publiée seule, elle cache la perte : une NRR au-dessus de 100 % peut tenir sur une base qui perd un client sur cinq. Lis-la avec le renouvellement.", en: "Published alone, it hides the loss: an NRR above 100% can rest on a base that loses one customer in five. Read it with the renewal rate." },
@@ -1123,7 +1123,7 @@ export const ENGINE_CATALOG: Record<MetricId, EngineCatalogEntry> = {
     ],
     trap: { fr: "Un montant qui porte trois ans de contrat triple l'ACV, et la mise en service n'est pas récurrente. Une moyenne se laisse tirer par un gros contrat : regarde aussi la médiane.", en: "An amount covering a three-year contract triples the ACV, and onboarding isn't recurring. An average gets pulled by one big deal: look at the median too." },
     request: { fr: "la valeur annuelle des contrats « nouveau client » signés {period}, hors mise en service, et leur nombre", en: "the annual value of the new-customer contracts signed {period}, onboarding excluded, and how many there were" },
-    noReferenceReason: { fr: "trois ordres de grandeur séparent les catégories : aucun repère ne vaut pour tous", en: "three orders of magnitude separate categories: no reference holds for all" },
+    noReferenceReason: { fr: "l'ACV couvre plusieurs ordres de grandeur d'une catégorie à l'autre : aucun repère ne vaut pour tous", en: "ACV spans several orders of magnitude from one category to another: no reference holds for all" },
   },
   "slg.rev.arpa": {
     name: { fr: "ARPA assisté", en: "Sales-assisted ARPA" },
@@ -1229,7 +1229,10 @@ export const ENGINE_DERIVED_CATALOG: Record<DerivedId, EngineDerivedEntry> = {
     name: { fr: "LTV assistée", en: "Sales-assisted LTV" },
     formula: { fr: "ACV ÷ 12 × marge brute de l'assisté × durée de vie (tirée du renouvellement, au plus 36 mois)", en: "ACV ÷ 12 × sales-assisted gross margin × lifetime (from the renewal rate, at most 36 months)" },
     uncomputable: { fr: "incalculable — il manque {input}", en: "can't be computed — missing: {input}" },
-    capNote: { fr: "durée de vie plafonnée à 36 mois, comme en libre-service : on prend le bas de trois à cinq ans", en: "lifetime capped at 36 months, as in self-serve: we take the low end of three to five years" },
+    capNote: {
+      fr: "durée de vie plafonnée à 36 mois, comme en libre-service : beaucoup de praticiens plafonnent entre trois et cinq ans, on prend le bas",
+      en: "lifetime capped at 36 months, as in self-serve: many practitioners cap it between three and five years, we take the low end",
+    },
   },
   "slg.rev.cac-payback": {
     name: { fr: "CAC payback assisté", en: "Sales-assisted CAC payback" },

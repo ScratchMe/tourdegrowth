@@ -1071,3 +1071,32 @@ Deux points restent pour le bon à tirer : la phrase des contrats mensuels sur u
 - la suite complète passe aussi : **670 specs, 647 passées, aucun échec**, 23 ignorées par construction.
 
 Ces deux passages ont tourné avant les deux correctifs de la relecture. Ceux-ci ne touchent qu'une copie qu'aucun écran n'affiche encore.
+
+## A7.3.c, S2 : la prose de l'assisté, `{period}` et toute la copie neuve de l'hybride (2026-10-01)
+
+Antoine : « Go pour S2 ». Trois commits sur la PR brouillon [#233](https://github.com/ScratchMe/tourdegrowth/pull/233) : `78f9abd` (la prose et `{period}`), `222f34e` (la copie et ses gardes), puis les corrections de la relecture. Rien n'est encore lu par un écran ni par une slide : S3 et S4 posent cette copie, et `ENGINE.md` §18.11 liste ce que chacun reprend.
+
+**La prose du catalogue** (`engine-catalog.ts`) : les quinze chiffres de l'assisté, la liaison et les trois calculés, « à relire ». Les deux dictionnaires sont maintenant typés sur **tous** les identifiants (`Record<MetricId, …>`), si bien qu'une fiche sans prose ne compile plus. Le serveur résout tout le catalogue ; c'est l'îlot qui filtre par `shapesOf(motions)`, et la fiche ne propose « aussi dans cet outil » que les chiffres que la configuration demande. Les quatre fiches d'A7.3.e pointent vers leurs termes. Les trois comptes partagés de l'assisté ont un libellé identique dans chaque groupe, et le test des libellés partagés les couvre désormais, dans les deux langues.
+
+**`{period}` porte sa préposition** : « de mai à juillet 2026 », « d'août à octobre 2026 », « en août 2026 » pour un seul mois, et l'année n'est écrite qu'une fois. Une préposition dans le gabarit aurait buté sur l'élision (« de août »), la même raison qui interdit « de {month} ». Trois remplisseurs l'ont : `catalogueValues` (demandes, annexe), la page statique (« [sur trois mois] ») et `catalogFill`. Ce dernier, le remplisseur propre à la fiche, aurait laissé passer « Leads créés {period} » comme libellé de champ : aucun test de `lib/engine` ne le lisait, et un test le garde maintenant.
+
+**La copie neuve**, toute « à relire » : le réglage (type, motions, fenêtres, périodes de l'assisté), les réglages après coup (§18.1.2), `hybrid`, `total`, `relays`, les titres et pieds des slides des deux motions, les notes d'orateur de §18.8.3, la fiche (période, marge globale, pièges hybrides), le pas à pas par motion, le panneau « Et si » de l'assisté avec ses dix hypothèses, la reprise, l'import, et la sixième question de la FAQ, qui s'affiche déjà sur la page fermée (sa date passe au 2026-10-01). Les pièges hybrides des cinq fiches du libre-service ne sortent qu'en hybride (`phrases.ts#hybridTrapOf`).
+
+**Trois formulations s'écartent de §18.8.2**, écrites dans `ENGINE.md` §18.11 :
+- les titres des relais disent « on ne mesure pas {étapes} » : le taux de closing et la mise en production n'ont pas le même genre, et l'accord ne peut pas suivre les deux ;
+- le cas « un seul payback » dit « il manque {entrée} », comme la slide du libre-service ;
+- ce cas a deux gabarits plutôt qu'un `{libre-service|assisté}` : le libre-service est nommé d'abord même quand seul l'assisté est calculable. Le tableau de §18.8.2 contredisait la règle 1 de §18.6.4 ; la règle gagne. C'est la relecture qui l'a vu.
+
+**Les gardes** :
+- aucun comparatif dans `hybrid.*`, `total.*` et les titres des deux motions. La phrase fixe « chacune se lit contre ses cibles, pas contre l'autre » est la seule exception, et l'exception porte sur la phrase entière, pas sur le mot ;
+- le libre-service avant l'assisté, dans les placeholders et dans les mots, partout où les deux sont nommés côte à côte ;
+- aucune préposition devant `{period}`, et `{period}` absent des fiches du libre-service ;
+- le contrat exact des dix-neuf titres neufs. Le test qui exige que chaque titre soit produit par le deck les tient dans `AWAITING_DECK` : S4 vide la liste, et le test tombe dès qu'un titre de la liste est produit sans en avoir été retiré.
+
+**Non-vacuité, mesurée par sabotage** (onze plus deux) : chaque sabotage fait tomber au moins un test. Il y en a un par garde ci-dessus, plus `catalogFill` sans `{period}`, la page statique sans `{period}`, un libellé de compte partagé qui diverge, un libellé d'un autre groupe recopié, et le serveur réduit au catalogue du libre-service. **Un sabotage n'est tombé que par chance** : `{period}` glissé dans une fiche du libre-service, en anglais seulement. C'est la parité des placeholders qui l'a attrapé, pas le test fait pour ça, qui ne lisait que le français. Il lit maintenant les deux langues ; resaboté, il tombe.
+
+**La relecture de la copie** (`relecteur-copie`), rien de bloquant :
+- **corrigé** : l'ordre des motions dans le cas « un seul payback » (ci-dessus) ; la date de la page ; la réserve « beaucoup de praticiens » perdue dans la note de plafond de la LTV assistée ; « tout se lit sur trois mois », faux pour la NRR à douze mois ; « came » au passé en anglais face au présent français ; la note du levier de la liaison, dont le « en » n'avait d'antécédent qu'après la phrase de liaison ; « reporting de la direction, souvent trimestriel », sans source et différent de l'anglais ; « trois ordres de grandeur » sur l'ACV, quand son terme de glossaire dit « plusieurs » ; un piège de mise en production faux à 30 jours ; la ligne amont des relais, qui lisait « ~1 leads » ; le nom accessible du sélecteur, qui finissait sur « de » ; « Leads passés en opportunité » devenu « Passage des leads en opportunités » ; et la coquille « Quatre fiches » de §18.4.6, qui en liste cinq ;
+- **pour le bon à tirer** : « Passer à l'assisté → » est à l'infinitif, comme dans la spécification et comme les boutons voisins, alors que l'en-tête de la copie veut des impératifs ; et la phrase de liaison nomme « assistées » avant « libre-service ». C'est le texte de §18.6.3, une phrase sur l'une des motions, pas une liste.
+
+**Vérifié** : `tsc` et `eslint` propres, **2 560 tests unitaires** (contre 2 550 avant S2), couverture au-dessus de ses seuils. Build de production avec les variables de la CI : les 151 specs Playwright du moteur et de l'accessibilité passent, puis, après les corrections, les 137 du moteur, des données structurées et de `llms`. La page du moteur pèse ~242 Ko en HTML (FR), catalogue de l'assisté compris.

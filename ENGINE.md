@@ -3036,7 +3036,7 @@ session des termes (anglais dans les deux langues, R2-16) : `win-rate`,
 - *Glossaire* : `cac-payback` (comme `rev.gross-margin`) · *Repère* : aucun.
 
 **Pièges du libre-service, en hybride seulement** (Q3, tranchée le
-2026-09-30). Quatre fiches du libre-service gagnent une ligne de piège,
+2026-09-30). Cinq fiches du libre-service gagnent une ligne de piège,
 affichée seulement si les deux motions sont cochées :
 - `ret.logo-churn`, `rev.contraction` et `rev.expansion` : « Un compte passé
   à l'assisté n'est ni perdu, ni en baisse, ni en hausse : il quitte le
@@ -4118,12 +4118,18 @@ hybrides des cinq fiches du libre-service, et `phrases.ts#hybridTrapOf` qui
 ne les rend qu'en hybride. Un test balaie `hybrid.*`, `total.*` et les titres
 des deux motions à la recherche d'un comparatif (seule la négation de la
 phrase fixe passe), et un autre vérifie l'ordre libre-service puis assisté.
-Deux formulations s'écartent du texte de §18.8.2, pour l'accord :
+Trois formulations s'écartent du texte de §18.8.2 :
 - les titres `gap` et `tail-break` des relais disent « on ne mesure pas
   {étapes} » : « le taux de closing » et « la mise en production » n'ont pas
   le même genre, et « n'est pas mesuré(e) » devrait s'accorder avec chacun ;
-- `unitEconomicsOneSide` dit « il manque {entrée} », comme la slide d'unit
-  economics du libre-service, plutôt que « {entrée} n'est pas mesurée ».
+- le cas « un seul payback calculable » dit « il manque {entrée} », comme la
+  slide d'unit economics du libre-service, plutôt que « {entrée} n'est pas
+  mesurée » ;
+- et il a **deux gabarits** (`unitEconomicsOneSidePlg`, `…Slg`) au lieu d'un
+  `{libre-service|assisté}` : quand seul l'assisté est calculable, le titre
+  nomme quand même le libre-service d'abord (« Côté libre-service, on ne peut
+  pas encore le dire… Un client assisté rembourse… »). Le tableau de §18.8.2
+  et la règle 1 de §18.6.4 se contredisaient ; c'est la règle qui gagne.
 
 Ce que S2 laisse :
 - **S3** pose la copie sur les écrans : le réglage (`setup.companyType`,

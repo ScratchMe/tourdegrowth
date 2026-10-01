@@ -472,7 +472,7 @@ describe("the sweep reaches every sentence it claims to", () => {
     "total", "totalUnknown", "totalUnknownBoth",
     "slgPelotonComplete", "slgPelotonGap", "slgPelotonGapOne", "slgPelotonTailBreak", "slgPelotonTailBreakOne", "slgPelotonEmpty",
     "slgLeakClearCustomers", "slgLeakClearCustomersOne", "slgLeakClearKept", "slgLeakClearKeptOne", "slgLeakClearPerHundred",
-    "unitEconomicsBoth", "unitEconomicsOneSide", "unitEconomicsNoneMargins", "unitEconomicsNoneDifferent",
+    "unitEconomicsBoth", "unitEconomicsOneSidePlg", "unitEconomicsOneSideSlg", "unitEconomicsNoneMargins", "unitEconomicsNoneDifferent",
   ];
 
   it("fires every slide title template (the sales-assisted ones from S4)", () => {

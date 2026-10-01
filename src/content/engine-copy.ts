@@ -152,8 +152,8 @@ export const ENGINE_COPY = {
     catalogueTitlePlg: { fr: "Libre-service : {n} chiffres", en: "Self-serve: {n} numbers" },
     catalogueTitleSlg: { fr: "Assisté : {n} chiffres", en: "Sales-assisted: {n} numbers" },
     catalogueIntroSlg: {
-      fr: "Trois par étape, deux pour Referral et quatre pour Revenue, qui porte aussi la marge de l'assisté. Tout se lit sur trois mois glissants : un mois compte trop peu d'affaires.",
-      en: "Three per stage, two for Referral and four for Revenue, which also carries sales-assisted's margin. Everything reads over rolling three-month periods: one month has too few deals.",
+      fr: "Trois par étape, deux pour Referral et quatre pour Revenue, qui porte aussi la marge de l'assisté. Les flux et les cohortes se lisent sur trois mois glissants : un mois compte trop peu d'affaires.",
+      en: "Three per stage, two for Referral and four for Revenue, which also carries sales-assisted's margin. Flows and cohorts read over rolling three-month periods: one month has too few deals.",
     },
     catalogueComputedTitleSlg: { fr: "Et trois chiffres calculés", en: "And three computed numbers" },
     catalogueLinkTitle: { fr: "La liaison, si tu vends des deux façons", en: "The link, if you sell both ways" },
@@ -774,7 +774,7 @@ export const ENGINE_COPY = {
       slg: { fr: "de l'assisté", en: "sales-assisted" },
     },
     /** The motion selector's accessible name: which motion's stages and what-ifs show below it. */
-    selectorLabel: { fr: "Étapes et « Et si » de", en: "Stages and what-ifs for" },
+    selectorLabel: { fr: "Motion affichée : étapes et « Et si »", en: "Motion shown: stages and what-ifs" },
     /** A column's eyebrow over its diagnosis: `{verdict}` a `diagnosis` title, lower-cased by the code. */
     diagnosisEyebrow: { fr: "{motion} — {verdict}", en: "{motion} — {verdict}" },
     /** The fixed sentence under the two diagnoses and at the foot of the side-by-side slide (§18.6.4). */
@@ -810,11 +810,11 @@ export const ENGINE_COPY = {
     /** `{period}`: the three months, bare (« juin à août 2026 »). */
     link: {
       fr: "{n} des {m} opportunités assistées viennent de comptes du libre-service ({period}).",
-      en: "{n} of the {m} sales-assisted opportunities came from self-serve accounts ({period}).",
+      en: "{n} of the {m} sales-assisted opportunities come from self-serve accounts ({period}).",
     },
     linkOne: {
       fr: "{n} des {m} opportunités assistées vient d'un compte du libre-service ({period}).",
-      en: "{n} of the {m} sales-assisted opportunities came from a self-serve account ({period}).",
+      en: "{n} of the {m} sales-assisted opportunities comes from a self-serve account ({period}).",
     },
     linkNote: {
       fr: "Une part du pipeline, pas une attribution : on ne sait pas combien de ces comptes auraient signé sans le libre-service.",
@@ -839,8 +839,11 @@ export const ENGINE_COPY = {
     },
     /** Between two relays, on the compact column (§18.7). */
     newBase: { fr: "nouvelle base", en: "new base" },
-    /** The line above relay 1: `{months}` bare (« mai à juillet 2026 »). */
-    upstream: { fr: "~{n} {base} par mois · {source} · {months}", en: "~{n} {base} a month · {source} · {months}" },
+    /**
+     * The line above relay 1: `{label}` is `relays.label.leads` or `.mql`, `{months}` bare (« mai à juillet 2026 »).
+     * The count follows its label, so « ~1 » needs no singular form.
+     */
+    upstream: { fr: "{label} par mois : ~{n} · {source} · {months}", en: "{label} a month: ~{n} · {source} · {months}" },
     /** `{label}`: `relays.label.leads` or `.mql`. */
     upstreamUnknown: { fr: "{label} par mois : non mesuré", en: "{label} a month: not measured" },
     /** Each grid's labels: its base of 100, then what the rate counts. */
@@ -1751,10 +1754,17 @@ export const ENGINE_COPY = {
       fr: "Un client libre-service rembourse son coût d'acquisition en **{plg}**, un client assisté en **{slg}**.",
       en: "A self-serve customer pays back their acquisition cost in **{plg}**, a sales-assisted one in **{slg}**.",
     },
-    /** `{known}`, `{other}`: `hybrid.motionAdjective`; `{input}` what the other side lacks, with its article (« il manque la marge brute »). */
-    unitEconomicsOneSide: {
-      fr: "Un client {known} rembourse son coût d'acquisition en **{m}**. Côté {other}, **on ne peut pas encore le dire** : il manque {input}.",
-      en: "A {known} customer pays back their acquisition cost in **{m}**. On the {other} side, **we can't say yet**. Missing: {input}.",
+    /**
+     * One payback computable: `{m}` it, `{input}` what the other side lacks, with its article (« il manque la
+     * marge brute »). Two templates, not a `{known}` slot: self-serve is named first whichever side is known (§18.6.4).
+     */
+    unitEconomicsOneSidePlg: {
+      fr: "Un client libre-service rembourse son coût d'acquisition en **{m}**. Côté assisté, **on ne peut pas encore le dire** : il manque {input}.",
+      en: "A self-serve customer pays back their acquisition cost in **{m}**. On the sales-assisted side, **we can't say yet**. Missing: {input}.",
+    },
+    unitEconomicsOneSideSlg: {
+      fr: "Côté libre-service, **on ne peut pas encore le dire** : il manque {input}. Un client assisté rembourse son coût d'acquisition en **{m}**.",
+      en: "On the self-serve side, **we can't say yet**. Missing: {input}. A sales-assisted customer pays back their acquisition cost in **{m}**.",
     },
     unitEconomicsNoneMargins: {
       fr: "**On ne peut pas encore dire ce que rapporte un client** : la marge brute n'est mesurée dans aucune des deux motions.",
@@ -1817,8 +1827,8 @@ export const ENGINE_COPY = {
     },
     /** The link's lever moved (C25 Q7): `{n}` signatures a quarter, formatted with its « ~ ». */
     selfServeLever: {
-      fr: "Si le libre-service en passait {to} au lieu de {from}, l'assisté signerait {n} de plus par trimestre (slide {k}).",
-      en: "If self-serve passed on {to} instead of {from}, sales-assisted would sign {n} more a quarter (slide {k}).",
+      fr: "Si le libre-service passait {to} opportunités aux commerciaux au lieu de {from}, l'assisté signerait {n} de plus par trimestre (slide {k}).",
+      en: "If self-serve handed {to} opportunities to sales instead of {from}, sales-assisted would sign {n} more a quarter (slide {k}).",
     },
     whyThreeMonths: {
       fr: "Pourquoi trois mois ? — Un mois compte trop peu d'affaires ; trois mois lissent sans mélanger deux grilles tarifaires.",

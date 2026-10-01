@@ -153,7 +153,8 @@ describe("placeholders", () => {
     slgLeakClearKeptOne: ["n", "stage", "target"],
     slgLeakClearPerHundred: ["stage", "target", "worth"],
     unitEconomicsBoth: ["plg", "slg"],
-    unitEconomicsOneSide: ["input", "known", "m", "other"],
+    unitEconomicsOneSidePlg: ["input", "m"],
+    unitEconomicsOneSideSlg: ["input", "m"],
     unitEconomicsNoneMargins: [],
     unitEconomicsNoneDifferent: ["plg", "slg"],
   };

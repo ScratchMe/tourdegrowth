@@ -752,7 +752,8 @@ export type SlideTitleKey =
   | "slgLeakClearPerHundred"
   /** The unit economics, the two motions side by side, never one against the other. */
   | "unitEconomicsBoth"
-  | "unitEconomicsOneSide"
+  | "unitEconomicsOneSidePlg"
+  | "unitEconomicsOneSideSlg"
   | "unitEconomicsNoneMargins"
   | "unitEconomicsNoneDifferent";
 export interface SlideTitle {
