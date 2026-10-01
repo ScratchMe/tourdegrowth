@@ -1033,7 +1033,7 @@ Points pour le bon à tirer A14.d : le rôle placé dans la phrase (« Relance
 - captures relues : l'accueil en français à 1 280 px (le moteur seul) et en anglais à 390 px (sous le dernier score), la demande copiée avec « Me le rappeler », le rappel du mois sous les comptes, et la slide en blanc à 1 280 et 390 px.
 
 
-## Design sync B6 : Claude Design à jour d'A15 et de C33, et les douze aperçus du jeu rejoués (2026-10-01, PR_B6)
+## Design sync B6 : Claude Design à jour d'A15 et de C33, et les douze aperçus du jeu rejoués (2026-10-01, #265)
 
 **Ce qui est parti** : les cinq contrats qui avaient changé depuis l'ancre de B4 (`fee6cc7084fe`). Ce sont `ErrorScreen` (`retry`), `LoadingScreen` (la variante `deep` racontée par l'horloge), `Button` (la bande de 44 px de `sm`), `MetaLabel` (`as`) et `GameEntry` (le surtitre de C33). La synchro passe par le chemin atomique, celui d'un projet épinglé : sentinelle d'abord, le contenu en quatre appels (96, 5, 180, 180), aucune suppression, la sentinelle de nouveau, puis `_ds_sync.json` seul et en dernier. `list_files` confirme les 463 fichiers, et `design/` (le brief 04 et son retour) n'a pas bougé. Ancre `edc539adcbbf`, 14 composants téléversés, 76 reportés avec leur note.
 
