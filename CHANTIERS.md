@@ -23,15 +23,15 @@ en fin de document). `CLAUDE.md` garde l'état courant, `JOURNAL.md` l'histoire.
 
 | Groupe | Qui | Où | Quand |
 |---|---|---|---|
-| **A. Le travail autonome**, en quatre lots | Une session seule, une PR par lot (A7 : une PR par item) | Session cloud | A1 à A6 livrés le 2026-09-29, A7 et A8 le 2026-09-30. **Reste d'A7** : A7.3.c (le code), **prêt depuis C25** (2026-09-30), A7.3.d après A7.3.c, A7.4 après A7.3, et A7.12.c à l'ouverture. A10 (S-15), A11 et A7.3.e (les quatre termes du glossaire) livrés le 2026-09-30. **A12, le niveau 2 du jeu** : spécifié et chiffré le 2026-09-30, **validé le 2026-10-01 (C30)** : A12.c peut partir. **A13** (trois alertes de dépendances, dont une critique sur `next`), ouvert le 2026-10-01, passe en premier |
+| **A. Le travail autonome**, en quatre lots | Une session seule, une PR par lot (A7 : une PR par item) | Session cloud | A1 à A6 livrés le 2026-09-29, A7 et A8 le 2026-09-30. **Reste d'A7** : A7.3.c (le code), **prêt depuis C25** (2026-09-30), A7.3.d après A7.3.c, A7.4 après A7.3, et A7.12.c à l'ouverture. A10 (S-15), A11 et A7.3.e (les quatre termes du glossaire) livrés le 2026-09-30. **A12, le niveau 2 du jeu** : spécifié et chiffré le 2026-09-30, **validé le 2026-10-01 (C30)** : A12.c peut partir. **A13** (trois alertes de dépendances, dont une critique sur `next`) livré le 2026-10-01 |
 | **B. Design sync** | Une session, cloud ou locale | N'importe où : une session cloud pousse vers Claude Design depuis le 2026-09-29 | **À jour le 2026-09-30, après A7.10, A10 et A11** (B3, puis la re-synchro d'A11 le soir même : 88 composants, 292 cellules, 88 aperçus sur 88 rendus). Rien à lancer tant qu'un composant, ou une copie qu'un aperçu reprend, ne change pas |
 | **C. Tes décisions**, une par une | Toi, guidé, avec une recommandation par question | N'importe quelle session | **Tranchées le 2026-09-29** (C18 close à part, par la session D). C23 à C29 tranchées le 2026-09-30, C26 à C29 livrées le même jour, **C25** (la spécification de A7.3, `ENGINE.md` §18) dans sa propre session. **C30** (le niveau 2 du jeu, `GAME-BRIEF.md` §17) le 2026-10-01. **Rien n'est ouvert** |
 | **D. Tes actions**, pas à pas | Toi, accompagné | Session cloud | Selon ce qui est prêt. D10 (l'indexation) est prêt tout de suite. D2 attend les bons à tirer nº7 et nº8, la recette (D9) et, pour le moteur, tout A7.3 |
 | **E. La veille** | Personne | — | Rien à lancer avant un déclencheur |
 
-**L'ordre conseillé** : A13 d'abord (une alerte critique sur `next`, merge
-avec l'accord d'Antoine), A7.3.c (prompt A sur « le lot A7.3.c », dans l'ordre
-du §18.11), puis D. A7.3.e, qui se menait en parallèle, est livré le
+**L'ordre conseillé** : A7.3.c (prompt A sur « le lot A7.3.c », dans l'ordre
+du §18.11), puis D. A13 (l'alerte critique sur `next`) est livré le
+2026-10-01. A7.3.e, qui se menait en parallèle, est livré le
 2026-09-30. A12.c (la copie du niveau 2 du jeu) peut partir en parallèle : il
 ne touche pas les mêmes fichiers. Le moteur ouvre avant le jeu (C23). Rien
 n'attend dans la section C : C30 est tranchée le 2026-10-01.
@@ -194,24 +194,6 @@ spécification validée telle quelle. A12.c peut partir. Toute copie neuve porte
 | A12.f | **Le branchement** | Le slug passe de `DraftLevelSlug` à `LevelSlug` et le compilateur liste ce qu'il exige (clé de sauvegarde, encart du résultat, analytique) ; page, image de partage, sitemap, hub « Jouable », et l'encart d'un goulot partagé : **une carte qui propose les deux niveaux** (C30 Q5, `GAME-BRIEF.md` §15.4) |
 | A12.g | **Les specs Playwright** | Sur le modèle de P1 à P27, dans les deux langues, à 1 280 et 390 px |
 | A12.h | **Le bon à tirer, puis la recette** | Un bon à tirer du niveau 2 (`/bon-a-tirer`), puis une recette (D9) qui couvre les deux niveaux, relecture juridique du catalogue comprise |
-
-### A13 — Trois alertes de dépendances, dont une critique sur `next` (vues le 2026-10-01)
-
-Trouvées par la session d'A7.3.e en se vérifiant : `npm audit --omit=dev`,
-à zéro le 2026-09-30, ne l'est plus sur `main`. A7.3.e ne touche aucune
-dépendance et ne les a pas corrigées : c'est une PR à part.
-
-| Paquet (installé) | Gravité | Avis | Corrigé dans |
-|---|---|---|---|
-| `next` (16.3.4) | **critique** | [GHSA-vcvr-r3jv-pc5j](https://github.com/advisories/GHSA-vcvr-r3jv-pc5j) : exécution de code à distance dans `ImageResponse` de `next/og`, dont le site se sert pour toutes ses images de partage (`src/lib/og/`) | 16.3.6 |
-| `@grpc/grpc-js` | haute | [GHSA-m9gg-hp2v-232j](https://github.com/advisories/GHSA-m9gg-hp2v-232j), [GHSA-f596-whhp-79r4](https://github.com/advisories/GHSA-f596-whhp-79r4) | 1.14.5 |
-| `brace-expansion` | haute | [GHSA-q2hr-2g5m-vwhr](https://github.com/advisories/GHSA-q2hr-2g5m-vwhr) et deux autres | 2.1.7 |
-
-**À faire, en premier** : une branche depuis `origin/main`, `npm audit fix`
-(les trois corrections restent dans leurs plages semver), `NEXTJS.md` lu avant
-de monter Next, puis toute la vérification de `/livrer`. **Le merge touche une
-dépendance : il attend l'accord d'Antoine** (`/livrer` §0), avec le poids des
-bundles serveur mesuré avant et après (`VERCEL.md` §1.2).
 
 ---
 

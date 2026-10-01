@@ -1007,3 +1007,27 @@ nomme les deux index qui y renvoient (`ENGINE.md`, `README.md`).
 dans le même ordre, et la tête, le §18 et la trame d'`ENGINE.md` sont intacts ;
 la fusion à trois de #233 avec le nouvel `ENGINE.md` est propre (simulée par
 `git merge-file`).
+
+## A13 : la faille critique de `next/og` corrigée, et `npm audit` revenu à zéro (2026-10-01)
+
+**La demande** : Antoine, sur le compte rendu d'A7.3.e : « Go pour fixer la faille critique ». Ce « go » valait l'accord que `/livrer` §0 exige pour un merge qui touche une dépendance, sous réserve d'un poids de bundle sans surprise.
+
+**L'avis, lu à la source** : [GHSA-vcvr-r3jv-pc5j](https://github.com/advisories/GHSA-vcvr-r3jv-pc5j), publié le 2026-09-22, critique (CVSS 9,5). Il permet une exécution de code à distance dans `ImageResponse` de `next/og`, sur le runtime **Node**, quand l'application passe des valeurs contrôlées par un attaquant dans le contenu, les attributs ou les styles du SVG. Il touche `next` de 16.2.0 à 16.3.5 et se corrige en 16.3.6. Le runtime Edge n'est pas touché.
+
+**Notre exposition, à notre lecture : faible, mais réelle sur le principe.**
+- Toutes nos routes tournent sur Node, et un test l'impose (`next-config.test.ts`). Les images de partage passent donc par la voie vulnérable.
+- Le modèle de l'image de résultat (`shareImageModel`) ne contient que des valeurs calculées côté serveur : le total, l'étape qui freine, l'action tirée de notre bibliothèque, la langue et deux booléens. Aucun texte libre, ni d'un visiteur ni de Gemini, n'atteint le SVG.
+- La montée s'imposait quand même : une seule valeur mal bornée un jour aurait suffi.
+
+**Les choix** :
+- **`next` en 16.3.6, pas en 16.3.8**, alors que npm prenait la plus haute version d'office. 16.3.6 est la version corrective nommée par l'avis, publiée depuis neuf jours, et c'est celle que Dependabot propose. 16.3.7 et 16.3.8 apportent d'autres changements, publiés la veille. Le plancher de `package.json` passe à `^16.3.6`, pour qu'aucune installation ne puisse retomber sur une version vulnérable.
+- **Les deux alertes transitives par `npm audit fix`** : `@grpc/grpc-js` en 1.14.5 (par `firebase-admin`) et `brace-expansion` en 2.1.7. S'y ajoute la même alerte sur cinq copies imbriquées de `brace-expansion` dans l'outillage ESLint, en développement seulement. Le lockfile ne change rien d'autre : la liste a été relue paquet par paquet.
+- **Pas la PR groupée de Dependabot** ([#238](https://github.com/ScratchMe/tourdegrowth/pull/238), ouverte la même nuit). Elle monte aussi React en mineure (19.2 → 19.3) et `firebase-admin` (14.3 → 14.5), ce qui est trop pour un correctif de sécurité. Elle reste ouverte et se réduira d'elle-même au rebase.
+- **Un piège d'outillage** : `npm audit fix --omit=dev` élague aussi les dépendances de développement de `node_modules`, sans toucher au lockfile. Le `npm audit fix` complet qui suivait les a remises (« added 337 packages »). Un `npm ci` a ensuite reconstruit l'arbre exact du lockfile avant toute vérification.
+
+**Poids des bundles serveur** (`VERCEL.md` §1.2, `vercel build` hors ligne, `filePathMap` des six bundles physiques) : **46,66 Mo avant, 46,70 Mo après**, soit +0,04 Mo, très loin du seuil d'environ 1 Mo.
+
+**Vérifié** :
+- `npm audit` à 0, en production comme en développement, après un `npm ci` depuis le lockfile neuf.
+- `eslint` et `tsc` propres, **2 403 tests unitaires** (2 405 après la fusion de #240, qui ajoute la garde des liens des documents), `vitest --coverage` au-dessus de ses seuils, et `next build` propre sous « Next.js 16.3.6 ».
+- La suite Playwright complète, avec les variables de la CI et l'émulateur Firestore : **688 specs, 683 passées, 5 ignorées par construction, aucun échec ni rejeu**. Elle comprend les specs des images de partage (`share-previews`, `game-share-images`, `result-real`), qui exercent `ImageResponse`.
