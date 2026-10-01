@@ -107,9 +107,12 @@ export const UI_STRINGS = {
     },
     ctaPrimary: { en: "Start your Tour →", fr: "Démarre ton Tour →" },
     // TODO: à relire (convention 6). A15.16 (2026-10-01): a Tour in progress on this device.
-    ctaResume: { en: "Resume your Tour (question {n} of 15) →", fr: "Reprends ton Tour (question {n} sur 15) →" },
-    // TODO: à relire (convention 6).
-    ctaResumeLast: { en: "Resume your Tour (last step) →", fr: "Reprends ton Tour (dernière étape) →" },
+    // « Q n / 15 » is the quiz's own counter, the one the next screen shows. Bound
+    // with no-break spaces: one line down to 360px, and at 320 the counter wraps
+    // whole (« (question 8 sur 15) » left « 15) → » alone on a second line at 390).
+    ctaResume: { en: "Resume your Tour (Q {n} / 15) →", fr: "Reprends ton Tour (Q {n} / 15) →" },
+    // TODO: à relire (convention 6). All fifteen answered: the segment and the tone are left.
+    ctaResumeLast: { en: "Finish your Tour →", fr: "Termine ton Tour →" },
     ctaSecondary: { en: "See a sample result", fr: "Voir un résultat d'exemple" },
   },
 

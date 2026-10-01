@@ -616,3 +616,32 @@ Le recueil Laws of UX (30 lois), confronté au code par trois agents en lecture 
 - l'ombre venue du haut : la direction I ;
 - 150 à 300 ms : notre 120 ms au survol est plus rapide, et le reel du bouton du même compte demandait un retour en moins de 100 ms ;
 - les rayons concentriques d'un bouton dans une carte : 2 px au lieu de 12 casseraient le bouton.
+
+
+## A15.7 à A15.20 : ce que les lois de l'UX laissaient à faire (2026-10-01)
+
+La seconde PR d'A15, comme Antoine l'a choisi (#252 mergée seule d'abord). Huit correctifs et quatre des cinq décisions qu'il a tranchées sur les recos ; la cinquième, A15.18, n'a pas tenu à l'écran et lui revient (C33). A15.19 part à Claude Design (B7).
+
+**Les correctifs** :
+- **A15.7, le quiz se corrige après la 15ᵉ réponse** : un retour discret sur les écrans du profil et du ton, et leur en-tête dit ce qui reste (« Plus que deux écrans », puis « Dernier écran ») au lieu de « 15 / 15 répondues ».
+- **A15.8, les centimes d'un montant** : cinq taux dont les deux termes sont des montants (marge brute, expansion, contraction, NRR, marge assistée) portent `amounts` dans `catalog-shape.ts` ; leurs deux cases prennent les décimales, l'unité « € » et le message d'un montant.
+- **A15.9, l'étape « base » ne jette plus rien** : une valeur illisible, décimale ou nulle arrête l'étape et dit pourquoi (« Un nombre plus grand que zéro : on compte des personnes. »). Elle lit la case brute : `NumberField` rend `null` pour une case illisible comme pour une case vide.
+- **A15.10, Postel** : « 18 % », « 1 200 € », « €1,200 » se lisent (`lib/forms/number.ts` retire les signes d'unité, que la case affiche déjà) ; un compte négatif est refusé dans la fiche comme à l'import. Le test d'A15.2 qui tapait « 25 %% » comme exemple illisible tape maintenant « 25 kg ».
+- **A15.11** : « Imprimer ou enregistrer en PDF », le geste que fait le bouton.
+- **A15.12, une fiche garde sa saisie** d'un onglet à l'autre ou repliée : `sheet-drafts.ts`, en mémoire seulement (l'appareil garde ce qui est enregistré, jamais une saisie à moitié), effacé avec le moteur ou à l'import.
+- **A15.13, les sections du résultat sont des titres** : `MetaLabel` prend `as` (`h2` pour les forces et les faiblesses). Son rendu par défaut ne change pas ; le contrat part à la re-synchro (B6).
+- **A15.14** : quand une des forces montrées est faible, la section dit « Ce qui tient le mieux », pas « Points forts ». Une fixture d'émulateur neuve, `low` (toutes les réponses au plus bas), le montre. Sur ce tableau à zéro partout, la section nomme encore deux étapes ex aequo : honnête avec ce titre, gardé.
+
+**Les décisions** :
+- **A15.15** : sur téléphone, l'accueil se ferme sur « Démarre ton Tour », sous l'encart du fondateur ; sur un écran plus large, l'en-tête collant garde le sien et le bloc est masqué (deux primaires seraient en vue).
+- **A15.16, « Reprends ton Tour »** : `TourCta` lit les réponses gardées après le montage et dit où l'on reprend. **La vérification à l'écran a changé la copie** : « Reprends ton Tour (question 4 sur 15) → » laissait « 15) → » seul sur une seconde ligne à 390 px. Mesuré sur six formulations : « (Q 8 / 15) », le compteur du quiz lui-même, tient sur une ligne jusqu'à 360 px, lié par des espaces insécables pour se reporter entier à 320. Les quinze réponses données : « Termine ton Tour → ».
+- **A15.17, finir sur le partage** : le bloc Markdown du badge, pour développeurs, est replié (`Disclosure`) et passe avant la carte de partage. Sur téléphone, la mention légale reste après le partage, comme une note de bas de page : la remonter mettrait une mention entre le score et l'action, et l'ordre de lecture est tenu par `result-reading-order.test.ts`.
+- **A15.20, Entrée enregistre une fiche** : d'abord fait avec un `<form>`. **`engine-boundary.test.ts` l'a refusé** (règle 3 : un formulaire est un porteur ; si son envoi partait un jour sans notre code, avant l'hydratation ou sur une erreur, le navigateur mettrait ce qui a été tapé dans une URL, et rien de ce qui est tapé dans le moteur ne quitte l'appareil, `ENGINE.md` §11.4). La fiche garde son `div` et lit la touche : Entrée dans une case de texte, hors composition, quand le bouton Enregistrer prendrait le clic.
+
+**A15.18, revenu à Antoine (C33)** : « dans le jeu » sur la bande de la carte du jeu. Trois placements essayés (un élément à part, en ligne, raccourci en « Jeu : ») ; les trois cassent P23, une ligne de 44 px sur ordinateur et 56 px au plus à 360 px, et il ne reste que 9 px en français sur ordinateur. Rien n'a été gardé du code. La reco, un surtitre hors de la bande, est en C33.
+
+**Non-vacuité** : un build saboté sur tous les items à la fois fait tomber les 17 tests neufs, et aucun test existant. Puis, après la vérification à l'écran et le passage d'A15.20 sans formulaire, un second : la touche ignorée, « Termine » jamais choisi et l'ancienne copie de reprise font tomber exactement les trois tests qui les tiennent (Entrée, « Termine ton Tour », la ligne à 360 px, 72 px au lieu de 55), les douze autres des deux fichiers passent.
+
+**Copie neuve ou réécrite, « à relire »** : `toneSelector.headerTwoLeft`, `headerLast` (le retour reprend le « Retour » du quiz) ; `landing.ctaResume`, `ctaResumeLast` ; `result.strengthsTitleRelative` ; dans le moteur, `steps.countPositive`, `workbench.countNegative`, `pdf`. Celles du moteur changent la copie du nº8.
+
+**Vérifié** : à l'écran, en français et en anglais (le retour et l'en-tête du ton, l'appel de fin à 390 px, l'étape « base » en erreur, le tableau `low`, le badge replié, puis la reprise mesurée à 390, 360 et 320 px). `eslint`, `tsc`, `next build` propres ; `vitest --coverage` 2 723 tests, seuils tenus ; la suite Playwright complète avec l'émulateur et `CI=1` : E2E_RESULT.

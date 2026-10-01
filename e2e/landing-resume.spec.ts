@@ -43,3 +43,27 @@ for (const locale of ["en", "fr"] as const) {
     await expect(page.getByTestId("closing-cta")).toHaveText(tc(t.ctaResume, locale).replace("{n}", "8"));
   });
 }
+
+test("all fifteen answered, the score not asked for: « Finish your Tour »", async ({ page }) => {
+  await page.goto("/fr");
+  await page.evaluate(() => {
+    const ids = ["acq", "act", "ret", "ref", "rev"].flatMap((p) => [1, 2, 3].map((i) => `${p}-${i}`));
+    window.localStorage.setItem("tdg.quiz.answers.v1", JSON.stringify(Object.fromEntries(ids.map((id) => [id, 1]))));
+  });
+  await page.reload();
+  await expect(page.getByTestId("hero-cta")).toHaveText(tc(t.ctaResumeLast, "fr"));
+});
+
+test("the resume label holds one line on a 360px phone (A15.16)", async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 800 });
+  await page.goto("/fr");
+  const cta = page.getByTestId("hero-cta");
+  const startHeight = (await cta.boundingBox())!.height;
+  await page.evaluate(() => {
+    const ids = ["acq-1", "acq-2", "acq-3", "act-1", "act-2", "act-3", "ret-1", "ret-2", "ret-3"];
+    window.localStorage.setItem("tdg.quiz.answers.v1", JSON.stringify(Object.fromEntries(ids.map((id) => [id, 1]))));
+  });
+  await page.reload();
+  await expect(cta).toHaveText(tc(t.ctaResume, "fr").replace("{n}", "10"));
+  expect((await cta.boundingBox())!.height).toBe(startHeight);
+});

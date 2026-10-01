@@ -18,9 +18,9 @@ import { isSubmittedTour, loadStoredAnswers, loadStoredResults } from "@/lib/qui
  */
 export interface TourCtaProps {
   label: string;
-  /** « Resume your Tour (question {n} of 15) → », `{n}` replaced here. */
+  /** « Resume your Tour (Q {n} / 15) → », `{n}` replaced here. */
   resumeLabel: string;
-  /** All fifteen answered, the score not asked for yet. */
+  /** « Finish your Tour → »: all fifteen answered, the score not asked for yet. */
   resumeLastLabel: string;
   testId: string;
   fullWidth?: boolean;

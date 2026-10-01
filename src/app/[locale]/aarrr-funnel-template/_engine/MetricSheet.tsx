@@ -37,6 +37,9 @@ import styles from "./Sheet.module.css";
 
 const ROLES = Object.keys(ROLE_KEY) as RoleId[];
 
+/** The boxes where Enter submits a form, in a browser (HTML's implicit submission): not a checkbox, a button or a textarea. */
+const TEXT_INPUTS = new Set(["text", "search", "url", "email", "tel", "number"]);
+
 /** The unit inside a bound's or a target's box, placed by the page's language — a duration's word in the number's grammatical number (A11.1). */
 function unitOf(shape: MetricShape, view: EngineView, value: number | null): NumberUnit {
   if (shape.unit === "percent") return percentUnit(view.ctx.locale);
@@ -113,7 +116,7 @@ export function MetricSheet({
   // button, outside any live region, said nothing to a screen reader. Counted,
   // so a second refusal moves it again.
   const [refusals, setRefusals] = useState(0);
-  const sheetRef = useRef<HTMLFormElement>(null);
+  const sheetRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (refusals === 0) return;
     const root = sheetRef.current;
@@ -227,16 +230,21 @@ export function MetricSheet({
   const [alsoBefore = ""] = strings.sheet.alsoIn.split("{metrics}");
 
   return (
-    // A form, so Enter in a box saves, as on any other form (A15.20, Jakob's
-    // law, decided by Antoine on 2026-10-01). Nothing is sent anywhere: the
-    // submit is the sheet's own save, on this device. The Save button is the
-    // form's one submit; every other Button is `type="button"` by default.
-    <form
+    // Enter in a box saves, as on any form (A15.20, Jakob's law, decided by
+    // Antoine on 2026-10-01). Not a <form>: one is a carrier, and if its
+    // submit ever ran without this code (before hydration, or a handler that
+    // throws), the browser would put what was typed in a URL. Nothing typed
+    // in the engine leaves the device (ENGINE.md §11.4, rule 3 in
+    // `engine-boundary.test.ts`). So the key itself, from a text box only,
+    // and only when the Save button would take the click.
+    <div
       ref={sheetRef}
       className={styles.sheet}
       data-testid={`engine-sheet-${domId(id)}`}
-      noValidate
-      onSubmit={(event) => {
+      onKeyDown={(event) => {
+        if (event.key !== "Enter" || event.nativeEvent.isComposing) return;
+        if (!(event.target instanceof HTMLInputElement) || !TEXT_INPUTS.has(event.target.type)) return;
+        if (draft.mode === null || draft.mode === "ask") return;
         event.preventDefault();
         save();
       }}
@@ -571,9 +579,9 @@ export function MetricSheet({
       {draft.mode !== "ask" ? (
         <div className={styles.saveRow}>
           <Button
-            type="submit"
             variant={variant === "step" ? "primary" : "secondary"}
             disabled={draft.mode === null}
+            onClick={save}
             data-testid={`engine-save-${domId(id)}`}
           >
             {variant === "step" ? strings.sheet.saveNext : strings.sheet.save}
@@ -600,7 +608,7 @@ export function MetricSheet({
           {strings.storage.writeFailed}
         </p>
       ) : null}
-    </form>
+    </div>
   );
 }
 
