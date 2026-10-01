@@ -1318,7 +1318,7 @@ Commit `70bdec2`. **Q14** (C25, tranchée oui) : `engine_setup/<plg|slg|hybrid>`
 
 **Ce que l'écran a trouvé** (à 1 280 px, avant la correction) : un « · » suspendu en fin de première ligne quand la bande passait à la ligne, et deux mises en page dans la même carte, le nom « Acquisition » renvoyé au-dessus d'un bouton trop long alors que « Retention » restait à côté du sien. D'où la bande empilée et le nom toujours au-dessus.
 
-**Copie neuve, « à relire »** : `GAME_ENTRY_SEVERAL` (« Le côté obscur de tes étapes », son corps, « vingt minutes par niveau, gratuit »).
+**Copie neuve, « à relire »** : `GAME_ENTRY_SEVERAL` (« Le côté obscur de tes étapes », son corps, « vingt minutes par niveau, gratuit »). La relecture de copie a trouvé une phrase fausse sur certains résultats : « un niveau pour chacune des étapes qui te freinent » ne tient pas quand trois étapes sont à égalité et que deux seulement ont un niveau, alors que la page au-dessus dit « 3 étapes te freinent ». C'est devenu « les étapes ci-dessous » et « huit astuces par niveau », et un test tient le cas.
 
 **Vérifié** :
 - `tsc` et `eslint` propres, **2 698 tests unitaires**, dont les cas de la liste : deux niveaux dans l'ordre du goulot, un seul quand une seule étape du goulot en a un, jamais deux fois le même, l'ouverture Deep dive pour toute la carte.

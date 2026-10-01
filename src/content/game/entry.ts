@@ -13,7 +13,8 @@ import type { Translatable } from "@/lib/i18n/translatable";
  * (`content/game/retention.ts`, `dashboard.churn` and
  * `dashboard.notOnDashboard`). Level 2's card (2026-10-01, A12.f) is new copy
  * written by the code session on the model of level 1's, the two openings
- * and the mention shared.
+ * and the mention shared; so is the card offering several levels
+ * (`GAME_ENTRY_SEVERAL`, A12.f.2), with its own title, body and mention.
  *
  * Its own module, and only the result page imports it: the level's text
  * (`retention.ts`, ~800 lines) must not ride into the result page's server
@@ -99,7 +100,9 @@ export const GAME_ENTRY_COPY = {
 /**
  * The card when the bottleneck holds several stages that each have a level
  * (C30 Q5, Antoine, 2026-10-01): one card offers them all, stage by stage,
- * and the reader chooses. The shared title, body and mention; each level
+ * and the reader chooses. « Les étapes ci-dessous », not « celles qui te
+ * freinent »: three stages can tie at the bottom with only two levels among
+ * them, and the page above says « 3 étapes te freinent ». The shared title, body and mention; each level
  * keeps its own button and its own number in the band (`GAME_ENTRY_COPY`).
  * The opening sentence is the same as a one-level card's (`OPENING`).
  *
@@ -108,8 +111,8 @@ export const GAME_ENTRY_COPY = {
 export const GAME_ENTRY_SEVERAL = {
   title: t("Le côté obscur de tes étapes", "The dark side of your stages"),
   body: t(
-    "Voici ce qu'il ne faut pas faire : un niveau pour chacune des étapes qui te freinent, une année comme PM growth, un DG qui veut du chiffre, et huit astuces que tu reconnaîtras ensuite partout.",
-    "Here is what not to do: a level for each of the stages holding you back, a year as a growth PM, a CEO who wants the number, and eight tricks you will recognise everywhere afterwards.",
+    "Voici ce qu'il ne faut pas faire : un niveau pour chacune des étapes ci-dessous, une année comme PM growth, un DG qui veut du chiffre, et huit astuces par niveau que tu reconnaîtras ensuite partout.",
+    "Here is what not to do: a level for each of the stages below, a year as a growth PM, a CEO who wants the number, and eight tricks a level you will recognise everywhere afterwards.",
   ),
   meta: t("vingt minutes par niveau, gratuit", "twenty minutes a level, free"),
 } as const;

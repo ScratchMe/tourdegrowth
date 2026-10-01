@@ -7,7 +7,8 @@ import { GameEntry } from "tour-de-growth";
  * the game in one glance — the churn the CEO watches, and the trust that is
  * missing from his dashboard (the empty cell is drawn, not a glyph).
  *
- * Copy is the brief's own (content/game/entry.ts), in both languages.
+ * Copy is content/game/entry.ts, in both languages: the brief's own for a
+ * one-level card, the code session's for the card offering several.
  *
  * `levels` holds what the card offers, lowest stage first: one level is the
  * brief's card; several (stages tied at the bottom that each have a level,
@@ -98,7 +99,7 @@ export const TwoLevels = () => (
   <div style={wrap}>
     <GameEntry
       title="The dark side of your stages"
-      body="Now you know what to do. Here is what not to do: a level for each of the stages holding you back, a year as a growth PM, a CEO who wants the number, and eight tricks you will recognise everywhere afterwards."
+      body="Now you know what to do. Here is what not to do: a level for each of the stages below, a year as a growth PM, a CEO who wants the number, and eight tricks a level you will recognise everywhere afterwards."
       meta="twenty minutes a level, free"
       band={{ trust: "Trust", notOnDashboard: "not on your dashboard" }}
       levels={[
@@ -126,7 +127,7 @@ export const TwoLevelsNarrow = () => (
   <div style={{ maxWidth: 342 }}>
     <GameEntry
       title="Le côté obscur de tes étapes"
-      body="Tes recommandations sont au-dessus. Voici ce qu'il ne faut pas faire : un niveau pour chacune des étapes qui te freinent, une année comme PM growth, un DG qui veut du chiffre, et huit astuces que tu reconnaîtras ensuite partout."
+      body="Tes recommandations sont au-dessus. Voici ce qu'il ne faut pas faire : un niveau pour chacune des étapes ci-dessous, une année comme PM growth, un DG qui veut du chiffre, et huit astuces par niveau que tu reconnaîtras ensuite partout."
       meta="vingt minutes par niveau, gratuit"
       band={{ trust: "Confiance", notOnDashboard: "pas sur ton dashboard" }}
       levels={[

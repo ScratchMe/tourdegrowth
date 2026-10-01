@@ -137,6 +137,16 @@ describe("resultGameEntry — C30 Q5, several levels on one card (A12.f.2)", () 
     expect(fr.meta).toBe(GAME_ENTRY_SEVERAL.meta.fr);
   });
 
+  it("three stages tied, two with a level: the card offers those two, and says « the stages below », not all of them", () => {
+    const three = board({ acquisition: 5, activation: 5, retention: 5, referral: 16, revenue: 20 });
+    expect(three.pillars.map((p) => p.pillar)).toEqual(["acquisition", "activation", "retention"]);
+    const entry = resultGameEntry({ bottleneck: three, locale: "fr", ...open })!;
+    expect(entry.levels.map((l) => l.stage)).toEqual(["Acquisition", "Retention"]);
+    // The page above says « 3 étapes te freinent »: the card must not claim a level for each of them.
+    expect(entry.body).toContain("ci-dessous");
+    expect(entry.body).not.toContain("qui te freinent");
+  });
+
   it("never offers the same level twice", () => {
     const twice = { acquisition: { slug: "retention" as const, enabled: true }, retention: { slug: "retention" as const, enabled: true } };
     const entry = resultGameEntry({ bottleneck: SHARED_WITH_RETENTION, locale: "en", ...open, levels: twice })!;
