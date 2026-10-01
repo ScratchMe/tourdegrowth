@@ -23,14 +23,18 @@ const ALL = [...ACQUISITION_HONEST_IDS, ...ACQUISITION_DARK_IDS] as AcquisitionC
 const kinds = (ids: AcquisitionCardId[]) => shopPhoneView(ids).map((item) => item.kind);
 const copyOf = (locale: "fr" | "en") => resolveLevelCopy<AcquisitionCopy>(ACQUISITION_CONTENT, locale);
 
-/** The text a static render shows, tags stripped until nothing changes. */
+/**
+ * The text a static render shows, tags stripped until nothing changes. `&amp;`
+ * is decoded last, so an escaped « &amp;quot; » stays « &quot; » rather than
+ * being unescaped twice (CodeQL js/double-escaping).
+ */
 function text(html: string): string {
   let out = html;
   for (let prev = ""; prev !== out; ) {
     prev = out;
     out = out.replace(/<[^>]*>/g, "");
   }
-  return out.replace(/&amp;/g, "&").replace(/&#x27;/g, "'").replace(/&quot;/g, '"');
+  return out.replace(/&#x27;/g, "'").replace(/&quot;/g, '"').replace(/&amp;/g, "&");
 }
 
 describe("what the phone shows (§17.7)", () => {

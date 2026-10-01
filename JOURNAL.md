@@ -1089,6 +1089,8 @@ la fusion à trois de #233 avec le nouvel `ENGINE.md` est propre (simulée par
 
 **Les gardes du design system ont attrapé trois écarts** avant la PR, tous dans le CSS neuf : une taille de prix en pixels (A1.5), des bordures en pixels pour le triangle de lecture et les roues (S-17), et un jeton « blanc sur le vert » que rien ne lisait (A1.6). Le triangle est maintenant un `clip-path`, les roues lisent `--border-width`, et le jeton orphelin est retiré avec sa paire de contraste.
 
+**CodeQL a rougi sur la PR** (une alerte « high », *double unescaping*) : l'assistant de test qui lit le texte d'un rendu décodait `&amp;` avant `&quot;` et `&#x27;`, donc un `&amp;quot;` échappé serait devenu un guillemet. Sans conséquence dans un test, mais l'alerte est juste : `&amp;` se décode en dernier.
+
 **Pour Claude Design** : deux aperçus neufs (`ShopPhone` : le départ, une année honnête, le bureau du troisième trimestre d'une année C, toutes les cartes sombres en français ; `BasketPill` : ses trois états, en français, en petit), construits sur des états que le jeu atteint vraiment, puis vérifiés au type près contre les composants. Les deux sont inscrits dans `componentSrcMap`, et `ShopPhone` dans `dtsPropsFor`, comme `PhoneMock` : la liste de ses éléments vient de `lib/`, et sans épingle le contrat n'en montrerait que le nom. La synchro elle-même est B4.
 
 **Vérifié** :
