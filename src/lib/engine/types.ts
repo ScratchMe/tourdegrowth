@@ -774,14 +774,29 @@ export interface DeckSlide {
   lines: Record<string, string>[];
   /** Speaker notes (§9.4), already filled. */
   notes: string[];
+  /**
+   * The motion a slide is about (A7.3.c S4), set only when sales-assisted is
+   * ticked: self-serve alone prints the v1 deck, whose slides have none. A
+   * common slide (visibility, the ask, the appendix…) has none either.
+   */
+  motion?: Motion;
+}
+/** One motion's chrome in the hybrid: its kicker names it, its pill counts its numbers, its footer cites its months and tools. */
+export interface DeckMotionChrome {
+  kicker: string;
+  dataPill: { measured: number; approximate: number; missing: number };
+  footer: string;
 }
 export interface DeckModel {
   slides: DeckSlide[];
   /** Non-blocking checks shown above the thumbnails: "{n} things to check before presenting". */
   checks: SanityCheck[];
+  /** The deck's pill: the ticked motions together (the link never counted). */
   dataPill: { measured: number; approximate: number; missing: number };
   kicker: Record<string, string>;
   footer: Record<string, string>;
+  /** The hybrid only: each motion's slides wear their own kicker, pill and footer (§18.8.1). */
+  byMotion?: Record<Motion, DeckMotionChrome>;
 }
 
 /** One ticked motion, read on its own (§18.6.1): its coverage, its funnel, its diagnosis, its unit economics. */

@@ -41,9 +41,9 @@ function positions(overrides: Partial<Diagnosis["positions"]> = {}): Diagnosis["
 }
 
 function derivedWith(diagnosis: Partial<Diagnosis>): EngineDerived {
-  return {
-    diagnosis: { state: "not-enough", named: [], basis: "none", belowUnpriced: [], blind: [], positions: positions(), ...diagnosis },
-  } as EngineDerived;
+  const full = { motion: "plg" as const, state: "not-enough" as const, named: [], basis: "none" as const, belowUnpriced: [], blind: [], positions: positions(), ...diagnosis };
+  // The ask reads each ticked motion's diagnosis (`motions`); self-serve alone here, as the v1 engine.
+  return { diagnosis: full, motions: [{ motion: "plg", diagnosis: full }] } as unknown as EngineDerived;
 }
 
 const clearOn = (metric: PlgCandidateId, comparator: Diagnosis["positions"][PlgCandidateId]["comparator"]) =>
@@ -91,6 +91,29 @@ describe("suggestedSuccess", () => {
   it("suggests nothing when the diagnosis names nothing — the tool doesn't pick a target on its own", () => {
     expect(suggestedSuccess(derivedWith({ state: "not-enough" }))).toEqual({});
     expect(suggestedSuccess(derivedWith({ state: "level" }))).toEqual({});
+  });
+});
+
+/** Non-vacuity, measured on 2026-10-01: proposing a stage as soon as one motion names it fails « both motions ». */
+describe("suggestedSuccess with two motions (§18.8.2, Q13)", () => {
+  const slgClear = {
+    motion: "slg",
+    state: "clear",
+    named: ["slg.rev.win-rate"],
+    basis: "mrr",
+    belowUnpriced: [],
+    blind: [],
+    positions: { "slg.rev.win-rate": { position: "below", comparator: { lo: 32, hi: 32, direction: "higher" } } },
+  };
+  const withSlg = (plg: EngineDerived, slg: unknown) => ({ ...plg, motions: [...plg.motions, { motion: "slg", diagnosis: slg }] }) as unknown as EngineDerived;
+
+  it("both motions name a stage: nothing proposed — the form offers both, the team chooses", () => {
+    const plg = clearOn("rev.paid-conversion", { lo: 12, hi: 12, direction: "higher" });
+    expect(suggestedSuccess(withSlg(plg, slgClear))).toEqual({});
+  });
+
+  it("only one names a stage: that one, its own target", () => {
+    expect(suggestedSuccess(withSlg(derivedWith({ state: "level" }), slgClear))).toEqual({ successMetric: "slg.rev.win-rate", successTarget: 32 });
   });
 });
 

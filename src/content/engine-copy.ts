@@ -1433,6 +1433,15 @@ export const ENGINE_COPY = {
     },
     /** The footer's `{assumption}` when activation is named: a clause, lower-case, no full stop. */
     leakAssumption: { fr: "les payants sont supposés parmi les activés", en: "paying customers are assumed to be among the activated" },
+    /**
+     * TODO: à relire (convention 6) — neuf le 2026-10-01 (A7.3.c S4, ENGINE.md §18.5.3) : the `slg:leak`
+     * footer's `{assumption}`, one per priced sales-assisted stage — a clause, lower-case, no full stop.
+     */
+    slgLeakAssumption: {
+      "slg.acq.lead-to-opp": { fr: "les opportunités en plus se signent au même taux que les autres", en: "the extra opportunities are signed at the same rate as the others" },
+      "slg.rev.win-rate": { fr: "le même nombre d'opportunités conclues", en: "the same number of closed opportunities" },
+      "slg.ret.renewal": { fr: "les contrats sauvés valent l'ARPA assisté", en: "the contracts saved are worth the sales-assisted ARPA" },
+    },
     /** The footer of a leak slide with no amount (C9): why there is none, in place of « toutes choses égales par ailleurs ». */
     // TODO: à relire (convention 6) — nouveau (2026-09-30, A7.6, C9).
     leakFooterUnpriced: {
@@ -1506,6 +1515,8 @@ export const ENGINE_COPY = {
      */
     whatIfKpis: { fr: "Les chiffres de croissance", en: "The growth numbers" },
     whatIfFunnel: { fr: "Le funnel du mois", en: "The month's funnel" },
+    // TODO: à relire (convention 6) — neuf le 2026-10-01 (A7.3.c S4) : the second table of a sales-assisted what-if slide.
+    whatIfQuarter: { fr: "Le trimestre", en: "The quarter" },
     whatIfToday: { fr: "Aujourd'hui", en: "Today" },
     whatIfWithOne: { fr: "Avec cet « Et si »", en: "With this what-if" },
     whatIfWithAll: { fr: "Avec les « Et si »", en: "With the what-ifs" },

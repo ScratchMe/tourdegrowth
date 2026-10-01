@@ -16,7 +16,7 @@ import type { EngineAsk, EngineState, MetricId } from "@/lib/engine/types";
 import { currentSnapshot } from "@/lib/engine/values";
 import type { Locale } from "@/lib/i18n/locale";
 import { percentUnit } from "../sources";
-import { SUCCESS_METRICS, horizonOptions, missingByRepairCost } from "./ask-defaults";
+import { horizonOptions, missingByRepairCost, successMetrics } from "./ask-defaults";
 import { SlideText } from "./slide-text";
 import styles from "./deck.module.css";
 
@@ -264,7 +264,7 @@ export function AskForm({ locale, strings, metrics, state, ask, titlePreview, on
         label={t.successMetric}
         value={ask.successMetric ?? ""}
         placeholder={u.askSuccessNone}
-        options={SUCCESS_METRICS.map((id) => ({ value: id, label: nameOf(id) }))}
+        options={successMetrics(state.setup).map((id) => ({ value: id, label: nameOf(id) }))}
         onChange={(value) => update({ successMetric: value || undefined })}
       />
       {/* Every metric offered here is a rate, typed "20" for 20 % — never "0.2": the % is in the box. */}
