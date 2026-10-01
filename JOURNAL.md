@@ -683,3 +683,64 @@ La seconde PR d'A15, comme Antoine l'a choisi (#252 mergée seule d'abord). Huit
 **Copie neuve ou réécrite, « à relire »** : `toneSelector.headerTwoLeft`, `headerLast` (le retour reprend le « Retour » du quiz) ; `landing.ctaResume`, `ctaResumeLast` ; `result.strengthsTitleRelative` ; dans le moteur, `steps.countPositive`, `countPositiveSlg`, `workbench.countNegative`, `pdf`. Celles du moteur changent la copie du nº8.
 
 **Vérifié** : à l'écran, en français et en anglais (le retour et l'en-tête du ton, l'appel de fin à 390 px, l'étape « base » en erreur, le tableau `low`, le badge replié, puis la reprise mesurée à 390, 360 et 320 px). `eslint`, `tsc`, `next build` propres ; `vitest --coverage` 2 724 tests, seuils tenus. La suite Playwright complète avec l'émulateur et `CI=1`, sur la tête d'avant les relectures : 788 passées, 6 ignorées par construction (« jeu fermé »), une tombée, le test du repli qu'A15.12 renverse (plus haut), réécrit. Puis, sur la tête finale, les 193 specs du moteur et de `platform-native` : 192 passées, une au second essai, la miniature du deck hybride déjà relevée dans l'entrée d'A15 (`engine-deck-hybrid.spec.ts:87`). **Fusionnée avec A14.c T0 (#255)**, mergée pendant ce temps, et qui range chaque moteur sous sa propre clé : le test du repli lit tout le stockage de l'appareil, et A14.c note pour T2 et T5 que changer de mois ou de moteur doit vider les brouillons. Sur la tête fusionnée : `vitest --coverage` 2 752 tests, et la suite Playwright complète avec l'émulateur et `CI=1`, 792 passées et 6 ignorées par construction sur 798, aucune au second essai.
+
+
+## A14.c, T1 : la série mensuelle, moteur pur (2026-10-01, #256)
+
+La deuxième PR du moteur complet (`docs/engine/moteur-complet.md` §19.2), drapeau fermé. T0 est en production le même jour (#255, squash `647834a`). Aucun écran ne permet encore de démarrer un deuxième mois, c'est T2 ; mais un fichier v3 à deux mois s'importe déjà, et il se lit en entier.
+
+**`lib/engine/series.ts`**, pur, sans horloge :
+- `monthView` relit un mois clos tel qu'il a été vu : les mois jusqu'à lui, ses fenêtres (`windows`), et le jour de sa clôture (`closedAt`) pour « aujourd'hui ». Chaque module dérivé lit le dernier mois ; il suffit donc de lui passer cette vue pour qu'un mois d'août relu en novembre garde sa période et sa confiance. Le test le montre, et montre aussi qu'une lecture naïve, sur la date du jour, aurait changé la confiance ;
+- `nextMonthOf` et `startNextMonth` : le mois suivant s'ouvre quand le mois des flux est clos, avec les cibles du précédent et rien d'autre (§19.2.2). Les définitions, variantes et sources sont proposées par la fiche (`proposedFromBefore`), jamais copiées ; après un trou de plusieurs mois, c'est le dernier mois clos qui s'ouvre, et la cohorte suivie avance d'autant. Au-delà de 36 mois, `full` ;
+- `comparable` et `delta` (§19.2.5) : deux mois se comparent quand les deux valeurs sont mesurées, saisies de la même façon (des comptes les deux fois, ou un taux les deux fois), avec la même variante, la même note de définition et la même fenêtre. Sinon, la raison : « définition changée », « saisi autrement », « pas mesuré en juillet », « estimé », « deux lectures ». L'écart s'écrit en points pour un taux, en valeur et en pour cent pour un montant ou une durée ;
+- `deriveSeries`, appelé par `deriveEngine` à partir du deuxième mois seulement : sans lui, aucune clé `series`, et les goldens v1 et v2 ne bougent pas d'un caractère. La fuite du mois d'avant est celle que l'équipe a vue alors, puisque ce mois est relu par `monthView`.
+
+**« Ce qui a bougé »** (`deck-series.ts`, §19.2.6), une par motion, juste après la fuite et ses « Et si », **décochée par défaut** (Q5). Trois lectures :
+- des chiffres ont bougé : « 3 chiffres ont bougé depuis juillet 2026 ; l'activation reste la fuite », et au plus six lignes dans l'ordre du catalogue ;
+- rien n'a bougé : « Rien n'a bougé depuis juillet 2026 », avec les chiffres restés stables ;
+- rien ne se compare : « juillet 2026 et août 2026 ne se comparent pas encore », et la raison de chaque chiffre.
+
+`notes.series` remplace `notes.seasonal` dès le deuxième mois, sur les quatre slides qui la portaient. Toute la copie neuve porte « TODO: à relire ».
+
+**Écarts à la spec**, notés au §19.2.6 :
+- une ligne s'écrit « 15 %, puis 18 % (+3 points) », sans flèche : les polices des slides ne dessinent pas « → », et la garde de `engine-copy.test.ts` l'a refusée ;
+- « vers la cible » ne se dit que d'un chiffre **en retard** le mois d'avant qui a bougé dans le bon sens. La lecture littérale (« s'en rapprocher ») écrivait « vers la cible » sous une activation tombée de 25 % à 18 % pour une cible à 20 %. Le sondage de la slide l'a montré avant tout test ;
+- la slide existe dès le deuxième mois, même quand rien ne se compare ; ses identifiants forment un type à part, `SeriesSlideId` ;
+- son composant est livré dès T1, en version minimale (les lignes « À côté » de la slide de fuite), pour qu'aucune slide du modèle ne reste sans rendu. La mise en page vient avec T2.
+
+**Les gardes existantes ont fait leur travail.** Avant tout test neuf, cinq ont refusé la première version :
+- une flèche sur une slide ;
+- « vers ta cible » (une slide ne tutoie pas) ;
+- les quatre titres neufs, ni remplis par l'échantillon, ni déclenchés par le balayage des phrases ;
+- deux sortes de lignes que le contrat des lignes ne connaissait pas.
+
+Le balayage des phrases a gagné six scénarios à deux mois, et le contrat des lignes deux états.
+
+**Non-vacuité**, mesurée en sabotant puis en restaurant le code. Chaque sabotage fait tomber les tests qui le visent :
+- un mois clos lu à la date du jour : 2 tests ; avec les fenêtres du jour : 1 ;
+- une note de définition ou une fenêtre ignorées à la comparaison ;
+- le mois suivant qui reprend les valeurs ;
+- `leakChanged` inversé ;
+- la slide cochée par défaut ;
+- `notes.seasonal` gardée au deuxième mois ;
+- les lignes triées par écart ;
+- « reste la fuite » écrit quand la fuite a changé ;
+- une série calculée sur un seul mois : 130 tests, dont tout le deck.
+
+**Un sabotage est d'abord passé** : « vers la cible » sans la condition « en retard le mois d'avant » laissait les 1 001 tests verts. Il manquait le cas d'un chiffre déjà au-delà de sa cible qui progresse encore. Ce cas est ajouté, et le sabotage tombe.
+
+**Un piège de Git, consigné dans `GITHUB.md` §1.9.** T1 s'est construit dans un worktree, pendant que la suite Playwright de T0 occupait le dépôt principal, avec un `node_modules` partagé par lien symbolique. Le `git add -A` du worktree a suivi ce lien, parce que la règle `/node_modules/` ne vise que les dossiers. Rejouer les commits sur `main` a remplacé le vrai `node_modules` par le lien, puis l'a supprimé. Un `npm ci` a réparé (lockfile intact). La règle de `.gitignore` s'écrit maintenant sans barre finale. Turbopack, lui, refuse de construire avec un `node_modules` lié : le build se fait dans le dépôt principal.
+
+**Vérifié** :
+- `vitest --coverage` : 2 780 tests passés, au-dessus des seuils ;
+- `tsc`, `eslint` et `next build` (avec `GAME_ENABLED=true`) propres ;
+- `e2e/engine-series.spec.ts`, nouveau : deux mois offrent la slide décochée, et cochée elle imprime ses trois lignes en FR et en EN, sans déborder ; un moteur à un mois n'en a pas ; l'hybride en a une par motion. Captures relues dans les deux langues ;
+- Playwright complet (`CI=1`) : 782 specs, 754 passées dont une au second essai, et 28 ignorées (22 faute d'émulateur, 6 par construction).
+- après la fusion d'A15.7-A15.20 (#257), mergée pendant que la CI de T1 tournait : 2 785 tests unitaires, et Playwright complet sur l'arbre fusionné, 802 specs, 771 passées et 31 ignorées (25 faute d'émulateur, 6 par construction), aucune au second essai.
+
+**Le test passé au second essai** : « every slide prints filled templates… » de `engine-deck-hybrid.spec.ts`, en anglais, avec « total is empty ». Il est antérieur à T1, qui ne touche pas au deck d'un moteur à un mois. Le test connaissait déjà le piège de `content-visibility: auto` (une vignette lue hors écran rend un texte vide) et attendait que chaque vignette soit rendue. Mais il relisait ensuite toutes les vignettes une seconde fois, en remontant à la première, et cette seconde lecture est tombée trop tôt une fois sous charge. Il lit maintenant chaque vignette une seule fois, au moment où le sondage voit son texte : 10 passages sur 10 sans nouvel essai, en français et en anglais.
+
+**La relecture de copie** (`relecteur-copie`) a relevé trois points, corrigés :
+- des marqueurs « à relire » qui ne nommaient pas les clés qu'ils couvraient : `/bon-a-tirer` part d'un `grep` et n'aurait pas su lesquelles relire ;
+- `notes.series` renvoyait à « la slide « Ce qui a bougé » ». Cette slide est décochée par défaut, et aucun de ses titres ne porte ce nom. La note ne renvoie plus à rien ;
+- un commentaire de `SlideEvolution` décrivait encore une flèche.

@@ -105,6 +105,11 @@ export interface DeckRows {
   /** One row of the hybrid's unit economics, side by side: `plg` and `slg` the two cells, self-serve first. */
   unitRow: { id: string; label: string; plg: string; slg: string; text: string };
   // Appendix
+  // « Ce qui a bougé » (A14 T1, §19.2.6)
+  /** One number, the month before then this one, as printed; `change` « +6 points » or `whatIfStable`; `tone` moved | stable; `toward` "true" or "". */
+  evolution: { id: string; label: string; tone: string; before: string; now: string; change: string; toward: string; text: string };
+  /** A number that doesn't compare, and why — « estimé en août », « définition changée ». */
+  apart: { id: string; label: string; text: string };
   annex: {
     id: string;
     label: string;
@@ -156,6 +161,8 @@ export const ROW_FIELDS: { readonly [K in RowKind]: readonly (keyof DeckRows[K])
   link: ["text", "note"],
   sum: ["id", "text"],
   unitRow: ["id", "label", "plg", "slg", "text"],
+  evolution: ["id", "label", "tone", "before", "now", "change", "toward", "text"],
+  apart: ["id", "label", "text"],
   annex: ["id", "label", "formula", "window", "period", "source", "status", "confidence", "definition", "text"],
 };
 

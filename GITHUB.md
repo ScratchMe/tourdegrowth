@@ -156,6 +156,38 @@ commentaire** ; les mineures et patchs continuent d'arriver.
 Et un principe : **les types suivent le runtime, jamais ils ne le précèdent**
 (`@types/node` reste sur le major réellement exécuté en production).
 
+### 1.8 Une PR en conflit n'a pas de CI, et rien ne le dit
+
+**Une PR que `main` a mise en conflit ne lance pas les workflows
+`pull_request`** : GitHub ne sait pas construire la référence de fusion
+qu'ils testent. Les checks dynamiques (CodeQL) tournent quand même, si bien
+que la PR montre des checks verts et un « Types, tests, build » qui n'apparaît
+simplement pas. Ni rouge, ni en attente. Ça nous est arrivé deux fois de
+suite le 2026-10-01 (A14 T0) : deux autres PR ont été mergées pendant que la
+nôtre attendait.
+
+La règle : quand le check requis **manque** au lieu d'être en cours, lire
+`mergeable_state` (`dirty` = conflit) et `git log origin/main` **avant** de
+soupçonner le workflow. Le correctif est de fusionner `main` dans la branche.
+Relancer la PR ne sert à rien.
+
+### 1.9 Git écrase un dossier ignoré sans prévenir
+
+Un `git worktree` avec un `node_modules` partagé par lien symbolique, puis un
+`git add -A` dans ce worktree : le lien est **suivi**, parce que la règle
+`node_modules/` de `.gitignore` ne vise que les dossiers, pas un lien qui
+porte ce nom. Rejouer ensuite ce commit dans le dépôt principal a **remplacé le
+vrai dossier `node_modules` par le lien**, puis l'a supprimé avec le commit
+suivant. Git considère un fichier ignoré comme jetable et l'écrase sans
+message. Le 2026-10-01 (A14 T1), c'est un `npm ci` qui a réparé.
+
+La règle : écrire `/node_modules` **sans** barre finale dans `.gitignore`
+(fait ici le même jour), pour que le lien d'un worktree soit ignoré lui aussi ;
+et relire `git show --stat` d'un commit de travail avant de le rejouer
+ailleurs. Dernier piège du même worktree : Turbopack refuse de construire avec
+un `node_modules` lié par un lien symbolique (« points out of the filesystem
+root ») ; le build se fait dans le dépôt principal.
+
 ---
 
 ## 2. Propre à Tour de Growth

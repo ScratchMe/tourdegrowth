@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { exampleState, hybridState, measured, ratio, salesAssistedState, tourResult, withEntry, withTarget } from "@/lib/engine/__tests__/fixtures";
+import { exampleState, hybridState, measured, ratio, salesAssistedState, tourResult, withEntry, withMonthBefore, withTarget } from "@/lib/engine/__tests__/fixtures";
 import { CTX_EN, CTX_FR, EN, FR } from "@/lib/engine/__tests__/props";
 import { buildDeck } from "@/lib/engine/deck";
 import { deriveEngine } from "@/lib/engine/derive";
@@ -32,7 +32,8 @@ import { OPTIONAL_FIELDS, ROW_FIELDS, type RowKind } from "../deck-rows";
  * `whatIf` fails it naming kpi, funnelStep, lever and together; dropping
  * `hybrid` and `hybridLinked` (2026-10-01) fails it naming totalBlock, link,
  * sum and unitRow — the hybrid's own rows (`salesAssisted` still writes the
- * relays).
+ * relays); dropping `series` and `seriesApart` (A14 T1) fails it naming
+ * evolution and apart.
  */
 
 const props = { fr: { ...FR, ctx: CTX_FR }, en: { ...EN, ctx: CTX_EN } } as const;
@@ -98,7 +99,20 @@ function salesAssisted(): EngineState {
   return withEntry(salesAssistedState(), "slg.rev.gross-margin", measured(ratio(75, 100), { kind: "person", role: "finance" }));
 }
 
-const STATES: Record<string, () => EngineState> = { example: exampleState, linked, filledAsk, teamAsk, margin, whatIf, hybrid, hybridLinked, salesAssisted };
+/**
+ * The monthly series (A14 T1): a second month writes « Ce qui a bougé » —
+ * evolution rows when numbers compare, apart rows when nothing does.
+ */
+function series(): EngineState {
+  return withMonthBefore(exampleState(), (july) => void (july.metrics["act.rate"] = measured(ratio(120, 800), { kind: "tool", tool: "amplitude" })));
+}
+function seriesApart(): EngineState {
+  return withMonthBefore(exampleState(), (july) => {
+    for (const id of Object.keys(july.metrics) as (keyof typeof july.metrics)[]) delete july.metrics[id];
+  });
+}
+
+const STATES: Record<string, () => EngineState> = { example: exampleState, linked, filledAsk, teamAsk, margin, whatIf, hybrid, hybridLinked, salesAssisted, series, seriesApart };
 
 function model(state: EngineState, locale: "fr" | "en"): DeckModel {
   const p = props[locale];

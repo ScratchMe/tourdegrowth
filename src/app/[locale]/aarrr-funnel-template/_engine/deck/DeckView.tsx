@@ -18,6 +18,7 @@ import { copyText } from "./copy-text";
 import { canCopyImage, copyPng, downloadBlob, renderSlidePng } from "./export-png";
 import { SLIDE_HEIGHT, SLIDE_WIDTH, slideTitle, type SlideContext, type SlideProps } from "./SlideFrame";
 import { SlideAnnex } from "./SlideAnnex";
+import { SlideEvolution } from "./SlideEvolution";
 import { SlideRelays } from "./SlideRelays";
 import { SlideTotal } from "./SlideTotal";
 import { SlideUnitBoth } from "./SlideUnitBoth";
@@ -88,6 +89,8 @@ function slideComponent(slide: DeckSlide): ComponentType<SlideProps> {
   if (id === "total") return SlideTotal;
   if (id === "slg:peloton") return SlideRelays;
   if (id === "slg:leak") return SlideLeak;
+  // « Ce qui a bougé » (A14 T1, §19.2.6): from the second month, one per motion.
+  if (id === "evolution" || id === "slg:evolution") return SlideEvolution;
   // The hybrid sets the two motions side by side; sales-assisted alone keeps the v1 tiles, on its own figures.
   if (id === "unit-economics" && slide.lines.some((line) => line.row === "unitRow")) return SlideUnitBoth;
   return SLIDES[id as FixedSlideId];

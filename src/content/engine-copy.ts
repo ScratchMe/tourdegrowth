@@ -1581,6 +1581,32 @@ export const ENGINE_COPY = {
     unitCompanyWideBoth: { fr: "marge globale reprise dans les deux motions", en: "company-wide margin used for both motions" },
     /** The appendix's third group, after each motion's (§18.8.2). */
     annexLink: { fr: "Liaison", en: "Link" },
+    /**
+     * TODO: à relire (convention 6) — neuf le 2026-10-01 (A14 T1, moteur-complet.md §19.2.5-§19.2.6) :
+     * « Ce qui a bougé » — evolutionLeakStays, evolutionLeakBecomes, evolutionRow, evolutionRowToward,
+     * evolutionRowStable, les cinq seriesApart et evolutionFooter, jusqu'à la fin de ce bloc.
+     * `{leak}` closes its title, written with its own separator; `{stage}` is a stage with its article
+     * (« l'activation »).
+     */
+    evolutionLeakStays: { fr: " ; {stage} reste la fuite", en: "; {stage} is still the leak" },
+    evolutionLeakBecomes: { fr: " ; {stage} devient la fuite", en: "; {stage} is now the leak" },
+    /**
+     * One number, the month before then this one: « 18 %, puis 24 % (+6 points) ». No arrow: the slide fonts
+     * don't draw one (§10.4) — a slide that wants it draws it, as the ask does.
+     */
+    evolutionRow: { fr: "{before}, puis {now} ({change})", en: "{before}, then {now} ({change})" },
+    evolutionRowToward: { fr: "{before}, puis {now} ({change}, vers la cible)", en: "{before}, then {now} ({change}, toward the target)" },
+    evolutionRowStable: { fr: "{now}, stable", en: "{now}, unchanged" },
+    /** TODO: à relire (A14 T1) — why a number doesn't compare (§19.2.5). `{month}`: the month the reason is about. */
+    seriesApart: {
+      definitionChanged: { fr: "définition changée", en: "definition changed" },
+      enteredDifferently: { fr: "saisi autrement d'un mois à l'autre", en: "entered differently from one month to the next" },
+      notMeasured: { fr: "pas mesuré en {month}", en: "not measured in {month}" },
+      estimated: { fr: "estimé en {month}", en: "estimated in {month}" },
+      conflicting: { fr: "deux lectures en {month}", en: "two readings in {month}" },
+    },
+    // TODO: à relire (A14 T1) — the slide's footer: the comparison rule, said once.
+    evolutionFooter: { fr: "Seuls les chiffres mesurés de la même façon les deux mois se comparent : même définition, même fenêtre, des comptes les deux fois ou un taux les deux fois.", en: "Only numbers measured the same way in both months are compared: same definition, same window, counts both times or a rate both times." },
   },
   /** One template per case and grammatical number (§9.3). `**…**` is the red accent. */
   slideTitles: {
@@ -1807,6 +1833,15 @@ export const ENGINE_COPY = {
       fr: "**On ne peut pas encore dire ce que rapporte un client** : il manque {plg} en libre-service et {slg} en assisté.",
       en: "**We can't yet say what a customer is worth**: self-serve lacks {plg}, sales-assisted lacks {slg}.",
     },
+    /**
+     * TODO: à relire (convention 6) — neuf le 2026-10-01 (A14 T1, §19.2.6) : « Ce qui a bougé »,
+     * décochée par défaut — evolution, evolutionOne, evolutionStill, evolutionApart. `{month}`: the
+     * month before; `{leak}`: `slide.evolutionLeak*`, or ""; `{before}`, `{now}`: the two months.
+     */
+    evolution: { fr: "**{n} chiffres ont bougé** depuis {month}{leak}", en: "**{n} numbers moved** since {month}{leak}" },
+    evolutionOne: { fr: "**{n} chiffre a bougé** depuis {month}{leak}", en: "**{n} number moved** since {month}{leak}" },
+    evolutionStill: { fr: "**Rien n'a bougé** depuis {month}{leak}", en: "**Nothing moved** since {month}{leak}" },
+    evolutionApart: { fr: "**{before} et {now} ne se comparent pas encore**", en: "**{before} and {now} don't compare yet**" },
   } satisfies Record<SlideTitleKey, Translatable>,
   /** Speaker notes (§9.4), pre-written against the classic objections. */
   notes: {
@@ -1819,6 +1854,11 @@ export const ENGINE_COPY = {
     seasonal: {
       fr: "Et si c'est saisonnier ? — Un seul mois est mesuré pour l'instant ; la comparaison d'un mois à l'autre viendra avec le suivant.",
       en: "What if it's seasonal? — Only one month is measured so far; the month-on-month comparison comes with the next one.",
+    },
+    /** TODO: à relire (convention 6) — neuf le 2026-10-01 (A14 T1, §19.2.6) : `seasonal` from the second month on. `{n}`: the months the engine holds. */
+    series: {
+      fr: "Et si c'est saisonnier ? — {n} mois sont suivis ; un écart ne se lit qu'entre deux mois mesurés de la même façon.",
+      en: "What if it's seasonal? — {n} months are tracked; a change is only read between two months measured the same way.",
     },
     /** `{stage}`: a subject phrase; `{ranking}`: one of `ranking`, capitalised by the code. */
     whyNot: { fr: "Pourquoi pas {stage} ? — {ranking}.", en: "Why not {stage}? — {ranking}." },

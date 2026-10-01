@@ -7,6 +7,7 @@ import type { UnitWords } from "./format";
 import { buildPeloton } from "./peloton";
 import { buildRelays } from "./relays";
 import { sanityChecks } from "./sanity";
+import { deriveSeries } from "./series";
 import type { ResolvedBridge } from "./strings";
 import { buildTotal } from "./total";
 import type { EngineCalcContext, EngineDerived, EngineState, MotionDerived } from "./types";
@@ -75,5 +76,7 @@ export function deriveEngine(
     sanity: sanityChecks(state, ctx, words),
     mirror,
   };
-  return { ...partial, findings: findings(state, partial, ctx, words) };
+  // The series only exists from the second month: a one-month engine — every v1 and v2 file — derives with no key for it.
+  const series = deriveSeries(state, ctx);
+  return { ...partial, findings: findings(state, partial, ctx, words), ...(series ? { series } : {}) };
 }

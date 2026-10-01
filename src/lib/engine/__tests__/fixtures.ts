@@ -1,6 +1,7 @@
 import type { StoredResult } from "../../quiz/storage";
 import { exampleEngine, exampleMetrics } from "../example";
-import type { CandidateId, EngineState, MetricEntry, MetricId, MetricValue, SourceRef, ToolId } from "../types";
+import { previousMonth } from "../cohort";
+import type { CandidateId, EngineState, MetricEntry, MetricId, MetricValue, Snapshot, SourceRef, ToolId } from "../types";
 
 /**
  * The engine spec's §6.0 example — ONE data set for every unit test and
@@ -88,6 +89,32 @@ export function withTarget(state: EngineState, id: CandidateId | MetricId, targe
 export function withoutTargets(state: EngineState): EngineState {
   const next = structuredClone(state);
   next.snapshots[next.snapshots.length - 1]!.targets = {};
+  return next;
+}
+
+/**
+ * The engine with one more month BEFORE the one it holds (A14 T1, §19.2):
+ * the current month's numbers copied a month earlier, that month closed on
+ * the 3rd of the next with the setup's windows. The current month — the
+ * example's August by default — stays exactly what it was, so every reading
+ * of it is the one the other tests check. `change` rewrites the earlier
+ * month: what moved since.
+ */
+export function withMonthBefore(state: EngineState, change: (before: Snapshot) => void = () => {}): EngineState {
+  const next = structuredClone(state);
+  const now = next.snapshots[next.snapshots.length - 1]!;
+  const { activationWindowDays, paidWindowDays, qualificationWindowDays, goLiveWindowDays } = next.setup;
+  const before: Snapshot = {
+    ...structuredClone(now),
+    id: `${now.id}-before`,
+    referenceMonth: previousMonth(now.referenceMonth),
+    cohortMonth: previousMonth(now.cohortMonth),
+    closedAt: `${now.referenceMonth}-03T09:00:00.000Z`,
+    windows: { activationWindowDays, paidWindowDays, qualificationWindowDays, goLiveWindowDays },
+  };
+  for (const entry of Object.values(before.metrics)) if (entry?.cohortMonth) entry.cohortMonth = previousMonth(entry.cohortMonth);
+  change(before);
+  next.snapshots = [...next.snapshots.slice(0, -1), before, now];
   return next;
 }
 

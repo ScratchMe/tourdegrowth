@@ -57,6 +57,7 @@ import {
   worthOf,
 } from "./phrases";
 import { annexPages, type AnnexCells } from "./annex-pages";
+import { buildEvolutionSlide, seasonalNote } from "./deck-series";
 import { buildRelaysSlide, buildSlgWhatIfSlides, buildTotalSlide, buildUnitBoth, buildUnitSlg, motionOf } from "./deck-slg";
 import { linkSentence } from "./deck-motions";
 import { buildScenario, leverAlone } from "./scenario";
@@ -484,7 +485,7 @@ export function buildLeak(
   }
   const blind = blindSentence(diagnosis.blind, strings, metrics);
   if (blind) lines.push({ row: "blind", text: blind });
-  notes.push(strings.notes.seasonal);
+  notes.push(seasonalNote(state, strings));
   return { present: true, title, lines, notes };
 }
 
@@ -1031,7 +1032,7 @@ function annexSlides(annex: BuiltSlide, rows: (Row & AnnexCells)[]): { id: Slide
 function buildWhatIfSlides(state: EngineState, strings: Words, ctx: EngineCalcContext): { id: SlideId; slide: BuiltSlide }[] {
   const levers = movedLevers(state, strings, ctx);
   const { approxMoney, roundMoney } = whatIfPrinters(state, strings, ctx);
-  const notes = [strings.notes.whatIf, strings.notes.seasonal];
+  const notes = [strings.notes.whatIf, seasonalNote(state, strings)];
 
   const slides: { id: SlideId; slide: BuiltSlide }[] = levers.map((lever) => {
     const gain = mrrGain(lever.alone);
@@ -1126,7 +1127,7 @@ export function buildDeck(state: EngineState, derived: EngineDerived, strings: W
       present: true,
       title: pelotonTitle(state, derived.peloton, strings, metrics, ctx),
       lines: pelotonLines(state, derived.peloton, strings, ctx),
-      notes: [...pelotonNotes, strings.notes.seasonal],
+      notes: [...pelotonNotes, seasonalNote(state, strings)],
     },
     leak: { present: leak.present && !blindEngine, title: leak.title, lines: leak.lines, notes: leak.notes },
     visibility: { present: true, title: visibility.title, lines: visibility.lines, notes: [] },
@@ -1153,9 +1154,12 @@ export function buildDeck(state: EngineState, derived: EngineDerived, strings: W
   const order: FixedSlideId[] = blindEngine ? ["visibility", ...SLIDE_ORDER.filter((id) => id !== "visibility")] : [...SLIDE_ORDER];
   // The what-if slides have no fixed place: they follow the leak, in lever order, then the « together » one.
   const whatIfs = buildWhatIfSlides(state, strings, ctx);
+  // « Ce qui a bougé » (§19.2.6): from the second month, after the leak and its what-ifs, unticked until the team ticks it.
+  const evolution = buildEvolutionSlide(state, derived.series, "plg", derived.diagnosis, strings, metrics, ctx);
+  const afterLeak = [...whatIfs.map((w) => ({ ...w, byDefault: true })), ...(evolution ? [{ id: "evolution" as const, slide: evolution, byDefault: false }] : [])];
   const entries = order.flatMap((id): { id: SlideId; slide: BuiltSlide; byDefault: boolean }[] => {
     if (id === "annex") return annexSlides(built.annex, annexRows);
-    return [{ id, slide: built[id], byDefault: DEFAULT_INCLUDE[id] }, ...(id === "leak" ? whatIfs.map((w) => ({ ...w, byDefault: true })) : [])];
+    return [{ id, slide: built[id], byDefault: DEFAULT_INCLUDE[id] }, ...(id === "leak" ? afterLeak : [])];
   });
   let index = 0;
   const slides: DeckSlide[] = entries.map(({ id, slide, byDefault }) => {
@@ -1244,13 +1248,15 @@ function buildMotionsDeck(state: EngineState, derived: EngineDerived, strings: W
           present: true,
           title: pelotonTitle(state, plg.peloton, strings, metrics, ctx),
           lines: pelotonLines(state, plg.peloton, strings, ctx),
-          notes: [...pelotonNotes, strings.notes.seasonal],
+          notes: [...pelotonNotes, seasonalNote(state, strings)],
         },
         byDefault: true,
       }),
       tag("plg")({ id: "leak", slide: { present: leak.present && !plgBlind, title: leak.title, lines: leak.lines, notes: leak.notes }, byDefault: true }),
       ...buildWhatIfSlides(state, strings, ctx).map((w) => tag("plg")({ ...w, byDefault: true })),
     );
+    const evolution = buildEvolutionSlide(state, derived.series, "plg", plg.diagnosis, strings, metrics, ctx);
+    if (evolution) plgEntries.push(tag("plg")({ id: "evolution", slide: evolution, byDefault: false }));
   }
   const slgLeak = buildLeak(state, slg.diagnosis, strings, metrics, ctx);
   const slgEntries: (Entry & { motion?: Motion })[] = [
@@ -1258,6 +1264,8 @@ function buildMotionsDeck(state: EngineState, derived: EngineDerived, strings: W
     tag("slg")({ id: "slg:leak", slide: { present: slgLeak.present && !slgBlind, title: slgLeak.title, lines: slgLeak.lines, notes: slgLeak.notes }, byDefault: true }),
     ...buildSlgWhatIfSlides(state, strings, ctx).map((w) => tag("slg")({ ...w, byDefault: true })),
   ];
+  const slgEvolution = buildEvolutionSlide(state, derived.series, "slg", slg.diagnosis, strings, metrics, ctx);
+  if (slgEvolution) slgEntries.push(tag("slg")({ id: "slg:evolution", slide: slgEvolution, byDefault: false }));
 
   // The slides the two motions share.
   const visibility = buildVisibility(state, derived, strings, metrics, ctx);
