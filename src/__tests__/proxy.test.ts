@@ -4,6 +4,7 @@ import { resetRateLimitsForTests } from "@/lib/rate-limit";
 import { config, constantTimeEqual, isAuthorizedForAdmin, proxy } from "../proxy";
 import { ENGINE_PREVIEW_COOKIE } from "@/lib/engine/access";
 import { GAME_PREVIEW_COOKIE } from "@/lib/game/access";
+import { enabledLevelSlugs } from "@/lib/game/levels";
 import { ownerPreviewToken } from "@/lib/owner-preview";
 
 function requestWithAuth(pathname: string, authHeader?: string): NextRequest {
@@ -357,6 +358,21 @@ describe("proxy (game flag and owner preview)", () => {
   it("rewrites a closed game page to an unmatched address under the same language", async () => {
     expect(rewriteOf(await proxy(request("/fr/game")))).toBe("https://tourdegrowth.com/fr/game-unavailable");
     expect(rewriteOf(await proxy(request("/en/game/retention")))).toBe("https://tourdegrowth.com/en/game-unavailable");
+  });
+
+  it("closes every level that exists, its page and its image, in both languages — not a list of names", async () => {
+    // Convention 11: what is held is what exists. A level added to the table
+    // (level 2, A12.f) is checked here without anyone naming it, so narrowing
+    // isGamePath to known slugs could not open a level by forgetting it.
+    const slugs = enabledLevelSlugs();
+    expect(slugs).toContain("acquisition");
+    for (const slug of slugs) {
+      for (const locale of ["en", "fr"]) {
+        for (const path of [`/${locale}/game/${slug}`, `/${locale}/game/${slug}/opengraph-image/${locale}`]) {
+          expect(rewriteOf(await proxy(request(path))), path).toBe(`https://tourdegrowth.com/${locale}/game-unavailable`);
+        }
+      }
+    }
   });
 
   it("closes the game's share images with the pages, and opens them with the same signed cookie (X20)", async () => {
