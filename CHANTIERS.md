@@ -23,19 +23,20 @@ en fin de document). `CLAUDE.md` garde l'état courant, `JOURNAL.md` l'histoire.
 
 | Groupe | Qui | Où | Quand |
 |---|---|---|---|
-| **A. Le travail autonome**, en quatre lots | Une session seule, une PR par lot (A7 : une PR par item) | Session cloud | A1 à A6 livrés le 2026-09-29, A7 et A8 le 2026-09-30. **Reste d'A7** : A7.3.d (le bon à tirer de la copie neuve), A7.4 après A7.3, et A7.12.c à l'ouverture. **A7.3.c est livré le 2026-10-01**, les textes de lancement de la ligne « Hors code » d'A7.3 le même jour (S0 à S5, PR d'intégration [#233](https://github.com/ScratchMe/tourdegrowth/pull/233), drapeau fermé). A10 (S-15), A11 et A7.3.e (les quatre termes du glossaire) livrés le 2026-09-30. **A12, le niveau 2 du jeu** : spécifié et chiffré le 2026-09-30, **validé le 2026-10-01 (C30)**, sa copie, l'îlot partagé, le téléphone de Pédalix et le branchement faits le même jour (A12.c à A12.f.2)  et ses specs (A12.g) : reste A12.h (le bon à tirer, puis la recette). **A14, le moteur complet** : spécifié le 2026-10-01, attend C31. **A13** (trois alertes de dépendances, dont une critique sur `next`) livré le 2026-10-01 |
-| **B. Design sync** | Une session, cloud ou locale | N'importe où : une session cloud pousse vers Claude Design depuis le 2026-09-29 | **À jour le 2026-09-30, après A7.10, A10 et A11** (B3, puis la re-synchro d'A11 le soir même : 88 composants, 292 cellules, 88 aperçus sur 88 rendus). Rien à lancer tant qu'un composant, ou une copie qu'un aperçu reprend, ne change pas |
-| **C. Tes décisions**, une par une | Toi, guidé, avec une recommandation par question | N'importe quelle session | **Tranchées le 2026-09-29** (C18 close à part, par la session D). C23 à C29 tranchées le 2026-09-30, C26 à C29 livrées le même jour, **C25** (la spécification de A7.3, `ENGINE.md` §18) dans sa propre session. **C30** (le niveau 2 du jeu, `GAME-BRIEF.md` §17) le 2026-10-01. **C31 est ouverte** (le moteur complet, `docs/engine/moteur-complet.md` §19.15) |
+| **A. Le travail autonome**, en quatre lots | Une session seule, une PR par lot (A7 : une PR par item) | Session cloud | A1 à A6 livrés le 2026-09-29, A7 et A8 le 2026-09-30. **Reste d'A7** : A7.3.d (le bon à tirer de la copie neuve), A7.4 après A7.3, et A7.12.c à l'ouverture. **A7.3.c est livré le 2026-10-01**, les textes de lancement de la ligne « Hors code » d'A7.3 le même jour (S0 à S5, PR d'intégration [#233](https://github.com/ScratchMe/tourdegrowth/pull/233), drapeau fermé). A10 (S-15), A11 et A7.3.e (les quatre termes du glossaire) livrés le 2026-09-30. **A12, le niveau 2 du jeu** : spécifié et chiffré le 2026-09-30, **validé le 2026-10-01 (C30)**, sa copie, l'îlot partagé, le téléphone de Pédalix et le branchement faits le même jour (A12.c à A12.f.2)  et ses specs (A12.g) : reste A12.h (le bon à tirer, puis la recette). **A14, le moteur complet** : spécifié et validé le 2026-10-01 (C32), A14.c peut partir. **A13** (trois alertes de dépendances, dont une critique sur `next`) livré le 2026-10-01 |
+| **B. Design sync** | Une session, cloud ou locale | N'importe où : une session cloud pousse vers Claude Design depuis le 2026-09-29 | **À jour le 2026-09-30, après A7.10, A10 et A11** (B3, puis la re-synchro d'A11 le soir même : 88 composants, 292 cellules, 88 aperçus sur 88 rendus). Ouverts le 2026-10-01 : **B4** (la re-synchro du niveau 2 du jeu) et **B5** (l'image de partage du moteur, C32 Q17). Hors d'eux, rien à lancer tant qu'un composant, ou une copie qu'un aperçu reprend, ne change pas |
+| **C. Tes décisions**, une par une | Toi, guidé, avec une recommandation par question | N'importe quelle session | **Tranchées le 2026-09-29** (C18 close à part, par la session D). C23 à C29 tranchées le 2026-09-30, C26 à C29 livrées le même jour, **C25** (la spécification de A7.3, `ENGINE.md` §18) dans sa propre session. **C30** (le niveau 2 du jeu, `GAME-BRIEF.md` §17) le 2026-10-01. **C31** (le bloc « Niveau suivant » du jeu) et **C32** (le moteur complet, `docs/engine/moteur-complet.md` §19.15) le 2026-10-01. **Rien n'est ouvert** |
 | **D. Tes actions**, pas à pas | Toi, accompagné | Session cloud | Selon ce qui est prêt. D10 (l'indexation) est prêt tout de suite. D2 attend les bons à tirer nº7 et nº8, la recette (D9) et, pour le moteur, la fin d'A7.3 (le code et les textes de lancement sont livrés le 2026-10-01 ; reste le bon à tirer A7.3.d) |
 | **E. La veille** | Personne | — | Rien à lancer avant un déclencheur |
 
 **L'ordre conseillé** : A7.3.d (le bon à tirer de la copie neuve du moteur,
-`/bon-a-tirer`), A7.4, puis D. A7.3.c, les textes de lancement d'A7.3 (ligne
+`/bon-a-tirer`), A7.4, A14.c et son bon à tirer A14.d, puis D. A7.3.c, les textes de lancement d'A7.3 (ligne
 « Hors code ») et A13 (l'alerte critique sur `next`) sont livrés le
 2026-10-01. A7.3.e, qui se menait en parallèle, est livré le
 2026-09-30. Le niveau 2 du jeu (A12.h, avec Antoine) peut avancer en
-parallèle : il ne touche pas les mêmes fichiers. Le moteur ouvre avant le jeu (C23). Dans la
-section C, C31 attend (le moteur complet, A14) ; C30 est tranchée le 2026-10-01.
+parallèle : il ne touche pas les mêmes fichiers. Le moteur ouvre avant le jeu (C23). A14.c
+(le moteur complet) peut partir : le moteur n'ouvre qu'après lui (C32 Q1).
+Rien n'attend dans la section C : C30 à C32 sont tranchées le 2026-10-01.
 
 **Deux sessions en parallèle** écrivent toutes deux à la fin de `JOURNAL.md`
 et dans ce fichier. La seconde à merger fusionne `main` dans sa branche avant
@@ -198,7 +199,7 @@ A12.f.1, A12.f.2 et A12.g aussi : le niveau est jouable, derrière le drapeau, l
 | A12.g | **Les specs Playwright** | **Faites le 2026-10-01** ([#250](https://github.com/ScratchMe/tourdegrowth/pull/250)). `e2e/game-level2.spec.ts`, sur le modèle de P1 à P27, dans les deux langues, à 1 280 et 390 px. Ses specs : le premier écran (P1, P2), le téléphone et le panier qui suivent les cartes (P5), les années A en français et C en anglais jouées à l'interface d'après les tables du §17.6, l'année D renvoyée en juin (P9), la sauvegarde sous sa propre clé, 390 px à chaque phase (P17), axe sur décembre (P21) et l'analytique par niveau (P20). Les assistants de `game-helpers.ts` prennent le niveau en paramètre |
 | A12.h | **Le bon à tirer, puis la recette** | Un bon à tirer du niveau 2 (`/bon-a-tirer`), puis une recette (D9) qui couvre les deux niveaux, relecture juridique du catalogue comprise |
 
-### A14 — Le moteur complet, pour le SaaS B2B (C31 ouverte le 2026-10-01)
+### A14 — Le moteur complet, pour le SaaS B2B (C32 tranchée le 2026-10-01)
 
 Antoine a demandé le 2026-10-01 de faire tout ce qui manque encore au moteur
 pour le SaaS B2B, avant l'app grand public et la place de marché : « on
@@ -207,17 +208,19 @@ série mensuelle, la rétention J30 et la part recommandée en €, la couvertur
 du pipeline, les outils au réglage et le contrôle « deux outils », coller un
 tableau, plusieurs moteurs par appareil, la fusion à l'import, le fond blanc,
 les rappels `.ics`, deux portes d'entrée et l'image de partage. L'export
-PowerPoint reste hors du lot. La spécification est dans
-`docs/engine/moteur-complet.md` (§19). **L'ouverture du moteur ne l'attend
-pas** (Q1, à confirmer) : A14 vit sur sa branche d'intégration jusqu'à son
-propre bon à tirer. Toute copie neuve porte « TODO: à relire » (convention 6).
+PowerPoint reste hors du lot (Q19). La spécification est dans
+`docs/engine/moteur-complet.md` (§19), **validée le même jour (C32)**.
+**L'ouverture du moteur attend tout le lot** (Q1, contre la reco), bon à tirer
+compris : chaque PR se merge donc sur `main` dès qu'elle est verte, drapeau
+fermé, sans branche d'intégration. Toute copie neuve porte « TODO: à relire »
+(convention 6).
 
 | # | Quoi | Détail |
 |---|---|---|
-| A14.a | **La spécification** | **Écrite le 2026-10-01**, contre le code de `main` : §19.0 à §19.14, et dix-neuf questions en §19.15 |
-| A14.b | **La validation par Antoine** | C31 : les questions de §19.15, une par une pour les plus lourdes (Q1, Q2, Q6, Q8, Q13), les autres en bloc. Les réponses se datent en §19.15 |
-| A14.c | **Le code** | Après C31 : T0 à T7 sur une branche d'intégration, un seul merge (§19.14), ~16,5 jours-agent. T0 (le socle v3) d'abord, puis T1 à T6 en parallèle, T7 pour finir |
-| A14.d | **Le bon à tirer de la copie neuve** | Après A14.c, avant le merge, construit depuis `grep -rn "TODO: à relire" src/` |
+| A14.a | **La spécification** | **Écrite le 2026-10-01**, contre le code de `main` : §19.0 à §19.14 |
+| A14.b | **La validation par Antoine** — **close le 2026-10-01** | C32 : dix-sept recos retenues, deux reprises (Q1 : l'ouverture attend A14 ; Q17 : l'image passe d'abord par Claude Design) et Q5 précisée (la slide « Ce qui a bougé » décochée par défaut). Réponses datées en §19.15 |
+| A14.c | **Le code** | T0 à T7 (§19.14), ~16,5 jours-agent, une PR chacune mergée dès qu'elle est verte. **T0 d'abord** (golden v2 figé avant toute ligne, puis le socle v3, plusieurs moteurs, le correctif `ALL_TOOLS`), puis T1 à T6 en parallèle, T7 pour finir. L'image de partage (T6) attend B5 |
+| A14.d | **Le bon à tirer de la copie neuve** | Après A14.c, avant l'ouverture (D2), construit depuis `grep -rn "TODO: à relire" src/` |
 
 ---
 
@@ -245,7 +248,14 @@ Design montre encore les anciens noms**. A12.e ajoute deux composants neufs,
 neufs) ; A12.f.2 fait proposer plusieurs niveaux à `GameEntry` (`levels`, deux aperçus neufs). Une seule
 synchro pour tout, avec la recapture des composants touchés (`.design-sync/NOTES.md`, « Synced »).
 
-**Hors de B4, rien d'ouvert.** La prochaine synchro se lance quand un composant change, ou
+**B5, ouvert le 2026-10-01 : l'image de partage du moteur** (C32 Q17). Un
+brief à Claude Design pour l'image de la page `/aarrr-funnel-template`, en
+1 200 × 630, dans les deux langues : le titre de la page, et jamais de vrais
+chiffres (un peloton du jeu d'exemple, si l'image en dessine un). Ce qui
+revient se porte dans `lib/og/` avec T6 (`docs/engine/moteur-complet.md`
+§19.11). Les images du jeu sont le modèle.
+
+**Hors de B4 et B5, rien d'ouvert.** La prochaine synchro se lance quand un composant change, ou
 quand change une copie, un chiffre du modèle ou un comportement qu'un aperçu
 reprend : c'est ainsi que B3 a trouvé l'amende du jeu et les cartes de
 `SpaceStrip` restées d'avant A7.8 et A7.9, dans des notes reportées. Ce qu'elle
@@ -264,21 +274,16 @@ La session qui les pose recopie chaque réponse, avec sa date, à l'endroit où
 vit la question. Une réponse qui demande du code devient un item de la
 section A, un geste d'Antoine un item de la section D.
 
-### Tranchées : C1 à C30
+### Tranchées : C1 à C32
 
 Les vingt-deux questions de la séance du 2026-09-29, puis C23 à C29 le
-2026-09-30 et C30 le 2026-10-01. Chaque réponse est écrite là où vit la
+2026-09-30, et C30 à C32 le 2026-10-01. Chaque réponse est écrite là où vit la
 question, et leur index (sujet, réponse, où c'est écrit, suite) est dans
 `docs/decisions.md`, où une question tranchée gagne sa ligne.
 
 ### Encore ouvert
 
-**C31 — Le moteur complet (A14), posée le 2026-10-01.**
-- **Aujourd'hui** : le moteur couvre le SaaS B2B (libre-service, assisté ou les deux) sur un seul mois, un moteur par appareil, sans outils au réglage ni rappel.
-- **Source** : `docs/engine/moteur-complet.md` §19.15, dix-neuf questions.
-- **Reco** : les dix-neuf recommandations telles quelles. Les plus lourdes, à trancher une par une : Q1 (l'ouverture n'attend pas A14), Q2 (le mois suivant reprend les cibles et les définitions, jamais une valeur), Q6 (la rétention J30 en €), Q8 (la couverture du pipeline) et Q13 (la fusion à l'import).
-
-C25 est tranchée le 2026-09-30 et C30 le 2026-10-01 (`docs/decisions.md`).
+Rien. C25 est tranchée le 2026-09-30, C30, C31 et C32 le 2026-10-01 (`docs/decisions.md`).
 
 ---
 
@@ -290,7 +295,7 @@ rien de privé dans le dépôt, qui est public. Cela vaut pour les chiffres de
 
 | # | Action | Prête ? | Détail |
 |---|---|---|---|
-| D2 | **Ouvrir le jeu et le moteur à tout le monde** | Non : il faut les bons à tirer nº7 et nº8 signés et les liens d'ouverture (C7, A7.4) construits. **Pour le moteur, en plus : tout le lot A7.3** (le B2B assisté et l'hybride, décidés le 2026-09-29), bon à tirer compris. **Le jeu n'ouvre pas avant le moteur** (C23, 2026-09-30), et sa phrase sur le Digital Fairness Act est remise à jour avant d'ouvrir (section E) | Poser `GAME_ENABLED` et/ou `ENGINE_ENABLED` à `true` dans Vercel (Production), puis **redéployer** (`VERCEL.md` §1.11). Ensuite, la session vérifie la production : pages en 200, sitemap, pied de page, bandeau. Toi, tu demandes l'indexation des nouvelles pages dans Search Console |
+| D2 | **Ouvrir le jeu et le moteur à tout le monde** | Non : il faut les bons à tirer nº7 et nº8 signés et les liens d'ouverture (C7, A7.4) construits. **Pour le moteur, en plus : tout le lot A7.3** (le B2B assisté et l'hybride, décidés le 2026-09-29), bon à tirer compris, **et tout le lot A14** (le moteur complet, C32 Q1), bon à tirer A14.d compris. **Le jeu n'ouvre pas avant le moteur** (C23, 2026-09-30), et sa phrase sur le Digital Fairness Act est remise à jour avant d'ouvrir (section E) | Poser `GAME_ENABLED` et/ou `ENGINE_ENABLED` à `true` dans Vercel (Production), puis **redéployer** (`VERCEL.md` §1.11). Ensuite, la session vérifie la production : pages en 200, sitemap, pied de page, bandeau. Toi, tu demandes l'indexation des nouvelles pages dans Search Console |
 | D5 | **Les entretiens, réorientés vers le moteur** (2026-09-30) | **Reportés par Antoine le 2026-09-30, sans date.** La trame attend en annexe d'`ENGINE.md` (validée le même jour). Une session ne les relance pas : c'est lui qui les rouvrira | Cinq à dix PM growth ou Heads of Growth, dans des boîtes où « on score sous 50 ». La question de fond : « quelqu'un taperait-il ses chiffres à la main, et pour obtenir quoi ? ». Ils servaient le Go / No-Go de l'audit ; l'audit étant entre parenthèses (`AUDIT-PLAN.md`, en tête), ils nourrissent le moteur (A7.3, les textes de lancement). **Les notes d'entretien restent hors du dépôt** : noms, entreprises, chiffres ; seule une synthèse anonyme y entre |
 | D6 | **La distribution, vague 1** | **Non : rien ne part avant que le moteur et le jeu soient prêts** (C19, 2026-09-29). Rien n'est encore parti. Le Tour n'aura ni Show HN ni r/SaaS | Textes dans `marketing/launch/` et `marketing/campaigns/`. Tu postes sous pseudo, la session fournit et met à jour les textes. Annuaires dans l'ordre de `GROWTH-PLAN.md` 1.6. **Pas de LinkedIn ni de lancement en grande pompe pour l'instant** (C22 : une question de calendrier, pas d'anonymat) |
 | D7 | **La distribution, vague 4** | Après deux semaines de lecture de la vague 1 | La session écrit les pitchs de newsletters et passe honnêtement le produit de chaque auteur au Tour ; tu envoies depuis `contact@`. Pour les listes « awesome », seulement si ton profil GitHub n'affiche pas ton nom (à vérifier d'abord sur github.com/ScratchMe) |

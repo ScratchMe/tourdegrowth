@@ -518,7 +518,7 @@ Demandé par Antoine après le merge d'A7.3.c : « ce qui reste, hors code »
 
 ## A14.a : la spécification du moteur complet, et le journal archivé une fois de plus (2026-10-01)
 
-Demandé par Antoine : « on devrait gérer tout ce que tu listes dans le point 3 ». C'est-à-dire tout ce qui manque au moteur pour le SaaS B2B, avant l'app grand public et la place de marché. La spécification est le §19 d'`ENGINE.md`, écrite directement dans `docs/engine/moteur-complet.md` pour n'avoir pas à la déplacer après. Elle compte onze chantiers, un découpage en huit PR (~16,5 jours-agent), et dix-neuf questions pour C31, chacune avec sa recommandation. L'export PowerPoint reste hors du lot, comme la spec v1 le voulait.
+Demandé par Antoine : « on devrait gérer tout ce que tu listes dans le point 3 ». C'est-à-dire tout ce qui manque au moteur pour le SaaS B2B, avant l'app grand public et la place de marché. La spécification est le §19 d'`ENGINE.md`, écrite directement dans `docs/engine/moteur-complet.md` pour n'avoir pas à la déplacer après. Elle compte onze chantiers, un découpage en huit PR (~16,5 jours-agent), et dix-neuf questions pour C32, chacune avec sa recommandation. L'export PowerPoint reste hors du lot, comme la spec v1 le voulait.
 
 **Écrite contre le code, pas contre les documents.** Trois relevés en parallèle (série et stockage ; outils et collecte ; chiffrage et surfaces) ont lu le code de `main`, avec un renvoi `fichier:ligne` pour chaque fait. Ce qu'ils ont trouvé et qui change la spec :
 - **les périodes d'un mois dépendent de la date du jour** (`values.ts:141-142`, `cohort.ts:155-168`). Relu plus tard, un mois clos changerait de période et de confiance. La série pose donc `closedAt` et `windows` sur chaque mois clos ;
@@ -534,3 +534,19 @@ Demandé par Antoine : « on devrait gérer tout ce que tu listes dans le poin
 **Vérifié** :
 - `vitest` : les liens de la documentation et les plafonds du journal et de `CLAUDE.md` passent. La spec, le neuvième volume et les index sont lus par le test des liens.
 - Documentation seule : rien n'est déployé (`scripts/vercel-ignore.sh`).
+
+
+## C32 : le moteur complet, validé (2026-10-01)
+
+Les dix-neuf questions de `docs/engine/moteur-complet.md` §19.15, tranchées dans la session qui les avait écrites : les quatre plus lourdes d'abord, puis par groupes de quatre, Antoine ayant préféré les voir une par une plutôt qu'en bloc. Les réponses sont datées dans la spec, et les sections qu'elles changent sont corrigées.
+
+**Deux reprises de la reco, une précision** :
+- **Q1 : l'ouverture du moteur attend A14**, bon à tirer compris. Conséquence pour la livraison : sans ouverture d'ici là, chaque PR du lot se merge sur `main` dès qu'elle est verte, drapeau fermé, comme celles du niveau 2 du jeu. La branche d'intégration n'avait de raison que si le moteur ouvrait pendant le lot. Le bon à tirer A14.d passe avant l'ouverture (D2).
+- **Q17 : l'image de partage passe d'abord par Claude Design.** Elle devient le brief B5 de la design sync, et T6 attend son retour pour la porter dans `lib/og/`.
+- **Q5 : la slide « Ce qui a bougé » existe, mais décochée par défaut.**
+
+Le reste suit la reco : le mois suivant reprend les cibles et les définitions, jamais une valeur ; les mois passés en lecture seule avec « Corriger » ; des écarts sans couleur ; la rétention J30 et la part recommandée en € ; la couverture du pipeline comme indicateur avancé ; les outils, le contrôle « deux outils », le modèle de tableau, dix moteurs au plus, la fusion avec aperçu, le blanc pur, les deux rappels `.ics`, les deux portes d'entrée, trois ajouts à GoatCounter, et pas de PowerPoint.
+
+**Une question d'Antoine en route** (Q16) : la carte « Le moteur » de l'accueil et la pastille de la bande noire deviendront-elles cliquables ? Oui, et sans rien à construire : C15 (A7.9) les a câblées sur le même drapeau que l'ouverture, mesurées par `home_strip` et `space_band`. La bande reste sans lien dans le questionnaire et le Deep dive (`bandLinked={false}`), pour ne faire sortir personne en plein parcours. Avis donné : la garder cliquable ailleurs, puisque c'est la seule navigation entre les trois espaces.
+
+**Un numéro rattrapé** : la décision s'appelait C31 dans le premier jet. `docs/decisions.md` montrait C31 déjà prise le matin même par le jeu (le bloc « Niveau suivant »), que la liste de `CHANTIERS.md` ne reportait pas encore. Renumérotée C32 avant le merge. Comme pour un numéro de PR (convention 8), un numéro de décision se lit dans l'index, pas dans une liste qui peut être en retard.

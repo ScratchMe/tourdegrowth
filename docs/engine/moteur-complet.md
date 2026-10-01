@@ -8,12 +8,14 @@ dans [`assiste-et-hybride.md`](assiste-et-hybride.md).*
 
 ---
 
-## 19. Le moteur complet — spécification A14.a, à valider (C31)
+## 19. Le moteur complet — spécification A14.a, validée le 2026-10-01 (C32)
 
 *Premier jet du 2026-10-01, demandé par Antoine (« on devrait gérer tout ce
 que tu listes dans le point 3 »), écrit contre le code de `main` (`d70ea4f`)
-et non contre les documents. Rien n'est validé ni codé : les questions sont en
-§19.15, avec une recommandation chacune. Toute la copie citée est de la copie
+et non contre les documents. **Validée par Antoine le même jour** (C32) : ses
+dix-neuf réponses sont en §19.15, et les sections qu'elles changent sont
+corrigées (Q1 en §19.0 et §19.14, Q5 en §19.2.6, Q17 en §19.11). Rien n'est
+encore codé. Toute la copie citée est de la copie
 neuve, **`TODO: à relire`** (convention 6), et sa typographie finale est posée
 dans `content/engine-*.ts`, pas dans ce document.*
 
@@ -82,7 +84,7 @@ n'apparaissent donc jamais sous « Autres outils ».
   même tableau et les mêmes slides (le golden v1 reste vert : aucun de ses
   jeux n'a de cible sur la rétention J30 ou la part recommandée, vérifié).
 - Toute la copie neuve est « à relire », et son bon à tirer (A14.d) passe
-  avant le merge.
+  avant l'ouverture.
 
 **Ce qui reste hors de ce lot.** L'export PowerPoint (la spec v1 le réserve
 au cas où les retours le demandent), l'app grand public et la place de
@@ -90,8 +92,11 @@ marché, le chiffrage de la mise en service assistée (il faudrait relier la
 mise en service au renouvellement, §18.5.2), et des recettes vérifiées outil
 par outil (§19.5).
 
-**Chiffrage.** Huit PR sur une branche d'intégration, un seul merge sur
-`main` après le bon à tirer de la copie neuve : ~16,5 jours-agent (§19.14).
+**L'ouverture attend ce lot** (Q1, Antoine, 2026-10-01) : le moteur n'ouvre
+au public qu'une fois A14 livré et sa copie relue (A14.d).
+
+**Chiffrage.** Huit PR, chacune mergée sur `main` dès qu'elle est verte,
+drapeau fermé : ~16,5 jours-agent (§19.14).
 
 ---
 
@@ -246,8 +251,9 @@ jamais la date du jour.
   ne se comparent pas encore », et la slide dit pourquoi.
 - **Corps** : au plus six lignes, dans l'ordre AARRR, jamais triées par
   écart, chacune « Activation : 18 % → 24 % (+6 pts) ».
-- **Incluse par défaut** dès que deux mois existent et qu'un écart au moins
-  est comparable.
+- **Décochée par défaut** (Q5, Antoine, 2026-10-01) : elle se propose dès
+  que deux mois existent et qu'un écart au moins est comparable, et la
+  personne la coche.
 - **La note d'orateur** `notes.seasonal` (« la comparaison viendra avec le
   suivant », `engine-copy.ts:1809-1811`) cède la place à `notes.series` dès le
   deuxième mois. Un fichier à un seul mois garde la note d'aujourd'hui, au
@@ -482,9 +488,12 @@ Chacune est mesurée par `engine_entry_clicked/<result_owner|landing_resume>`.
 
 Aujourd'hui la page prend l'image générique de l'accueil
 (`aarrr-funnel-template/page.tsx:42-57`). Elle gagne la sienne,
-`aarrr-funnel-template/opengraph-image.tsx`, en 1 200 × 630 :
-- le cadre de contenu (`lib/og/content-frame.tsx`), avec le titre de la page ;
-- un peloton de 100 points tiré du jeu d'exemple, jamais de vrais chiffres.
+`aarrr-funnel-template/opengraph-image.tsx`, en 1 200 × 630. **Elle se
+dessine d'abord dans Claude Design** (Q17, Antoine, 2026-10-01), comme les
+images du jeu : un brief part par la design sync (`CHANTIERS.md` B5), puis
+l'image se porte dans `lib/og/` sur ce qui revient. Deux contraintes pour le
+brief : jamais de vrais chiffres (un peloton du jeu d'exemple, si l'image en
+dessine un), et le titre de la page dans les deux langues.
 
 `contentMetadata` reçoit `ownShareImage`. Moteur fermé, la route répond 404 :
 elle le vérifie elle-même, comme le jeu (`game/opengraph-image.tsx:20-24`),
@@ -564,8 +573,10 @@ s'étend aux nouveaux écrans.
 
 ### 19.14 Découpage en PR
 
-Une branche d'intégration et un seul merge sur `main`, après le bon à tirer
-de la copie neuve (A14.d), comme A7.3.c (Q1).
+**Chaque PR se merge sur `main` dès qu'elle est verte**, drapeau fermé, comme
+les PR du niveau 2 du jeu : puisque l'ouverture attend tout le lot (Q1), aucune
+copie neuve n'est visible avant le bon à tirer A14.d. Seule exception : la
+phrase de confidentialité de T7, visible dès son merge, comme celle de S5.
 
 | PR | Contenu | Dépend de | Jours-agent |
 |---|---|---|---|
@@ -580,31 +591,33 @@ de la copie neuve (A14.d), comme A7.3.c (Q1).
 
 Total ≈ **16,5 jours-agent**. Chemin critique T0 → T1 → T2 → T7, soit environ
 7,5 jours ; T3 à T6 avancent en parallèle une fois T0 livré. Chaque PR porte
-sa copie, « à relire ». Viennent ensuite **A14.d**, le bon à tirer de toute la
-copie neuve, construit depuis `grep -rn "TODO: à relire" src/`, puis le merge.
+sa copie, « à relire ». Vient ensuite **A14.d**, le bon à tirer de toute la
+copie neuve, construit depuis `grep -rn "TODO: à relire" src/`, puis
+l'ouverture (`CHANTIERS.md` D2). L'image de partage de T6 attend le retour de
+Claude Design (B5).
 
 ---
 
-### 19.15 Questions produit — à trancher (C31)
+### 19.15 Questions produit — tranchées le 2026-10-01 (C32)
 
-| # | Question | Proposition | Recommandation, et « si on se trompe » |
-|---|---|---|---|
-| Q1 | **L'ouverture du moteur attend-elle ce lot ?** | Non : le moteur ouvre dès A7.3.d et le nº8 signés, et A14 vit sur sa branche d'intégration jusqu'à son propre bon à tirer | **Non, on n'attend pas.** Un seul merge garantit qu'aucune copie neuve ne part en production sans relecture, que le moteur soit ouvert ou non. *Si on se trompe* : on ouvre un moteur sans série, et les premiers retours la demanderont |
-| Q2 | **Que reprend le mois suivant ?** | Les cibles et les définitions (variante, libellé, note, sources), comme valeurs proposées ; jamais une valeur, ni les comptes partagés, ni les demandes | **Oui.** Recopier une valeur serait la présenter comme mesurée. *Si on se trompe* : il faudra resaisir une note de définition, rien de faux n'apparaît |
-| Q3 | **Les mois passés : lecture seule, avec « Corriger ce mois » ?** | Un sélecteur de mois, un bandeau, un bouton de correction ; le deck toujours sur le dernier mois | **Oui.** *Si on se trompe* : un deck d'un mois passé se demandera ; il suffira alors de construire le deck sur le mois choisi |
-| Q4 | **Les écarts : quand, et sous quelle forme ?** | Seulement entre deux mesures comparables (§19.2.5), en points, valeur ou pour cent, avec une flèche et un signe, sans couleur | **Oui.** La couleur dirait « bien » ou « mal », ce que seule une cible peut dire (C1). *Si on se trompe* : une lecture un peu plus lente, rien de faux |
-| Q5 | **La slide « Ce qui a bougé »** | Après la fuite et ses « Et si », une par motion, ordre AARRR, incluse dès deux mois comparables | **Oui.** *Si on se trompe* : une case à décocher |
-| Q6 | **La rétention J30 en €, avec « les payants sont supposés parmi les actifs à J30 » ?** | La même chaîne que l'activation, l'hypothèse au pied de la slide, et J30 devient un levier | **Oui.** C'est le prolongement exact de l'hypothèse de l'activation. *Si on se trompe* : le montant gonfle quand des clients paient avant J30 puis partent ; le pied de slide le dit |
-| Q7 | **La part recommandée en €, dans les deux motions, avec la formule du « Et si » et une borne à 50 % ?** | (1 − r) ÷ (1 − t), puis la conversion (libre-service) ou le closing et l'ACV (assisté) | **Oui.** La même formule partout : la slide de fuite et le « Et si » ne peuvent pas se contredire. *Si on se trompe* : la boucle surestime quand les recommandés convertissent moins bien ; le pied de slide le dit |
-| Q8 | **La couverture du pipeline : un indicateur avancé, lu contre ton seuil seulement ?** | Deux nombres saisis (pipeline ouvert du trimestre, objectif du trimestre), un seuil facultatif ; jamais une fuite, jamais en € | **Oui.** C'est le seul indicateur qui regarde devant. *Si on se trompe* : deux champs de plus que personne ne remplit ; ils sont facultatifs |
-| Q9 | **« Tes outils » au réglage, collecte rangée par outil, sans recettes vérifiées ?** | Liste facultative ; « À faire toi-même » par outil avec `where.path` ; un chiffre sans ton outil passe à « À demander » | **Oui.** Les recettes vérifiées coûteraient un travail de contenu par outil, invérifiable d'ici. *Si on se trompe* : un chemin de menu moins détaillé qu'une recette |
-| Q10 | **Le contrôle « deux outils » : une source pour le dénominateur, et un « à vérifier » non bloquant ?** | Une case dans la fiche d'un taux, un second choix de source, un contrôle en fiche et sur la slide de visibilité | **Oui.** *Si on se trompe* : une case que peu de gens cochent ; le contrôle ne se déclenche alors jamais |
-| Q11 | **Coller un tableau : le modèle du moteur, avec aperçu, et pas les exports des outils ?** | Un CSV à télécharger et à recoller (tabulations ou CSV), rattaché par `id`, avec un aperçu avant d'écrire | **Oui.** *Si on se trompe* : il faut recopier une colonne d'export dans le modèle ; c'est l'affaire d'une minute |
-| Q12 | **Plusieurs moteurs : au plus 10, une clé chacun, nommés par l'entreprise ?** | §19.1.4 et §19.1.5 | **Oui.** *Si on se trompe* : la limite se relève en une ligne |
-| Q13 | **La fusion : trois choix à l'import, la valeur la plus récente gagne, un aperçu, refusée si les réglages diffèrent ?** | §19.7 | **Oui.** « Ajouter comme nouveau moteur » par défaut : le choix qui ne perd rien. *Si on se trompe* : une valeur plus ancienne mais plus juste est écrasée ; l'aperçu la montre avant |
-| Q14 | **Le fond blanc : une case, « papier » par défaut, un blanc pur (`--paper-white`, #ffffff) et aucune autre couleur ?** | §19.8 ; l'autre choix est `--paper-0` (#fbf9f2), déjà là mais crème | **Oui, le blanc pur**, sans passe de Claude Design : seul le fond change. *Si on se trompe* : un rendu plat sur blanc, qu'une passe de design reprendra |
-| Q15 | **Les rappels `.ics` : relancer une demande et démarrer le mois suivant, sans valeur ni nom d'entreprise ?** | §19.9 | **Oui.** *Si on se trompe* : un fichier que personne ne télécharge |
-| Q16 | **Les deux portes : une ligne pour le propriétaire du résultat, une ligne de reprise sur l'accueil ?** | §19.10, moteur ouvert seulement | **Oui.** *Si on se trompe* : une ligne de plus sous l'action prioritaire, qu'on retire |
-| Q17 | **L'image de partage : le cadre de contenu et un peloton de l'exemple ?** | §19.11 | **Oui.** *Si on se trompe* : une image moins travaillée que celles du jeu, qu'une passe de design reprendra |
-| Q18 | **Analytics : `engine_month_started`, `engine_exported/<ics\|csv>`, deux sources d'entrée, et la phrase de confidentialité réécrite ?** | §19.12 | **Oui.** Sans `engine_month_started`, on ne saura pas si la série fait revenir. *Si on se trompe* : un événement de trop, retiré en une PR |
-| Q19 | **L'export PowerPoint reste hors du lot ?** | La spec v1 le réserve au cas où les retours le demandent | **Oui, hors du lot.** *Si on se trompe* : il se spécifiera seul, plus tard |
+| # | Question | Proposition | Recommandation, et « si on se trompe » | Réponse d'Antoine |
+|---|---|---|---|---|
+| Q1 | **L'ouverture du moteur attend-elle ce lot ?** | Non : le moteur ouvre dès A7.3.d et le nº8 signés, et A14 vit sur sa branche d'intégration jusqu'à son propre bon à tirer | **Non, on n'attend pas.** Un seul merge garantit qu'aucune copie neuve ne part en production sans relecture, que le moteur soit ouvert ou non. *Si on se trompe* : on ouvre un moteur sans série, et les premiers retours la demanderont | **2026-10-01 : oui, l'ouverture attend A14**, contre la reco. Les PR se mergent une à une, drapeau fermé (§19.14) |
+| Q2 | **Que reprend le mois suivant ?** | Les cibles et les définitions (variante, libellé, note, sources), comme valeurs proposées ; jamais une valeur, ni les comptes partagés, ni les demandes | **Oui.** Recopier une valeur serait la présenter comme mesurée. *Si on se trompe* : il faudra resaisir une note de définition, rien de faux n'apparaît | **2026-10-01 : oui, la reco** |
+| Q3 | **Les mois passés : lecture seule, avec « Corriger ce mois » ?** | Un sélecteur de mois, un bandeau, un bouton de correction ; le deck toujours sur le dernier mois | **Oui.** *Si on se trompe* : un deck d'un mois passé se demandera ; il suffira alors de construire le deck sur le mois choisi | **2026-10-01 : oui, la reco** |
+| Q4 | **Les écarts : quand, et sous quelle forme ?** | Seulement entre deux mesures comparables (§19.2.5), en points, valeur ou pour cent, avec une flèche et un signe, sans couleur | **Oui.** La couleur dirait « bien » ou « mal », ce que seule une cible peut dire (C1). *Si on se trompe* : une lecture un peu plus lente, rien de faux | **2026-10-01 : oui, la reco** |
+| Q5 | **La slide « Ce qui a bougé »** | Après la fuite et ses « Et si », une par motion, ordre AARRR, incluse dès deux mois comparables | **Oui.** *Si on se trompe* : une case à décocher | **2026-10-01 : oui, mais décochée par défaut** : la personne la coche (§19.2.6) |
+| Q6 | **La rétention J30 en €, avec « les payants sont supposés parmi les actifs à J30 » ?** | La même chaîne que l'activation, l'hypothèse au pied de la slide, et J30 devient un levier | **Oui.** C'est le prolongement exact de l'hypothèse de l'activation. *Si on se trompe* : le montant gonfle quand des clients paient avant J30 puis partent ; le pied de slide le dit | **2026-10-01 : oui, la reco** |
+| Q7 | **La part recommandée en €, dans les deux motions, avec la formule du « Et si » et une borne à 50 % ?** | (1 − r) ÷ (1 − t), puis la conversion (libre-service) ou le closing et l'ACV (assisté) | **Oui.** La même formule partout : la slide de fuite et le « Et si » ne peuvent pas se contredire. *Si on se trompe* : la boucle surestime quand les recommandés convertissent moins bien ; le pied de slide le dit | **2026-10-01 : oui, la reco** |
+| Q8 | **La couverture du pipeline : un indicateur avancé, lu contre ton seuil seulement ?** | Deux nombres saisis (pipeline ouvert du trimestre, objectif du trimestre), un seuil facultatif ; jamais une fuite, jamais en € | **Oui.** C'est le seul indicateur qui regarde devant. *Si on se trompe* : deux champs de plus que personne ne remplit ; ils sont facultatifs | **2026-10-01 : oui, la reco** |
+| Q9 | **« Tes outils » au réglage, collecte rangée par outil, sans recettes vérifiées ?** | Liste facultative ; « À faire toi-même » par outil avec `where.path` ; un chiffre sans ton outil passe à « À demander » | **Oui.** Les recettes vérifiées coûteraient un travail de contenu par outil, invérifiable d'ici. *Si on se trompe* : un chemin de menu moins détaillé qu'une recette | **2026-10-01 : oui, la reco** |
+| Q10 | **Le contrôle « deux outils » : une source pour le dénominateur, et un « à vérifier » non bloquant ?** | Une case dans la fiche d'un taux, un second choix de source, un contrôle en fiche et sur la slide de visibilité | **Oui.** *Si on se trompe* : une case que peu de gens cochent ; le contrôle ne se déclenche alors jamais | **2026-10-01 : oui, la reco** |
+| Q11 | **Coller un tableau : le modèle du moteur, avec aperçu, et pas les exports des outils ?** | Un CSV à télécharger et à recoller (tabulations ou CSV), rattaché par `id`, avec un aperçu avant d'écrire | **Oui.** *Si on se trompe* : il faut recopier une colonne d'export dans le modèle ; c'est l'affaire d'une minute | **2026-10-01 : oui, la reco** |
+| Q12 | **Plusieurs moteurs : au plus 10, une clé chacun, nommés par l'entreprise ?** | §19.1.4 et §19.1.5 | **Oui.** *Si on se trompe* : la limite se relève en une ligne | **2026-10-01 : oui, la reco** |
+| Q13 | **La fusion : trois choix à l'import, la valeur la plus récente gagne, un aperçu, refusée si les réglages diffèrent ?** | §19.7 | **Oui.** « Ajouter comme nouveau moteur » par défaut : le choix qui ne perd rien. *Si on se trompe* : une valeur plus ancienne mais plus juste est écrasée ; l'aperçu la montre avant | **2026-10-01 : oui, la reco** |
+| Q14 | **Le fond blanc : une case, « papier » par défaut, un blanc pur (`--paper-white`, #ffffff) et aucune autre couleur ?** | §19.8 ; l'autre choix est `--paper-0` (#fbf9f2), déjà là mais crème | **Oui, le blanc pur**, sans passe de Claude Design : seul le fond change. *Si on se trompe* : un rendu plat sur blanc, qu'une passe de design reprendra | **2026-10-01 : oui, le blanc pur** |
+| Q15 | **Les rappels `.ics` : relancer une demande et démarrer le mois suivant, sans valeur ni nom d'entreprise ?** | §19.9 | **Oui.** *Si on se trompe* : un fichier que personne ne télécharge | **2026-10-01 : oui, la reco** |
+| Q16 | **Les deux portes : une ligne pour le propriétaire du résultat, une ligne de reprise sur l'accueil ?** | §19.10, moteur ouvert seulement | **Oui.** *Si on se trompe* : une ligne de plus sous l'action prioritaire, qu'on retire | **2026-10-01 : oui, les deux.** Antoine a demandé si la carte « Le moteur » de l'accueil et la pastille de la bande noire deviendront cliquables : oui, c'est déjà câblé par C15 (A7.9) sur le même drapeau, et la bande reste sans lien dans le questionnaire et le Deep dive |
+| Q17 | **L'image de partage : le cadre de contenu et un peloton de l'exemple ?** | §19.11 | **Oui.** *Si on se trompe* : une image moins travaillée que celles du jeu, qu'une passe de design reprendra | **2026-10-01 : avec une passe de design**, contre la reco : l'image se dessine d'abord dans Claude Design (§19.11, `CHANTIERS.md` B5) |
+| Q18 | **Analytics : `engine_month_started`, `engine_exported/<ics\|csv>`, deux sources d'entrée, et la phrase de confidentialité réécrite ?** | §19.12 | **Oui.** Sans `engine_month_started`, on ne saura pas si la série fait revenir. *Si on se trompe* : un événement de trop, retiré en une PR | **2026-10-01 : oui, la reco** |
+| Q19 | **L'export PowerPoint reste hors du lot ?** | La spec v1 le réserve au cas où les retours le demandent | **Oui, hors du lot.** *Si on se trompe* : il se spécifiera seul, plus tard | **2026-10-01 : oui, hors du lot** |
