@@ -745,7 +745,7 @@ Le balayage des phrases a gagné six scénarios à deux mois, et le contrat des 
 - `notes.series` renvoyait à « la slide « Ce qui a bougé » ». Cette slide est décochée par défaut, et aucun de ses titres ne porte ce nom. La note ne renvoie plus à rien ;
 - un commentaire de `SlideEvolution` décrivait encore une flèche.
 
-## A14.c, T2 : les écrans de la série (2026-10-01, #PRNUM)
+## A14.c, T2 : les écrans de la série (2026-10-01, #258)
 
 La troisième PR du moteur complet (`docs/engine/moteur-complet.md` §19.2.2 à §19.2.6), drapeau fermé. T1 est sur `main` le même jour (#256, squash `9d78ef5`). Avec T2, un moteur passe d'un mois au suivant sans quitter la page.
 
