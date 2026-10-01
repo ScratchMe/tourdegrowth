@@ -1060,7 +1060,7 @@ la fusion à trois de #233 avec le nouvel `ENGINE.md` est propre (simulée par
 
 **En production (2026-10-01)** : [#242](https://github.com/ScratchMe/tourdegrowth/pull/242), squash `48bc535`, 14 fichiers, arbre identique à la tête. Le statut `Vercel` du commit est `success` ; `/en` et `/fr` répondent 200 sur le nouveau build (`age: 0`, `PRERENDER`). Rien de visible : aucune route n'importe encore la copie du niveau 2.
 
-## A12.d : l'îlot du jeu, le même pour tout niveau (2026-10-01)
+## A12.d : l'îlot du jeu, le même pour tout niveau (2026-10-01, #245)
 
 **Ce qui change** : l'îlot du niveau 1 (le tableau de bord, la visio, la main, le rapport, les nouvelles, décembre) quitte `app/[locale]/game/retention/` pour `app/[locale]/game/_island/`, un dossier privé que Next ne route pas. Il ne sait plus rien du niveau 1 : un niveau y apporte son modèle, sa copie, le format de son chiffre et son téléphone. La page du niveau 1 lui passe `slug="retention"` ; rien ne change à l'écran.
 
