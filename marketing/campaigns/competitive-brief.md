@@ -8,9 +8,10 @@ interdit de se comparer nommément à un concurrent en public ; ce document
 existe pour savoir où l'on se place, pas pour être cité.*
 
 *Tout ce qui n'a pas été vu de ses yeux est marqué « non vérifié ». Les
-fonctionnalités de nos deux produits à venir sont celles de leurs
-spécifications (`GAME-BRIEF.md`, spec du moteur), pas encore celles d'un code
-livré.*
+fonctionnalités de nos deux produits à venir étaient, le 2026-09-24, celles de
+leurs spécifications (`GAME-BRIEF.md`, spec du moteur). Leur code est livré
+depuis, fermé derrière son drapeau, et la ligne du moteur a été remise d'accord
+avec lui le 2026-10-01.*
 
 ---
 
@@ -83,7 +84,7 @@ nommer un goulot quand les chiffres ne le portent pas.
 | **Milanote** | Tableau | À la main | Non | Le tableau | Compte |
 | **Sourcetable** — « Pirate Metrics Excel Template Generator » | Tableur généré par IA | Oui | Non vérifié | Le tableur | Compte (non vérifié) |
 | **Calculateurs de K-factor** (UserJot, LaunchList — cités par l'audit SEO) | Calculateur à une métrique | Une seule métrique | Non | Non | Faible |
-| **Moteur de growth** (spécifié) | Page + îlot local | Oui, en comptes (numérateur ÷ dénominateur) | Oui, contre une cible d'équipe seulement (une fourchette relue ne fait que situer, C1) | Oui : 4 à 7 slides, PDF, PNG, texte | Aucune, rien n'est envoyé |
+| **Moteur de growth** (livré, fermé ; libre-service, vente assistée ou les deux) | Page + îlot local | Oui, en comptes (numérateur ÷ dénominateur) | Oui, contre une cible d'équipe seulement (une fourchette relue ne fait que situer, C1) | Oui : un deck 16:9, PDF, PNG, texte | Aucune, rien n'est envoyé |
 
 **Lecture** : le marché sépare trois gestes que le moteur réunit — *saisir*
 (tableur), *juger* (personne), *présenter* (banque de slides). Le point faible

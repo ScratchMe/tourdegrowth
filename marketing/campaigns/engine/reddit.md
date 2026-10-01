@@ -56,7 +56,7 @@ titre.
 C'est un commentaire dans un fil, pas un post. Répondre à trois autres projets
 du fil avant de poster le sien.
 
-> **Growth engine (Tour de Growth)** — a free AARRR funnel template that runs in your browser: seventeen numbers, where you lose the most people, and a short deck for your next leadership meeting. Nothing you type is sent anywhere. Looking for feedback on one thing: which of the seventeen numbers you couldn't find in your own tools. [link]
+> **Growth engine (Tour de Growth)** — a free AARRR funnel template that runs in your browser: your funnel's numbers (self-serve, sales-assisted, or both), where you lose the most people, and a deck for your next leadership meeting. Nothing you type is sent anywhere. Looking for feedback on one thing: which number you couldn't find in your own tools. [link]
 
 ---
 
@@ -64,20 +64,22 @@ du fil avant de poster le sien.
 
 **Lien** : `https://www.tourdegrowth.com/en/aarrr-funnel-template?utm_source=reddit_growthhacking&utm_campaign=launch_engine`
 
-**Titre** : `Fifteen numbers to read a self-serve SaaS funnel — which one would you swap?`
+**Titre** : `Seventeen numbers to read a self-serve SaaS funnel — which one would you swap?`
 
 **Corps** (les chiffres **dans** le post : c'est ce qui le rend lisible sans
 cliquer) :
 
-> Three per stage, deliberately boring:
+> Three per stage, five for revenue, deliberately boring:
 >
 > - **Acquisition** — sign-up rate (sign-ups ÷ unique visitors), top channel's share of sign-ups, CAC (and which variant: media only, plus team, fully loaded).
 > - **Activation** — the activation event itself (named, with its window), activation rate within that window, median time-to-value.
 > - **Retention** — day-30 retention of a sign-up cohort, monthly logo churn, main churn cause (and how you know it: data, interviews, or a hunch).
 > - **Referral** — whether sharing is built into the product, share of sign-ups that came from a user, K-factor.
-> - **Revenue** — sign-up → paid conversion, monthly ARPA, gross margin. LTV, payback and LTV:CAC are computed from these, never typed.
+> - **Revenue** — sign-up → paid conversion, monthly ARPA, gross margin, monthly expansion and contraction. LTV, payback, LTV:CAC, GRR and NRR are computed from these, never typed.
 >
 > Two rules we held: LTV caps the customer lifetime at 36 months, and never falls back to revenue when gross margin is missing (that's the flattering version).
+>
+> (A sales-assisted motion gets its own fifteen — lead-to-opportunity, win rate, new-contract ACV, contract renewal… — but that's another thread.)
 >
 > We put these in a free, local-only tool that turns them into a short deck: [link]. But the list is the interesting part — which one is the wrong number for a self-serve SaaS, and what would you replace it with?
 
@@ -94,7 +96,7 @@ cliquer) :
 
 **Corps** :
 
-> **What it is**: you enter seventeen numbers from your own tools, stage by stage. It shows how 100 sign-ups move through your product, where you lose the most people (only against a target you set; published ranges are shown for context), and what each missing number would cost to measure. Then it exports 4 to 7 slides: PDF, PNG per slide, or text with speaker notes.
+> **What it is**: you enter the numbers from your own tools, stage by stage — seventeen for a self-serve SaaS, fifteen for a sales-assisted one, or both, shown as two engines and one total. It shows how 100 sign-ups move through your product, where you lose the most people (only against a target you set; published ranges are shown for context), and what each missing number would cost to measure. Then it exports the deck: PDF, PNG per slide, or text with speaker notes.
 >
 > **Why local-only**: these are your employer's numbers. No account, no server, no AI; there's a test in the repo that fails if any request carries something you typed.
 >

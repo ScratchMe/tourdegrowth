@@ -146,7 +146,7 @@ these files are written first.
 | --- | --- |
 | [`SPEC.md`](SPEC.md) | The original product specification — scoring rules, tone, sharing mechanics |
 | [`design/DESIGN-BRIEF.md`](design/DESIGN-BRIEF.md) | The visual system, screen by screen; the extension briefs `DS-EXTENSION-BRIEF-01` to `04` sit next to it, each with what came back in `ds-extension-0N-return/` |
-| [`ENGINE.md`](ENGINE.md) | The growth engine: its decisions and the sales-assisted extension being built (§18); the v1 implementation spec is in [`docs/engine/v1.md`](docs/engine/v1.md) |
+| [`ENGINE.md`](ENGINE.md) | The growth engine: its decisions, with its spec in two parts — self-serve, the v1, in [`docs/engine/v1.md`](docs/engine/v1.md); sales-assisted and the hybrid (§18) in [`docs/engine/assiste-et-hybride.md`](docs/engine/assiste-et-hybride.md) |
 | [`GAME-BRIEF.md`](GAME-BRIEF.md) | The game: level 1 in full and the four other levels sketched; level 2's spec is in [`docs/game/niveau-2.md`](docs/game/niveau-2.md) |
 | [`GROWTH-PLAN.md`](GROWTH-PLAN.md) | The distribution plan, wave by wave; [`marketing/`](marketing/) holds its texts |
 | [`AUDIT.md`](AUDIT.md), [`AUDIT-PLAN.md`](AUDIT-PLAN.md) | A private growth-audit instrument, browser-only, paused since 2026-09-30 |
