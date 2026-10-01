@@ -14,7 +14,7 @@ import { LLMS_SUMMARY, llmsUrl } from "./llms-shared";
 /**
  * `/llms-full.txt` — CHANTIERS.md C27, decided by Antoine on 2026-09-30: the
  * full English text of the articles (How it works, the two open-door pages,
- * the five comparisons) and of the 24 glossary terms, in one Markdown file.
+ * the five comparisons) and of every glossary term, in one Markdown file.
  *
  * **Built from the same fields the pages render, in the same order**, so it
  * says what the pages say and nothing else. Every heading inside a page is a

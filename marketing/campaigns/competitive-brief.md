@@ -161,7 +161,7 @@ grand public.
 
 | Sujet | Nous | Concurrence | Trou ? |
 |---|---|---|---|
-| AARRR expliqué | Glossaire long (24 termes), `/how-it-works`, quatre « AARRR vs X » | Articles partout (Amplitude, PostHog, ProductPlan…) | Parité ; la valeur est dans « Dans le Tour » (la question qui mesure chaque terme) |
+| AARRR expliqué | Glossaire long (28 termes, dont 4 de vente assistée depuis le 2026-09-30), `/how-it-works`, quatre « AARRR vs X » | Articles partout (Amplitude, PostHog, ProductPlan…) | Parité ; la valeur est dans « Dans le Tour » (la question qui mesure chaque terme) |
 | AARRR vs HEART | Absent | Un article générique, aucun comparatif dédié (audit SEO §3.1) | **Oui, pour nous** |
 | Gabarit AARRR avec tes chiffres + deck | Le moteur | Gabarits statiques | **Oui, pour nous** — le plus grand |
 | Dark patterns de la résiliation, en français, pédagogique | Le jeu (et la page texte proposée par l'audit SEO §3.2) | Contenu juridique (avocats, DGCCRF, presse) | **Oui, pour nous** |

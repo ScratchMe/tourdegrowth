@@ -48,7 +48,7 @@ qu'un seul champ de formulaire soit rempli.*
 - Un résultat partagé se rend dans la **langue du lecteur**, pas de l'auteur ; l'image de partage porte le score, l'étape qui freine et l'action.
 - Aucun compte, aucun e-mail : les réponses du Tour sont envoyées pour calculer le score et gardées avec le résultat, sous un identifiant impossible à deviner, sans aucune donnée d'identité (`src/lib/submissions/types.ts`, pages légales). *Corrigé le 2026-09-24 : la version précédente disait qu'elles « ne quittent le navigateur que pour calculer le score », ce qui laissait entendre qu'elles ne sont pas gardées.* GoatCounter sans cookie ; pages légales complètes.
 - Open source, AGPL-3.0, 700+ tests unitaires et 280+ specs Playwright en CI.
-- Le glossaire : 24 termes AARRR expliqués longuement dans les deux langues, avec pour chacun la question du Tour qui le mesure.
+- Le glossaire : 28 termes expliqués longuement dans les deux langues (le vocabulaire AARRR, et depuis le 2026-09-30 celui de la vente assistée), avec pour chacun la question du Tour qui le mesure.
 
 **À ne pas avancer** : un nombre d'utilisateurs, un pourcentage de quoi que ce soit, une comparaison nommée à un concurrent, une promesse chiffrée d'amélioration.
 
