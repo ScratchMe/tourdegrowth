@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
 import { NumberField } from "@/components/core/NumberField";
+import { isUnreadableNumber } from "@/lib/forms/number";
 import { candidatesOf } from "@/lib/engine/catalog-shape";
 import { totalIn12 } from "@/lib/engine/deck-motions";
 import { isAnswerMetric } from "@/lib/engine/phrases";
@@ -202,7 +203,10 @@ function TargetInput({ id, view, actions }: { id: MetricId; view: EngineView; ac
       hint={metric.oneLiner}
       value={value}
       onChange={setValue}
-      onBlur={() => {
+      onBlur={(event) => {
+        // An unreadable box stays on screen with its message and writes
+        // nothing: the stored target is not erased by a typo (A15.2).
+        if (isUnreadableNumber(event.target.value, view.ctx.locale)) return;
         if ((value ?? undefined) !== target) actions.setTarget(id, value);
       }}
       locale={view.ctx.locale}

@@ -1,4 +1,5 @@
 import type { Locator, Page } from "@playwright/test";
+import { ENGINE_COPY } from "@/content/engine-copy";
 import { exampleState } from "../src/lib/engine/__tests__/fixtures";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
 import { storedEngineEntry, writeEngineSeed } from "./engine-helpers";
@@ -169,3 +170,46 @@ test("the joiner of a pair sits against the first box, however long its label", 
   expect(measure.labelWider).toBe(true);
   expect(measure.gap).toBeLessThanOrEqual(measure.columnGap + 1);
 });
+
+/*
+ * A15.3 (2026-10-01): a sheet's refused save said nothing to a screen reader
+ * — its lines under the button sit in no live region, and the focus stayed on
+ * the button. It now moves to the first field it names, whose label and
+ * message are read out with it. And a rule one value breaks (a rate over
+ * 100 %) is said as the box is left, where the person still looks.
+ *
+ * Non-vacuity (2026-10-01), one mechanism at a time, both languages: without
+ * the focus move, the test falls on `toBeFocused` after the blur part
+ * passes; without the check on leaving, on the message (« element(s) not
+ * found »). A first version typed the rate AFTER a refused save and passed
+ * without the blur check: once a save was tried, the sheet re-reads its rules
+ * at every keystroke. Hence the order above.
+ */
+for (const locale of ["en", "fr"] as const) {
+  test(`a refused save puts the focus on the field it names; a rate over 100 is said on leaving it (${locale})`, async ({ page }) => {
+    await openEngine(page, locale);
+    await page.getByTestId("engine-setup-board").click();
+    const tab = page.getByTestId("engine-tab-activation");
+    if ((await tab.getAttribute("aria-selected")) !== "true") await tab.click();
+    const toggle = page.getByTestId("engine-metric-act-rate");
+    if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.click();
+    const sheet = page.getByTestId("engine-sheet-act-rate");
+    await sheet.getByRole("radio", { name: ENGINE_COPY.sheet.haveIt[locale] }).check();
+
+    // The rate alone, over 100, BEFORE any save: once a save was tried the
+    // sheet re-reads its rules at every keystroke, which would say it anyway.
+    await sheet.getByRole("button", { name: ENGINE_COPY.sheet.rateOnly[locale] }).click();
+    const rate = page.locator("#engine-act-rate-rate");
+    await rate.fill("140");
+    await expect(sheet.getByText(ENGINE_COPY.workbench.percentRange[locale])).toHaveCount(0);
+    await rate.blur();
+    await expect(sheet.getByText(ENGINE_COPY.workbench.percentRange[locale]).first()).toBeVisible();
+    await expect(rate).toHaveAttribute("aria-invalid", "true");
+
+    // The save is refused, and the focus goes to the first field it names — not left on the button.
+    await page.getByTestId("engine-save-act-rate").click();
+    const first = sheet.locator('[aria-invalid="true"]').first();
+    await expect(first).toBeFocused();
+    await expect(page.getByTestId("engine-save-act-rate")).not.toBeFocused();
+  });
+}

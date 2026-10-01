@@ -363,6 +363,17 @@ export const UI_STRINGS = {
       en: "Your 15 answers are still saved on this device — retrying doesn't restart the questionnaire.",
       fr: "Tes 15 réponses sont toujours enregistrées sur cet appareil — réessayer ne relance pas le questionnaire.",
     },
+    // TODO: à relire (convention 6). A15.4 (2026-10-01): `errorBody` says « in a moment »,
+    // which a dropped connection and the hourly limit both make false. `{m}` is in minutes.
+    errorOffline: {
+      en: "The connection dropped before our answer reached you — check your network, then try again.",
+      fr: "La connexion a coupé avant que notre réponse t'arrive — vérifie ton réseau, puis réessaie.",
+    },
+    // TODO: à relire (convention 6).
+    errorRateLimited: {
+      en: "That's a lot of requests from this connection in an hour — you can try again in {m} min.",
+      fr: "Beaucoup de demandes depuis cette connexion en une heure — tu pourras réessayer dans {m} min.",
+    },
   },
 
   /** Tone selector (DESIGN-BRIEF.md §06a). SPEC.md §6bis: "Straight up" /
@@ -402,19 +413,18 @@ export const UI_STRINGS = {
     },
   },
 
-  /** Loading — DESIGN-BRIEF.md §06b's 3 rotating messages. Quick mode now
+  /** Loading — DESIGN-BRIEF.md §06b had 3 rotating messages. Quick mode
    * only ever shows message1, briefly (SPEC-ADDENDUM-01.md §0: no real wait
-   * left to narrate); the Deep dive keeps the full 3-message sequence,
-   * since it still makes a real Gemini call. */
+   * left to narrate). Since A15.6 (2026-10-01) the Deep dive shows message3
+   * alone, the one true for its whole wait, over a bar told by the clock;
+   * « Calcul de tes temps par étape » went with the steps it promised. */
   loading: {
     message1: { en: "Reviewing your answers...", fr: "Relecture de tes réponses…" },
-    message2: { en: "Calculating your stage times...", fr: "Calcul de tes temps par étape…" },
     message3: { en: "Drafting your race report...", fr: "Rédaction de ton rapport de course…" },
-    // Relu et validé par Antoine (2026-09-09) — R2-09. Shown once the three messages have
-    // run their course and the Deep dive is still generating: a real Deep
-    // dive was measured at ~70 s in production, and nothing on this screen
-    // said so. Not a fourth message (the three segments are the design), a
-    // line under them.
+    // Relu et validé par Antoine (2026-09-09) — R2-09. Shown once the first
+    // seconds of the Deep dive have passed and it is still generating: a real
+    // Deep dive was measured at ~70 s in production, and nothing on this
+    // screen said so. A line under the bar.
     stillWorkingHint: {
       en: "About a minute in total — nothing is stuck.",
       fr: "Environ une minute en tout — rien n'est bloqué.",

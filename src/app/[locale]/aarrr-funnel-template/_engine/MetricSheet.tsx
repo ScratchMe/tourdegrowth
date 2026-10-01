@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/core/Button";
 import { Choices } from "@/components/core/Choices";
 import { Field } from "@/components/core/Field";
 import { FieldRow } from "@/components/core/FieldRow";
 import { NumberField } from "@/components/core/NumberField";
+import { isUnreadableNumber } from "@/lib/forms/number";
 import { Select } from "@/components/core/Select";
 import { Tag } from "@/components/core/Tag";
 import { TextArea } from "@/components/core/TextArea";
@@ -102,6 +103,18 @@ export function MetricSheet({
     };
   });
   const [attempted, setAttempted] = useState(false);
+  // A refused save moves the focus to the first field it names (A15.3): its
+  // label and its message are read out with it, where a line under the
+  // button, outside any live region, said nothing to a screen reader. Counted,
+  // so a second refusal moves it again.
+  const [refusals, setRefusals] = useState(0);
+  const sheetRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (refusals === 0) return;
+    const root = sheetRef.current;
+    const first = root?.querySelector<HTMLElement>('[aria-invalid="true"]') ?? root?.querySelector<HTMLElement>("[data-save-problems]");
+    first?.focus();
+  }, [refusals]);
   // Every refusal reads the same to the person — the device kept nothing, save a file — whether
   // it was the quota, storage switched off, or a store another tab left unreadable.
   const [outcome, setOutcome] = useState<"saved" | "failed" | null>(null);
@@ -124,7 +137,10 @@ export function MetricSheet({
     const built = entryFromDraft(draft, shape, nowIso, options);
     // The engine's own guard, on top of the form's: the same impossibility
     // (more of the part than of the whole) must block here and in an import.
-    if (!built.entry || blockingCheck(built.entry, shape, locale)) return;
+    if (!built.entry || blockingCheck(built.entry, shape, locale)) {
+      setRefusals((n) => n + 1);
+      return;
+    }
     const result = actions.saveEntry(id, built.entry);
     setOutcome(result.ok ? "saved" : "failed");
     if (result.ok) onSaved?.();
@@ -201,7 +217,7 @@ export function MetricSheet({
   const [alsoBefore = ""] = strings.sheet.alsoIn.split("{metrics}");
 
   return (
-    <div className={styles.sheet} data-testid={`engine-sheet-${domId(id)}`}>
+    <div ref={sheetRef} className={styles.sheet} data-testid={`engine-sheet-${domId(id)}`}>
       <div className={styles.meta}>
         <Tag tone="outline">{strings.effort[EFFORT_KEY[shape.effort]]}</Tag>
         <a className={styles.definitionLink} href={metric.glossaryHref} target="_blank" rel="noopener">
@@ -298,7 +314,15 @@ export function MetricSheet({
         <div className={styles.editor} data-testid="engine-estimate">
           {/* « At least » / « At most » name themselves: a pair with no joiner,
               and the rule about the two belongs to the row. */}
-          <FieldRow error={draft.low !== null && draft.high !== null && draft.low > draft.high ? strings.sheet.lowAboveHigh : undefined}>
+          <FieldRow
+            error={
+              draft.low !== null && draft.high !== null && draft.low > draft.high
+                ? strings.sheet.lowAboveHigh
+                : problems.includes("percent-range")
+                  ? strings.workbench.percentRange
+                  : undefined
+            }
+          >
             <NumberField
               size="sm"
               id={`${prefix}-low`}
@@ -537,14 +561,14 @@ export function MetricSheet({
         </div>
       ) : null}
       {missing.length ? (
-        <p className={styles.error} data-testid="engine-save-needs">
+        <p className={styles.error} data-testid="engine-save-needs" data-save-problems tabIndex={-1}>
           {fill(strings.workbench.saveNeeds, { fields: joinList(missing, strings.grammar) })}
         </p>
       ) : null}
       {rules
         .filter((p) => p !== "num-gt-den" && p !== "denominator-zero")
         .map((p) => (
-          <p key={p} className={styles.error}>
+          <p key={p} className={styles.error} data-save-problems tabIndex={-1}>
             {ruleMessage(p, filledMetric, strings, locale)}
           </p>
         ))}
@@ -626,7 +650,10 @@ function TargetField({
       hint={view.strings.sheet.targetHint}
       value={value}
       onChange={setValue}
-      onBlur={() => {
+      onBlur={(event) => {
+        // An unreadable box stays on screen with its message and writes
+        // nothing: the stored target is not erased by a typo (A15.2).
+        if (isUnreadableNumber(event.target.value, view.ctx.locale)) return;
         if ((value ?? undefined) !== target) actions.setTarget(id, value);
       }}
       locale={view.ctx.locale}

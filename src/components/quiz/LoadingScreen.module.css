@@ -65,17 +65,6 @@
   color: var(--text-body);
 }
 
-.next {
-  border: var(--border-rule);
-  color: var(--text-muted);
-}
-
-.pending {
-  border: var(--border-rule);
-  color: var(--text-muted);
-  opacity: 0.5;
-}
-
 .dots {
   display: inline-block;
   width: 3ch;
@@ -98,44 +87,57 @@
   }
 }
 
-.segments {
+/*
+ * The wait told by the clock (A15.6, 2026-10-01): one track in the language
+ * the three segments had — dashed while empty, solid road-paint red where it
+ * is filled (--accent-mark: a mark, no text on it) — and the time spent
+ * beside it, in the system's mono. The fill follows `waitProgress` and never
+ * reaches the end; its width moves four times a second (TICK_MS in
+ * LoadingScreen.tsx), eased over the same quarter-second so the steps do
+ * not show.
+ */
+.progress {
   display: flex;
-  gap: 8px;
+  align-items: center;
+  gap: 12px;
   width: 100%;
   max-width: 420px;
 }
 
-.segment {
+/* The dashed outline is the track's own pseudo-element, so the fill can be
+   drawn OVER it, edge included, the way a filled segment was a whole red
+   pill — inside a bordered box it read as red between two dashed lines. */
+.track {
+  position: relative;
   flex: 1;
   height: 12px;
+}
+
+.track::before {
+  content: "";
+  position: absolute;
+  inset: 0;
   border-radius: var(--radius-tag);
   border: var(--border-dashed);
 }
 
-.filled {
-  border: var(--border-width) solid var(--accent-mark);
+.fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: var(--radius-tag);
   background: var(--accent-mark);
+  transition: width var(--dur-state) linear;
 }
 
-/* The currently-active segment keeps a slow pulse once the screen has
-   settled into its open-ended "still working" state — same purpose as the
-   ellipsis and the breathing numeral: visible motion for as long as the
-   real call takes, never a fixed timeout. */
-.pulsing {
-  animation: segmentPulse var(--dur-wait) ease-in-out infinite;
+.clock {
+  font: var(--meta-md);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  min-width: 4ch;
+  text-align: right;
 }
 
-@keyframes segmentPulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.55;
-  }
-}
-
-/* REVIEW-02.md R2-09 — under the segments, only in the "still working" state. */
+/* REVIEW-02.md R2-09 — under the bar, once the first seconds have passed. */
 .hint {
   font: var(--meta-xs);
   color: var(--text-muted);

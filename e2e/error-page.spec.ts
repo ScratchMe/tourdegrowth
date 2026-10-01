@@ -60,3 +60,33 @@ test("an unknown but well-formed id is our 404 when Firestore answers", async ({
   await page.goto("/r/3f1c2a7e-9b4d-4e21-a8c6-000000000000");
   await expect(page.getByRole("heading", { name: /no result at this address/i })).toBeVisible();
 });
+
+/*
+ * A15.5 (2026-10-01): « Try again » on our error screen called Next's
+ * `reset`, which re-renders the segment WITHOUT fetching it — after a server
+ * failure, it could only show the same failure. `retry` (stable since Next
+ * 16.3) fetches it again. Behaviour, not the prop: the click must send a
+ * request for the page that failed.
+ *
+ * Non-vacuity (2026-10-01), on the emulator: the same button wired back to
+ * `reset` sends nothing (0 requests) and fails exactly this test; the three
+ * others pass. Without the emulator the page may be a 404, and it skips.
+ */
+test("« Try again » on the error screen asks the server for the page again", async ({ page }) => {
+  const url = EMULATOR_HOST ? `/r/${MALFORMED_ID}` : "/r/3f1c2a7e-9b4d-4e21-a8c6-000000000000";
+  await page.goto(url);
+  const retry = page.getByTestId("error-retry");
+  // Without the emulator the read may answer a 404 instead (see above): nothing to retry then.
+  const shown = await retry.waitFor({ timeout: 10_000 }).then(() => true, () => false);
+  test.skip(!shown, "this environment answered a 404, not a server failure");
+
+  const id = url.split("/").pop()!;
+  const asked: string[] = [];
+  page.on("request", (request) => {
+    if (request.url().includes(id)) asked.push(request.url());
+  });
+  await retry.click();
+  await expect.poll(() => asked.length).toBeGreaterThan(0);
+  // Still our screen: the document cannot be read, so the failure comes back, ours.
+  await expect(page.getByTestId("error-retry")).toBeVisible();
+});

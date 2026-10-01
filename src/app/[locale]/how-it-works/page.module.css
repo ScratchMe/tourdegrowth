@@ -26,6 +26,7 @@
 /* REVIEW-02.md R2-13 — the pillar name is a link to its glossary page, styled as
    the heading it sits in: no underline until hover, so the step reads as a title. */
 .pillarLink {
+  composes: strip from "../../../styles/hit.module.css";
   color: inherit;
   text-decoration: none;
 }
@@ -100,6 +101,7 @@
 }
 
 .comparisonLink {
+  composes: strip from "../../../styles/hit.module.css";
   font: var(--meta-sm);
   letter-spacing: var(--meta-tracking);
   color: var(--text-link);

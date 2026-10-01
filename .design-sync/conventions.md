@@ -155,7 +155,8 @@ smaller than that and extend their hit area on the element itself: a
 room the group keeps above and below it; the 16px `DefinitionTrigger` glyph
 takes taps on a 44px disc around it; `Button variant="quiet"` is drawn as a
 line of underlined text (31px, 27px at `sm`) and takes taps on a 44px strip
-centred on it. Never strip that surrounding room to tighten a header — it is
+centred on it; a boxed `Button size="sm"` is drawn 39px tall and takes taps
+on the same strip. Never strip that surrounding room to tighten a header — it is
 where the taps land. The system has one text button, `quiet`: an action in
 text is that, never a styled `<button>` of its own. A link inside a sentence
 is a link, set in the sentence's type.
@@ -210,8 +211,7 @@ Every duration is a token of `tokens/motion.css`, never a literal:
 leaving — leaving is faster), `--dur-state` (a change in place),
 `--dur-stamp` with `--ease-stamp` (the stamp overshoots once; only an
 entrance may overshoot), `--dur-shake`, `--dur-pulse`, `--dur-reveal`,
-`--dur-draw`, and three loops for waiting (`--dur-wait`, `--dur-breathe`,
-`--dur-dots`). An arrival rises by `--dist-step` (8px). The shared keyframes
+`--dur-draw`, and two loops for waiting (`--dur-breathe`, `--dur-dots`). An arrival rises by `--dist-step` (8px). The shared keyframes
 (the score's `stamp`, the verdict's `slam`, the progress `pulse`) reach a
 component through `composes` from `styles/motion.module.css`. Reduced motion
 switches all of it off; every element rests in its final state, so nothing

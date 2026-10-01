@@ -14,8 +14,13 @@ import styles from "./NotFoundScreen.module.css";
 export interface ErrorScreenProps {
   locale: Locale;
   error: Error & { digest?: string };
-  /** Next's error-boundary reset: re-renders the segment that threw. */
-  reset: () => void;
+  /**
+   * Next's `retry`: fetches the segment that threw again, then re-renders it.
+   * Not `reset`, which re-renders without fetching — after a server failure
+   * (Firestore on `/r/<id>`), the very case this screen exists for, `reset`
+   * could only show the same failure again (Next 16.3, `error.md`; A15.5).
+   */
+  retry: () => void;
 }
 
 /**
@@ -32,7 +37,7 @@ export interface ErrorScreenProps {
  * internals. Same layout module as the 404 on purpose — the two are one
  * family in two temperatures.
  */
-export function ErrorScreen({ locale, error, reset }: ErrorScreenProps) {
+export function ErrorScreen({ locale, error, retry }: ErrorScreenProps) {
   const t = ERROR_SCREEN_STRINGS;
 
   useEffect(() => {
@@ -50,7 +55,7 @@ export function ErrorScreen({ locale, error, reset }: ErrorScreenProps) {
           {tc(t.errorBody, locale)}
         </DetourCard>
 
-        <Button onClick={reset}>{tc(t.errorRetry, locale)}</Button>
+        <Button onClick={retry} data-testid="error-retry">{tc(t.errorRetry, locale)}</Button>
 
         {error.digest && (
           <MetaLabel size="xs" uppercase={false}>

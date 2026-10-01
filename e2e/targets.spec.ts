@@ -1,7 +1,9 @@
-import { ADMIN_PASSWORD, expect, grantOwnerPreview, openFold, SKIP_ADMIN_REASON, test } from "./helpers";
+import { ADMIN_PASSWORD, expect, grantOwnerPreview, openFold, seedOwnedResult, SKIP_ADMIN_REASON, test } from "./helpers";
 import type { Page } from "@playwright/test";
-import { exampleState } from "../src/lib/engine/__tests__/fixtures";
+import { ENGINE_COPY } from "@/content/engine-copy";
+import { exampleState, hybridState } from "../src/lib/engine/__tests__/fixtures";
 import { writeEngineSeed } from "./engine-helpers";
+import { EMULATOR_HOST, REAL_RESULTS, SKIP_EMULATOR_REASON } from "./real-results";
 
 /**
  * DS v3 H-2 and H-3 — touch targets measured the way a finger meets them.
@@ -227,8 +229,8 @@ test("a trigger inside question copy takes a 44px tap without covering an answer
  */
 const QUIET = '[class*="Button-module__"][class*="__quiet"]';
 
-/** Indices of the quiet buttons a person can see (a hidden nav link has no box). */
-async function visibleQuiet(page: Page, sel: string): Promise<number[]> {
+/** Indices of the buttons matching `sel` a person can see (a hidden nav link has no box). */
+async function visibleTargets(page: Page, sel: string): Promise<number[]> {
   return page.evaluate((sel) => {
     const out: number[] = [];
     document.querySelectorAll(sel).forEach((el, i) => {
@@ -246,17 +248,17 @@ async function visibleQuiet(page: Page, sel: string): Promise<number[]> {
 const NEAR = 16;
 
 /**
- * Claim 2, for quiet button `index`: every other target whose drawn box meets
- * the quiet button's 44px zone is still reached at every point of that
- * overlap (sampled every 1px). Returns the labels of the targets that lost a
- * point, and how many targets stand within NEAR px of the zone — so an empty
- * list can be told apart from a check with nothing around it.
+ * Claim 2, for button `index`: every other target whose drawn box meets the
+ * button's 44px zone is still reached at every point of that overlap
+ * (sampled every 1px). Returns the labels of the targets that lost a point,
+ * and how many targets stand within NEAR px of the zone — so an empty list
+ * can be told apart from a check with nothing around it.
  */
 async function stolenFrom(page: Page, sel: string, index: number): Promise<{ near: number; stolen: string[] }> {
   return page.evaluate(
     ({ sel, index, near_ }) => {
-      const quiet = document.querySelectorAll(sel)[index] as HTMLElement;
-      const q = quiet.getBoundingClientRect();
+      const target = document.querySelectorAll(sel)[index] as HTMLElement;
+      const q = target.getBoundingClientRect();
       const zone = {
         top: q.top + q.height / 2 - Math.max(q.height, 44) / 2,
         bottom: q.top + q.height / 2 + Math.max(q.height, 44) / 2,
@@ -264,9 +266,9 @@ async function stolenFrom(page: Page, sel: string, index: number): Promise<{ nea
         right: q.left + q.width / 2 + Math.max(q.width, 44) / 2,
       };
       // Only a neighbour someone can tap: not one inside a folded row's
-      // `hidden="until-found"` sheet, which still reports a box (visibleQuiet).
+      // `hidden="until-found"` sheet, which still reports a box (visibleTargets).
       const targets = [...document.querySelectorAll("a, button, input, select, textarea, summary, label")].filter(
-        (el) => el !== quiet && !quiet.contains(el) && !el.contains(quiet) && el.checkVisibility(),
+        (el) => el !== target && !target.contains(el) && !el.contains(target) && el.checkVisibility(),
       );
       let near = 0;
       const stolen: string[] = [];
@@ -284,7 +286,7 @@ async function stolenFrom(page: Page, sel: string, index: number): Promise<{ nea
         for (let y = top + 0.5; y < bottom && !lost; y += 1) {
           for (let x = left + 0.5; x < right && !lost; x += 1) {
             const hit = document.elementFromPoint(x, y);
-            if (hit && (hit === quiet || quiet.contains(hit))) lost = true;
+            if (hit && (hit === target || target.contains(hit))) lost = true;
           }
         }
         if (lost) stolen.push(`${el.tagName} "${(el.textContent ?? "").trim().slice(0, 40)}"`);
@@ -296,23 +298,35 @@ async function stolenFrom(page: Page, sel: string, index: number): Promise<{ nea
 }
 
 /**
- * The three claims for every quiet button inside `scope` (a test id). Scoped
- * because a sheet can hold the page still: the buttons behind it cannot be
+ * How each kind of button is drawn, for claim 3: no taller than `max` while
+ * its label sits on one line, which it does below `oneLine` (a label that
+ * wraps is two lines tall, and taller than 44 on its own).
+ */
+interface Look {
+  what: string;
+  max: number;
+  oneLine: number;
+}
+
+/** A line of text, not a 44px box. */
+const QUIET_LOOK: Look = { what: "a line of text", max: 32, oneLine: 40 };
+
+/**
+ * The three claims for every button matching `sel`. Scope `sel` to a test
+ * id where a sheet can hold the page still: the buttons behind it cannot be
  * scrolled to, and a finger cannot reach them either.
  */
-async function expectQuietTargets(page: Page, scope: string, minimum: number): Promise<number> {
-  const sel = `[data-testid="${scope}"] ${QUIET}`;
-  const indices = await visibleQuiet(page, sel);
+async function expectTapTargets(page: Page, sel: string, minimum: number, look: Look): Promise<number> {
+  const indices = await visibleTargets(page, sel);
   expect(indices.length).toBeGreaterThanOrEqual(minimum);
   let neighbours = 0;
   for (const i of indices) {
-    const quiet = page.locator(sel).nth(i);
-    await quiet.evaluate((el) => el.scrollIntoView({ block: "center" }));
-    const drawn = (await quiet.boundingBox())!;
-    const label = (await quiet.textContent())?.trim();
-    // Claim 3: the look is unchanged — a line of text, not a 44px box.
-    // (A label that wraps is two lines tall, and taller than 44 on its own.)
-    if (drawn.height < 40) expect(drawn.height, `"${label}" is drawn as a line of text`).toBeLessThanOrEqual(32);
+    const button = page.locator(sel).nth(i);
+    await button.evaluate((el) => el.scrollIntoView({ block: "center" }));
+    const drawn = (await button.boundingBox())!;
+    const label = (await button.textContent())?.trim();
+    // Claim 3: the look is unchanged.
+    if (drawn.height < look.oneLine) expect(drawn.height, `"${label}" is drawn as ${look.what}`).toBeLessThanOrEqual(look.max);
     // Claim 1.
     expect(await hitExtent(page, sel, i, "y"), `"${label}" tap strip, vertical`).toBeGreaterThanOrEqual(43.5);
     expect(await hitExtent(page, sel, i, "x"), `"${label}" tap strip, horizontal`).toBeGreaterThanOrEqual(
@@ -324,6 +338,11 @@ async function expectQuietTargets(page: Page, scope: string, minimum: number): P
     neighbours += near;
   }
   return neighbours;
+}
+
+/** The three claims for every quiet button inside `scope` (a test id). */
+function expectQuietTargets(page: Page, scope: string, minimum: number): Promise<number> {
+  return expectTapTargets(page, `[data-testid="${scope}"] ${QUIET}`, minimum, QUIET_LOOK);
 }
 
 test.describe("the quiet text button", () => {
@@ -405,3 +424,98 @@ test("a quiet link answers the pointer: ink and a heavier underline on hover, th
   await page.mouse.up();
   expect(rest.offset).toBe("3px");
 });
+
+/*
+ * The small button (`size="sm"`, 2026-10-01). Drawn 39px tall, it was tapped
+ * 39px tall, under --hit-min, on the engine's margin action, a chart's retry
+ * and the owner's badge copy, all within a finger's reach. It carries the
+ * quiet button's strip now, and makes the same three claims: a 44px tap, no
+ * neighbour's tap stolen, the box drawn as before. One test per place a
+ * person meets it; the chart's retry is the fourth, and only an error state
+ * renders it.
+ *
+ * Claim 2 is a guard for a later layout here, not a present risk, and the
+ * tests do not ask for a neighbour within NEAR px the way the quiet ones do:
+ * the strip reaches 2.5px past a 39px box, and on 2026-10-01 the closest
+ * target to any small button was 12px away (the audit's « Nouvelle mission »),
+ * 20px in the landing header, 36px on the owner's result, 50px in the engine,
+ * the only sheets of 130 opened, in three states at 390 and 1280px, that
+ * carry one.
+ *
+ * Non-vacuity (2026-10-01): a build without `.sm::before` fails exactly the
+ * three tests below, on claim 1 (strips of 39.5, 40 and 39.75px); the nine
+ * others pass.
+ */
+const SMALL = '[class*="Button-module__"][class*="__sm"]:not([class*="__quiet"])';
+
+/** Still the compact box: 39px, not grown to 44. */
+const SMALL_LOOK: Look = { what: "the compact box", max: 40, oneLine: 44 };
+
+test("the landing header's small call to action takes a 44px tap where a tablet shows it", async ({ page }) => {
+  // Hidden under 760px (page.module.css); a tablet held upright shows it, and is touched.
+  await page.setViewportSize({ width: 820, height: 1180 });
+  await page.goto("/en");
+  await page.locator("main").waitFor();
+  await expectTapTargets(page, `header ${SMALL}`, 1, SMALL_LOOK);
+});
+
+test.describe("the small button inside the engine", () => {
+  test.skip(!ADMIN_PASSWORD, SKIP_ADMIN_REASON);
+
+  test("« use the company-wide margin » takes a 44px tap and covers none of the choices under it", async ({ page, context }) => {
+    await grantOwnerPreview(context.request, "engine");
+    await page.clock.setFixedTime(new Date(2026, 8, 24, 12));
+    await page.goto("/fr/aarrr-funnel-template");
+    await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
+    await writeEngineSeed(page, hybridState());
+    await page.reload();
+    await page.getByTestId("engine-motion-selector").getByRole("button", { name: ENGINE_COPY.hybrid.motionName.slg.fr }).click();
+    await page.getByTestId("engine-metric-slg-rev-gross-margin").click();
+    const scope = '[data-testid="engine-sheet-slg-rev-gross-margin"]';
+    await expect(page.locator(`${scope} ${SMALL}`)).toBeVisible();
+    await expectTapTargets(page, `${scope} ${SMALL}`, 1, SMALL_LOOK);
+  });
+});
+
+test.describe("the small button on the owner's result", () => {
+  test.skip(!EMULATOR_HOST, SKIP_EMULATOR_REASON);
+
+  test("the badge's « copy » takes a 44px tap and covers nothing around it", async ({ page }) => {
+    const { clear } = REAL_RESULTS;
+    await page.goto(`/r/${clear.id}?lang=en`);
+    await seedOwnedResult(page, clear.id, clear.total, clear.answers);
+    await page.reload();
+    await expect(page.getByTestId("badge-copy")).toBeVisible();
+    await expectTapTargets(page, `[data-testid="badge-snippet"] ${SMALL}`, 1, SMALL_LOOK);
+  });
+});
+
+/*
+ * A15.1 (2026-10-01): what is not a Button and was drawn, and tapped, under
+ * 44px — measured that day on ten pages at 390px with `elementFromPoint` —
+ * now composes the same strip (`styles/hit.module.css`). Same three claims
+ * per target; the related terms of a glossary page stand in rows, so their
+ * claim 2 is the one that counts: at 12px between rows the two rows' strips
+ * met and the upper link kept 31px of its 44, hence rows 26px apart.
+ *
+ * Non-vacuity (2026-10-01): without the shared `::before`, all seven fall on
+ * claim 1; with the related terms' rows back at 10px apart, only that test
+ * falls (« LTV — Lifetime Value », vertical strip), the six others pass.
+ */
+const STRIPPED: { where: string; path: string; sel: string; look: Look; minimum: number }[] = [
+  { where: "the space band's pills", path: "/en", sel: 'a[class*="SpaceBand-module__"][class*="__pill"]', look: { what: "a 28px pill", max: 30, oneLine: 44 }, minimum: 1 },
+  { where: "the wordmark", path: "/en", sel: 'a[class*="WordmarkLink-module__"][class*="__link"]', look: { what: "the wordmark", max: 24, oneLine: 44 }, minimum: 1 },
+  { where: "a glossary term's way back", path: "/en/glossary/cac", sel: 'a[class*="__backLink"]', look: { what: "a line of text", max: 24, oneLine: 40 }, minimum: 1 },
+  { where: "a glossary term's related terms", path: "/en/glossary/cac", sel: 'a[class*="__relatedLink"]', look: { what: "a line of text", max: 24, oneLine: 40 }, minimum: 3 },
+  { where: "the stages of « how it works »", path: "/fr/how-it-works", sel: 'a[class*="__pillarLink"]', look: { what: "a heading", max: 26, oneLine: 40 }, minimum: 5 },
+  { where: "the comparisons of « how it works »", path: "/fr/how-it-works", sel: 'a[class*="__comparisonLink"]', look: { what: "a 38px chip", max: 40, oneLine: 44 }, minimum: 4 },
+  { where: "the stages of the checklist", path: "/fr/growth-audit-checklist", sel: 'a[class*="__pillarLink"]', look: { what: "a 41px heading", max: 42, oneLine: 50 }, minimum: 5 },
+];
+
+for (const { where, path, sel, look, minimum } of STRIPPED) {
+  test(`${where} take a 44px tap and cover no neighbour`, async ({ page }) => {
+    await page.goto(path);
+    await page.locator("main").waitFor();
+    await expectTapTargets(page, sel, minimum, look);
+  });
+}
