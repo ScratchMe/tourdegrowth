@@ -1032,6 +1032,8 @@ la fusion à trois de #233 avec le nouvel `ENGINE.md` est propre (simulée par
 - `eslint` et `tsc` propres, **2 403 tests unitaires** (2 405 après la fusion de #240, qui ajoute la garde des liens des documents), `vitest --coverage` au-dessus de ses seuils, et `next build` propre sous « Next.js 16.3.6 ».
 - La suite Playwright complète, avec les variables de la CI et l'émulateur Firestore : **688 specs, 683 passées, 5 ignorées par construction, aucun échec ni rejeu**. Elle comprend les specs des images de partage (`share-previews`, `game-share-images`, `result-real`), qui exercent `ImageResponse`.
 
+**En production (2026-10-01)** : [#241](https://github.com/ScratchMe/tourdegrowth/pull/241), squash `e82eeae`, 5 fichiers, arbre identique à la tête. Le statut `Vercel` du commit est `success` : le quota quotidien, épuisé la veille au soir (`VERCEL.md` §1.12), était rétabli. Vérifié en HTTP sur `www.tourdegrowth.com` : `/en`, `/quiz`, `/r/sample`, `/en/how-it-works` et `/fr/glossary/acv` répondent 200. Les images de partage de l'accueil, du résultat d'exemple et de `/fr/glossary/win-rate` sont servies en PNG 1200 × 630.
+
 ## A12.c : la copie du niveau 2 du jeu, relue sur les sources (2026-10-01)
 
 **Ce qui est livré** ([#242](https://github.com/ScratchMe/tourdegrowth/pull/242)) : tout le texte du niveau 2 « Comment les gens vous trouvent », sans rien brancher (`content/game/acquisition.ts`, le chapeau et les métadonnées dans `meta.ts`). Aucune route ne l'importe : le joueur ne voit rien de neuf, et le niveau 1 ne change pas d'un mot. Tout est « à relire », d'après les premiers jets du §17.
