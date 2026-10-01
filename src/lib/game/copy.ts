@@ -23,6 +23,7 @@
 import type { Locale } from "../i18n/locale";
 import type { Translatable } from "../i18n/translatable";
 import { tc } from "../i18n/translatable";
+import type { AcquisitionCardId, AcquisitionDarkId } from "./levels/acquisition";
 import type { RetentionCardId, RetentionDarkId } from "./levels/retention";
 import type { EndingId } from "./types";
 
@@ -73,6 +74,11 @@ export interface EndingCopy {
  * (`RETENTION_INTRO`) and `content/game/hub.ts` (`GAME_HUB`). An earlier draft
  * kept a second copy of both here, which nothing rendered and which was
  * already drifting from the one on screen (review R8).
+ */
+/**
+ * What every level says. A level's phone and the pill under it are its own
+ * (Flixo's cancellation screen, Pédalix's path to the basket): each level's
+ * copy type adds them to this one, with whatever else only it has.
  */
 export interface LevelCopy<CardId extends string = string, DarkId extends CardId = CardId, OrderId extends DarkId = DarkId> {
   /** Twelve month names, January first, as they appear inside a sentence. */
@@ -163,47 +169,6 @@ export interface LevelCopy<CardId extends string = string, DarkId extends CardId
   };
   cards: Readonly<Record<CardId, CardCopy>>;
   patterns: Readonly<Record<DarkId, PatternCopy>>;
-  /** Flixo's cancellation screen — a drawn app, fictional brand, fictional phone number. */
-  phone: {
-    caption: string;
-    appName: string;
-    time: string;
-    streakPush: string;
-    crumbs: string;
-    crumbsBuried: string;
-    /** The plan name, shown after `appName` (« Flixo Premium »), as the prototype composes it. */
-    plan: string;
-    planAnnual: string;
-    price: string;
-    priceAnnual: string;
-    social: string;
-    reminder: string;
-    number: string;
-    call: string;
-    pauseButton: string;
-    cancelLink: string;
-    cancelLinkBuried: string;
-    cancelButton: string;
-    pauseOffer: string;
-    pauseAccept: string;
-    pauseDecline: string;
-    cascadeOffers: readonly string[];
-    stay: string;
-    decline: string;
-    declineShamed: string;
-    confirm: string;
-    survey: string;
-    surveyAnswers: readonly string[];
-    notice: string;
-    threeClicks: string;
-  };
-  /** The pill under the phone. */
-  clicks: {
-    count: string;
-    infinite: string;
-    lawSuffix: string;
-    phoneSuffix: string;
-  };
   report: {
     metric: string;
     target: string;
@@ -236,12 +201,15 @@ export interface LevelCopy<CardId extends string = string, DarkId extends CardId
   };
   /** The year so far, under the desk — one disclosure per quarter played (plan §2.6). */
   journal: { title: string };
-  /** One per `VisibleEffect` kind — `gain` splits on `rising`. */
+  /**
+   * One per `VisibleEffect` kind — `gain` splits on `rising`. `extra` (a month
+   * billed to every leaver) belongs to the level whose cards can have it:
+   * `RetentionCopy` adds it.
+   */
   effects: {
     insight: string;
     present: string;
     clean: string;
-    extra: string;
     gain: string;
     gainRising: string;
     loss: string;
@@ -381,7 +349,133 @@ export interface LevelCopy<CardId extends string = string, DarkId extends CardId
 /** The CEO only ever asks for these five (GAME-BRIEF §5.10). */
 export type RetentionOrderId = Extract<RetentionDarkId, "pdef" | "call" | "bury" | "cascade" | "notice">;
 
-export type RetentionCopy = LevelCopy<RetentionCardId, RetentionDarkId, RetentionOrderId>;
+/** Flixo's cancellation screen — a drawn app, fictional brand, fictional phone number. */
+export interface RetentionPhoneCopy {
+  caption: string;
+  appName: string;
+  time: string;
+  streakPush: string;
+  crumbs: string;
+  crumbsBuried: string;
+  /** The plan name, shown after `appName` (« Flixo Premium »), as the prototype composes it. */
+  plan: string;
+  planAnnual: string;
+  price: string;
+  priceAnnual: string;
+  social: string;
+  reminder: string;
+  number: string;
+  call: string;
+  pauseButton: string;
+  cancelLink: string;
+  cancelLinkBuried: string;
+  cancelButton: string;
+  pauseOffer: string;
+  pauseAccept: string;
+  pauseDecline: string;
+  cascadeOffers: readonly string[];
+  stay: string;
+  decline: string;
+  declineShamed: string;
+  confirm: string;
+  survey: string;
+  surveyAnswers: readonly string[];
+  notice: string;
+  threeClicks: string;
+}
+
+/** The pill under Flixo's phone: how many clicks it takes to cancel. */
+export interface ClicksCopy {
+  count: string;
+  infinite: string;
+  lawSuffix: string;
+  phoneSuffix: string;
+}
+
+export type RetentionCopy = LevelCopy<RetentionCardId, RetentionDarkId, RetentionOrderId> & {
+  phone: RetentionPhoneCopy;
+  clicks: ClicksCopy;
+  /** The notice period's month billed to every leaver: only level 1 has a card that does it. */
+  effects: { extra: string };
+};
+
+/** The CEO only ever asks for these five on level 2 (GAME-BRIEF §17.5). */
+export type AcquisitionOrderId = Extract<AcquisitionDarkId, "stock" | "anchor" | "reviews" | "countdown" | "teaser">;
+
+/**
+ * Pédalix's app, from the search to the basket (GAME-BRIEF §17.7) — a drawn
+ * app, fictional brand, fictional bike, fictional creator and partner brand.
+ * Each string is one line the phone shows when the card it belongs to is in
+ * production or picked; the phone composes them, the copy never does.
+ */
+export interface AcquisitionPhoneCopy {
+  caption: string;
+  appName: string;
+  time: string;
+  /** `native`: a creator's video, shown with no mention that it is paid. */
+  video: string;
+  videoBy: string;
+  search: string;
+  /** The top result: the best-rated model, or — `sponsored` — a partner brand's, unlabelled. */
+  resultTop: string;
+  resultSponsored: string;
+  resultMeta: string;
+  /** `compare`. */
+  compared: string;
+  product: string;
+  productKind: string;
+  /** `specs`. */
+  photos: string;
+  price: string;
+  /** `anchor`: the struck-through reference price and the discount it implies. */
+  priceStruck: string;
+  discount: string;
+  /** `allin`. */
+  priceAllIn: string;
+  rating: string;
+  /** `reviews`. */
+  ratingSorted: string;
+  /** `verified`, after whichever rating shows. */
+  verified: string;
+  /** `countdown`, `stock`, `watchers`: one line each. */
+  countdown: string;
+  stock: string;
+  watchers: string;
+  /** `delivery`. */
+  delivery: string;
+  /** `guides`. */
+  guide: string;
+  basketTitle: string;
+  basketDelivery: string;
+  /** `allin`: delivery already in the price. */
+  basketDeliveryIncluded: string;
+  /** `teaser`. */
+  basketFees: string;
+  total: string;
+  totalWithFees: string;
+  /** `origin`, after the order. */
+  origin: string;
+  originAnswers: readonly string[];
+}
+
+/**
+ * The pill under Pédalix's phone: what the basket adds to the product page's
+ * price (GAME-BRIEF §17.7). A measurable fact the law frames, never a
+ * judgement — level 2's « N clics pour résilier ».
+ */
+export interface BasketPillCopy {
+  /** « +{amount} au panier ». `{amount}` arrives formatted, currency included. */
+  extra: string;
+  /** Nothing more than the page announced. */
+  none: string;
+  /** `teaser`: mandatory fees outside the displayed price. */
+  feesSuffix: string;
+}
+
+export type AcquisitionCopy = LevelCopy<AcquisitionCardId, AcquisitionDarkId, AcquisitionOrderId> & {
+  phone: AcquisitionPhoneCopy;
+  basket: BasketPillCopy;
+};
 
 /**
  * Every template, and the placeholders the island supplies for it. A dotted
@@ -407,8 +501,6 @@ export const LEVEL_COPY_TEMPLATES: Readonly<Record<string, readonly string[]>> =
   "hand.title": ["q"],
   "hand.count": ["picked", "max"],
   "hand.production": ["cards"],
-  "phone.call": ["number"],
-  "clicks.count": ["n"],
   "report.target": ["target"],
   "report.statusMissed": ["gap"],
   "report.effectLine": ["card", "effect"],
@@ -436,6 +528,19 @@ export const LEVEL_COPY_TEMPLATES: Readonly<Record<string, readonly string[]>> =
   "resume.finished": ["title"],
   "a11y.quarterEnd": ["q", "metric", "target", "status", "patience"],
   "a11y.resumed": ["q"],
+};
+
+/** Level 1's own templates: the phone's number, the clicks pill. */
+export const RETENTION_COPY_TEMPLATES: Readonly<Record<string, readonly string[]>> = {
+  ...LEVEL_COPY_TEMPLATES,
+  "phone.call": ["number"],
+  "clicks.count": ["n"],
+};
+
+/** Level 2's own templates: the basket pill. */
+export const ACQUISITION_COPY_TEMPLATES: Readonly<Record<string, readonly string[]>> = {
+  ...LEVEL_COPY_TEMPLATES,
+  "basket.extra": ["amount"],
 };
 
 function isTranslatable(value: object): value is Translatable {

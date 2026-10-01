@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { GAME_HUB } from "../game/hub";
-import { GAME_META, RETENTION_INTRO } from "../game/meta";
+import { ACQUISITION_INTRO, GAME_META, RETENTION_INTRO } from "../game/meta";
 import { LOCALES } from "@/lib/i18n/locale";
 import { PILLARS } from "@/lib/scoring/pillars";
 
@@ -26,6 +26,7 @@ const ALL = (() => {
   translatables(GAME_HUB, "GAME_HUB", out);
   translatables(GAME_META, "GAME_META", out);
   translatables(RETENTION_INTRO, "RETENTION_INTRO", out);
+  translatables(ACQUISITION_INTRO, "ACQUISITION_INTRO", out);
   return out;
 })();
 
@@ -61,6 +62,7 @@ describe("game hub and metadata copy", () => {
 
   it("explains a year in exactly three steps", () => {
     expect(RETENTION_INTRO.steps).toHaveLength(3);
+    expect(ACQUISITION_INTRO.steps).toHaveLength(3);
   });
 
   /**
@@ -70,7 +72,7 @@ describe("game hub and metadata copy", () => {
    * get cut in results; descriptions outside 70-160 get rewritten by Google.
    */
   it("keeps titles to 60 characters and descriptions within 70-160, in both languages", () => {
-    for (const page of [GAME_META.hub, GAME_META.retention]) {
+    for (const page of [GAME_META.hub, GAME_META.retention, GAME_META.acquisition]) {
       for (const locale of LOCALES) {
         const title = page.title[locale];
         const description = page.description[locale];
