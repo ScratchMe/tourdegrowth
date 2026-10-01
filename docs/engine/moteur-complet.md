@@ -725,7 +725,7 @@ elle le vérifie elle-même, comme le jeu (`game/opengraph-image.tsx:20-24`),
 parce que `isEnginePath` ne reconnaît que le chemin exact
 (`engine/access.ts:45-47`).
 
-**Écarts au code, T6.2** (2026-10-01, @@PR@@). L'image est portée du retour de
+**Écarts au code, T6.2** (2026-10-01, [#272](https://github.com/ScratchMe/tourdegrowth/pull/272)). L'image est portée du retour de
 Claude Design (`design/ds-extension-06-return/`) : du papier, la pastille
 « 2/3 · CONTRE-LA-MONTRE » à côté du logo, le titre de la page sur deux lignes
 avec « moteur » en outremer, une ligne et une promesse neuves

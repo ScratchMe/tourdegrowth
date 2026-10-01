@@ -1278,7 +1278,7 @@ Le texte du skill `/design-sync` (trouvé en ligne) dit que l'application « cle
 
 **Consigné** : `CHANTIERS.md` (A15 clos, A16 retiré, B7, B9 ouvert), `docs/decisions.md` (C34 et C35 codées), `design/README.md`, `design/LOIS-UX.md` (la loi de similarité : tenue).
 
-## A14.c, T6.2 : l'image de partage du moteur, portée du retour de B5 (2026-10-01, @@PR@@)
+## A14.c, T6.2 : l'image de partage du moteur, portée du retour de B5 (2026-10-01, #272)
 
 Antoine a lancé le brief 06 dans Claude Design le soir même du dépôt (D12), puis a dit « Claude Design a terminé ». Cette PR recopie le retour dans le dépôt et le porte : c'était la dernière pièce d'A14.c.
 
