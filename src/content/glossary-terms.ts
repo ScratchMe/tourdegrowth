@@ -267,7 +267,7 @@ export const GLOSSARY_TERMS: Record<GlossaryTermId, { term: Translatable; defini
   },
   "lead-to-opportunity": {
     // TODO: à relire (convention 6) — terme neuf, A7.3.e. L'anglais reprend le nom de la fiche du moteur (§18.4.2) ; « conversion rate » est dans la définition.
-    term: { fr: "Conversion lead → opportunité", en: "Lead-to-opportunity rate" },
+    term: { fr: "Conversion lead → opportunité", en: "Lead-to-opportunity rate" },
     definition: {
       // TODO: à relire (convention 6).
       fr: "La part des leads d'une période qui deviennent une opportunité qualifiée dans un délai fixé. Le chiffre de la vente assistée qui dépend le plus des définitions.",

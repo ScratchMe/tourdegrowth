@@ -3559,7 +3559,7 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
     formula: {
       expression: t(
         "Lead-to-opportunity rate = leads created over a three-month cohort that became a qualified opportunity within n days ÷ leads created over those three months",
-        "Conversion lead → opportunité = leads créés sur une cohorte de trois mois devenus une opportunité qualifiée sous n jours ÷ leads créés sur ces trois mois",
+        "Conversion lead → opportunité = leads créés sur une cohorte de trois mois devenus une opportunité qualifiée sous n jours ÷ leads créés sur ces trois mois",
       ),
       terms: [
         {
@@ -3586,7 +3586,7 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
       ],
       note: t(
         "In some CRMs the step is called MQL to SQL — a sales-qualified lead. The name changes, the question does not: of what marketing passes on, how much does sales take?",
-        "Dans certains CRM, l'étape s'appelle MQL → SQL — sales-qualified lead, le lead qualifié par les ventes. Le nom change, la question non : de ce que le marketing transmet, combien les ventes en prennent-elles ?",
+        "Dans certains CRM, l'étape s'appelle MQL → SQL — sales-qualified lead, le lead qualifié par les ventes. Le nom change, la question non : de ce que le marketing transmet, combien les ventes en prennent-elles ?",
       ),
     },
     example: {
@@ -3611,13 +3611,13 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
       ],
       takeaway: t(
         "Write down what a lead is, what an opportunity is and how many days one has to become the other, then read each cohort once its window has closed. Without those three, a lead-to-opportunity rate is a number any team can make go up.",
-        "Écris ce qu'est un lead, ce qu'est une opportunité et combien de jours l'un a pour devenir l'autre, puis lis chaque cohorte une fois son délai écoulé. Sans ces trois-là, une conversion lead → opportunité est un chiffre que n'importe quelle équipe sait faire monter.",
+        "Écris ce qu'est un lead, ce qu'est une opportunité et combien de jours l'un a pour devenir l'autre, puis lis chaque cohorte une fois son délai écoulé. Sans ces trois-là, une conversion lead → opportunité est un chiffre que n'importe quelle équipe sait faire monter.",
       ),
     },
     benchmark: [
       t(
         "Published lead-to-opportunity rates are hard to compare, because the rate depends almost entirely on what each company calls a lead. A base that counts every newsletter sign-up and one that counts only MQLs can be far apart with the very same sales team.",
-        "Les taux de conversion lead → opportunité publiés se comparent mal, parce que le taux dépend presque entièrement de ce que chaque entreprise appelle un lead. Une base qui compte chaque inscription à la newsletter et une base qui ne compte que les MQL peuvent être très éloignées avec exactement la même équipe commerciale.",
+        "Les taux de conversion lead → opportunité publiés se comparent mal, parce que le taux dépend presque entièrement de ce que chaque entreprise appelle un lead. Une base qui compte chaque inscription à la newsletter et une base qui ne compte que les MQL peuvent être très éloignées avec exactement la même équipe commerciale.",
       ),
       t(
         "The internal order of magnitude that matters is the size of the base: on 480 MQLs a quarter, one opportunity more or less moves the rate by about 0.2 point. The rate is steady enough to read from one quarter to the next; one point is five opportunities.",
@@ -3655,7 +3655,7 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
     },
     faq: [
       {
-        question: t("How do you calculate the lead-to-opportunity conversion rate?", "Comment calculer le taux de conversion lead → opportunité ?"),
+        question: t("How do you calculate the lead-to-opportunity conversion rate?", "Comment calculer le taux de conversion lead → opportunité ?"),
         answer: t(
           "Take the leads created over a period, count those that became a qualified opportunity within a fixed window — 30 days, say — and divide. 72 opportunities out of 480 MQLs is 15%. Count by cohort: the opportunities that came from those leads, not the opportunities created in the same months.",
           "Prends les leads créés sur une période, compte ceux qui sont devenus une opportunité qualifiée dans un délai fixé — 30 jours, par exemple — et divise. 72 opportunités sur 480 MQL, c'est 15 %. Compte par cohorte : les opportunités issues de ces leads, pas les opportunités créées les mêmes mois.",
@@ -3672,11 +3672,11 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
         question: t("MQL, SQL, opportunity: in what order?", "MQL, SQL, opportunité : dans quel ordre ?"),
         answer: t(
           "The lead, then the MQL when marketing judges it worth passing on, then the SQL — sales-qualified lead — when a salesperson accepts it, and the opportunity once a deal is opened. Many teams merge the last two steps, and it does not matter as long as the rate names both its ends: \"MQL to opportunity\" is not the same number as \"lead to opportunity\".",
-          "Le lead, puis le MQL quand le marketing le juge digne d'être transmis, puis le SQL — le lead qualifié par les ventes — quand un commercial l'accepte, et l'opportunité une fois l'affaire ouverte. Beaucoup d'équipes fusionnent les deux dernières étapes, et peu importe tant que le taux nomme ses deux bouts : « MQL → opportunité » n'est pas le même chiffre que « lead → opportunité ».",
+          "Le lead, puis le MQL quand le marketing le juge digne d'être transmis, puis le SQL — le lead qualifié par les ventes — quand un commercial l'accepte, et l'opportunité une fois l'affaire ouverte. Beaucoup d'équipes fusionnent les deux dernières étapes, et peu importe tant que le taux nomme ses deux bouts : « MQL → opportunité » n'est pas le même chiffre que « lead → opportunité ».",
         ),
       },
       {
-        question: t("What is a good lead-to-opportunity rate?", "C'est quoi un bon taux de conversion lead → opportunité ?"),
+        question: t("What is a good lead-to-opportunity rate?", "C'est quoi un bon taux de conversion lead → opportunité ?"),
         answer: t(
           "One you can compare with last quarter's, because nothing in the definitions moved. Published figures vary with what counts as a lead far more than with how good a team is, so a table from elsewhere mostly compares definitions.",
           "Un taux que tu peux comparer à celui du trimestre dernier, parce que rien n'a bougé dans les définitions. Les chiffres publiés varient bien plus avec ce qui compte comme lead qu'avec la qualité d'une équipe, donc un tableau venu d'ailleurs compare surtout des définitions.",
