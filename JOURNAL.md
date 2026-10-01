@@ -1120,3 +1120,33 @@ Points pour le bon à tirer A14.d : la phrase de confidentialité elle-même, p
 - sur un build `ENGINE_ENABLED=true`, avec l'émulateur : les specs des portes, de la porte du résultat, des rappels et du canari, 30, toutes passées, clics comptés compris ;
 - dix specs neuves : neuf dans `engine-mobile.spec.ts` (les largeurs dans les deux langues, 320 px mesuré, axe) et une dans `engine-deck-theme.spec.ts` (l'impression) ; les événements neufs sont lus dans les specs de la série, du tableau, des rappels, des portes et du canari ;
 - captures relues : les dix écrans d'A14 en français à 390 px et en anglais à 1 280 px, et la page de confidentialité dans les deux langues.
+
+
+## B7 : le brief 05 des puces d'étape, déposé dans Claude Design (2026-10-01)
+
+**La demande d'Antoine** : A15.19, le seul écart que les lois de l'UX ont laissé (`design/LOIS-UX.md`, similarité). Écrire et déposer un brief pour Claude Design, sans toucher au composant.
+
+**Le constat, relu dans le code et mesuré dans un vrai build** : `PillarChip` est une valeur dessinée comme un `Button` secondaire. Même rayon (`--radius-button`, le jeton des boutons), même bord plein de 2 px, presque la même hauteur (54,5 px au bureau, 50 px au téléphone et en `sm`, contre 47 et 55 px pour le bouton), aucune ombre au repos. Seuls la police (mono contre Inter) et une nuance de bord les séparent sur papier. **La nuit, même cette nuance disparaît** : le monde nuit lie `--border-soft` et `--border-hard` au même `--night-line`. Le fond n'y est pour rien : dans la carte de l'accueil, il est celui de la carte, et la puce n'y est plus qu'un bord, comme un bouton secondaire transparent. Sur le résultat, seul le `?` se touche ; **sur l'accueil, la puce entière est un lien** vers sa page du glossaire (R2-13), sans survol, et son nom accessible est le seul nom de l'étape, sans la note. Les deux vont dans le brief comme questions, pas comme correctifs.
+
+**Les captures** (`design/ds-extension-05/`, dix PNG) : `/r/sample` et l'accueil, en français et en anglais, à 1 280 et 390 px, tirés d'un `next build` puis `next start` comme la CI (`GAME_ENABLED=true`, d'où la carte du jeu sur le résultat, dite dans le brief). S'y ajoutent deux gros plans à 3× d'une puce normale et de la rouge à côté du vrai « Partager ce résultat », clonés depuis la même page pour que la CSS de production dessine les trois. **Deux pièges de capture** :
+- `fullPage` avec un cadrage coupait le fond de la page net à 900 px, un artefact de l'outil et pas du produit. Les captures défilent maintenant la vraie fenêtre ;
+- l'en-tête est collant aux deux largeurs (118 px au bureau, 114 au téléphone) et translucide (alpha 0,92, voulu). Le premier cadrage glissait le titre du profil dessous. Le défilement retranche maintenant sa hauteur.
+
+À l'accueil, à 1 280 px, « Voir un résultat d'exemple » et la première rangée de puces partent à 2 px l'un de l'autre sur la même ligne : la confusion en place, sans montage.
+
+**Le brief** (`design/DS-EXTENSION-BRIEF-05.md`, en anglais, sur la forme du 04) :
+- ce qui doit rester : la note sur 20, le rouge de l'étape qui freine (un diagnostic, jamais en tirets), le `?` et sa cible de 44 px, et le contraste AA de la CI ; la jauge aussi, sauf avis contraire ;
+- ce qu'on attend : une puce qui se lit comme une valeur, en papier comme en nuit ;
+- les contrastes d'aujourd'hui, mesurés composés sur leur vrai fond, aux deux mondes ;
+- huit questions, les dix contraintes, et les états à dessiner ;
+- le retour demandé dans `design/ds-extension-05-return/`, sous la forme du 04. Une précision vient de `ds-extension-04-return/COPIE.md` : la planche doit s'ouvrir depuis sa source, puisque ses PNG et son `board.js` construit n'avaient pas pu être rapatriés.
+
+**Le dépôt** : onze fichiers écrits par `DesignSync` dans le projet `23b9671c-…`, aux mêmes chemins que dans le dépôt, sous un plan qui ne nommait qu'eux, sans suppression. Le bundle, la sentinelle et `_ds_sync.json` ne sont pas touchés (ancre `6da5e42a15ef`, relue avant). Comme pour le 04, **rien ne tourne côté Claude Design tant qu'Antoine ne le lance pas** : c'est D11, avec le prompt à coller.
+
+**Vérifié** :
+- `list_files` relu après l'envoi : les onze chemins y sont, et le brief 04 et son retour n'ont pas bougé ;
+- le brief relu côté projet par `get_file` : identique au fichier du dépôt ;
+- les dix captures sont distinctes (sommes de contrôle) et relues à l'œil une par une ;
+- chaque chaîne citée relue dans `dictionary.ts` et `glossary-terms.ts`, chaque contraste recalculé depuis les jetons.
+
+**Consigné** : `CHANTIERS.md` (vue d'ensemble, A15.19, B7, D11), `design/README.md` (l'index), `design/LOIS-UX.md` (la ligne de la similarité), `.design-sync/NOTES.md` (« Synced » : ce que le projet garde sous `design/`). Que de la doc et des images sous `design/` : `vercel-ignore.sh` ne déploie pas.

@@ -366,7 +366,11 @@ number). The 2026-09-29 note on 245 → 238 → 244 is in the journal.
 `design/DS-EXTENSION-BRIEF-04.md` and the nine PNGs under
 `design/ds-extension-04/` (ten files, written alone under their own plan,
 anchor untouched), and Claude Design wrote its return next to them,
-`design/ds-extension-04-return/` (56 files). A re-sync must leave them: before applying
+`design/ds-extension-04-return/` (56 files). On 2026-10-01 brief 05 (the stage
+chips, B7) went in the same way: `design/DS-EXTENSION-BRIEF-05.md` and the ten
+PNGs under `design/ds-extension-05/` (eleven files, their own plan, no delete,
+anchor `6da5e42a15ef` untouched); its return is expected under
+`design/ds-extension-05-return/`. A re-sync must leave them: before applying
 `upload.deletePaths`, check it names nothing under `design/`. Remove them on
 purpose once the return is ported, not as a side effect of a sync.
 
