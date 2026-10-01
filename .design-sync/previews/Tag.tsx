@@ -10,15 +10,16 @@ import { NightSurface, Tag } from "tour-de-growth";
 /**
  * All four tones, each with a label it carries in the product: `neutral`, a
  * card the game's journal lists ("Pause offer" — its one use, at night, see
- * InARow); `outline`, the teaser's "coming soon" (NextLevel); `ink`, a figure
- * the growth engine found ("Found"); `alert`, a trick still "in production" in
- * December's catalogue (PatternCatalogue) — the red of a diagnosis, never an
- * error state.
+ * InARow); `ink`, a figure the growth engine found ("Found"), and `outline`,
+ * one it has only estimated ("Estimated") — the same board's status tag, ink
+ * for found and outline for every other status (`_engine/StageTabs.tsx`);
+ * `alert`, a trick still "in production" in December's catalogue
+ * (PatternCatalogue) — the red of a diagnosis, never an error state.
  */
 export const Tones = () => (
   <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
     <Tag tone="neutral">Pause offer</Tag>
-    <Tag tone="outline">coming soon</Tag>
+    <Tag tone="outline">Estimated</Tag>
     <Tag tone="ink">Found</Tag>
     <Tag tone="alert">in production</Tag>
   </div>
