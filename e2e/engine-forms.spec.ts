@@ -289,7 +289,13 @@ test("an engine imported from the board opens with no half-typed sheet of the on
   await page.getByTestId("engine-import-open-screen").click();
   await page.getByTestId("engine-import-file").setInputFiles({ name: "other.json", mimeType: "application/json", buffer: Buffer.from(JSON.stringify(other)) });
   await page.getByTestId("engine-import-open").click();
-  const reopened = await openSheet(page, "en", "activation", "act-rate");
+  // Back on the board in the same page: `openSheet` navigates, and a reload
+  // empties the drafts on its own (they live in memory) — the test would pass
+  // on the bug. Measured: it did, until this line stopped reloading.
+  await page.getByTestId("engine-tab-activation").click();
+  const toggle = page.getByTestId("engine-metric-act-rate");
+  if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.click();
+  const reopened = page.getByTestId("engine-sheet-act-rate");
   await expect(reopened.getByRole("radio", { name: ENGINE_COPY.sheet.haveIt.en })).not.toBeChecked();
   await reopened.getByRole("radio", { name: ENGINE_COPY.sheet.haveIt.en }).check();
   await expect(page.locator("#engine-act-rate-num")).toHaveValue("");
