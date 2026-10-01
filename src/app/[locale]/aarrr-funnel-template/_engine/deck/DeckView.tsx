@@ -446,6 +446,12 @@ export function DeckView({
               onChange={(showSiteCredit) => change({ showSiteCredit })}
               data-testid="deck-show-credit"
             />
+            <Checkbox
+              label={t.whiteTheme}
+              checked={state.deck.theme === "white"}
+              onChange={(white) => change({ theme: white ? "white" : "paper" })}
+              data-testid="deck-white-theme"
+            />
             {mirrorSlide ? (
               <Checkbox
                 label={t.showMirror}

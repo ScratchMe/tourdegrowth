@@ -44,6 +44,17 @@
   background-repeat: no-repeat;
 }
 
+/*
+ * « Fond blanc » (engine spec §19.8, C32 Q14, A14 T6): a company template's
+ * pure white, without the paper's lift. Only the ground changes — the inks,
+ * the leak's red and the accents are the paper's (token-contrast.test.ts
+ * measures them on this white too).
+ */
+.slide[data-theme="white"] {
+  background-color: var(--surface-white);
+  background-image: none;
+}
+
 .slideTop {
   display: flex;
   justify-content: space-between;

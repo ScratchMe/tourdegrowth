@@ -3,8 +3,11 @@
 import { useId, useState } from "react";
 import { Button } from "@/components/core/Button";
 import type { MetricId, RoleId } from "@/lib/engine/types";
+import { calendarFile, requestReminderDay } from "@/lib/engine/ics";
 import { buildRequest } from "@/lib/engine/request";
+import { download, enginePageUrl } from "./download";
 import { trackEngine } from "./engine-events";
+import { fill, metricById } from "./text";
 import type { EngineView } from "./view";
 import { Field } from "@/components/core/Field";
 import styles from "./Sheet.module.css";
@@ -22,6 +25,10 @@ import styles from "./Sheet.module.css";
  *
  * `onCopied` marks the numbers `requested` (or stamps `remindedAt` for a
  * follow-up): the copy IS the act of asking, so there is no separate save.
+ *
+ * Once asked, « Me le rappeler » (§19.9, A14 T6) downloads a calendar file
+ * for the day the board will say « à relancer »: the role and the numbers'
+ * names from the catalogue, never a value, never the company.
  */
 export function RequestCopy({
   role,
@@ -39,7 +46,28 @@ export function RequestCopy({
   variant?: "primary" | "secondary" | "quiet";
 }) {
   const [outcome, setOutcome] = useState<{ ok: boolean; text: string } | null>(null);
+  // The numbers asked, kept from the copy: copying marks them requested, which empties `ids`.
+  const [asked, setAsked] = useState<MetricId[]>([]);
   const fallbackId = useId();
+
+  function remind() {
+    const r = view.strings.reminders;
+    const roleName = view.strings.role[role];
+    const day = requestReminderDay(new Date());
+    const title = asked.length === 1 ? fill(r.requestTitleOne, { role: roleName }) : fill(r.requestTitle, { role: roleName, n: asked.length });
+    const list = asked.map((id) => metricById(view.metrics, id).name).join("\n");
+    const file = calendarFile({
+      uid: `${globalThis.crypto.randomUUID()}@tourdegrowth.com`,
+      stamp: new Date(),
+      day,
+      title,
+      // The list, then the page's address — also in URL, which not every calendar shows (§19.9).
+      description: `${fill(asked.length === 1 ? r.requestDescriptionOne : r.requestDescription, { role: roleName, list })}\n\n${enginePageUrl()}`,
+      url: enginePageUrl(),
+    });
+    const date = `${day.year}-${String(day.month).padStart(2, "0")}-${String(day.date).padStart(2, "0")}`;
+    download(file, fill(r.fileName, { date }), "text/calendar;charset=utf-8");
+  }
 
   async function copy() {
     const text = buildRequest(role, ids, view.strings, view.metrics, view.state, view.ctx);
@@ -51,6 +79,7 @@ export function RequestCopy({
       ok = false;
     }
     setOutcome({ ok, text });
+    setAsked(ids);
     trackEngine({ name: "engine_request_copied" });
     onCopied();
   }
@@ -65,6 +94,11 @@ export function RequestCopy({
       {ids.length ? (
         <Button variant={variant} onClick={() => void copy()} data-testid="engine-request-copy">
           {label}
+        </Button>
+      ) : null}
+      {outcome && asked.length > 0 ? (
+        <Button variant="quiet" onClick={remind} data-testid="engine-request-remind">
+          {view.strings.reminders.request}
         </Button>
       ) : null}
       {/* Always in the DOM so the confirmation is announced when it appears. */}

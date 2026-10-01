@@ -386,6 +386,28 @@ describe("growth engine boundary (engine spec §11.4)", () => {
     expect(door).not.toMatch(/detail\??:\s*string\b/);
   });
 
+  /*
+   * The security review of A14 T6: outside the engine's route, the landing
+   * now reads the engine's storage (§19.10). Rules 3 and 5 only saw the
+   * route and lib/engine, so a count read there could have become an event's
+   * detail through a plain trackEvent. One file may read it — its own
+   * component — and it is held to the engine's rules: no network primitive,
+   * no analytics at all. Non-vacuity, measured on 2026-10-01: a
+   * `trackEvent` import in EngineResume.tsx fails the second assertion; the
+   * read moved back into LastResult.tsx fails the first.
+   */
+  it("rule 8 — outside the route, only the landing's EngineResume reads the engine's storage, and it sends nothing", () => {
+    const READERS = ["@/lib/engine/storage", "@/lib/engine/resume"];
+    const outside = FILES.filter((f) => !ENGINE.includes(f) && !f.path.includes("__tests__/") && !f.path.startsWith("lib/engine/"));
+    const readers = outside.filter((f) => valueImports(f.source).some((i) => READERS.includes(i))).map((f) => f.path);
+    expect(readers).toEqual(["app/[locale]/EngineResume.tsx"]);
+    const reader = BY_PATH.get("app/[locale]/EngineResume.tsx")!;
+    const code = stripComments(reader);
+    expect(NETWORK.filter((re) => re.test(code)).map(String)).toEqual([]);
+    expect(valueImports(reader).filter((i) => i.includes("analytics") || i.includes("engine-events"))).toEqual([]);
+    expect(code).not.toMatch(/\btrack(Event|Engine)\s*\(/);
+  });
+
   it("the flag has one reader: only lib/engine/access.ts reads ENGINE_ENABLED", () => {
     const readers = FILES.filter(
       (f) => !f.path.includes("__tests__/") && /process\.env\.ENGINE_ENABLED|process\.env\[["']ENGINE_ENABLED["']\]/.test(f.source),

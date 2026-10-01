@@ -106,6 +106,19 @@ test.describe("the growth engine keeps everything in the browser (D16)", () => {
     await expect(asked.getByText(ENGINE_COPY.request.copied.en)).toBeVisible();
     // The copy is a way out the person chose: the definition IS in it.
     expect(await clipboard(page)).toContain(ASKED);
+    // A14 T6: the request's reminder is another way out — a calendar file, synced, shown on a lock screen. Nothing typed goes in it.
+    const requestIcs = page.waitForEvent("download");
+    await asked.getByTestId("engine-request-remind").click();
+    const reminders = [await readFile((await (await requestIcs).path())!, "utf8")];
+
+    // --- « Me rappeler de démarrer {mois} » (A14 T6): the next month's reminder ---
+    const monthIcs = page.waitForEvent("download");
+    await page.getByTestId("engine-month-remind").click();
+    reminders.push(await readFile((await (await monthIcs).path())!, "utf8"));
+    for (const ics of reminders) {
+      expect(ics).toMatch(/^BEGIN:VCALENDAR\r\n/);
+      for (const canary of canaries) expect(ics, `a reminder carries ${canary}`).not.toContain(canary);
+    }
 
     // --- « Saisie en tableau » (A14 T5): the template downloaded, a table pasted and applied --
     await page.getByTestId("engine-table").locator("summary").click();

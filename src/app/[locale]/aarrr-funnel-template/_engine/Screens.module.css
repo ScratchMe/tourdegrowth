@@ -437,3 +437,10 @@
   color: var(--text-muted);
   margin: 0;
 }
+
+/* --- « Me rappeler de démarrer {mois} » (§19.9, A14 T6) ----------------- */
+.remind {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: calc(-1 * var(--space-2));
+}

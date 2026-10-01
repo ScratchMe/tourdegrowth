@@ -219,7 +219,7 @@ fermé, sans branche d'intégration. Toute copie neuve porte « TODO: à relire 
 |---|---|---|
 | A14.a | **La spécification** | **Écrite le 2026-10-01**, contre le code de `main` : §19.0 à §19.14 |
 | A14.b | **La validation par Antoine** — **close le 2026-10-01** | C32 : dix-sept recos retenues, deux reprises (Q1 : l'ouverture attend A14 ; Q17 : l'image passe d'abord par Claude Design) et Q5 précisée (la slide « Ce qui a bougé » décochée par défaut). Réponses datées en §19.15 |
-| A14.c | **Le code** | T0 à T7 (§19.14), ~16,5 jours-agent, une PR chacune mergée dès qu'elle est verte. **T0 livré le 2026-10-01** ([#255](https://github.com/ScratchMe/tourdegrowth/pull/255) : golden v2 figé avant toute ligne, le fichier v3, plusieurs moteurs dans le stockage, la validation neuve, le correctif `ALL_TOOLS`). **T1 livré le même jour** ([#256](https://github.com/ScratchMe/tourdegrowth/pull/256) : la série mensuelle en moteur pur — mois clos relus à leur date, mois suivant, comparaison de deux mois, fuite du mois d'avant, slide « Ce qui a bougé » décochée, `notes.series`). **T2 livré le même jour** ([#258](https://github.com/ScratchMe/tourdegrowth/pull/258) : démarrer le mois suivant, le sélecteur de mois, un mois passé en lecture seule et « Corriger ce mois », l'écart sur chaque ligne, la fuite du mois d'avant, les propositions de la fiche, la mise en page de la slide). **T3 livré le même jour** ([#259](https://github.com/ScratchMe/tourdegrowth/pull/259) : la rétention J30 et la part recommandée chiffrées dans les deux motions, jusqu'à une cible de 50 %, et deux leviers « Et si » neufs). **T3.2 livré le même jour** ([#260](https://github.com/ScratchMe/tourdegrowth/pull/260) : la couverture du pipeline, saisie sous les relais, objectif et seuil dans les Réglages, sur la slide des relais). **T4 livré le même jour** ([#261](https://github.com/ScratchMe/tourdegrowth/pull/261) : les outils de l'équipe cochés au réglage, proposés d'abord dans la fiche, « À faire toi-même » rangé par outil, le contrôle « deux outils »). **T5 livré le même jour** ([#263](https://github.com/ScratchMe/tourdegrowth/pull/263) : plusieurs moteurs sur l'appareil, l'import à trois choix avec la fusion et son aperçu, « Saisie en tableau » avec son modèle CSV). Restent T6, puis T7 pour finir. L'image de partage (T6) attend B5 |
+| A14.c | **Le code** | T0 à T7 (§19.14), ~16,5 jours-agent, une PR chacune mergée dès qu'elle est verte. **T0 livré le 2026-10-01** ([#255](https://github.com/ScratchMe/tourdegrowth/pull/255) : golden v2 figé avant toute ligne, le fichier v3, plusieurs moteurs dans le stockage, la validation neuve, le correctif `ALL_TOOLS`). **T1 livré le même jour** ([#256](https://github.com/ScratchMe/tourdegrowth/pull/256) : la série mensuelle en moteur pur — mois clos relus à leur date, mois suivant, comparaison de deux mois, fuite du mois d'avant, slide « Ce qui a bougé » décochée, `notes.series`). **T2 livré le même jour** ([#258](https://github.com/ScratchMe/tourdegrowth/pull/258) : démarrer le mois suivant, le sélecteur de mois, un mois passé en lecture seule et « Corriger ce mois », l'écart sur chaque ligne, la fuite du mois d'avant, les propositions de la fiche, la mise en page de la slide). **T3 livré le même jour** ([#259](https://github.com/ScratchMe/tourdegrowth/pull/259) : la rétention J30 et la part recommandée chiffrées dans les deux motions, jusqu'à une cible de 50 %, et deux leviers « Et si » neufs). **T3.2 livré le même jour** ([#260](https://github.com/ScratchMe/tourdegrowth/pull/260) : la couverture du pipeline, saisie sous les relais, objectif et seuil dans les Réglages, sur la slide des relais). **T4 livré le même jour** ([#261](https://github.com/ScratchMe/tourdegrowth/pull/261) : les outils de l'équipe cochés au réglage, proposés d'abord dans la fiche, « À faire toi-même » rangé par outil, le contrôle « deux outils »). **T5 livré le même jour** ([#263](https://github.com/ScratchMe/tourdegrowth/pull/263) : plusieurs moteurs sur l'appareil, l'import à trois choix avec la fusion et son aperçu, « Saisie en tableau » avec son modèle CSV). **T6 livré le même jour** ([#PRNUM](https://github.com/ScratchMe/tourdegrowth/pull/PRNUM) : le fond blanc du deck, les deux rappels d'agenda en `.ics`, les deux portes vers le moteur, sur le résultat et sur l'accueil). Reste T7 pour finir, et T6.2, l'image de partage, au retour de B5 |
 | A14.d | **Le bon à tirer de la copie neuve** | Après A14.c, avant l'ouverture (D2), construit depuis `grep -rn "TODO: à relire" src/` |
 
 ### A15 — La finition UI et UX avant le lancement (ouvert le 2026-10-01)
@@ -264,8 +264,9 @@ composants, 292 cellules et 88 aperçus sur 88 rendus** (`JOURNAL.md`, « Design
 brief à Claude Design pour l'image de la page `/aarrr-funnel-template`, en
 1 200 × 630, dans les deux langues : le titre de la page, et jamais de vrais
 chiffres (un peloton du jeu d'exemple, si l'image en dessine un). Ce qui
-revient se porte dans `lib/og/` avec T6 (`docs/engine/moteur-complet.md`
-§19.11). Les images du jeu sont le modèle.
+revient se porte dans `lib/og/` en T6.2, une PR à part : T6 est livré sans
+elle (`docs/engine/moteur-complet.md` §19.11). Les images du jeu sont le
+modèle.
 
 **B6, ouvert le 2026-10-01 : la re-synchro d'A15.** Trois contrats changent
 après l'ancre de B4 : `ErrorScreen` (`reset` devient `retry`), `LoadingScreen`
@@ -276,7 +277,9 @@ après l'ancre de B4 : `ErrorScreen` (`reset` devient `retry`), `LoadingScreen`
 `MetaLabel` prend `as` (`div`, `h2` ou `h3`), pour que les sections du
 résultat soient des titres (A15.13) ; son rendu par défaut ne change pas. C33
 en ajoute un cinquième : `GameEntry` prend `eyebrow`, le surtitre « Dans le
-jeu » au-dessus de la carte ; son aperçu est à jour dans le dépôt.
+jeu » au-dessus de la carte ; son aperçu est à jour dans le dépôt.
+A14 T6 ajoute deux jetons, `--paper-white` et `--surface-white` (le fond
+blanc du deck) : une synchro les emporte avec la chaîne des jetons.
 
 **B7, ouvert le 2026-10-01 : les puces d'étape** (A15.19, la loi de
 similarité, `design/LOIS-UX.md`). `PillarChip`, les cinq notes sur 20 du

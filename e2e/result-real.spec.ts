@@ -175,6 +175,28 @@ test.describe("the owner's view", () => {
     await expect(page.getByTestId("score-breakdown")).toBeVisible();
     await expect(page.getByTestId("deep-dive-cta")).toBeVisible();
   });
+
+  /*
+   * Engine spec §19.10 (C32 Q16, A14 T6): under the action, for its owner
+   * only, a way into the engine — and only on a build that opened it. The CI
+   * builds it closed: the line must then be absent; `ENGINE_ENABLED=true` at
+   * build and test time checks the open side.
+   */
+  test("offers its owner the engine under the action — only on a build that opened it, never to a visitor", async ({ page }) => {
+    const entry = page.getByTestId("result-engine-entry");
+    await page.goto(`/r/${clear.id}?lang=en`);
+    await expect(page.getByTestId("priority-move")).toBeVisible();
+    await expect(entry).toHaveCount(0);
+    await seedOwnedResult(page, clear.id, clear.total, clear.answers);
+    await page.reload();
+    await expect(page.getByTestId("score-breakdown")).toBeVisible();
+    if (process.env.ENGINE_ENABLED === "true") {
+      await expect(entry).toHaveText(tc(UI_STRINGS.result.engineEntry, "en"));
+      await expect(entry).toHaveAttribute("href", "/en/aarrr-funnel-template");
+    } else {
+      await expect(entry).toHaveCount(0);
+    }
+  });
 });
 
 test.describe("the other two states of the bottleneck block", () => {

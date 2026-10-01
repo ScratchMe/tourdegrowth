@@ -104,6 +104,8 @@ export function SlideFrame({
       data-testid={`slide-${slide.id}`}
       // A slide is printed on paper whatever world the page around it is in.
       data-world="paper"
+      // « Fond blanc » (§19.8, A14 T6): the deck's choice, on every slide — so the PNG and the PDF of one slide follow it.
+      data-theme={context.state.deck.theme === "white" ? "white" : "paper"}
       lang={locale}
       role="group"
       aria-labelledby={titleId}

@@ -1439,6 +1439,8 @@ export const ENGINE_COPY = {
     },
     showCompany: { fr: "Nom de l'entreprise sur les slides", en: "Company name on the slides" },
     showCredit: { fr: "Mention tourdegrowth.com", en: "tourdegrowth.com credit" },
+    // TODO: à relire (convention 6) — neuf le 2026-10-01 (A14 T6, §19.8, C32 Q14) : le fond blanc des slides.
+    whiteTheme: { fr: "Fond blanc (pour un gabarit d'entreprise)", en: "White background (for a company slide template)" },
     showMirror: { fr: "Slide « Déclaré × mesuré »", en: "\"Declared × measured\" slide" },
     showMirrorHint: {
       fr: "Le Tour est une auto-évaluation : à montrer seulement si l'écart est ton argument.",
@@ -2422,6 +2424,18 @@ export const ENGINE_COPY = {
       sheet: { fr: "un choix à faire dans sa fiche", en: "a choice to make in its sheet" },
       shared: { fr: "{other} porte aussi ce compte, à une autre valeur plus haut", en: "{other} carries this count too, with another value on an earlier row" },
     },
+  },
+  // TODO: à relire (convention 6) — neuf le 2026-10-01 (A14 T6, §19.9) : les rappels en fichier calendrier. Jamais une valeur ni le nom de l'entreprise : `{role}` est un rôle, `{list}` les noms du catalogue.
+  reminders: {
+    request: { fr: "Me le rappeler", en: "Remind me" },
+    requestTitle: { fr: "Relancer {role} : {n} chiffres du moteur", en: "Follow up with {role}: {n} engine numbers" },
+    requestTitleOne: { fr: "Relancer {role} : 1 chiffre du moteur", en: "Follow up with {role}: 1 engine number" },
+    requestDescription: { fr: "Demandés à {role} :\n{list}", en: "Asked of {role}:\n{list}" },
+    requestDescriptionOne: { fr: "Demandé à {role} :\n{list}", en: "Asked of {role}:\n{list}" },
+    month: { fr: "Me rappeler de démarrer {month}", en: "Remind me to start {month}" },
+    monthTitle: { fr: "Démarrer {month} dans le moteur de growth", en: "Start {month} in the growth engine" },
+    monthDescription: { fr: "Mois clos : {month}. Ses chiffres peuvent entrer dans ton moteur.", en: "Month over: {month}. Its numbers can go into your engine." },
+    fileName: { fr: "tdg-rappel-{date}.ics", en: "tdg-reminder-{date}.ics" },
   },
   io: {
     importTitle: { fr: "Importer un moteur", en: "Import an engine" },

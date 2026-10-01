@@ -16,6 +16,7 @@ import { latestTourWithAnswers } from "@/lib/engine/bridge";
 import { pelotonTitle } from "@/lib/engine/deck";
 import { relaysTitle, totalTitle } from "@/lib/engine/deck-motions";
 import { deriveEngine } from "@/lib/engine/derive";
+import { calendarFile, nextMonthStart } from "@/lib/engine/ics";
 import { engineFileName, monthFileName, serializeEngine } from "@/lib/engine/io";
 import { mergeEngines } from "@/lib/engine/merge";
 import { markReminded, markRequested } from "@/lib/engine/request";
@@ -28,6 +29,7 @@ import { engineSetupDetail, engineStageDetail, trackEngine, type EngineStageDeta
 import { commit, erase, getClientSnapshot, getServerSnapshot, removeEngine, subscribe, switchEngine, type CommitResult } from "./_engine/engine-store";
 import { tableTemplate, type TablePreview } from "./_engine/csv";
 import { DeleteEngineDialog } from "./_engine/DeleteEngineDialog";
+import { download, enginePageUrl } from "./_engine/download";
 import { EngineSwitcher, engineName } from "./_engine/EngineSwitcher";
 import { EraseDialog } from "./_engine/EraseDialog";
 import { ExampleView } from "./_engine/ExampleView";
@@ -35,7 +37,7 @@ import { ImportPanel, type ImportChoice } from "./_engine/ImportPanel";
 import { Steps } from "./_engine/Steps";
 import { resumePosition, type StepPosition } from "./_engine/steps-model";
 import { Setup, type SetupChoice } from "./_engine/Setup";
-import { domId, formatMonth } from "./_engine/text";
+import { domId, fill, formatMonth } from "./_engine/text";
 import type { EngineActions, EngineView } from "./_engine/view";
 import screens from "./_engine/Screens.module.css";
 
@@ -92,19 +94,6 @@ function lastSnapshot(state: EngineState): Snapshot {
 
 function withSnapshot(state: EngineState, change: (snapshot: Snapshot) => Snapshot): EngineState {
   return { ...state, snapshots: [...state.snapshots.slice(0, -1), change(lastSnapshot(state))] };
-}
-
-/** A download that never touches the network: a Blob URL on an anchor IN the document (a detached one doesn't download everywhere), revoked later so a slow start isn't cut. */
-function download(text: string, fileName: string, type = "application/json") {
-  const url = URL.createObjectURL(new Blob([text], { type }));
-  const anchor = document.createElement("a");
-  anchor.href = url;
-  anchor.download = fileName;
-  anchor.hidden = true;
-  document.body.appendChild(anchor);
-  anchor.click();
-  anchor.remove();
-  window.setTimeout(() => URL.revokeObjectURL(url), 10_000);
 }
 
 /**
@@ -598,7 +587,12 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
     months: current.snapshots.map((s, index) => ({ index, label: formatMonth(s.referenceMonth, locale) })),
     shown: month ?? lastIndex,
     correcting: month !== null && correcting,
-    next: next.kind === "ready" ? { kind: "ready", label: formatMonth(next.referenceMonth, locale) } : next.kind === "full" ? { kind: "full" } : null,
+    next:
+      next.kind === "ready"
+        ? { kind: "ready", label: formatMonth(next.referenceMonth, locale) }
+        : next.kind === "full"
+          ? { kind: "full" }
+          : { kind: "later", label: formatMonth(nextMonthStart(current).month, locale) },
     onPick(index) {
       setMonthIndex(index === lastIndex ? null : index);
       setCorrecting(false);
@@ -611,6 +605,22 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
     },
     onDoneCorrecting() {
       setCorrecting(false);
+    },
+    onRemind() {
+      // The day the next month can start (§19.9): its flows' month name, never a number of the engine.
+      const r = strings.reminders;
+      const { month, day } = nextMonthStart(current);
+      const label = formatMonth(month, locale);
+      const file = calendarFile({
+        uid: `${globalThis.crypto.randomUUID()}@tourdegrowth.com`,
+        stamp: new Date(),
+        day,
+        title: fill(r.monthTitle, { month: label }),
+        description: `${fill(r.monthDescription, { month: label })}\n\n${enginePageUrl()}`,
+        url: enginePageUrl(),
+      });
+      const date = `${day.year}-${String(day.month).padStart(2, "0")}-${String(day.date).padStart(2, "0")}`;
+      download(file, fill(r.fileName, { date }), "text/calendar;charset=utf-8");
     },
     onStart() {
       // The month that ends is closed with today's date and the setup's windows; the new one starts with its targets only (§19.2.2).

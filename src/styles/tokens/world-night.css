@@ -82,6 +82,8 @@
   --surface-page: var(--night-0);
   --surface-card: var(--night-1);
   --surface-sunken: var(--night-2);
+  /* Never read at night: a slide declares data-world="paper", which binds it to --paper-white again (§19.8). Bound so the world stays complete. */
+  --surface-white: var(--night-text);
   /* "The darkest neutral ground" — at night the page already is. */
   --surface-desk: var(--night-0);
   --surface-alert: var(--night-red-wash);

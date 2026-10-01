@@ -59,3 +59,15 @@
 .nudgeLink:focus-visible {
   color: var(--text-link-hover);
 }
+
+/* Engine spec §19.10 (A14 T6): the engine's way back, the nudge's quiet mono. */
+.engine {
+  font: var(--meta-xs);
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+/* No Tour on the device: the line stands where the result's link would, as far from the buttons (.link's margin). */
+.engineAlone {
+  margin-top: 26px;
+}

@@ -230,7 +230,7 @@ export function Board({
       ) : null}
 
       {series ? <MonthBar series={series} strings={strings} /> : null}
-      {series && !past ? <NextMonthBand next={series.next} onStart={series.onStart} strings={strings} /> : null}
+      {series && !past ? <NextMonthBand next={series.next} onStart={series.onStart} onRemind={series.onRemind} strings={strings} /> : null}
 
       {returningFrom && !past ? <ResumeBand returningFrom={returningFrom} plan={plan} view={view} actions={actions} /> : null}
 

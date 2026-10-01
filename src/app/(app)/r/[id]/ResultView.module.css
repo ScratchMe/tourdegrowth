@@ -253,6 +253,16 @@
   margin: 0;
 }
 
+/* Engine spec §19.10: the owner's way into the engine, under the action. */
+.engineEntry {
+  font: var(--body-sm);
+  margin: 0;
+}
+
+.engineEntry a {
+  color: var(--text-link);
+}
+
 .disclaimer {
   text-align: center;
 }

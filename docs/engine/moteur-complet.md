@@ -667,6 +667,46 @@ l'accueil et les liens d'A7.4 :
 
 Chacune est mesurée par `engine_entry_clicked/<result_owner|landing_resume>`.
 
+*Écarts au code, T6 (2026-10-01).*
+- **Le fond blanc** (§19.8) : `--paper-white` et `--surface-white`, comme
+  prévu. Le monde nocturne lie aussi `--surface-white` (à son encre claire),
+  parce que chaque jeton sémantique doit y être relié. Il n'y est jamais lu :
+  une slide déclare `data-world="paper"`, qui le relie au blanc pur. Sur le
+  blanc, toutes les encres gagnent en contraste, et le rouge de la fuite
+  (4,66:1) passerait même pour du texte : il reste une marque. L'e2e lit la
+  couleur peinte d'une slide à l'écran et un pixel du PNG exporté, dans les
+  deux thèmes. Le PDF suit par `print-color-adjust`, sans test au pixel.
+- **« Me le rappeler »** (§19.9) paraît une fois la demande copiée, à côté de
+  la confirmation. Le rappel tombe cinq jours après le jour de la copie
+  (`REMIND_AFTER_DAYS`), à 9 h à l'heure de l'agenda (une heure « flottante »),
+  pour 30 minutes. La description est « Demandés à {rôle} : » suivi des noms
+  du catalogue, et l'adresse de la page va dans le champ URL.
+- **« Me rappeler de démarrer {mois} »** est un bouton discret, à la place du
+  bandeau du mois suivant, tant que les flux du mois ne sont pas clos. Le
+  rappel tombe le premier jour ouvré (du lundi au vendredi, sans les jours
+  fériés) du mois qui suit ce mois. Les fichiers s'appellent
+  `tdg-rappel-{date}.ics`, avec un UID aléatoire.
+- **La ligne du résultat** (§19.10) dit « Tu mesures déjà cette étape ? »
+  plutôt que de nommer l'étape : la carte juste au-dessus la nomme, et les
+  noms d'étapes en français (« Retention », « Revenue ») demanderaient un
+  article que le gabarit ne peut pas porter. Le bon à tirer tranchera. Elle
+  se place sous le bouton du Deep dive, dans la zone réservée au propriétaire
+  de la carte, et seulement quand une étape est nommée.
+- **La ligne de l'accueil** paraît aussi sans Tour sur l'appareil. Elle compte
+  les chiffres des motions cochées, sans la liaison, comme le tableau. Elle est
+  lue par un `import()` dynamique derrière le drapeau du build : un accueil
+  construit moteur fermé n'en porte pas le code.
+- **Les deux portes** ne s'ouvrent que sur un build où le moteur est ouvert.
+  La CI construit moteur fermé et vérifie leur absence, et que l'accueil ne
+  charge aucun code du moteur (sur ce build, aucun morceau ne porte
+  `engineResume` : l'import est retiré à la construction). Le côté ouvert a été
+  vérifié en local, sur un build `ENGINE_ENABLED=true` avec l'émulateur
+  Firestore. `engine_exported/ics` et `engine_entry_clicked` viennent avec T7
+  (§19.12), avec la phrase de confidentialité.
+- **L'image de partage** (§19.11) attend toujours la passe de Claude Design
+  (B5) : elle n'est pas dans T6, et viendra en T6.2, une PR à part, au retour
+  de B5.
+
 ---
 
 ### 19.11 L'image de partage du moteur (Q17)
