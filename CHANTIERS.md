@@ -236,7 +236,7 @@ l'UX vivent dans `design/LOIS-UX.md`. **Une PR par lot, pas par item**
 livrés le 2026-10-01 dans la première (#252 ; le journal, à « A15 »).
 
 **Ce que les lois de l'UX laissaient** (2026-10-01, `design/LOIS-UX.md`) est
-livré le même jour dans une seconde PR, comme Antoine l'a choisi : les
+livré le même jour dans une seconde PR ([#257](https://github.com/ScratchMe/tourdegrowth/pull/257)), comme Antoine l'a choisi : les
 correctifs A15.7 à A15.14 et les décisions A15.15 à A15.17 et A15.20, qu'il a
 tranchées sur les recos (le détail, et ce que chaque test prouve, sont au
 journal, à « A15.7 à A15.20 »). **Reste :**

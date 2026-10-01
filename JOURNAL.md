@@ -652,7 +652,7 @@ La première PR du moteur complet (`docs/engine/moteur-complet.md` §19.1 et §1
 - la barrière de `/livrer` §0 relève deux fichiers non TypeScript ajoutés sous `src/` : `golden-v2-inputs.json` et `golden-v2.json` (1 Mo à eux deux). Ce sont des données de test lues par `readFileSync` dans Vitest seulement, comme celles du golden v1 ; aucun `.nft.json` du build ne les trace, donc aucun bundle serveur ne les porte.
 
 
-## A15.7 à A15.20 : ce que les lois de l'UX laissaient à faire (2026-10-01)
+## A15.7 à A15.20 : ce que les lois de l'UX laissaient à faire (2026-10-01, #257)
 
 La seconde PR d'A15, comme Antoine l'a choisi (#252 mergée seule d'abord). Huit correctifs et quatre des cinq décisions qu'il a tranchées sur les recos ; la cinquième, A15.18, n'a pas tenu à l'écran et lui revient (C33). A15.19 part à Claude Design (B7).
 
