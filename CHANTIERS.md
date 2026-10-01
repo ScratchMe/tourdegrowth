@@ -276,7 +276,7 @@ modèle.
 similarité, `design/LOIS-UX.md`). `PillarChip`, les cinq notes sur 20 du
 résultat et de l'aperçu de l'accueil, porte le cadre et le rayon d'un bouton
 secondaire sans en être un : seul son `?` se touche. **Le brief 05 est écrit et
-déposé le 2026-10-01** : [`design/DS-EXTENSION-BRIEF-05.md`](design/DS-EXTENSION-BRIEF-05.md)
+déposé le 2026-10-01** ([#268](https://github.com/ScratchMe/tourdegrowth/pull/268)) : [`design/DS-EXTENSION-BRIEF-05.md`](design/DS-EXTENSION-BRIEF-05.md)
 et ses dix captures (`design/ds-extension-05/`, un vrai build, l'accueil et
 `/r/sample` aux deux langues et aux deux largeurs, plus un gros plan d'une puce
 à côté d'un vrai `Button` secondaire), aux mêmes chemins dans le projet Claude

@@ -1122,7 +1122,7 @@ Points pour le bon à tirer A14.d : la phrase de confidentialité elle-même, p
 - captures relues : les dix écrans d'A14 en français à 390 px et en anglais à 1 280 px, et la page de confidentialité dans les deux langues.
 
 
-## B7 : le brief 05 des puces d'étape, déposé dans Claude Design (2026-10-01)
+## B7 : le brief 05 des puces d'étape, déposé dans Claude Design (2026-10-01, #268)
 
 **La demande d'Antoine** : A15.19, le seul écart que les lois de l'UX ont laissé (`design/LOIS-UX.md`, similarité). Écrire et déposer un brief pour Claude Design, sans toucher au composant.
 
