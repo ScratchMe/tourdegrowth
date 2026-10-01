@@ -79,7 +79,7 @@ paper (1.87); the night's amber never leaves the night.
 
 ## Responsive
 
-Sizing is CSS-only. `ScoreDisplay`, `PillarChip`, `QuestionCard`,
+Sizing is CSS-only. `ScoreDisplay`, `StageScores`, `QuestionCard`,
 `AnswerOption`, `StageProgress`, `Bottleneck` and a `hero` `StatTile` shrink
 themselves below 760px — you do not detect a viewport in JS. `size="sm"` is
 the explicit override for the rare case of forcing the small scale on a wide
@@ -109,7 +109,13 @@ Target 390px. Nothing may scroll horizontally at 360px.
   props, not a new component.
 - `DetourCard` is the one dead-end. 404s and error screens are the same family
   at two temperatures.
-- Pillar-and-sentence is `InsightCard`. Pillar-and-score is `PillarChip`.
+- Pillar-and-sentence is `InsightCard`. A stage and its score is a
+  `StageScore`, five of them a `StageScores` — a ruled score sheet, one column,
+  never a box: it is a value, and a value that looks like a button breaks the
+  law of similarity (A15.19, extension 05). Its red follows the bottleneck as
+  the profile does: one row on `clear`, the tied group on `shared`, none on
+  `level`. The only thing to touch on a row is its « ? », or on the landing
+  the stage name, which is the link.
 - A prose page is `ProsePage` plus `ProseSection`/`ProseText`/`ProseList`/
   `ProseActions`; its aside is `Callout`.
 - A figure is `StatTile`; a series over time is `Sparkline`; a value against a
@@ -123,8 +129,8 @@ Target 390px. Nothing may scroll horizontally at 360px.
 - The five pillar scores as a shape are `StageProfile` (« Profil du
   parcours » / "Route profile") — one climb per stage,
   as high as the points it is missing, the named stage flagged « HC ». It
-  sits over the five `PillarChip`s, which are its table: it is hidden from
-  assistive technology and never shown without them.
+  sits over the `StageScores` sheet, which is its table: it is hidden from
+  assistive technology and never shown without it.
 - On a result, the score is a kilometre marker (`ScoreDisplay
   variant="marker"`) standing beside the stage that stalls: it goes in
   `Bottleneck`'s `lead`, never on its own.
@@ -361,7 +367,7 @@ Retired names, and where each went, one family at a time
 
 | Was | Now | Family |
 |---|---|---|
-| `size="desktop"` / `"mobile"` | `size="md"` / `"sm"` | quiz and result: `AnswerOption`, `QuestionCard`, `StageProgress`, `Bottleneck`, `PillarChip`, `ScoreDisplay`, `ShareCard` — done |
+| `size="desktop"` / `"mobile"` | `size="md"` / `"sm"` | quiz and result: `AnswerOption`, `QuestionCard`, `StageProgress`, `Bottleneck`, `StageScores`, `ScoreDisplay`, `ShareCard` — done |
 | `size="compact"`, `Button compact` | `size="sm"` | core: `Segmented`, `ToneToggle`, `Button` — done |
 | `tone="red"` | `tone="alert"` | core: `Tag` — done |
 | `size="hero"` / `"compact"` / `"responsive"`, `size="mini"` | `size="lg"` / `"sm"` / `"auto"`, `size="sm"` | viz: `StatTile`, `BulletChart` — done |

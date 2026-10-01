@@ -15,10 +15,11 @@ import { GlossaryTerm } from "@/components/glossary/GlossaryTerm";
 import { Bottleneck } from "@/components/result/Bottleneck";
 import { Disclaimer } from "@/components/result/Disclaimer";
 import { InsightCard } from "@/components/result/InsightCard";
-import { PillarChip } from "@/components/result/PillarChip";
 import { PriorityMove } from "@/components/result/PriorityMove";
 import { ScoreDisplay } from "@/components/result/ScoreDisplay";
 import { ShareCard } from "@/components/result/ShareCard";
+import { StageScore } from "@/components/result/StageScore";
+import { StageScores } from "@/components/result/StageScores";
 import { StampedPillar } from "@/components/result/StampedPillar";
 import { StageProfile } from "@/components/viz/StageProfile";
 import { ANTOINE_LINKS, cvUrl, DEEP_DIVE_CREDIT, QUICK_CREDIT } from "@/content/antoine-credit";
@@ -68,7 +69,6 @@ interface ResultViewProps {
   badge?: { src: string; alt: string; markdown: string } | null;
   total: number;
   pillars: { pillar: Pillar; score: number }[];
-  weakestPillar: Pillar;
   verdicts: { neutral: QuickVerdict; roast: QuickVerdict };
   /** Which stage is holding this product back, and how honestly we can say so — resolved on the server (`lib/scoring/bottleneck.ts`), because deciding is not the same job as wording. */
   bottleneck: BottleneckView<{ pillar: Pillar; score: number }>;
@@ -133,7 +133,6 @@ export function ResultView({
   badge = null,
   total,
   pillars,
-  weakestPillar,
   verdicts,
   bottleneck,
   nextMove,
@@ -482,14 +481,13 @@ export function ResultView({
               </p>
             </Card>
 
-            <div className={`${styles.pillarGrid} ${styles.slotPillars}`}>
+            <div className={`${styles.pillars} ${styles.slotPillars}`}>
               {/* Design I + B (2026-09-28): the shape of the five scores over
-                  the chips that give them. Flagged: exactly the stages the
+                  the sheet that gives them. Flagged: exactly the stages the
                   Bottleneck block names — none on a level board, every tied
                   one on a shared bottleneck — never the roast's second red
-                  chip, which is emphasis and not a diagnosis. */}
+                  row, which is emphasis and not a diagnosis. */}
               <StageProfile
-                className={styles.spanFull}
                 data-testid="stage-profile"
                 stages={PILLARS.flatMap((pillar) => {
                   const entry = pillars.find((p) => p.pillar === pillar);
@@ -507,42 +505,41 @@ export function ResultView({
                 legend={tc(UI_STRINGS.profile.legend, locale)}
                 flag={tc(UI_STRINGS.profile.flag, locale)}
               />
-              {PILLARS.map((pillar) => {
-                const entry = pillars.find((p) => p.pillar === pillar);
-                if (!entry) return null;
-                // Only the roast's stamp takes the whole row. Revenue used to
-                // as well, to close the phone's two-up grid; with a meter on
-                // every chip it would have drawn its bar on a track twice as
-                // long as the other four (design I + B, 2026-09-28).
-                const spanFull = roast && !level && pillar === weakestName;
-                const label = tc(UI_STRINGS.pillars[pillar], locale);
+              {/* Design system extension 05 (A16): the profile's table, one
+                  row per stage, one column at every width — a value, not five
+                  boxes that looked like buttons (A15.19). Its red follows the
+                  bottleneck as the profile does (C34): one row on `clear`,
+                  the tied group on `shared`, none on `level`. */}
+              <StageScores label={tc(t.stageScoresLabel, locale)} data-testid="stage-scores">
+                {PILLARS.map((pillar) => {
+                  const entry = pillars.find((p) => p.pillar === pillar);
+                  if (!entry) return null;
+                  const label = tc(UI_STRINGS.pillars[pillar], locale);
 
-                if (roast && !level && pillar === weakestName) {
+                  // The roast's stamp takes the weakest stage's row.
+                  if (roast && !level && pillar === weakestName) {
+                    return <StampedPillar key={pillar} pillar={label} score={entry.score} suffix={tc(t.stampedSuffix, locale)} />;
+                  }
+
+                  const isAlert =
+                    !level &&
+                    (bottleneck.pillars.some((p) => p.pillar === pillar) || (roast && pillar === secondWeakestName));
                   return (
-                    <div key={pillar} className={spanFull ? styles.spanFull : ""}>
-                      <StampedPillar pillar={label} score={entry.score} suffix={tc(t.stampedSuffix, locale)} />
-                    </div>
-                  );
-                }
-
-                const isWeak = !level && (pillar === weakestPillar || (roast && pillar === secondWeakestName));
-                return (
-                  <div key={pillar} className={spanFull ? styles.spanFull : ""}>
-                    <PillarChip pillar={label} score={entry.score} weak={isWeak} stretch>
+                    <StageScore key={pillar} stage={label} score={entry.score} tone={isAlert ? "alert" : "neutral"}>
                       <GlossaryTerm
                         id={pillar}
                         locale={locale}
                         openId={openGlossaryId}
                         onOpenChange={setOpenGlossaryId}
-                        tone={isWeak ? "alert" : "muted"}
+                        tone={isAlert ? "alert" : "muted"}
                         closeLabel={tc(UI_STRINGS.glossary.closeLabel, locale)}
                         labelTemplate={tc(UI_STRINGS.glossary.definitionLabelTemplate, locale)}
                         moreLabel={tc(UI_STRINGS.glossary.moreLabel, locale)}
                       />
-                    </PillarChip>
-                  </div>
-                );
-              })}
+                    </StageScore>
+                  );
+                })}
+              </StageScores>
             </div>
 
           </div>

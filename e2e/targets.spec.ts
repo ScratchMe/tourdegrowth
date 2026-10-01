@@ -512,6 +512,8 @@ const STRIPPED: { where: string; path: string; sel: string; look: Look; minimum:
   { where: "the stages of « how it works »", path: "/fr/how-it-works", sel: 'a[class*="__pillarLink"]', look: { what: "a heading", max: 26, oneLine: 40 }, minimum: 5 },
   { where: "the comparisons of « how it works »", path: "/fr/how-it-works", sel: 'a[class*="__comparisonLink"]', look: { what: "a 38px chip", max: 40, oneLine: 44 }, minimum: 4 },
   { where: "the stages of the checklist", path: "/fr/growth-audit-checklist", sel: 'a[class*="__pillarLink"]', look: { what: "a 41px heading", max: 42, oneLine: 50 }, minimum: 5 },
+  // A16 (extension 05): the landing's stage names are the links now, in rows 44px apart.
+  { where: "the stage names of the landing's preview", path: "/fr", sel: '[data-testid="preview-scores"] a', look: { what: "a line of mono text", max: 24, oneLine: 40 }, minimum: 5 },
 ];
 
 for (const { where, path, sel, look, minimum } of STRIPPED) {

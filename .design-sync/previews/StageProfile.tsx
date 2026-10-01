@@ -9,9 +9,9 @@ import { StageProfile } from "tour-de-growth";
  * road and the one that stalls is the highest climb. The stage the page
  * names is red and flagged « HC » (hors catégorie).
  *
- * It shows the shape; the five `PillarChip`s under it give the numbers and
- * are its table view, so the whole figure is aria-hidden. Never render it
- * without them. `hot` follows the `Bottleneck` block's rule: the stages it
+ * It shows the shape; the score sheet under it (`StageScores`) gives the
+ * numbers and is its table view, so the whole figure is aria-hidden. Never
+ * render it without the sheet. `hot` follows the `Bottleneck` block's rule: the stages it
  * names, all of the tied ones on a shared bottleneck, none on a level board.
  *
  * All copy is the product's own, from `UI_STRINGS.profile` and

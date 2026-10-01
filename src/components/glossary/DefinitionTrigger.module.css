@@ -1,3 +1,14 @@
+/*
+ * Design system extension 05 (design/ds-extension-05-return/, C35: everywhere,
+ * the quiz included). Once the stage rows stopped looking pressable, the « ? »
+ * is the one thing on a row to touch, and it has to say so. It was a DASHED
+ * ring — in this system dashed means « not yet », and a dashed ring around a
+ * « ? » reads as a loading spinner — with no hover, and an « open » state
+ * that was a border colour shift on a 16px ring. Now: a solid ring (a real
+ * edge, the sign of a control) in the tone's colour, body ink under the
+ * pointer, and the inverse fill while its definition is open — the system's
+ * one language for « this one ». Same <button>, label, 44px disc.
+ */
 .trigger {
   display: inline-flex;
   align-items: center;
@@ -7,17 +18,24 @@
   padding: 0;
   margin-left: 4px;
   vertical-align: middle;
+  border: var(--border-width) solid currentColor;
   border-radius: var(--radius-round);
   background: none;
   font: var(--meta-2xs);
+  /* The glyph holds inside a 12px hole. */
+  font-weight: 700;
   line-height: 1;
   cursor: pointer;
   position: relative;
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
 }
 
 /*
  * The 16px circle is right visually — it sits inside a line of text or a
- * pillar chip — but it was the whole target too, 16×16 with nothing around
+ * row of the score sheet — but it was the whole target too, 16×16 with nothing around
  * it (DS v3 H-3). A transparent 44px disc centred on it takes the taps: the
  * inset is measured from the padding box, so it is half of (44 − 16) plus
  * the 2px border it has to clear. A disc rather than a square keeps the
@@ -32,23 +50,30 @@
 }
 
 .muted {
-  border: var(--border-width) dashed var(--text-muted);
   color: var(--text-muted);
 }
 
 .ink {
-  border: var(--border-width) dashed var(--text-body);
   color: var(--text-body);
 }
 
 .alert {
-  border: var(--border-width) dashed var(--text-alert);
   color: var(--text-alert);
 }
 
+/* Pointer only: a stuck touch hover must not look like anything. */
+@media (hover: hover) {
+  .trigger:hover:not(.open) {
+    color: var(--text-body);
+  }
+}
+
+/* Open: the inverse fill — ink disc and paper « ? » on paper, the amber
+   disc at night (16.06 / 10.13). */
 .open {
-  border-color: var(--text-body);
-  color: var(--text-body);
+  color: var(--state-selected-text);
+  background: var(--state-selected-bg);
+  border-color: var(--state-selected-bg);
 }
 
 .trigger:focus-visible {

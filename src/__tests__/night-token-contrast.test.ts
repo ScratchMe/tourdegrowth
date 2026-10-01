@@ -96,6 +96,7 @@ const PAIRS: Pair[] = [
   { fg: "text-alert", bg: "surface-alert", stated: 5.56, role: "text", why: "red text on the red wash" },
   { fg: "text-muted", bg: "surface-alert", stated: 6.91, role: "text", why: "a label on the red wash" },
   { fg: "border-alert", bg: "surface-alert", stated: 3.37, role: "mark", why: "an alert card's own edge" },
+  { fg: "viz-highlight-text", bg: "surface-alert", stated: 5.56, role: "mark", why: "the score sheet's stalling meter, on its wash (extension 05)" },
   ...on3("border-alert", [4.04, 3.76, 3.3], "mark", "red border"),
   ...on3("focus-ring-invert", [4.04, 3.76, 3.3], "mark", "red ring of option buttons"),
   { fg: "field-border-alert", bg: N1, stated: 3.76, role: "mark", why: "a field past its limit" },

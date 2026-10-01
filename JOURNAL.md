@@ -1241,3 +1241,37 @@ Le texte du skill `/design-sync` (trouvé en ligne) dit que l'application « cle
 - le portage dans la même session : **A16**.
 
 **Consigné** : `design/ds-extension-05-return/COPIE.md`, `docs/decisions.md` (C34, C35), `CHANTIERS.md` (B7 fait, A15.19, A16 ouvert, D11 retiré), `design/README.md`, `design/LOIS-UX.md`, `.design-sync/NOTES.md` (« Synced »). Que de la doc sous `design/`, `docs/` et à la racine : rien ne se déploie.
+
+
+## A16 : la feuille de score portée, C34 et C35 codées (2026-10-02)
+
+**Ce qui change à l'écran** : les cinq puces d'étape du résultat et de l'aperçu de l'accueil deviennent **une feuille de score** (`StageScores`, une `<ol>` nommée « Score par étape, sur 20 »), juste sous le profil du parcours dont elle est la table. Une ligne par étape (`StageScore`, un `<li>`) : la note, une jauge, le nom, le `?`. Ni boîte, ni coin arrondi : un filet plein en tête, des tirets fins entre les lignes, comme `DataTable`. Une seule colonne à toutes les largeurs, 48 px par ligne sur le résultat, 44 px au téléphone et sur l'accueil. La liste est la grille et chaque ligne une sous-grille : les cinq jauges partent du même x et se comparent. `PillarChip` est retiré, ses deux jetons de rembourrage avec lui (le test des jetons morts l'a exigé).
+
+**C34, codée** : le rouge de la feuille suit la netteté du frein. Une ligne sur `clear`, sur `shared`, tout le groupe que nomme le frein (`bottleneck.pillars` : les étapes à moins de 4 points de la plus basse, `CLEAR_GAP`, et pas fortes), aucune sur `level`, comme le profil. En roast, l'étape la plus basse sort de la feuille en tampon et la deuxième prend le rouge, sauf sur `level`. La prop `weakestPillar`, qui ne servait qu'à la puce rouge unique, disparaît de `ResultView`.
+
+**C35, codée** : le `?` (`DefinitionTrigger`) a un vrai bord plein de la couleur du texte au repos, un survol (seulement sur un appareil qui survole), et le remplissage inverse de `--state-selected-*` une fois ouvert. Partout, quiz compris.
+
+**Le tampon du roast** (`StampedPillar`) : encre rouge sur le lavis, bord plein de 3 px, coins de 4 px (`--radius-stamp`), un degré de travers. C'était le rouge plein de l'action principale. Il devient une ligne de la feuille (un `<li>`), lu en mots, ses points cachés.
+
+**À l'accueil**, le lien quitte la puce entière pour le **nom de l'étape**, souligné, nommé « Activation — définition » (nouvelle clé `stageLinkLabelTemplate`, avec `stageScoresLabel` : les deux « à relire », convention 6). La note reste hors du lien. Une bande de 44 px, centrée sur le nom, garde la cible tactile.
+
+**Les jetons, un écart assumé avec le retour** : `tokens/scores.css` proposait onze alias de couleur (`--score-alert-bg: var(--surface-alert)`…) et une dizaine de tailles. Le portage lit les jetons sémantiques directement : un alias qui ne fait que renommer un jeton est un nom de plus à tenir, pour aucun changement de valeur. Restent trois jetons neufs, ceux qui portent une valeur que le système n'avait pas : `--score-row-height-md` et `--score-row-height-sm` (48 et 44 px) et `--radius-stamp`. Le `-1deg` du tampon reste écrit en dur : `individual-transforms.test.ts` compte ces littéraux, et le tampon n'en est qu'un de plus.
+
+**Le contraste, vérifié par les tests de jetons** (le retour l'annonçait, la CI le tient) : le texte rouge sur le lavis mesure 5,28 sur papier et 5,56 la nuit, la jauge rouge 5,28 contre le lavis, et le filet rouge 3,47.
+
+**Tests** :
+- unitaires : `stage-scores.test.ts` fixe le balisage (une liste ordonnée nommée, le texte d'une ligne est toute sa lecture, la jauge cachée et à l'échelle, le lien sur le nom seul, le tampon lu en mots) ;
+- e2e : `result-composition.spec.ts` mesure la feuille à 1280 en anglais et à 390 en français (aucun rayon, aucun fond hors de la ligne rouge, lignes de 44 px au moins, sans chevauchement, colonnes alignées) ; `result-real.spec.ts` tient C34 sur deux vrais résultats (un frein partagé : deux lignes rouges ; un profil plat : aucune) ; `targets.spec.ts` déclare la bande de 44 px des noms de l'accueil ;
+- **non-vacuité, sur un build muté** : un rayon de bouton sur la ligne fait échouer la mesure de la feuille (« 12px » au lieu de « 0px ») ; le rouge calculé sur la seule première étape du frein fait échouer le test du frein partagé (une ligne rouge au lieu de deux) ; le test du profil plat, lui, reste vert, comme attendu. Mutations retirées, build refait.
+
+**Les suites, sur la branche** : 2 908 tests unitaires verts ; 859 specs Playwright, 853 passées en local avec l'émulateur et `CI=1`, 6 ignorées par construction (les specs « jeu fermé ») ; `tsc` et `eslint` propres.
+
+**À 320 px** (hors contrat, remesuré parce que `CHANTIERS.md` E citait la puce) : la feuille tient, tampon compris, et `/r/sample` ne déborde plus (il débordait de 37 px). Un résultat en roast déborde encore de 14 px, par le badge de l'en-tête, hors d'A16 : noté en E.
+
+**Le tampon garde son suffixe** (`stampedSuffix`, « bon dernier ») mais sa composition change : « RETENTION · 8/20 · BON DERNIER » au lieu de « 8/20 RETENTION — bon dernier », capitales comprises. La chaîne n'a pas bougé, donc le grep du bon à tirer ne la verrait pas : elle reprend un « TODO: à relire » pour que le prochain bon à tirer la montre.
+
+**Captures** du vrai build, avant et après, aux deux langues, 1280 et 390 (le résultat, le `?` ouvert, le roast au téléphone avec le tampon et l'Activation en rouge, l'accueil, le `?` du quiz) : conformes à la planche du retour.
+
+**Le design system** : `.design-sync/config.json` retire `PillarChip` et ajoute `StageScore` et `StageScores` (91 composants, `check-inventory` vert) ; les aperçus de `StampedPillar`, `GlossaryTerm` et `DefinitionTrigger` sont réécrits sur la feuille, ceux de `Tag` et `StageProfile` corrigés dans leurs commentaires, ceux de `StageScore` et `StageScores` neufs ; `conventions.md` suit. **La re-synchro vers Claude Design est B9**, pas faite ici.
+
+**Consigné** : `CHANTIERS.md` (A15 clos, A16 retiré, B7, B9 ouvert), `docs/decisions.md` (C34 et C35 codées), `design/README.md`, `design/LOIS-UX.md` (la loi de similarité : tenue).

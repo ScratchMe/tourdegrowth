@@ -39,10 +39,10 @@ const gap = (missing: number) => (missing ? `−${missing}` : "0");
  *
  * The five AARRR stages drawn as a road book draws the day's route: one
  * climb per stage, as high as the points it is missing, the stage that stalls in red
- * and flagged « HC ». It shows the SHAPE of the five scores; the pillar chips
- * under it give the numbers and are its table view, which is why the whole
+ * and flagged « HC ». It shows the SHAPE of the five scores; the score sheet
+ * under it (StageScores) gives the numbers and is its table view, which is why the whole
  * figure is hidden from assistive technology — a screen reader gets the
- * chips, and the Bottleneck block above has already named the stage.
+ * sheet, and the Bottleneck block above has already named the stage.
  *
  * One series in ink, one red for the diagnosis (DS v3 §5.5), every summit
  * labelled with its gap — the red never speaks alone: the flag, the bold red

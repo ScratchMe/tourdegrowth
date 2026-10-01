@@ -209,7 +209,6 @@ export default async function ResultPage({ params, searchParams }: PageProps) {
       <ResultView
         total={SAMPLE_RESULT.total}
         pillars={SAMPLE_RESULT.pillars}
-        weakestPillar={SAMPLE_RESULT.weakestPillar}
         verdicts={getSampleVerdicts(locale)}
         bottleneck={sampleBottleneck}
         nextMove={getSampleNextMove(locale)}
@@ -272,7 +271,6 @@ export default async function ResultPage({ params, searchParams }: PageProps) {
       id={submission.id}
       total={submission.total}
       pillars={pillars}
-      weakestPillar={submission.weakestPillar}
       verdicts={buildQuickVerdicts(locale, pillars, submission.weakestPillar)}
       // Both resolved on the server, for the two reasons R-09 gave: the
       // answers behind the action never leave the server (R-02, R2-19), and

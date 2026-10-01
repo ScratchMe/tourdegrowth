@@ -231,50 +231,80 @@ test.describe("what the reading order costs is bounded, and checked", () => {
   });
 });
 
-test.describe("the stretched pillar rows", () => {
+test.describe("the score sheet", () => {
   /*
-   * The row has FOUR flex children — score, "/20", pillar name, glossary
-   * trigger — so `justify-content: space-between` spread all three gaps and
-   * the row read "18 … /20 … Acquisition … ?" in production for a month.
-   * One auto margin on the name takes the free space instead.
+   * Design system extension 05 (A16, the law of similarity, A15.19): the five
+   * stage scores were chips — a closed box with the button's radius and a
+   * solid edge, 47 to 55px tall, beside real secondary buttons of the same
+   * look. They are now the rows of one ruled sheet: no box, no radius, no
+   * background on a neutral row; only the stalling row takes the red wash and
+   * its solid rule down the start edge.
    *
    * Measured, not asserted from a class name: a rule can be present and
-   * beaten. What matters is that the score reads as one unit with its
-   * denominator, and that the free space sits between the two halves.
+   * beaten. The score reads as one unit, the figures line up on the right
+   * (8/20 under 18/20), and the names start on one line.
    *
-   * Deliberately NOT measuring the gap between the name and the "?": that
-   * 4px is a margin on the button INSIDE the trigger's anchor, not a gap
-   * between flex items, so it would measure something else entirely.
+   * Non-vacuity (2026-10-02): with the old chip's `border-radius:
+   * var(--radius-button)` put back on the row, « no row is a box » fails.
    */
-  test("pair the score with its denominator and push the name right", async ({ page }) => {
-    await page.setViewportSize({ width: 1280, height: 900 });
-    await page.goto("/r/sample?lang=en");
-    await page.locator('[class*="pillarGrid"]').first().waitFor();
+  for (const { width, locale } of [
+    { width: 1280, locale: "en" },
+    { width: 390, locale: "fr" },
+  ]) {
+    test(`reads as a value, not five buttons, at ${width}px (${locale})`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto(`/r/sample?lang=${locale}`);
+      const sheet = page.getByTestId("stage-scores");
+      await sheet.waitFor();
+      await expect(sheet).toHaveAttribute("aria-label", locale === "fr" ? "Score par étape, sur 20" : "Score per stage, out of 20");
 
-    const rows = await page.evaluate(() => {
-      // Each grid cell is an unclassed wrapper div; the chip is inside it.
-      const chips = document.querySelectorAll('[class*="pillarGrid"] [class*="chip"]');
-      return [...chips].map((chip) => {
-        const score = chip.querySelector('[class*="score"]')!.getBoundingClientRect();
-        // The denominator is the only child with no class of its own.
-        const denom = [...chip.children]
-          .find((c) => c.tagName === "SPAN" && !c.className)!
-          .getBoundingClientRect();
-        const label = chip.querySelector('[class*="label"]')!.getBoundingClientRect();
-        return {
-          name: chip.querySelector('[class*="label"]')!.textContent,
-          scoreToDenom: Math.round(denom.left - score.right),
-          denomToLabel: Math.round(label.left - denom.right),
-          width: Math.round(chip.getBoundingClientRect().width),
-        };
-      });
+      const rows = await sheet.evaluate((ol) =>
+        [...ol.querySelectorAll(":scope > li")].map((li) => {
+          const css = getComputedStyle(li);
+          const r = li.getBoundingClientRect();
+          const score = li.querySelector('[class*="score"]')!.getBoundingClientRect();
+          const name = li.querySelector('[class*="name"]')!.getBoundingClientRect();
+          return {
+            text: (li.textContent ?? "").replace(/\s+/g, " ").trim(),
+            alert: li.className.includes("alert"),
+            top: r.top,
+            height: r.height,
+            width: r.width,
+            radius: css.borderTopLeftRadius,
+            borderTop: css.borderTopWidth,
+            background: css.backgroundColor,
+            scoreRight: Math.round(score.right),
+            nameLeft: Math.round(name.left),
+          };
+        }),
+      );
+
+      expect(rows.length, "the score sheet moved — this measures nothing now").toBe(5);
+      // The « ? » is a button right after the name (its accessible name is « Definition: … »).
+      expect(rows.map((r) => r.text)).toEqual([
+        "18/20 Acquisition?",
+        "12/20 Activation?",
+        "8/20 Retention?",
+        "16/20 Referral?",
+        "20/20 Revenue?",
+      ]);
+      // One column at every width, rows at least 44px and never overlapping.
+      for (const [i, row] of rows.entries()) {
+        expect(row.width, `${row.text}: the row should fill the column`).toBeGreaterThan(300);
+        expect(row.height).toBeGreaterThanOrEqual(44);
+        if (i > 0) expect(row.top).toBeGreaterThanOrEqual(rows[i - 1]!.top + rows[i - 1]!.height - 0.5);
+      }
+      // No row is a box: no corner, no top edge, no fill on a neutral row.
+      for (const row of rows) {
+        expect(row.radius, `${row.text}: a row has no corner`).toBe("0px");
+        expect(row.borderTop, `${row.text}: a row has no edge all round`).toBe("0px");
+        if (!row.alert) expect(row.background, `${row.text}: a neutral row has no fill`).toBe("rgba(0, 0, 0, 0)");
+      }
+      // The sample names retention alone (a clear bottleneck): one red row.
+      expect(rows.filter((r) => r.alert).map((r) => r.text)).toEqual(["8/20 Retention?"]);
+      // Figures set right on one edge, names starting on one line.
+      expect(new Set(rows.map((r) => r.scoreRight)).size).toBe(1);
+      expect(new Set(rows.map((r) => r.nameLeft)).size).toBe(1);
     });
-
-    expect(rows.length, "the pillar grid moved — this measures nothing now").toBe(5);
-    for (const row of rows) {
-      expect(row.width, `${row.name}: the row should fill the column`).toBeGreaterThan(300);
-      expect(row.scoreToDenom, `${row.name}: "18" and "/20" must read as one unit`).toBeLessThanOrEqual(2);
-      expect(row.denomToLabel, `${row.name}: the free space belongs between the two halves`).toBeGreaterThan(60);
-    }
-  });
+  }
 });

@@ -1,22 +1,25 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { MetaLabel } from "@/components/brand/MetaLabel";
 import { Card } from "@/components/core/Card";
 import { Bottleneck } from "@/components/result/Bottleneck";
-import { PillarChip } from "@/components/result/PillarChip";
+import { StageScore } from "@/components/result/StageScore";
+import { StageScores } from "@/components/result/StageScores";
 import { PriorityMove } from "@/components/result/PriorityMove";
 import { ScoreDisplay } from "@/components/result/ScoreDisplay";
 import { ToneToggle, type ToneToggleValue } from "@/components/result/ToneToggle";
 import { setSampleTone } from "./sample-tone";
 import styles from "./page.module.css";
 
-export interface PreviewChip {
-  /** Already-translated pillar name. */
+export interface PreviewStage {
+  /** Already-translated stage name. */
   label: string;
   score: number;
+  /** Its glossary page. */
   href: string;
+  /** The link's accessible name: the stage name and where it leads ("Acquisition — definition"). */
+  linkLabel: string;
   weak: boolean;
 }
 
@@ -32,7 +35,9 @@ export interface PreviewCardProps {
   bottleneckScore: number;
   /** The sample headline, one per tone — the only thing the toggle swaps. */
   verdicts: Record<ToneToggleValue, string>;
-  chips: PreviewChip[];
+  /** The score sheet's accessible name (« Score par étape, sur 20 »). */
+  scoresLabel: string;
+  stages: PreviewStage[];
   moveLabel: string;
   move: string;
 }
@@ -71,7 +76,8 @@ export function PreviewCard({
   bottleneckPillar,
   bottleneckScore,
   verdicts,
-  chips,
+  scoresLabel,
+  stages,
   moveLabel,
   move,
 }: PreviewCardProps) {
@@ -108,16 +114,24 @@ export function PreviewCard({
         tone={tone}
       />
 
-      <div className={styles.previewTags}>
-        {/* REVIEW-02.md R2-13: each chip is a link to its pillar's glossary
-            page — the landing is the strongest page on the site and passed
-            nothing to any term page. */}
-        {chips.map((chip) => (
-          <Link key={chip.href} href={chip.href} className={styles.previewChipLink} aria-label={chip.label}>
-            <PillarChip pillar={chip.label} score={chip.score} size="sm" weak={chip.weak} stretch />
-          </Link>
+      {/* REVIEW-02.md R2-13: each stage links to its glossary page — the
+          landing is the strongest page on the site and passed nothing to any
+          term page. Design system extension 05 (A16): the link is the stage
+          NAME, underlined in its row's ink; the row stays a value. The whole
+          chip used to be the link, a box that looked like the secondary
+          button beside it (A15.19). */}
+      <StageScores size="sm" label={scoresLabel} className={styles.previewScores} data-testid="preview-scores">
+        {stages.map((stage) => (
+          <StageScore
+            key={stage.href}
+            stage={stage.label}
+            score={stage.score}
+            tone={stage.weak ? "alert" : "neutral"}
+            href={stage.href}
+            linkLabel={stage.linkLabel}
+          />
         ))}
-      </div>
+      </StageScores>
 
       {/* Sample action, no upgrade slot: there is nothing to own here. */}
       <PriorityMove
