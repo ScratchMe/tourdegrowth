@@ -21,16 +21,18 @@ en fin de document). `CLAUDE.md` garde l'état courant, `JOURNAL.md` l'histoire.
 
 | Groupe | Qui | Où | Quand |
 |---|---|---|---|
-| **A. Le travail autonome**, en quatre lots | Une session seule, une PR par lot (A7 : une PR par item) | Session cloud | A1 à A6 livrés le 2026-09-29, A7 et A8 le 2026-09-30. **Reste d'A7** : A7.3.c (le code) et A7.3.e (les quatre termes du glossaire), **prêts depuis C25** (2026-09-30), A7.3.d après A7.3.c, A7.4 après A7.3, et A7.12.c à l'ouverture. A10 (S-15) et A11 livrés le 2026-09-30. **A12, le niveau 2 du jeu** : spécifié et chiffré le 2026-09-30, **validé le 2026-10-01 (C30)** : A12.c peut partir |
+| **A. Le travail autonome**, en quatre lots | Une session seule, une PR par lot (A7 : une PR par item) | Session cloud | A1 à A6 livrés le 2026-09-29, A7 et A8 le 2026-09-30. **Reste d'A7** : A7.3.c (le code), **prêt depuis C25** (2026-09-30), A7.3.d après A7.3.c, A7.4 après A7.3, et A7.12.c à l'ouverture. A10 (S-15), A11 et A7.3.e (les quatre termes du glossaire) livrés le 2026-09-30. **A12, le niveau 2 du jeu** : spécifié et chiffré le 2026-09-30, **validé le 2026-10-01 (C30)** : A12.c peut partir. **A13** (trois alertes de dépendances, dont une critique sur `next`), ouvert le 2026-10-01, passe en premier |
 | **B. Design sync** | Une session, cloud ou locale | N'importe où : une session cloud pousse vers Claude Design depuis le 2026-09-29 | **À jour le 2026-09-30, après A7.10, A10 et A11** (B3, puis la re-synchro d'A11 le soir même : 88 composants, 292 cellules, 88 aperçus sur 88 rendus). Rien à lancer tant qu'un composant, ou une copie qu'un aperçu reprend, ne change pas |
 | **C. Tes décisions**, une par une | Toi, guidé, avec une recommandation par question | N'importe quelle session | **Tranchées le 2026-09-29** (C18 close à part, par la session D). C23 à C29 tranchées le 2026-09-30, C26 à C29 livrées le même jour, **C25** (la spécification de A7.3, `ENGINE.md` §18) dans sa propre session. **C30** (le niveau 2 du jeu, `GAME-BRIEF.md` §17) le 2026-10-01. **Rien n'est ouvert** |
 | **D. Tes actions**, pas à pas | Toi, accompagné | Session cloud | Selon ce qui est prêt. D10 (l'indexation) est prêt tout de suite. D2 attend les bons à tirer nº7 et nº8, la recette (D9) et, pour le moteur, tout A7.3 |
 | **E. La veille** | Personne | — | Rien à lancer avant un déclencheur |
 
-**L'ordre conseillé** : A7.3.c (prompt A sur « le lot A7.3.c », dans l'ordre
-du §18.11) et A7.3.e (son prompt) en parallèle, puis D. A12.c (la copie du
-niveau 2 du jeu) peut partir en parallèle aussi : il ne touche pas les mêmes
-fichiers. Le moteur ouvre avant le jeu (C23). Rien n'attend dans la section C.
+**L'ordre conseillé** : A13 d'abord (une alerte critique sur `next`, merge
+avec l'accord d'Antoine), A7.3.c (prompt A sur « le lot A7.3.c », dans l'ordre
+du §18.11), puis D. A7.3.e, qui se menait en parallèle, est livré le
+2026-09-30. A12.c (la copie du niveau 2 du jeu) peut partir en parallèle : il
+ne touche pas les mêmes fichiers. Le moteur ouvre avant le jeu (C23). Rien
+n'attend dans la section C : C30 est tranchée le 2026-10-01.
 
 **Deux sessions en parallèle** écrivent toutes deux à la fin de `JOURNAL.md`
 et dans ce fichier. La seconde à merger fusionne `main` dans sa branche avant
@@ -66,7 +68,7 @@ rencontrée en le faisant repart en section C. Toute copie neuve porte
 - A7.3 avant A7.4, parce que les liens promettent ce que le moteur fait ;
 
 Le jeu n'attend rien du moteur.
-**A7.1, A7.2, A7.5 à A7.11, A7.12.a, A7.12.b et A7.13 sont livrés (2026-09-30).** **A7.3.a est écrit et A7.3.b est close** : Antoine a validé la spécification le 2026-09-30 (C25, `ENGINE.md` §18.12). **A7.3.c et A7.3.e peuvent partir**, en parallèle.
+**A7.1, A7.2, A7.5 à A7.11, A7.12.a, A7.12.b et A7.13 sont livrés (2026-09-30).** **A7.3.a est écrit et A7.3.b est close** : Antoine a validé la spécification le 2026-09-30 (C25, `ENGINE.md` §18.12). **A7.3.e est livré le 2026-09-30, et A7.3.c peut partir.**
 
 #### A7.3 — Le B2B assisté et l'hybride dès la v1 (C4)
 
@@ -100,16 +102,15 @@ Le jeu n'attend rien du moteur.
   part (A7.3.e) ;
 - les dix autres recos du §18.12 telles quelles.
 
-**Dans l'ordre, et chaque étape attend la précédente** (sauf A7.3.e, en
-parallèle de A7.3.c) :
+**Dans l'ordre, et chaque étape attend la précédente** (A7.3.e, mené en
+parallèle de A7.3.c, est livré le 2026-09-30 et retiré du tableau) :
 
 | # | Quoi | Précisions |
 |---|---|---|
 | A7.3.a | **La spécification** — **écrite le 2026-09-30 : `ENGINE.md` §18** | Le catalogue assisté (14 chiffres, 15 depuis Q4 ; trois relais sur leur propre base de 100), le modèle de données (`type` + `motions`, ids `slg.*`, `schemaVersion` 2 et sa migration testée au caractère près), l'hybride en « deux moteurs, un total » et ses garde-fous contre le face-à-face, le deck, l'exemple rempli calculé à la main, les tests et le découpage en PR. Seize questions produit en §18.12, reprises en C25 |
 | A7.3.b | **La validation par Antoine** — **close le 2026-09-30** | C25 : treize recos retenues, trois reprises (Q4, Q7, Q8) et Q3 précisée. Les réponses sont datées en `ENGINE.md` §18.12, et les sections qu'elles changent sont corrigées |
-| A7.3.c | **Le code**, sur le modèle du moteur actuel — **prêt à partir** | Dans l'ordre du **§18.11** : branche d'intégration `feat/engine-slg`, six PR (S0 contrats et migration → S1 moteur pur → S4 deck → S5 intégration, avec S2 contenu et S3 écrans en parallèle), **un seul merge sur `main`**, drapeau fermé. Se lance avec le prompt A sur « le lot A7.3.c ». S2 attend les slugs d'A7.3.e pour lier les fiches. Moteur pur dans `lib/engine/`, catalogue et copie dans `content/engine-*.ts` (« à relire »), la vue sous `aarrr-funnel-template/_engine/`. Tests du moteur pur avec leur non-vacuité, e2e dans les deux langues, à 1 280 et 390 px, par l'aperçu propriétaire. Le canari « rien ne quitte le navigateur » couvre la nouvelle saisie |
+| A7.3.c | **Le code**, sur le modèle du moteur actuel — **prêt à partir** | Dans l'ordre du **§18.11** : branche d'intégration `feat/engine-slg`, six PR (S0 contrats et migration → S1 moteur pur → S4 deck → S5 intégration, avec S2 contenu et S3 écrans en parallèle), **un seul merge sur `main`**, drapeau fermé. Se lance avec le prompt A sur « le lot A7.3.c ». **Les slugs d'A7.3.e sont en place** (2026-09-30), dans `GlossaryTermId` : S2 lie `slg.acq.lead-to-opp` à `lead-to-opportunity`, `slg.acq.cycle` à `sales-cycle`, `slg.rev.win-rate` à `win-rate` et `slg.rev.acv` à `acv`. Aucun n'écrit de repère : les « pas de repère publiable » du §18.4 tiennent. Le seul chiffre cité, sur la page `acv` (Janz, 2014), cadre un modèle économique et n'est pas un repère de fiche. Moteur pur dans `lib/engine/`, catalogue et copie dans `content/engine-*.ts` (« à relire »), la vue sous `aarrr-funnel-template/_engine/`. Tests du moteur pur avec leur non-vacuité, e2e dans les deux langues, à 1 280 et 390 px, par l'aperçu propriétaire. Le canari « rien ne quitte le navigateur » couvre la nouvelle saisie |
 | A7.3.d | **Le bon à tirer** de la copie neuve | Par l'agent des bons à tirer, avec `/bon-a-tirer`, construit depuis le code, **les quatre termes d'A7.3.e compris** |
-| A7.3.e | **Les quatre termes du glossaire de l'assisté** (Q8) — **prêt à partir**, en parallèle d'A7.3.c | « Taux de closing », « cycle de vente », « ACV » et « conversion lead → opportunité ». Pages FR et EN, sur le modèle de la vague 2.2 (`JOURNAL.md`, « Glossaire, lot 1 » à « lot 3 ») : FAQ sur la forme des requêtes que lit Search Console, exemples chiffrés repris de l'exemple §18.9 (18 signées sur 75 conclues, cycle médian de 64 jours, ACV 24 000 €, 72 opportunités sur 480 MQL), maillage vers `revenue`, `cac`, `arpu`, `acquisition` et `pql`. Un repère n'entre que s'il a une source primaire publique, et reste du contexte (C1). **Jamais** les ordres de grandeur de l'instrument d'audit (non relus au nº4, et la décision 6 l'interdit). Slugs proposés : `win-rate`, `sales-cycle`, `acv`, `lead-to-opportunity`, à confirmer. Une PR sur `main`, hors drapeau : sitemap, `hreflang`, JSON-LD, IndexNow, et `/llms.txt` et `/llms-full.txt`, qui les reprennent d'eux-mêmes (C27). Le glossaire passe de 24 à 28 termes (56 pages) : les comptes écrits dans les tests et dans `CLAUDE.md` suivent. Copie « à relire ». Prompt : « Prompt A7.3.e », en fin de fichier |
 | Hors code | Les textes de lancement disent « v1 : SaaS en libre-service » | `marketing/kit.md:105` et la ligne de risque de `marketing/campaigns/README.md` §8 : ils sont à réécrire quand A7.3.c est livré, pas avant |
 
 #### A7.4 — Les liens d'ouverture du moteur (C7)
@@ -233,6 +234,24 @@ spécification validée telle quelle. A12.c peut partir. Toute copie neuve porte
 | A12.g | **Les specs Playwright** | Sur le modèle de P1 à P27, dans les deux langues, à 1 280 et 390 px |
 | A12.h | **Le bon à tirer, puis la recette** | Un bon à tirer du niveau 2 (`/bon-a-tirer`), puis une recette (D9) qui couvre les deux niveaux, relecture juridique du catalogue comprise |
 
+### A13 — Trois alertes de dépendances, dont une critique sur `next` (vues le 2026-10-01)
+
+Trouvées par la session d'A7.3.e en se vérifiant : `npm audit --omit=dev`,
+à zéro le 2026-09-30, ne l'est plus sur `main`. A7.3.e ne touche aucune
+dépendance et ne les a pas corrigées : c'est une PR à part.
+
+| Paquet (installé) | Gravité | Avis | Corrigé dans |
+|---|---|---|---|
+| `next` (16.3.4) | **critique** | [GHSA-vcvr-r3jv-pc5j](https://github.com/advisories/GHSA-vcvr-r3jv-pc5j) : exécution de code à distance dans `ImageResponse` de `next/og`, dont le site se sert pour toutes ses images de partage (`src/lib/og/`) | 16.3.6 |
+| `@grpc/grpc-js` | haute | [GHSA-m9gg-hp2v-232j](https://github.com/advisories/GHSA-m9gg-hp2v-232j), [GHSA-f596-whhp-79r4](https://github.com/advisories/GHSA-f596-whhp-79r4) | 1.14.5 |
+| `brace-expansion` | haute | [GHSA-q2hr-2g5m-vwhr](https://github.com/advisories/GHSA-q2hr-2g5m-vwhr) et deux autres | 2.1.7 |
+
+**À faire, en premier** : une branche depuis `origin/main`, `npm audit fix`
+(les trois corrections restent dans leurs plages semver), `NEXTJS.md` lu avant
+de monter Next, puis toute la vérification de `/livrer`. **Le merge touche une
+dépendance : il attend l'accord d'Antoine** (`/livrer` §0), avec le poids des
+bundles serveur mesuré avant et après (`VERCEL.md` §1.2).
+
 ---
 
 ## B. Design sync
@@ -324,7 +343,7 @@ rien de privé dans le dépôt, qui est public. Cela vaut pour les chiffres de
 | D6 | **La distribution, vague 1** | **Non : rien ne part avant que le moteur et le jeu soient prêts** (C19, 2026-09-29). Rien n'est encore parti. Le Tour n'aura ni Show HN ni r/SaaS | Textes dans `marketing/launch/` et `marketing/campaigns/`. Tu postes sous pseudo, la session fournit et met à jour les textes. Annuaires dans l'ordre de `GROWTH-PLAN.md` 1.6. **Pas de LinkedIn ni de lancement en grande pompe pour l'instant** (C22 : une question de calendrier, pas d'anonymat) |
 | D7 | **La distribution, vague 4** | Après deux semaines de lecture de la vague 1 | La session écrit les pitchs de newsletters et passe honnêtement le produit de chaque auteur au Tour ; tu envoies depuis `contact@`. Pour les listes « awesome », seulement si ton profil GitHub n'affiche pas ton nom (à vérifier d'abord sur github.com/ScratchMe) |
 | D9 | **La recette du jeu** (`GAME-BRIEF.md` §7.3), avant d'ouvrir le jeu (D2) | Oui, dès que le nº7 est signé | Cinq testeurs qui ne connaissent pas le sujet, et les critères de §7.3. **Chronomètre chaque partie complète** (C13, 2026-09-29) : « vingt minutes » reste si la médiane tombe entre 15 et 25 minutes. Sinon, donne-moi la médiane : une session réécrit l'encart (`content/game/entry.ts:65`) et les textes de lancement. La relecture juridique du catalogue des cas réels est aussi à toi (`marketing/campaigns/README.md` §9) |
-| D10 | **Le Tour au seul SEO, maintenant** (C20, 2026-09-29) | **Indexation : il reste le français**, dès que le quota de Search Console le permet. **Annuaires : Launching Next soumis le 2026-09-30 ; les suivants peuvent partir**, les captures du Tour sont refaites (A7.12.a, 2026-09-30) | Ce ne sont pas des posts, ils partent sans attendre le moteur et le jeu. 1) Search Console, « Demander l'indexation ». **Fait le 2026-09-29** : `/en` (déjà sur Google), les deux pages « porte ouverte » et les cinq « AARRR vs X » en anglais (aucune n'était sur Google), plus trois `/en/glossary/*` (ex-D8). Le sitemap est lu (74 pages, 2026-09-29). **Reste**, le quota étant dépassé le 2026-09-30 au matin (une dizaine de demandes par 24 h glissantes) : `/fr` (déjà sur Google), `/fr/growth-audit-checklist`, `/fr/startup-growth-diagnostic`, `/fr/aarrr-vs-north-star-metric`, `/fr/aarrr-vs-rarra`, `/fr/aarrr-vs-growth-loops`, `/fr/aarrr-vs-okr`, `/fr/aarrr-vs-heart`. 2) Les annuaires restants de la vague 1, dans l'ordre de `GROWTH-PLAN.md` 1.6, avec les liens `relaunch_tour` de `marketing/kit.md` (`node scripts/utm-link.mjs directory:<slug> /en --campaign relaunch_tour`). Launching Next est fait. Pas de fil X/Bluesky pour le Tour |
+| D10 | **Le Tour au seul SEO, maintenant** (C20, 2026-09-29) | **Indexation : il reste le français**, dès que le quota de Search Console le permet. **Annuaires : Launching Next soumis le 2026-09-30 ; les suivants peuvent partir**, les captures du Tour sont refaites (A7.12.a, 2026-09-30) | Ce ne sont pas des posts, ils partent sans attendre le moteur et le jeu. 1) Search Console, « Demander l'indexation ». **Fait le 2026-09-29** : `/en` (déjà sur Google), les deux pages « porte ouverte » et les cinq « AARRR vs X » en anglais (aucune n'était sur Google), plus trois `/en/glossary/*` (ex-D8). Le sitemap est lu (74 pages, 2026-09-29). **Reste**, le quota étant dépassé le 2026-09-30 au matin (une dizaine de demandes par 24 h glissantes) : `/fr` (déjà sur Google), `/fr/growth-audit-checklist`, `/fr/startup-growth-diagnostic`, `/fr/aarrr-vs-north-star-metric`, `/fr/aarrr-vs-rarra`, `/fr/aarrr-vs-growth-loops`, `/fr/aarrr-vs-okr`, `/fr/aarrr-vs-heart`, et depuis A7.3.e (2026-09-30) les quatre termes de la vente assistée : `/en/glossary/win-rate`, `/en/glossary/sales-cycle`, `/en/glossary/acv`, `/en/glossary/lead-to-opportunity`, puis leurs adresses `/fr`. 2) Les annuaires restants de la vague 1, dans l'ordre de `GROWTH-PLAN.md` 1.6, avec les liens `relaunch_tour` de `marketing/kit.md` (`node scripts/utm-link.mjs directory:<slug> /en --campaign relaunch_tour`). Launching Next est fait. Pas de fil X/Bluesky pour le Tour |
 
 ---
 
@@ -407,26 +426,6 @@ Tu es là pour me faire trancher, une par une, les décisions de la section C de
 Réponds-moi en français.
 ```
 
-### Prompt A7.3.e — les quatre termes du glossaire de l'assisté
-
-Écrit le 2026-09-30 à la validation de C25 (Q8 : « on peut créer un prompt à
-part »). Il se lance en parallèle d'A7.3.c : les deux ne touchent pas les
-mêmes fichiers, et S2 attend seulement ses slugs. Le prompt C25 qui était ici
-a servi le même jour.
-
-```text
-Tu reprends Tour de Growth en autonomie sur l'item A7.3.e de CHANTIERS.md : les quatre termes de glossaire de la vente assistée, « taux de closing », « cycle de vente », « ACV » et « conversion lead → opportunité ».
-
-1. Lis CLAUDE.md (chargé d'office), l'item A7.3.e de CHANTIERS.md, ENGINE.md §18.4 (les fiches qui renverront à ces termes) et §18.9 (l'exemple chiffré), puis les entrées « Glossaire, lot 1 » à « lot 3 » de JOURNAL.md : la vague 2.2 est le modèle à suivre. Ouvre TESTING.md avant d'annoncer quoi que ce soit comme vérifié, et VERCEL.md avant le merge.
-2. Crée ta branche depuis origin/main avant la première édition.
-3. Avant d'écrire : relève les requêtes réelles (le rapport Search Console par stats.yml, scope gsc, et les résultats de recherche du jour) pour confirmer les slugs proposés (win-rate, sales-cycle, acv, lead-to-opportunity) et la forme des FAQ. Aucun chiffre du rapport n'entre dans le dépôt.
-4. Chaque terme, en FR et en EN : définition, formule, exemple chiffré repris de l'exemple §18.9 (jamais un nouveau jeu de nombres), pièges, FAQ, maillage vers les termes voisins (revenue, cac, arpu, acquisition, pql). Un repère n'entre que s'il a une source primaire publique, citée ; il reste du contexte et ne désigne jamais (C1). Jamais les ordres de grandeur de l'instrument d'audit (audit-catalog.ts) : non relus, et la décision 6 d'ENGINE.md l'interdit. Toute copie neuve porte « // TODO: à relire (convention 6). ».
-5. Les pages suivent tout ce que le glossaire fait déjà : sitemap, hreflang, JSON-LD, date de mise à jour, IndexNow, et /llms.txt et /llms-full.txt (C27), qui les reprennent d'eux-mêmes. Les comptes écrits en dur (24 termes, 48 pages) suivent : tests, CLAUDE.md. Vérifie à l'écran, en français et en anglais, à 1280 et 390 px.
-6. Avant la PR : tsc, lint, vitest --coverage, build avec GAME_ENABLED=true NEXT_PUBLIC_GOATCOUNTER_CODE=e2e-stub ADMIN_DASHBOARD_PASSWORD=e2e-admin, Playwright complet, et le relecteur-copie. Une PR sur main, mergée quand elle est verte en suivant /livrer (lu, pas appelé). Vérifie en production.
-7. Si tu rencontres une question produit, ne la tranche pas : ajoute-la en section C de CHANTIERS.md avec ta recommandation.
-8. À la fin : retire A7.3.e de CHANTIERS.md, écris dans l'item A7.3.c les slugs retenus (S2 en a besoin), ajoute l'entrée de JOURNAL.md, mets à jour CLAUDE.md (le nombre de termes et de pages).
-
-Réponds-moi en français, court : ce qui est livré, ce qui est vérifié et comment, ce qui reste.
 ```
 
 ### Prompt D — tes actions, pas à pas
