@@ -363,6 +363,17 @@ export const UI_STRINGS = {
       en: "Your 15 answers are still saved on this device — retrying doesn't restart the questionnaire.",
       fr: "Tes 15 réponses sont toujours enregistrées sur cet appareil — réessayer ne relance pas le questionnaire.",
     },
+    // TODO: à relire (convention 6). A14.4 (2026-10-01): `errorBody` says « in a moment »,
+    // which a dropped connection and the hourly limit both make false. `{m}` is in minutes.
+    errorOffline: {
+      en: "The connection dropped before our answer reached you — check your network, then try again.",
+      fr: "La connexion a coupé avant que notre réponse t'arrive — vérifie ton réseau, puis réessaie.",
+    },
+    // TODO: à relire (convention 6).
+    errorRateLimited: {
+      en: "That's a lot of requests from this connection in an hour — you can try again in {m} min.",
+      fr: "Beaucoup de demandes depuis cette connexion en une heure — tu pourras réessayer dans {m} min.",
+    },
   },
 
   /** Tone selector (DESIGN-BRIEF.md §06a). SPEC.md §6bis: "Straight up" /

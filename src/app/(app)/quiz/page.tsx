@@ -39,6 +39,7 @@ import {
 import type { AnswerIndex, Answers } from "@/lib/scoring/score";
 import { LoadingScreen } from "@/components/quiz/LoadingScreen";
 import { segmentDetail, type SegmentAnswers } from "@/lib/submissions/segment";
+import { failureOf, failureSentence, requestOrFail, type RequestFailure } from "@/lib/quiz/request-failure";
 import { SegmentSelector } from "./SegmentSelector";
 import { ToneSelector, type Tone } from "./ToneSelector";
 import styles from "./page.module.css";
@@ -87,7 +88,7 @@ export default function QuizPage() {
   const [segment, setSegment] = useState<SegmentAnswers>({ stage: "unknown", model: "unknown" });
   const [answers, setAnswers] = useState<Answers>({});
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<RequestFailure | null>(null);
   const [openGlossaryId, setOpenGlossaryId] = useState<string | null>(null);
   // SPEC.md §6bis: "Straight up" (neutral) is the explicit default tone.
   const [tone, setTone] = useState<Tone>("neutral");
@@ -244,7 +245,7 @@ export default function QuizPage() {
     const minDwell = new Promise((resolve) => window.setTimeout(resolve, 300));
     try {
       const [res] = await Promise.all([
-        fetch("/api/submissions", {
+        requestOrFail("/api/submissions", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           // SPEC.md §7 for the ref; REVIEW-02.md R2-26 for the segment.
@@ -252,11 +253,6 @@ export default function QuizPage() {
         }),
         minDwell,
       ]);
-      if (!res.ok) {
-        const body: unknown = await res.json().catch(() => null);
-        const message = (body as { error?: string } | null)?.error;
-        throw new Error(message || `Request failed (${res.status})`);
-      }
       const created = (await res.json()) as { id: string; ownerToken: string; total: number };
       // REVIEW.md R-01: the owner token comes back exactly once and is never
       // recoverable afterwards — store it before navigating away. It is the
@@ -287,7 +283,9 @@ export default function QuizPage() {
       trackEvent("submission_completed", tone); // SPEC.md §8: one custom event per completed analysis
       router.push(`/r/${created.id}`);
     } catch (err) {
-      setSubmitError(err instanceof Error ? err.message : "Unknown error");
+      // The full error for the console; the reader gets a sentence and a stable code (A14.4, R-04).
+      console.error(err);
+      setSubmitError(failureOf(err));
       setPhase("error");
     }
   }
@@ -429,8 +427,16 @@ export default function QuizPage() {
               eyebrow={tc(t.errorEyebrow, locale)}
               title={tc(t.errorTitle, locale)}
             >
-              {tc(t.errorBody, locale)}
-              {submitError && <p className={styles.errorDetail}>{submitError}</p>}
+              {failureSentence(submitError, {
+                body: tc(t.errorBody, locale),
+                offline: tc(t.errorOffline, locale),
+                rateLimited: tc(t.errorRateLimited, locale),
+              })}
+              {submitError && (
+                <p className={styles.errorDetail} data-testid="error-code">
+                  {submitError.code}
+                </p>
+              )}
             </DetourCard>
 
             {/* Below the card, never inside it: what is hidden or nested is not
