@@ -225,7 +225,7 @@ test("an answer's screen says where it sits, never « Chiffre »", async ({ page
   await page.getByTestId("engine-number-skip").click();
   const number = page.getByTestId("engine-number");
   await expect(number).toHaveAttribute("data-metric", "act.event");
-  await expect(number).toContainText(ENGINE_COPY.list.position.fr.replace("{stage}", ENGINE_COPY.stages.activation.fr).replace("{i}", "1").replace("{n}", "3"));
+  await expect(number).toContainText(ENGINE_COPY.list.position.fr.replace("{stage}", ENGINE_COPY.stages.activation.fr).replace("{i}", "2").replace("{n}", "3"));
   await expect(number).not.toContainText("Chiffre");
   await expect(number.getByRole("group", { name: ENGINE_COPY.sheet.answerLegendAnswer.fr, exact: true })).toBeVisible();
 });

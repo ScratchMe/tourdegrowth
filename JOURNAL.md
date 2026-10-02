@@ -800,7 +800,7 @@ Le tout est « à relire ».
   - une seule demande restante ;
   - un mois passé corrigé ;
   - dans l'hybride, l'ordre des deux moteurs étape par étape.
-- Gardés : l'exemple, les réglages, le nom de l'entreprise, les réponses qui ne sont pas des chiffres (leur place sur l'écran, « Activation · 1 sur 3 », remplace « Point 4 sur 17 »), les grands nombres (tapés dans les cases d'un chiffre au lieu de la base), la cible illisible et le signe %.
+- Gardés : l'exemple, les réglages, le nom de l'entreprise, les réponses qui ne sont pas des chiffres (leur place sur l'écran, « Activation · 2 sur 3 », remplace « Point 4 sur 17 »), les grands nombres (tapés dans les cases d'un chiffre au lieu de la base), la cible illisible et le signe %.
 - Retirée : la garde de la base (A15.9), qui part avec la base.
 - **Huit specs attendaient la ligne « Enregistré »** sous la fiche : enregistrer mène maintenant ailleurs, et la ligne part avec l'écran. Une aide, `expectLeft`, attend que la fiche s'en aille (un refus la garde, avec son message). Seul le mois passé qu'on corrige garde sa ligne.
 - **`openNumber` choisit d'abord le moteur du chiffre dans l'hybride** : continuer vers un chiffre du libre-service affiche la liste du libre-service, et la ligne d'un chiffre de l'assisté n'y est plus.
