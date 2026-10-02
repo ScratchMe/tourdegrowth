@@ -380,8 +380,13 @@ copied to the repo the same day; nothing outside that folder changed). Brief 06 
 B5) followed the same evening: `design/DS-EXTENSION-BRIEF-06.md` and the ten
 PNGs under `design/ds-extension-06/` (eleven files, their own plan, no delete,
 anchor untouched); Claude Design returned it the same evening, under
-`design/ds-extension-06-return/`, copied into this repo and ported (T6.2). A
-re-sync must leave them: before applying
+`design/ds-extension-06-return/`, copied into this repo and ported (T6.2).
+Brief 07 (the growth engine made simpler, B10) went in on 2026-10-02:
+`design/DS-EXTENSION-BRIEF-07.md`, the sixteen screens of
+`design/ds-extension-07/` in two languages and two widths (26 PNGs) and its
+`CATALOGUE.md` (28 files, their own plan, no delete, bundle and
+`_ds_sync.json` untouched); its return is awaited under
+`design/ds-extension-07-return/`. A re-sync must leave them: before applying
 `upload.deletePaths`, check it names nothing under `design/`. Remove them on
 purpose once the return is ported, not as a side effect of a sync.
 

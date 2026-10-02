@@ -280,3 +280,28 @@ Les suites passaient pourtant sur `main` + #244 : lint, `tsc`, 2 944 tests unita
 **Le journal, archivé une fois de plus.** Cette entrée portait `JOURNAL.md` à environ 202 000 caractères, pour un plafond de 200 000, et le test rougissait. Les 35 entrées du 2026-10-01 sont parties telles quelles dans `docs/journal/10-niveau-2-assiste-moteur-complet.md`. Il est vérifié que le bloc s'y retrouve à l'identique, et que les entrées du 2026-10-02 n'ont pas bougé. La table des volumes gagne sa ligne, et ce fichier repart à environ 37 000 caractères.
 
 **Ce qui reste pour la suite, et pourquoi ce fichier le dit** : `GITHUB.md` §2 pose maintenant qu'une PR Dependabot ouverte se mesure et se pose en question dans `CHANTIERS.md` C. Sans cette règle, #244 serait restée ouverte, ou aurait été mergée par une session pressée, avec 11 Mo de plus par déploiement.
+
+## B10 : le brief 07 du moteur, plus simple sans perdre son expertise (2026-10-02)
+
+**La demande d'Antoine** : la saisie du moteur reste « extrêmement dense », au retour comme dans le pas à pas. Faire travailler Claude Design sur le moteur seul, pour une fonctionnalité plus simple à comprendre et à utiliser, « sans retirer toute l'expertise et la connaissance qu'il va apporter ».
+
+**Ce qui est livré** : `design/DS-EXTENSION-BRIEF-07.md`, en anglais comme les précédents, et pour la première fois sur un parcours plutôt qu'un composant. Ses seize écrans sont dans `design/ds-extension-07/`, chacun en français à 1 280 px et en anglais à 390 px, sauf six qui n'existent qu'une fois (la liste « À aller chercher », l'hybride, le mois suivant, les deux pages entières à 1×, la slide). `CATALOGUE.md`, dans le même dossier, est le texte de chaque chiffre tel que la page l'imprime, extrait du HTML prérendu dans les deux langues : 41 fiches par langue, les 17 + 15 + 1 chiffres et les huit calculés.
+
+**Mesuré sur un build de production** (`ENGINE_ENABLED=true`, horloge au 24 septembre 2026, l'exemple §6.0, et pour le retour le même exemple avec quatre chiffres remis « à faire », touché douze jours plus tôt) :
+- l'outil commence à 1 267 px du haut de la page au bureau et à 1 849 px au téléphone, **à la première visite comme au retour** : les deux captures d'arrivée sont identiques à l'octet, et une seule est gardée ;
+- la carte de réglage fait 1 431 px et 36 contrôles ; le tableau de bord du retour, 2 463 px, 12 blocs et 75 contrôles visibles (3 597 px au téléphone) ; un chiffre ouvert, 1 667 px et 15 contrôles ;
+- le pas à pas compte 21 écrans en libre-service, 38 en hybride.
+
+**Ce que le brief pose** : l'inventaire de ce qui existe, sept raisons de la densité (à contester), ce qui doit rester (chaque chiffre garde sa définition, sa formule, où le trouver, son piège, son repère et son effort, joignables au moment de le saisir ; les quatre réponses ; seule une cible d'équipe désigne l'étape, C1 ; le verdict est le titre de la première slide ; le local seul et la promesse avant l'appel ; la série mensuelle ; « deux moteurs, un total » ; le contenu que lit un moteur de recherche), ce qui peut changer (l'ordre, les réglages, la granularité du pas à pas, la composition du tableau, toute la copie), vingt questions, quinze contraintes dont une nouvelle (les données ne bougent pas sans décision d'Antoine), et les états à dessiner. **En retour, deux pièces neuves** : `INVENTORY.md`, où est passé chaque morceau de l'expertise (c'est ainsi qu'Antoine vérifie que rien ne s'est perdu), et `COPY.md` pour son bon à tirer.
+
+**Deux pièges de capture** :
+- une capture d'élément plus haute que la fenêtre dessinait l'en-tête collant du site en travers, au milieu du tableau de bord. Les éléments `sticky` et `fixed` sont passés en `static` avant chaque capture d'élément ;
+- la souris, laissée là par le dernier clic, mettait « Je l'ai » en survol sur l'écran d'un chiffre vierge. Elle est ramenée dans le coin avant chaque capture.
+
+**Le script reste** : `scripts/engine-density.capture.ts`, avec sa propre config hors de `e2e/` (la CI ne le lance pas), refait les captures, le catalogue et les mesures. Relancé sous un autre `OUT`, il redonne le même catalogue à l'octet. Le portage du retour le relancera pour mesurer l'après de la même façon.
+
+**Vérifié contre le code** : chaque chaîne citée relue dans `engine-copy.ts` (deux corrigées : « Motion shown: stages and what-ifs », et l'assisté a cinq cibles possibles, pas trois) ; les comptes d'écrans contre `steps-model.ts` ; les sept chiffres de la base contre `shared-counts.ts` ; les défauts du réglage contre la capture.
+
+**Le dépôt** : 28 fichiers écrits par `DesignSync` dans le projet `23b9671c-…`, aux mêmes chemins que dans le dépôt, sous un plan qui ne nommait qu'eux, sans suppression. `get_project` avant (un design system, modifiable) ; `list_files` avant (rien sous `design/ds-extension-07/`) et après (les 28 chemins, les briefs 04 à 06 et leurs retours inchangés) ; le brief relu côté projet par `get_file`, identique au fichier du commit.
+
+**Ouvert** : D14 (le lancer, avec le prompt à coller) et C38 (les bons à tirer A7.3.d et A14.d attendent-ils le portage du retour ? Reco : oui, une copie relue avant la refonte serait relue deux fois). `ENGINE.md` dit qu'une refonte est demandée.
