@@ -1340,7 +1340,7 @@ Le balisage du composant `Stopwatch` est identique avant et après, au caractèr
 **Consigné** : `CHANTIERS.md` (A14.c, A14.d, B5 clos, D12 retirée, D2, et A17 pour le halo grisé des images de contenu, trouvé en route : `transparent` dans un dégradé Satori se mélange à travers le noir), `ENGINE.md`, `docs/engine/moteur-complet.md` §19.11, `NEXTJS.md` §1.10 et §1.11, `design/README.md`, `.design-sync/NOTES.md`, `CLAUDE.md` (l'état et les chiffres).
 
 
-## L'en-tête du résultat sur téléphone : les états descendent en tête de page (2026-10-02)
+## L'en-tête du résultat sur téléphone : les états descendent en tête de page (2026-10-02, #273)
 
 **La demande** (Antoine) : à 320 px, un résultat en roast débordait de 14 px, par le badge roast de l'en-tête (`CHANTIERS.md` E, noté par A16).
 
