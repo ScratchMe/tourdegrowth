@@ -336,7 +336,7 @@ describe("lengths", () => {
       ...under("actions", "collect.fill", "resume.continue", "erase.confirm", "io.replace", "io.cancel"),
       ...under("request.copy", "request.copyGroup", "request.copied", "request.remind"),
       ...under("deck.png", "deck.pngHd", "deck.copyImage", "deck.pdf", "deck.copyText", "deck.textCopied"),
-      ...under("sheet.save", "sheet.haveIt", "sheet.canEstimate", "sheet.willAsk", "sheet.cantFind"),
+      ...under("sheet.save", "sheet.canEstimate", "sheet.willAsk", "sheet.cantFind", "sheet.answerBack", "sheet.writeDefinition"),
       ...under("page.cta", "page.tourFirst", "setup.startSteps", "setup.startBoard", "setup.tourLink"),
       ...under("steps.skipToSlg", "steps.skipToWhatIf", "sheet.companyWide"),
       ...under("engines.open", "engines.new", "engines.delete", "engines.deleteConfirm", "io.addApply", "io.mergeApply"),

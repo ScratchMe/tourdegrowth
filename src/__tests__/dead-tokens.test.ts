@@ -42,22 +42,11 @@ const WAITING: Record<string, string> = {
  * third test; a step that is dropped leaves its tokens here, in plain sight.
  */
 const A18_STEP = {
-  T1: "A18 T1, the number's screen (NumberSheet, TrapNote, HowItCompares)",
   T2: "A18 T2, the board (EngineBar, NextStep, EngineProgress, NumberList, LeverCard, the verdict)",
   T4: "A18 T4, the page (EngineLanding)",
   T5: "A18 T5, the hybrid (TotalBand)",
 } as const;
 const WAITING_FOR_A18: Record<string, string> = {
-  "--engine-measure": A18_STEP.T1,
-  "--engine-number-title": A18_STEP.T1,
-  "--engine-number-title-mobile": A18_STEP.T1,
-  "--engine-formula": A18_STEP.T1,
-  "--engine-advice-edge": A18_STEP.T1,
-  "--engine-key-width": A18_STEP.T1,
-  "--engine-key-bar": A18_STEP.T1,
-  "--engine-key-tick-width": A18_STEP.T1,
-  "--engine-key-tick-height": A18_STEP.T1,
-  "--engine-key-tick-radius": A18_STEP.T1,
   "--engine-row-height": A18_STEP.T2,
   "--engine-mark-size": A18_STEP.T2,
   "--engine-mark-gap": A18_STEP.T2,

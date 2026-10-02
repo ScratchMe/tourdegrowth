@@ -90,9 +90,14 @@ export function isAnswerMetric(id: MetricId): boolean {
   return unit === "text" || unit === "choice";
 }
 
-/** The question over the sheet's four status choices: « ce chiffre » for a number, « ce point » for an answer. */
+/**
+ * What the sheet offers under the boxes (A18 T1, design system extension 07):
+ * « Pas de chiffre sous la main ? » over a number, « Pas de réponse sous la
+ * main ? » over an answer. It was the question over the four status choices
+ * (« Où en es-tu avec ce chiffre ? »), before the boxes became the question.
+ */
 export function statusQuestionOf(id: MetricId, strings: Words): string {
-  return isAnswerMetric(id) ? strings.sheet.statusQuestionAnswer : strings.sheet.statusQuestion;
+  return isAnswerMetric(id) ? strings.sheet.answerLegendAnswer : strings.sheet.answerLegend;
 }
 
 // --- Grammatical number --------------------------------------------------------
@@ -441,6 +446,18 @@ const HYBRID_TRAPS: Partial<Record<MetricId, keyof Words["sheet"]["hybridTrap"]>
   "rev.paid-conversion": "signedBySales",
   "rev.arpa": "signedBySales",
 };
+
+/**
+ * The traps that tell the person to write something down (A18 T1, the
+ * number's TrapNote): their note carries « Écrire ta définition », which
+ * opens « Ta définition et une note » and moves the focus there. The return
+ * named three (sign-up rate, activation rate, lead to opportunity); its rule,
+ * « when the trap says to write something in your definition », also covers
+ * the two CAC traps (« décale la dépense et écris-le »). Held against the
+ * catalogue's own text by a test, so a trap rewritten one day cannot keep a
+ * button its words no longer ask for.
+ */
+export const TRAPS_ASKING_DEFINITION: readonly MetricId[] = ["acq.signup-rate", "acq.cac", "act.rate", "slg.acq.lead-to-opp", "slg.acq.cac"];
 
 /**
  * The extra trap line a self-serve sheet shows in the hybrid, and ONLY in

@@ -557,12 +557,6 @@ export const ENGINE_COPY = {
       fr: "Cette cohorte n'a pas encore eu toute sa fenêtre : le chiffre sera marqué approximatif.",
       en: "This cohort hasn't had its full window yet: the number will be marked approximate.",
     },
-    statusQuestion: { fr: "Où en es-tu avec ce chiffre ?", en: "Where are you with this number?" },
-    // TODO: à relire — nouveau (2026-09-26, retour d'Antoine) : trois des dix-sept ne sont pas des chiffres
-    // (l'événement d'activation et la cause de churn sont des mots, le mécanisme de recommandation un choix).
-    // On ne leur demande pas où on en est « avec ce chiffre ».
-    statusQuestionAnswer: { fr: "Où en es-tu sur ce point ?", en: "Where are you on this?" },
-    haveIt: { fr: "Je l'ai", en: "I have it" },
     canEstimate: { fr: "Je peux l'estimer", en: "I can estimate it" },
     willAsk: { fr: "Je le demande", en: "I'll ask for it" },
     cantFind: { fr: "Je ne le trouve pas", en: "I can't find it" },
@@ -605,20 +599,9 @@ export const ENGINE_COPY = {
       en: "{range} · for context, never to name a stage: {caveat}",
     },
     noReference: { fr: "Pas de repère publiable : {reason}.", en: "No reference worth publishing: {reason}." },
-    // TODO: à relire (convention 6) — 2026-09-30 (C29) : « facultatif » sort du libellé, la prop `optional` le dessine (workbench.optional).
-    target: { fr: "Ta cible", en: "Your target" },
-    // TODO: à relire (convention 6) — réécrit le 2026-09-30 (A7.1, C1 : aucun repère ne désigne).
-    targetHint: {
-      fr: "Seule une cible d'équipe permet de dire quelle étape freine.",
-      en: "Only a team target lets us say which stage holds you back.",
-    },
     dependsOnEvent: {
       fr: "Il faut d'abord nommer l'événement d'activation : sans lui, ce taux ne veut rien dire.",
       en: "Name the activation event first: without it, this rate means nothing.",
-    },
-    declaredAtTour: {
-      fr: "Au Tour : « {answer} » ({points} pts). Ici : {found}.",
-      en: "In the Tour: \"{answer}\" ({points} pts). Here: {found}.",
     },
     note: { fr: "Note pour toi", en: "Note to self" },
     noteHint: { fr: "Jamais sur une slide.", en: "Never on a slide." },
@@ -631,6 +614,40 @@ export const ENGINE_COPY = {
     },
     offBase: { fr: "Compté sur {n}, pas sur ta base de {base}.", en: "Counted on {n}, not on your base of {base}." },
     saveNext: { fr: "Enregistrer et continuer →", en: "Save and continue →" },
+    /**
+     * TODO: à relire (convention 6) — neuf le 2026-10-02 (A18 T1, le retour 07 de Claude Design,
+     * design/ds-extension-07-return/COPY.md) : l'écran d'un chiffre, le piège avant la valeur, les trois
+     * autres réponses sous les cases, « Comment il se situe » en un objet, la définition et la note repliées.
+     */
+    trapLabel: { fr: "Le piège, avant de taper", en: "The trap, before you type" },
+    writeDefinition: { fr: "Écrire ta définition", en: "Write your definition" },
+    hybridTrapLabel: { fr: "Si tu vends des deux façons", en: "When you sell both ways" },
+    answerLegend: { fr: "Pas de chiffre sous la main ?", en: "No figure to hand?" },
+    /** The same over the three answers that are not numbers (the activation event, the churn cause, the referral mechanism): a name is not « un chiffre » (Antoine, 2026-09-26). */
+    answerLegendAnswer: { fr: "Pas de réponse sous la main ?", en: "No answer to hand?" },
+    answerBack: { fr: "← J'ai le chiffre, finalement", en: "← I have the figure after all" },
+    askCopied: { fr: "Copiée le {date}. Ton moteur te rappellera de relancer.", en: "Copied on {date}. Your engine reminds you to follow it up." },
+    whereYours: { fr: "ton outil", en: "your tool" },
+    tourAnswer: { fr: "Dans le Tour, tu as répondu : {answer}", en: "In the Tour, you answered: {answer}" },
+    compareTitle: { fr: "Comment il se situe", en: "How it compares" },
+    compareYours: { fr: "Ton chiffre {value}", en: "Your figure {value}" },
+    compareReference: { fr: "Repère {range}", en: "Reference {range}" },
+    compareTarget: { fr: "La cible de ton équipe", en: "Your team's target" },
+    compareTargetValue: { fr: "La cible de ton équipe {value}", en: "Your team's target {value}" },
+    compareTargetHint: {
+      fr: "Seule une cible désigne l'étape qui freine. Sans cible, le chiffre compte quand même.",
+      en: "Only a target names the stage that holds you back. Without one, the figure still counts.",
+    },
+    compareNoTargetHere: { fr: "Ce chiffre situe ; il ne désigne pas d'étape.", en: "This number situates; it does not name a stage." },
+    compareCaveat: { fr: "Pour situer, sans désigner d'étape : {caveat}", en: "For context, never to name a stage: {caveat}" },
+    /** The chart in words, for a screen reader: `{target}` is `compareChartTarget` or `compareChartNoTarget`. */
+    compareChart: { fr: "{name} : {value}. Repère {range}. {target}", en: "{name}: {value}. Reference {range}. {target}" },
+    compareChartTarget: { fr: "Cible {value}.", en: "Target {value}." },
+    compareChartNoTarget: { fr: "Pas de cible.", en: "No target." },
+    compareChartNoValue: { fr: "pas encore de chiffre", en: "no figure yet" },
+    /** The same, for a number with no published reference. */
+    compareChartNoReference: { fr: "{name} : {value}. {target}", en: "{name}: {value}. {target}" },
+    wordsSummary: { fr: "Ta définition et une note", en: "Your definition and a note" },
     /**
      * TODO: à relire (convention 6) — neuf le 2026-10-01 (A7.3.c S2, ENGINE.md §18.7 E3, §18.4.6, C25
      * Q2-Q4) : the sales-assisted period, the company-wide margin, and the
@@ -658,7 +675,6 @@ export const ENGINE_COPY = {
       en: "Prefilled with the company-wide margin already entered on the {motion} side.",
     },
     /** Five self-serve sheets gain a trap in the hybrid only (C25 Q3) — `phrases.ts#hybridTrapOf` says which, and when. */
-    hybridTrapTitle: { fr: "Avec l'assisté", en: "With sales-assisted" },
     hybridTrap: {
       leaves: {
         fr: "Un compte passé à l'assisté n'est ni perdu, ni en baisse, ni en hausse : il quitte le libre-service. Si ton outil de facturation l'annule, retire-le des perdus.",

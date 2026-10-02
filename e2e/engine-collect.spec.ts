@@ -4,7 +4,7 @@ import type { Locator, Page } from "@playwright/test";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import { EXAMPLE_EXPECTED, exampleState } from "../src/lib/engine/__tests__/fixtures";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, openFold, SKIP_ADMIN_REASON, test, trackedEvents } from "./helpers";
-import { activeEngineKey, storedEngineEntry, writeEngineSeed } from "./engine-helpers";
+import { activeEngineKey, openWords, storedEngineEntry, writeEngineSeed } from "./engine-helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
 // owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
@@ -135,7 +135,6 @@ test.describe("setup and first save", () => {
   test("counts give the live rate; Save keeps them on the device through a reload that clears nothing", async ({ page }) => {
     await startEngine(page);
     const sheet = await openSheet(page, "activation", "act-rate");
-    await sheet.getByRole("radio", { name: "I have it" }).check();
     await sheet.locator("#engine-act-rate-num").fill("144");
     await sheet.locator("#engine-act-rate-den").fill("800");
     await expect(sheet.getByTestId("engine-live")).toContainText("18%");
@@ -160,7 +159,6 @@ test.describe("setup and first save", () => {
   test("a share with more of the part than of the whole is refused, and nothing is stored", async ({ page }) => {
     await startEngine(page);
     const sheet = await openSheet(page, "activation", "act-rate");
-    await sheet.getByRole("radio", { name: "I have it" }).check();
     await sheet.locator("#engine-act-rate-num").fill("900");
     await sheet.locator("#engine-act-rate-den").fill("800");
     await sheet.locator("#engine-act-rate-source").selectOption({ label: "Amplitude" });
@@ -176,7 +174,6 @@ test.describe("setup and first save", () => {
   test("a missing piece is named rather than silently blocking", async ({ page }) => {
     await startEngine(page);
     const sheet = await openSheet(page, "activation", "act-rate");
-    await sheet.getByRole("radio", { name: "I have it" }).check();
     await sheet.locator("#engine-act-rate-num").fill("144");
     await sheet.getByTestId("engine-save-act-rate").click();
     await expect(sheet.getByTestId("engine-save-needs")).toBeVisible();
@@ -185,7 +182,7 @@ test.describe("setup and first save", () => {
   test("a wide estimate is said to be wide, and still saved", async ({ page }) => {
     await startEngine(page);
     const sheet = await openSheet(page, "activation", "act-rate");
-    await sheet.getByRole("radio", { name: "I can estimate it" }).check();
+    await sheet.getByRole("button", { name: "I can estimate it" }).click();
     await sheet.locator("#engine-act-rate-low").fill("5");
     await sheet.locator("#engine-act-rate-high").fill("40");
     await expect(sheet.getByTestId("engine-wide-range")).toBeVisible();
@@ -198,7 +195,7 @@ test.describe("setup and first save", () => {
   test("\"I can't find it\" asks why and what fixing it would cost, and the answer is a status", async ({ page }) => {
     await startEngine(page);
     const sheet = await openSheet(page, "retention", "ret-d30");
-    await sheet.getByRole("radio", { name: "I can't find it" }).check();
+    await sheet.getByRole("button", { name: "I can't find it" }).click();
     const triage = sheet.getByTestId("engine-triage");
     await triage.getByRole("radio", { name: "We don't measure it" }).check();
     await triage.getByRole("radio", { name: "a sprint" }).check();
@@ -223,14 +220,13 @@ test.describe("asking and collecting", () => {
     await page.getByLabel(ENGINE_COPY.setup.companyLabel.en).fill("Canary Corp 4242");
     await page.getByTestId("engine-setup-board").click();
     const found = await openSheet(page, "activation", "act-rate");
-    await found.getByRole("radio", { name: "I have it" }).check();
     await found.locator("#engine-act-rate-num").fill("144");
     await found.locator("#engine-act-rate-den").fill("800");
     await found.locator("#engine-act-rate-source").selectOption({ label: "Amplitude" });
     await found.getByTestId("engine-save-act-rate").click();
 
     const sheet = await openSheet(page, "revenue", "rev-gross-margin");
-    await sheet.getByRole("radio", { name: "I'll ask for it" }).check();
+    await sheet.getByRole("button", { name: "I'll ask for it" }).click();
     await sheet.getByTestId("engine-request-copy").click();
     await expect(sheet.getByText(ENGINE_COPY.request.copied.en)).toBeVisible();
     const clip = await page.evaluate(() => navigator.clipboard.readText());
@@ -403,8 +399,11 @@ test.describe("the §6.0 example on the board", () => {
       const sheet = await openSheet(page, "retention", "ret-logo-churn");
       const above = ENGINE_COPY.side.overTarget[locale];
       const label = above.charAt(0).toUpperCase() + above.slice(1);
-      await expect(sheet.getByTestId("engine-position")).toHaveText(label);
-      await expect(sheet.getByTestId("engine-position")).not.toContainText(locale === "fr" ? "Sous" : "Below");
+      // Since A18 T1 it is the verdict of « How it compares »: the red of a diagnosis, against the team's target only (C1).
+      const verdict = sheet.getByTestId("engine-reference").locator("[data-verdict]");
+      await expect(verdict).toHaveText(label);
+      await expect(verdict).toHaveAttribute("data-verdict", "below");
+      await expect(verdict).not.toContainText(locale === "fr" ? "Sous" : "Below");
     });
   }
 
@@ -453,7 +452,6 @@ test.describe("leaving the device and coming back", () => {
   test("save → clear the site's data → import gives back the same engine", async ({ page }) => {
     await startEngine(page);
     const sheet = await openSheet(page, "activation", "act-rate");
-    await sheet.getByRole("radio", { name: "I have it" }).check();
     await sheet.locator("#engine-act-rate-num").fill("144");
     await sheet.locator("#engine-act-rate-den").fill("800");
     await sheet.locator("#engine-act-rate-source").selectOption({ label: "Amplitude" });
@@ -586,14 +584,14 @@ test.describe("keyboard, languages, widths", () => {
     await context.grantPermissions(["clipboard-read", "clipboard-write"]);
     await startEngine(page);
     const sheet = await openSheet(page, "activation", "act-rate");
-    await sheet.getByRole("radio", { name: "I have it" }).check();
     await sheet.locator("#engine-act-rate-num").fill("144");
     await sheet.locator("#engine-act-rate-den").fill("800");
     await sheet.locator("#engine-act-rate-source").selectOption({ label: "Amplitude" });
+    await openWords(sheet);
     await sheet.locator("#engine-act-rate-note").fill("canary-note-4242");
     await sheet.getByTestId("engine-save-act-rate").click();
     const ask = await openSheet(page, "revenue", "rev-gross-margin");
-    await ask.getByRole("radio", { name: "I'll ask for it" }).check();
+    await ask.getByRole("button", { name: "I'll ask for it" }).click();
     await ask.getByTestId("engine-request-copy").click();
     await expect.poll(async () => (await trackedEvents(page)).length).toBeGreaterThanOrEqual(3);
     const events = await trackedEvents(page);
@@ -608,9 +606,8 @@ test.describe("accessibility of each screen", () => {
     await expectNoSeriousA11y(page, "setup");
     await page.getByTestId("engine-setup-board").click();
     const sheet = await openSheet(page, "activation", "act-rate");
-    await sheet.getByRole("radio", { name: "I have it" }).check();
     await expectNoSeriousA11y(page, "sheet");
-    await sheet.getByRole("radio", { name: "I can't find it" }).check();
+    await sheet.getByRole("button", { name: "I can't find it" }).click();
     await sheet.getByTestId("engine-triage").getByRole("radio").first().check();
     await expectNoSeriousA11y(page, "triage");
     await page.getByTestId("engine-collect-disclosure").locator("summary").click();

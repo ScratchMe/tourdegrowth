@@ -12,13 +12,6 @@
   min-width: 0;
 }
 
-.meta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-4);
-}
-
 .definitionLink {
   font: var(--meta-sm);
   color: var(--text-link);
@@ -37,30 +30,6 @@
   outline-offset: var(--focus-offset-tight);
 }
 
-.oneLiner {
-  font: var(--body-md);
-  color: var(--text-body);
-  margin: 0;
-}
-
-.formulaBlock {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-.formula {
-  font: var(--meta-md);
-  color: var(--text-body);
-  background: var(--surface-sunken);
-  border-radius: var(--radius-button);
-  padding: var(--space-4) var(--space-5);
-  margin: 0;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-}
-
-.cohort,
 .caveat {
   font: var(--body-sm);
   color: var(--text-muted);
@@ -84,123 +53,6 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
-}
-
-.where {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-  border-top: var(--border-rule);
-  padding-top: var(--space-5);
-}
-
-.whereToggle {
-  align-self: flex-start;
-  font: var(--meta-sm);
-  letter-spacing: var(--meta-tracking);
-  text-transform: uppercase;
-  color: var(--text-body);
-  background: none;
-  border: none;
-  padding: 0;
-  min-height: var(--hit-compact);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-3);
-}
-
-.whereToggle::after {
-  content: "+" / "";
-  font: var(--meta-md);
-  background: var(--surface-sunken);
-  border-radius: var(--radius-tag);
-  width: 22px;
-  height: 22px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.whereToggle[aria-expanded="true"]::after {
-  content: "\2212" / "";
-}
-
-.whereToggle:focus-visible {
-  outline: var(--focus-width) solid var(--focus-ring);
-  outline-offset: var(--focus-offset-tight);
-}
-
-.whereBody {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-5);
-}
-
-.whereList {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-  font: var(--body-sm);
-}
-
-.whereSource {
-  font-weight: 600;
-}
-
-.wherePath {
-  display: block;
-  font: var(--meta-xs);
-  color: var(--text-muted);
-  overflow-wrap: anywhere;
-}
-
-.trap {
-  font: var(--body-sm);
-  margin: 0;
-}
-
-.alsoIn {
-  font: var(--body-sm);
-  margin: 0;
-}
-
-.reference {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-  border-top: var(--border-rule);
-  padding-top: var(--space-5);
-}
-
-.referenceText {
-  font: var(--body-sm);
-  color: var(--text-muted);
-  margin: 0;
-}
-
-.position {
-  font: var(--meta-xs);
-  letter-spacing: var(--meta-tracking);
-  text-transform: uppercase;
-  color: var(--text-body);
-  margin: 0;
-}
-
-.positionBelow {
-  color: var(--text-alert);
-}
-
-.declared {
-  font: var(--body-sm);
-  color: var(--text-body);
-  background: var(--surface-sunken);
-  border-radius: var(--radius-button);
-  padding: var(--space-4) var(--space-5);
-  margin: 0;
 }
 
 .saveRow {
@@ -262,89 +114,6 @@
   gap: var(--space-5);
 }
 
-/* --- Comparison strip (§8.3) ------------------------------------------- */
-.strip {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-/* The target's label lives ABOVE the track — nothing is ever written in it.
-   Axis text is --chart-label (12px), the system's floor for a chart's words
-   (design audit S-26): the 11px meta label is for a tag, not an axis. */
-.stripMarks {
-  position: relative;
-  height: 1.4em;
-  font: var(--chart-label);
-  color: var(--text-body);
-}
-
-.stripTargetLabel {
-  position: absolute;
-  bottom: 0;
-  transform: translateX(-50%);
-  white-space: nowrap;
-}
-
-.stripTrack {
-  position: relative;
-  height: 12px;
-  background: var(--surface-sunken);
-  border-radius: var(--radius-tag);
-}
-
-/* The reference band: dashed ink over a translucent wash, drawn above the value. */
-.stripReference {
-  position: absolute;
-  top: -3px;
-  bottom: -3px;
-  border: var(--border-width) dashed var(--viz-unknown);
-  border-radius: var(--radius-tag);
-  background: var(--texture-ink);
-}
-
-.stripValue {
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  width: 4px;
-  transform: translateX(-50%);
-  background: var(--viz-ink);
-}
-
-.stripRange {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  background: repeating-linear-gradient(45deg, var(--viz-ink) 0 2px, transparent 2px 5px);
-  border: var(--border-width) solid var(--viz-ink);
-}
-
-.stripBelow {
-  background-color: var(--viz-highlight);
-  border-color: var(--viz-highlight);
-}
-
-.stripValue.stripBelow {
-  background: var(--viz-highlight);
-}
-
-.stripTarget {
-  position: absolute;
-  top: -6px;
-  bottom: -6px;
-  width: 2px;
-  transform: translateX(-50%);
-  background: var(--viz-ink);
-}
-
-.stripBounds {
-  display: flex;
-  justify-content: space-between;
-  font: var(--chart-label);
-  color: var(--text-muted);
-}
-
 /* --- Outside the fields ------------------------------------------------- */
 
 /* A caption over a block of the sheet ("Formula", "Trap", "Reference"): the
@@ -376,29 +145,16 @@
   align-self: flex-start;
 }
 
-/*
- * A link inside a sentence ("also in Amplitude: activation rate and…"): it
- * opens another sheet, so it is a button, but it reads as the sentence's own
- * words — its font, the link colour, no box. Not a text button: WCAG 2.5.8
- * exempts a target set in a line of text, and a 44px strip here would cover
- * the lines above and below.
- */
-.inlineLink {
-  font: inherit;
-  color: var(--text-link);
-  background: none;
-  border: none;
-  padding: 0;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  cursor: pointer;
+/* « Même nombre que pour … » — one full-width line under the row of boxes (design system extension 07). */
+.sharedLine {
+  font: var(--field-hint);
+  color: var(--text-muted);
+  margin: 0;
 }
 
-.inlineLink:hover {
-  color: var(--text-link-hover);
-}
-
-.inlineLink:focus-visible {
-  outline: var(--focus-width) solid var(--focus-ring);
-  outline-offset: var(--focus-offset-tight);
+/* « Ta définition et une note », inside its fold. */
+.words {
+  display: flex;
+  flex-direction: column;
+  gap: var(--form-gap-sm);
 }

@@ -186,7 +186,6 @@ test("a new month's sheet offers the month before's variant and source, never it
   await page.getByTestId("engine-tab-acquisition").click();
   await page.getByTestId("engine-metric-acq-cac").click();
   const sheet = page.getByTestId("engine-sheet-acq-cac");
-  await sheet.getByRole("radio", { name: "I have it" }).check();
   await expect(sheet.locator('input[type="radio"][value="media-only"]')).toBeChecked();
   await expect(sheet.locator("#engine-acq-cac-num")).toHaveValue("");
 });

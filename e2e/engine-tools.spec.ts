@@ -72,7 +72,6 @@ test("a sheet offers the team's tools first; a rate's two counts from two tools 
   await startEngine(page);
   await tickTools(page, ["mixpanel"]);
   const sheet = await openSheet(page, "activation", "act-rate");
-  await sheet.getByRole("radio", { name: "I have it" }).check();
   // The team's Mixpanel first, before the usual Amplitude (offered after it).
   const first = await sheet.locator("#engine-act-rate-source option:not([value=''])").first().textContent();
   expect(first).toBe("Mixpanel");

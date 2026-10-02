@@ -393,3 +393,22 @@ Première étape du portage du retour 07 (A18), drapeau fermé : rien ne change 
 - le prompt relance une demande « après sept jours », le moteur après **cinq** (`REMIND_AFTER_DAYS`, §6.13, la même durée que le rappel d'agenda). T2 gardera cinq et lira `isRequestStale`.
 
 **Vérifié** : `tsc` et `eslint` propres, 2 977 tests unitaires, `next build` avec les variables de la CI, et les 315 specs e2e du moteur, des niveaux du jeu (le `BulletChart` du tableau de bord), de la composition du résultat (des `Disclosure`) et de l'accessibilité, toutes passées. Un premier passage de la CI a rougi sur le lint (`react/no-children-prop`, dans le test du `Disclosure` réécrit pour `tsc` après le passage d'`eslint`) : le lint se relance après toute retouche, même d'un test.
+
+## A18 T1 : l'écran d'un chiffre, une question et son savoir à côté (2026-10-02)
+
+Deuxième étape du portage du retour 07, drapeau fermé. L'écran d'un chiffre, au tableau comme dans le pas à pas, suit maintenant l'ordre du `NumberSheet` : ce que le chiffre est et sa formule sur une ligne, le Tour en une ligne, **le piège ouvert avant la valeur**, « Où le trouver » replié avec les outils dans son résumé, **les cases d'abord**, « Comment il se situe » (repère, cible, verdict en un objet), puis « Ta définition et une note » repliées.
+
+**Les cinq composants** sont dans `src/components/engine/` : `NumberSheet`, `AnswerSwitch`, `TrapNote`, `WhereToFind`, `HowItCompares`, avec leurs tests de balisage. Les jetons qu'ils lisent quittent la liste d'attente de `dead-tokens.test.ts`. `ComparisonStrip` part avec les classes de `Sheet.module.css` que plus rien ne lisait. Les écritures n'ont pas bougé (`sheet-draft.ts`), sauf sur un point : **une sauvegarde sans autre réponse choisie lit les cases**, et nomme les cases vides plutôt qu'une réponse à cocher. « Je l'ai » n'existe plus comme choix, taper dans une case l'est.
+
+**Trois écarts au retour, voulus** :
+- **pas de `<form>`** : le `NumberSheet` du retour en est un, et la règle du dépôt l'interdit (A15.20) : avant l'hydratation, son envoi mettrait ce qui est tapé dans l'adresse. Entrée dans une case appelle `onSubmit`, comme avant ;
+- **« Pas de réponse sous la main ? »** au-dessus des trois réponses qui ne sont pas des chiffres (l'événement d'activation, la cause de churn, le mécanisme), sans estimation : « Pas de chiffre » y aurait refait l'erreur que relevait Antoine le 2026-09-26. `statusQuestionOf` reste l'unique endroit qui choisit, et les deux anciennes questions sortent de la copie ;
+- **le verdict reprend `positionLabel`**, pas « Sous la cible / À la cible ou au-dessus » du retour : pour la résiliation, être derrière sa cible, c'est être **au-dessus**, et le tableau le disait déjà ainsi. Le tag n'existe que contre une cible d'équipe (C1) ; « peut-être sous » se dit en toutes lettres, sans tag.
+
+**« Écrire ta définition »** est sur cinq pièges, pas les trois du retour : sa règle (« quand le piège dit d'écrire quelque chose ») couvre aussi les deux CAC (« décale la dépense et écris-le »). La liste, `TRAPS_ASKING_DEFINITION`, est tenue contre le texte du catalogue dans les deux langues par un test. Non-vacuité : `act.rate` retiré de la liste fait tomber le premier.
+
+**Ce qui a bougé de place** : la phrase de la cohorte est l'indice du dénominateur, la phrase du nombre partagé une ligne pleine sous la rangée (aucun chiffre ne partage ses deux comptes), la source n'apparaît qu'une fois une valeur tapée, la cible se saisit aussi dans le pas à pas (C40 : sur l'écran de son chiffre). Le pas à pas passe sa position, son titre et ses boutons au `NumberSheet`, qui porte la carte ; au tableau, la feuille s'ouvre sans titre ni carte sous sa ligne, jusqu'à T2.
+
+**Copie neuve**, « à relire » : le piège, les trois autres réponses, « Comment il se situe » et sa légende, le graphique en mots, la définition et la note. Les clés mortes sortent (`haveIt`, `target`, `targetHint`, `declaredAtTour`, `hybridTrapTitle`, `statusQuestion`, `statusQuestionAnswer`).
+
+**Les specs** du moteur suivent : plus de « Je l'ai » à cocher, les trois réponses sont des boutons, `openWords` déplie la définition et la note avant d'y taper, le test « une réponse n'est pas un chiffre » lit la nouvelle légende, celui de la résiliation lit le verdict.

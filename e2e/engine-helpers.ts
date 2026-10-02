@@ -1,4 +1,4 @@
-import type { Page } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
 import { ENGINE_ENTRY_PREFIX, ENGINE_INDEX_KEY, ENGINE_SCHEMA_VERSION, type EngineIndex, type EngineState, type EngineStore } from "../src/lib/engine/types";
 
 /**
@@ -49,4 +49,14 @@ export function storedEngineEntry<T = EngineStore>(page: Page): Promise<T | null
     const entry = window.localStorage.getItem(`${prefix}${(JSON.parse(raw) as { activeId: string }).activeId}`);
     return entry ? JSON.parse(entry) : null;
   }, ENGINE_KEYS);
+}
+
+/**
+ * « Ta définition et une note » is folded on a number's screen (A18 T1, design
+ * system extension 07): unfolds it so its two boxes can be typed in. Nothing
+ * when it is already open — a second click would fold it again.
+ */
+export async function openWords(sheet: Locator): Promise<void> {
+  const words = sheet.locator('details[data-testid^="engine-words-"]');
+  if (!(await words.evaluate((d) => (d as HTMLDetailsElement).open))) await words.locator("summary").click();
 }
