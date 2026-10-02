@@ -626,9 +626,11 @@ export const ENGINE_COPY = {
     /** The same over the three answers that are not numbers (the activation event, the churn cause, the referral mechanism): a name is not « un chiffre » (Antoine, 2026-09-26). */
     answerLegendAnswer: { fr: "Pas de réponse sous la main ?", en: "No answer to hand?" },
     answerBack: { fr: "← J'ai le chiffre, finalement", en: "← I have the figure after all" },
+    /** The same over an answer that is not a number. */
+    answerBackAnswer: { fr: "← J'ai la réponse, finalement", en: "← I have the answer after all" },
     askCopied: { fr: "Copiée le {date}. Ton moteur te rappellera de relancer.", en: "Copied on {date}. Your engine reminds you to follow it up." },
     whereYours: { fr: "ton outil", en: "your tool" },
-    tourAnswer: { fr: "Dans le Tour, tu as répondu : {answer}", en: "In the Tour, you answered: {answer}" },
+    tourAnswer: { fr: "Dans le Tour, tu as répondu : « {answer} »", en: "In the Tour, you answered: \"{answer}\"" },
     compareTitle: { fr: "Comment il se situe", en: "How it compares" },
     compareYours: { fr: "Ton chiffre {value}", en: "Your figure {value}" },
     compareReference: { fr: "Repère {range}", en: "Reference {range}" },

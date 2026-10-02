@@ -573,7 +573,7 @@ export function MetricSheet({
             onAnswer={(a) => update({ mode: MODE_OF[a] })}
             value={value}
             editor={editor}
-            backLabel={strings.sheet.answerBack}
+            backLabel={words ? strings.sheet.answerBackAnswer : strings.sheet.answerBack}
             onBack={() => update({ mode: "have" })}
             legendId={`${prefix}-answers`}
             data-testid={`engine-answer-${domId(id)}`}
