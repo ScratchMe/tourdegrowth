@@ -9,7 +9,7 @@ import { MAX_ENGINES, type EngineCalcContext, type EngineDerived, type EngineSet
 import type { Locale } from "@/lib/i18n/locale";
 import type { Pillar } from "@/lib/scoring/pillars";
 import { Board } from "./_engine/Board";
-import type { SeriesControls } from "./_engine/MonthBar";
+import type { SeriesControls } from "./_engine/BoardHead";
 import { DeckView } from "./_engine/deck/DeckView";
 import { collectPlan } from "./_engine/collect";
 import { latestTourWithAnswers } from "@/lib/engine/bridge";
@@ -30,7 +30,7 @@ import { commit, erase, getClientSnapshot, getServerSnapshot, removeEngine, subs
 import { tableTemplate, type TablePreview } from "./_engine/csv";
 import { DeleteEngineDialog } from "./_engine/DeleteEngineDialog";
 import { download, enginePageUrl } from "./_engine/download";
-import { EngineSwitcher, engineName } from "./_engine/EngineSwitcher";
+import { engineName } from "./_engine/EngineSwitcher";
 import { EraseDialog } from "./_engine/EraseDialog";
 import { ExampleView } from "./_engine/ExampleView";
 import { ImportPanel, type ImportChoice } from "./_engine/ImportPanel";
@@ -131,6 +131,8 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
   const [monthIndex, setMonthIndex] = useState<number | null>(null);
   const [correcting, setCorrecting] = useState(false);
   const [focusRequest, setFocusRequest] = useState<{ id: string; n: number } | null>(null);
+  // « Renommer » (A18 T2.a): the settings open at the company's name, not at their title.
+  const [renaming, setRenaming] = useState(false);
 
   useEffect(() => {
     if (focusRequest) document.getElementById(focusRequest.id)?.focus();
@@ -517,8 +519,13 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
           any: Object.keys(snapshot.metrics).length > 0,
           entered: enteredCounts(snapshot),
         }}
-        onCancel={openBoard}
+        focusCompany={renaming}
+        onCancel={() => {
+          setRenaming(false);
+          openBoard();
+        }}
         onStart={(choice) => {
+          setRenaming(false);
           // The Tour box (C8): ticked keeps the link there is, or links this Tour; unticked unlinks —
           // and the Tour stays on the device either way.
           const settled = withSettings(current, choice.setup, choice.referenceMonth, choice.cohortMonth);
@@ -674,6 +681,7 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
       }}
       onSettings={() => {
         toCurrentMonth();
+        setRenaming(false);
         setScreen("settings");
         focus("engine-setup-title");
       }}
@@ -681,31 +689,34 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
         toCurrentMonth();
         openSteps(resumePosition(lastSnapshot(current), current.setup.motions));
       }}
-      switcher={
-        engines.length > 0 ? (
-          <EngineSwitcher
-            engines={engines}
-            currentId={current.id}
-            strings={strings}
-            locale={locale}
-            onSwitch={(id) => {
-              const result = switchEngine(id);
-              if (!result.ok) return;
-              resetBoard();
-              focus("engine-verdict");
-            }}
-            onNew={() => {
-              resetBoard();
-              setScreen("new");
-              focus("engine-setup-title");
-            }}
-            onDelete={() => {
-              resetBoard();
-              setScreen("delete");
-              focus("engine-delete-title");
-            }}
-          />
-        ) : null
+      onRename={() => {
+        toCurrentMonth();
+        setScreen("settings");
+        setRenaming(true);
+      }}
+      engines={
+        engines.length > 0
+          ? {
+              list: engines,
+              currentId: current.id,
+              onSwitch: (id) => {
+                const result = switchEngine(id);
+                if (!result.ok) return;
+                resetBoard();
+                focus("engine-verdict");
+              },
+              onNew: () => {
+                resetBoard();
+                setScreen("new");
+                focus("engine-setup-title");
+              },
+              onDelete: () => {
+                resetBoard();
+                setScreen("delete");
+                focus("engine-delete-title");
+              },
+            }
+          : undefined
       }
       onTemplate={() => {
         // The month being filled, its ticked motions, the page's language: « ; » and the decimal comma in French.

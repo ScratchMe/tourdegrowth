@@ -3,7 +3,7 @@ import type { Locator, Page, Request } from "@playwright/test";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import { engineEventPaths } from "@/lib/analytics/goatcounter";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test, trackedEvents } from "./helpers";
-import { openWords } from "./engine-helpers";
+import { openWords, openEngineMenu } from "./engine-helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
 // owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
@@ -113,6 +113,7 @@ test.describe("the growth engine keeps everything in the browser (D16)", () => {
 
     // --- « Me rappeler de démarrer {mois} » (A14 T6): the next month's reminder ---
     const monthIcs = page.waitForEvent("download");
+    await openEngineMenu(page);
     await page.getByTestId("engine-month-remind").click();
     reminders.push(await readFile((await (await monthIcs).path())!, "utf8"));
     for (const ics of reminders) {
@@ -152,6 +153,7 @@ test.describe("the growth engine keeps everything in the browser (D16)", () => {
 
     // --- The merge (A14 T5): the same file merged back, through its preview --
     await page.getByTestId("engine-deck-back").click();
+    await openEngineMenu(page);
     await page.getByTestId("engine-import-open-screen").click();
     await page.getByTestId("engine-import-file").setInputFiles(jsonPath);
     await page.getByRole("radio", { name: /Merge into/ }).check();
@@ -269,11 +271,11 @@ test.describe("sales-assisted keeps everything in the browser too (D16, §18.10.
     await saveSheet(link, "link-pql-handoff");
 
     // The motions changed after the fact: unticked, saved, ticked again — on the device only.
-    await page.getByTestId("engine-open-settings").click();
+    await page.getByTestId("engine-bar-settings").click();
     await page.getByTestId("engine-settings").getByTestId("engine-motion-slg").uncheck();
     await page.getByTestId("engine-settings-save").click();
     await expect(page.getByTestId("engine-board")).toHaveAttribute("data-motions", "plg");
-    await page.getByTestId("engine-open-settings").click();
+    await page.getByTestId("engine-bar-settings").click();
     await page.getByTestId("engine-settings").getByTestId("engine-motion-slg").check();
     await page.getByTestId("engine-settings-save").click();
     await expect(page.getByTestId("engine-board")).toHaveAttribute("data-motions", "hybrid");

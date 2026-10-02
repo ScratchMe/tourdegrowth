@@ -3,7 +3,7 @@ import type { Page } from "@playwright/test";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import { exampleState } from "../src/lib/engine/__tests__/fixtures";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test, trackedEvents } from "./helpers";
-import { engineSeed } from "./engine-helpers";
+import { engineSeed, openEngineMenu } from "./engine-helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
 // owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
@@ -66,6 +66,7 @@ test.describe("reminders", () => {
   for (const locale of ["en", "fr"] as const) {
     test(`« Remind me to start » the next month: the first working day after its flows (${locale})`, async ({ page }) => {
       await open(page, locale);
+      await openEngineMenu(page);
       const button = page.getByTestId("engine-month-remind");
       const month = locale === "fr" ? "septembre 2026" : "September 2026";
       await expect(button).toHaveText(ENGINE_COPY.reminders.month[locale].replace("{month}", month));

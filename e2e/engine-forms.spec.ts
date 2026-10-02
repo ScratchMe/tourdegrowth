@@ -2,7 +2,7 @@ import type { Locator, Page } from "@playwright/test";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import { exampleState } from "../src/lib/engine/__tests__/fixtures";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
-import { storedEngineEntry, writeEngineSeed } from "./engine-helpers";
+import { storedEngineEntry, writeEngineSeed, openEngineMenu } from "./engine-helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
 // owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
@@ -273,6 +273,7 @@ test("an engine imported from the board opens with no half-typed sheet of the on
   // Another engine, with nothing saved for this metric either.
   const other = await storedState(page);
   expect(other?.snapshots[0]?.metrics["act.rate"]).toBeUndefined();
+  await openEngineMenu(page);
   await page.getByTestId("engine-import-open-screen").click();
   await page.getByTestId("engine-import-file").setInputFiles({ name: "other.json", mimeType: "application/json", buffer: Buffer.from(JSON.stringify(other)) });
   await page.getByTestId("engine-import-open").click();

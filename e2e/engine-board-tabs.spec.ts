@@ -2,7 +2,7 @@ import type { Locator, Page } from "@playwright/test";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import { exampleState } from "../src/lib/engine/__tests__/fixtures";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
-import { activeEngineKey, writeEngineSeed } from "./engine-helpers";
+import { activeEngineKey, writeEngineSeed, nextStep } from "./engine-helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
 // owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
@@ -165,7 +165,7 @@ test.describe("the stage menu", () => {
     expect(Object.entries(await expandedStates(page)).filter(([, v]) => v === "true").map(([k]) => k)).toEqual(["engine-metric-rev-arpa"]);
   });
 
-  test("\"Continue\" from the resume band lands on the cheapest number, open, whatever tab was showing", async ({ page }) => {
+  test("the next step's « Next number » lands on the five-minute number, open, whatever tab was showing", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await startEngine(page);
     await page.evaluate((key) => {
@@ -174,11 +174,13 @@ test.describe("the stage menu", () => {
       window.localStorage.setItem(key, JSON.stringify(store));
     }, await activeEngineKey(page));
     await page.reload();
-    await expect(page.getByTestId("engine-resume")).toBeVisible();
+    // A return (A18 T2.a): the last visit, then the one primary.
+    await expect(page.locator("#engine-next")).toHaveText("Last visit · 3 days ago");
+    await expect(nextStep(page, "number")).toBeVisible();
     await page.getByTestId("engine-tab-referral").click();
-    await page.getByTestId("engine-resume-continue").click();
+    await page.getByTestId("engine-next-number").click();
 
-    // The cheapest number still to fill is the sign-up rate (on your own, 5 min).
+    // The first five-minute number in the funnel's order is the sign-up rate.
     await expect(page.getByTestId("engine-panel")).toHaveAttribute("data-stage", "acquisition");
     const rate = page.getByTestId("engine-metric-acq-signup-rate");
     await expect(rate).toHaveAttribute("aria-expanded", "true");

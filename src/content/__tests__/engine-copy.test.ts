@@ -333,7 +333,7 @@ describe("lengths", () => {
 
   it("keeps button labels short enough for one line on a phone", () => {
     const buttons: Pair[] = [
-      ...under("actions", "collect.fill", "resume.continue", "erase.confirm", "io.replace", "io.cancel"),
+      ...under("actions", "collect.fill", "erase.confirm", "io.replace", "io.cancel"),
       ...under("request.copy", "request.copyGroup", "request.copied", "request.remind"),
       ...under("deck.png", "deck.pngHd", "deck.copyImage", "deck.pdf", "deck.copyText", "deck.textCopied"),
       ...under("sheet.save", "sheet.canEstimate", "sheet.willAsk", "sheet.cantFind", "sheet.answerBack", "sheet.answerBackAnswer", "sheet.writeDefinition"),

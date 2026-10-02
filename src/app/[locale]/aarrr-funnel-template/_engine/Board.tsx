@@ -1,22 +1,20 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useState } from "react";
 import { Button } from "@/components/core/Button";
 import { Callout } from "@/components/core/Callout";
 import { Card } from "@/components/core/Card";
 import { Disclosure } from "@/components/core/Disclosure";
 import { Field } from "@/components/core/Field";
 import { Segmented } from "@/components/core/Segmented";
-import { candidatesOf, shapeOf } from "@/lib/engine/catalog-shape";
-import { periodRangeOf } from "@/lib/engine/cohort";
+import { candidatesOf } from "@/lib/engine/catalog-shape";
 import { totalIn12 } from "@/lib/engine/deck-motions";
-import { formatMonthRange } from "@/lib/engine/format";
 import { findingText } from "@/lib/engine/sentences";
 import type { CandidateId, Interval, MetricId, Motion, MotionDerived, SlideTitle } from "@/lib/engine/types";
 import { knownIn } from "@/lib/engine/values";
 import { knownSharedCount } from "@/lib/engine/shared-counts";
 import type { Pillar } from "@/lib/scoring/pillars";
-import { BackupBar } from "./BackupBar";
+import { BoardBar, BoardNextStep, boardNextStep, type EngineControls, type SeriesControls } from "./BoardHead";
 import type { CollectPlan } from "./collect";
 import { CollectHub } from "./CollectHub";
 import { Coverage } from "./Coverage";
@@ -24,15 +22,13 @@ import { Diagnosis } from "./Diagnosis";
 import { Mirror } from "./Mirror";
 import { Peloton } from "./Peloton";
 import { Relays } from "./Relays";
-import { MonthBar, NextMonthBand, type SeriesControls } from "./MonthBar";
-import { ResumeBand } from "./ResumeBand";
 import { previousLeakLine } from "./series-view";
 import { SlgWhatIfPanel } from "./SlgWhatIfPanel";
 import { defaultStage } from "./stage-tabs";
 import { StageTabs } from "./StageTabs";
 import type { TablePreview } from "./csv";
 import { TableEntry } from "./TableEntry";
-import { fill, formatMonth } from "./text";
+import { fill } from "./text";
 import { MotionColumns } from "./MotionColumns";
 import { PipelineBand } from "./PipelineBand";
 import { TotalBand } from "./TotalBand";
@@ -47,12 +43,15 @@ type SlgDerived = Extract<MotionDerived, { motion: "slg" }>;
 /**
  * The board (spec §7 E2) — « la façon que tu as actuellement, quand tu
  * connais l'outil » (Antoine, 2026-09-25), next to the step-by-step. Top to
- * bottom: the eyebrow with the settings and the way back to the steps, the
- * verdict title (the board's h2 and its focus target), the coverage in
- * fractions, the diagnosis, the funnel in the screen's one raised card, the
- * five stages as a menu with one panel of folded numbers under it
- * (`StageTabs`), « et si », the declared × measured mirror, what is left to
- * go and get (folded), then the actions and the backup band.
+ * bottom (design system extension 07, A18 T2.a): the engine bar (what is on
+ * screen, the settings, and the menu that holds the engines, the month and
+ * the file), the verdict title (the board's h2 and its focus target), the
+ * coverage in fractions, the next step — the screen's one primary — then
+ * the diagnosis, the funnel in the screen's one raised card, the five
+ * stages as a menu with one panel of folded numbers under it (`StageTabs`),
+ * « et si », the declared × measured mirror, what is left to go and get
+ * (folded), the table entry (folded, opened from the menu), and the slides
+ * as a quiet link while they are not the next step.
  *
  * Three layouts, by the motions the setup ticked (A7.3.c S3, §18.7):
  * - **self-serve alone**: the v1 board, unchanged to the character;
@@ -87,8 +86,9 @@ export function Board({
   onErase,
   onSettings,
   onSteps,
+  onRename,
   series,
-  switcher,
+  engines,
   onTemplate,
   onApplyTable,
 }: {
@@ -112,10 +112,12 @@ export function Board({
   onErase: () => void;
   onSettings: () => void;
   onSteps: () => void;
+  /** « Renommer », in the menu: the settings, at the company's name. */
+  onRename: () => void;
   /** The monthly series (§19.2, A14 T2): the month selector, a past month read only or corrected, the next month. */
   series?: SeriesControls;
-  /** « Moteur : {nom} », the engines of the device (§19.1.5, A14 T5), at the head of the board. */
-  switcher?: ReactNode;
+  /** The engines of the device (§19.1.5, A14 T5): switched and added from the menu, one deleted from « Fichier ». */
+  engines?: EngineControls;
   /** « Saisie en tableau » (§19.6, A14 T5): the template's download, and the pasted table written in one go. */
   onTemplate?: () => void;
   onApplyTable?: (preview: TablePreview) => boolean;
@@ -124,6 +126,17 @@ export function Board({
   // A past month on screen (§19.2.4): read only — no « Et si », no entry, no file actions — unless it is being corrected.
   const past = series ? series.shown !== series.months.length - 1 : false;
   const readOnly = past && !series?.correcting;
+  // Opened from the next step (« Copier tes {n} demandes ») and from the menu (« Saisie en tableau »): the person asked for the move.
+  const [collectOpen, setCollectOpen] = useState(false);
+  const [tableOpen, setTableOpen] = useState(false);
+  const next = boardNextStep(view, plan, writeFailed, past);
+  const slidesNext = next.kind === "slides";
+  const reveal = (id: string) =>
+    requestAnimationFrame(() => {
+      const summary = document.querySelector<HTMLElement>(`#${id} > summary`);
+      summary?.focus();
+      summary?.scrollIntoView({ block: "start" });
+    });
   const { plg: hasPlg, slg: hasSlg } = state.setup.motions;
   const hybrid = hasPlg && hasSlg;
   const motion: Motion = hybrid ? (motionView ?? "plg") : hasPlg ? "plg" : "slg";
@@ -146,19 +159,6 @@ export function Board({
     slg: slgD ? defaultStage(snapshot, slgD.diagnosis, "slg") : "acquisition",
   }));
   const current = selected ?? initialStages[motion];
-
-  // Sales-assisted alone reads three months of flows (C25 Q2): its eyebrow says which. The hybrid's, the flows' month.
-  const flows = periodRangeOf(shapeOf("slg.rev.win-rate"), undefined, snapshot, state.setup, ctx.today);
-  const eyebrow = !hasSlg
-    ? fill(strings.board.eyebrow, {
-        model: strings.workbench.modelShort.selfserve,
-        cohort: formatMonth(snapshot.cohortMonth, ctx.locale),
-        month: formatMonth(snapshot.referenceMonth, ctx.locale),
-      })
-    : fill(strings.board.eyebrowNoCohort, {
-        model: hybrid ? strings.workbench.modelShort.hybrid : strings.workbench.modelShort.salesAssisted,
-        month: hybrid || !flows ? formatMonth(snapshot.referenceMonth, ctx.locale) : formatMonthRange(flows, ctx.locale, strings.units),
-      });
 
   // « Sur 25 opportunités conclues, un de plus ou de moins bouge le taux de 4 points » — the finding's own sentence.
   const smallSample = derived.findings.find((f) => f.kind === "small-sample" && f.motion === "slg");
@@ -202,18 +202,27 @@ export function Board({
   return (
     <div className={styles.board} data-testid="engine-board" data-motions={hybrid ? "hybrid" : motion}>
       <header className={styles.head}>
-        {switcher}
-        <div className={styles.eyebrowRow}>
-          <p className={styles.eyebrow}>{eyebrow}</p>
-          <div className={styles.headActions}>
-            <Button variant="quiet" onClick={onSteps} data-testid="engine-open-steps">
-              {strings.board.steps}
-            </Button>
-            <Button variant="quiet" onClick={onSettings} data-testid="engine-open-settings">
-              {strings.board.settings}
-            </Button>
-          </div>
-        </div>
+        <BoardBar
+          view={view}
+          series={series}
+          engines={engines}
+          past={past}
+          correcting={Boolean(series?.correcting)}
+          onSettings={onSettings}
+          onRename={onRename}
+          onSteps={onSteps}
+          onSave={onSave}
+          onImport={onImport}
+          onErase={onErase}
+          onTable={
+            !past && onTemplate && onApplyTable
+              ? () => {
+                  setTableOpen(true);
+                  reveal("engine-table");
+                }
+              : undefined
+          }
+        />
         {/* The hybrid's verdict is the total band's title; its coverage, each column's own. */}
         {hybrid ? null : (
           <>
@@ -223,20 +232,27 @@ export function Board({
         )}
       </header>
 
-      {writeFailed ? (
-        <p className={styles.writeFailed} role="alert" data-testid="engine-write-failed">
-          {strings.storage.writeFailed}
-        </p>
-      ) : null}
+      {hybrid && plgD && slgD ? <TotalBand view={view} verdict={verdict} /> : null}
 
-      {series ? <MonthBar series={series} strings={strings} /> : null}
-      {series && !past ? <NextMonthBand next={series.next} onStart={series.onStart} onRemind={series.onRemind} strings={strings} /> : null}
-
-      {returningFrom && !past ? <ResumeBand returningFrom={returningFrom} plan={plan} view={view} actions={actions} /> : null}
+      <BoardNextStep
+        choice={next}
+        view={view}
+        actions={actions}
+        plan={plan}
+        returningFrom={returningFrom}
+        series={series}
+        past={past}
+        correcting={Boolean(series?.correcting)}
+        onSave={onSave}
+        onDeck={onDeck}
+        onRequests={() => {
+          setCollectOpen(true);
+          reveal("engine-collect");
+        }}
+      />
 
       {hybrid && plgD && slgD ? (
         <>
-          <TotalBand view={view} verdict={verdict} />
           <MotionColumns view={view} actions={actions} readOnly={readOnly} />
           {smallSampleText ? (
             <Callout tone="caveat" data-testid="engine-small-sample">
@@ -335,32 +351,30 @@ export function Board({
       )}
 
       {plan.count > 0 && !past ? (
-        <Disclosure summary={fill(strings.board.collectTitle, { n: plan.count })} data-testid="engine-collect-disclosure">
+        <Disclosure
+          summary={fill(strings.board.collectTitle, { n: plan.count })}
+          open={collectOpen}
+          onOpenChange={setCollectOpen}
+          id="engine-collect"
+          data-testid="engine-collect-disclosure"
+        >
           <CollectHub plan={plan} view={view} actions={actions} />
         </Disclosure>
       ) : null}
 
-      {/* Beside the collection, even once it is done: a table also corrects what was typed (§19.6). */}
-      {!past && onTemplate && onApplyTable ? <TableEntry view={view} onTemplate={onTemplate} onApply={onApplyTable} /> : null}
+      {/* Beside the collection, even once it is done: a table also corrects what was typed (§19.6). Opened from the menu. */}
+      {!past && onTemplate && onApplyTable ? (
+        <TableEntry view={view} onTemplate={onTemplate} onApply={onApplyTable} open={tableOpen} onOpenChange={setTableOpen} id="engine-table" />
+      ) : null}
 
-      {past ? null : (
-        <div className={styles.actions} data-testid="engine-actions">
-          <Button onClick={onDeck} data-testid="engine-open-deck">
-            {strings.actions.deck}
-          </Button>
-          <Button variant="secondary" onClick={onSave} data-testid="engine-save-json">
-            {strings.actions.save}
-          </Button>
-          <Button variant="quiet" onClick={onImport} data-testid="engine-import-open-screen">
-            {strings.actions.import}
-          </Button>
-          <Button variant="quiet" onClick={onErase} data-testid="engine-erase-open">
-            {strings.actions.erase}
+      {/* The slides, quietly, while they are not the next step: then the next step carries them as its primary. */}
+      {past || slidesNext ? null : (
+        <div className={styles.slidesQuiet}>
+          <Button variant="quiet" onClick={onDeck} data-testid="engine-open-deck">
+            {strings.next.slidesQuiet}
           </Button>
         </div>
       )}
-
-      <BackupBar state={state} strings={strings} locale={ctx.locale} onSave={onSave} />
     </div>
   );
 }

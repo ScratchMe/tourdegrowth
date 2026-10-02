@@ -1,0 +1,85 @@
+/* EngineBar — design system extension 07 (design/ds-extension-07-return/components/engine/EngineBar). */
+
+.root {
+  max-width: var(--engine-measure);
+}
+
+/* The top line is a full 44px row, so the settings button's hit area stays
+ * inside it and never reaches the menu's summary (constraint 4). */
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-5);
+  min-height: var(--hit-min);
+}
+
+.line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-5);
+  min-width: 0;
+  margin: 0;
+}
+
+/* The engine's own blue, here only: the page already wears it in the band. */
+.what {
+  color: var(--engine-accent);
+}
+
+.settings {
+  flex: none;
+}
+
+.groups {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-8);
+  padding-top: var(--space-3);
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.items {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin: 0;
+  padding: 0;
+}
+
+/* One 44px row per item: the quiet buttons' hit areas never overlap. */
+.items > li {
+  display: flex;
+  align-items: center;
+  min-height: var(--hit-min);
+  max-width: 100%;
+}
+
+/* A label that wraps in a narrow column reads from the left, like the menu's other rows. */
+.items > li > :where(button, a) {
+  text-align: start;
+}
+
+.note {
+  margin: var(--space-8) 0 0;
+  padding-left: var(--space-5);
+  border-left: var(--engine-pending-edge);
+  font: var(--body-sm);
+  color: var(--text-body);
+  max-width: var(--measure-read);
+}
+
+@media (max-width: 760px) {
+  .groups {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-7);
+  }
+}

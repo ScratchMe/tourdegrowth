@@ -28,7 +28,7 @@ async function startEngine(page: Page, locale: "en" | "fr" = "en"): Promise<void
 }
 
 async function tickTools(page: Page, tools: string[]): Promise<void> {
-  await page.getByTestId("engine-open-settings").click();
+  await page.getByTestId("engine-bar-settings").click();
   await page.getByTestId("engine-setup-tools").locator("summary").click();
   for (const tool of tools) await page.getByTestId(`engine-setup-tool-${tool}`).check();
   await page.getByTestId("engine-settings-save").click();

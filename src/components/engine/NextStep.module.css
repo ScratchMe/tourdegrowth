@@ -1,0 +1,84 @@
+/* NextStep — design system extension 07 (design/ds-extension-07-return/components/engine/NextStep). */
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  max-width: var(--engine-measure);
+}
+
+.lead {
+  font: var(--body-lg);
+  color: var(--text-body);
+  margin: calc(-1 * var(--space-4)) 0 0;
+  max-width: var(--measure-read);
+}
+
+/* The refused save: advice, so the dashed red edge — never a wash. */
+.lead.advice {
+  padding-left: var(--space-5);
+  border-left: var(--engine-advice-edge);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-5) var(--space-10);
+}
+
+.lines {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  margin: 0;
+  padding: var(--space-7) 0 0;
+  border-top: var(--border-rule);
+}
+
+/* Each line is at least a 44px row: a line's quiet action keeps its hit
+ * area inside its own line (constraint 4). */
+.line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  min-height: var(--hit-min);
+  gap: 0 var(--space-5);
+  font: var(--body-md);
+  color: var(--text-body);
+}
+
+.pending,
+.advice {
+  padding-left: var(--space-5);
+}
+
+/* « Not yet »: a request out, a month to start. */
+.pending {
+  border-left: var(--engine-pending-edge);
+}
+
+/* Advice: the backup. */
+.advice {
+  border-left: var(--engine-advice-edge);
+}
+
+.text {
+  flex: 1 1 22em;
+  min-width: 0;
+}
+
+.lineAction {
+  flex: none;
+}
+
+@media (max-width: 760px) {
+  .lead {
+    font: var(--body-md);
+  }
+
+  .primary {
+    width: 100%;
+  }
+}
