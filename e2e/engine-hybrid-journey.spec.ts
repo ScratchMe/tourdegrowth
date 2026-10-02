@@ -4,7 +4,7 @@ import { ENGINE_COPY } from "@/content/engine-copy";
 import { hybridState } from "../src/lib/engine/__tests__/fixtures";
 import type { EngineState, MetricId } from "../src/lib/engine/types";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
-import { engineSeed, openEngineMenu, openNumber, expectFound, backToBoard } from "./engine-helpers";
+import { engineSeed, openEngineMenu, openNumber, expectFound, backToBoard, expectLeft } from "./engine-helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
 // owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
@@ -65,7 +65,7 @@ async function typeCounts(page: Page, locale: "fr" | "en", stage: string, dom: s
   const variant = sheet.getByRole("group", { name: ENGINE_COPY.sheet.variant[locale] });
   if ((await variant.count()) > 0) await variant.getByRole("radio").first().check();
   await sheet.getByTestId(`engine-save-${dom}`).click();
-  await expect(sheet.getByTestId(`engine-saved-${dom}`)).not.toBeEmpty();
+  await expectLeft(page, dom);
   // Back to the board, whose figures the journey reads next (a number has its own screen, A18 T2.b).
   await backToBoard(page);
 }

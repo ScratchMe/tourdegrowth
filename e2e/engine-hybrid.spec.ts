@@ -3,7 +3,7 @@ import { ENGINE_COPY } from "@/content/engine-copy";
 import { hybridState, salesAssistedState } from "../src/lib/engine/__tests__/fixtures";
 import type { EngineState } from "../src/lib/engine/types";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
-import { storedEngineEntry, writeEngineSeed, openNumber, openEngineMenu } from "./engine-helpers";
+import { storedEngineEntry, writeEngineSeed, openNumber } from "./engine-helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
 // owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
@@ -280,8 +280,8 @@ test.describe("the settings: a motion unticked is hidden, never erased (§18.1.3
   });
 });
 
-test.describe("the step-by-step, per motion (§18.7 E3)", () => {
-  test("the start's targets grouped by motion; the step-by-step's both bases, then skip to sales-assisted and past the optional link", async ({ page }) => {
+test.describe("the journey, both motions (§18.7 E3, A18 T3.b)", () => {
+  test("the start's targets grouped by motion; then one order for both engines, stage by stage", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await page.clock.setFixedTime(EXAMPLE_CLOCK);
     await openEngine(page);
@@ -291,30 +291,15 @@ test.describe("the step-by-step, per motion (§18.7 E3)", () => {
     await expect(page.getByTestId("engine-targets-start-plg")).toBeVisible();
     await expect(page.getByTestId("engine-targets-start-slg")).toBeVisible();
     await page.getByTestId("engine-targets-next").click();
-    // The first number is self-serve's quickest: the two motions' numbers are taken stage by stage.
-    await expect(page.getByTestId("engine-number")).toHaveAttribute("data-metric", "acq.signup-rate");
 
-    // The step-by-step, until A18 T3.b folds it into the board: from the menu, at the targets of an engine nobody has touched.
-    await openEngineMenu(page);
-    await page.getByTestId("engine-open-steps").click();
-    const steps = page.getByTestId("engine-steps");
-    await expect(steps).toHaveAttribute("data-phase", "targets");
-    await expect(page.getByTestId("engine-steps-targets-plg")).toBeVisible();
-    await expect(page.getByTestId("engine-steps-targets-slg")).toBeVisible();
-    await page.getByTestId("engine-steps-next").click();
-    await expect(page.getByTestId("engine-steps-base")).toBeVisible();
-    await page.getByTestId("engine-steps-next").click();
-    await expect(page.getByTestId("engine-steps-base-slg")).toBeVisible();
-    await page.getByTestId("engine-steps-next").click();
-
-    const number = page.getByTestId("engine-steps-number");
-    await expect(number).toHaveAttribute("data-metric", /^(?!slg\.)/);
-    await expect(page.getByTestId("engine-steps-skip-group")).toHaveText(ENGINE_COPY.steps.skipToSlg.en);
-    await page.getByTestId("engine-steps-skip-group").click();
-    await expect(number).toHaveAttribute("data-metric", /^slg\./);
-    await expect(page.getByTestId("engine-steps-skip-group")).toHaveText(ENGINE_COPY.steps.skipToWhatIf.en);
-    await page.getByTestId("engine-steps-skip-group").click();
-    await expect(steps).toHaveAttribute("data-phase", "whatif");
+    // The five-minute numbers of both engines, in the funnel's order: self-serve's acquisition, then the
+    // activation of each — not all of self-serve's before sales-assisted's, as the step-by-step went.
+    const number = page.getByTestId("engine-number");
+    await expect(number).toHaveAttribute("data-metric", "acq.signup-rate");
+    await page.getByTestId("engine-number-skip").click();
+    await expect(number).toHaveAttribute("data-metric", "act.event");
+    await page.getByTestId("engine-number-skip").click();
+    await expect(number).toHaveAttribute("data-metric", "slg.act.live-event");
   });
 });
 

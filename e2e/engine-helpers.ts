@@ -101,6 +101,13 @@ export async function openNumber(page: Page, metricDomId: string): Promise<Locat
   const sheet = page.getByTestId(`engine-sheet-${metricDomId}`);
   if (await sheet.count()) return sheet;
   await backToBoard(page);
+  // The hybrid shows one engine's list at a time (§18.7), and continuing from a number's screen (A18 T3.b)
+  // shows the engine of the number opened last: the number's own engine first — sales-assisted for `slg-…` and the link.
+  const selector = page.getByTestId("engine-motion-selector");
+  if (await selector.count()) {
+    const slg = metricDomId.startsWith("slg-") || metricDomId.startsWith("link-");
+    await selector.getByRole("button").nth(slg ? 1 : 0).click();
+  }
   const row = page.getByTestId(`engine-metric-${metricDomId}`);
   // A row in a closed group (the hybrid's link, at the end of sales-assisted's list): the group opens first.
   const group = row.locator("xpath=ancestor::details[1]");
@@ -137,4 +144,14 @@ export async function startEngine(page: Page, motion: "ss" | "sa" | "both" = "ss
   await page.getByTestId("engine-targets-next").click();
   await page.getByTestId("engine-number").waitFor();
   await backToBoard(page);
+}
+
+/**
+ * A number's screen saved and left (A18 T3.b): « Enregistre et continue »
+ * leads to the next step, so the sheet goes — that is how a spec knows the
+ * save went through. A refused save keeps the sheet, its message under the
+ * boxes; a past month corrected only saves, and says « Enregistré ».
+ */
+export async function expectLeft(page: Page, metricDomId: string): Promise<void> {
+  await expect(page.getByTestId(`engine-sheet-${metricDomId}`)).toHaveCount(0);
 }

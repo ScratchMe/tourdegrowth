@@ -35,12 +35,11 @@ import { EraseDialog } from "./_engine/EraseDialog";
 import { ExampleView } from "./_engine/ExampleView";
 import { ImportPanel, type ImportChoice } from "./_engine/ImportPanel";
 import { NumberScreen } from "./_engine/NumberScreen";
-import { Steps } from "./_engine/Steps";
-import { resumePosition, type StepPosition } from "./_engine/steps-model";
 import { Setup, type SetupChoice } from "./_engine/Setup";
 import { motionsOf, startDefaults, startPlan } from "./_engine/start";
 import { TargetsStart } from "./_engine/TargetsStart";
-import { nextSelfNumber } from "./_engine/next-step";
+import { continueFrom, nextSelfNumber, type Continuation } from "./_engine/next-step";
+import { seedAskDraft } from "./_engine/sheet-drafts";
 import { domId, fill, formatMonth } from "./_engine/text";
 import type { EngineActions, EngineView } from "./_engine/view";
 import screens from "./_engine/Screens.module.css";
@@ -64,8 +63,9 @@ export interface EngineWorkbenchProps {
 }
 
 /**
- * The screens of the one route (§7): the board, the step-by-step, the
- * slides, the settings, the example, and the two file screens. The current
+ * The screens of the one route (§7): the start and its « Cibles », the
+ * board and a number's own screen (the step-by-step folded into them, A18
+ * T3.b), the slides, the settings, the example, and the file screens. The current
  * screen is NOT persisted — reopening costs a click, the entries are what is
  * kept; an engine found on arrival opens on the board.
  */
@@ -73,7 +73,8 @@ export interface EngineWorkbenchProps {
 // `number` since A18 T2.b: one number's own screen, opened from the board's list.
 // `targets` since A18 T3.a: the « Cibles » screen right after the start (C40); `new-settings`, the full card of another engine.
 // Before an engine exists, `settings` is that full card, opened by the start screen's « Modifier ».
-type Screen = "board" | "number" | "targets" | "steps" | "deck" | "import" | "erase" | "settings" | "example" | "new" | "new-settings" | "delete";
+// `steps` until A18 T3.b: the step-by-step, folded into the board since (« Enregistre et continue »).
+type Screen = "board" | "number" | "targets" | "deck" | "import" | "erase" | "settings" | "example" | "new" | "new-settings" | "delete";
 
 // Once per page session, not per mount (§11.6: "first view of the island in the session").
 let openedTracked = false;
@@ -124,9 +125,10 @@ function withSnapshot(state: EngineState, change: (snapshot: Snapshot) => Snapsh
 export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy, bridges }: EngineWorkbenchProps) {
   const snap = useSyncExternalStore(subscribe, getClientSnapshot, getServerSnapshot);
   const [screen, setScreen] = useState<Screen>("board");
-  const [stepsFrom, setStepsFrom] = useState<StepPosition>({ phase: "targets" });
   // The number whose own screen is open (A18 T2.b): opened from its row in « Tes chiffres », the next step, or the collect list.
   const [numberId, setNumberId] = useState<MetricId | null>(null);
+  // The numbers passed this session (« Passe pour l'instant », A18 T3.b): still « à faire », not offered again by « Enregistre et continue ».
+  const [skipped, setSkipped] = useState<MetricId[]>([]);
   // The hybrid's selector (§18.7): the motion of the number opened last in this session, else self-serve.
   const [motionView, setMotionView] = useState<Motion | null>(null);
   // The motions the start screen had chosen when « Voir un exemple rempli » was pressed (§18.7).
@@ -196,7 +198,7 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
     focus("engine-verdict");
   }
 
-  /** Back to the month being filled: every screen but the board works on it (the deck, the settings, the steps, the files). */
+  /** Back to the month being filled: every screen but the board works on it (the deck, the settings, the files). */
   function toCurrentMonth() {
     setMonthIndex(null);
     setCorrecting(false);
@@ -207,6 +209,7 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
     toCurrentMonth();
     setNumberId(null);
     setMotionView(null);
+    setSkipped([]);
   }
 
   /**
@@ -225,12 +228,6 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
     resetBoard();
     setScreen("targets");
     focus("engine-targets-title");
-  }
-
-  function openSteps(from: StepPosition) {
-    setStepsFrom(from);
-    setScreen("steps");
-    focus("engine-steps-title");
   }
 
   function openExample(motions?: Record<Motion, boolean>) {
@@ -601,23 +598,6 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
     );
   }
 
-  if (screen === "steps") {
-    return shell(
-      <Steps
-        view={view}
-        actions={actions}
-        initial={stepsFrom}
-        onBoard={openBoard}
-        onSave={exportJson}
-        onDeck={() => {
-          setScreen("deck");
-          trackEngine({ name: "engine_deck_opened" });
-          focus("engine-deck-title");
-        }}
-      />,
-    );
-  }
-
   if (screen === "deck") {
     // DeckView owns the section, its heading (focused on arrival) and its back button (§7 E5).
     // html-to-image stays a dynamic import inside it, never in this island's first chunk.
@@ -696,6 +676,22 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
 
   if (screen === "number" && numberId) {
     const id = numberId;
+    const shapes = motionShapes(current.setup.motions);
+    // Where this screen leads (A18 T3.b): the board's next step once this number is left — read from the plan
+    // as it is now, before the save, with this number and the ones passed for now taken out.
+    const after = continueFrom(plan, shapes, [id, ...skipped]);
+    const go = (to: Continuation) => {
+      if (to.kind === "number") actions.openMetric(to.id);
+      else if (to.kind === "ask-one") {
+        // One number to ask for: its screen, « Je le demande » open, as the board's next step opens it.
+        seedAskDraft(lastSnapshot(current), to.id);
+        actions.openMetric(to.id);
+      }
+      // The requests (until A18 T3.c gives them their screen), the slides, a month to start: the board says them.
+      else openBoard();
+    };
+    // A past month is corrected, not walked through: its sheet only saves.
+    const walking = month === null;
     return shell(
       <NumberScreen
         id={id}
@@ -706,6 +702,24 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
           // Back to its row (the list's), as « ← Tes chiffres » says.
           focus(`engine-metric-${domId(id)}`);
         }}
+        next={
+          walking
+            ? {
+                // « … et vois ton moteur » when nothing is left to find alone or to ask for, the numbers passed aside (`saveLast`).
+                label: after.kind === "board" ? strings.sheet.saveLast : strings.sheet.saveNext,
+                onSaved: () => go(after),
+              }
+            : undefined
+        }
+        // « Passe pour l'instant » leaves a number « à faire »: only on one that is.
+        onSkip={
+          walking && (lastSnapshot(current).metrics[id]?.status ?? "todo") === "todo"
+            ? () => {
+                setSkipped((was) => (was.includes(id) ? was : [...was, id]));
+                go(after);
+              }
+            : undefined
+        }
       />,
     );
   }
@@ -745,10 +759,6 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
         setRenaming(false);
         setScreen("settings");
         focus("engine-setup-title");
-      }}
-      onSteps={() => {
-        toCurrentMonth();
-        openSteps(resumePosition(lastSnapshot(current), current.setup.motions));
       }}
       onRename={() => {
         toCurrentMonth();

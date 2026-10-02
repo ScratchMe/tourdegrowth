@@ -58,7 +58,7 @@ function unitOf(shape: MetricShape, view: EngineView, value: number | null): Num
   return {};
 }
 
-/** What the sheet is, when it is the whole screen (the step-by-step, a number opened from the board's list): where the number sits, and its heading. */
+/** What the sheet is, when it is the whole screen (a number opened from the board's list, or reached by continuing): where the number sits, and its heading. */
 export interface SheetScreen {
   position: ReactNode;
   headingId: string;
@@ -88,20 +88,24 @@ export function MetricSheet({
   id,
   view,
   actions,
-  variant = "board",
-  onSaved,
+  next,
   screen,
   extraActions,
 }: {
   id: MetricId;
   view: EngineView;
   actions: EngineActions;
-  /** `step`: one number per screen in the step-by-step (Antoine, 2026-09-25), and saving moves on (`onSaved`). */
-  variant?: "board" | "step";
-  onSaved?: () => void;
-  /** The sheet is the whole screen (the step-by-step, a number opened from the board's list): it carries the card and the heading. */
+  /**
+   * Saving moves on (A18 T3.b, the step-by-step folded into the board): the
+   * primary says where — « Enregistre et continue → », or « … et vois ton
+   * moteur → » for the last — and `onSaved` goes there. A copied request is
+   * the save of « Je le demande »: « Continue → » then moves on. Absent (a
+   * past month corrected), the sheet only saves.
+   */
+  next?: { label: string; onSaved: () => void };
+  /** The sheet is the whole screen (a number opened from the board's list, or reached by continuing): it carries the card and the heading. */
   screen?: SheetScreen;
-  /** Quiet actions after the save: the step-by-step's back and skip. */
+  /** Quiet actions after the save: « Passe pour l'instant ». */
   extraActions?: ReactNode;
 }) {
   const { strings, ctx, state } = view;
@@ -192,7 +196,7 @@ export function MetricSheet({
     const result = actions.saveEntry(id, built.entry);
     if (result.ok) dropDraft(key);
     setOutcome(result.ok ? "saved" : "failed");
-    if (result.ok) onSaved?.();
+    if (result.ok) next?.onSaved();
   }
 
   // null, not 0, when the definition has no window: the sheet then prints no cohort line at all.
@@ -510,7 +514,6 @@ export function MetricSheet({
       />
     ) : null;
 
-  const saveLabel = variant === "step" ? strings.sheet.saveNext : strings.sheet.save;
   return (
     <div ref={sheetRef} className={styles.sheet} data-testid={`engine-sheet-${domId(id)}`}>
       <NumberSheet
@@ -647,14 +650,15 @@ export function MetricSheet({
           <>
             {/* The copy button of « Je le demande » is that answer's save: the request is what gets recorded. */}
             {draft.mode === "ask" ? (
-              variant === "step" ? (
-                <Button onClick={() => onSaved?.()} data-testid={`engine-continue-${domId(id)}`}>
-                  {strings.steps.continue}
+              // « Continue » once the request is copied — its save; before, the ways on are the copy and « Passe ».
+              next && entry?.status === "requested" ? (
+                <Button onClick={next.onSaved} data-testid={`engine-continue-${domId(id)}`}>
+                  {strings.sheet.continue}
                 </Button>
               ) : null
             ) : (
-              <Button variant={variant === "step" ? "primary" : "secondary"} onClick={save} data-testid={`engine-save-${domId(id)}`}>
-                {saveLabel}
+              <Button variant={next ? "primary" : "secondary"} onClick={save} data-testid={`engine-save-${domId(id)}`}>
+                {next ? next.label : strings.sheet.save}
               </Button>
             )}
             {extraActions}

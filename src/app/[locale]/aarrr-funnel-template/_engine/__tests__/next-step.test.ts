@@ -3,7 +3,7 @@ import { METRIC_SHAPES, motionShapes, type MetricShape } from "@/lib/engine/cata
 import type { NextMonth } from "@/lib/engine/series";
 import type { MetricEntry, MetricId, Snapshot } from "@/lib/engine/types";
 import { collectPlan, type CollectTools } from "../collect";
-import { nextSelfNumber, nextStepFor, type NextStepChoice, type NextStepFacts } from "../next-step";
+import { continueFrom, nextSelfNumber, nextStepFor, type NextStepChoice, type NextStepFacts } from "../next-step";
 
 /**
  * The board's one next step (A18 T0, `NextStep.prompt.md`): a fixed order,
@@ -182,5 +182,39 @@ describe("nextSelfNumber: « Taper d'abord le chiffre suivant » (A18 T2.a)", ()
 
   it("is null once nothing is left to find alone", () => {
     expect(self({ ...all(QUICK, found), ...all(LONG, found), ...all(SELF_SERVE.filter((s) => s.effort === "build").map((s) => s.id), found) })).toBeNull();
+  });
+});
+
+/**
+ * « Enregistre et continue » (A18 T3.b): the step-by-step folded into the
+ * board — the same order as the board's next step, read from the plan as it
+ * was before the save, the number just left and the ones passed taken out.
+ *
+ * Non-vacuity: without `leaving`, the first case would send the person back
+ * to the number they had just saved (the plan still says « à faire »).
+ */
+describe("continueFrom: where a number's screen leads", () => {
+  const plan = (metrics: Partial<Record<MetricId, MetricEntry>> = {}) => collectPlan(snapshot(metrics), NOW, SELF_SERVE);
+
+  it("from the first quick number, saved: the next quick one, never the one just saved", () => {
+    expect(continueFrom(plan(), SELF_SERVE, [QUICK[0]!])).toEqual({ kind: "number", id: QUICK[1] });
+  });
+
+  it("a number passed for now is not offered again in the session", () => {
+    expect(continueFrom(plan(), SELF_SERVE, [QUICK[0]!, QUICK[1]!])).toEqual({ kind: "number", id: QUICK[2] });
+  });
+
+  it("the quick numbers done: the requests next, all on one screen", () => {
+    expect(continueFrom(plan(all(QUICK.slice(0, -1), found)), SELF_SERVE, [QUICK[QUICK.length - 1]!])).toEqual({ kind: "ask-all", ids: expect.arrayContaining(ASK) });
+  });
+
+  it("the requests sent: the hour-long numbers", () => {
+    const metrics = { ...all(QUICK, found), ...all(ASK, asked("finance", 0)) };
+    expect(continueFrom(plan(metrics), SELF_SERVE, [])).toEqual({ kind: "number", id: LONG[0] });
+  });
+
+  it("the last number to find alone, saved, with the requests out: the board, whose next step offers the slides", () => {
+    const metrics = { ...all(QUICK, found), ...all(ASK, asked("finance", 0)), ...all(LONG.slice(0, -1), found) };
+    expect(continueFrom(plan(metrics), SELF_SERVE, [LONG[LONG.length - 1]!])).toEqual({ kind: "board" });
   });
 });

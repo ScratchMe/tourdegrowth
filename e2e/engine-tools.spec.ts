@@ -1,7 +1,7 @@
 import type { Locator, Page } from "@playwright/test";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
-import { storedEngineEntry, openNumber, backToBoard } from "./engine-helpers";
+import { storedEngineEntry, openNumber, backToBoard, expectLeft } from "./engine-helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
 // owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
@@ -80,7 +80,7 @@ test("a sheet offers the team's tools first; a rate's two counts from two tools 
   await sheet.locator("#engine-act-rate-denominator-source").selectOption({ label: "GA4" });
   await expect(sheet.getByTestId("engine-act-rate-two-tools")).toContainText("Numerator (Mixpanel) and denominator (GA4) come from two tools");
   await sheet.getByTestId("engine-save-act-rate").click();
-  await expect(sheet.getByTestId("engine-saved-act-rate")).toBeVisible();
+  await expectLeft(page, "act-rate");
   const entry = (await storedEngineEntry(page))?.state.snapshots[0]?.metrics["act.rate"];
   expect(entry).toMatchObject({ source: { kind: "tool", tool: "mixpanel" }, denominatorSource: { kind: "tool", tool: "ga4" } });
 

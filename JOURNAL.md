@@ -763,3 +763,60 @@ Sixième étape du portage du retour 07, drapeau fermé, et la première de T3 (
 - `tsc` et `eslint` propres ; 3 039 tests unitaires ; `next build` avec les variables de la CI.
 - **Les specs du moteur, des cibles, de l'accessibilité et de la plateforme**, plus les captures : 306 passées et une ignorée par construction, sur le build final. La première passe avait eu quatre échecs, tous des specs qui cherchaient encore le nom de l'entreprise ou le nombre d'écrans d'avant, et un essai instable dans le menu du pas à pas, que T3.b retire. La dernière avait eu un échec : le piège déjà écrit dans la spec de la base, où le message apparaît quand la case perd le focus, pousse le bouton et fait tomber le clic dans le vide. La spec quitte d'abord la case, comme celle de la base ; les specs de la collecte et du Tour repassent ensuite (37).
 - **Captures** de la question (libre-service et assisté), de la carte complète, de l'écran « Cibles » et du premier chiffre, en français et en anglais, à 1 280 et 390 px : aucun défilement horizontal.
+
+## A18 T3.b : « Enregistre et continue », le pas à pas fondu dans le tableau (2026-10-02, #294)
+
+Septième étape du portage du retour 07, drapeau fermé, et la deuxième de T3 : **le pas à pas et le tableau ne font plus qu'un** (C40).
+
+**Avant** : deux façons de remplir, le pas à pas (cibles, base, un chiffre par écran, « Et si », fin) et le tableau, et un bouton de menu pour passer de l'un à l'autre (« Reprendre le pas à pas »).
+
+**Maintenant** :
+- **L'écran d'un chiffre mène à l'étape suivante.** Son bouton principal dit « Enregistre et continue → », puis ouvre ce que la prochaine étape du tableau choisirait si le chiffre était déjà enregistré (`continueFrom`, testé) : les chiffres de cinq minutes, puis les demandes, puis les chiffres d'une heure, dans l'ordre du funnel, les deux moteurs étape par étape dans l'hybride. Un seul ordre pour le tableau et le parcours.
+- **Le plan lu est celui d'avant l'enregistrement**, le chiffre qu'on quitte retiré à la main. Le clic n'attend donc pas un second rendu, et ne peut pas renvoyer sur le chiffre qu'on vient d'enregistrer : c'est le test de non-vacuité.
+- **Le dernier** : quand plus rien ne reste à trouver seul ni à demander, le bouton dit « Enregistre et vois ton moteur → » et mène au tableau, le focus sur son verdict.
+- **« Passe pour l'instant »** laisse le chiffre « à faire » et continue sans lui. Les chiffres passés ne reviennent pas dans la session (la liste `skipped` de l'îlot, vidée au changement de moteur). Le tableau, lui, continue de les proposer : on les a passés, pas oubliés.
+- **Une seule demande restante** : la suite ouvre son écran sur « Je le demande », comme la prochaine étape du tableau (`seedAskDraft`, partagé avec elle). Après la copie, qui est l'enregistrement, « Continue → » mène plus loin.
+- **Plusieurs demandes** : jusqu'à T3.c, la suite rend la main au tableau, dont la prochaine étape propose de les demander.
+- **Un mois passé qu'on corrige** ne se parcourt pas : son écran ne fait qu'enregistrer, sans « continue » ni « passe ».
+
+**Ce qui part** :
+- le pas à pas (`Steps.tsx`, `steps-model.ts`, son test et ses styles), son bouton de menu et l'écran `steps` de l'îlot ;
+- **les écrans « Ta base »** du libre-service et de l'assisté : un nombre partagé se tape dans le premier chiffre qui le porte (`propagateFrom`), et les Réglages le recevront avec T3.d. Avec eux part la garde A15.9 (un compte à zéro ou décimal arrêtait l'étape) : la fiche a la sienne, celle de chaque case de compte ;
+- le groupe de copie `steps`, sauf `targetFor`, déplacé dans `targetsStart` sans changer de texte ; la clé `board.steps`.
+- `MetricSheet` perd sa variante `step` : une prop `next` dit où mène l'enregistrement.
+
+**Les goldens tiennent sans être touchés** : v1 et v2 figeaient aussi `resumePosition`, l'endroit où le pas à pas reprenait. Ce n'était rien qu'un moteur v1 ou v2 imprimait (ni tableau, ni slide, ni texte), seulement l'endroit où un écran s'ouvrait. Une projection (`withoutResume`, `golden-projection.ts`) le retire du côté attendu ; les fichiers ne bougent pas.
+
+**La copie** :
+- `sheet.saveNext` passe à l'impératif (« Enregistre et continue → ») ;
+- neuves : `saveLast`, `skip` et `continue` ;
+- `page.durationReady` ne dit plus « Le pas à pas garde ta place » mais « Ton moteur garde ce que tu as tapé ».
+Le tout est « à relire ».
+
+**Les specs** : `engine-steps.spec.ts` devient `engine-journey.spec.ts`.
+- Neufs :
+  - le parcours depuis le départ (une cible, le premier chiffre enregistré, le suivant avec le focus sur son titre, un chiffre passé qui reste « à faire », le nombre d'inscrits du mois tapé une fois et repris par la part du premier canal) ;
+  - le dernier chiffre ;
+  - une seule demande restante ;
+  - un mois passé corrigé ;
+  - dans l'hybride, l'ordre des deux moteurs étape par étape.
+- Gardés : l'exemple, les réglages, le nom de l'entreprise, les réponses qui ne sont pas des chiffres (leur place sur l'écran, « Activation · 2 sur 3 », remplace « Point 4 sur 17 »), les grands nombres (tapés dans les cases d'un chiffre au lieu de la base), la cible illisible et le signe %.
+- Retirée : la garde de la base (A15.9), qui part avec la base.
+- **Huit specs attendaient la ligne « Enregistré »** sous la fiche : enregistrer mène maintenant ailleurs, et la ligne part avec l'écran. Une aide, `expectLeft`, attend que la fiche s'en aille (un refus la garde, avec son message). Seul le mois passé qu'on corrige garde sa ligne.
+- **`openNumber` choisit d'abord le moteur du chiffre dans l'hybride** : continuer vers un chiffre du libre-service affiche la liste du libre-service, et la ligne d'un chiffre de l'assisté n'y est plus.
+
+**La relecture de copie** (`relecteur-copie`), appliquée dans la même PR :
+- **deux comportements que les mots rendaient faux** : « Continue → » apparaissait dès « Je le demande », avant la copie. Cliqué, il menait plus loin sans rien enregistrer, et le chiffre revenait à l'écran suivant. Il n'apparaît plus qu'une fois la demande copiée. Et « Passe pour l'instant » s'offrait sur un chiffre déjà trouvé, estimé ou demandé : il ne s'offre plus que sur un chiffre « à faire » ;
+- **« Ton moteur garde ce que tu as tapé »** promettait trop : un chiffre tapé sans être enregistré ne vit qu'en mémoire. La phrase dit « chaque chiffre que tu enregistres », et la date de la page passe au 2026-10-02 (`updated-at.ts`), puisque c'est du texte pré-rendu ;
+- **la garde des longueurs de bouton** citait les clés du pas à pas supprimées et ne vérifiait plus rien : elle garde maintenant les quatre boutons neufs ;
+- le marqueur de copie dit la vraie condition de `saveLast` (hors les chiffres passés pour l'instant) et les écarts au retour (l'impératif ; « Continue → » écrit par la session) ; `targetFor` n'est pas « approuvée », elle reste à relire avec A18.d ; des commentaires décrivaient encore le pas à pas.
+
+**À T7** : `scripts/engine-density.capture.ts`, qui mesure l'avant et l'après, vise encore les identifiants de l'ancien départ et du pas à pas.
+
+**Vérifié** :
+- `tsc` et `eslint` propres ; 3 037 tests unitaires ; `next build` avec les variables de la CI.
+- **Les specs du moteur, des cibles, de l'accessibilité et de la plateforme** : 301 passées et une ignorée par construction, sur le build qui porte la relecture.
+  - La première passe a mis au jour les specs qui attendaient la ligne « Enregistré » (huit) et l'aide qui ouvrait un chiffre de l'assisté depuis la liste du libre-service.
+  - La seconde a eu deux échecs : le canari de l'assisté et la place de l'événement d'activation (2 sur 3, le chiffre principal de l'étape passe en premier). Les deux sont corrigés.
+  - La spec du parcours, complétée après la relecture, repasse seule (13).
+- **Captures** du premier chiffre et du dernier, en français et en anglais, à 1 280 et 390 px, sans défilement horizontal : un bouton principal qui dit où il mène, « Passe pour l'instant » discret à côté.

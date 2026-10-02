@@ -11,7 +11,7 @@ import type { EngineActions, EngineView } from "./view";
 /**
  * A team target for one of the numbers that can name the stage holding you
  * back (C1) — written on blur, like the sheet's. On the « Cibles » screen at
- * the start (C40) and in the step-by-step until A18 T3.b folds it away.
+ * the start (C40); the Settings receive the same boxes with A18 T3.d.
  */
 export function TargetInput({ id, view, actions }: { id: MetricId; view: EngineView; actions: EngineActions }) {
   const snapshot = view.state.snapshots[view.state.snapshots.length - 1]!;
@@ -21,7 +21,7 @@ export function TargetInput({ id, view, actions }: { id: MetricId; view: EngineV
   return (
     <NumberField
       id={`engine-step-target-${domId(id)}`}
-      label={fill(view.strings.steps.targetFor, { metric: metric.name })}
+      label={fill(view.strings.targetsStart.targetFor, { metric: metric.name })}
       hint={metric.oneLiner}
       value={value}
       onChange={setValue}

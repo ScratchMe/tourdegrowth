@@ -2,7 +2,7 @@ import type { Locator, Page } from "@playwright/test";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import { exampleState } from "../src/lib/engine/__tests__/fixtures";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
-import { storedEngineEntry, writeEngineSeed, openEngineMenu, backToBoard, openNumber } from "./engine-helpers";
+import { storedEngineEntry, writeEngineSeed, openEngineMenu, backToBoard, openNumber, expectLeft } from "./engine-helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
 // owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
@@ -300,6 +300,7 @@ test("Enter in a box saves the sheet, like any form", async ({ page }) => {
   const den = page.locator("#engine-act-rate-den");
   await den.fill("800");
   await den.press("Enter");
-  await expect(page.getByTestId("engine-saved-act-rate")).toHaveText(ENGINE_COPY.workbench.saved.en);
+  // Saved, and on to the next step (A18 T3.b).
+  await expectLeft(page, "act-rate");
   expect((await storedState(page))?.snapshots[0]?.metrics["act.rate"]).toMatchObject({ status: "measured", value: { kind: "ratio", numerator: 144, denominator: 800 } });
 });

@@ -3,7 +3,6 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { collectPlan } from "@/app/[locale]/aarrr-funnel-template/_engine/collect";
 import { listStages } from "@/app/[locale]/aarrr-funnel-template/_engine/number-list";
-import { resumePosition } from "@/app/[locale]/aarrr-funnel-template/_engine/steps-model";
 import type { StoredResult } from "@/lib/quiz/storage";
 import { QUESTIONS } from "../../../content/copy-library";
 import { motionShapes } from "../catalog-shape";
@@ -15,7 +14,7 @@ import { buildSlgScenario } from "../slg-scenario";
 import type { EngineState, MetricId } from "../types";
 import { currentSnapshot } from "../values";
 import { EXAMPLE_TODAY, exampleState, hybridState, salesAssistedState, tourResult } from "./fixtures";
-import { asBeforeT3, asTabs } from "./golden-projection";
+import { asBeforeT3, asTabs, withoutResume } from "./golden-projection";
 import { CTX_EN, CTX_FR, EN, FR } from "./props";
 
 /**
@@ -32,7 +31,8 @@ import { CTX_EN, CTX_FR, EN, FR } from "./props";
  * English: the whole derived board (both motions and the total), the whole
  * deck (every slide with its motion, the chrome of each motion), its text
  * export, both what-if scenarios, each motion's stage tabs, where the steps
- * resume and the collection plan.
+ * resumed (retired with the step-by-step, A18 T3.b: `withoutResume`) and the
+ * collection plan.
  *
  * **Both files were written ONCE, by the v2 code, before the first line of
  * T0** (`ENGINE_GOLDEN_V2_WRITE=1`, at commit « golden v2 figé »). Never
@@ -90,7 +90,6 @@ function outputsOf(state: EngineState, tour: StoredResult | null) {
       scenario: motions.plg ? buildScenario(state, state.whatIf ?? {}, ctx) : null,
       slgScenario: motions.slg ? buildSlgScenario(state, state.whatIf ?? {}, ctx) : null,
       tabs: Object.fromEntries(derived.motions.map((m) => [m.motion, asTabs(listStages(snapshot, m.diagnosis, m.motion))])),
-      resume: resumePosition(snapshot, motions),
       collect: collectPlan(snapshot, EXAMPLE_TODAY, motionShapes(motions)),
     };
   }
@@ -154,7 +153,8 @@ describe("golden v2 — a v2 engine reads the same after the change", () => {
   for (const name of Object.keys(inputs)) {
     it(`${name}: same board, same slides, same text, to the character`, () => {
       const { state, tour } = inputs[name]!;
-      expect(outputsOf(openV2(state), tour)).toEqual(outputs[name]);
+      // The step-by-step's resume position retired with it (A18 T3.b): dropped from the expected side, the file untouched.
+      expect(outputsOf(openV2(state), tour)).toEqual(withoutResume(outputs[name]));
     });
   }
 });
