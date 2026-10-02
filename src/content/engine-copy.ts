@@ -314,7 +314,6 @@ export const ENGINE_COPY = {
     toFill: { fr: "à renseigner", en: "to fill in" },
     // TODO: à relire — nouveau (2026-09-25, retours d'Antoine sur le moteur).
     settings: { fr: "Réglages", en: "Settings" },
-    collectTitle: { fr: "À aller chercher ({n})", en: "To go and get ({n})" },
     whatIfTitle: { fr: "Et si ?", en: "What if?" },
   },
   /**
@@ -806,7 +805,7 @@ export const ENGINE_COPY = {
     answerBack: { fr: "← J'ai le chiffre, finalement", en: "← I have the figure after all" },
     /** The same over an answer that is not a number. */
     answerBackAnswer: { fr: "← J'ai la réponse, finalement", en: "← I have the answer after all" },
-    askCopied: { fr: "Copiée le {date}. Ton moteur te rappellera de relancer.", en: "Copied on {date}. Your engine reminds you to follow it up." },
+    askCopied: { fr: "Copiée le {date}. Ton moteur te rappellera de relancer.", en: "Copied on {date}. Your engine will remind you to follow it up." },
     whereYours: { fr: "ton outil", en: "your tool" },
     tourAnswer: { fr: "Dans le Tour, tu as répondu : « {answer} »", en: "In the Tour, you answered: \"{answer}\"" },
     compareTitle: { fr: "Comment il se situe", en: "How it compares" },
@@ -904,24 +903,23 @@ export const ENGINE_COPY = {
     groupPlg: { fr: "Libre-service :", en: "Self-serve:" },
     groupSlg: { fr: "Assisté :", en: "Sales-assisted:" },
   },
-  collect: {
-    title: { fr: "À aller chercher", en: "To go and get" },
-    self: { fr: "À faire toi-même", en: "To do yourself" },
-    ask: { fr: "À demander", en: "To ask for" },
-    hint: {
+  /**
+   * TODO: à relire (convention 6) — le 2026-10-02 (A18 T3.c, le retour 07, design/ds-extension-07-return/COPY.md) :
+   * les demandes en un écran (`AskList`), à la place de « À aller chercher » replié en bas du tableau, qui part.
+   * `lead` est l'ancien `collect.hint`, inchangé. `{n}` ≥ 2 : l'écran ne s'ouvre que pour deux demandes ou plus
+   * (une seule ouvre l'écran de son chiffre). `{date}` : `formatDate`. `doneBoard` quand rien ne reste à trouver
+   * seul : le bouton mène au tableau. Écarts au retour : `doneBoard` n'y est pas, la session l'a écrit ; `done`
+   * y dit « C'est envoyé, chiffre suivant → », passé à l'impératif comme les autres CTA à flèche (40 caractères).
+   * Une carte copiée dit `sheet.askCopied`, la phrase de la fiche, plutôt qu'une clé de plus qui dirait la même chose.
+   */
+  asks: {
+    title: { fr: "À demander ({n})", en: "To ask for ({n})" },
+    lead: {
       fr: "Envoie les demandes aujourd'hui, remplis le reste en attendant les réponses.",
       en: "Send the requests today, and fill in the rest while you wait for answers.",
     },
-    fill: { fr: "Renseigner", en: "Fill in" },
-    empty: { fr: "Plus rien à aller chercher.", en: "Nothing left to go and get." },
-    /**
-     * TODO: à relire (convention 6) — neuf le 2026-10-01 (A14 T4, §19.5.2) : byToolHint. « À faire toi-même » grouped by
-     * the team's tools: each number under the first of its tools, with the menu path the catalogue gives (`where.path`).
-     */
-    byToolHint: {
-      fr: "Rangés par outil, chacun avec son chemin. Ce qu'aucun de tes outils ne donne est passé dans « À demander ».",
-      en: "Grouped by tool, each with its path. What none of your tools gives has moved to \"To ask for\".",
-    },
+    done: { fr: "C'est envoyé, passe au chiffre suivant →", en: "Sent, go to the next number →" },
+    doneBoard: { fr: "C'est envoyé, vois ton moteur →", en: "Sent, see your engine →" },
   },
 
   /**

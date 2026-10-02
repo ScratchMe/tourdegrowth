@@ -820,3 +820,41 @@ Le tout est « à relire ».
   - La seconde a eu deux échecs : le canari de l'assisté et la place de l'événement d'activation (2 sur 3, le chiffre principal de l'étape passe en premier). Les deux sont corrigés.
   - La spec du parcours, complétée après la relecture, repasse seule (13).
 - **Captures** du premier chiffre et du dernier, en français et en anglais, à 1 280 et 390 px, sans défilement horizontal : un bouton principal qui dit où il mène, « Passe pour l'instant » discret à côté.
+
+## A18 T3.c : les demandes en un écran, à la place de « À aller chercher » (2026-10-02, #PR)
+
+Huitième étape du portage du retour 07, drapeau fermé, et la troisième de T3 : **les chiffres qui viennent de quelqu'un d'autre se demandent sur un écran à eux** (`AskList`, design system extension 07).
+
+**Avant** : une section repliée en bas du tableau, « À aller chercher ({n}) », en deux listes (« À faire toi-même », rangée par outil depuis A14 T4, et « À demander », une demande par rôle), chaque chiffre avec son bouton « Renseigner ».
+
+**Maintenant** :
+- **L'écran « À demander ({n}) »** : une carte par personne (Finance, Data, Support…), le rôle en titre, ses chiffres, et la demande telle qu'elle sera copiée, en citation. La copie reste l'action de la carte (`RequestCopy`, avec sa confirmation, son texte de secours et « Me le rappeler »). Une carte copiée le dit sur son bord pointillé : « Copiée le {date}. Ton moteur te rappellera de relancer. »
+- **Il s'ouvre de deux endroits** : la prochaine étape du tableau, « Demande tes {n} chiffres » (qui ouvrait jusqu'ici la section repliée), et « Enregistre et continue → » d'un chiffre quand la suite est de demander deux chiffres ou plus (`continueFrom`, T3.b, qui rendait la main au tableau en attendant cet écran). Une seule demande ouvre toujours l'écran de son chiffre, sur « Je le demande ».
+- **Une carte copiée le dit une fois** : la ligne de la carte se voit, et « Demande copiée » de `RequestCopy` n'est plus qu'annoncé (`quietStatus`, en `tdg-visually-hidden`), là où il doublait la ligne.
+- **Les cartes sont figées à l'ouverture** : une carte copiée reste à l'écran avec sa date au lieu de disparaître sous le doigt. Les chiffres sont groupés par le rôle à qui on les demande, son rôle par défaut sinon, dans l'ordre du funnel.
+- **Le bouton principal** dit « C'est envoyé, chiffre suivant → », ou « C'est envoyé, vois ton moteur → » quand rien ne reste à trouver seul. Il mène là où mènerait « Enregistre et continue » après ces demandes ; celles qu'on n'a pas copiées restent « à faire », passées pour la session, comme « Passe pour l'instant ».
+
+**Ce qui part** : `CollectHub.tsx` et la section repliée du tableau, avec ses styles ; le groupe de copie `collect` (`lead` reprend `collect.hint` sans changer de texte) et la clé `board.collectTitle`. **La liste « À faire toi-même » rangée par outil (A14 T4) part avec** : depuis T1, la fiche d'un chiffre met les outils de l'équipe en tête de « Où le trouver », avec leur chemin, et la prochaine étape mène à chaque chiffre de cinq minutes un par un.
+
+**La copie** : le groupe `asks`, neuf et « à relire », sauf `lead`.
+- Trois écarts au retour : `doneBoard` n'y est pas, la session l'a écrit sur le modèle de `sheet.saveLast` ; `done` y dit « C'est envoyé, chiffre suivant → », passé à l'impératif comme les autres CTA à flèche (« C'est envoyé, passe au chiffre suivant → », 40 caractères, la limite du test des boutons) ; et la ligne d'une carte copiée lit `sheet.askCopied`, la même phrase dans la fiche, plutôt qu'une clé de plus.
+- `sheet.askCopied` passe au futur en anglais (« Your engine will remind you… »), comme le français.
+- Le test des boutons mesurait encore `collect.fill`, sans échouer puisque la clé n'existait plus : il mesure `asks.done` et `asks.doneBoard`.
+- La relecture (`relecteur-copie`) a trouvé ces quatre points ; ils sont appliqués.
+
+**Les specs** :
+- `engine-collect` : « les demandes, un écran » remplace le test de la section (une carte par personne, la copie qui marque les deux chiffres de Finance, la carte qui dit quand, « C'est envoyé » vers les chiffres d'une heure, la demande non copiée restée « à faire »), avec la lecture axe sur l'écran ;
+- `engine-collect` vérifie aussi que la confirmation n'est dite qu'une fois à l'écran ;
+- `engine-tools` : les outils se lisent dans « Où le trouver » de la fiche, et l'écran des demandes porte ce qu'aucun outil ne donne (on y arrive en passant les chiffres de cinq minutes : le chemin a été vérifié une fois, la spec n'a pas de branche) ;
+- `engine-mobile` : l'écran des demandes mesuré de 320 à 430 px ;
+- `engine-numbers` : « Renseigner » part avec la section.
+- Un test unitaire du composant (`ask-list.test.ts`, 4 tests).
+
+**Pour le bon à tirer A18.d** (le fond, pas une règle) : le bouton dit « C'est envoyé » même quand aucune carte n'a été copiée, et `lead` dit « remplis le reste en attendant » aussi quand il ne reste rien à remplir seul (le cas `doneBoard`).
+
+**Vérifié** :
+- `tsc` et `npm run lint` propres ;
+- **3 041 tests unitaires** verts, dont les 4 du composant ;
+- `next build` avec les variables de la CI ;
+- les **301 specs** du moteur, des cibles, de l'accessibilité et de la plateforme sur le build final : 300 passées, une ignorée par construction ; 913 specs au total (`--list`, hors captures temporaires) ;
+- **captures** de l'écran avant et après une copie, en français et en anglais, à 1 280, 390 et 320 px, sans défilement horizontal : la carte copiée ne dit sa confirmation qu'une fois, et quand le presse-papiers refuse, le texte de secours s'affiche sous la carte.

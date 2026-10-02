@@ -63,11 +63,11 @@ describe("viewport breakpoints are a short, written list (L-11)", () => {
     // The board keeps one viewport rule of its own, the breakout of the page
     // column (page layout, on the list above). What moved was its tab strip;
     // the tabs left with A18 T2.b, and the hybrid's columns read the same
-    // container query.
+    // container query. The collect hub's two columns left with A18 T3.c: the
+    // requests are one screen (AskList), one card per role, a single column.
     const expectations: [string, RegExp, RegExp][] = [
       ["app/[locale]/aarrr-funnel-template/_engine/Board.module.css", /@container board \(min-width: 860px\)\s*\{\s*\.totalBlocks/, /@media[^{]*960px\)\s*\{\s*\.totalBlocks/],
       ["app/[locale]/aarrr-funnel-template/_engine/WhatIfPanel.module.css", /@container whatif \(min-width: 860px\)/, /@media[^{]*960px\)/],
-      ["app/[locale]/aarrr-funnel-template/_engine/Screens.module.css", /@container collect \(min-width: 860px\)/, /@media[^{]*960px\)/],
       ["components/game/RevealCells.module.css", /@container \(max-width: 520px\)/, /@media[^{]*560px\)/],
       ["components/game/PatternCatalogue.module.css", /@container \(max-width: 520px\)/, /@media[^{]*560px\)/],
     ];

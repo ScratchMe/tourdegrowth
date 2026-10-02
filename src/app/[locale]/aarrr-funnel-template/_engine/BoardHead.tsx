@@ -242,8 +242,8 @@ export function BoardNextStep({
   correcting: boolean;
   onSave: () => void;
   onDeck: () => void;
-  /** Rank 5, two or more: opens the requests, by role. */
-  onRequests: () => void;
+  /** Rank 5, two or more: the requests' screen (AskList, A18 T3.c), with the numbers to ask for. */
+  onRequests: (ids: readonly MetricId[]) => void;
 }) {
   const { strings, state, ctx } = view;
   const n = strings.next;
@@ -265,7 +265,7 @@ export function BoardNextStep({
   /** What « Continuer {mois} » and « Taper d'abord le chiffre suivant » open: the step the month would not have taken over. */
   const resumeButton = (label: string, testId: string, rest: NextStepChoice): ReactNode => {
     const go =
-      rest.kind === "number" ? () => openNumber(rest.id) : rest.kind === "ask-one" ? () => openNumber(rest.id, true) : rest.kind === "ask-all" ? onRequests : null;
+      rest.kind === "number" ? () => openNumber(rest.id) : rest.kind === "ask-one" ? () => openNumber(rest.id, true) : rest.kind === "ask-all" ? () => onRequests(rest.ids) : null;
     return go ? (
       <Button variant="quiet" onClick={go} data-testid={testId}>
         {label}
@@ -337,7 +337,7 @@ export function BoardNextStep({
       const self = nextSelfNumber(plan, shapes);
       step = {
         lead: fill(self ? n.leadAskAll : n.leadAskAllOnly, { n: choice.ids.length }),
-        primary: { label: fill(n.goRequests, { n: choice.ids.length }), onClick: onRequests, "data-testid": "engine-next-requests" },
+        primary: { label: fill(n.goRequests, { n: choice.ids.length }), onClick: () => onRequests(choice.ids), "data-testid": "engine-next-requests" },
         secondary: self ? resumeButton(n.skipRequests, "engine-next-skip", { kind: "number", ...self }) : undefined,
       };
       break;

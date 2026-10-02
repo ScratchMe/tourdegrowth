@@ -1,7 +1,7 @@
 import type { Locator, Page } from "@playwright/test";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
-import { storedEngineEntry, openNumber, backToBoard, expectLeft } from "./engine-helpers";
+import { storedEngineEntry, openNumber, backToBoard, expectLeft, skipToAsks } from "./engine-helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
 // owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
@@ -42,27 +42,33 @@ async function openSheet(page: Page, _stage: string, metricDomId: string): Promi
   return openNumber(page, metricDomId);
 }
 
-test("tools ticked in the settings: stored in their families' order, and the collect list grouped by them", async ({ page }) => {
+test("tools ticked in the settings: stored in their families' order; a number's « Where to find it » opens on them, tagged", async ({ page }) => {
   await startEngine(page);
   await tickTools(page, ["stripe", "ga4"]);
   expect((await storedEngineEntry(page))?.state.setup.tools).toEqual(["ga4", "stripe"]);
 
-  await page.getByTestId("engine-collect-disclosure").locator("summary").click();
-  const self = page.getByTestId("engine-collect-self");
-  await expect(self).toContainText(ENGINE_COPY.collect.byToolHint.en);
-  await expect(self.getByTestId("engine-collect-tool-ga4")).toContainText("Sign-up rate");
-  await expect(self.getByTestId("engine-collect-tool-stripe")).toBeVisible();
-  // Each path is the sheet's, filled: never a raw {placeholder}.
-  await expect(self).not.toContainText(/\{[a-z]+\}/);
+  // The by-tool list of « To go and get » left with A18 T3.c: a tool's path is in its number's own screen.
+  const sheet = await openSheet(page, "acquisition", "acq-signup-rate");
+  const where = sheet.getByTestId("engine-where");
+  await expect(where).toHaveJSProperty("open", true);
+  await expect(where).toContainText(ENGINE_COPY.sheet.whereYours.en);
+  // Each path is filled: never a raw {placeholder}.
+  await expect(where).not.toContainText(/\{[a-z]+\}/);
 });
 
 test("a number none of the team's tools gives is to ask for, even one you could read yourself", async ({ page }) => {
-  await startEngine(page);
+  await page.clock.setFixedTime(EXAMPLE_CLOCK);
+  await page.goto("/en/aarrr-funnel-template");
+  await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
+  await page.getByTestId("engine-start-go").click();
+  await page.getByTestId("engine-targets-next").click();
+  await page.getByTestId("engine-number-back").click();
   await tickTools(page, ["stripe"]);
-  await page.getByTestId("engine-collect-disclosure").locator("summary").click();
+  // The requests' screen holds what Stripe does not give (A18 T3.c), past the five-minute numbers, passed one by one.
+  await page.getByTestId("engine-next-number").click();
+  await skipToAsks(page);
   // Activation lives in product analytics, and the catalogue never cites Stripe for it.
-  await expect(page.getByTestId("engine-collect-self")).not.toContainText("Activation rate");
-  await expect(page.getByTestId("engine-collect-ask")).toContainText("Activation rate");
+  await expect(page.getByTestId("engine-asks")).toContainText("Activation rate");
 });
 
 test("a sheet offers the team's tools first; a rate's two counts from two tools says « to check »", async ({ page }) => {
@@ -90,12 +96,12 @@ test("a sheet offers the team's tools first; a rate's two counts from two tools 
   await expect(page.getByTestId("deck-checks")).toContainText("Numerator (Mixpanel) and denominator (GA4)");
 });
 
-test("390px, French: the tools in the settings and the collect list by tool, nothing scrolls sideways", async ({ page }) => {
+test("390px, French: the tools in the settings and a number's « Où le trouver » opened on them, nothing scrolls sideways", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await startEngine(page, "fr");
   await tickTools(page, ["ga4", "stripe", "hubspot"]);
-  await page.getByTestId("engine-collect-disclosure").locator("summary").click();
-  await expect(page.getByTestId("engine-collect-tool-ga4")).toBeVisible();
+  const sheet = await openSheet(page, "acquisition", "acq-signup-rate");
+  await expect(sheet.getByTestId("engine-where")).toHaveJSProperty("open", true);
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   expect(overflow).toBe(0);
 });
