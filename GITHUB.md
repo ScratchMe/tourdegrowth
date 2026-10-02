@@ -268,4 +268,6 @@ ne doit lister que les fichiers de la PR.
   refait, jamais une résolution à la main.
 - **Majeures ignorées** avec leur raison dans `dependabot.yml` : TypeScript 7,
   ESLint 10, et toute majeure de `@types/node` (elle suit à la main le major
-  de Node qu'exécutent Vercel et la CI).
+  de Node qu'exécutent Vercel et la CI). **Une mineure aussi** depuis le
+  2026-10-02 : `firebase-admin` ≥ 14.4, pour son poids (`VERCEL.md` §2.2,
+  C36).

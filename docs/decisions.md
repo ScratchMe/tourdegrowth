@@ -8,7 +8,7 @@ question tranchée plus tard y gagne sa ligne, dans le même format.*
 C1 à C22 ont été tranchées dans la séance du 2026-09-29. Les questions de
 design y ont été posées avec des captures du vrai écran : un build local avec
 le jeu et le moteur ouverts, et, pour la vue propriétaire, un build jetable
-jamais commité. C23 à C29 l'ont été le 2026-09-30, C30 à C33 le 2026-10-01, C34 et C35 le 2026-10-02.
+jamais commité. C23 à C29 l'ont été le 2026-09-30, C30 à C33 le 2026-10-01, C34 à C36 le 2026-10-02.
 Les questions encore ouvertes sont dans `CHANTIERS.md`, section C.
 
 | # | Sujet | Réponse | Écrit dans | Suite |
@@ -48,3 +48,4 @@ Les questions encore ouvertes sont dans `CHANTIERS.md`, section C.
 | C33 | La carte du jeu sous les chiffres du lecteur, A15.18 (tranchée le 2026-10-01, sur captures) | **Un surtitre « Dans le jeu » au-dessus de la carte, hors de la bande** : « dans le jeu » sur la bande ne tenait pas dans sa ligne de 44 px (P23). La variante « Dans le jeu, pas dans tes chiffres » écartée | `GAME-BRIEF.md` §15.4 | Codé le même jour, [#262](https://github.com/ScratchMe/tourdegrowth/pull/262) |
 | C34 | Le rouge des étapes ex aequo sur la feuille de score (née du retour 05 de Claude Design, réponse 8.3, tranchée le 2026-10-02, planche sous les yeux) | **Toutes les ex aequo en rouge** (la reco) : le rouge de la feuille suit la netteté du frein, une ligne sur `clear`, tout le groupe sur `shared`, aucune sur `level`, comme le profil du parcours. La règle « au plus une puce rouge » tombe | `design/ds-extension-05-return/COPIE.md`, puis `StageScore` au portage | Codé le 2026-10-02, A16, [#271](https://github.com/ScratchMe/tourdegrowth/pull/271) |
 | C35 | Le nouveau « ? » (cercle plein, rempli quand la définition est ouverte, un survol) : partout ou seulement sur les scores (retour 05, réponse 4, tranchée le 2026-10-02) | **Partout, quiz compris** (la reco) : un seul dessin du bouton de définition | `design/ds-extension-05-return/COPIE.md`, puis `DefinitionTrigger` au portage | Codé le 2026-10-02, A16, [#271](https://github.com/ScratchMe/tourdegrowth/pull/271) |
+| C36 | La PR Dependabot #244 : React 19.2.8 → 19.3.0 et `firebase-admin` 14.3 → 14.5 (tranchée le 2026-10-02, poids mesuré, suites vertes) | **React 19.3 seul** (la reco). `firebase-admin` ≥ 14.4 ajoutait 11,4 Mo à chaque déploiement (47,83 → 59,21 Mo) : il tire deux `google-gax`, un défaut de l'amont. React pesait 0,01 Mo. `firebase-admin` est ignoré par Dependabot jusqu'au déclencheur de `CHANTIERS.md` E | `.github/dependabot.yml`, `VERCEL.md` §2.2 | Codé le même jour, [#275](https://github.com/ScratchMe/tourdegrowth/pull/275) |
