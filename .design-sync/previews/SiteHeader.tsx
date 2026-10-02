@@ -7,7 +7,14 @@ import { LocaleSwitcher, SiteHeader, WordmarkLink } from "tour-de-growth";
  * the window on frosted paper, 92% opaque so its row stays AA over anything
  * that scrolls under it. On a page that belongs to one of the three spaces,
  * the space band hangs from it and is its bottom edge; elsewhere, the dashed
- * rule it always had.
+ * rule it always had, drawn once the page scrolls under it.
+ *
+ * In a landscape window, once the page has scrolled, it becomes one line of
+ * 48px (design system extension 08): the wordmark, the race with this leg
+ * filled in its space's colour, the page's controls, over the band's colour
+ * slimmed to a stripe — 54px painted instead of 118. Its own script sets that
+ * state on scroll and measures it; nothing to pass, and a still card never
+ * shows it: every cell below is the full header, as at the top of a page.
  */
 
 /**
@@ -25,7 +32,7 @@ export const WithBand = () => (
   </div>
 );
 
-/** On a glossary page: no space, the dashed rule. */
+/** On a glossary page: no space, so no band. At the top of the page there is no rule either: the raised glass is edge enough, and the dashed rule comes in once the page scrolls under it. */
 export const Plain = () => (
   <div style={{ width: 760 }}>
     <SiteHeader locale="en" width="reading">

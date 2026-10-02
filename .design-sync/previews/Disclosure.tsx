@@ -31,14 +31,15 @@ export const TopLevel = () => (
 
 /*
  * Opened, which is the only way a static card can show what the panel holds
- * and what the marker looks like in its `−` state. `open` is the native
- * <details> attribute: DisclosureProps does not declare it — the browser owns
- * the open state — but it still reaches the element through the component's
- * `...rest`. In the product nobody passes it; the user clicks.
+ * and what the marker looks like in its `−` state. `defaultOpen` opens a row
+ * on first render and leaves it to the reader; `open` with `onOpenChange` is
+ * the controlled form, for a row another control opens (pair `id` with that
+ * control's `aria-controls`). Every row the product draws today starts
+ * closed: the reader clicks.
  */
 export const Open = () => (
   <div style={{ maxWidth: 460 }}>
-    <Disclosure summary="How this score is calculated" open>
+    <Disclosure summary="How this score is calculated" defaultOpen>
       <p style={line}>Three questions per stage. Your answers, and what each one was worth.</p>
     </Disclosure>
   </div>
@@ -77,13 +78,13 @@ const RETENTION = [
  */
 export const Nested = () => (
   <div style={{ maxWidth: 520 }}>
-    <Disclosure summary="How this score is calculated" open>
+    <Disclosure summary="How this score is calculated" defaultOpen>
       <p style={intro}>Three questions per stage. Your answers, and what each one was worth.</p>
       <div style={{ borderTop: "var(--border-rule)" }}>
         <Disclosure
           size="sm"
           rule={false}
-          open
+          defaultOpen
           summary={
             <span style={pillarHead}>
               <span style={pillarName}>Retention</span>

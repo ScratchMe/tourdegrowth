@@ -516,6 +516,37 @@ Deuxième étape du portage du retour 07, drapeau fermé. L'écran d'un chiffre,
 
 **Vérifié** : `tsc` et `eslint` propres, les tests unitaires, `next build` avec les variables de la CI, les 285 specs du moteur, des cibles et de l'accessibilité (onze échecs à la première passe, tous dans les specs qui visaient l'ancien écran, puis les cinq fichiers repassés : 84 sur 84), et des captures de l'écran en français et en anglais, à 1 280 et 390 px, dans le pas à pas et au tableau, sans défilement horizontal. Le `toggle` du `Disclosure` livré en T0 est exercé en vrai : « Écrire ta définition » déplie la note et y met le focus, vérifié par Playwright.
 
+## D10 : Uneed soumis, Smol Launch écarté (2026-10-02)
+
+**Uneed** : soumis par Antoine le 2026-10-02 dans la file gratuite, avec le lien `directory_uneed` en campagne `relaunch_tour`, le compte créé avec `contact@` et la fiche sous « Tour de Growth ». La session lui avait transmis le logo et les trois captures refaites par A7.12.a (accueil, résultat, sélecteur de ton). Uneed a fixé le lancement au **21 février 2027**, ce que la section E de `CHANTIERS.md` note. Relevé sur leur page de tarifs le même jour : la fiche doit atteindre 10 votes pour rester publiée, et 20 pour le lien en dofollow. On n'en demande jamais (`GROWTH-PLAN.md`).
+
+**Smol Launch**, le premier de l'ordre de `GROWTH-PLAN.md` 1.6, était noté « annoncé gratuit et dofollow » dans le kit depuis le 2026-09-13. Revérifié le 2026-10-02 : le gratuit exige d'afficher leur badge sur notre site, et le dofollow est réservé aux formules payantes (19 $ et plus). Écarté pour l'instant, comme Fazier : un badge tiers sur le site serait du code et une décision. Leur soumission « par un agent » passe par un serveur MCP. Elle n'a pas été utilisée, puisque brancher un connecteur se décide à part (`PLUGINS.md`).
+
+**SaaSHub, le même soir** : soumis par Antoine, avec le lien `directory_saashub` en campagne `relaunch_tour` et l'offre payante refusée. La page bloque les robots (défi Cloudflare), et AlternativeTo aussi : la session n'a rien pu en vérifier, Antoine l'a vue seul. **MicroLaunch et StartupBase** ne se connectent que par Google ou X (StartupBase : Google, LinkedIn ou X, vérifié par la session ; MicroLaunch : constaté par Antoine). Ils sont mis de côté, parce que **le compte X de la marque n'existe pas** : la ligne du 2026-09-14 de `GROWTH-PLAN.md` §7 le disait créé, et la correction y est datée. Le créer reste un geste d'Antoine, sans date (0.6). BetaList accepte aussi un lien magique par e-mail.
+
+## B9 et B12 : la re-synchro d'A16 et d'A19 (2026-10-02, #289)
+
+**Ce qu'elle emporte**, en une seule synchro vers le projet Claude Design, faite sur `main` à `44f2a2a` :
+- B9, la feuille de scores : `StageScore` et `StageScores` (nouveaux), `PillarChip` sorti du projet, `StampedPillar` et `DefinitionTrigger` redessinés, les rangs rouges de C34 ;
+- B12, l'en-tête compact : `SiteHeader`, `SpaceBand` (la course sortie en `SpaceRace`, hors inventaire comme `SiteHeaderCompactor`), `Segmented` à 42 px de large (C44), `tokens/header.css` ;
+- `Disclosure`, qui a gagné `defaultOpen` et une forme contrôlée avec A18 T0.
+
+**Le résultat** : 91 composants, 308 cellules, toutes notées bonnes. Le pilote a classé 5 composants comme changés, 2 comme nouveaux et 1 comme retiré ; la vérification de 18 autres, dont le code a changé sans leur aperçu, les a trouvés conformes. 14 composants envoyés, 77 reportés, 466 fichiers. `report_validate` : 91, 0 mauvais, 0 maigre, 0 identique ; l'index relu identique (91 cartes) ; ancre `59b524b3669b`.
+
+**Cinq aperçus corrigés**, chacun une carte qui s'affichait bien et disait faux :
+- la feuille en roast de `StageScores` et la carte de `StampedPillar` dessinaient les voisins du tampon sans leur « ? », que `ResultView` leur donne ;
+- `Disclosure` passait l'attribut natif `open`, devenu la prop contrôlée avec A18 T0 : `defaultOpen` à la place ;
+- `SiteHeader` disait le filet toujours tracé (il n'apparaît qu'au défilement depuis A19) et ne disait rien de l'état compact. Une carte immobile ne peut pas le montrer : sa documentation le décrit ;
+- `Segmented` ne disait pas les 42 px de C44.
+
+**`design/` dans le projet** : décision d'Antoine, les briefs 04, 05, 06 et 08 et leurs retours en sont retirés, puisqu'ils sont portés. 171 fichiers, listés depuis le projet et non depuis le dépôt : les retours n'y sont pas fichier pour fichier les copies d'ici. Seuls le brief 07 et son retour restent, A18 étant en cours. Tout ce qui est retiré est dans ce dépôt.
+
+**Ce que la synchro a trouvé après coup** : A18 T1 (#285) est arrivé sur `main` pendant qu'elle tournait. Il ajoute cinq composants sous `src/components/engine/` qui ne sont pas dans `componentSrcMap` (la prochaine construction du paquet échouera sur `check-inventory`, et c'est voulu), et retire de la copie que trois aperçus citent encore (`Choices`, `NumberField`, `FieldRow`). A18 n'est pas fini : c'est **B13**, la re-synchro à la fin de son portage, ouverte dans `CHANTIERS.md`.
+
+**Le volet Design System** reste sur sa copie du 2026-09-11 (B8) : l'agent de Claude Design, lui, lit les fichiers à jour.
+
+**Consigné** : `.design-sync/NOTES.md` (« Synced », « Found in the 2026-10-02 re-sync », la méthode de vérification des types, un risque de plus), `CHANTIERS.md` (B9 et B12 clos, B13 ouvert), `CLAUDE.md`.
+
 ## A18 T2.a : la barre du moteur et la prochaine étape, une seule action (2026-10-02, #290)
 
 Troisième étape du portage du retour 07, drapeau fermé. **T2 est coupé en trois PR** : T2.a (la tête du tableau, celle-ci), T2.b (`EngineProgress` et `NumberList` à la place des onglets), T2.c (`LeverCard`). Les onglets touchent plus de la moitié des specs du moteur : les changer dans la même PR que la tête aurait mêlé deux réécritures de specs.
