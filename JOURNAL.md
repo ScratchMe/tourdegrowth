@@ -457,3 +457,9 @@ Captures relues : l'accueil compact en français, le moteur compact avec ses chi
 ## D10 : l'indexation française demandée (2026-10-02)
 
 Antoine a demandé l'indexation des sept pages françaises que la session lui avait listées : les deux pages « porte ouverte » et les cinq « AARRR vs X ». `/fr` était déjà sur Google. Le rappel de la session avait vérifié avant que les huit adresses répondaient en 200. Il reste dans D10 les huit adresses des quatre termes de la vente assistée ajoutés par A7.3.e (`win-rate`, `sales-cycle`, `acv`, `lead-to-opportunity`, en anglais puis en français), vérifiées en 200 et présentes dans le sitemap le 2026-10-02. Les annuaires peuvent repartir depuis A7.12.a.
+
+## D10 : Uneed soumis, Smol Launch écarté (2026-10-02)
+
+**Uneed** : soumis par Antoine le 2026-10-02 dans la file gratuite, avec le lien `directory_uneed` en campagne `relaunch_tour`, le compte créé avec `contact@` et la fiche sous « Tour de Growth ». La session lui avait transmis le logo et les trois captures refaites par A7.12.a (accueil, résultat, sélecteur de ton). Uneed a fixé le lancement au **21 février 2027**, ce que la section E de `CHANTIERS.md` note. Relevé sur leur page de tarifs le même jour : la fiche doit atteindre 10 votes pour rester publiée, et 20 pour le lien en dofollow. On n'en demande jamais (`GROWTH-PLAN.md`).
+
+**Smol Launch**, le premier de l'ordre de `GROWTH-PLAN.md` 1.6, était noté « annoncé gratuit et dofollow » dans le kit depuis le 2026-09-13. Revérifié le 2026-10-02 : le gratuit exige d'afficher leur badge sur notre site, et le dofollow est réservé aux formules payantes (19 $ et plus). Écarté pour l'instant, comme Fazier : un badge tiers sur le site serait du code et une décision. Leur soumission « par un agent » passe par un serveur MCP. Elle n'a pas été utilisée, puisque brancher un connecteur se décide à part (`PLUGINS.md`).
