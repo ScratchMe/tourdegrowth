@@ -21,6 +21,22 @@ const GAME_OPEN = process.env.GAME_ENABLED === "true";
 const ENGINE_OPEN = process.env.ENGINE_ENABLED === "true";
 
 const band = (page: Page) => page.getByTestId("space-band");
+
+/**
+ * `--sticky-offset` less the header's painted height, rounded up: 0 once the
+ * header's script has measured it (compact-header.ts), positive while the
+ * no-script stand-in (118, 74) is in force, never negative.
+ */
+function offsetGap(page: Page): Promise<number> {
+  return page.evaluate(() => {
+    const height = document.querySelector("header[data-site-header]")!.getBoundingClientRect().height;
+    const offset = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--sticky-offset"));
+    return offset - Math.ceil(height);
+  });
+}
+
+/** Every kind of header: the band, the quiz's row (no 44px control in it), a reading page's plain one. */
+const OFFSET_PAGES = ["/fr", "/r/sample", "/quiz", "/fr/glossary/cac"];
 const stop = (page: Page, s: "tour" | "engine" | "game") => band(page).locator(`[data-stop="${s}"]`);
 
 test.describe("the space band", () => {
@@ -112,16 +128,29 @@ test.describe("the sticky header", () => {
     expect(look.blur).toContain("blur(14px)");
   });
 
-  test("--sticky-offset covers the header it stands for", async ({ page }) => {
-    for (const path of ["/fr", "/quiz", "/fr/glossary/cac"]) {
+  // Measured since 2026-10-02: the stand-in left anchors and focus 25px
+  // too low in the quiz, whose header is 93px, and 4px on every page of a
+  // phone held upright (JOURNAL.md, « A19.1 »).
+  test("--sticky-offset is the header's own height, measured", async ({ page }) => {
+    for (const path of OFFSET_PAGES) {
       await page.goto(path);
-      const { height, offset } = await page.evaluate(() => ({
-        height: document.querySelector("header[data-site-header]")!.getBoundingClientRect().height,
-        offset: parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--sticky-offset")),
-      }));
-      expect(offset, path).toBeGreaterThanOrEqual(Math.floor(height));
+      await expect.poll(() => offsetGap(page), path).toBe(0);
     }
   });
+});
+
+test.describe("the sticky header without JavaScript", () => {
+  test.use({ javaScriptEnabled: false });
+
+  for (const [width, height] of [[1280, 720], [390, 844], [320, 568]] as const) {
+    test(`at ${width}px, --sticky-offset's stand-in still covers the header`, async ({ page }) => {
+      await page.setViewportSize({ width, height });
+      for (const path of OFFSET_PAGES) {
+        await page.goto(path);
+        expect(await offsetGap(page), path).toBeGreaterThanOrEqual(0);
+      }
+    });
+  }
 });
 
 test.describe("the space band on a phone", () => {
@@ -136,14 +165,18 @@ test.describe("the space band on a phone", () => {
     });
   }
 
-  test("--sticky-offset covers the header at this width too", async ({ page }) => {
-    for (const path of ["/fr", "/fr/glossary/cac"]) {
+  test("--sticky-offset is the header's own height at this width too", async ({ page }) => {
+    for (const path of OFFSET_PAGES) {
       await page.goto(path);
-      const { height, offset } = await page.evaluate(() => ({
-        height: document.querySelector("header[data-site-header]")!.getBoundingClientRect().height,
-        offset: parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--sticky-offset")),
-      }));
-      expect(offset, path).toBeGreaterThanOrEqual(Math.floor(height));
+      await expect.poll(() => offsetGap(page), path).toBe(0);
+    }
+  });
+
+  test("and at 320px, the narrowest width the site holds", async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 568 });
+    for (const path of OFFSET_PAGES) {
+      await page.goto(path);
+      await expect.poll(() => offsetGap(page), path).toBe(0);
     }
   });
 });
