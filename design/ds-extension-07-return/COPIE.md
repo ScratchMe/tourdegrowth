@@ -41,3 +41,25 @@ cite, prises par Claude Design avec ses propres polices.
 liste des fichiers du projet est celle d'avant. Seuls s'y ajoutent
 `design/DS-EXTENSION-BRIEF-08.md` et `design/ds-extension-08/`, déposés par
 une autre session (B11).
+
+## Ce qu'Antoine a tranché sur ce retour (2026-10-02)
+
+Posé dans la session qui a recopié le retour, la planche sous les yeux (le
+retour au moteur à 1 280 et 390 px, et l'écran d'un chiffre) :
+
+- **C40, le pas à pas et le tableau** (réponses 11, 12 et 14) : **fondus en
+  un**, comme le propose le retour, **mais un écran « Cibles » est gardé au
+  début**, sautable, pour une équipe qui a ses cibles sous la main. La cible
+  se saisit aussi sur l'écran de son chiffre (« Comment il se situe ») et dans
+  les Réglages. L'écran « Base » part.
+- **C41, les onglets d'étape** (réponse 16) : **une liste par étape**, la
+  reco. La décision du 2026-09-26 est renversée.
+- **C42, les mots** (réponse 19) : **tous les renommages**, relus au bon à
+  tirer.
+- **C38, l'ordre** : **le portage d'abord**, puis un seul bon à tirer qui
+  absorbe A7.3.d et A14.d.
+
+Le portage est le lot A18 de `CHANTIERS.md`. Le reste du retour est la réponse
+de Claude Design au brief, et le portage le suit tel quel. La trouvaille 9 (la
+clause rouge du verdict peut nommer une autre étape que le diagnostic) est
+posée au bon à tirer, comme le retour le propose.

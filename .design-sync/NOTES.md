@@ -385,8 +385,10 @@ Brief 07 (the growth engine made simpler, B10) went in on 2026-10-02:
 `design/DS-EXTENSION-BRIEF-07.md`, the sixteen screens of
 `design/ds-extension-07/` in two languages and two widths (26 PNGs) and its
 `CATALOGUE.md` (28 files, their own plan, no delete, bundle and
-`_ds_sync.json` untouched); its return is awaited under
-`design/ds-extension-07-return/`.
+`_ds_sync.json` untouched). Claude Design returned it the same day under
+`design/ds-extension-07-return/` (101 files, all source; nothing outside that
+folder changed), copied into this repo identical to the character (its
+`COPIE.md`); its port is `CHANTIERS.md` A18.
 Brief 08 (the sticky header, compact once the page scrolls, B11) went in on
 2026-10-02: `design/DS-EXTENSION-BRIEF-08.md` and the sixteen PNGs under
 `design/ds-extension-08/` (seventeen files, their own plan, no delete, bundle
