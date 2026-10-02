@@ -68,3 +68,23 @@
   background: var(--viz-highlight);
   border-radius: 1px;
 }
+
+/*
+ * The published range (design system extension 07, `band`): a bracket under
+ * the track, not on it, so the value bar never hides it and it never reads as
+ * a second value. --viz-axis on the card is 7.20:1, past the 3:1 of a mark.
+ * Never red: a reference situates, it never names a stage (C1).
+ */
+.bandRow {
+  position: relative;
+  height: var(--viz-band-height);
+  margin-top: var(--space-1);
+}
+
+.band {
+  position: absolute;
+  top: 0;
+  height: var(--viz-band-height);
+  border: var(--viz-band-edge);
+  border-top: none;
+}

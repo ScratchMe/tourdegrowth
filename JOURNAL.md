@@ -375,3 +375,21 @@ Quatorze composants neufs, deux deltas (`Disclosure`, `BulletChart`), aucun chan
 **Ouvert** : **A18**, le portage, en huit étapes (T0 à T7) puis A18.d. La clause rouge du verdict, qui peut nommer une autre étape que le diagnostic (trouvaille 9 du retour), est posée au bon à tirer.
 
 **Consigné** : `design/ds-extension-07-return/COPIE.md`, `docs/decisions.md` (C38, C40 à C42), `CHANTIERS.md` (A18 ouvert, A7.3.d et A14.d absorbés, B10 clos, C sans question ouverte, D14 retiré, D2), `ENGINE.md`, `CLAUDE.md` (l'état), `design/README.md`, `.design-sync/NOTES.md`.
+
+## A18 T0 : le socle du moteur simplifié, les jetons, deux deltas et la prochaine étape (2026-10-02)
+
+Première étape du portage du retour 07 (A18), drapeau fermé : rien ne change à l'écran, tout ce qui suit sert T1 à T5.
+
+**Les jetons** : `src/styles/tokens/engine.css`, importé par `globals.css`, tels que le retour les donne, à un sélecteur près. Le bloc des couleurs est déclaré sur `:root, [data-world]` et non `[data-world=paper]` : la règle des mondes du dépôt (`token-sources.test.ts`, dont le balayage couvre maintenant `engine.css`) veut qu'un jeton bâti sur un jeton sémantique suive un monde qui le redéfinit. Le moteur ne sort jamais du papier, la valeur ne change donc pas. Non-vacuité : le sélecteur du retour remis fait tomber le test sur `--engine-advice-edge`. **Trente-cinq jetons ne sont lus par rien en T0**, et `dead-tokens.test.ts` refuse un jeton sans lecteur : ils attendent dans sa liste, chacun sous l'étape dont le composant le lit le premier (T1, T2, T4, T5, d'après le CSS du retour), et le test oblige chaque étape à les retirer en les lisant. `--engine-verdict` n'est lu par aucun composant du retour, seulement par la planche : c'est T2. Le plancher de 11 px (`type-scale.test.ts`) lit aussi `engine.css`.
+
+**`BulletChart`** reçoit le delta : `value: null` (aucune barre), `target: null`, et `band`, la fourchette publiée en crochet **sous** la piste. Sa géométrie est pure (`bandGeometry`, `lib/viz/bullet.ts`) : bornée au domaine comme la barre et le trait, et **rien** quand la fourchette tombe entièrement hors du domaine, là où la planche l'aurait écrasée en un crochet sur le bord ; elle accepte un domaine descendant. Une valeur qui n'est pas un nombre ne dessine plus une barre de largeur nulle mais rien, ce qui revient au même à l'écran.
+
+**`Disclosure`** reçoit `defaultOpen`, `open` avec `onOpenChange`, et `id`, toujours un `<details>` natif. Le balisage est épinglé sans DOM. **L'événement `toggle` n'est exercé en navigateur qu'en T1**, par son premier appelant (le piège qui ouvre « Ta définition et une note »).
+
+**La prochaine étape** : `nextStepFor` (`_engine/next-step.ts`), les huit rangs de `NextStep.prompt.md`, le premier qui s'applique gagne, l'ordre du tunnel dans un rang. Elle part du plan de collecte, pour que la carte et les listes ne se contredisent jamais : un chiffre qu'aucun outil de l'équipe ne couvre y est « à demander » comme dans la liste. Les sept états de la planche sont épinglés avec le moteur qu'ils montrent (« Demander le CAC à la finance » au retour), ainsi que l'hybride (étape par étape, les deux moteurs ensemble, pas l'un puis l'autre) et les outils cochés. Non-vacuité : les rangs 4 et 5 inversés font tomber cinq tests, l'ordre du catalogue seul fait tomber les deux de l'hybride.
+
+**Deux lectures du retour, faites ici et à confirmer au bon à tirer (A18.d)** :
+- le prompt donne l'écran des demandes à « deux ou plus **à une première visite** » et ne dit rien d'un retour. Un retour avec deux demandes ou plus non envoyées reçoit le même écran : une demande par écran les étalerait sur plusieurs visites, ce que le rang 5 évite ;
+- le prompt relance une demande « après sept jours », le moteur après **cinq** (`REMIND_AFTER_DAYS`, §6.13, la même durée que le rappel d'agenda). T2 gardera cinq et lira `isRequestStale`.
+
+**Vérifié** : `tsc` et `eslint` propres, 2 977 tests unitaires, `next build` avec les variables de la CI, et les specs e2e du moteur, des niveaux du jeu (le `BulletChart` du tableau de bord), de la composition du résultat (des `Disclosure`) et de l'accessibilité.
