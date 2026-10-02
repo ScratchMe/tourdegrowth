@@ -372,6 +372,26 @@ export function ResultView({
   const disclaimerLinkText = tc(NAV_STRINGS.howItWorks, locale);
   const disclaimerSplit = disclaimerShort.split(disclaimerLinkText);
 
+  /*
+   * The result's two states, a Deep dive and a roast, rendered twice: in the
+   * header from 761px, at the top of the page below it — CSS picks one, the
+   * other is `display: none` and out of the accessibility tree. On a phone
+   * the header row holds the wordmark and the language switch, and nothing
+   * more fits: with a state beside them it scrolled sideways, by 9px at 390
+   * with both, 14px at 320 with the roast alone, and the roast badge broke
+   * over two lines from 390 down (430 with the Deep dive tag beside it).
+   * Hiding them, as R-21 hid the landing's nav links, is not an option here:
+   * nothing else on the page says "roast", and that word is what tells a
+   * reader of a shared link that the harsh tone was chosen.
+   */
+  const stateTags =
+    deepDive || roast ? (
+      <>
+        {deepDive && <ModeTag mode="deep">{tc(dd.badge, locale)}</ModeTag>}
+        {roast && <span className={styles.roastBadge}>{tc(t.roastBadge, locale)}</span>}
+      </>
+    ) : null;
+
   return (
     <>
       <SiteHeader locale={locale} width="wide" space="tour">
@@ -385,13 +405,17 @@ export function ResultView({
               the switch goes through `?lang=`, which the proxy folds into
               the cookie — the choice then carries on to `/quiz`. */}
           <LocaleSwitcher locale={locale} />
-          {deepDive && <ModeTag mode="deep">{tc(dd.badge, locale)}</ModeTag>}
           {/* Design system extension 01 drops the "Stage 5/5 — Finished ·
               15/15 answered" meta line from this header: the score below is
               the proof it is finished. The roast badge and the Deep dive tag
               stay — those are state, not a progress read-out, and each has
-              its own component in the system. */}
-          {roast && <span className={styles.roastBadge}>{tc(t.roastBadge, locale)}</span>}
+              its own component in the system. On a phone they move to the
+              top of the page (`stateTags` below). */}
+          {stateTags && (
+            <span className={styles.headerTags} data-testid="result-header-tags">
+              {stateTags}
+            </span>
+          )}
         </div>
       </SiteHeader>
 
@@ -408,6 +432,11 @@ export function ResultView({
           <MetaLabel size="xs" wide tone="alert" className={styles.sampleBadge}>
             {tc(t.sampleBadge, locale)}
           </MetaLabel>
+        )}
+        {stateTags && (
+          <div className={styles.stateTags} data-testid="result-state-tags">
+            {stateTags}
+          </div>
         )}
 
         {/* `data-owner` reorders the share block above the CTA row on a

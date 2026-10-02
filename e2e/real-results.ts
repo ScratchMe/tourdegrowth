@@ -108,6 +108,18 @@ export const REAL_RESULTS = {
     answers: answersFor({ acquisition: 2, activation: 2, retention: 2, referral: 2, revenue: 2 }),
     total: 0,
   },
+  /**
+   * A roast WITH a Deep dive (2026-10-02): the result header at its widest —
+   * the language switch, the Deep dive tag and the roast badge on one row
+   * beside the wordmark. Measured from 320px by e2e/result-header.spec.ts.
+   */
+  roastDeep: {
+    id: "7d3c9e2a-0b1f-4c5d-8e6f-1a2b3c4d5e07",
+    tone: "roast",
+    locale: "fr",
+    answers: answersFor({ acquisition: 1, activation: 0, retention: 2, referral: 0, revenue: 1 }),
+    total: 54,
+  },
 } as const satisfies Record<string, RealResult>;
 
 /**

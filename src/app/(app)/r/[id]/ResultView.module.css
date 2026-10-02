@@ -13,6 +13,36 @@
   border-radius: var(--radius-tag);
   padding: 6px 10px;
   rotate: -1.5deg;
+  /* A badge, never two lines: « 🔥 ROAST » over « MODE » is what a squeezed
+     header made of it. */
+  white-space: nowrap;
+}
+
+/*
+ * The result's states (the Deep dive tag, the roast badge): in the header
+ * from 761px, on their own line at the top of the page below — see
+ * `stateTags` in ResultView.tsx. In the header they stay plain items of
+ * `.headerRight`, spaced by its gap.
+ */
+.headerTags {
+  display: contents;
+}
+
+.stateTags {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .headerTags {
+    display: none;
+  }
+
+  .stateTags {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+  }
 }
 
 .main {
