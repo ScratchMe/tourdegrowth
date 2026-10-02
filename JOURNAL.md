@@ -281,7 +281,7 @@ Les suites passaient pourtant sur `main` + #244 : lint, `tsc`, 2 944 tests unita
 
 **Ce qui reste pour la suite, et pourquoi ce fichier le dit** : `GITHUB.md` §2 pose maintenant qu'une PR Dependabot ouverte se mesure et se pose en question dans `CHANTIERS.md` C. Sans cette règle, #244 serait restée ouverte, ou aurait été mergée par une session pressée, avec 11 Mo de plus par déploiement.
 
-## B11 : le brief 08 de l'en-tête collant compact, déposé dans Claude Design (2026-10-02)
+## B11 : le brief 08 de l'en-tête collant compact, déposé dans Claude Design (2026-10-02, #281)
 
 **La demande** (Antoine) : l'en-tête collant est agréable sur un téléphone tenu droit, mais sur un écran de bureau, en paysage, il prend beaucoup de place. Il veut le réduire au défilement, en gardant de quoi savoir où l'on est dans l'app, avec une transition élégante, et passer par Claude Design pour la qualité du rendu.
 
