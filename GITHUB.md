@@ -55,6 +55,16 @@ un `git push --force-with-lease` échoue parce que la référence de suivi local
 croit encore que la branche distante existe. `git fetch --prune` avant de
 pousser.
 
+**Un clone superficiel ment sur l'ascendance.** Un clone fait avec une
+profondeur (50 commits dans une session cloud) ne voit qu'un bout de
+l'historique. `git merge-base --is-ancestor` et `git log main..branche` y
+calculent sur ce bout. Le 2026-10-02, une branche entièrement contenue dans
+`main` est ressortie « pas ancêtre, 5 commits d'avance ». Après
+`git fetch --unshallow`, elle avait 0 commit d'avance. Avant d'affirmer qu'une
+branche est mergée ou de compter ses commits : `git rev-parse
+--is-shallow-repository`, puis `git fetch --unshallow` s'il répond `true`. On
+peut aussi passer par l'API de comparaison.
+
 ### 1.3 Rulesets : l'API classique ment
 
 Sur un dépôt où l'exigence de check vit dans un **ruleset**, l'API classique
@@ -239,7 +249,23 @@ ne doit lister que les fichiers de la PR.
   barrière et les commandes qui la vérifient sont au §0 de ce skill.
 - **La suppression automatique des branches de tête est activée** : les
   branches de PR mergées disparaissent seules. Ne pas s'en étonner au prochain
-  `--force-with-lease`.
+  `--force-with-lease`. Elle ne touche que la branche d'une PR mergée.
+  Une branche de session recréée depuis `main` après un merge, puis jamais
+  reprise, n'a pas de PR, donc elle reste. C'était le cas de
+  `claude/repo-technical-functional-audit-e9xr8t`, trouvée le 2026-10-02 :
+  son bout était le squash même de #185, donc elle avait été repoussée après
+  le merge. Une session ne peut pas la supprimer : le proxy git refuse en 403
+  toute écriture hors de la branche désignée, suppression comprise. C'est un
+  geste d'Antoine, sur la page *Branches* du dépôt.
+- **Une PR Dependabot ne se merge jamais sans Antoine** : elle touche
+  `package.json` et le lockfile (`/livrer` §0). La session qui en voit une
+  ouverte mesure le poids des bundles serveur avant et après (`VERCEL.md`
+  §1.2) et la pose en question dans `CHANTIERS.md` C. Sinon, elle reste
+  ouverte sans que personne le sache : #239 et #244 l'étaient le 2026-10-02,
+  absentes de tout document, et la seconde ajoutait 11,4 Mo à chaque
+  déploiement. Deux PR groupées se touchent toujours dans `package.json` :
+  après le merge de l'une, l'autre est en conflit. C'est Dependabot qui la
+  refait, jamais une résolution à la main.
 - **Majeures ignorées** avec leur raison dans `dependabot.yml` : TypeScript 7,
   ESLint 10, et toute majeure de `@types/node` (elle suit à la main le major
   de Node qu'exécutent Vercel et la CI).
