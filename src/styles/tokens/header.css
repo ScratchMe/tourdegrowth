@@ -1,0 +1,36 @@
+/*
+ * The sticky header's compact state — design system extension 08 (the return
+ * in design/ds-extension-08-return/, Antoine's brief of 2026-10-02).
+ *
+ * In a landscape window, once the page has scrolled, the header becomes one
+ * line of 48px over the band's colour slimmed to a stripe: 54px painted
+ * instead of 118 (48 + 6), 50px instead of 74 on a page without a band
+ * (48 + 2). The header's box keeps its full height; only layers inside it
+ * move (SiteHeader.module.css, compact-header.ts).
+ *
+ * Measures only: no colour, no duration, no curve — the motion reads
+ * tokens/motion.css as it stands. Media queries cannot read a custom
+ * property, so the landscape condition is written where it applies
+ * (`@media (orientation: landscape)` in SiteHeader.module.css and
+ * globals.css). Today's full heights (row 72px, band 46px, 118 and 74 in
+ * all; a 68px row under 760px) are measured by compact-header.ts on the page,
+ * never written here.
+ */
+:root {
+  /* One line: a 44px target with 2px of air above and below. Every control
+     kept in it is drawn 28–37px tall and reaches 44px through its hit strip
+     (styles/hit.module.css, Button sm, Segmented sm). */
+  --header-line: 48px;
+
+  /* The band, slimmed to its colour: 4px of the space's colour over the
+     band's own 2px solid ink edge — 6px in all. */
+  --header-edge-band: 6px;
+
+  /* A page with no band keeps its edge: the dashed rule, 2px. */
+  --header-edge-plain: 2px;
+
+  /* What leaves the line and what arrives in it travels one step. The band
+     and the edge travel the measured difference between the two heights
+     (compact-header.ts sets it as --header-edge-shift). */
+  --header-step: var(--dist-step);
+}

@@ -66,6 +66,12 @@ for (const locale of ["fr", "en"] as const) {
     await link.click();
     await expect.poll(() => trackedEvents(page)).toContain("game_entry_clicked/home_strip");
 
+    // The click on the card scrolled the page, and a scrolled landscape window
+    // folds the band into the compact header (design system extension 08),
+    // whose race counts apart (e2e/site-header-compact.spec.ts). The band's
+    // pill is a door at the top of the page.
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await expect(page.locator("header[data-site-header]")).toHaveAttribute("data-compact", "false");
     const pill = page.getByTestId("space-band").locator('[data-stop="game"] a');
     await expect(pill).toHaveAttribute("href", `/${locale}/game`);
     await holdNavigation(page);

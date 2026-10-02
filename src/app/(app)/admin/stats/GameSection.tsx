@@ -56,6 +56,7 @@ function GameCard({ window, growth }: { window: FunnelWindow; growth: Pick<Growt
         <li>Entries — hub: {game.entries.hub}</li>
         <li>Entries — landing strip: {game.entries.home_strip}</li>
         <li>Entries — space band: {game.entries.space_band}</li>
+        <li>Entries — compact header race: {game.entries.space_band_compact}</li>
       </ul>
 
       <ul className={styles.list}>

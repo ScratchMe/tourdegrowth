@@ -68,11 +68,17 @@ test("every header item meant to be gone on a phone computes to display:none", a
   await page.goto("/fr");
   await page.locator("main").waitFor();
 
+  // The link itself, or the item that carries it: since design system
+  // extension 08 the two quiet links sit in a span that holds their
+  // compact-header mark, and the span is what the phone rule removes.
   const displays = await page.locator("header").evaluate((header) =>
-    [...header.querySelectorAll("a")].map((a) => ({
-      text: (a.textContent ?? "").trim(),
-      display: getComputedStyle(a).display,
-    })),
+    [...header.querySelectorAll("a")].map((a) => {
+      let display = getComputedStyle(a).display;
+      for (let el: Element | null = a; el && el !== header && display !== "none"; el = el.parentElement) {
+        display = getComputedStyle(el).display;
+      }
+      return { text: (a.textContent ?? "").trim(), display };
+    }),
   );
 
   for (const label of ["Glossaire", "Comment ça marche", "Démarre ton Tour →"]) {

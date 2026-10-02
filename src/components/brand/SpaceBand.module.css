@@ -167,6 +167,11 @@ a.pill:focus-visible {
 }
 
 /*
+ * The two container queries below answer to the band's own `.inner` (its
+ * container): every rule in them is scoped to it, so they never reach the
+ * compact race, which sits in the header row — a size container too since
+ * design system extension 08.
+ *
  * A narrower header (the quiz, the Deep dive, the game's reading column): the
  * race keeps its pictograms and numbers, and the legs' names leave the screen
  * but not the page — a screen reader still hears « 2 Moteur bientôt ». The
@@ -174,7 +179,7 @@ a.pill:focus-visible {
  * (Antoine, 2026-09-28), at every width it fits in.
  */
 @container (max-width: 900px) {
-  .label {
+  .inner .label {
     position: absolute;
     width: 1px;
     height: 1px;
@@ -183,11 +188,11 @@ a.pill:focus-visible {
     white-space: nowrap;
   }
 
-  .n::after {
+  .inner .n::after {
     content: none;
   }
 
-  .pill {
+  .inner .pill {
     padding: 3px 9px 3px 7px;
   }
 }
@@ -199,7 +204,7 @@ a.pill:focus-visible {
  * the word goes to screen readers only.
  */
 @container (max-width: 560px) {
-  .soon {
+  .inner .soon {
     position: absolute;
     width: 1px;
     height: 1px;
@@ -212,7 +217,7 @@ a.pill:focus-visible {
     padding-block: 7px;
   }
 
-  .where {
+  .inner .where {
     flex-direction: column;
     align-items: flex-start;
     gap: 3px;
@@ -221,27 +226,149 @@ a.pill:focus-visible {
   /* The desktop's size: at 18px it was the one literal of the band, and 19
      fits every space's name down to 320px in both languages (measured
      2026-09-29, design audit A1.5). */
-  .name {
+  .inner .name {
     order: -1;
   }
 
-  .kicker {
+  .inner .kicker {
     padding-right: 0;
     border-right: 0;
     letter-spacing: var(--meta-tracking);
   }
 
-  .mini {
+  .inner .mini {
     display: none;
   }
 
-  .stops {
+  .inner .stops {
     gap: 4px;
   }
 
-  .pill {
+  .inner .pill {
     min-width: 28px;
     justify-content: center;
     padding: 3px 8px;
+  }
+}
+
+/*
+ * The compact race (`SpaceRace variant="compact"`, design system extension
+ * 08), on the compact header's paper: the same three pills; this leg filled
+ * in its space's colour, with its pictogram and short name; the other legs
+ * their number; a closed one greyed and dashed. No colour of its own: the
+ * band's tokens. SiteHeader places it and shows it; these rules draw it.
+ */
+.raceCompact {
+  margin-left: 0;
+}
+
+.raceCompact[data-space="tour"] {
+  --band-bg: var(--space-tour-bg);
+  --band-text: var(--space-tour-text);
+  --band-mark: var(--space-tour-mark);
+}
+
+.raceCompact[data-space="engine"] {
+  --band-bg: var(--space-engine-bg);
+  --band-text: var(--space-engine-text);
+  --band-mark: var(--space-engine-mark);
+}
+
+.raceCompact[data-space="game"] {
+  --band-bg: var(--space-game-bg);
+  --band-text: var(--space-game-text);
+  --band-mark: var(--space-game-mark);
+}
+
+/* 28px pills reach 44px through their hit strip, 8px out on each side: 16px
+   between them, and the targets abut without overlapping. */
+.raceCompact .stops {
+  gap: var(--space-7);
+}
+
+.raceCompact .pill {
+  min-width: 28px;
+  justify-content: center;
+  padding: 3px 9px;
+  color: var(--text-body);
+  border-color: var(--border-hard);
+  background: transparent;
+}
+
+/* Numbers only on the legs you are not on: their names stay for screen
+   readers, their pictograms go. */
+.raceCompact .stop:not([data-state="current"]) .label,
+.raceCompact .soon {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.raceCompact .stop:not([data-state="current"]) .mini {
+  display: none;
+}
+
+.raceCompact .stop:not([data-state="current"]) .n::after {
+  content: none;
+}
+
+/* This leg: the band, in one pill. The ink edge holds the ochre pill to 3:1
+   against the paper (extension 08's README, « Contrast »). */
+.raceCompact .stop[data-state="current"] .pill {
+  padding: 3px 11px 3px 8px;
+  background: var(--band-bg);
+  color: var(--band-text);
+  border-color: var(--border-hard);
+}
+
+.raceCompact[data-space="tour"] .stop[data-state="current"] .mini {
+  color: var(--band-mark);
+}
+
+.raceCompact .stop[data-state="soon"] .pill {
+  color: var(--text-muted);
+  border-color: var(--border-soft);
+  border-style: dashed;
+}
+
+.raceCompact a.pill:hover {
+  background: var(--mark-hover-bg);
+}
+
+.raceCompact a.pill:focus-visible {
+  outline: var(--focus-width) solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/*
+ * A narrow line (a phone on its side narrower than about 690px, such as
+ * 667 × 375): the current leg keeps its pictogram and number, its name goes
+ * to screen readers only. The container is the header row (SiteHeader), the
+ * nearest size container of the compact race.
+ */
+@container (max-width: 640px) {
+  .raceCompact .stop[data-state="current"] .label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .raceCompact .stop[data-state="current"] .n::after {
+    content: none;
+  }
+}
+
+/* The narrowest line (a 568 × 320 phone on its side, with the quiz's
+   progress): the current leg is its number in its space's colour, as the
+   band's own race is on a phone today. */
+@container (max-width: 560px) {
+  .raceCompact .stop[data-state="current"] .mini {
+    display: none;
   }
 }

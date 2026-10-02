@@ -395,10 +395,22 @@ Brief 08 (the sticky header, compact once the page scrolls, B11) went in on
 and `_ds_sync.json` untouched). It is numbered 08 because the project already
 held a brief 07 (the growth engine made simpler, B10), deposited the same day
 by another session before its PR merged: read `list_files` under `design/`
-before numbering a brief, not only the repo. Its return is awaited under
-`design/ds-extension-08-return/`. A re-sync must leave them: before applying
+before numbering a brief, not only the repo. Claude Design returned it the
+same day under `design/ds-extension-08-return/` (28 files, all source;
+nothing outside that folder changed), copied into this repo (its `COPIE.md`)
+and ported the same day (`CHANTIERS.md` A19); the re-sync that carries the
+port is B12. A re-sync must leave these folders: before applying
 `upload.deletePaths`, check it names nothing under `design/`. Remove them on
 purpose once the return is ported, not as a side effect of a sync.
+
+**A19 (2026-10-02) added two exports that are not cards.** `SpaceRace` (the
+race, out of `SpaceBand`, that the band renders and the compact header
+reuses) only makes sense inside a header, and `SiteHeaderCompactor` (the
+header's client piece) renders an empty marker: both are `null` in
+`componentSrcMap`, so the inventory reads 91 pinned and 3 excluded. The
+compact state is set by a script and measured at runtime, so a preview of it
+has to pose `data-compact="true"` and the measured custom properties by hand
+(`compact-header.ts` names them).
 
 **T6.2 (2026-10-01) moved two drawings into data, with the same markup.**
 `brand/Stopwatch` reads its shapes from `stopwatch-geometry.ts` and

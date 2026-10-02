@@ -1,5 +1,8 @@
 /*
- * The site header — see SiteHeader.tsx. Sticky, on frosted paper.
+ * The site header — see SiteHeader.tsx. Sticky, on frosted paper, and
+ * compact once the page scrolls in a landscape window (design system
+ * extension 08, design/ds-extension-08-return/: README.md for the why,
+ * MOTION.md for every value of the motion).
  *
  * The glass is the RAISED paper (--surface-card, --paper-0), a step lighter
  * than the page ground (--surface-page, --paper-1): the design I + B mockup
@@ -11,12 +14,31 @@
  * scrolls under the row shows through the rest, and the worst ground is a
  * solid ink one (the game's night desk, a card's hard shadow). Measured over
  * solid ink, 92% keeps the row's muted text at 6.14 and red link text at 5.73;
- * the design's mockup ran 74%, which puts them at 4.16 and 3.89.
+ * the design's mockup ran 74%, which puts them at 4.16 and 3.89. The compact
+ * state keeps it as it is, so every figure holds.
+ *
+ * Layers, bottom to top, with no number of their own (z-index.test.ts): the
+ * band (positioned, `auto`), the bar — the glass, then the row over it — at
+ * --z-raised, and the edge one above. The band therefore folds up UNDER the
+ * glass in the compact state, never over the wordmark.
  */
 .header {
   position: sticky;
   top: 0;
   z-index: var(--z-header);
+}
+
+.bar {
+  position: relative;
+  z-index: var(--z-raised);
+}
+
+/* The row's frosted paper, a layer of its own since extension 08: the
+   compact state shrinks it with a transform, never the header's box
+   (mechanic 1). */
+.glass {
+  position: absolute;
+  inset: 0;
   background: color-mix(in srgb, var(--surface-card) 92%, transparent);
   /*
    * Unprefixed ONLY: the build (Lightning CSS) adds `-webkit-` for Safari.
@@ -25,13 +47,71 @@
    * 2026-09-29; e2e/site-header.spec.ts now reads the computed value).
    */
   backdrop-filter: blur(14px) saturate(1.3);
+  transform-origin: top;
 }
 
 /* Without the blur, glass is just a pane in the way: paper, solid. */
 @supports not (backdrop-filter: blur(1px)) {
-  .header {
+  .glass {
     background: var(--surface-card);
   }
+}
+
+/*
+ * The row is a size container since extension 08: the compact race shortens
+ * by the line's width (SpaceBand.module.css, under 640 and 560px), never by
+ * the language. Its width comes from its column, never from its content, so
+ * the containment changes nothing in its layout.
+ */
+.row {
+  position: relative;
+  margin: 0 auto;
+  padding: var(--space-6) 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  container-type: inline-size;
+}
+
+/* Two classes deep so the width never loses to `.row` on emission order. */
+.row.wide {
+  max-width: var(--content-max-width);
+}
+
+.row.reading {
+  max-width: var(--width-reading);
+}
+
+.row.narrow {
+  max-width: 720px;
+}
+
+@media (max-width: 760px) {
+  .row {
+    padding-block: var(--space-5);
+  }
+}
+
+/* The wordmark, and after it (compact only, out of flow) the race. */
+.lead {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+/* The page's own controls, right. */
+.end {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+  margin-left: auto;
+}
+
+.band {
+  position: relative;
 }
 
 /* A page without a space keeps the dashed rule as its edge; the band is the edge otherwise. */
@@ -69,30 +149,216 @@
   }
 }
 
-.row {
-  margin: 0 auto;
-  padding: var(--space-6) 24px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+/*
+ * The edge that rises with the compact line. In the full state it lies
+ * exactly on the band's own bottom 6px (4px of its colour, 2px of ink), so it
+ * cannot be told apart from it; a plain header's is invisible until compact.
+ */
+.edge {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: calc(var(--z-raised) + 1);
+  pointer-events: none;
 }
 
-/* Two classes deep so the width never loses to `.row` on emission order. */
-.row.wide {
-  max-width: var(--content-max-width);
+.header[data-site-header="band"] .edge {
+  height: var(--header-edge-band);
+  border-bottom: var(--border-solid);
 }
 
-.row.reading {
-  max-width: var(--width-reading);
+.header[data-space="tour"] .edge {
+  background: var(--space-tour-bg);
 }
 
-.row.narrow {
-  max-width: 720px;
+.header[data-space="engine"] .edge {
+  background: var(--space-engine-bg);
 }
 
-@media (max-width: 760px) {
-  .row {
-    padding-block: var(--space-5);
+.header[data-space="game"] .edge {
+  background: var(--space-game-bg);
+}
+
+.header[data-site-header="plain"] .edge {
+  height: var(--header-edge-plain);
+  border-bottom: var(--border-rule);
+  opacity: 0;
+}
+
+/*
+ * The compact race waits, out of flow and out of sight, right after the
+ * wordmark. Hidden (visibility), it is out of the accessibility tree too:
+ * only one race is ever exposed, the band's or this one.
+ */
+.lead > .race {
+  position: absolute;
+  top: 50%;
+  left: calc(100% + var(--space-8));
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(calc(-50% + var(--header-step)));
+  pointer-events: none;
+}
+
+/* A phone held upright never compacts: there the race is not drawn at all,
+   so nothing of it can widen the page. */
+@media not (orientation: landscape) {
+  .lead > .race {
+    display: none;
+  }
+}
+
+/* ── The compact state: landscape windows, once the page has scrolled ──── */
+
+@media (orientation: landscape) {
+  /* The box keeps its full height; only the line is painted and hit. */
+  .header[data-compact="true"] {
+    pointer-events: none;
+  }
+
+  .header[data-compact="true"] .glass {
+    transform: scaleY(var(--header-glass-scale));
+    pointer-events: auto;
+  }
+
+  .header[data-compact="true"] .row {
+    transform: translateY(var(--header-row-shift));
+  }
+
+  .header[data-compact="true"] .row > * {
+    pointer-events: auto;
+  }
+
+  /* The band folds up with the edge it hangs from, under the glass: what
+     shows of it is always exactly the room between the line and the edge. */
+  .header[data-compact="true"] .band,
+  .header[data-compact="true"] .edge {
+    transform: translateY(var(--header-edge-shift));
+  }
+
+  .header[data-compact="true"] .band {
+    visibility: hidden;
+  }
+
+  .header[data-compact="true"][data-site-header="plain"] .edge {
+    opacity: 1;
+  }
+
+  .header[data-compact="true"][data-site-header="plain"]::after {
+    opacity: 0;
+  }
+
+  .header[data-compact="true"][data-site-header="plain"] {
+    border-bottom-color: transparent;
+  }
+
+  .header[data-compact="true"] [data-header-compact="leave"] {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(calc(-1 * var(--header-step)));
+  }
+
+  /* What stays closes up on the right, over the room of what left after it
+     (compact-header.ts measures it). */
+  .header[data-compact="true"] [data-header-close-up] {
+    transform: translateX(var(--header-close-up));
+  }
+
+  .header[data-compact="true"] .lead > .race {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(-50%);
+    pointer-events: auto;
+  }
+
+  /*
+   * The motion (MOTION.md). Only once the enhancement is live, so a page
+   * opened halfway down starts compact without moving. Each element carries,
+   * in each state, the transition that brings it INTO that state. What
+   * leaves goes first and faster (--dur-close), what changes in place moves
+   * together (--dur-state), what arrives waits --dur-fast (--dur-open).
+   */
+
+  /* Changes in place, both ways. */
+  .header[data-compact-ready] .glass,
+  .header[data-compact-ready] .row,
+  .header[data-compact-ready] .edge {
+    transition:
+      transform var(--dur-state) var(--ease-out),
+      opacity var(--dur-state) var(--ease-out);
+  }
+
+  /* A plain header: the edge takes over from today's rule in place, at
+     once, then travels up with the line; coming back, it hands over to the
+     rule only once it is home. */
+  .header[data-compact-ready][data-site-header="plain"][data-compact="true"] .edge {
+    transition:
+      transform var(--dur-state) var(--ease-out),
+      opacity var(--flip);
+  }
+
+  .header[data-compact-ready][data-site-header="plain"][data-compact="false"] .edge {
+    transition:
+      transform var(--dur-state) var(--ease-out),
+      opacity var(--flip) linear var(--dur-state);
+  }
+
+  .header[data-compact-ready][data-site-header="plain"][data-compact="false"],
+  .header[data-compact-ready][data-site-header="plain"][data-compact="false"]::after {
+    transition:
+      border-color var(--flip) linear var(--dur-state),
+      opacity var(--flip) linear var(--dur-state);
+  }
+
+  /* The band folds and unfolds with them; it is out of sight (and out of
+     the accessibility tree) only once folded. */
+  .header[data-compact-ready][data-compact="false"] .band {
+    transition: transform var(--dur-state) var(--ease-out);
+  }
+
+  .header[data-compact-ready][data-compact="true"] .band {
+    transition:
+      transform var(--dur-state) var(--ease-out),
+      visibility var(--flip) linear var(--dur-state);
+  }
+
+  /* The close-up: once what leaves has gone when compacting; at once when
+     expanding, so the room is open before the links arrive in it. */
+  .header[data-compact-ready] [data-header-close-up] {
+    transition: transform var(--dur-state) var(--ease-out);
+  }
+
+  .header[data-compact-ready][data-compact="true"] [data-header-close-up] {
+    transition: transform var(--dur-state) var(--ease-out) var(--dur-fast);
+  }
+
+  /* Expanding: what left comes back (arrives), once the compact race has gone. */
+  .header[data-compact-ready][data-compact="false"] [data-header-compact="leave"] {
+    transition:
+      opacity var(--dur-open) var(--ease-out) var(--dur-fast),
+      transform var(--dur-open) var(--ease-out) var(--dur-fast),
+      visibility var(--flip) linear var(--dur-fast);
+  }
+
+  .header[data-compact-ready][data-compact="false"] .lead > .race {
+    transition:
+      opacity var(--dur-close) var(--ease-out),
+      transform var(--dur-close) var(--ease-out),
+      visibility var(--flip) linear var(--dur-close);
+  }
+
+  /* Compacting: what leaves goes first (faster); the race arrives after it. */
+  .header[data-compact-ready][data-compact="true"] [data-header-compact="leave"] {
+    transition:
+      opacity var(--dur-close) var(--ease-out),
+      transform var(--dur-close) var(--ease-out),
+      visibility var(--flip) linear var(--dur-close);
+  }
+
+  .header[data-compact-ready][data-compact="true"] .lead > .race {
+    transition:
+      opacity var(--dur-open) var(--ease-out) var(--dur-fast),
+      transform var(--dur-open) var(--ease-out) var(--dur-fast),
+      visibility var(--flip) linear var(--dur-fast);
   }
 }

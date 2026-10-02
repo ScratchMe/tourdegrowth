@@ -4,8 +4,10 @@
   gap: 20px;
 }
 
+/* The span that carries a quiet link and its compact-header mark. */
 .navLink {
   flex-shrink: 0;
+  display: flex;
 }
 
 .headerCta {

@@ -1,0 +1,17 @@
+/* The page-level rules the compact header needs (styles/globals.delta.md),
+ * as the board loads them. In the app they go in globals.css. */
+
+/* What sticks under the header follows it: the compact line's height once
+ * the header is compact (compactHeader.js measures it: 54px, 50px plain). */
+@media (orientation: landscape) {
+  html:has(.SiteHeader_header[data-compact=true]) {
+    --sticky-offset: var(--sticky-offset-compact, 54px);
+  }
+}
+
+/* The header is never "under itself": while focus is inside it, the page's
+ * scroll padding is off, so Tab into the header does not scroll the page
+ * back up (today, three Tabs from 800px down land at the top). */
+html:has(header[data-site-header]:focus-within) {
+  scroll-padding-top: 0;
+}

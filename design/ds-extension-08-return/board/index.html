@@ -1,0 +1,113 @@
+<!-- @dsCard group="Extension 08 · proposal" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The header, compact · every state</title>
+<link rel="stylesheet" href="../../../fonts/fonts.css">
+<link rel="stylesheet" href="system-snapshot.css">
+<link rel="stylesheet" href="../tokens/header.css">
+<style>
+  body { padding: var(--space-11) var(--gutter-desktop, 32px) var(--space-15); }
+  main { max-width: 1120px; margin: 0 auto; display: flex; flex-direction: column; gap: var(--space-10); }
+  h1 { font: var(--display-title); letter-spacing: var(--display-letter-spacing); }
+  .lead { font: var(--body-lg); max-width: var(--measure-read); }
+  .note { font: var(--body-sm); color: var(--text-muted); max-width: var(--measure-read); }
+  .note code { font: var(--meta-xs); }
+  h2 { font: var(--title-card); padding-top: var(--space-5); border-top: var(--border-rule); }
+  table { width: 100%; border-collapse: collapse; font: var(--body-sm); }
+  th, td { text-align: left; padding: var(--space-2) var(--space-5) var(--space-2) 0; vertical-align: middle; }
+  th { font: var(--meta-xs); letter-spacing: var(--meta-tracking); text-transform: uppercase; color: var(--text-muted); }
+  td a { display: inline-flex; align-items: center; min-height: var(--hit-min); color: var(--text-body); }
+  .same { font: var(--meta-2xs); letter-spacing: var(--meta-tracking); text-transform: uppercase; color: var(--text-muted); margin-left: var(--space-3); }
+  ul.states { display: flex; flex-direction: column; gap: 0; padding-left: 1.2em; font: var(--body-sm); }
+  ul.states a { display: inline-flex; align-items: center; min-height: var(--hit-min); color: var(--text-body); }
+  ul.states span { color: var(--text-muted); }
+  @media (max-width: 760px) { body { padding: var(--space-8) var(--gutter-mobile, 16px); } .wrap { overflow-x: auto; } td:first-child { min-width: 9em; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>The header, compact — every state</h1>
+  <p class="lead">Brief 08's header, drawn from this return's own SiteHeader and SpaceBand over a stand-in page that really scrolls. Each link opens one page at one window size, at the top (full) or scrolled (compact). A frame of exactly that size is drawn when your window is another size, with buttons to scroll it down and back up.</p>
+  <p class="note">Serve the project over http (ES modules do not load from <code>file://</code>), e.g. <code>python3 -m http.server</code> from the project root, then open <code>design/ds-extension-08-return/board/index.html</code>. Parameters: <code>page</code>, <code>lang</code>, <code>w</code>, <code>h</code>, <code>at=scrolled</code>, <code>focus=1</code>, <code>hover=pill|primary</code>, <code>motion=reduce</code>, <code>slow=10</code>, <code>play=1</code>, <code>enhance=off</code>, <code>closed=engine|game</code>. The specs: <a href="../README.md">README.md</a>, <a href="../MOTION.md">MOTION.md</a>.</p>
+
+  <section>
+    <h2>The transition, both ways</h2>
+    <ul class="states" id="motion"></ul>
+  </section>
+
+  <section>
+    <h2>States the brief names</h2>
+    <ul class="states" id="special"></ul>
+  </section>
+
+  <div id="list"></div>
+</main>
+<script type="module">
+  import { PAGES, WINDOWS } from "./pages.js";
+  const url = (o) => "board.html?" + new URLSearchParams(o).toString();
+  const item = (ul, href, text, note) => {
+    const li = document.createElement("li");
+    const a = document.createElement("a");
+    a.href = href;
+    a.textContent = text;
+    li.append(a);
+    if (note) { const s = document.createElement("span"); s.textContent = " — " + note; li.append(s); }
+    document.getElementById(ul).append(li);
+  };
+
+  item("motion", url({ page: "landing", lang: "fr", w: 1280, h: 720, play: 1 }), "Landing · FR · 1280 × 720 · playing", "down and up every 1.6s");
+  item("motion", url({ page: "landing", lang: "fr", w: 1280, h: 720, play: 1, slow: 10 }), "Landing · FR · 1280 × 720 · ten times slower", "every token × 10, to watch the order");
+  item("motion", url({ page: "engine", lang: "en", w: 1280, h: 720, play: 1, slow: 4 }), "Engine · EN · 1280 × 720 · four times slower", "the ultramarine stripe, and the « What if » figures gliding with the header");
+  item("motion", url({ page: "reading", lang: "fr", w: 1280, h: 720, play: 1, slow: 10 }), "Reading page · FR · ten times slower", "no band: the dashed rule rises with the line");
+  item("motion", url({ page: "result", lang: "en", w: 844, h: 390, play: 1, slow: 4 }), "Result · EN · 844 × 390 · four times slower", "a phone on its side");
+  item("motion", url({ page: "landing", lang: "fr", w: 1280, h: 720, play: 1, motion: "reduce" }), "Landing · FR · reduced motion · playing", "the same states, no motion");
+
+  item("special", url({ page: "landing", lang: "fr", w: 1280, h: 720, at: "scrolled", focus: 1 }), "Keyboard focus inside the compact header · FR 1280", "it opens full while focus is inside");
+  item("special", url({ page: "landing", lang: "en", w: 844, h: 390, at: "scrolled", focus: 1 }), "Keyboard focus inside the compact header · EN 844 × 390");
+  item("special", url({ page: "landing", lang: "fr", w: 1280, h: 720, at: "scrolled", hover: "pill" }), "Hover on a race pill · FR 1280");
+  item("special", url({ page: "landing", lang: "en", w: 1280, h: 720, at: "scrolled", hover: "pill" }), "Hover on a race pill · EN 1280");
+  item("special", url({ page: "landing", lang: "fr", w: 1280, h: 720, at: "scrolled", hover: "primary" }), "Hover on the landing's primary · FR 1280");
+  item("special", url({ page: "landing", lang: "en", w: 1280, h: 720, at: "scrolled", hover: "primary" }), "Hover on the landing's primary · EN 1280");
+  item("special", url({ page: "engine", lang: "fr", w: 1280, h: 720, at: "scrolled", y: 900 }), "The engine's « Et si » figures under the compact header · FR 1280", "stuck at 54 + 16 = 70px");
+  item("special", url({ page: "engine", lang: "en", w: 844, h: 390, at: "scrolled", y: 900 }), "The engine's « What if » figures under the compact header · EN 844 × 390");
+  item("special", url({ page: "landing", lang: "fr", w: 1280, h: 720, at: "scrolled", motion: "reduce" }), "Reduced motion, compact · FR 1280");
+  item("special", url({ page: "landing", lang: "fr", w: 1280, h: 720, at: "scrolled", enhance: "off" }), "No script (or before hydration), scrolled · FR 1280", "today's header");
+  item("special", url({ page: "landing", lang: "fr", w: 1280, h: 720, at: "scrolled", closed: "game" }), "A closed leg in the compact race · FR 1280", "greyed, dashed, « bientôt » for screen readers, never a link");
+  item("special", url({ page: "quiz", lang: "fr", w: 568, h: 320, at: "scrolled" }), "The narrowest landscape line · quiz · FR 568 × 320", "the current leg as its number");
+
+  const list = document.getElementById("list");
+  for (const p of PAGES) {
+    const h2 = document.createElement("h2");
+    h2.textContent = p.title;
+    list.append(h2);
+    const wrap = document.createElement("div");
+    wrap.className = "wrap";
+    const table = document.createElement("table");
+    table.innerHTML = "<thead><tr><th>Window</th><th>FR · top</th><th>FR · scrolled</th><th>EN · top</th><th>EN · scrolled</th></tr></thead>";
+    const tbody = document.createElement("tbody");
+    for (const win of WINDOWS) {
+      const tr = document.createElement("tr");
+      const name = document.createElement("td");
+      name.textContent = win.label;
+      if (win.w < win.h) { const k = document.createElement("span"); k.className = "same"; k.textContent = "top = scrolled"; name.append(k); }
+      tr.append(name);
+      for (const lang of ["fr", "en"]) for (const at of ["top", "scrolled"]) {
+        const td = document.createElement("td");
+        const a = document.createElement("a");
+        a.href = url({ page: p.id, lang, w: win.w, h: win.h, ...(at === "scrolled" ? { at } : {}) });
+        a.textContent = at === "top" ? "full" : win.w < win.h ? "scrolled" : "compact";
+        td.append(a);
+        tr.append(td);
+      }
+      tbody.append(tr);
+    }
+    table.append(tbody);
+    wrap.append(table);
+    list.append(wrap);
+  }
+</script>
+</body>
+</html>
