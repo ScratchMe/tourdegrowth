@@ -1339,6 +1339,37 @@ Le balisage du composant `Stopwatch` est identique avant et après, au caractèr
 
 **Consigné** : `CHANTIERS.md` (A14.c, A14.d, B5 clos, D12 retirée, D2, et A17 pour le halo grisé des images de contenu, trouvé en route : `transparent` dans un dégradé Satori se mélange à travers le noir), `ENGINE.md`, `docs/engine/moteur-complet.md` §19.11, `NEXTJS.md` §1.10 et §1.11, `design/README.md`, `.design-sync/NOTES.md`, `CLAUDE.md` (l'état et les chiffres).
 
+## A17 : le halo des images de partage, clair et plus gris (2026-10-02, #274)
+
+Trouvé par le portage de l'image du moteur (T6.2) et confié par Antoine le même soir.
+
+**Le défaut** : l'image de partage de l'accueil, que reprennent « Comment ça marche », le glossaire et le quiz (`lib/og/content-frame.tsx`), pose sur le papier un halo blanc en haut à gauche. Son dégradé finissait sur `transparent`, que Satori mélange à travers le noir. Le halo dessinait donc une bande grise : le fond tombait à (204, 199, 188) sous le sous-titre, contre (231, 225, 210) pour le papier nu. Rien ne cassait, et seule une comparaison au rendu correct du moteur l'a montré. **Ce que ça coûtait** : l'accent rouge « cale-t-elle ? » descendait à 2,76:1 sur ce gris, sous les 3:1 de sa taille d'affichage, et le sous-titre à 4,50:1. La lampe de la nuit du jeu (`game-frame.tsx`) avait la même forme, sans dommage visible à 6 %.
+
+**Le correctif** : chaque dégradé finit sur sa propre couleur à alpha nul. Celui du halo et celui de la lampe changent. Ceux des ombres noires sont écrits `rgba(0, 0, 0, 0)` au lieu de `transparent`, au pixel près pareil, pour que la règle se lise sans exception.
+
+**Mesuré sur les dix images** (accueil, quiz, hub et deux niveaux du jeu, aux deux langues), avant contre après :
+- **sens des écarts** : chaque pixel qui change s'éclaircit, aucun ne s'assombrit ;
+- **amplitude** : jusqu'à 32 niveaux de luminance sur le papier, 4 sur la nuit ;
+- **contrastes au pire** dans la bande sans texte : le sous-titre passe de 4,50 à 5,81:1, l'accent rouge de 2,76 à 3,57:1. Ce sont les valeurs du papier nu, que le halo ne fait plus qu'éclaircir.
+
+Sur la nuit, la lampe la plus claire ne change pas : seul son milieu remonte. Le gris clair de la nuit reste au-dessus de 7,6:1.
+
+**La garde** (`src/lib/og/ground-lift.test.ts`) :
+- aucun cadre d'image (`lib/og`, et les routes `opengraph-image` et `share`) n'écrit `transparent` dans un dégradé ;
+- l'image de l'accueil, rendue, n'est nulle part plus sombre que son papier, dans la bande de 46 px que le texte ne traverse pas, hors de la ligne de route.
+
+Le PNG est décodé avec `node:zlib` : `sharp` n'arrive que par `next`, en dépendance optionnelle, et un test ne s'y adosse pas. **Deux sabotages** : `transparent` remis fait tomber les deux gardes ; le même défaut écrit `rgba(0,0,0,0)` ne fait tomber que la seconde, comme prévu.
+
+**Ce qui ne bouge pas** : l'adresse de l'image de l'accueil garde son `?hash`, qui est celui du fichier de la route et non de l'image (`lib/i18n/meta.ts`). Une plateforme qui l'a déjà en cache la garde jusqu'à sa prochaine lecture. Rien n'est encore lancé sur les réseaux (C22), donc rien à forcer.
+
+**Vérifié** :
+- les dix images relues avant et après, en paires ;
+- `vitest`, 2 944 tests ;
+- `tsc` et `eslint` propres ;
+- Playwright complet sur un build fermé comme la CI, avec l'émulateur et `CI=1` : 865 specs, 859 passées, 6 ignorées par construction.
+
+**Consigné** : `CHANTIERS.md` (A17 clos), `NEXTJS.md` §1.10.
+
 
 ## L'en-tête du résultat sur téléphone : les états descendent en tête de page (2026-10-02, #273)
 

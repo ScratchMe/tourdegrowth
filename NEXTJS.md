@@ -304,7 +304,9 @@ Deux écarts de rendu, hors des polices :
   qui finit sur `transparent` assombrit le fond au lieu de l'éclaircir. Mesuré
   le 2026-10-01 sur un fond `#e7e1d2` : (195, 190, 179) à mi-rayon, contre
   (238, 233, 222) en finissant sur `rgba(255, 255, 255, 0)`. Finir un dégradé
-  sur la couleur de départ à alpha nul.
+  sur la couleur de départ à alpha nul. Chez nous, l'image de l'accueil en a
+  perdu le contraste AA de son accent rouge (2,76:1) jusqu'au 2026-10-02 ;
+  `src/lib/og/ground-lift.test.ts` tient maintenant la règle.
 - **Une espace en fin de `<span>` est perdue.** Écrire l'espace en `&nbsp;`, ou
   la porter par un `gap` du parent (relevé par Claude Design au brief 06).
 
