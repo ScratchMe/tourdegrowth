@@ -1,0 +1,124 @@
+/* LeverCard — design system extension 07 (design/ds-extension-07-return/components/engine/LeverCard). */
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  max-width: var(--engine-measure);
+  padding-top: var(--space-7);
+  border-top: var(--border-rule);
+}
+
+.title {
+  font: var(--title-card);
+  color: var(--text-body);
+  margin: 0;
+}
+
+.lever {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-2) var(--space-7);
+}
+
+.label {
+  grid-column: 1 / -1;
+  font: var(--field-label);
+}
+
+.output {
+  font: var(--chart-value-compact);
+  font-variant-numeric: var(--tabular);
+  min-width: 4.5em;
+  text-align: end;
+}
+
+/* The slider: a 44px tall tap row, an 8px track, a 28px thumb. */
+.slider {
+  appearance: none;
+  width: 100%;
+  height: var(--hit-min);
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.slider::-webkit-slider-runnable-track {
+  height: var(--engine-slider-track);
+  border-radius: var(--radius-tag);
+  background: linear-gradient(to right, var(--engine-slider-fill) 0 var(--lever-fill), var(--engine-slider-track-bg) var(--lever-fill) 100%);
+}
+
+.slider::-moz-range-track {
+  height: var(--engine-slider-track);
+  border-radius: var(--radius-tag);
+  background: var(--engine-slider-track-bg);
+}
+
+.slider::-moz-range-progress {
+  height: var(--engine-slider-track);
+  border-radius: var(--radius-tag);
+  background: var(--engine-slider-fill);
+}
+
+.slider::-webkit-slider-thumb {
+  appearance: none;
+  width: var(--engine-slider-thumb);
+  height: var(--engine-slider-thumb);
+  margin-top: calc((var(--engine-slider-track) - var(--engine-slider-thumb)) / 2);
+  border-radius: var(--radius-round);
+  background: var(--engine-slider-thumb-bg);
+  border: var(--engine-slider-thumb-edge);
+}
+
+.slider::-moz-range-thumb {
+  width: var(--engine-slider-thumb);
+  height: var(--engine-slider-thumb);
+  border-radius: var(--radius-round);
+  background: var(--engine-slider-thumb-bg);
+  border: var(--engine-slider-thumb-edge);
+}
+
+.slider:focus-visible {
+  outline: var(--focus-width) solid var(--focus-ring);
+  outline-offset: var(--focus-offset-tight);
+}
+
+.figures {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-7);
+  margin: 0;
+}
+
+.figure {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.figureLabel {
+  font: var(--meta-xs);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.figureValue {
+  font: var(--engine-figure-lg);
+  font-variant-numeric: var(--tabular);
+  margin: 0;
+}
+
+.figureToday {
+  font: var(--meta-xs);
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-6) var(--space-10);
+}

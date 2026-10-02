@@ -22,6 +22,7 @@ import { Peloton } from "./Peloton";
 import { Relays } from "./Relays";
 import { previousLeakLine } from "./series-view";
 import { SlgWhatIfPanel } from "./SlgWhatIfPanel";
+import { BoardLever } from "./BoardLever";
 import { BoardNumbers } from "./BoardNumbers";
 import type { TablePreview } from "./csv";
 import { TableEntry } from "./TableEntry";
@@ -118,6 +119,7 @@ export function Board({
   // Opened from the next step (« Copier tes {n} demandes ») and from the menu (« Saisie en tableau »): the person asked for the move.
   const [collectOpen, setCollectOpen] = useState(false);
   const [tableOpen, setTableOpen] = useState(false);
+  const [whatIfOpen, setWhatIfOpen] = useState(false);
   const next = boardNextStep(view, plan, writeFailed, past);
   const slidesNext = next.kind === "slides";
   const reveal = (id: string) =>
@@ -159,12 +161,24 @@ export function Board({
   const relaysOf = (compact: boolean) =>
     slgD ? <Relays relays={slgD.relays} state={state} strings={strings} locale={ctx.locale} diagnosis={slgD.diagnosis} compact={compact} /> : null;
 
+  // One lever first (design system extension 07, A18 T2.c); « Les {n} leviers » opens the full panel, as it was.
   const whatIf = (
-    <Disclosure summary={strings.board.whatIfTitle} data-testid="engine-board-whatif">
-      <div className={styles.whatIf}>
-        {motion === "plg" ? <WhatIfPanel view={view} onChange={actions.setWhatIf} /> : <SlgWhatIfPanel view={view} onChange={actions.setWhatIf} />}
-      </div>
-    </Disclosure>
+    <>
+      <BoardLever
+        view={view}
+        motion={motion}
+        onChange={actions.setWhatIf}
+        onAll={() => {
+          setWhatIfOpen(true);
+          reveal("engine-whatif-full");
+        }}
+      />
+      <Disclosure summary={strings.board.whatIfTitle} open={whatIfOpen} onOpenChange={setWhatIfOpen} id="engine-whatif-full" data-testid="engine-board-whatif">
+        <div className={styles.whatIf}>
+          {motion === "plg" ? <WhatIfPanel view={view} onChange={actions.setWhatIf} /> : <SlgWhatIfPanel view={view} onChange={actions.setWhatIf} />}
+        </div>
+      </Disclosure>
+    </>
   );
   const numbers = <BoardNumbers view={view} motion={motion} readOnly={readOnly} onOpen={actions.openMetric} />;
 

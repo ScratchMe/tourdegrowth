@@ -47,13 +47,6 @@ const A18_STEP = {
   T5: "A18 T5, the hybrid (TotalBand)",
 } as const;
 const WAITING_FOR_A18: Record<string, string> = {
-  "--engine-slider-thumb": A18_STEP.T2,
-  "--engine-slider-track": A18_STEP.T2,
-  "--engine-slider-track-bg": A18_STEP.T2,
-  "--engine-slider-fill": A18_STEP.T2,
-  "--engine-slider-thumb-bg": A18_STEP.T2,
-  "--engine-slider-thumb-edge": A18_STEP.T2,
-  "--engine-figure-lg": A18_STEP.T2,
   "--engine-reserve": A18_STEP.T4,
   "--engine-reserve-mobile": A18_STEP.T4,
   "--engine-landing-title": A18_STEP.T4,

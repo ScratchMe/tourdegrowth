@@ -379,6 +379,24 @@ export const ENGINE_COPY = {
     position: { fr: "{stage} · {i} sur {n}", en: "{stage} · {i} of {n}" },
     back: { fr: "← Tes chiffres", en: "← Your numbers" },
   },
+  /**
+   * TODO: à relire (convention 6) — neuf le 2026-10-02 (A18 T2.c, le retour 07 de Claude Design,
+   * design/ds-extension-07-return/COPY.md) : « Et si ? » par un seul levier, devant le panneau complet.
+   * `{lever}` : le nom d'un chiffre du catalogue, en étiquette (jamais sujet d'une phrase) ; `{today}` :
+   * `scenario.leverToday` rempli ; `{from}`, `{to}` : des valeurs formatées ; `{n}` ≥ 2.
+   */
+  lever: {
+    untouched: { fr: "Bouge le levier de l'étape qui freine, et vois ce qui suit.", en: "Move the lever of the stage that holds you back, and see what follows." },
+    untouchedNoStage: { fr: "Bouge un levier et vois ce qui suit. Avec une cible, le levier de l'étape qui freine passe en premier.", en: "Move one lever and see what follows. With a target, the lever of the stage that holds you back comes first." },
+    /** A target names a stage, but none of its numbers is a lever with a value: the first one typed, in the funnel's order. */
+    untouchedOther: { fr: "Bouge un levier et vois ce qui suit.", en: "Move a lever and see what follows." },
+    moved: { fr: "Et si : {lever}, de {from} à {to}", en: "What if: {lever}, from {from} to {to}" },
+    label: { fr: "{lever}, {today}", en: "{lever}, {today}" },
+    /** Without the month's sign-up count, the funnel reads per 100 sign-ups: so does this figure. */
+    payingPerHundred: { fr: "Payants pour 100 inscrits", en: "Paying per 100 sign-ups" },
+    all: { fr: "Les {n} leviers et ce que le calcul suppose →", en: "All {n} levers and what the calculation assumes →" },
+    allOne: { fr: "Ce que le calcul suppose →", en: "What the calculation assumes →" },
+  },
 
   coverage: {
     found: { fr: "{n} chiffres sur {N} trouvés", en: "{n} of {N} numbers found" },

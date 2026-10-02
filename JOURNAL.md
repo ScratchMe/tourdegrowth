@@ -646,3 +646,33 @@ Ce sont les renommages du retour 07, que C42 range en T6. Enfin, `board.toFill` 
 - `tsc` et `eslint` propres ; 3 014 tests unitaires ; `next build` avec les variables de la CI ;
 - les 295 specs du moteur, des cibles, de l'accessibilité et de la plateforme passent (une ignorée par construction), avec `GAME_ENABLED=true` côté serveur ;
 - des captures de la liste et de l'écran d'un chiffre, en français et en anglais, à 1 280 et 390 px, sans défilement horizontal.
+
+## A18 T2.c : « Et si ? » par un seul levier, devant le panneau complet (2026-10-02, #291)
+
+Cinquième étape du portage du retour 07, drapeau fermé, et la dernière de T2, livrée dans la même PR que T2.b. « Et si ? » ne commence plus par un panneau plié de huit curseurs : **une carte à un seul levier** (`LeverCard`) le précède sur le tableau.
+
+- **Le levier** est celui de l'étape qu'une cible d'équipe nomme (C1) : le chiffre nommé quand c'est un levier, sinon le premier levier saisi de cette étape. Sans cible, c'est le premier levier saisi dans l'ordre du funnel, et le titre ne parle pas d'étape. Un levier sans valeur n'a pas de carte, comme il n'a pas de curseur dans le panneau (`cardLever`, testé).
+- **Les deux chiffres** viennent du même calcul que le panneau : le MRR dans 12 mois, puis les nouveaux payants du mois en libre-service (pour 100 inscrits sans le nombre d'inscrits du mois), les nouveaux clients du trimestre en assisté.
+- **Bougé**, le titre dit le mouvement (« Et si : Taux d'activation, de 18 % à 22 % »), chaque chiffre dit « aujourd'hui … » dessous, à la précision dont le mouvement a besoin, comme dans le panneau, et « Remettre à aujourd'hui » apparaît.
+- **La cible s'écrit où le panneau l'écrit** (`state.whatIf`), par les mêmes `withTarget` et `targetAt` : la carte et le panneau ne peuvent pas se contredire, et les slides en ont une par levier comme avant.
+- **« Les {n} leviers et ce que le calcul suppose → »** ouvre le panneau complet, inchangé, et y met le focus : le `Disclosure` contrôlé de T0, une troisième fois.
+
+**Code** :
+- `LeverCard` dans `src/components/engine/`, avec son test de balisage : un curseur natif, rangée de 44 px, piste de 8 px, pouce de 28 px, encre jusqu'à la valeur ;
+- son câblage dans `_engine/BoardLever.tsx`, avec `cardLever` testé ;
+- les derniers jetons de T2 quittent la liste d'attente (le curseur, `--engine-figure-lg`) ;
+- copie neuve « à relire » : le groupe `lever`. Les deux chiffres et « aujourd'hui » reprennent les libellés du panneau.
+
+**Les specs** : `engine-lever.spec.ts`, qui couvre :
+- le levier de l'exemple ;
+- quatre flèches qui le portent de 18 % à 22 %, les chiffres qui suivent et la cible gardée sur l'appareil ;
+- le retour à aujourd'hui ;
+- le panneau ouvert depuis la carte ;
+- 390 px sans défilement horizontal, en français et en anglais.
+
+Aucune autre spec n'a bougé : le panneau est toujours là, plié, sous la carte.
+
+**Vérifié** :
+- `tsc` et `eslint` propres ; 3 023 tests unitaires ; `next build` avec les variables de la CI ;
+- les 295 specs du moteur, des cibles, de l'accessibilité et de la plateforme, puis les 3 de la carte ;
+- des captures de la carte, intacte et bougée, en français et en anglais, à 1 280 et 390 px. Une capture de l'élément seul coupait le « % » de la sortie : mesurée, la sortie tient dans la carte, au pixel près, et la capture élargie la montre entière.
