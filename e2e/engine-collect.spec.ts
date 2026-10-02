@@ -136,8 +136,11 @@ test.describe("setup and first save", () => {
     // A box it cannot read stops the move, its message shown and the focus on it: leaving would drop it unseen.
     const target = page.locator("#engine-step-target-act-rate");
     await target.fill("25 kg");
-    await page.getByTestId("engine-targets-next").click();
+    // Left first, as in the base step's spec: the message appears as the box loses focus and moves the
+    // button down — a click begun before that lands on nothing.
+    await target.blur();
     await expect(page.getByText(ENGINE_COPY.workbench.notANumber.en)).toBeVisible();
+    await page.getByTestId("engine-targets-next").click();
     await expect(target).toBeFocused();
     await expect(page.getByTestId("engine-targets-start")).toBeVisible();
     await target.fill("");
