@@ -16,6 +16,14 @@ puis son image de partage, T6.2, [#272](https://github.com/ScratchMe/tourdegrowt
 fermé ; sa copie neuve attend le bon à tirer A14.d, et l'ouverture l'attend, en
 plus du reste de `CHANTIERS.md` D2.
 
+**Une refonte de la saisie est demandée à Claude Design le 2026-10-02** (brief 07,
+[`design/DS-EXTENSION-BRIEF-07.md`](design/DS-EXTENSION-BRIEF-07.md), `CHANTIERS.md`
+B10) : le moteur jugé « extrêmement dense » par Antoine, au retour comme dans le
+pas à pas, à rendre plus simple sans rien perdre de son expertise. En attendant
+le retour, une session ne refond pas la présentation du moteur de son côté ; un
+correctif reste bienvenu. C38 demande si les bons à tirer du moteur attendent ce
+retour.
+
 **Décisions prises par défaut le 2026-09-24 pour que le travail avance** —
 chacune se renverse en une phrase :
 
