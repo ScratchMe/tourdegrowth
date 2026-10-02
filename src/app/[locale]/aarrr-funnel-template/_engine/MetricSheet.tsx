@@ -1,45 +1,51 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode, type Ref } from "react";
 import { Button } from "@/components/core/Button";
 import { Choices } from "@/components/core/Choices";
+import { Disclosure } from "@/components/core/Disclosure";
 import { Field } from "@/components/core/Field";
 import { FieldRow } from "@/components/core/FieldRow";
 import { NumberField } from "@/components/core/NumberField";
-import { isUnreadableNumber } from "@/lib/forms/number";
 import { Select } from "@/components/core/Select";
-import { Tag } from "@/components/core/Tag";
 import { TextArea } from "@/components/core/TextArea";
+import { AnswerSwitch, type OtherAnswer } from "@/components/engine/AnswerSwitch";
+import { HowItCompares } from "@/components/engine/HowItCompares";
+import { NumberSheet } from "@/components/engine/NumberSheet";
+import { TrapNote } from "@/components/engine/TrapNote";
+import { WhereToFind } from "@/components/engine/WhereToFind";
+import { isUnreadableNumber } from "@/lib/forms/number";
 import { TEXT_LIMITS, motionOfMetric, shapeOf, shapesOf, type MetricShape } from "@/lib/engine/catalog-shape";
-import { BASIS_KEY, EFFORT_KEY, ROLE_KEY, SHEET_BASES, STATUS_KEY, type ResolvedMetric } from "@/lib/engine/strings";
-import type { CandidateId, MetricEntry, MetricId, RoleId } from "@/lib/engine/types";
+import { BASIS_KEY, EFFORT_KEY, ROLE_KEY, SHEET_BASES, type ResolvedMetric } from "@/lib/engine/strings";
+import type { CandidateId, Interval, MetricEntry, MetricId, RoleId } from "@/lib/engine/types";
 import { isImmature, nextMonth, periodRangeOf, windowDaysOf } from "@/lib/engine/cohort";
 import { comparatorOf } from "@/lib/engine/diagnose";
 import { formatInterval, formatMonthRange, formatNumber, roundDisplay } from "@/lib/engine/format";
 import { isRequestStale } from "@/lib/engine/request";
 import { blockingCheck } from "@/lib/engine/sanity";
-import { hybridTrapOf, isCandidate as isCandidateId, numbered, positionIn, positionLabel, statusQuestionOf } from "@/lib/engine/phrases";
+import { TRAPS_ASKING_DEFINITION, hybridTrapOf, isCandidate as isCandidateId, numbered, positionIn, positionLabel, statusQuestionOf } from "@/lib/engine/phrases";
 import { smallSampleOf } from "@/lib/engine/relays";
 import { proposedFromBefore } from "@/lib/engine/series";
 import { slgBaseNoun } from "@/lib/engine/sentences";
+import { teamTools } from "@/lib/engine/tools";
 import { knownIn } from "@/lib/engine/values";
 import { SHARED_COUNTS, knownSharedCount, sharedCountAt } from "@/lib/engine/shared-counts";
-import { ComparisonStrip } from "./ComparisonStrip";
 import { MissingTriage } from "./MissingTriage";
 import { RequestCopy } from "./RequestCopy";
 import { draftFromEntry, entryFromDraft, isWideRange, withProposals, type DraftProblem, type SheetDraft, type SheetMode } from "./sheet-draft";
 import { isRule, missingLabel, ruleMessage } from "./sheet-problems";
 import { draftKey, dropDraft, keepDraft, keptDraft } from "./sheet-drafts";
 import { moneyUnit, percentUnit, wordUnit, type NumberUnit } from "./sources";
-import { catalogFill, daysBetween, domId, fill, formatMonth, joinList, metricById, midSentence, sourceLabel } from "./text";
+import { catalogFill, daysBetween, domId, fill, formatDate, formatMonth, joinList, metricById, midSentence, sourceLabel } from "./text";
 import { ValueEditor } from "./ValueEditor";
 import type { EngineActions, EngineView } from "./view";
 import styles from "./Sheet.module.css";
 
 const ROLES = Object.keys(ROLE_KEY) as RoleId[];
 
-/** The boxes where Enter submits a form, in a browser (HTML's implicit submission): not a checkbox, a button or a textarea. */
-const TEXT_INPUTS = new Set(["text", "search", "url", "email", "tel", "number"]);
+/** The three other answers and the modes they write (sheet-draft.ts): « je l'ai » is the boxes themselves. */
+const ANSWER_OF: Record<SheetMode, OtherAnswer | null> = { have: null, estimate: "estimate", ask: "ask", cantFind: "cant" };
+const MODE_OF: Record<OtherAnswer, SheetMode> = { estimate: "estimate", ask: "ask", cant: "cantFind" };
 
 /** The unit inside a bound's or a target's box, placed by the page's language — a duration's word in the number's grammatical number (A11.1). */
 function unitOf(shape: MetricShape, view: EngineView, value: number | null): NumberUnit {
@@ -52,17 +58,29 @@ function unitOf(shape: MetricShape, view: EngineView, value: number | null): Num
   return {};
 }
 
+/** What the sheet is, when it is the whole screen (the step-by-step): where the number sits, and its heading. */
+export interface SheetScreen {
+  position: ReactNode;
+  headingId: string;
+  headingRef?: Ref<HTMLHeadingElement>;
+}
+
 /**
- * The sheet of one number (spec §7 E3), in the spec's order: what it is and
- * how to compute it, which cohort to take, WHERE YOU ARE with it (nothing
- * pre-selected — a number nobody has looked at is "to fill in"), the answer
- * that status asks for, where to find it and its trap, its reference and
- * the team's target, what the Tour said about it, and a private note.
+ * The screen of one number (spec §7 E3), laid out as the simpler engine's
+ * NumberSheet (design system extension 07, A18 T1): one question, and its
+ * knowledge attached to what it explains. In order: what it is and how to
+ * compute it, what the Tour said, the TRAP (open, before the value: it
+ * changes what one types), where to find it (folded, its summary naming the
+ * tools), the VALUE — the boxes are the question, the three other answers
+ * one tap under them — how it compares (the reference, the team's target and
+ * the verdict as one object), then the definition and a note, folded.
  *
- * The form is `sheet-draft.ts`; this component only lays it out. "Save" is
- * refused only for what the entry cannot mean (§6.9, D11) — everything
- * merely odd is saved and shown "to check" elsewhere — and it names what is
- * missing rather than reddening boxes before anyone has tried.
+ * The form is `sheet-draft.ts`; this component only lays it out, and writes
+ * what it wrote before. Nothing is chosen for the person: a save with no
+ * other answer chosen is read as the value boxes, so it names the boxes still
+ * empty rather than an answer to pick. "Save" is refused only for what the
+ * entry cannot mean (§6.9, D11) — everything merely odd is saved and shown
+ * "to check" elsewhere.
  */
 export function MetricSheet({
   id,
@@ -70,17 +88,19 @@ export function MetricSheet({
   actions,
   variant = "board",
   onSaved,
+  screen,
+  extraActions,
 }: {
   id: MetricId;
   view: EngineView;
   actions: EngineActions;
-  /**
-   * `step`: one number per screen in the step-by-step (Antoine, 2026-09-25).
-   * The team target is asked on the step before, so it is not repeated here,
-   * and saving moves on (`onSaved`).
-   */
+  /** `step`: one number per screen in the step-by-step (Antoine, 2026-09-25), and saving moves on (`onSaved`). */
   variant?: "board" | "step";
   onSaved?: () => void;
+  /** The step-by-step's screen: the sheet carries the heading. Absent on the board, whose row names the number (until A18 T2). */
+  screen?: SheetScreen;
+  /** Quiet actions after the save: the step-by-step's back and skip. */
+  extraActions?: ReactNode;
 }) {
   const { strings, ctx, state } = view;
   const locale = ctx.locale;
@@ -96,7 +116,7 @@ export function MetricSheet({
   };
 
   // A count several numbers share is typed once (shared-counts.ts): an empty side of this
-  // number's counts starts from it, and the field says so.
+  // number's counts starts from it, and the line under the boxes says so.
   const shared = sharedSides(id, snapshot);
   // An unsaved draft comes back when the sheet is remounted (A15.12), in its own month (A14 T2).
   const key = draftKey(id, entry, snapshot.referenceMonth);
@@ -128,9 +148,14 @@ export function MetricSheet({
   // Every refusal reads the same to the person — the device kept nothing, save a file — whether
   // it was the quota, storage switched off, or a store another tab left unreadable.
   const [outcome, setOutcome] = useState<"saved" | "failed" | null>(null);
-  // Folded by default, even on a number still to fill in: where to find it and its trap are
-  // read when needed, not scrolled past every time (Antoine, 2026-09-25).
-  const [whereOpen, setWhereOpen] = useState(false);
+  // « Ta définition et une note », folded; the trap's « Écrire ta définition » opens it and
+  // moves the focus to the definition — the person asked for that move.
+  const [wordsOpen, setWordsOpen] = useState(false);
+  const [toDefinition, setToDefinition] = useState(0);
+  useEffect(() => {
+    if (toDefinition === 0) return;
+    document.getElementById(`${prefix}-definition`)?.focus();
+  }, [toDefinition, prefix]);
   const update = (patch: Partial<SheetDraft>) => {
     setDraft((current) => {
       const next = { ...current, ...patch };
@@ -139,19 +164,26 @@ export function MetricSheet({
     });
     setOutcome(null);
   };
+  // Typing in the boxes is the answer « je l'ai »: nothing to pick first.
+  const updateValue = (patch: Partial<SheetDraft>) => update(draft.mode === "have" ? patch : { ...patch, mode: "have" });
 
+  // No other answer chosen: the boxes are the question, and a save reads them.
+  const answered: SheetDraft = draft.mode === null ? { ...draft, mode: "have" } : draft;
   // Recomputed from the draft on every render once a save was tried, so a
   // problem disappears the moment it is fixed — never a stale red line.
-  const problems: DraftProblem[] = attempted ? entryFromDraft(draft, shape, ctx.today.toISOString(), options).problems : [];
+  const problems: DraftProblem[] = attempted ? entryFromDraft(answered, shape, ctx.today.toISOString(), options).problems : [];
   const rules = problems.filter(isRule);
+  const wordsProblem = problems.includes("definition-too-long") || problems.includes("note-too-long");
 
   function save() {
     setAttempted(true);
     const nowIso = new Date().toISOString();
-    const built = entryFromDraft(draft, shape, nowIso, options);
+    const built = entryFromDraft(answered, shape, nowIso, options);
     // The engine's own guard, on top of the form's: the same impossibility
     // (more of the part than of the whole) must block here and in an import.
     if (!built.entry || blockingCheck(built.entry, shape, locale)) {
+      // A text too long sits in the folded words: open them, so the focus can land on it.
+      if (built.problems.includes("definition-too-long") || built.problems.includes("note-too-long")) setWordsOpen(true);
       setRefusals((n) => n + 1);
       return;
     }
@@ -177,13 +209,14 @@ export function MetricSheet({
   const need = (p: DraftProblem) =>
     problems.includes(p) ? fill(strings.workbench.saveNeeds, { fields: missingLabel(p, filledMetric, strings) }) : null;
 
-  const modes: { value: SheetMode; label: string }[] = [
-    { value: "have", label: strings.sheet.haveIt },
+  const words = shape.unit === "text" || shape.unit === "choice";
+  const others: { value: OtherAnswer; label: string }[] = [
     // A name or a mechanism cannot be "somewhere between": no estimate for words.
-    ...(shape.unit === "text" || shape.unit === "choice" ? [] : [{ value: "estimate" as const, label: strings.sheet.canEstimate }]),
+    ...(words ? [] : [{ value: "estimate" as const, label: strings.sheet.canEstimate }]),
     { value: "ask", label: strings.sheet.willAsk },
-    { value: "cantFind", label: strings.sheet.cantFind },
+    { value: "cant", label: strings.sheet.cantFind },
   ];
+  const answer = draft.mode ? ANSWER_OF[draft.mode] : null;
 
   const eventMeasured = snapshot.metrics["act.event"]?.status === "measured";
   const isCandidate = isCandidateId(id);
@@ -199,17 +232,28 @@ export function MetricSheet({
   const range = shape.span > 1 ? periodRangeOf(shape, entry, snapshot, state.setup, ctx.today) : null;
   // « Sur 25 opportunités conclues, un de plus ou de moins bouge le taux de 4 points » (§18.5.1).
   const sample = shape.scope === "slg" ? smallSampleOf(snapshot, id) : null;
-  const trap = hybridTrapOf(id, state.setup.motions);
+  const hybridTrap = hybridTrapOf(id, state.setup.motions);
   // The company-wide margin, in the hybrid only, on the two margin sheets (C25 Q4).
   const marginSheet = hybrid && (id === "rev.gross-margin" || id === "slg.rev.gross-margin");
   const otherMargin = id === "rev.gross-margin" ? snapshot.metrics["slg.rev.gross-margin"] : snapshot.metrics["rev.gross-margin"];
   const companyWideElsewhere = companyWide(otherMargin);
   const target = snapshot.targets[id];
   const bench = shape.benchmark;
-  // The strip is decorative; this sentence is what it says, in words — said
-  // physically, so churn behind its reference reads « au-dessus » (P7a).
-  const positionText = known.kind !== "known" || !position ? null : positionLabel(position, comparator, strings);
-  const formatBound = (v: number) => formatInterval({ lo: v, hi: v }, shape.unit === "percent" ? "percent" : "ratio", ctx, strings.units);
+
+  // Which months to count: the denominator's hint when it is a cohort, a line otherwise (design system extension 07).
+  const period = range
+    ? shape.flow === "cohort" && windowDays !== null
+      ? fill(strings.sheet.periodSlgCohort, { period: formatMonthRange(range, locale, strings.units, "from"), n: windowDays })
+      : fill(strings.sheet.periodSlg, { period: formatMonthRange(range, locale, strings.units, "from") })
+    : shape.flow === "cohort" && windowDays !== null
+      ? fill(strings.sheet.cohortToUse, {
+          cohort: formatMonth(snapshot.cohortMonth, locale),
+          next: formatMonth(nextMonth(snapshot.cohortMonth), locale),
+          n: windowDays,
+        }) + (isImmature(snapshot.cohortMonth, windowDays, ctx.today) ? ` ${strings.sheet.immatureCohort}` : "")
+      : null;
+  const periodHint = period ? <span data-testid="engine-sheet-period">{period}</span> : null;
+  const periodOnDenominator = shape.flow === "cohort";
 
   const bridge = view.bridges.find((b) => b.metric === id);
   const answerIndex = bridge ? view.tourResult?.answers?.[bridge.questionId] : undefined;
@@ -218,6 +262,13 @@ export function MetricSheet({
   const requestedAt = entry?.request?.remindedAt ?? entry?.request?.requestedAt;
   const stale = isRequestStale(entry, ctx.today);
 
+  // Where to find it: the catalogue's places, the tool named once; the team's own tools first.
+  const team = teamTools(state.setup.tools);
+  const places = metric.where.map((w) => ({
+    tool: w.label || sourceLabel(w.source, strings),
+    path: fillCatalog(w.path),
+    yours: w.source.kind === "tool" && team.includes(w.source.tool),
+  }));
   // "Also in Stripe: ARPA, churn" — the other numbers that sit in the same
   // tool, among the ones this setup asks for (§18.2.1).
   const shown = new Set<MetricId>(shapesOf(state.setup.motions).map((s) => s.id));
@@ -231,58 +282,69 @@ export function MetricSheet({
     .filter((x): x is { tool: NonNullable<typeof x.tool>; others: ResolvedMetric[] } => x.tool !== null && x.others.length > 0);
   const [alsoBefore = ""] = strings.sheet.alsoIn.split("{metrics}");
 
-  return (
-    // Enter in a box saves, as on any form (A15.20, Jakob's law, decided by
-    // Antoine on 2026-10-01). Not a <form>: one is a carrier, and if its
-    // submit ever ran without this code (before hydration, or a handler that
-    // throws), the browser would put what was typed in a URL. Nothing typed
-    // in the engine leaves the device (ENGINE.md §11.4, rule 3 in
-    // `engine-boundary.test.ts`). So the key itself, from a text box only,
-    // and only when the Save button would take the click.
-    <div
-      ref={sheetRef}
-      className={styles.sheet}
-      data-testid={`engine-sheet-${domId(id)}`}
-      onKeyDown={(event) => {
-        if (event.key !== "Enter" || event.nativeEvent.isComposing) return;
-        if (!(event.target instanceof HTMLInputElement) || !TEXT_INPUTS.has(event.target.type)) return;
-        if (draft.mode === null || draft.mode === "ask") return;
-        event.preventDefault();
-        save();
-      }}
-    >
-      <div className={styles.meta}>
-        <Tag tone="outline">{strings.effort[EFFORT_KEY[shape.effort]]}</Tag>
-        <a className={styles.definitionLink} href={metric.glossaryHref} target="_blank" rel="noopener">
-          {strings.sheet.definition}
-        </a>
+  // How it compares: one chart for a number, in the display unit the catalogue's reference and the target use.
+  const numeric = !words;
+  const unitWords = strings.units;
+  const currency = state.setup.currency;
+  const show = (i: Interval) => formatInterval(i, shape.unit, ctx, unitWords, { currency });
+  const knownValue = known.kind === "known" ? known.value : null;
+  const figure = knownValue && knownValue.lo === knownValue.hi ? knownValue.lo : null;
+  const band = bench ? ([bench.lo, bench.hi] as const) : undefined;
+  const benchText = bench ? formatInterval({ lo: bench.lo, hi: bench.hi }, shape.unit === "percent" ? "percent" : "ratio", ctx, unitWords) : null;
+  const top = Math.max(band ? band[1] * 2 : 0, (target ?? 0) * 1.5, (knownValue?.hi ?? 0) * 1.25) || 10;
+  const valueText = knownValue ? show(knownValue) : null;
+  const targetText = target !== undefined ? show({ lo: target, hi: target }) : null;
+  const sentence = positionLabel(position ?? "unknown", comparator, strings);
+  // C1: a verdict only against the team's target, stamped only when it is clear; « peut-être sous » is said in words.
+  const verdict =
+    comparator && valueText && sentence && (position === "below" || position === "within" || position === "above")
+      ? { tone: position === "below" ? ("below" as const) : ("ok" as const), label: sentence }
+      : null;
+  const chartLabel = fill(benchText ? strings.sheet.compareChart : strings.sheet.compareChartNoReference, {
+    name: metric.name,
+    value: valueText ?? strings.sheet.compareChartNoValue,
+    range: benchText ?? "",
+    target: targetText ? fill(strings.sheet.compareChartTarget, { value: targetText }) : strings.sheet.compareChartNoTarget,
+  });
+
+  // The company's margin, offered on both margin sheets in the hybrid whatever the answer shown (C25 Q4): above the answers.
+  const companyWideOffer =
+    marginSheet && draft.basis !== "company-wide" ? (
+      <div className={styles.saveRow}>
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={() =>
+            // Saved as an estimate on the company's margin: approximate, never found (C25 Q4).
+            update({
+              mode: "estimate",
+              basis: "company-wide",
+              low: draft.low ?? companyWideElsewhere?.low ?? null,
+              high: draft.high ?? companyWideElsewhere?.high ?? null,
+            })
+          }
+          data-testid={`engine-company-wide-${domId(id)}`}
+        >
+          {strings.sheet.companyWide}
+        </Button>
       </div>
-      <p className={styles.oneLiner}>{fillCatalog(metric.oneLiner)}</p>
+    ) : null;
 
-      <div className={styles.formulaBlock}>
-        <span className={styles.metaLabel}>{strings.sheet.formula}</span>
-        <p className={styles.formula}>{fillCatalog(metric.formula)}</p>
-      </div>
-
-      {range ? (
-        <p className={styles.cohort} data-testid="engine-sheet-period">
-          {shape.flow === "cohort" && windowDays !== null
-            ? fill(strings.sheet.periodSlgCohort, { period: formatMonthRange(range, locale, strings.units, "from"), n: windowDays })
-            : fill(strings.sheet.periodSlg, { period: formatMonthRange(range, locale, strings.units, "from") })}
-        </p>
-      ) : shape.flow === "cohort" && windowDays !== null ? (
-        <p className={styles.cohort}>
-          {fill(strings.sheet.cohortToUse, {
-            cohort: formatMonth(snapshot.cohortMonth, locale),
-            next: formatMonth(nextMonth(snapshot.cohortMonth), locale),
-            n: windowDays,
-          })}
-          {isImmature(snapshot.cohortMonth, windowDays, ctx.today) ? ` ${strings.sheet.immatureCohort}` : ""}
-        </p>
-      ) : null}
-
+  const value = (
+    <>
       {shape.dependsOn === "act.event" && !eventMeasured ? <p className={styles.caveat}>{strings.sheet.dependsOnEvent}</p> : null}
-
+      {!periodOnDenominator && periodHint ? <p className={styles.caveat}>{periodHint}</p> : null}
+      <ValueEditor
+        idPrefix={prefix}
+        draft={answered}
+        update={updateValue}
+        shape={shape}
+        metric={filledMetric}
+        view={view}
+        problems={problems}
+        shared={sharedLine(shared, view)}
+        periodHint={periodOnDenominator ? periodHint : undefined}
+      />
       {sample ? (
         <p className={styles.caveat} data-testid="engine-small-sample-sheet">
           {/* The finding's own sentence and number: « 4 points », « 0,8 point ». */}
@@ -293,370 +355,344 @@ export function MetricSheet({
           })}
         </p>
       ) : null}
+    </>
+  );
 
-      {marginSheet && draft.basis !== "company-wide" ? (
-        <div className={styles.saveRow}>
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() =>
-              // Saved as an estimate on the company's margin: approximate, never found (C25 Q4).
-              update({
-                mode: "estimate",
-                basis: "company-wide",
-                low: draft.low ?? companyWideElsewhere?.low ?? null,
-                high: draft.high ?? companyWideElsewhere?.high ?? null,
-              })
-            }
-            data-testid={`engine-company-wide-${domId(id)}`}
-          >
-            {strings.sheet.companyWide}
-          </Button>
-        </div>
-      ) : null}
-      <Choices
-        size="sm"
-        id={`${prefix}-mode`}
-        legend={statusQuestionOf(id, strings)}
-        value={draft.mode}
-        options={modes}
-        onChange={(mode) => update({ mode })}
-        columns={2}
-      />
-
-      {draft.mode === "have" ? (
-        <>
-          <ValueEditor
-            idPrefix={prefix}
-            draft={draft}
-            update={update}
-            shape={shape}
-            metric={filledMetric}
-            view={view}
-            problems={problems}
-            sharedHints={{
-              numerator: shared.numerator ? sharedHint(shared.numerator.others, view) : undefined,
-              denominator: shared.denominator ? sharedHint(shared.denominator.others, view) : undefined,
-            }}
-          />
-          <DefinitionNote prefix={prefix} draft={draft} update={update} view={view} error={problems.includes("definition-too-long")} />
-        </>
-      ) : null}
-
-      {draft.mode === "estimate" ? (
-        <div className={styles.editor} data-testid="engine-estimate">
-          {/* « At least » / « At most » name themselves: a pair with no joiner,
-              and the rule about the two belongs to the row. */}
-          <FieldRow
-            error={
-              draft.low !== null && draft.high !== null && draft.low > draft.high
-                ? strings.sheet.lowAboveHigh
-                : problems.includes("percent-range")
-                  ? strings.workbench.percentRange
-                  : undefined
-            }
-          >
-            <NumberField
-              size="sm"
-              id={`${prefix}-low`}
-              label={strings.sheet.low}
-              error={need("low")}
-              value={draft.low}
-              onChange={(low) => update({ low })}
-              locale={locale}
-              {...unitOf(shape, view, draft.low)}
-              parseError={strings.workbench.notANumber}
-            />
-            <NumberField
-              size="sm"
-              id={`${prefix}-high`}
-              label={strings.sheet.high}
-              error={need("high")}
-              value={draft.high}
-              onChange={(high) => update({ high })}
-              locale={locale}
-              {...unitOf(shape, view, draft.high)}
-              parseError={strings.workbench.notANumber}
-            />
-          </FieldRow>
-          {draft.low !== null && draft.high !== null && draft.low > draft.high ? null : isWideRange(draft.low, draft.high) ? (
-            <p className={styles.caveat} data-testid="engine-wide-range">
-              {strings.sheet.wideRange}
-            </p>
-          ) : null}
-          {draft.basis === "company-wide" ? (
-            // The company's margin stands in for this motion's: said, with what it costs, never offered as a basis to pick.
-            <div data-testid="engine-company-wide">
-              <p className={styles.metaLabel}>{strings.basis.companyWide}</p>
-              <p className={styles.caveat}>{strings.sheet.companyWideHint}</p>
-              {companyWideElsewhere ? (
-                <p className={styles.caveat}>
-                  {fill(strings.sheet.companyWidePrefilled, { motion: strings.hybrid.motionAdjective[id === "rev.gross-margin" ? "slg" : "plg"] })}
-                </p>
-              ) : null}
-            </div>
-          ) : (
-            <Choices
-              size="sm"
-              id={`${prefix}-basis`}
-              legend={strings.sheet.basis}
-              error={need("basis")}
-              value={draft.basis || null}
-              options={SHEET_BASES.map((b) => ({ value: b, label: strings.basis[BASIS_KEY[b]] }))}
-              onChange={(basis) => update({ basis })}
-              columns={2}
-            />
-          )}
-        </div>
-      ) : null}
-
-      {draft.mode === "ask" ? (
-        <div className={styles.editor} data-testid="engine-ask">
-          <Select<RoleId>
-            size="sm"
-            id={`${prefix}-role`}
-            label={strings.request.role}
-            value={draft.requestRole}
-            options={ROLES.map((role) => ({ value: role, label: strings.role[ROLE_KEY[role]] }))}
-            onChange={(role) => role && update({ requestRole: role })}
-          />
-          <DefinitionNote prefix={prefix} draft={draft} update={update} view={view} error={problems.includes("definition-too-long")} />
-          {entry?.status === "requested" && requestedAt ? (
-            <p className={stale ? styles.error : styles.caveat}>
-              {stale
-                ? fill(strings.request.stale, { n: daysBetween(requestedAt, ctx.today) })
-                : `${strings.status.requested} · ${strings.role[ROLE_KEY[entry.request?.role ?? draft.requestRole]]}`}
-            </p>
-          ) : null}
-          <RequestCopy
-            role={draft.requestRole}
-            ids={[id]}
-            label={entry?.status === "requested" ? strings.request.remind : strings.request.copy}
-            view={withDefinition(view, id, draft.definitionNote)}
-            onCopied={() => {
-              if (entry?.status === "requested") {
-                actions.markReminded([id]);
-                return;
-              }
-              // The copy IS the request: it writes `requested`, stamped now,
-              // with the definition just typed — so the message and the
-              // stored entry say the same thing.
-              const built = entryFromDraft({ ...draft, mode: "ask" }, shape, new Date().toISOString(), options);
-              if (built.entry) actions.saveEntry(id, built.entry);
-            }}
-          />
-        </div>
-      ) : null}
-
-      {draft.mode === "cantFind" ? (
-        <MissingTriage
-          idPrefix={prefix}
-          draft={draft}
-          update={update}
-          shape={shape}
-          metric={filledMetric}
-          view={view}
-          problems={problems}
-          onRequested={(role) => actions.markRequested([id], role)}
-        />
-      ) : null}
-
-      <div className={styles.where}>
-        <button
-          type="button"
-          className={styles.whereToggle}
-          aria-expanded={whereOpen}
-          aria-controls={`${prefix}-where`}
-          onClick={() => setWhereOpen((open) => !open)}
+  const editor =
+    draft.mode === "estimate" ? (
+      <div className={styles.editor} data-testid="engine-estimate">
+        {/* « At least » / « At most » name themselves: a pair with no joiner,
+            and the rule about the two belongs to the row. */}
+        <FieldRow
+          error={
+            draft.low !== null && draft.high !== null && draft.low > draft.high
+              ? strings.sheet.lowAboveHigh
+              : problems.includes("percent-range")
+                ? strings.workbench.percentRange
+                : undefined
+          }
         >
-          {strings.sheet.whereTitle}
-        </button>
-        {whereOpen ? (
-          <div id={`${prefix}-where`} className={styles.whereBody}>
-            <ul className={styles.whereList}>
-              {metric.where.map((w) => (
-                <li key={`${w.label}-${w.path}`}>
-                  <span className={styles.whereSource}>{sourceLabel(w.source, strings) || w.label}</span>
-                  {w.label && w.label !== sourceLabel(w.source, strings) ? <span> · {w.label}</span> : null}
-                  <span className={styles.wherePath}>{fillCatalog(w.path)}</span>
-                </li>
-              ))}
-            </ul>
-            <p className={styles.trap}>
-              <span className={styles.metaLabel}>{strings.sheet.trapTitle}</span> {fillCatalog(metric.trap)}
-            </p>
-            {/* Five self-serve sheets have a second trap in the hybrid, and only there (C25 Q3, §18.4.6). */}
-            {trap ? (
-              <p className={styles.trap} data-testid="engine-hybrid-trap">
-                <span className={styles.metaLabel}>{strings.sheet.hybridTrapTitle}</span> {strings.sheet.hybridTrap[trap]}
+          <NumberField
+            size="sm"
+            id={`${prefix}-low`}
+            label={strings.sheet.low}
+            error={need("low")}
+            value={draft.low}
+            onChange={(low) => update({ low })}
+            locale={locale}
+            {...unitOf(shape, view, draft.low)}
+            parseError={strings.workbench.notANumber}
+          />
+          <NumberField
+            size="sm"
+            id={`${prefix}-high`}
+            label={strings.sheet.high}
+            error={need("high")}
+            value={draft.high}
+            onChange={(high) => update({ high })}
+            locale={locale}
+            {...unitOf(shape, view, draft.high)}
+            parseError={strings.workbench.notANumber}
+          />
+        </FieldRow>
+        {draft.low !== null && draft.high !== null && draft.low > draft.high ? null : isWideRange(draft.low, draft.high) ? (
+          <p className={styles.caveat} data-testid="engine-wide-range">
+            {strings.sheet.wideRange}
+          </p>
+        ) : null}
+        {draft.basis === "company-wide" ? (
+          // The company's margin stands in for this motion's: said, with what it costs, never offered as a basis to pick.
+          <div data-testid="engine-company-wide">
+            <p className={styles.metaLabel}>{strings.basis.companyWide}</p>
+            <p className={styles.caveat}>{strings.sheet.companyWideHint}</p>
+            {companyWideElsewhere ? (
+              <p className={styles.caveat}>
+                {fill(strings.sheet.companyWidePrefilled, { motion: strings.hybrid.motionAdjective[id === "rev.gross-margin" ? "slg" : "plg"] })}
               </p>
             ) : null}
-            {alsoIn.map(({ tool, others }) => (
-              <p key={tool} className={styles.alsoIn}>
-                {fill(alsoBefore, { tool: strings.tools[tool] })}
-                {others.map((other, i) => (
-                  <span key={other.id}>
-                    {i > 0 ? (i === others.length - 1 ? strings.grammar.and : strings.grammar.listSeparator) : null}
-                    <button type="button" className={styles.inlineLink} onClick={() => actions.openMetric(other.id)}>
-                      {midSentence(other.name, locale)}
-                    </button>
-                  </span>
-                ))}
-              </p>
-            ))}
           </div>
-        ) : null}
-      </div>
-
-      {bench || isCandidate ? (
-        <div className={styles.reference} data-testid="engine-reference">
-          <span className={styles.metaLabel}>{strings.sheet.reference}</span>
-          {shape.unit === "percent" ? (
-            <ComparisonStrip
-              value={known.kind === "known" ? known.value : null}
-              below={position === "below"}
-              reference={bench ? { lo: bench.lo, hi: bench.hi } : undefined}
-              target={target}
-              formatBound={formatBound}
-              strings={strings}
-            />
-          ) : null}
-          <p className={styles.referenceText}>
-            {bench
-              ? fill(strings.sheet.referenceContext, {
-                  range: formatInterval({ lo: bench.lo, hi: bench.hi }, shape.unit === "percent" ? "percent" : "ratio", ctx, strings.units),
-                  caveat: metric.benchmarkCaveat ?? "",
-                })
-              : fill(strings.sheet.noReference, { reason: metric.noReferenceReason ?? "" })}
-          </p>
-          {isCandidate && variant === "board" ? (
-            <TargetField id={id} prefix={prefix} target={target} unitFor={(value) => unitOf(shape, view, value)} view={view} actions={actions} />
-          ) : null}
-          {positionText ? (
-            <p className={[styles.position, position === "below" ? styles.positionBelow : ""].filter(Boolean).join(" ")} data-testid="engine-position">
-              {positionText}
-            </p>
-          ) : null}
-        </div>
-      ) : null}
-
-      {declared ? (
-        <p className={styles.declared} data-testid="engine-declared">
-          {fill(strings.sheet.declaredAtTour, {
-            answer: declared.label,
-            points: declared.points,
-            found: midSentence(strings.status[STATUS_KEY[entry?.status ?? "todo"]], locale),
-          })}
-        </p>
-      ) : null}
-
-      <Field
-        size="sm"
-        id={`${prefix}-note`}
-        label={strings.sheet.note}
-        hint={strings.sheet.noteHint}
-        error={problems.includes("note-too-long") ? ruleMessage("note-too-long", filledMetric, strings, locale) : null}
-      >
-        {({ id: noteId, describedBy, invalid }) => (
-          <TextArea
-            id={noteId}
-            value={draft.note}
-            onChange={(note) => update({ note })}
-            maxLength={TEXT_LIMITS.note}
-            invalid={invalid}
-            aria-describedby={describedBy}
-            rows={3}
+        ) : (
+          <Choices
+            size="sm"
+            id={`${prefix}-basis`}
+            legend={strings.sheet.basis}
+            error={need("basis")}
+            value={draft.basis || null}
+            options={SHEET_BASES.map((b) => ({ value: b, label: strings.basis[BASIS_KEY[b]] }))}
+            onChange={(basis) => update({ basis })}
+            columns={2}
           />
         )}
-      </Field>
+      </div>
+    ) : draft.mode === "ask" ? (
+      <div className={styles.editor} data-testid="engine-ask">
+        <Select<RoleId>
+          size="sm"
+          id={`${prefix}-role`}
+          label={strings.request.role}
+          value={draft.requestRole}
+          options={ROLES.map((role) => ({ value: role, label: strings.role[ROLE_KEY[role]] }))}
+          onChange={(role) => role && update({ requestRole: role })}
+        />
+        {entry?.status === "requested" && requestedAt ? (
+          <p className={stale ? styles.error : styles.caveat} data-testid="engine-request-status">
+            {stale
+              ? fill(strings.request.stale, { n: daysBetween(requestedAt, ctx.today) })
+              : fill(strings.sheet.askCopied, { date: formatDate(requestedAt, locale) })}
+          </p>
+        ) : null}
+        <RequestCopy
+          role={draft.requestRole}
+          ids={[id]}
+          label={entry?.status === "requested" ? strings.request.remind : strings.request.copy}
+          view={withDefinition(view, id, draft.definitionNote)}
+          onCopied={() => {
+            if (entry?.status === "requested") {
+              actions.markReminded([id]);
+              return;
+            }
+            // The copy IS the request: it writes `requested`, stamped now,
+            // with the definition just typed — so the message and the
+            // stored entry say the same thing.
+            const built = entryFromDraft({ ...draft, mode: "ask" }, shape, new Date().toISOString(), options);
+            if (built.entry) actions.saveEntry(id, built.entry);
+          }}
+        />
+      </div>
+    ) : draft.mode === "cantFind" ? (
+      <MissingTriage
+        idPrefix={prefix}
+        draft={draft}
+        update={update}
+        shape={shape}
+        metric={filledMetric}
+        view={view}
+        problems={problems}
+        onRequested={(role) => actions.markRequested([id], role)}
+      />
+    ) : null;
 
-      {/* The copy button of "I'll ask for it" is that mode's save: the request is what gets recorded. */}
-      {variant === "step" && draft.mode === "ask" ? (
-        <div className={styles.saveRow}>
-          <Button onClick={() => onSaved?.()} data-testid={`engine-continue-${domId(id)}`}>
-            {strings.steps.continue}
-          </Button>
-        </div>
-      ) : null}
-      {draft.mode !== "ask" ? (
-        <div className={styles.saveRow}>
-          <Button
-            variant={variant === "step" ? "primary" : "secondary"}
-            disabled={draft.mode === null}
-            onClick={save}
-            data-testid={`engine-save-${domId(id)}`}
+  const compare =
+    bench || isCandidate ? (
+      <HowItCompares
+        title={strings.sheet.compareTitle}
+        value={numeric ? figure : null}
+        domain={[0, top]}
+        band={numeric ? band : undefined}
+        target={numeric && isCandidate ? (target ?? null) : null}
+        chartLabel={chartLabel}
+        legend={[
+          ...(valueText ? [{ kind: "value" as const, label: fill(strings.sheet.compareYours, { value: valueText }) }] : []),
+          ...(benchText ? [{ kind: "band" as const, label: fill(strings.sheet.compareReference, { range: benchText }) }] : []),
+          ...(isCandidate && targetText ? [{ kind: "target" as const, label: fill(strings.sheet.compareTargetValue, { value: targetText }) }] : []),
+        ]}
+        caveat={
+          bench
+            ? fill(strings.sheet.compareCaveat, { caveat: metric.benchmarkCaveat ?? "" })
+            : fill(strings.sheet.noReference, { reason: metric.noReferenceReason ?? "" })
+        }
+        verdict={verdict}
+        note={
+          !isCandidate ? (
+            strings.sheet.compareNoTargetHere
+          ) : !verdict && comparator && valueText && sentence && position !== "no-comparator" ? (
+            <span data-testid="engine-position">{sentence}</span>
+          ) : null
+        }
+        targetField={
+          isCandidate ? (
+            <TargetField id={id} prefix={prefix} target={target} unitFor={(v) => unitOf(shape, view, v)} view={view} actions={actions} />
+          ) : null
+        }
+        data-testid="engine-reference"
+      />
+    ) : null;
+
+  const saveLabel = variant === "step" ? strings.sheet.saveNext : strings.sheet.save;
+  return (
+    <div ref={sheetRef} className={styles.sheet} data-testid={`engine-sheet-${domId(id)}`}>
+      <NumberSheet
+        framed={variant === "step"}
+        name={screen ? metric.name : undefined}
+        headingId={screen?.headingId}
+        headingRef={screen?.headingRef}
+        position={screen?.position}
+        effort={strings.effort[EFFORT_KEY[shape.effort]]}
+        definitionLabel={strings.sheet.definition}
+        definitionHref={metric.glossaryHref}
+        definition={fillCatalog(metric.oneLiner)}
+        formulaLabel={strings.sheet.formula}
+        formula={fillCatalog(metric.formula)}
+        tour={
+          declared ? <span data-testid="engine-declared">{fill(strings.sheet.tourAnswer, { answer: declared.label })}</span> : null
+        }
+        trap={
+          <TrapNote
+            label={strings.sheet.trapLabel}
+            hybrid={hybridTrap ? { label: strings.sheet.hybridTrapLabel, text: strings.sheet.hybridTrap[hybridTrap] } : undefined}
+            action={
+              TRAPS_ASKING_DEFINITION.includes(id) ? (
+                <Button
+                  variant="quiet"
+                  size="sm"
+                  aria-controls={`${prefix}-words`}
+                  onClick={() => {
+                    setWordsOpen(true);
+                    setToDefinition((n) => n + 1);
+                  }}
+                  data-testid={`engine-write-definition-${domId(id)}`}
+                >
+                  {strings.sheet.writeDefinition}
+                </Button>
+              ) : null
+            }
+            data-testid="engine-trap"
           >
-            {variant === "step" ? strings.sheet.saveNext : strings.sheet.save}
-          </Button>
-          <p className={styles.saved} role="status" aria-live="polite" data-testid={`engine-saved-${domId(id)}`}>
-            {outcome === "saved" ? strings.workbench.saved : ""}
-          </p>
-        </div>
-      ) : null}
-      {missing.length ? (
-        <p className={styles.error} data-testid="engine-save-needs" data-save-problems tabIndex={-1}>
-          {fill(strings.workbench.saveNeeds, { fields: joinList(missing, strings.grammar) })}
-        </p>
-      ) : null}
-      {rules
-        .filter((p) => p !== "num-gt-den" && p !== "denominator-zero")
-        .map((p) => (
-          <p key={p} className={styles.error} data-save-problems tabIndex={-1}>
-            {ruleMessage(p, filledMetric, strings, locale)}
-          </p>
-        ))}
-      {outcome === "failed" ? (
-        <p className={styles.error} role="alert">
-          {strings.storage.writeFailed}
-        </p>
-      ) : null}
+            {fillCatalog(metric.trap)}
+          </TrapNote>
+        }
+        where={
+          places.length ? (
+            <WhereToFind
+              label={strings.sheet.whereTitle}
+              tools={places}
+              yoursLabel={strings.sheet.whereYours}
+              open={team.length > 0 && places.some((p) => p.yours)}
+              also={alsoIn.map(({ tool, others }) => ({
+                tool,
+                label: fill(alsoBefore, { tool: strings.tools[tool] }),
+                items: others.map((other) => ({ id: other.id, label: midSentence(other.name, locale) })),
+              }))}
+              onOpenNumber={(other) => actions.openMetric(other as MetricId)}
+              data-testid="engine-where"
+            />
+          ) : null
+        }
+        answer={
+          <>
+            {companyWideOffer}
+            <AnswerSwitch
+              legend={statusQuestionOf(id, strings)}
+              options={others}
+              answer={answer}
+              onAnswer={(a) => update({ mode: MODE_OF[a] })}
+              value={value}
+              editor={editor}
+              backLabel={words ? strings.sheet.answerBackAnswer : strings.sheet.answerBack}
+              onBack={() => update({ mode: "have" })}
+              legendId={`${prefix}-answers`}
+              data-testid={`engine-answer-${domId(id)}`}
+            />
+          </>
+        }
+        compare={compare}
+        words={
+          <Disclosure
+            summary={strings.sheet.wordsSummary}
+            id={`${prefix}-words`}
+            open={wordsOpen || wordsProblem}
+            onOpenChange={setWordsOpen}
+            data-testid={`engine-words-${domId(id)}`}
+          >
+            <div className={styles.words}>
+              <Field
+                size="sm"
+                id={`${prefix}-definition`}
+                label={strings.sheet.definitionNote}
+                optional={strings.workbench.optional}
+                hint={strings.sheet.definitionNoteHint}
+                error={problems.includes("definition-too-long") ? fill(strings.sheet.tooLong, { n: TEXT_LIMITS.definitionNote }) : null}
+              >
+                {({ id: definitionId, describedBy, invalid }) => (
+                  <TextArea
+                    id={definitionId}
+                    value={draft.definitionNote}
+                    onChange={(definitionNote) => update({ definitionNote })}
+                    maxLength={TEXT_LIMITS.definitionNote}
+                    invalid={invalid}
+                    aria-describedby={describedBy}
+                    rows={2}
+                  />
+                )}
+              </Field>
+              <Field
+                size="sm"
+                id={`${prefix}-note`}
+                label={strings.sheet.note}
+                optional={strings.workbench.optional}
+                hint={strings.sheet.noteHint}
+                error={problems.includes("note-too-long") ? ruleMessage("note-too-long", filledMetric, strings, locale) : null}
+              >
+                {({ id: noteId, describedBy, invalid }) => (
+                  <TextArea
+                    id={noteId}
+                    value={draft.note}
+                    onChange={(note) => update({ note })}
+                    maxLength={TEXT_LIMITS.note}
+                    invalid={invalid}
+                    aria-describedby={describedBy}
+                    rows={3}
+                  />
+                )}
+              </Field>
+            </div>
+          </Disclosure>
+        }
+        // Enter in a box saves, as on any form (A15.20) — except a request, which the copy saves.
+        onSubmit={draft.mode === "ask" ? undefined : save}
+        actions={
+          <>
+            {/* The copy button of « Je le demande » is that answer's save: the request is what gets recorded. */}
+            {draft.mode === "ask" ? (
+              variant === "step" ? (
+                <Button onClick={() => onSaved?.()} data-testid={`engine-continue-${domId(id)}`}>
+                  {strings.steps.continue}
+                </Button>
+              ) : null
+            ) : (
+              <Button variant={variant === "step" ? "primary" : "secondary"} onClick={save} data-testid={`engine-save-${domId(id)}`}>
+                {saveLabel}
+              </Button>
+            )}
+            {extraActions}
+          </>
+        }
+        footer={
+          <>
+            {draft.mode !== "ask" ? (
+              <p className={styles.saved} role="status" aria-live="polite" data-testid={`engine-saved-${domId(id)}`}>
+                {outcome === "saved" ? strings.workbench.saved : ""}
+              </p>
+            ) : null}
+            {missing.length ? (
+              <p className={styles.error} data-testid="engine-save-needs" data-save-problems tabIndex={-1}>
+                {fill(strings.workbench.saveNeeds, { fields: joinList(missing, strings.grammar) })}
+              </p>
+            ) : null}
+            {rules
+              .filter((p) => p !== "num-gt-den" && p !== "denominator-zero")
+              .map((p) => (
+                <p key={p} className={styles.error} data-save-problems tabIndex={-1}>
+                  {ruleMessage(p, filledMetric, strings, locale)}
+                </p>
+              ))}
+            {outcome === "failed" ? (
+              <p className={styles.error} role="alert">
+                {strings.storage.writeFailed}
+              </p>
+            ) : null}
+          </>
+        }
+      />
     </div>
   );
 }
 
-/** "Your definition" — the line that travels with the number into the copied request and the deck's appendix. */
-function DefinitionNote({
-  prefix,
-  draft,
-  update,
-  view,
-  error,
-}: {
-  prefix: string;
-  draft: SheetDraft;
-  update: (patch: Partial<SheetDraft>) => void;
-  view: EngineView;
-  error: boolean;
-}) {
-  const { strings } = view;
-  return (
-    <Field
-      size="sm"
-      id={`${prefix}-definition`}
-      label={strings.sheet.definitionNote}
-      optional={strings.workbench.optional}
-      hint={strings.sheet.definitionNoteHint}
-      error={error ? fill(strings.sheet.tooLong, { n: TEXT_LIMITS.definitionNote }) : null}
-    >
-      {({ id: definitionId, describedBy, invalid }) => (
-        <TextArea
-          id={definitionId}
-          value={draft.definitionNote}
-          onChange={(definitionNote) => update({ definitionNote })}
-          maxLength={TEXT_LIMITS.definitionNote}
-          invalid={invalid}
-          aria-describedby={describedBy}
-          rows={2}
-        />
-      )}
-    </Field>
-  );
-}
-
 /**
- * "Your target" — written on blur, not on the sheet's save: a team can know
- * where it wants a stage to be before it has the number, and a target is
- * what lets the diagnosis name a bottleneck at all (D8).
+ * The team's target — written on blur, not on the sheet's save: a team can
+ * know where it wants a stage to be before it has the number, and a target is
+ * what lets the diagnosis name a bottleneck at all (D8). Asked here, where the
+ * value is in front of the person (brief 07 Q12), as in Settings.
  */
 function TargetField({
   id,
@@ -678,9 +714,9 @@ function TargetField({
     <NumberField
       size="sm"
       id={`${prefix}-target`}
-      label={view.strings.sheet.target}
+      label={view.strings.sheet.compareTarget}
       optional={view.strings.workbench.optional}
-      hint={view.strings.sheet.targetHint}
+      hint={view.strings.sheet.compareTargetHint}
       value={value}
       onChange={setValue}
       onBlur={(event) => {
@@ -709,8 +745,8 @@ function withDefinition(view: EngineView, id: MetricId, definitionNote: string):
 /**
  * The shared counts on each side of this number's counts: the value already
  * typed (the base, or another number's entry) and the other numbers that use
- * it — named in the hint, so « changing it here changes it everywhere » says
- * where.
+ * it — named in the line under the boxes, so « changing it here changes it
+ * everywhere » says where.
  */
 function sharedSides(
   id: MetricId,
@@ -729,7 +765,10 @@ function sharedSides(
   return out;
 }
 
-function sharedHint(others: MetricId[], view: EngineView): string {
+/** The one line under the boxes: no number shares both of its counts (shared-counts.ts). */
+function sharedLine(shared: ReturnType<typeof sharedSides>, view: EngineView): string | undefined {
+  const others = shared.numerator?.others ?? shared.denominator?.others;
+  if (!others?.length) return undefined;
   const names = others.map((m) => midSentence(metricById(view.metrics, m).name, view.ctx.locale));
   return fill(view.strings.sheet.sharedHint, { metrics: joinList(names, view.strings.grammar) });
 }

@@ -48,7 +48,7 @@ test.describe("reminders", () => {
     const toggle = page.getByTestId("engine-metric-rev-gross-margin");
     if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.click();
     const sheet = page.getByTestId("engine-sheet-rev-gross-margin");
-    await sheet.getByRole("radio", { name: ENGINE_COPY.sheet.willAsk.fr }).check();
+    await sheet.getByRole("button", { name: ENGINE_COPY.sheet.willAsk.fr }).click();
     await sheet.getByTestId("engine-request-copy").click();
     const ics = await downloaded(page, () => sheet.getByTestId("engine-request-remind").click());
     expect(ics.name).toBe("tdg-rappel-2026-09-29.ics");

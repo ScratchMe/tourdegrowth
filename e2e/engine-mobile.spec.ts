@@ -158,8 +158,6 @@ test("the keyboard alone: tick sales-assisted, open the board, fill its win rate
   await page.keyboard.press("Enter");
   const sheet = page.getByTestId("engine-sheet-slg-rev-win-rate");
   await expect(sheet).toBeVisible();
-  await tabTo(page, sheet.getByRole("radio", { name: ENGINE_COPY.sheet.haveIt.en }));
-  await page.keyboard.press("Space");
   await tabTo(page, sheet.locator("#engine-slg-rev-win-rate-num"));
   await page.keyboard.type("18");
   await tabTo(page, sheet.locator("#engine-slg-rev-win-rate-den"));
@@ -260,7 +258,7 @@ async function measureA14(page: Page, locale: "fr" | "en"): Promise<Record<(type
   const toggle = page.getByTestId("engine-metric-rev-gross-margin");
   if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.click();
   const sheet = page.getByTestId("engine-sheet-rev-gross-margin");
-  await sheet.getByRole("radio", { name: ENGINE_COPY.sheet.willAsk[locale] }).check();
+  await sheet.getByRole("button", { name: ENGINE_COPY.sheet.willAsk[locale] }).click();
   await sheet.getByTestId("engine-request-copy").click();
   await expect(sheet.getByTestId("engine-request-remind")).toBeVisible();
   out.reminder = await overflow(page);
