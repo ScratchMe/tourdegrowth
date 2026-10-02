@@ -317,7 +317,7 @@ retour laissait (C43 : les clics sur la course compacte comptés à part,
 `space_band_compact` ; C44 : le sélecteur de langue à 88 px partout, 44 × 44
 par cible). **A19.1**, le même jour, sur une question d'Antoine :
 `--sticky-offset` est mesuré aussi dans l'état plein, sur toutes les pages et
-à toutes les largeurs (le journal à « A19.1 »). **A19 est clos** ; la
+à toutes les largeurs ([#287](https://github.com/ScratchMe/tourdegrowth/pull/287), le journal à « A19.1 »). **A19 est clos** ; la
 re-synchro qui l'emporte vers Claude Design est B12.
 
 ---
@@ -461,7 +461,7 @@ Ce que ce paragraphe annonçait du quiz était trop étroit : dans l'état plein
 `--sticky-offset` était posé à la main (118, 74), juste au bureau seulement.
 Le quiz avait 25 px de trop au bureau, 30 à 390 px de large et 12 à 320 ; sur
 un téléphone tenu droit, chaque page en avait 4 (114 et 70 px peints). Rien
-n'était masqué. **Mesuré lui aussi depuis le 2026-10-02** (A19.1), 118 et 74
+n'était masqué. **Mesuré lui aussi depuis le 2026-10-02** (A19.1, [#287](https://github.com/ScratchMe/tourdegrowth/pull/287)), 118 et 74
 restant le repli sans script.
 
 **B12, ouvert le 2026-10-02 : la re-synchro d'A19.** Ce qu'elle emporte :
