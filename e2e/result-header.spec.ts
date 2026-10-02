@@ -22,7 +22,8 @@ import { EMULATOR_HOST, REAL_RESULTS, SKIP_EMULATOR_REASON } from "./real-result
  */
 
 const PHONE_WIDTHS = [320, 360, 375, 390, 430, 760] as const;
-const WIDE_WIDTHS = [761, 1280] as const;
+/** 768 and 834 are tablets held upright; from 761 the page has two columns. */
+const WIDE_WIDTHS = [761, 768, 834, 1024, 1280] as const;
 
 const VARIANTS = [
   { name: "the sample", path: "/r/sample", deep: false, roast: false, needsEmulator: false },
@@ -90,7 +91,7 @@ for (const variant of VARIANTS) {
         }
       });
 
-      test("from 761px: the states stay in the header, which holds its row", async ({ page }) => {
+      test("from 761px: no sideways scroll, and the states in the header, which holds its row", async ({ page }) => {
         await page.setViewportSize({ width: WIDE_WIDTHS[0], height: 800 });
         await page.goto(`${variant.path}?lang=${locale}`);
         await page.locator("main").waitFor();
@@ -98,9 +99,12 @@ for (const variant of VARIANTS) {
 
         for (const width of WIDE_WIDTHS) {
           await page.setViewportSize({ width, height: 800 });
-          // The header's own row, not the document: /r/sample's two-column
-          // grid is up to 8px too wide from 761 to 768px, whatever the header holds
-          // (CHANTIERS.md E, « Un contrat de largeur »).
+          // The page AND the header's own row: /r/sample scrolled 8px sideways
+          // at 761 (1px at 768) whatever the header held, its two insight
+          // cards forced side by side in a 249px column — fixed the same day
+          // (`.cardGrid` lays out on its own width).
+          const scrollWidth = await page.evaluate(() => document.documentElement.scrollWidth);
+          expect(scrollWidth, `scrolls sideways at ${width}px`).toBe(width);
           const row = await page.locator("header").first().evaluate((header) => {
             const el = header.firstElementChild as HTMLElement;
             return { scroll: el.scrollWidth, client: el.clientWidth };
