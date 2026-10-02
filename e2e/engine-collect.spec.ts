@@ -521,8 +521,6 @@ test.describe("keyboard, languages, widths", () => {
     await tabTo(page, toggle);
     if ((await toggle.getAttribute("aria-expanded")) !== "true") await page.keyboard.press("Enter");
     const sheet = page.getByTestId("engine-sheet-act-rate");
-    await tabTo(page, sheet.getByRole("radio", { name: "I have it" }));
-    await page.keyboard.press("Space");
     await tabTo(page, sheet.locator("#engine-act-rate-num"));
     await page.keyboard.type("144");
     await tabTo(page, sheet.locator("#engine-act-rate-den"));
@@ -548,9 +546,7 @@ test.describe("keyboard, languages, widths", () => {
           const t = toggles.nth(i);
           if ((await t.getAttribute("aria-expanded")) !== "true") await t.click();
         }
-        // "I have it" is the first mode in every sheet: it reveals the count labels.
-        const haves = panel.locator('[data-testid^="engine-sheet-"]').getByRole("radio").first();
-        await haves.check();
+        // The boxes are the question (A18 T1): every count label is on screen as soon as the sheet is.
         await expect(page.getByTestId("engine-workbench")).not.toContainText(/\{[a-zA-Z]+\}/);
       }
     });
@@ -560,7 +556,8 @@ test.describe("keyboard, languages, widths", () => {
         await page.setViewportSize({ width, height: 900 });
         await startEngine(page, locale);
         const sheet = await openSheet(page, "activation", "act-rate");
-        await sheet.getByRole("radio").first().check();
+        // The widest the sheet gets: the boxes, and « Where to find it » unfolded with its paths.
+        await sheet.locator("summary", { hasText: ENGINE_COPY.sheet.whereTitle[locale] }).click();
         await noHorizontalScroll(page);
         const tabs = await page.getByTestId("engine-tabs").boundingBox();
         const panel = await page.getByTestId("engine-panel").boundingBox();
