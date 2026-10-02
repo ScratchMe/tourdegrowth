@@ -1,0 +1,40 @@
+<!-- @dsCard group="Extension 07 · proposal" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The engine, simpler · states</title>
+<!-- Everything here is source: no build step, no CDN. Serve the folder over
+     http (ES modules do not load from file://). The project's own fonts: this
+     folder lives at design/ds-extension-07-return/. -->
+<link rel="stylesheet" href="../../../fonts/fonts.css">
+<link rel="stylesheet" href="system-snapshot.css">
+<link rel="stylesheet" href="../tokens/engine.css">
+<link rel="stylesheet" href="../components/viz/BulletChart/BulletChart.delta.css">
+<link rel="stylesheet" href="../components/engine/EngineLanding/EngineLanding.css">
+<link rel="stylesheet" href="../components/engine/EngineStart/EngineStart.css">
+<link rel="stylesheet" href="../components/engine/EngineBar/EngineBar.css">
+<link rel="stylesheet" href="../components/engine/NextStep/NextStep.css">
+<link rel="stylesheet" href="../components/engine/EngineProgress/EngineProgress.css">
+<link rel="stylesheet" href="../components/engine/NumberList/NumberList.css">
+<link rel="stylesheet" href="../components/engine/NumberSheet/NumberSheet.css">
+<link rel="stylesheet" href="../components/engine/AnswerSwitch/AnswerSwitch.css">
+<link rel="stylesheet" href="../components/engine/TrapNote/TrapNote.css">
+<link rel="stylesheet" href="../components/engine/WhereToFind/WhereToFind.css">
+<link rel="stylesheet" href="../components/engine/HowItCompares/HowItCompares.css">
+<link rel="stylesheet" href="../components/engine/LeverCard/LeverCard.css">
+<link rel="stylesheet" href="../components/engine/TotalBand/TotalBand.css">
+<link rel="stylesheet" href="../components/engine/AskList/AskList.css">
+<link rel="stylesheet" href="board.css">
+<!-- The components import React from "react" and the system from
+     "tour-de-growth". On the board those are react-lite.js and sys/ (the
+     synced components' markup and class names); in the app, the real ones. -->
+<script type="importmap">{ "imports": { "react": "./react-lite.js", "tour-de-growth": "./sys/index.js" } }</script>
+</head>
+<body>
+<div id="root"></div>
+<noscript>The board draws its states with a small script (react-lite.js + board.js), from the components' own files.</noscript>
+<script type="module" src="board.js"></script>
+</body>
+</html>

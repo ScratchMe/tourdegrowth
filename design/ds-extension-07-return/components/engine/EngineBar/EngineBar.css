@@ -1,0 +1,74 @@
+/* EngineBar — design system extension 07. Tokens only. */
+.EngineBar_root {
+  max-width: var(--engine-measure);
+}
+
+/* The top line is a full 44px row, so the Settings button's hit area
+ * stays inside it and never reaches the menu's summary (constraint 4). */
+.EngineBar_top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-5);
+  min-height: var(--hit-min);
+}
+
+.EngineBar_line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-5);
+  min-width: 0;
+}
+
+.EngineBar_what {
+  color: var(--engine-accent);
+}
+
+.EngineBar_settings {
+  flex: none;
+}
+
+.EngineBar_groups {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-8);
+  padding-top: var(--space-3);
+}
+
+.EngineBar_group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.EngineBar_items {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+/* One 44px row per item: the quiet buttons' hit areas never overlap. */
+.EngineBar_items > li {
+  display: flex;
+  align-items: center;
+  min-height: var(--hit-min);
+}
+
+.EngineBar_note {
+  margin-top: var(--space-8);
+  padding-left: var(--space-5);
+  border-left: var(--engine-pending-edge);
+  font: var(--body-sm);
+  color: var(--text-body);
+  max-width: var(--measure-read);
+}
+
+@media (max-width: 760px) {
+  .EngineBar_groups {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-7);
+  }
+}

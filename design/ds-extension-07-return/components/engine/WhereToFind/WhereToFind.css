@@ -1,0 +1,65 @@
+/* WhereToFind — design system extension 07. Tokens only. */
+.WhereToFind_summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--space-5);
+}
+
+.WhereToFind_tools {
+  color: var(--text-muted);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.WhereToFind_list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  margin-bottom: var(--space-7);
+}
+
+.WhereToFind_tool {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  font: var(--field-label);
+  color: var(--text-body);
+}
+
+.WhereToFind_path {
+  font: var(--meta-sm);
+  color: var(--text-muted);
+  max-width: var(--measure-read);
+}
+
+.WhereToFind_also {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 var(--space-5);
+  font: var(--body-sm);
+  color: var(--text-body);
+}
+
+.WhereToFind_alsoList {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--space-7);
+}
+
+/* Links to other numbers: each a 44px row (constraint 4), ink underline,
+ * not the red of --text-link, so the screen's only reds stay the trap's
+ * advice and a diagnosis. */
+.WhereToFind_link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--hit-min);
+  color: var(--text-body);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.WhereToFind_link:hover {
+  text-decoration-thickness: var(--border-width);
+}

@@ -1,0 +1,69 @@
+/* AnswerSwitch — design system extension 07. Tokens only. */
+.AnswerSwitch_root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+}
+
+.AnswerSwitch_value,
+.AnswerSwitch_editor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--form-gap-sm);
+}
+
+.AnswerSwitch_back {
+  align-self: flex-start;
+}
+
+.AnswerSwitch_others {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 var(--space-7);
+  padding-top: var(--space-3);
+  border-top: var(--border-rule);
+}
+
+.AnswerSwitch_legend {
+  font: var(--field-label-sm);
+  color: var(--text-muted);
+}
+
+.AnswerSwitch_options {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--space-7);
+}
+
+/* A text button with the system's 44px row (constraint 4). Pressed: ink,
+ * no underline, a solid rule under it — chosen, not a link any more. */
+.AnswerSwitch_option {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--hit-min);
+  padding: 0;
+  border: none;
+  background: none;
+  font: var(--label-button);
+  color: var(--text-muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.AnswerSwitch_option:hover {
+  color: var(--text-body);
+}
+
+.AnswerSwitch_option[aria-pressed=true] {
+  color: var(--text-body);
+  text-decoration: none;
+  box-shadow: inset 0 calc(-1 * var(--border-width-stamp)) 0 var(--text-body);
+}
+
+.AnswerSwitch_option:focus-visible {
+  outline: var(--focus-width) solid var(--focus-ring);
+  outline-offset: var(--focus-offset-tight);
+}

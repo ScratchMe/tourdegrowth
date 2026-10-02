@@ -1,0 +1,74 @@
+/* NextStep — design system extension 07. Tokens only. */
+.NextStep_root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  max-width: var(--engine-measure);
+}
+
+.NextStep_lead {
+  font: var(--body-lg);
+  color: var(--text-body);
+  margin-top: calc(-1 * var(--space-4));
+}
+
+.NextStep_lines {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding-top: var(--space-7);
+  border-top: var(--border-rule);
+}
+
+/* Each line is at least a 44px row: a line's quiet action keeps its hit
+ * area inside its own line (constraint 4). */
+.NextStep_line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  min-height: var(--hit-min);
+  gap: 0 var(--space-5);
+  font: var(--body-md);
+  color: var(--text-body);
+}
+
+.NextStep_pending,
+.NextStep_advice {
+  padding-left: var(--space-5);
+}
+
+/* "Not yet": a request out, a month to start. */
+.NextStep_pending {
+  border-left: var(--engine-pending-edge);
+}
+
+/* Advice: the backup, the refused save. */
+.NextStep_advice {
+  border-left: var(--engine-advice-edge);
+}
+
+.NextStep_text {
+  flex: 1 1 22em;
+  min-width: 0;
+}
+
+.NextStep_lineAction {
+  flex: none;
+}
+
+.NextStep_actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-5) var(--space-10);
+}
+
+@media (max-width: 760px) {
+  .NextStep_lead {
+    font: var(--body-md);
+  }
+  .NextStep_primary {
+    width: 100%;
+  }
+}

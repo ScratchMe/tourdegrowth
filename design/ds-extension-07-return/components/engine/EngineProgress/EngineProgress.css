@@ -1,0 +1,95 @@
+/* EngineProgress — design system extension 07. Tokens only. */
+.EngineProgress_root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.EngineProgress_text {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--space-5);
+  font: var(--body-md);
+}
+
+.EngineProgress_remaining {
+  font: var(--field-label);
+  color: var(--text-body);
+}
+
+.EngineProgress_counts {
+  font: var(--meta-xs);
+  color: var(--text-muted);
+}
+
+.EngineProgress_sm .EngineProgress_text {
+  font: var(--meta-xs);
+}
+
+.EngineProgress_sm .EngineProgress_remaining {
+  font: var(--meta-sm);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+}
+
+.EngineProgress_groups,
+.EngineProgress_legend {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.EngineProgress_groups {
+  gap: var(--space-3) var(--engine-mark-group-gap);
+}
+
+.EngineProgress_group {
+  display: inline-flex;
+  gap: var(--engine-mark-gap);
+}
+
+.EngineProgress_legend {
+  gap: var(--space-2) var(--space-7);
+  font: var(--meta-xs);
+  color: var(--text-muted);
+}
+
+.EngineProgress_legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* The marks: ink or --viz-axis on paper, no colour carries the meaning. */
+.EngineProgress_mark {
+  display: inline-block;
+  flex: none;
+  width: var(--engine-mark-size);
+  height: var(--engine-mark-size);
+  border-radius: var(--radius-round);
+  box-sizing: border-box;
+}
+
+.EngineProgress_found {
+  background: var(--engine-mark-ink);
+}
+
+.EngineProgress_est {
+  background: var(--engine-mark-hatch);
+  border: var(--border-width-fine) solid var(--engine-mark-ring);
+}
+
+.EngineProgress_asked {
+  border: var(--border-width) dashed var(--engine-mark-ink);
+}
+
+.EngineProgress_cant {
+  border: var(--border-width-fine) solid var(--engine-mark-ink);
+  background: linear-gradient(135deg, transparent 0 42%, var(--engine-mark-ink) 42% 58%, transparent 58%);
+}
+
+.EngineProgress_todo {
+  border: var(--border-width-fine) solid var(--engine-mark-ring);
+}

@@ -1,0 +1,48 @@
+/* EngineStart — design system extension 07. Tokens only. */
+.EngineStart_root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--form-gap-md);
+  max-width: var(--engine-measure);
+}
+
+.EngineStart_title {
+  font: var(--display-section);
+  letter-spacing: var(--display-letter-spacing);
+}
+
+.EngineStart_plan {
+  font: var(--body-md);
+  color: var(--text-body);
+}
+
+.EngineStart_defaults {
+  font: var(--body-sm);
+  color: var(--text-muted);
+}
+
+.EngineStart_term {
+  white-space: nowrap;
+}
+
+.EngineStart_actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-7) var(--space-10);
+}
+
+.EngineStart_ways {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-6) var(--space-8);
+}
+
+@media (max-width: 760px) {
+  .EngineStart_root {
+    gap: var(--form-gap-sm);
+  }
+  .EngineStart_go {
+    width: 100%;
+  }
+}
