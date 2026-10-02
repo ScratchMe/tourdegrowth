@@ -68,12 +68,8 @@ export function nextStepFor({ plan, shapes, writeFailed, viewingPast, nextMonth 
   if (nextMonth.kind === "ready") return { kind: "start-month", referenceMonth: nextMonth.referenceMonth };
 
   const order = funnelOrder(shapes);
-  const shapeOf = new Map(shapes.map((s) => [s.id, s]));
-  const self = order([...plan.self.flatMap((g) => g.ids), ...(plan.byTool ?? []).flatMap((g) => g.ids)]);
-  const effortOf = (id: MetricId) => shapeOf.get(id)?.effort;
-
-  const quick = self.find((id) => effortOf(id) === "self-5min");
-  if (quick) return { kind: "number", id: quick, effort: "self-5min" };
+  const self = nextSelfNumber(plan, shapes);
+  if (self?.effort === "self-5min") return { kind: "number", ...self };
 
   const toAsk = order(plan.ask.flatMap((g) => g.toAsk));
   if (toAsk.length === 1) {
@@ -82,13 +78,29 @@ export function nextStepFor({ plan, shapes, writeFailed, viewingPast, nextMonth 
   }
   if (toAsk.length > 1) return { kind: "ask-all", ids: toAsk };
 
+  if (self) return { kind: "number", ...self };
+
+  return { kind: "slides", waiting: order(plan.ask.flatMap((g) => g.requested)) };
+}
+
+/**
+ * The number a person can find on their own, next: the five-minute ones
+ * first, then the hour-long and the ones to build — each in the funnel's
+ * order. What ranks 4 and 6 open, and what « Taper d'abord le chiffre
+ * suivant » opens beside the requests (rank 5). Null: nothing left to find
+ * alone.
+ */
+export function nextSelfNumber(plan: CollectPlan, shapes: readonly MetricShape[]): { id: MetricId; effort: "self-5min" | "self-1h" | "build" } | null {
+  const shapeOf = new Map(shapes.map((s) => [s.id, s]));
+  const self = funnelOrder(shapes)([...plan.self.flatMap((g) => g.ids), ...(plan.byTool ?? []).flatMap((g) => g.ids)]);
+  const effortOf = (id: MetricId) => shapeOf.get(id)?.effort;
+  const quick = self.find((id) => effortOf(id) === "self-5min");
+  if (quick) return { id: quick, effort: "self-5min" };
   const long = self.find((id) => {
     const effort = effortOf(id);
     return effort === "self-1h" || effort === "build";
   });
-  if (long) return { kind: "number", id: long, effort: effortOf(long) as "self-1h" | "build" };
-
-  return { kind: "slides", waiting: order(plan.ask.flatMap((g) => g.requested)) };
+  return long ? { id: long, effort: effortOf(long) as "self-1h" | "build" } : null;
 }
 
 /** Sorts ids by stage (acquisition → revenue), then by their place in `shapes`. An id `shapes` does not hold goes last. */

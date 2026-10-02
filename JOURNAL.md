@@ -547,6 +547,41 @@ Deuxième étape du portage du retour 07, drapeau fermé. L'écran d'un chiffre,
 
 **Consigné** : `.design-sync/NOTES.md` (« Synced », « Found in the 2026-10-02 re-sync », la méthode de vérification des types, un risque de plus), `CHANTIERS.md` (B9 et B12 clos, B13 ouvert), `CLAUDE.md`.
 
+## A18 T2.a : la barre du moteur et la prochaine étape, une seule action (2026-10-02, #290)
+
+Troisième étape du portage du retour 07, drapeau fermé. **T2 est coupé en trois PR** : T2.a (la tête du tableau, celle-ci), T2.b (`EngineProgress` et `NumberList` à la place des onglets), T2.c (`LeverCard`). Les onglets touchent plus de la moitié des specs du moteur : les changer dans la même PR que la tête aurait mêlé deux réécritures de specs.
+
+**La tête du tableau** est maintenant : la barre (`EngineBar`), le verdict, la couverture (jusqu'à T2.b), puis la prochaine étape (`NextStep`). Cinq choses en sont sorties : le sélecteur de moteur, l'eyebrow, le sélecteur de mois et son bandeau, le bandeau de reprise, le bandeau de sauvegarde, la ligne « impossible d'enregistrer », et la rangée d'actions du bas.
+
+- **La barre** dit ce qui est à l'écran (« Moteur sans nom · libre-service · août 2026 », « · lecture seule » sur un mois passé), porte l'étiquette pointillée « Jamais sauvegardé » tant qu'une sauvegarde est due, les Réglages, et le menu « Moteur, mois et fichier » : le sélecteur de moteurs, « Renommer » (les Réglages, le focus sur le nom de l'entreprise), le mois affiché et le rappel, puis Sauvegarder, Importer, Saisie en tableau, Supprimer ce moteur et Tout effacer, la phrase de Safari en dernier. La cohorte quitte la ligne : elle est dite là où elle sert, au dénominateur (T1).
+- **La prochaine étape** est une carte, une seule action principale, choisie par `nextStepFor` (T0) : la sauvegarde en fichier si l'appareil a refusé d'écrire (annoncée, `role="alert"`), le retour au mois courant, le mois suivant, le chiffre de cinq minutes, la demande, le chiffre d'une heure, les slides. Dessous, ce qui attend : une ligne par rôle à relancer (« Demandé à Data il y a 7 jours : coefficient viral (K), pas encore de réponse. », avec « Relancer »), la sauvegarde due, le plafond de mois. L'en-tête dit « Dernière visite · il y a 3 jours » au retour, « Où tu en es » sinon.
+- **Les slides** sont l'action principale quand plus rien n'est à taper ; sinon, un lien discret en bas du tableau, « Préparer tes slides avec ce que tu as → ».
+- **Le verdict** passe à `--engine-verdict` (40 px, 25 px sous 760) : il était à la taille du héros de la page d'accueil.
+
+**Quatre choix de portage, à relire avec A18.d** :
+- **« Reprendre le pas à pas »** reste, dans « Ce moteur » : le retour le retire, mais le pas à pas n'est fondu dans le tableau qu'en T3. Il part avec lui ;
+- **« Supprimer ce moteur » et « Tout effacer »** restent tous deux dans « Fichier » ; le retour n'a qu'« Effacer ce moteur ». Fondre les deux retirerait l'effacement de tout l'appareil en un geste : c'est une décision, pas un portage ;
+- **« Comparer deux mois »** n'est pas dans le menu : le retour le donne pour « la vue d'aujourd'hui, inchangée », et le tableau n'en a pas (la comparaison est une slide, A14) ;
+- **les renommages du retour attendent T6** (C42) : la barre et la carte reprennent les libellés existants (« Sauvegarder (.json) », « Tout effacer », « Saisie en tableau », « Réglages »). Seules les phrases neuves sont neuves.
+
+**« Copier tes {n} demandes »** ouvre et met le focus sur « À aller chercher », en attendant `AskList` (T3). **« Demander à {rôle} : {chiffre} »** ouvre l'écran du chiffre avec « Je le demande » déjà choisi (un brouillon posé dans `sheet-drafts.ts`, qui ne s'écrit nulle part). **« Saisie en tableau »** ouvre le tableau, resté à sa place en bas du tableau de bord, et y met le focus : le `Disclosure` contrôlé de T0 sert pour la première fois.
+
+**Code** : `EngineBar` et `NextStep` dans `src/components/engine/`, avec leurs tests de balisage ; leur câblage dans `_engine/BoardHead.tsx` (`BoardBar`, `BoardNextStep`, `boardNextStep`), qui reprend `needsBackup` et le type `SeriesControls`. `nextSelfNumber` sort de `nextStepFor` pour « Taper d'abord le chiffre suivant » et « Continuer {mois} », testé. `MonthBar`, `ResumeBand` et `BackupBar` partent, avec leur CSS ; les clés qu'ils étaient seuls à lire aussi (`resume.*`, `series.start`, `series.backTo`, `engines.current`, `board.eyebrow`, `board.eyebrowNoCohort`, `workbench.lastVisit*`). Quatre jetons quittent la liste d'attente (`--engine-pending-edge`, `--engine-accent`, `--engine-verdict`, `--engine-verdict-mobile`).
+
+**Relevé en route** : la première coupe de la copie a cherché le commentaire de `board.eyebrow` par son texte, qui ouvre aussi celui du fil d'Ariane plus haut, et a emporté 240 lignes. Le diff l'a montré avant tout test : fichier restauré, coupe refaite bornée au groupe. Et dans la carte, « Relancer » montait au-dessus de sa ligne : la confirmation de `RequestCopy`, vide mais gardée pour être annoncée, prenait une ligne sous le bouton. Elle se met à côté (`inline`).
+
+**La relecture de copie** (le relecteur, sur la PR ouverte) a trouvé de quoi changer, appliqué :
+- le nom d'un chiffre passait en sujet de phrase (« Opportunités recommandées vient de quelqu'un d'autre ») : il est une étiquette après les deux-points, comme la règle du fichier le veut ;
+- « Demander à Produit » : le rôle est une étiquette sans article, d'où « à l'équipe {rôle} ». **Le même défaut est déjà dans `reminders.requestTitle` et `requestDescription`** (« Relancer {rôle} ») : laissé pour A18.d ;
+- « Copier tes 3 demandes » comptait des chiffres, pas des demandes (une par rôle) : « Demande tes {n} chiffres », et « {n} chiffres demandés » au rang 7 ;
+- « remplis le reste en attendant » quand plus rien n'est à faire seul : deux variantes qui s'arrêtent à « envoie la demande maintenant » ;
+- les boutons fléchés passent à l'impératif avec « ton », la règle de l'en-tête du fichier (« Passe au chiffre suivant », « Reviens à », « Démarre », « Sauvegarde ton moteur ») ; l'infinitif venait du retour ;
+- la phrase de Safari dit la règle entière (« sept jours d'utilisation sans passage ici »), comme celle du menu ; « il y a {n} jours » prend son espace insécable ; « read-only » comme ailleurs.
+
+**Reste pour A18.d** : « Moteur, mois et fichier » annonce un mois que le menu n'a pas quand le moteur n'a qu'un mois et que le suivant est à démarrer (le groupe est vide, donc absent).
+
+**Vérifié** : `tsc` et `eslint` propres ; 3 008 tests unitaires ; `next build` avec les variables de la CI ; les 284 specs (et les 77 que touche la relecture, rejouées après elle) du moteur, des cibles et de l'accessibilité (une ignorée par construction) ; les specs du bandeau, du kit et des aperçus de partage, avec `GAME_ENABLED=true` aussi côté serveur (sans lui, les pages du jeu manquent et trois specs tombent, ce qui n'est pas ce changement) ; des captures en français et en anglais, à 1 280 et 390 px : le retour, le menu ouvert, le mois à démarrer, un mois passé, sans défilement horizontal.
+
 ## L'en-tête du jeu à la largeur des deux autres espaces (2026-10-02)
 
 **Le constat d'Antoine**, captures à l'appui : la barre du haut est plus étroite dans le jeu, et sa course n'y nomme jamais « Diagnostic » ni « Moteur ». Seuls les numéros s'affichent, quelle que soit la largeur de la fenêtre.

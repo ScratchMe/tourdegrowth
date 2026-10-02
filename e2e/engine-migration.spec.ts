@@ -2,7 +2,7 @@ import type { Page } from "@playwright/test";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import { exampleState } from "../src/lib/engine/__tests__/fixtures";
 import type { EngineState } from "../src/lib/engine/types";
-import { ENGINE_KEYS, engineSeed, storedEngineEntry } from "./engine-helpers";
+import { ENGINE_KEYS, engineSeed, storedEngineEntry, openEngineMenu } from "./engine-helpers";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the owner's signed preview.
@@ -88,6 +88,7 @@ for (const [version, key, older] of [
 
     // The export: a file now holds everything the older copy held, and it goes.
     const download = page.waitForEvent("download");
+    await openEngineMenu(page);
     await page.getByTestId("engine-save-json").click();
     await download;
     await expect.poll(() => keys(page)).toEqual([ENTRY_KEY, ENGINE_KEYS.index]);

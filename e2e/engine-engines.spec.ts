@@ -4,7 +4,7 @@ import { ENGINE_COPY } from "@/content/engine-copy";
 import { exampleState, measured, ratio } from "../src/lib/engine/__tests__/fixtures";
 import type { EngineIndex, EngineState } from "../src/lib/engine/types";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test, trackedEvents } from "./helpers";
-import { ENGINE_KEYS, engineSeed, storedEngineEntry } from "./engine-helpers";
+import { ENGINE_KEYS, engineSeed, storedEngineEntry, openEngineMenu } from "./engine-helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
 // owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
@@ -41,7 +41,9 @@ function storedIndex(page: Page): Promise<EngineIndex | null> {
   }, ENGINE_KEYS);
 }
 
+/** « Changer ou ajouter un moteur », in the engine bar's menu (A18 T2.a). */
 async function openSwitcher(page: Page): Promise<void> {
+  await openEngineMenu(page);
   const details = page.getByTestId("engine-switcher");
   if ((await details.getAttribute("open")) === null) await details.locator("summary").click();
 }
@@ -49,14 +51,15 @@ async function openSwitcher(page: Page): Promise<void> {
 test("a second engine: created from the switcher, switched to and back, deleted without touching the first", async ({ page }) => {
   await open(page, "en", exampleState());
   const before = await storedEngineEntry(page);
-  await expect(page.getByTestId("engine-switcher").locator("summary")).toContainText("Engine: Unnamed engine, created");
+  // The engine bar says which engine is on screen (A18 T2.a): its company, else « Unnamed engine ».
+  await expect(page.getByTestId("engine-bar-line")).toContainText("Unnamed engine");
 
   await openSwitcher(page);
   await page.getByTestId("engine-new").click();
   await expect(page.getByTestId("engine-setup")).toBeVisible();
   await page.getByLabel(ENGINE_COPY.setup.companyLabel.en).fill("Second Co");
   await page.getByTestId("engine-setup-board").click();
-  await expect(page.getByTestId("engine-switcher").locator("summary")).toHaveText(/Engine: Second Co/);
+  await expect(page.getByTestId("engine-bar-line")).toContainText("Second Co");
   const index = (await storedIndex(page))!;
   expect(index.order).toHaveLength(2);
   expect(index.order[0]).toBe(EXAMPLE_ID);
@@ -66,7 +69,7 @@ test("a second engine: created from the switcher, switched to and back, deleted 
   await openSwitcher(page);
   await expect(page.getByTestId("engine-switcher-list").locator("li")).toHaveCount(2);
   await page.getByTestId(`engine-switch-${EXAMPLE_ID}`).click();
-  await expect(page.getByTestId("engine-switcher").locator("summary")).toContainText("Unnamed engine");
+  await expect(page.getByTestId("engine-bar-line")).toContainText("Unnamed engine");
   await expect(page.getByTestId("engine-coverage")).toContainText("11 of 17");
   expect((await storedIndex(page))!.activeId).toBe(EXAMPLE_ID);
 
@@ -75,6 +78,7 @@ test("a second engine: created from the switcher, switched to and back, deleted 
   await openSwitcher(page);
   await page.getByTestId(`engine-switch-${index.activeId}`).click();
   await openSwitcher(page);
+  await openEngineMenu(page);
   await page.getByTestId("engine-delete-open").click();
   await expect(page.locator("#engine-delete-title")).toHaveText('Delete "Second Co"?');
   const download = page.waitForEvent("download");
@@ -88,6 +92,7 @@ test("a second engine: created from the switcher, switched to and back, deleted 
 
   // The last one deleted leaves the device empty: the setup.
   await openSwitcher(page);
+  await openEngineMenu(page);
   await page.getByTestId("engine-delete-open").click();
   await page.getByTestId("engine-delete-confirm").click();
   await expect(page.getByTestId("engine-setup")).toBeVisible();
@@ -105,8 +110,10 @@ test("ten engines at most: « New engine » is greyed, with its reason", async (
 test("an exported file re-imported is added beside the engine, under an id of its own", async ({ page }) => {
   await open(page, "en", exampleState());
   const download = page.waitForEvent("download");
+  await openEngineMenu(page);
   await page.getByTestId("engine-save-json").click();
   const path = (await (await download).path())!;
+  await openEngineMenu(page);
   await page.getByTestId("engine-import-open-screen").click();
   await page.getByTestId("engine-import-file").setInputFiles(path);
   // « Add as a new engine » is the default: the choice that loses nothing.
@@ -127,6 +134,7 @@ test("the merge lists what it changes before writing it; it is refused, with its
   const file = exampleState();
   file.snapshots[0]!.metrics["acq.signup-rate"] = measured(ratio(900, 26_000), { kind: "tool", tool: "ga4" }, { updatedAt: "2026-09-30T10:00:00.000Z" });
   file.snapshots[0]!.targets["rev.paid-conversion"] = 12;
+  await openEngineMenu(page);
   await page.getByTestId("engine-import-open-screen").click();
   await page.getByTestId("engine-import-file").setInputFiles({ name: "laptop.json", mimeType: "application/json", buffer: Buffer.from(JSON.stringify(file)) });
   await page.getByRole("radio", { name: /Merge into/ }).check();
@@ -143,6 +151,7 @@ test("the merge lists what it changes before writing it; it is refused, with its
   expect((await storedIndex(page))!.order).toEqual([EXAMPLE_ID]);
 
   // Another currency: the numbers would not mean the same, the choice says why.
+  await openEngineMenu(page);
   await page.getByTestId("engine-import-open-screen").click();
   await page.getByTestId("engine-import-file").setInputFiles({ name: "usd.json", mimeType: "application/json", buffer: Buffer.from(JSON.stringify({ ...file, setup: { ...file.setup, currency: "USD" } })) });
   await expect(page.getByRole("radio", { name: /Merge into/ })).toBeDisabled();
@@ -238,6 +247,7 @@ test("a file opened over an unreadable engine keeps the engines the device can s
 
 test("erasing everything says how many engines go", async ({ page }) => {
   await open(page, "fr", exampleState(), { ...exampleState(), id: "00000000-0000-4000-8000-000000000199" });
+  await openEngineMenu(page);
   await page.getByTestId("engine-erase-open").click();
   await expect(page.getByTestId("engine-erase-body")).toContainText("Les 2 moteurs de cet appareil seront supprimés");
 });
@@ -254,6 +264,7 @@ test("390px, French: the switcher, the import's choices and the table's preview,
   await page.getByTestId("engine-table-read").click();
   await expect(page.getByTestId("engine-table-preview")).toBeVisible();
   expect(await overflow()).toBe(0);
+  await openEngineMenu(page);
   await page.getByTestId("engine-import-open-screen").click();
   await page.getByTestId("engine-import-file").setInputFiles({ name: "x.json", mimeType: "application/json", buffer: Buffer.from(JSON.stringify(exampleState())) });
   await expect(page.getByTestId("engine-import-choices")).toBeVisible();

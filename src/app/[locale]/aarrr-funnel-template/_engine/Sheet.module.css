@@ -76,6 +76,13 @@
   align-items: flex-start;
 }
 
+/* A line's action in the board's next step: the button, then its confirmation on the same row. */
+.requestInline {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
 .requestStatus {
   font: var(--meta-sm);
   color: var(--text-body);

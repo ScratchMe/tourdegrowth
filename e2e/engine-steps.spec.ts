@@ -2,7 +2,7 @@ import type { Page } from "@playwright/test";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import { METRIC_SHAPES } from "@/lib/engine/catalog-shape";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
-import { storedEngineEntry } from "./engine-helpers";
+import { storedEngineEntry, openEngineMenu } from "./engine-helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
 // owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
@@ -79,6 +79,7 @@ test("« Start step by step » walks targets → base → one number per screen,
   await expect(page.getByTestId("peloton-same-hundred").first()).toContainText("800");
 
   // Back to the steps: it resumes on the first number nobody has touched, not at the targets.
+  await openEngineMenu(page);
   await page.getByTestId("engine-open-steps").click();
   await expect(steps).toHaveAttribute("data-phase", "number");
 });
@@ -110,7 +111,7 @@ test("settings can be changed later; a new activation window sends that number b
   await sheet.getByTestId("engine-save-act-rate").click();
   await expect(page.getByTestId("engine-coverage")).toContainText("1 of 17 numbers found");
 
-  await page.getByTestId("engine-open-settings").click();
+  await page.getByTestId("engine-bar-settings").click();
   const settings = page.getByTestId("engine-settings");
   await expect(settings).toBeVisible();
   await settings.getByRole("group", { name: ENGINE_COPY.setup.activationWindow.en }).getByRole("button", { name: "14 days" }).click();

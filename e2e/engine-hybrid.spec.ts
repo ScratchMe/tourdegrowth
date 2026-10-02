@@ -227,7 +227,7 @@ test.describe("the settings: a motion unticked is hidden, never erased (§18.1.3
   test("untick sales-assisted: said before saving, gone from the board, back with its numbers when ticked again; the last box can't be unticked", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await seed(page, hybridState());
-    await page.getByTestId("engine-open-settings").click();
+    await page.getByTestId("engine-bar-settings").click();
     const settings = page.getByTestId("engine-settings");
     await settings.getByTestId("engine-motion-slg").uncheck();
     await expect(page.getByTestId("engine-settings-resets")).toContainText("Unticking sales-assisted removes it from the board and the slides. Its 15 numbers");
@@ -239,7 +239,7 @@ test.describe("the settings: a motion unticked is hidden, never erased (§18.1.3
     const kept = (await storedEngineEntry(page))?.state.snapshots[0]!.metrics["slg.rev.win-rate"]?.status;
     expect(kept).toBe("measured");
 
-    await page.getByTestId("engine-open-settings").click();
+    await page.getByTestId("engine-bar-settings").click();
     // Self-serve is the only box left: it can't be unticked.
     const last = page.getByTestId("engine-settings").getByTestId("engine-motion-plg");
     await expect(last).toBeDisabled();

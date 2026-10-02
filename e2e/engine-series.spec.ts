@@ -1,7 +1,7 @@
 import type { Page } from "@playwright/test";
 import { exampleState, hybridState, measured, ratio, withMonthBefore } from "../src/lib/engine/__tests__/fixtures";
 import type { EngineState } from "../src/lib/engine/types";
-import { engineSeed, storedEngineEntry } from "./engine-helpers";
+import { engineSeed, nextStep, openEngineMenu, storedEngineEntry } from "./engine-helpers";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test, trackedEvents } from "./helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the owner's signed preview.
@@ -114,7 +114,7 @@ for (const locale of ["fr", "en"] as const) {
 
   test(`${locale}: a month over offers the next; started, it opens empty with its targets, and the month before is read only`, async ({ page }) => {
     await openBoard(page, locale, exampleState(), new Date(2026, 9, 2, 12));
-    const next = page.getByTestId("engine-month-next");
+    const next = nextStep(page, "start-month");
     await expect(next).toContainText(t.september);
     await page.getByTestId("engine-month-start").click();
     await expect(next).toHaveCount(0);
@@ -130,17 +130,19 @@ for (const locale of ["fr", "en"] as const) {
     expect(stored?.state.snapshots[1]!.targets).toEqual(stored?.state.snapshots[0]!.targets);
 
     // August, read only: its numbers, no « Et si », no entry, no file actions; then back.
+    await openEngineMenu(page);
     await page.getByTestId("engine-month-select").selectOption({ label: t.august });
-    const past = page.getByTestId("engine-month-past");
+    const past = nextStep(page, "back-to-current");
     await expect(past).toContainText(t.august);
     await expect(page.getByTestId("engine-board-whatif")).toHaveCount(0);
-    await expect(page.getByTestId("engine-actions")).toHaveCount(0);
+    // Read only: the slides are not offered from a closed month (A18 T2.a: the board's foot, and no next step to them).
+    await expect(page.getByTestId("engine-open-deck")).toHaveCount(0);
     await page.getByTestId("engine-tab-activation").click();
     await expect(page.getByTestId("engine-row-value-act-rate")).toContainText("18");
     expect(await page.getByTestId("engine-metric-act-rate").evaluate((el) => el.tagName)).toBe("SPAN");
     await page.getByTestId("engine-month-back").click();
     await expect(past).toHaveCount(0);
-    await expect(page.getByTestId("engine-actions")).toBeVisible();
+    await expect(page.getByTestId("engine-open-deck")).toBeVisible();
   });
 
   test(`${locale}: each number says how far it moved; a past month corrected recomputes the next month's change`, async ({ page }) => {
@@ -150,9 +152,10 @@ for (const locale of ["fr", "en"] as const) {
     await expect(delta).toHaveText(t.delta);
 
     // Correct July's activation: 130 activated instead of 120.
+    await openEngineMenu(page);
     await page.getByTestId("engine-month-select").selectOption({ label: t.july });
     await page.getByTestId("engine-month-correct").click();
-    await expect(page.getByTestId("engine-month-past")).toHaveAttribute("data-correcting", "true");
+    await expect(page.getByTestId("engine-month-done")).toBeVisible();
     await page.getByTestId("engine-tab-activation").click();
     await page.getByTestId("engine-metric-act-rate").click();
     const sheet = page.getByTestId("engine-sheet-act-rate");
@@ -194,8 +197,9 @@ for (const width of [390, 1280]) {
   test(`the month bar and a past month's band fit at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
     await openBoard(page, "fr", twoMonths(), new Date(2026, 8, 24, 12));
+    await openEngineMenu(page);
     await page.getByTestId("engine-month-select").selectOption({ label: "juillet 2026" });
-    await expect(page.getByTestId("engine-month-past")).toBeVisible();
+    await expect(nextStep(page, "back-to-current")).toBeVisible();
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     expect(overflow).toBeLessThanOrEqual(0);
   });
@@ -203,7 +207,7 @@ for (const width of [390, 1280]) {
 
 test("in a series, the settings never offer a flows month before the month before's", async ({ page }) => {
   await openBoard(page, "fr", twoMonths(), new Date(2026, 8, 24, 12));
-  await page.getByTestId("engine-open-settings").click();
+  await page.getByTestId("engine-bar-settings").click();
   const months = await page.getByLabel("Mois des flux").locator("option").allTextContents();
   expect(months).toContain("août 2026");
   expect(months).not.toContain("juillet 2026");

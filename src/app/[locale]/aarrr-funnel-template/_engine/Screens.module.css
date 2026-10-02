@@ -238,47 +238,6 @@
   align-items: flex-start;
 }
 
-/* --- Resume (E6) ------------------------------------------------------- */
-/* The month selector and, on a past month, its band (A14 T2, §19.2.4). */
-.monthBar {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
-
-.resume {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-  border: var(--border-dashed);
-  border-radius: var(--radius-card);
-  padding: var(--space-6);
-}
-
-.resumeText {
-  font: var(--body-md);
-  color: var(--text-body);
-  margin: 0;
-}
-
-.resumeActions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-4);
-  align-items: flex-start;
-}
-
-/* --- Backup band ------------------------------------------------------- */
-.backupText {
-  margin: 0;
-}
-
-.backupMeta {
-  font: var(--meta-sm);
-  color: var(--text-muted);
-  margin: 0;
-}
-
 /* --- Unreadable storage, and the slides' slot -------------------------- */
 .notice {
   font: var(--body-md);
@@ -438,9 +397,3 @@
   margin: 0;
 }
 
-/* --- « Me rappeler de démarrer {mois} » (§19.9, A14 T6) ----------------- */
-.remind {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: calc(-1 * var(--space-2));
-}

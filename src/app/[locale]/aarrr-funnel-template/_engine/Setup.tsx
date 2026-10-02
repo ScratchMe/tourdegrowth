@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
 import { METRIC_SHAPES, SLG_METRIC_SHAPES, TEXT_LIMITS, shapeOf } from "@/lib/engine/catalog-shape";
@@ -69,6 +69,7 @@ export function Setup({
   linked,
   after,
   onCancel,
+  focusCompany,
 }: {
   strings: EngineStrings;
   locale: "en" | "fr";
@@ -94,10 +95,16 @@ export function Setup({
    */
   after?: YearMonth;
   onCancel?: () => void;
+  /** « Renommer », from the engine bar's menu (A18 T2.a): the focus goes to the company's name, the field the person came to change. */
+  focusCompany?: boolean;
 }) {
   const s = strings.setup;
   const editing = Boolean(initial);
   const id = useId();
+  // On arrival: neither changes while the card is on screen, so the person's one move is made once.
+  useEffect(() => {
+    if (focusCompany) document.getElementById(`${id}-company`)?.focus();
+  }, [focusCompany, id]);
   const lastClosed = defaultReferenceMonth(today);
   const [currency, setCurrency] = useState<Currency>(initial?.setup.currency ?? "EUR");
   const [activation, setActivation] = useState<EngineSetup["activationWindowDays"]>(initial?.setup.activationWindowDays ?? 7);
