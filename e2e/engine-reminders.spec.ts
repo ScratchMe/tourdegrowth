@@ -3,7 +3,7 @@ import type { Page } from "@playwright/test";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import { exampleState } from "../src/lib/engine/__tests__/fixtures";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test, trackedEvents } from "./helpers";
-import { engineSeed, openEngineMenu } from "./engine-helpers";
+import { engineSeed, openEngineMenu, openNumber } from "./engine-helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
 // owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
@@ -44,9 +44,7 @@ test.describe("reminders", () => {
 
   test("« Me le rappeler » after a request: the role and the numbers' names, five days on, and nothing typed", async ({ page }) => {
     await open(page, "fr");
-    await page.getByTestId("engine-tab-revenue").click();
-    const toggle = page.getByTestId("engine-metric-rev-gross-margin");
-    if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.click();
+    await openNumber(page, "rev-gross-margin");
     const sheet = page.getByTestId("engine-sheet-rev-gross-margin");
     await sheet.getByRole("button", { name: ENGINE_COPY.sheet.willAsk.fr }).click();
     await sheet.getByTestId("engine-request-copy").click();

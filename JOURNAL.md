@@ -581,3 +581,57 @@ Troisième étape du portage du retour 07, drapeau fermé. **T2 est coupé en tr
 **Reste pour A18.d** : « Moteur, mois et fichier » annonce un mois que le menu n'a pas quand le moteur n'a qu'un mois et que le suivant est à démarrer (le groupe est vide, donc absent).
 
 **Vérifié** : `tsc` et `eslint` propres ; 3 008 tests unitaires ; `next build` avec les variables de la CI ; les 284 specs (et les 77 que touche la relecture, rejouées après elle) du moteur, des cibles et de l'accessibilité (une ignorée par construction) ; les specs du bandeau, du kit et des aperçus de partage, avec `GAME_ENABLED=true` aussi côté serveur (sans lui, les pages du jeu manquent et trois specs tombent, ce qui n'est pas ce changement) ; des captures en français et en anglais, à 1 280 et 390 px : le retour, le menu ouvert, le mois à démarrer, un mois passé, sans défilement horizontal.
+
+## A18 T2.b : « Tes chiffres », une liste à la place des onglets, et l'écran d'un chiffre (2026-10-02)
+
+Quatrième étape du portage du retour 07, drapeau fermé, et la décision C41 d'Antoine : **les cinq onglets d'étape du 2026-09-26 sont remplacés par une liste**. Toutes les étapes sont visibles, chaque chiffre est une ligne (nom, valeur ou statut), et une ligne ouvre l'écran du chiffre, au lieu de déplier sa fiche sur place (1 667 px pour un chiffre, sur un téléphone).
+
+- **« Tes chiffres »** (`NumberList`) : l'en-tête dit d'abord ce qui reste (`EngineProgress` : « 6 à faire », « Plus qu'un », « Plus rien à faire »), puis les comptes (« 11 trouvés · 2 estimés · 1 demandé · 3 introuvables », les zéros omis), puis une marque par chiffre et leur légende.
+- **Chaque étape** dit ses marques et « 2 sur 3 trouvés ». Celle que nomme une cible d'équipe (C1) porte « Freine ici » et le filet rouge du diagnostic ; aucune autre n'a de rouge.
+- **Une ligne** : un chiffre trouvé montre sa valeur, sans étiquette. Les autres portent une étiquette : neutre pour l'estimé et l'introuvable, pointillée pour le demandé et l'à-faire. Une note dessous dit pourquoi un chiffre est introuvable, et de combien il a bougé depuis le mois d'avant.
+- **Un mois clos** : ses lignes se lisent et ne s'ouvrent pas.
+- **Dans l'hybride** : la liste est celle du moteur affiché. La liaison est dans un groupe fermé à la fin de la liste de l'assisté.
+- **L'écran d'un chiffre** (`NumberScreen`) est la fiche de T1, en carte, avec sa place (« Activation · 2 sur 3 ») et ce qui reste à droite. « ← Tes chiffres » ramène à la ligne et lui rend le focus. « Chiffre suivant » de la carte, « Renseigner » de « À aller chercher » et la demande ouvrent ce même écran.
+- **La couverture en pastilles** quitte la tête du tableau à un moteur : la liste la dit. L'hybride garde la sienne dans ses colonnes jusqu'à T5.
+
+**Ce qui part, et pourquoi c'est voulu** :
+- **`hidden="until-found"`** : les fiches repliées étaient dans la page pour Ctrl+F (A4). Elles ne sont plus dans la page, donc ne se trouvent plus par la recherche du navigateur ; chaque nom de chiffre, lui, est dans la liste ;
+- **les positions** en tête de panneau (« Taux d'activation · sous ta cible ») : l'écran de chaque chiffre le dit dans « Comment il se situe », et l'étape nommée le dit par son filet ;
+- **le clavier des onglets** (flèches, Origine, Fin) : la liste est une suite de boutons, que la tabulation parcourt.
+
+**Les goldens tiennent** : `golden-v1` et `golden-v2` figeaient la sortie des onglets. Une projection (`asTabs`, `golden-projection.ts`) reconstruit l'ancienne forme depuis la liste, et les deux passent sans toucher aux fichiers : la liste dit exactement ce que disaient les onglets.
+
+**Code** :
+- `EngineProgress` et `NumberList` dans `src/components/engine/`, avec leurs tests de balisage ;
+- `_engine/number-list.ts`, le modèle pur, prend la place de `stage-tabs.ts`, et ses tests ceux des onglets ;
+- `_engine/BoardNumbers.tsx` et `_engine/NumberScreen.tsx` sont neufs, et l'îlot gagne un écran `number` ;
+- `StageTabs.tsx` part, avec ses règles CSS et les clés `board.stagesLabel`, `tabFound` et `tabNamed`. « Freine ici » passe dans le groupe `list`, avec la copie neuve « à relire » ;
+- neuf jetons quittent la liste d'attente.
+
+Deux tests de gouvernance suivent, chacun avec sa raison écrite :
+- `breakpoints` : la requête de conteneur du tableau est lue par les colonnes de l'hybride, plus par les onglets ;
+- `hard-shadows` : le seuil de non-vacuité passe de 60 à 50, car les ombres des onglets sont parties.
+
+**Les specs** : `engine-board-tabs.spec.ts` devient `engine-numbers.spec.ts`, qui dit maintenant :
+- toutes les étapes sont à l'écran, une seule freine, et ce qui reste est dit ;
+- une ligne ouvre son écran, et le retour rend le focus à la ligne ;
+- « Renseigner » et « Chiffre suivant » ouvrent l'écran d'un chiffre ;
+- les lignes font 48 px à 390 px, sans défilement horizontal.
+
+Trois aides dans `engine-helpers.ts` :
+- `openNumber` ouvre un chiffre depuis la liste, en ouvrant au besoin le groupe fermé ;
+- `backToBoard` revient au tableau ;
+- `expectFound` lit les comptes de la liste.
+
+`openEngineMenu` revient d'abord au tableau. Trois specs de `platform-native` partent ou changent : la recherche dans les fiches repliées et les flèches de la bande d'onglets partent ; « garder ce qui est tapé » se rejoue sur l'écran d'un chiffre.
+
+**Relevé en route** :
+- La première passe e2e a eu 31 échecs, tous dans des specs qui enregistraient sur l'écran d'un chiffre puis cherchaient le tableau. Elles reviennent d'abord à la liste.
+- Un vrai défaut aussi : le retour ne rendait pas le focus à la ligne, faute d'`id` sur le bouton. C'est réparé, et la spec le tient.
+
+**Pas fait ici** : le groupe « Calculés à partir des tiens » du retour. Les chiffres calculés ne sont pas sur le tableau aujourd'hui (seulement dans les slides), donc ce serait un ajout, pas un portage.
+
+**Vérifié** :
+- `tsc` et `eslint` propres ; 3 014 tests unitaires ; `next build` avec les variables de la CI ;
+- les 295 specs du moteur, des cibles, de l'accessibilité et de la plateforme passent (une ignorée par construction), avec `GAME_ENABLED=true` côté serveur ;
+- des captures de la liste et de l'écran d'un chiffre, en français et en anglais, à 1 280 et 390 px, sans défilement horizontal.

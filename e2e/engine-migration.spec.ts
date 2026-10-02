@@ -2,7 +2,7 @@ import type { Page } from "@playwright/test";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import { exampleState } from "../src/lib/engine/__tests__/fixtures";
 import type { EngineState } from "../src/lib/engine/types";
-import { ENGINE_KEYS, engineSeed, storedEngineEntry, openEngineMenu } from "./engine-helpers";
+import { ENGINE_KEYS, engineSeed, storedEngineEntry, openEngineMenu, openNumber } from "./engine-helpers";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the owner's signed preview.
@@ -54,10 +54,11 @@ async function seed(page: Page, items: [string, string][]): Promise<void> {
 /** Every key the engine holds: the v3 index (`tdg.engines.v3`), its entries and the older single keys. */
 const keys = (page: Page) => page.evaluate(() => Object.keys(window.localStorage).filter((k) => k.startsWith("tdg.engine")).sort());
 
-async function board(page: Page): Promise<{ verdict: string; coverage: string }> {
+async function board(page: Page): Promise<{ verdict: string; progress: string }> {
   return {
     verdict: (await page.getByTestId("engine-verdict").innerText()).trim(),
-    coverage: (await page.getByTestId("engine-coverage").innerText()).trim(),
+    // « Tes chiffres »: what remains, then the counts (A18 T2.b; the coverage chips before).
+    progress: (await page.getByTestId("engine-progress").innerText()).trim(),
   };
 }
 
@@ -69,7 +70,7 @@ for (const [version, key, older] of [
     // The reference: the same example, as a v3 build stores it.
     await seed(page, engineSeed(exampleState()));
     const reference = await board(page);
-    expect(reference.coverage).toContain("of 17 numbers found");
+    expect(reference.progress).toContain("11 found");
 
     await seed(page, [[key, JSON.stringify({ schemaVersion: version, state: older() })]]);
     expect(await board(page)).toEqual(reference);
@@ -77,8 +78,7 @@ for (const [version, key, older] of [
     expect(await keys(page)).toEqual([key]);
 
     // A first save — a number re-saved as it is — writes the v3 index and entry, and leaves the older copy in place.
-    await page.getByTestId("engine-tab-activation").click();
-    await page.getByTestId("engine-metric-act-rate").click();
+    await openNumber(page, "act-rate");
     await page.getByTestId("engine-save-act-rate").click();
     await expect.poll(() => keys(page)).toEqual([key, ENTRY_KEY, ENGINE_KEYS.index]);
     const v3 = await storedEngineEntry(page);

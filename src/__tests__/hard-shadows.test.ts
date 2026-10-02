@@ -77,8 +77,9 @@ describe("every shadow is hard: no blur radius (design audit S-6)", () => {
         }
       }
     }
-    // Non-vacuity: the hard shadows of the system and every ring are read.
-    expect(checked).toBeGreaterThan(60);
+    // Non-vacuity: the hard shadows of the system and every ring are read
+    // (60 once the engine's stage tabs left with A18 T2.b, 2026-10-02).
+    expect(checked).toBeGreaterThan(50);
     expect(blurred).toEqual([]);
   });
 });

@@ -7,7 +7,6 @@ import { motionOfMetric, motionShapes, shapeOf } from "@/lib/engine/catalog-shap
 import type { EngineStrings, ResolvedBridge, ResolvedDerived, ResolvedMetric } from "@/lib/engine/strings";
 import { MAX_ENGINES, type EngineCalcContext, type EngineDerived, type EngineSetup, type EngineState, type LeverId, type MetricEntry, type MetricId, type Motion, type MotionDerived, type RoleId, type SharedCount, type SlideTitle, type Snapshot, type YearMonth } from "@/lib/engine/types";
 import type { Locale } from "@/lib/i18n/locale";
-import type { Pillar } from "@/lib/scoring/pillars";
 import { Board } from "./_engine/Board";
 import type { SeriesControls } from "./_engine/BoardHead";
 import { DeckView } from "./_engine/deck/DeckView";
@@ -34,6 +33,7 @@ import { engineName } from "./_engine/EngineSwitcher";
 import { EraseDialog } from "./_engine/EraseDialog";
 import { ExampleView } from "./_engine/ExampleView";
 import { ImportPanel, type ImportChoice } from "./_engine/ImportPanel";
+import { NumberScreen } from "./_engine/NumberScreen";
 import { Steps } from "./_engine/Steps";
 import { resumePosition, type StepPosition } from "./_engine/steps-model";
 import { Setup, type SetupChoice } from "./_engine/Setup";
@@ -66,7 +66,8 @@ export interface EngineWorkbenchProps {
  * kept; an engine found on arrival opens on the board.
  */
 // `new` and `delete` since A14 T5 (§19.1.5): another engine's setup, and one engine's deletion.
-type Screen = "board" | "steps" | "deck" | "import" | "erase" | "settings" | "example" | "new" | "delete";
+// `number` since A18 T2.b: one number's own screen, opened from the board's list.
+type Screen = "board" | "number" | "steps" | "deck" | "import" | "erase" | "settings" | "example" | "new" | "delete";
 
 // Once per page session, not per mount (§11.6: "first view of the island in the session").
 let openedTracked = false;
@@ -110,18 +111,16 @@ function withSnapshot(state: EngineState, change: (snapshot: Snapshot) => Snapsh
  * Every write goes through `persist`: it stamps `updatedAt`, commits (the
  * screen keeps what was typed even if the device refuses — D15), and says
  * so when it did refuse. Focus moves only when a PERSON moved between
- * screens (R-19): to the verdict on entering the board, to a number's row
- * when it is opened from elsewhere — never on first paint. Choosing a stage
- * tab moves nothing: focus stays on the tab, as the WAI-ARIA tabs pattern
- * wants.
+ * screens (R-19): to the verdict on entering the board, to a number's
+ * heading when its screen opens, back to its row in « Tes chiffres » on the
+ * way back — never on first paint.
  */
 export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy, bridges }: EngineWorkbenchProps) {
   const snap = useSyncExternalStore(subscribe, getClientSnapshot, getServerSnapshot);
   const [screen, setScreen] = useState<Screen>("board");
   const [stepsFrom, setStepsFrom] = useState<StepPosition>({ phase: "targets" });
-  const [selected, setSelected] = useState<Pillar | null>(null);
-  const [panelSeq, setPanelSeq] = useState(0);
-  const [focusMetric, setFocusMetric] = useState<MetricId | null>(null);
+  // The number whose own screen is open (A18 T2.b): opened from its row in « Tes chiffres », the next step, or the collect list.
+  const [numberId, setNumberId] = useState<MetricId | null>(null);
   // The hybrid's selector (§18.7): the motion of the number opened last in this session, else self-serve.
   const [motionView, setMotionView] = useState<Motion | null>(null);
   // The motions the setup card had ticked when « Voir un exemple rempli » was pressed (§18.7).
@@ -375,13 +374,12 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
       write(withSnapshot(lensState, (s) => markReminded(s, ids, new Date().toISOString())));
     },
     openMetric(id: MetricId) {
-      setScreen("board");
-      // The link sits in sales-assisted's Acquisition panel: its motion, for the selector.
+      // Its own screen, its heading focused: a move between screens the person asked for (R-19).
+      // The link is sales-assisted's: its motion, for the selector the way back lands on.
       setMotionView(motionOfMetric(id));
-      setSelected(shapeOf(id).stage);
-      setFocusMetric(id);
-      setPanelSeq((n) => n + 1);
-      focus(`engine-metric-${domId(id)}`);
+      setNumberId(id);
+      setScreen("number");
+      focus("engine-number-title");
     },
     linkTour(resultId: string | null) {
       // Only the id is stored (D13): the Tour is read from `tdg.results.v1`, never copied, and
@@ -403,11 +401,10 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
   const engines = snap.engines ?? [];
   const currentName = engineName({ createdAt: current.createdAt, ...(current.setup.companyLabel ? { companyLabel: current.setup.companyLabel } : {}) }, strings, locale);
 
-  /** Leaves whatever the board was showing — a past month, a stage, a sheet — for another engine's. */
+  /** Leaves whatever the board was showing — a past month, a number, the engine shown — for another engine's. */
   function resetBoard() {
     toCurrentMonth();
-    setSelected(null);
-    setFocusMetric(null);
+    setNumberId(null);
     setMotionView(null);
   }
 
@@ -492,7 +489,7 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
         onErase={() => {
           erase();
           setScreen("board");
-          setSelected(null);
+          setNumberId(null);
           focus("engine-setup-title");
         }}
         onCancel={openBoard}
@@ -603,8 +600,7 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
     onPick(index) {
       setMonthIndex(index === lastIndex ? null : index);
       setCorrecting(false);
-      setSelected(null);
-      setFocusMetric(null);
+      setNumberId(null);
       focus("engine-verdict");
     },
     onCorrect() {
@@ -637,10 +633,26 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
       // The one sign of a series in use (§19.12) — counted once the device holds it, never which month.
       if (persist(started).ok) trackEngine({ name: "engine_month_started" });
       toCurrentMonth();
-      setSelected(null);
+      setNumberId(null);
       focus("engine-verdict");
     },
   };
+
+  if (screen === "number" && numberId) {
+    const id = numberId;
+    return shell(
+      <NumberScreen
+        id={id}
+        view={view}
+        actions={actions}
+        onBack={() => {
+          setScreen("board");
+          // Back to its row (the list's), as « ← Tes chiffres » says.
+          focus(`engine-metric-${domId(id)}`);
+        }}
+      />,
+    );
+  }
 
   return shell(
     // Keyed by the engine: another engine's board starts fresh — no pasted table, open sheet or pinned tab follows it (A14 T5).
@@ -651,13 +663,6 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
       verdict={verdict}
       series={series}
       plan={plan}
-      selected={selected}
-      onSelect={(stage) => {
-        setSelected(stage);
-        setFocusMetric(null);
-      }}
-      panelSeq={panelSeq}
-      focusMetric={focusMetric}
       returningFrom={snap.returningFrom}
       motionView={motionView}
       onMotion={setMotionView}

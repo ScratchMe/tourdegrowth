@@ -1,7 +1,7 @@
 import type { Locator, Page } from "@playwright/test";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
-import { storedEngineEntry } from "./engine-helpers";
+import { storedEngineEntry, openNumber, backToBoard } from "./engine-helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
 // owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
@@ -35,14 +35,9 @@ async function tickTools(page: Page, tools: string[]): Promise<void> {
   await expect(page.getByTestId("engine-board")).toBeVisible();
 }
 
-async function openSheet(page: Page, stage: string, metricDomId: string): Promise<Locator> {
-  const tab = page.getByTestId(`engine-tab-${stage}`);
-  if ((await tab.getAttribute("aria-selected")) !== "true") await tab.click();
-  const toggle = page.getByTestId(`engine-metric-${metricDomId}`);
-  if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.click();
-  const sheet = page.getByTestId(`engine-sheet-${metricDomId}`);
-  await expect(sheet).toBeVisible();
-  return sheet;
+async function openSheet(page: Page, _stage: string, metricDomId: string): Promise<Locator> {
+  // The list shows every stage (A18 T2.b): the row is enough, the stage stays for the callers' reading.
+  return openNumber(page, metricDomId);
 }
 
 test("tools ticked in the settings: stored in their families' order, and the collect list grouped by them", async ({ page }) => {
@@ -88,6 +83,7 @@ test("a sheet offers the team's tools first; a rate's two counts from two tools 
   expect(entry).toMatchObject({ source: { kind: "tool", tool: "mixpanel" }, denominatorSource: { kind: "tool", tool: "ga4" } });
 
   // The deck's « to check » list says it too.
+  await backToBoard(page);
   await page.getByTestId("engine-open-deck").click();
   await expect(page.getByTestId("deck-checks")).toContainText("Numerator (Mixpanel) and denominator (GA4)");
 });

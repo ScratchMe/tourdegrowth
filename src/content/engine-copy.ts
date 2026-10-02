@@ -265,13 +265,6 @@ export const ENGINE_COPY = {
       en: "Small numbers: fewer than 100 sign-ups in this cohort. Read the direction, not the decimals.",
     },
     toFill: { fr: "à renseigner", en: "to fill in" },
-    // TODO: à relire — nouveau (2026-09-26, les étapes en onglets : « c'est rude de devoir scroller autant sur chaque chiffre »).
-    /** The tab list's accessible name: five tabs, one per AARRR stage. */
-    stagesLabel: { fr: "Les cinq étapes", en: "The five stages" },
-    /** Under a tab's name, next to its marks: the coverage line's "found", per stage. Built so 1 reads right (« trouvés : 1/3 »). */
-    tabFound: { fr: "trouvés : {n}/{N}", en: "found: {n}/{N}" },
-    /** The stamp on a stage the diagnosis names — its red said in words too. */
-    tabNamed: { fr: "Freine ici", en: "Holds you back" },
     // TODO: à relire — nouveau (2026-09-25, retours d'Antoine sur le moteur).
     settings: { fr: "Réglages", en: "Settings" },
     steps: { fr: "Reprendre le pas à pas", en: "Back to step by step" },
@@ -344,6 +337,47 @@ export const ENGINE_COPY = {
     backupChanged: { fr: "Modifié depuis ta sauvegarde du {date} : Safari peut l'effacer après sept jours d'utilisation sans passage ici.", en: "Changed since you saved it on {date}: Safari may erase it after seven days of use without a visit here." },
     /** At the board's end while the slides are not the next step. */
     slidesQuiet: { fr: "Prépare tes slides avec ce que tu as →", en: "Prepare your slides with what you have →" },
+  },
+  /**
+   * TODO: à relire (convention 6) — neuf le 2026-10-02 (A18 T2.b, le retour 07 de Claude Design,
+   * design/ds-extension-07-return/COPY.md) : « Tes chiffres », la liste par étape qui remplace les onglets
+   * (C41), sa progression par ce qui reste, et l'en-tête de l'écran d'un chiffre ouvert depuis elle. `xOne`
+   * sert aussi pour 0, comme le français le veut (« 0 sur 3 trouvé »).
+   */
+  list: {
+    title: { fr: "Tes chiffres", en: "Your numbers" },
+    found: { fr: "{n} sur {N} trouvés", en: "{n} of {N} found" },
+    foundOne: { fr: "{n} sur {N} trouvé", en: "{n} of {N} found" },
+    /** The stage a team target names (C1): its red said in words too. Was the tab's stamp. */
+    holds: { fr: "Freine ici", en: "Holds you back" },
+    /** What remains, first: never « fini » while a number has no answer. `{n}` ≥ 2. */
+    toGo: { fr: "{n} à faire", en: "{n} to go" },
+    lastOne: { fr: "Plus qu'un", en: "Last one to go" },
+    noneToGo: { fr: "Plus rien à faire", en: "None to go" },
+    countFound: { fr: "{n} trouvés", en: "{n} found" },
+    countFoundOne: { fr: "1 trouvé", en: "1 found" },
+    countEst: { fr: "{n} estimés", en: "{n} estimated" },
+    countEstOne: { fr: "1 estimé", en: "1 estimated" },
+    countAsked: { fr: "{n} demandés", en: "{n} asked" },
+    countAskedOne: { fr: "1 demandé", en: "1 asked" },
+    countCant: { fr: "{n} introuvables", en: "{n} can't find" },
+    countCantOne: { fr: "1 introuvable", en: "1 can't find" },
+    /** The marks: their list's name, a stage's (`{list}`: the status words, joined), and their legend. */
+    marksLabel: { fr: "Tes chiffres, étape par étape", en: "Your numbers, stage by stage" },
+    groupLabel: { fr: "{stage} : {list}", en: "{stage}: {list}" },
+    legendLabel: { fr: "Ce que disent les marques", en: "What the marks mean" },
+    /** A number's answer, as a row's tag and the legend say it. */
+    status: {
+      found: { fr: "Trouvé", en: "Found" },
+      est: { fr: "Estimé", en: "Estimated" },
+      asked: { fr: "Demandé", en: "Asked" },
+      cant: { fr: "Introuvable", en: "Can't find" },
+      todo: { fr: "À faire", en: "To do" },
+      na: { fr: "Sans objet", en: "Not applicable" },
+    },
+    /** The number's screen, opened from the list: where it sits, and the way back to its row. */
+    position: { fr: "{stage} · {i} sur {n}", en: "{stage} · {i} of {n}" },
+    back: { fr: "← Tes chiffres", en: "← Your numbers" },
   },
 
   coverage: {

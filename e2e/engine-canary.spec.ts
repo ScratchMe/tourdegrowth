@@ -3,7 +3,7 @@ import type { Locator, Page, Request } from "@playwright/test";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import { engineEventPaths } from "@/lib/analytics/goatcounter";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test, trackedEvents } from "./helpers";
-import { openWords, openEngineMenu } from "./engine-helpers";
+import { openWords, openEngineMenu, openNumber, backToBoard } from "./engine-helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
 // owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
@@ -271,6 +271,7 @@ test.describe("sales-assisted keeps everything in the browser too (D16, §18.10.
     await saveSheet(link, "link-pql-handoff");
 
     // The motions changed after the fact: unticked, saved, ticked again — on the device only.
+    await backToBoard(page);
     await page.getByTestId("engine-bar-settings").click();
     await page.getByTestId("engine-settings").getByTestId("engine-motion-slg").uncheck();
     await page.getByTestId("engine-settings-save").click();
@@ -308,15 +309,10 @@ test.describe("sales-assisted keeps everything in the browser too (D16, §18.10.
   });
 });
 
-/** Selects a stage's tab if it isn't already the one showing, then unfolds the metric's sheet. */
-async function openSheet(page: Page, stage: string, metricDomId: string): Promise<Locator> {
-  const tab = page.getByTestId(`engine-tab-${stage}`);
-  if ((await tab.getAttribute("aria-selected")) !== "true") await tab.click();
-  const toggle = page.getByTestId(`engine-metric-${metricDomId}`);
-  if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.click();
-  const sheet = page.getByTestId(`engine-sheet-${metricDomId}`);
-  await expect(sheet).toBeVisible();
-  return sheet;
+/** The number's own screen, from its row in « Tes chiffres » (A18 T2.b). */
+async function openSheet(page: Page, _stage: string, metricDomId: string): Promise<Locator> {
+  // The list shows every stage (A18 T2.b): the row is enough, the stage stays for the callers' reading.
+  return openNumber(page, metricDomId);
 }
 
 /** Saves a sheet and waits for its "saved" line: a save that silently failed would leave a canary untyped. */

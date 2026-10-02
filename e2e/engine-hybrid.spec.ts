@@ -3,7 +3,7 @@ import { ENGINE_COPY } from "@/content/engine-copy";
 import { hybridState, salesAssistedState } from "../src/lib/engine/__tests__/fixtures";
 import type { EngineState } from "../src/lib/engine/types";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
-import { storedEngineEntry, writeEngineSeed } from "./engine-helpers";
+import { storedEngineEntry, writeEngineSeed, openNumber } from "./engine-helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
 // owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
@@ -122,7 +122,7 @@ test.describe("the hybrid board (§18.7 E2)", () => {
     await expect(page.getByTestId("engine-two-segments")).toHaveText(ENGINE_COPY.hybrid.twoSegments.en);
   });
 
-  test("the selector shows one motion's stages and what-ifs at a time; the link is its own block under sales-assisted acquisition", async ({ page }) => {
+  test("the selector shows one motion's list and what-ifs at a time; the link is its own group at the end of sales-assisted's", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await seed(page, hybridState());
     const selector = page.getByTestId("engine-motion-selector");
@@ -131,13 +131,14 @@ test.describe("the hybrid board (§18.7 E2)", () => {
     await expect(page.getByTestId("engine-link-block")).toHaveCount(0);
 
     await selector.getByRole("button", { name: ENGINE_COPY.hybrid.motionName.slg.en }).click();
-    // Sales-assisted's diagnosis names the win rate: its tabs open on revenue.
-    await expect(page.getByTestId("engine-panel")).toHaveAttribute("data-stage", "revenue");
-    await expect(page.getByTestId("engine-tab-revenue")).toHaveAttribute("data-named", "true");
+    // Sales-assisted's diagnosis names the win rate: its revenue holds back, in its own list.
+    await expect(page.getByTestId("engine-numbers-revenue")).toHaveAttribute("data-holds", "true");
     await expect(page.getByTestId("engine-metric-slg-rev-win-rate")).toBeVisible();
-    await page.getByTestId("engine-tab-acquisition").click();
+    await expect(page.getByTestId("engine-metric-act-rate")).toHaveCount(0);
+    // The link: its own closed group at the end of sales-assisted's list (A18 T2.b).
     const block = page.getByTestId("engine-link-block");
-    await expect(block).toContainText(ENGINE_COPY.hybrid.linkBlock.en);
+    await expect(block.locator("summary")).toContainText(ENGINE_COPY.hybrid.linkBlock.en);
+    await block.locator("summary").click();
     await expect(block.getByTestId("engine-metric-link-pql-handoff")).toBeVisible();
 
     // Its what-if panel, its own levers, the link counted in opportunities; the total line under it.
@@ -202,7 +203,7 @@ test.describe("sales-assisted alone", () => {
     await expect(page.getByTestId("engine-total-band")).toHaveCount(0);
     await expect(page.getByTestId("engine-motion-selector")).toHaveCount(0);
     await expect(page.getByTestId("engine-board-peloton")).toHaveCount(0);
-    await expect(page.getByTestId("engine-tab-revenue")).toHaveAttribute("aria-selected", "true");
+    await expect(page.getByTestId("engine-numbers-revenue")).toHaveAttribute("data-holds", "true");
   });
 });
 
@@ -211,11 +212,11 @@ test.describe("a sales-assisted sheet", () => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await seed(page, hybridState(), "fr");
     await page.getByTestId("engine-motion-selector").getByRole("button", { name: ENGINE_COPY.hybrid.motionName.slg.fr }).click();
-    await page.getByTestId("engine-metric-slg-rev-win-rate").click();
+    await openNumber(page, "slg-rev-win-rate");
     const sheet = page.getByTestId("engine-sheet-slg-rev-win-rate");
     await expect(sheet.getByTestId("engine-sheet-period")).toContainText("Prends les trois mois");
 
-    await page.getByTestId("engine-metric-slg-rev-gross-margin").click();
+    await openNumber(page, "slg-rev-gross-margin");
     const margin = page.getByTestId("engine-sheet-slg-rev-gross-margin");
     await margin.getByTestId("engine-company-wide-slg-rev-gross-margin").click();
     await expect(margin.getByTestId("engine-company-wide")).toContainText(ENGINE_COPY.sheet.companyWideHint.fr);

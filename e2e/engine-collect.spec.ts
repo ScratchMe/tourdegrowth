@@ -4,7 +4,7 @@ import type { Locator, Page } from "@playwright/test";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import { EXAMPLE_EXPECTED, exampleState } from "../src/lib/engine/__tests__/fixtures";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, openFold, SKIP_ADMIN_REASON, test, trackedEvents } from "./helpers";
-import { activeEngineKey, openWords, storedEngineEntry, writeEngineSeed, openEngineMenu } from "./engine-helpers";
+import { activeEngineKey, openWords, storedEngineEntry, writeEngineSeed, openEngineMenu, openNumber, backToBoard, expectFound } from "./engine-helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
 // owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
@@ -78,15 +78,10 @@ async function startEngine(page: Page, locale: "en" | "fr" = "en"): Promise<void
   await expect(page.getByTestId("engine-board")).toBeVisible();
 }
 
-/** Selects a stage's tab if it isn't already the one showing, then unfolds the metric's sheet. */
-async function openSheet(page: Page, stage: string, metricDomId: string): Promise<Locator> {
-  const tab = page.getByTestId(`engine-tab-${stage}`);
-  if ((await tab.getAttribute("aria-selected")) !== "true") await tab.click();
-  const toggle = page.getByTestId(`engine-metric-${metricDomId}`);
-  if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.click();
-  const sheet = page.getByTestId(`engine-sheet-${metricDomId}`);
-  await expect(sheet).toBeVisible();
-  return sheet;
+/** The number's own screen, from its row in « Tes chiffres » (A18 T2.b). */
+async function openSheet(page: Page, _stage: string, metricDomId: string): Promise<Locator> {
+  // The list shows every stage (A18 T2.b): the row is enough, the stage stays for the callers' reading.
+  return openNumber(page, metricDomId);
 }
 
 async function storedEngine(page: Page): Promise<{ state: Record<string, unknown> & { snapshots: { metrics: Record<string, { status: string }> }[] } } | null> {
@@ -126,7 +121,7 @@ test.describe("setup and first save", () => {
     await expect(page.getByTestId("engine-motion-plg")).toBeChecked();
     await expect(page.getByTestId("engine-motion-slg")).not.toBeChecked();
     await page.getByTestId("engine-setup-board").click();
-    await expect(page.getByTestId("engine-coverage")).toContainText("0 of 17 numbers found");
+    await expectFound(page, 0);
     // Focus follows the screen change to the verdict, never left on <body>.
     await expect(page.locator("#engine-verdict")).toBeFocused();
     await expect.poll(() => trackedEvents(page)).toContain("engine_opened");
@@ -141,7 +136,7 @@ test.describe("setup and first save", () => {
     await sheet.locator("#engine-act-rate-source").selectOption({ label: "Amplitude" });
     await sheet.getByTestId("engine-save-act-rate").click();
     await expect(sheet.getByTestId("engine-saved-act-rate")).toBeVisible();
-    await expect(page.getByTestId("engine-coverage")).toContainText("1 of 17 numbers found");
+    await expectFound(page, 1);
 
     const stored = await storedEngine(page);
     expect(stored?.state.snapshots[0]?.metrics["act.rate"]?.status).toBe("measured");
@@ -150,7 +145,7 @@ test.describe("setup and first save", () => {
 
     await page.reload();
     await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
-    await expect(page.getByTestId("engine-coverage")).toContainText("1 of 17 numbers found");
+    await expectFound(page, 1);
     const again = await openSheet(page, "activation", "act-rate");
     await expect(again.locator("#engine-act-rate-num")).toHaveValue("144");
     await expect(again.locator("#engine-act-rate-den")).toHaveValue("800");
@@ -167,7 +162,7 @@ test.describe("setup and first save", () => {
     await expect(sheet.getByTestId("engine-saved-act-rate")).toBeEmpty();
     // The refusal takes the live rate's place, under the two counts it is about.
     await expect(sheet.getByTestId("engine-live")).toContainText(ENGINE_COPY.sanity.numGtDen.en.split("{num}")[0]!);
-    await expect(page.getByTestId("engine-coverage")).toContainText("0 of 17 numbers found");
+    await expectFound(page, 0);
     expect((await storedEngine(page))?.state.snapshots[0]?.metrics["act.rate"]).toBeUndefined();
   });
 
@@ -204,10 +199,11 @@ test.describe("setup and first save", () => {
     const entry = (await storedEngine(page))?.state.snapshots[0]?.metrics["ret.d30"] as { status: string; missing?: { cause: string; repair: string } };
     expect(entry.status).toBe("missing");
     expect(entry.missing).toMatchObject({ cause: "not-tracked", repair: "sprint" });
-    // The number's own row says it, in words, next to why it can't be found.
+    // The number's own row says it, in words, and why it can't be found (its note, A18 T2.b).
+    await backToBoard(page);
     const row = page.getByTestId("engine-metric-ret-d30");
-    await expect(row).toContainText(ENGINE_COPY.status.missing.en);
-    await expect(row).toContainText(ENGINE_COPY.cause.notTracked.en);
+    await expect(row).toContainText(ENGINE_COPY.list.status.cant.en);
+    await expect(page.getByTestId("engine-metric-ret-d30-note")).toContainText(ENGINE_COPY.cause.notTracked.en);
   });
 });
 
@@ -303,8 +299,7 @@ test.describe("the §6.0 example on the board", () => {
     test(`${locale}: the peloton's numerals are its grids, and an unmeasured stage is a "?", never a 0`, async ({ page }) => {
       await page.setViewportSize({ width: 1280, height: 900 });
       await openExample(page, locale);
-      const copy = ENGINE_COPY.coverage.found[locale].replace("{n}", "11").replace("{N}", "17");
-      await expect(page.getByTestId("engine-coverage")).toContainText(copy);
+      await expectFound(page, 11);
       // The next step is always there (A18 T2.a): one card under the verdict, one primary.
       await expect(page.getByTestId("engine-next")).toBeVisible();
 
@@ -351,12 +346,9 @@ test.describe("the §6.0 example on the board", () => {
     test(`${locale}: "what if" moves a lever, and the growth numbers and the what-if funnel move with it`, async ({ page }) => {
       await page.setViewportSize({ width: 1280, height: 900 });
       await openExample(page, locale);
-      // The board opens on the stage the diagnosis names, every number folded.
-      const stagePanel = page.getByTestId("engine-panel");
-      await expect(stagePanel).toHaveAttribute("data-stage", "activation");
-      await expect(stagePanel.locator('[data-testid^="engine-sheet-"]:visible')).toHaveCount(0);
-      // « What if » is folded on the board, and no longer inside a number's sheet.
-      await expect(stagePanel.getByTestId("engine-whatif-panel")).toHaveCount(0);
+      // « Tes chiffres » opens nothing in place (A18 T2.b), and « what if » is not in a number's sheet.
+      await expect(page.locator('[data-testid^="engine-sheet-"]')).toHaveCount(0);
+      await expect(page.getByTestId("engine-numbers").getByTestId("engine-whatif-panel")).toHaveCount(0);
       const fold = page.getByTestId("engine-board-whatif");
       await fold.locator(":scope > summary").click();
       const panel = fold.getByTestId("engine-whatif-panel");
@@ -426,13 +418,14 @@ test.describe("the §6.0 example on the board", () => {
     for (const row of rows) expect(row.gridRight, "mini-grid left of its numeral").toBeLessThanOrEqual(row.numeralLeft);
     for (let i = 1; i < rows.length; i += 1) expect(rows[i]!.top, "one column under another").toBeGreaterThan(rows[i - 1]!.top);
     // Every stage name on one line: a stencil name that wraps (« ACQUISITI / ON », seen at
-    // 390 on the old rows) would give five tabs five heights. One line of 19px/1 is 19px.
+    // 390 on the old rows). One line of --engine-stage-title (21px/1.1) is 23px.
     for (const stage of ["acquisition", "activation", "retention", "referral", "revenue"]) {
-      const box = await page.getByTestId(`engine-tab-name-${stage}`).boundingBox();
+      const box = await page.getByTestId(`engine-numbers-${stage}`).locator("h3").boundingBox();
       expect(box!.height, stage).toBeLessThan(28);
     }
     await openSheet(page, "activation", "act-rate");
     await noHorizontalScroll(page);
+    await backToBoard(page);
     const fold = page.getByTestId("engine-board-whatif");
     await fold.locator(":scope > summary").click();
     await expect(fold.getByTestId("engine-whatif-panel")).toBeVisible();
@@ -455,7 +448,7 @@ test.describe("leaving the device and coming back", () => {
     await sheet.locator("#engine-act-rate-den").fill("800");
     await sheet.locator("#engine-act-rate-source").selectOption({ label: "Amplitude" });
     await sheet.getByTestId("engine-save-act-rate").click();
-    await expect(page.getByTestId("engine-coverage")).toContainText("1 of 17 numbers found");
+    await expectFound(page, 1);
 
     const downloadP = page.waitForEvent("download");
     await openEngineMenu(page);
@@ -476,7 +469,7 @@ test.describe("leaving the device and coming back", () => {
     await page.getByTestId("engine-import-file").setInputFiles(path);
     await expect(page.getByTestId("engine-import-preview")).toContainText("1 of 17");
     await page.getByTestId("engine-import-open").click();
-    await expect(page.getByTestId("engine-coverage")).toContainText("1 of 17 numbers found");
+    await expectFound(page, 1);
     expect((await storedEngine(page))?.state.snapshots[0]?.metrics["act.rate"]?.status).toBe("measured");
   });
 
@@ -506,21 +499,16 @@ test.describe("leaving the device and coming back", () => {
 });
 
 test.describe("keyboard, languages, widths", () => {
-  test("keyboard only: setup, a stage, one sheet, saved", async ({ page }) => {
+  test("keyboard only: setup, a number's row, its screen, saved", async ({ page }) => {
     await openEngine(page);
     await tabTo(page, page.getByTestId("engine-setup-board"));
     await page.keyboard.press("Enter");
     await expect(page.getByTestId("engine-board")).toBeVisible();
 
-    // The tab list is ONE Tab stop (roving tabindex): the selected tab, then the arrows.
-    // A fresh engine opens on acquisition, the first stage with a number to fill.
-    await tabTo(page, page.getByTestId("engine-tab-acquisition"));
-    await page.keyboard.press("ArrowRight");
-    await expect(page.getByTestId("engine-tab-activation")).toBeFocused();
-    await expect(page.getByTestId("engine-panel")).toHaveAttribute("data-stage", "activation");
-    const toggle = page.getByTestId("engine-metric-act-rate");
-    await tabTo(page, toggle);
-    if ((await toggle.getAttribute("aria-expanded")) !== "true") await page.keyboard.press("Enter");
+    // « Tes chiffres » (A18 T2.b): a row is one button; Enter opens the number's screen, its heading focused.
+    await tabTo(page, page.getByTestId("engine-metric-act-rate"));
+    await page.keyboard.press("Enter");
+    await expect(page.locator("#engine-number-title")).toBeFocused();
     const sheet = page.getByTestId("engine-sheet-act-rate");
     await tabTo(page, sheet.locator("#engine-act-rate-num"));
     await page.keyboard.type("144");
@@ -537,43 +525,28 @@ test.describe("keyboard, languages, widths", () => {
   for (const locale of ["en", "fr"] as const) {
     test(`${locale}: every sheet's labels are resolved — no raw {placeholder} anywhere`, async ({ page }) => {
       await startEngine(page, locale);
-      for (const stage of ["acquisition", "activation", "retention", "referral", "revenue"]) {
-        const tab = page.getByTestId(`engine-tab-${stage}`);
-        if ((await tab.getAttribute("aria-selected")) !== "true") await tab.click();
-        const panel = page.getByTestId("engine-panel");
-        await expect(panel).toHaveAttribute("data-stage", stage);
-        const toggles = panel.locator('button[data-testid^="engine-metric-"]');
-        for (let i = 0; i < (await toggles.count()); i += 1) {
-          const t = toggles.nth(i);
-          if ((await t.getAttribute("aria-expanded")) !== "true") await t.click();
-        }
+      // Every row of « Tes chiffres », each number's own screen in turn (A18 T2.b).
+      const rows = await page.locator('button[data-testid^="engine-metric-"]').evaluateAll((els) => els.map((el) => el.getAttribute("data-testid")!));
+      expect(rows).toHaveLength(17);
+      for (const row of rows) {
+        await page.getByTestId(row).click();
+        await expect(page.getByTestId("engine-number")).toBeVisible();
         // The boxes are the question (A18 T1): every count label is on screen as soon as the sheet is.
         await expect(page.getByTestId("engine-workbench")).not.toContainText(/\{[a-zA-Z]+\}/);
+        await backToBoard(page);
       }
     });
 
     for (const width of [390, 1280]) {
-      test(`${locale} at ${width}px: no sideways scroll with a sheet open, and the panel sits under the tabs`, async ({ page }) => {
+      test(`${locale} at ${width}px: no sideways scroll on a number's screen, its widest`, async ({ page }) => {
         await page.setViewportSize({ width, height: 900 });
         await startEngine(page, locale);
         const sheet = await openSheet(page, "activation", "act-rate");
         // The widest the sheet gets: the boxes, and « Where to find it » unfolded with its paths.
         await sheet.locator("summary", { hasText: ENGINE_COPY.sheet.whereTitle[locale] }).click();
         await noHorizontalScroll(page);
-        const tabs = await page.getByTestId("engine-tabs").boundingBox();
-        const panel = await page.getByTestId("engine-panel").boundingBox();
-        const first = await page.getByTestId("engine-tab-acquisition").boundingBox();
-        const last = await page.getByTestId("engine-tab-revenue").boundingBox();
-        if (!tabs || !panel || !first || !last) throw new Error("tabs or panel not rendered");
-        // One panel, right under the whole strip, never beside it (no side column any more).
-        expect(panel.y).toBeGreaterThanOrEqual(tabs.y + tabs.height - 1);
-        // One row of tabs at every width: the five sit on the same line.
-        expect(Math.abs(last.y - first.y)).toBeLessThan(2);
-        if (width >= 960) {
-          // On a desk the five share the panel's width, all in view.
-          expect(first.x).toBeGreaterThanOrEqual(panel.x - 1);
-          expect(last.x + last.width).toBeLessThanOrEqual(panel.x + panel.width + 1);
-        }
+        // The screen is the number's: no board beside it or under it (A18 T2.b).
+        await expect(page.getByTestId("engine-board")).toHaveCount(0);
       });
     }
   }
@@ -608,6 +581,7 @@ test.describe("accessibility of each screen", () => {
     await sheet.getByRole("button", { name: "I can't find it" }).click();
     await sheet.getByTestId("engine-triage").getByRole("radio").first().check();
     await expectNoSeriousA11y(page, "triage");
+    await backToBoard(page);
     await page.getByTestId("engine-collect-disclosure").locator("summary").click();
     await expectNoSeriousA11y(page, "collect");
     await openEngineMenu(page);

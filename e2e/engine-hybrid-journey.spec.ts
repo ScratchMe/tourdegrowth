@@ -4,7 +4,7 @@ import { ENGINE_COPY } from "@/content/engine-copy";
 import { hybridState } from "../src/lib/engine/__tests__/fixtures";
 import type { EngineState, MetricId } from "../src/lib/engine/types";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
-import { engineSeed, openEngineMenu } from "./engine-helpers";
+import { engineSeed, openEngineMenu, openNumber, expectFound, backToBoard } from "./engine-helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
 // owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
@@ -50,15 +50,10 @@ async function seed(page: Page, locale: "fr" | "en") {
   await expect(page.getByTestId("engine-board")).toHaveAttribute("data-motions", "hybrid");
 }
 
-/** Sales-assisted's tab of a stage, then its sheet unfolded. */
-async function openSheet(page: Page, stage: string, dom: string): Promise<Locator> {
-  const tab = page.getByTestId(`engine-tab-${stage}`);
-  if ((await tab.getAttribute("aria-selected")) !== "true") await tab.click();
-  const toggle = page.getByTestId(`engine-metric-${dom}`);
-  if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.click();
-  const sheet = page.getByTestId(`engine-sheet-${dom}`);
-  await expect(sheet).toBeVisible();
-  return sheet;
+/** A number's own screen, from its row in sales-assisted's list (A18 T2.b). */
+async function openSheet(page: Page, _stage: string, dom: string): Promise<Locator> {
+  // The list shows every stage (A18 T2.b): the row is enough, the stage stays for the callers' reading.
+  return openNumber(page, dom);
 }
 
 /** « I have it », two counts, a source, the first variant when the number has one — then saved. */
@@ -71,6 +66,8 @@ async function typeCounts(page: Page, locale: "fr" | "en", stage: string, dom: s
   if ((await variant.count()) > 0) await variant.getByRole("radio").first().check();
   await sheet.getByTestId(`engine-save-${dom}`).click();
   await expect(sheet.getByTestId(`engine-saved-${dom}`)).not.toBeEmpty();
+  // Back to the board, whose figures the journey reads next (a number has its own screen, A18 T2.b).
+  await backToBoard(page);
 }
 
 const found = (locale: "fr" | "en", n: number, N: number) => (locale === "fr" ? `${n} chiffres sur ${N} trouvés` : `${n} of ${N} numbers found`);
@@ -110,7 +107,7 @@ for (const locale of ["fr", "en"] as const) {
       await expect(page.getByTestId("engine-settings-resets")).not.toBeEmpty();
       await page.getByTestId("engine-settings-save").click();
       await expect(page.getByTestId("engine-board")).toHaveAttribute("data-motions", "plg");
-      await expect(page.getByTestId("engine-coverage")).toContainText(found(locale, 11, 17));
+      await expectFound(page, 11);
       await page.getByTestId("engine-bar-settings").click();
       await page.getByTestId("engine-settings").getByTestId("engine-motion-slg").check();
       await page.getByTestId("engine-settings-save").click();

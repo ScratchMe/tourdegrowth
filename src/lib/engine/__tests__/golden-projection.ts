@@ -1,3 +1,4 @@
+import type { ListStage, RowStatus } from "@/app/[locale]/aarrr-funnel-template/_engine/number-list";
 import type { LeverId } from "../types";
 
 /**
@@ -33,4 +34,22 @@ export function asBeforeT3(scenario: unknown, slg: boolean): number {
     delete s.projected.opps;
   }
   return before - s.levers.length;
+}
+
+/**
+ * The board's stage tabs as v1 and v2 builds printed them, from the list that
+ * replaced them (« Tes chiffres », C41, A18 T2.b). The list says the same
+ * things — one mark per number, ★ first, found out of those that apply, the
+ * stage the diagnosis names — so the goldens keep holding them: this is the
+ * old shape rebuilt from the new, nothing added, nothing dropped.
+ */
+export function asTabs(stages: readonly ListStage[]) {
+  const KIND: Record<RowStatus, string> = { found: "found", est: "approximate", asked: "inProgress", todo: "inProgress", cant: "missing", na: "notApplicable" };
+  return stages.map((s) => ({
+    stage: s.stage,
+    marks: s.rows.map((r) => ({ id: r.id, kind: KIND[r.status] })),
+    found: s.found,
+    applicable: s.applicable,
+    named: s.holdsBack,
+  }));
 }

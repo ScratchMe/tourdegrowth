@@ -1,7 +1,7 @@
 import type { Page } from "@playwright/test";
 import { exampleState, hybridState, measured, ratio, withMonthBefore } from "../src/lib/engine/__tests__/fixtures";
 import type { EngineState } from "../src/lib/engine/types";
-import { engineSeed, nextStep, openEngineMenu, storedEngineEntry } from "./engine-helpers";
+import { engineSeed, nextStep, openEngineMenu, storedEngineEntry, backToBoard, openNumber } from "./engine-helpers";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test, trackedEvents } from "./helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the owner's signed preview.
@@ -137,9 +137,9 @@ for (const locale of ["fr", "en"] as const) {
     await expect(page.getByTestId("engine-board-whatif")).toHaveCount(0);
     // Read only: the slides are not offered from a closed month (A18 T2.a: the board's foot, and no next step to them).
     await expect(page.getByTestId("engine-open-deck")).toHaveCount(0);
-    await page.getByTestId("engine-tab-activation").click();
-    await expect(page.getByTestId("engine-row-value-act-rate")).toContainText("18");
-    expect(await page.getByTestId("engine-metric-act-rate").evaluate((el) => el.tagName)).toBe("SPAN");
+    // Its rows are read, not opened (A18 T2.b): a row of text, no button.
+    await expect(page.getByTestId("engine-metric-act-rate-value")).toContainText("18");
+    expect(await page.getByTestId("engine-metric-act-rate").evaluate((el) => el.tagName)).toBe("DIV");
     await page.getByTestId("engine-month-back").click();
     await expect(past).toHaveCount(0);
     await expect(page.getByTestId("engine-open-deck")).toBeVisible();
@@ -147,8 +147,7 @@ for (const locale of ["fr", "en"] as const) {
 
   test(`${locale}: each number says how far it moved; a past month corrected recomputes the next month's change`, async ({ page }) => {
     await openBoard(page, locale, twoMonths(), new Date(2026, 8, 24, 12));
-    await page.getByTestId("engine-tab-activation").click();
-    const delta = page.getByTestId("engine-row-delta-act-rate");
+    const delta = page.getByTestId("engine-metric-act-rate-note");
     await expect(delta).toHaveText(t.delta);
 
     // Correct July's activation: 130 activated instead of 120.
@@ -156,19 +155,18 @@ for (const locale of ["fr", "en"] as const) {
     await page.getByTestId("engine-month-select").selectOption({ label: t.july });
     await page.getByTestId("engine-month-correct").click();
     await expect(page.getByTestId("engine-month-done")).toBeVisible();
-    await page.getByTestId("engine-tab-activation").click();
-    await page.getByTestId("engine-metric-act-rate").click();
+    await openNumber(page, "act-rate");
     const sheet = page.getByTestId("engine-sheet-act-rate");
     await sheet.locator("#engine-act-rate-num").fill("130");
     await page.getByTestId("engine-save-act-rate").click();
     await expect(sheet.getByTestId("engine-saved-act-rate")).not.toBeEmpty();
+    await backToBoard(page);
     const stored = await storedEngineEntry(page);
     expect(stored?.state.snapshots[0]!.metrics["act.rate"]?.value).toEqual({ kind: "ratio", numerator: 130, denominator: 800 });
     expect(stored?.state.snapshots[1]!.metrics["act.rate"]?.value).toEqual({ kind: "ratio", numerator: 144, denominator: 800 });
 
     await page.getByTestId("engine-month-done").click();
     await page.getByTestId("engine-month-back").click();
-    await page.getByTestId("engine-tab-activation").click();
     await expect(delta).not.toHaveText(t.delta);
     await expect(delta).toContainText(t.july);
   });
@@ -186,8 +184,7 @@ test("the diagnosis says the month before's leak when it changed stage", async (
 test("a new month's sheet offers the month before's variant and source, never its value", async ({ page }) => {
   await openBoard(page, "en", exampleState(), new Date(2026, 9, 2, 12));
   await page.getByTestId("engine-month-start").click();
-  await page.getByTestId("engine-tab-acquisition").click();
-  await page.getByTestId("engine-metric-acq-cac").click();
+  await openNumber(page, "acq-cac");
   const sheet = page.getByTestId("engine-sheet-acq-cac");
   await expect(sheet.locator('input[type="radio"][value="media-only"]')).toBeChecked();
   await expect(sheet.locator("#engine-acq-cac-num")).toHaveValue("");
