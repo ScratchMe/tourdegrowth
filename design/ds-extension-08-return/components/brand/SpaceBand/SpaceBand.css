@@ -1,0 +1,281 @@
+/* SpaceBand — design system extension 08. Tokens only.
+ * Port: SpaceBand.module.css. The band's own rules are today's, verbatim,
+ * with one change: the container-query rules are scoped to `.SpaceBand_inner`
+ * so they keep applying to the band only — the compact race lives in the
+ * header row, which is now a container too. The compact race's rules follow. */
+
+.SpaceBand_band {
+  background: var(--band-bg);
+  color: var(--band-text);
+  border-bottom: var(--border-solid);
+}
+.SpaceBand_band[data-space=tour] {
+  --band-bg: var(--space-tour-bg);
+  --band-text: var(--space-tour-text);
+  --band-muted: var(--space-tour-muted);
+  --band-mark: var(--space-tour-mark);
+}
+.SpaceBand_band[data-space=engine] {
+  --band-bg: var(--space-engine-bg);
+  --band-text: var(--space-engine-text);
+  --band-muted: var(--space-engine-muted);
+  --band-mark: var(--space-engine-mark);
+}
+.SpaceBand_band[data-space=game] {
+  --band-bg: var(--space-game-bg);
+  --band-text: var(--space-game-text);
+  --band-muted: var(--space-game-muted);
+  --band-mark: var(--space-game-mark);
+}
+.SpaceBand_inner {
+  container-type: inline-size;
+  margin: 0 auto;
+  padding: 0 24px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+}
+.SpaceBand_inner.SpaceBand_wide {
+  max-width: var(--content-max-width);
+}
+.SpaceBand_inner.SpaceBand_reading {
+  max-width: var(--width-reading);
+}
+.SpaceBand_inner.SpaceBand_narrow {
+  max-width: 720px;
+}
+.SpaceBand_picto {
+  display: flex;
+  flex: none;
+  color: var(--band-mark);
+}
+.SpaceBand_picto svg {
+  display: block;
+  width: 34px;
+  height: 22px;
+}
+.SpaceBand_where {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  min-width: 0;
+}
+.SpaceBand_kicker {
+  font: var(--meta-2xs);
+  letter-spacing: var(--meta-tracking-wide);
+  text-transform: uppercase;
+  white-space: nowrap;
+  padding-right: var(--space-5);
+  border-right: var(--border-width-fine) solid currentColor;
+}
+.SpaceBand_name {
+  font: var(--display-wordmark);
+  white-space: nowrap;
+}
+.SpaceBand_race {
+  margin-left: auto;
+}
+.SpaceBand_stops {
+  list-style: none;
+  display: flex;
+  gap: 6px;
+}
+.SpaceBand_pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  padding: 3px 11px 3px 8px;
+  border: var(--border-width-fine) solid currentColor;
+  border-radius: var(--radius-tag);
+  font: var(--meta-2xs);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: inherit;
+  text-decoration: none;
+}
+.SpaceBand_mini {
+  display: flex;
+}
+.SpaceBand_mini svg {
+  display: block;
+  width: 21px;
+  height: 14px;
+}
+.SpaceBand_n {
+  font-weight: 700;
+}
+.SpaceBand_n::after {
+  content: "\b7";
+  margin-left: 6px;
+  font-weight: 500;
+}
+.SpaceBand_stop[data-state=current] .SpaceBand_pill {
+  background: var(--band-text);
+  color: var(--band-bg);
+  border-color: var(--band-text);
+}
+.SpaceBand_band[data-space=tour] .SpaceBand_stop[data-state=current] .SpaceBand_mini {
+  color: var(--band-mark);
+}
+.SpaceBand_stop[data-state=soon] .SpaceBand_pill {
+  color: var(--band-muted);
+  border-style: dashed;
+}
+.SpaceBand_soon::before {
+  content: "\b7";
+  margin-right: 6px;
+}
+a.SpaceBand_pill:hover .SpaceBand_label {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+a.SpaceBand_pill:focus-visible {
+  outline: var(--focus-width) solid var(--band-text);
+  outline-offset: 2px;
+}
+@container (max-width: 900px) {
+  .SpaceBand_inner .SpaceBand_label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .SpaceBand_inner .SpaceBand_n::after {
+    content: none;
+  }
+  .SpaceBand_inner .SpaceBand_pill {
+    padding: 3px 9px 3px 7px;
+  }
+}
+@container (max-width: 560px) {
+  .SpaceBand_inner .SpaceBand_soon {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .SpaceBand_inner {
+    padding-block: 7px;
+  }
+  .SpaceBand_inner .SpaceBand_where {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+  }
+  .SpaceBand_inner .SpaceBand_name {
+    order: -1;
+  }
+  .SpaceBand_inner .SpaceBand_kicker {
+    padding-right: 0;
+    border-right: 0;
+    letter-spacing: var(--meta-tracking);
+  }
+  .SpaceBand_inner .SpaceBand_mini {
+    display: none;
+  }
+  .SpaceBand_inner .SpaceBand_stops {
+    gap: 4px;
+  }
+  .SpaceBand_inner .SpaceBand_pill {
+    min-width: 28px;
+    justify-content: center;
+    padding: 3px 8px;
+  }
+}
+
+/* ── The compact race (SpaceRace variant="compact"), on the header's paper ─
+ * The same three pills; the current leg filled in its space's colour, with
+ * its pictogram and short name; the other legs a number; a closed one greyed
+ * and dashed. No colour of its own: the band's tokens. */
+
+.SpaceBand_raceCompact {
+  margin-left: 0;
+}
+
+.SpaceBand_raceCompact[data-space=tour] {
+  --band-bg: var(--space-tour-bg);
+  --band-text: var(--space-tour-text);
+  --band-mark: var(--space-tour-mark);
+}
+
+.SpaceBand_raceCompact[data-space=engine] {
+  --band-bg: var(--space-engine-bg);
+  --band-text: var(--space-engine-text);
+  --band-mark: var(--space-engine-mark);
+}
+
+.SpaceBand_raceCompact[data-space=game] {
+  --band-bg: var(--space-game-bg);
+  --band-text: var(--space-game-text);
+  --band-mark: var(--space-game-mark);
+}
+
+/* 28px pills reach 44px through their hit strip, 8px out on each side: 16px
+ * between them, and the targets abut without overlapping. */
+.SpaceBand_raceCompact .SpaceBand_stops {
+  gap: var(--space-7);
+}
+
+.SpaceBand_raceCompact .SpaceBand_pill {
+  min-width: 28px;
+  justify-content: center;
+  padding: 3px 9px;
+  color: var(--text-body);
+  border-color: var(--border-hard);
+  background: transparent;
+}
+
+/* Numbers only on the legs you are not on: their names stay for screen
+ * readers, their pictograms go. */
+.SpaceBand_raceCompact .SpaceBand_stop:not([data-state=current]) .SpaceBand_label,
+.SpaceBand_raceCompact .SpaceBand_soon {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.SpaceBand_raceCompact .SpaceBand_stop:not([data-state=current]) .SpaceBand_mini {
+  display: none;
+}
+
+.SpaceBand_raceCompact .SpaceBand_stop:not([data-state=current]) .SpaceBand_n::after {
+  content: none;
+}
+
+/* This leg: the band, in one pill. The ink edge holds the ochre pill to 3:1
+ * against the paper (README, "Contrast"). */
+.SpaceBand_raceCompact .SpaceBand_stop[data-state=current] .SpaceBand_pill {
+  padding: 3px 11px 3px 8px;
+  background: var(--band-bg);
+  color: var(--band-text);
+  border-color: var(--border-hard);
+}
+
+.SpaceBand_raceCompact[data-space=tour] .SpaceBand_stop[data-state=current] .SpaceBand_mini {
+  color: var(--band-mark);
+}
+
+.SpaceBand_raceCompact .SpaceBand_stop[data-state=soon] .SpaceBand_pill {
+  color: var(--text-muted);
+  border-color: var(--border-soft);
+  border-style: dashed;
+}
+
+.SpaceBand_raceCompact a.SpaceBand_pill:hover {
+  background: var(--mark-hover-bg);
+}
+
+.SpaceBand_raceCompact a.SpaceBand_pill:focus-visible {
+  outline: var(--focus-width) solid var(--focus-ring);
+  outline-offset: 2px;
+}

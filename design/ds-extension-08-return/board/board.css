@@ -1,0 +1,205 @@
+/* The board's own layout: the frame, its control bar, and the stand-in
+ * pages under the header. Board only — never ported. Tokens only. */
+
+/* ── Framing ── */
+.Board_shell {
+  min-height: 100vh;
+  padding: var(--space-8);
+  background: var(--surface-desk);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-5);
+}
+
+.Board_bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.Board_title {
+  font: var(--meta-sm);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  margin-right: var(--space-7);
+}
+
+.Board_button {
+  font: var(--label-button-sm);
+  padding: 8px 12px;
+  min-height: var(--hit-min);
+  border: var(--border-solid);
+  border-radius: var(--radius-button);
+  background: var(--surface-card);
+  cursor: pointer;
+}
+
+.Board_frame {
+  border: var(--border-solid);
+  background: var(--surface-page);
+}
+
+/* ── States forced for review ── */
+.SpaceBand_raceCompact a.SpaceBand_pill.Board_forceHover {
+  background: var(--mark-hover-bg);
+}
+
+.Button_primary.Board_forceHover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-card);
+  border-color: var(--state-hover-border);
+}
+
+/* The site's one guard, replayed on demand (?motion=reduce): every
+ * transition and animation off. The real media query works too. */
+.Board_reduce *,
+.Board_reduce *::before,
+.Board_reduce *::after {
+  transition: none !important;
+  animation: none !important;
+}
+
+/* ?slow=10: the motion tokens stretched, to watch the transition. */
+.Board_slow {
+  --dur-fast: calc(120ms * var(--board-slow));
+  --dur-close: calc(150ms * var(--board-slow));
+  --dur-open: calc(250ms * var(--board-slow));
+  --dur-state: calc(250ms * var(--board-slow));
+}
+
+/* ── The landing's links, as the page styles them (quiet text links) ── */
+.Board_quietLink {
+  font: var(--label-nav);
+  font-size: 15px;
+  color: var(--text-muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  white-space: nowrap;
+}
+
+.Board_progress {
+  white-space: nowrap;
+}
+
+/* Below 760px these leave the header today (the page's own rule). */
+@media (max-width: 760px) {
+  .Board_wideOnly {
+    display: none !important;
+  }
+}
+
+/* ── The stand-in page ── */
+.Page_main {
+  margin: 0 auto;
+  padding: var(--space-12) 24px var(--space-15);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
+}
+
+.Page_main.Page_wide {
+  max-width: var(--content-max-width);
+}
+
+.Page_main.Page_reading {
+  max-width: var(--width-reading);
+}
+
+.Page_main.Page_narrow {
+  max-width: 720px;
+}
+
+.Page_eyebrow {
+  font: var(--meta-sm);
+  letter-spacing: var(--meta-tracking-wide);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.Page_h1 {
+  font: var(--display-hero);
+  letter-spacing: var(--display-letter-spacing);
+}
+
+.Page_h2 {
+  font: var(--display-section);
+  letter-spacing: var(--display-letter-spacing);
+}
+
+.Page_p {
+  font: var(--body-read);
+  max-width: var(--measure-read);
+}
+
+.Page_card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.Page_link {
+  align-self: flex-start;
+  font: var(--label-nav);
+  color: var(--text-link, var(--text-body));
+}
+
+.Page_ink {
+  background: var(--surface-inverse);
+  color: var(--text-on-inverse);
+  border-radius: var(--radius-card);
+  padding: var(--space-15) var(--pad-card-mobile);
+}
+
+.Page_inkText {
+  font: var(--body-lg);
+}
+
+/* The engine's « Et si » figures: they stick under the header and glide with
+ * it (styles/globals.delta.md, "What sticks under the header"). */
+.Page_figures {
+  position: sticky;
+  top: calc(var(--sticky-offset) + 16px);
+  z-index: 2;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-8);
+  padding: var(--space-5) var(--space-7);
+  background: var(--surface-sunken);
+  border: var(--border-solid);
+  border-radius: var(--radius-panel);
+  transition: top var(--dur-state) var(--ease-out);
+}
+
+.Page_figure {
+  font: var(--chart-value-compact);
+}
+
+.Page_figure small {
+  font: var(--meta-xs);
+  color: var(--text-muted);
+  margin-right: var(--space-3);
+}
+
+.Page_figureTitle {
+  font: var(--title-card);
+}
+
+.Page_footer {
+  padding: var(--space-11) 24px;
+  border-top: var(--border-rule);
+  font: var(--meta-sm);
+  color: var(--text-muted);
+  text-align: center;
+}
+
+@media (max-width: 760px) {
+  .Page_h1 {
+    font: var(--display-hero-mobile);
+  }
+  .Page_figures {
+    flex-wrap: wrap;
+  }
+}
