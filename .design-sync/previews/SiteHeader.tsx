@@ -45,7 +45,7 @@ export const Plain = () => (
 /** A phone. */
 export const Phone = () => (
   <div style={{ width: 390 }}>
-    <SiteHeader locale="fr" space="game" width="reading">
+    <SiteHeader locale="fr" space="game" width="wide">
       <WordmarkLink locale="fr" />
       <LocaleSwitcher locale="fr" path="/game" />
     </SiteHeader>

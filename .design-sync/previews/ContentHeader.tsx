@@ -12,8 +12,9 @@ import { ContentHeader } from "tour-de-growth";
  *
  * The header spans the page; its row aligns to the page's own column —
  * `width="reading"` (760px, the default: every prose page, How it works and
- * the glossary alike, through `ProsePage`) or `wide` (the app shell's 1040px,
- * the engine's page).
+ * the glossary alike, through `ProsePage`) or `wide` (the app shell's 1040px:
+ * the engine's page, and the game's, which `ProsePage` sets wide because they
+ * belong to a space — the band is the same width in the three).
  */
 
 /** On a glossary term page: the header runs the card's width, its row sits on the 760px reading column, so both ends are inset. */

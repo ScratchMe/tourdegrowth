@@ -503,6 +503,10 @@ number? », « I have it »), `NumberField` (« Seule une cible d'équipe permet
 de dire quelle étape freine. ») et `FieldRow` (sa documentation). À faire
 quand A18 est livré, pas avant : chaque tranche change encore le moteur.
 Le brief 07 et son retour pourront alors quitter `design/` dans le projet.
+Elle emportera aussi l'en-tête du jeu, passé à la largeur des deux autres
+espaces le 2026-10-02 : les JSDoc de `ProsePage` et de `ContentHeader`, et
+deux aperçus retouchés dans le dépôt (la doc de `ContentHeader`, la carte
+« Phone » de `SiteHeader` en `wide`). Les cartes ne changent pas de rendu.
 
 **Hors de B13, rien d'ouvert.** La prochaine synchro se lance quand un composant change, ou
 quand change une copie, un chiffre du modèle ou un comportement qu'un aperçu

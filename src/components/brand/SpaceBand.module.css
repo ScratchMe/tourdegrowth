@@ -172,9 +172,10 @@ a.pill:focus-visible {
  * compact race, which sits in the header row — a size container too since
  * design system extension 08.
  *
- * A narrower header (the quiz, the Deep dive, the game's reading column): the
- * race keeps its pictograms and numbers, and the legs' names leave the screen
- * but not the page — a screen reader still hears « 2 Moteur bientôt ». The
+ * A narrower header (the quiz and the Deep dive, or a window under about
+ * 950px): the race keeps its pictograms and numbers, and the legs' names
+ * leave the screen but not the page — a screen reader still hears « 2 Moteur
+ * bientôt ». The
  * word « bientôt » stays on screen: a closed leg is greyed AND marked
  * (Antoine, 2026-09-28), at every width it fits in.
  */
