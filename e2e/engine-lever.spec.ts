@@ -33,7 +33,7 @@ test("the example: activation's lever; moved, the figures follow and the target 
   await openExample(page);
   const card = page.getByTestId("engine-lever");
   await expect(page.getByTestId("engine-lever-title")).toHaveText(L.untouched.en);
-  await expect(card.locator("label")).toHaveText("Activation rate, today 18%");
+  await expect(card.locator("label")).toHaveText("Activation rate (today 18%)");
   const mrr = page.getByTestId("engine-lever-figure-0").locator("dd").first();
   const before = await mrr.innerText();
 
@@ -41,7 +41,7 @@ test("the example: activation's lever; moved, the figures follow and the target 
   const slider = page.getByTestId("engine-lever-slider");
   await slider.focus();
   for (let i = 0; i < 4; i++) await page.keyboard.press("ArrowRight");
-  await expect(page.getByTestId("engine-lever-title")).toHaveText("What if: Activation rate, from 18% to 22%");
+  await expect(page.getByTestId("engine-lever-title")).toHaveText("What if: Activation rate, 22% instead of 18%");
   await expect(mrr).not.toHaveText(before);
   // « today » under each figure once anything moved — at the precision the move needs to read, as in the panel.
   await expect(page.getByTestId("engine-lever-figure-0")).toContainText(/today ~?€/);

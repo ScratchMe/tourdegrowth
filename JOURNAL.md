@@ -653,9 +653,9 @@ Cinquième étape du portage du retour 07, drapeau fermé, et la dernière de T2
 
 - **Le levier** est celui de l'étape qu'une cible d'équipe nomme (C1) : le chiffre nommé quand c'est un levier, sinon le premier levier saisi de cette étape. Sans cible, c'est le premier levier saisi dans l'ordre du funnel, et le titre ne parle pas d'étape. Un levier sans valeur n'a pas de carte, comme il n'a pas de curseur dans le panneau (`cardLever`, testé).
 - **Les deux chiffres** viennent du même calcul que le panneau : le MRR dans 12 mois, puis les nouveaux payants du mois en libre-service (pour 100 inscrits sans le nombre d'inscrits du mois), les nouveaux clients du trimestre en assisté.
-- **Bougé**, le titre dit le mouvement (« Et si : Taux d'activation, de 18 % à 22 % »), chaque chiffre dit « aujourd'hui … » dessous, à la précision dont le mouvement a besoin, comme dans le panneau, et « Remettre à aujourd'hui » apparaît.
+- **Bougé**, le titre dit le mouvement (« Et si : Taux d'activation, 22 % au lieu de 18 % », après la relecture), chaque chiffre dit « aujourd'hui … » dessous, à la précision dont le mouvement a besoin, comme dans le panneau, et « Remettre à aujourd'hui » apparaît.
 - **La cible s'écrit où le panneau l'écrit** (`state.whatIf`), par les mêmes `withTarget` et `targetAt` : la carte et le panneau ne peuvent pas se contredire, et les slides en ont une par levier comme avant.
-- **« Les {n} leviers et ce que le calcul suppose → »** ouvre le panneau complet, inchangé, et y met le focus : le `Disclosure` contrôlé de T0, une troisième fois.
+- **« Vois les {n} leviers et ce que le calcul suppose → »** ouvre le panneau complet, inchangé, et y met le focus : le `Disclosure` contrôlé de T0, une troisième fois.
 
 **Code** :
 - `LeverCard` dans `src/components/engine/`, avec son test de balisage : un curseur natif, rangée de 44 px, piste de 8 px, pouce de 28 px, encre jusqu'à la valeur ;
@@ -676,3 +676,12 @@ Aucune autre spec n'a bougé : le panneau est toujours là, plié, sous la carte
 - `tsc` et `eslint` propres ; 3 023 tests unitaires ; `next build` avec les variables de la CI ;
 - les 295 specs du moteur, des cibles, de l'accessibilité et de la plateforme, puis les 3 de la carte ;
 - des captures de la carte, intacte et bougée, en français et en anglais, à 1 280 et 390 px. Une capture de l'élément seul coupait le « % » de la sortie : mesurée, la sortie tient dans la carte, au pixel près, et la capture élargie la montre entière.
+
+**La relecture de copie** (`relecteur-copie`), appliquée dans la même PR : aucune règle mécanique enfreinte, mais des phrases que le diagnostic, juste à côté, contredisait. Corrigé :
+- **le titre suit l'état du diagnostic** (`titleKey`, testé) : « une des étapes qui freinent » quand plusieurs freinent autant (`shared`) ; l'invitation simple quand rien ne freine (`level`), là où « Avec une cible… » contredisait « Rien ne freine le moteur » ; « avec des cibles sur au moins deux étapes » quand moins de deux étapes en ont (`not-enough`) ;
+- **les chiffres comptent aussi les leviers bougés dans le panneau** : le titre le dit (« …, avec tes autres leviers », « Bouge aussi ce levier… ») ;
+- **« {to} au lieu de {from} »** : « de 6 à 9 % à 12 % » se lisait mal quand la valeur du jour est une fourchette ;
+- **un chiffre inconnu dit ce qui manque**, comme la tuile du panneau (« il manque l'ARPA »), en note et non en gros chiffre ; plus de « aujourd'hui ? » ;
+- **le second chiffre en libre-service dit sa période** (« Nouveaux payants par mois ») ; les deux boutons vers le panneau passent à l'impératif (« Vois les {n} leviers… ») ; le résumé du panneau plié ne répète plus « Et si ? » (« Tous les leviers ensemble ») ; l'étiquette du curseur passe entre parenthèses, « Taux d'activation (aujourd'hui 18 %) », pour ne plus empiler les virgules sur le lien de l'hybride.
+
+Le tout reste « à relire » pour A18.d. Après la relecture : 3 029 tests unitaires (6 de plus), et les specs du moteur repassées sur le nouveau build.

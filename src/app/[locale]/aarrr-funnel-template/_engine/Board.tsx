@@ -173,7 +173,7 @@ export function Board({
           reveal("engine-whatif-full");
         }}
       />
-      <Disclosure summary={strings.board.whatIfTitle} open={whatIfOpen} onOpenChange={setWhatIfOpen} id="engine-whatif-full" data-testid="engine-board-whatif">
+      <Disclosure summary={strings.lever.panel} open={whatIfOpen} onOpenChange={setWhatIfOpen} id="engine-whatif-full" data-testid="engine-board-whatif">
         <div className={styles.whatIf}>
           {motion === "plg" ? <WhatIfPanel view={view} onChange={actions.setWhatIf} /> : <SlgWhatIfPanel view={view} onChange={actions.setWhatIf} />}
         </div>

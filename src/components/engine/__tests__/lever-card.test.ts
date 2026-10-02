@@ -15,12 +15,12 @@ const card = (props: Partial<LeverCardProps> = {}) =>
     createElement(LeverCard, {
       eyebrow: "Et si ?",
       title: "TITLE",
-      lever: { id: "lever-act", label: "Taux d'activation, aujourd'hui 18 %", min: 9, max: 54, step: 1, value: 18, valueText: "18 %", onChange: () => {} },
+      lever: { id: "lever-act", label: "Taux d'activation (aujourd'hui 18 %)", min: 9, max: 54, step: 1, value: 18, valueText: "18 %", onChange: () => {} },
       figures: [
         { label: "MRR dans 12 mois", value: "~40 000 €" },
         { label: "Nouveaux payants", value: "54" },
       ],
-      allLabel: "Les 8 leviers et ce que le calcul suppose →",
+      allLabel: "Vois les 8 leviers et ce que le calcul suppose →",
       resetLabel: "Remettre à aujourd'hui",
       "data-testid": "lever",
       ...props,
@@ -46,10 +46,16 @@ describe("LeverCard", () => {
     expect(card({ figures: [{ label: "MRR", value: "~44 000 €", today: "today ~40 000 €" }] })).toContain("today ~40 000 €");
   });
 
+  it("an unknown figure says what is missing as a note, not as a numeral", () => {
+    const markup = card({ figures: [{ label: "MRR dans 12 mois", value: "il manque l'ARPA", unknown: true }] });
+    expect(markup).toMatch(/<dd class="[^"]*figureUnknown[^"]*">il manque/);
+    expect(markup).not.toMatch(/figureValue[^"]*">il manque/);
+  });
+
   it("offers « back to today » only once the lever moved; the full panel always", () => {
     expect(card()).not.toContain("Remettre à aujourd");
     expect(card({ moved: true })).toContain("Remettre à aujourd");
-    expect(card()).toContain("Les 8 leviers");
+    expect(card()).toContain("Vois les 8 leviers");
   });
 
   it("has no primary button: the next step is the board's", () => {

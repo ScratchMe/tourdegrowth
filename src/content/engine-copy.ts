@@ -387,15 +387,30 @@ export const ENGINE_COPY = {
    */
   lever: {
     untouched: { fr: "Bouge le levier de l'étape qui freine, et vois ce qui suit.", en: "Move the lever of the stage that holds you back, and see what follows." },
-    untouchedNoStage: { fr: "Bouge un levier et vois ce qui suit. Avec une cible, le levier de l'étape qui freine passe en premier.", en: "Move one lever and see what follows. With a target, the lever of the stage that holds you back comes first." },
-    /** A target names a stage, but none of its numbers is a lever with a value: the first one typed, in the funnel's order. */
-    untouchedOther: { fr: "Bouge un levier et vois ce qui suit.", en: "Move a lever and see what follows." },
-    moved: { fr: "Et si : {lever}, de {from} à {to}", en: "What if: {lever}, from {from} to {to}" },
-    label: { fr: "{lever}, {today}", en: "{lever}, {today}" },
+    /** Two stages or more hold back as much (the `shared` diagnosis): the card's lever is one of theirs. */
+    untouchedShared: { fr: "Bouge le levier d'une des étapes qui freinent, et vois ce qui suit.", en: "Move the lever of one of the stages that hold you back, and see what follows." },
+    /** Fewer than two stages have a target: no stage can be named yet (C1). */
+    untouchedNoStage: {
+      fr: "Bouge un levier et vois ce qui suit. Avec des cibles sur au moins deux étapes, le levier de celle qui freine passe en premier.",
+      en: "Move one lever and see what follows. With targets on at least two stages, the lever of the one that holds you back comes first.",
+    },
+    /** Nothing holds back, or a target names a stage none of whose numbers is a lever with a value: the first one typed, in the funnel's order. */
+    untouchedOther: { fr: "Bouge un levier et vois ce qui suit.", en: "Move one lever and see what follows." },
+    /** This lever unmoved, another moved in the full panel: the figures already count it. */
+    untouchedWithOthers: { fr: "Bouge aussi ce levier, avec ceux que tu as déjà bougés.", en: "Move this lever too, with the ones you have already moved." },
+    /** `{from}` may be a range (« 6 à 9 % »): never « de 6 à 9 % à 12 % ». */
+    moved: { fr: "Et si : {lever}, {to} au lieu de {from}", en: "What if: {lever}, {to} instead of {from}" },
+    /** The figures count the levers moved in the full panel too. */
+    movedWithOthers: { fr: "Et si : {lever}, {to} au lieu de {from}, avec tes autres leviers", en: "What if: {lever}, {to} instead of {from}, with your other levers" },
+    label: { fr: "{lever} ({today})", en: "{lever} ({today})" },
+    /** The funnel is the month's: so is this figure, beside « MRR dans 12 mois ». */
+    payingMonth: { fr: "Nouveaux payants par mois", en: "New paying customers a month" },
     /** Without the month's sign-up count, the funnel reads per 100 sign-ups: so does this figure. */
-    payingPerHundred: { fr: "Payants pour 100 inscrits", en: "Paying per 100 sign-ups" },
-    all: { fr: "Les {n} leviers et ce que le calcul suppose →", en: "All {n} levers and what the calculation assumes →" },
-    allOne: { fr: "Ce que le calcul suppose →", en: "What the calculation assumes →" },
+    payingPerHundred: { fr: "Nouveaux payants pour 100 inscrits", en: "New paying customers per 100 sign-ups" },
+    all: { fr: "Vois les {n} leviers et ce que le calcul suppose →", en: "See the {n} levers and what the calculation assumes →" },
+    allOne: { fr: "Vois ce que le calcul suppose →", en: "See what the calculation assumes →" },
+    /** The full panel's summary, under the card: not « Et si ? » a second time. */
+    panel: { fr: "Tous les leviers ensemble", en: "All the levers together" },
   },
 
   coverage: {

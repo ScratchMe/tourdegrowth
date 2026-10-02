@@ -3,7 +3,7 @@ import { diagnose } from "@/lib/engine/diagnose";
 import type { EngineState, MetricId } from "@/lib/engine/types";
 import { exampleState, withoutTargets } from "@/lib/engine/__tests__/fixtures";
 import { CTX_EN, EN } from "@/lib/engine/__tests__/props";
-import { cardLever } from "../BoardLever";
+import { cardLever, titleKey } from "../BoardLever";
 import { leverRows, scenarioFor } from "../scenario-view";
 
 /**
@@ -44,5 +44,31 @@ describe("cardLever", () => {
 
   it("no lever typed: no card", () => {
     expect(cardLever(rows(exampleState()).map((r) => ({ ...r, today: null })), ["act.rate"])).toBeNull();
+  });
+});
+
+describe("titleKey", () => {
+  const base = { moved: false, others: false, byStage: true, stagesNamed: 1, state: "clear" as const };
+
+  it("one stage named, its lever on the card: « the stage that holds you back »", () => {
+    expect(titleKey(base)).toBe("untouched");
+  });
+
+  it("several stages hold back as much: « one of the stages », never the singular", () => {
+    expect(titleKey({ ...base, stagesNamed: 2, state: "shared" })).toBe("untouchedShared");
+  });
+
+  it("fewer than two stages with a target: how to get one named, never « with a target »", () => {
+    expect(titleKey({ ...base, byStage: false, stagesNamed: 0, state: "not-enough" })).toBe("untouchedNoStage");
+  });
+
+  it("nothing holds back (level): the plain invitation, which « Rien ne freine » does not contradict", () => {
+    expect(titleKey({ ...base, byStage: false, stagesNamed: 0, state: "level" })).toBe("untouchedOther");
+  });
+
+  it("another lever moved in the full panel: the title says the figures count it", () => {
+    expect(titleKey({ ...base, others: true })).toBe("untouchedWithOthers");
+    expect(titleKey({ ...base, moved: true, others: true })).toBe("movedWithOthers");
+    expect(titleKey({ ...base, moved: true })).toBe("moved");
   });
 });

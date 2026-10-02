@@ -111,6 +111,13 @@
   margin: 0;
 }
 
+/* A figure unknown with the what-ifs: what is missing, in words — read, not a numeral. */
+.figureUnknown {
+  font: var(--body-sm);
+  color: var(--text-muted);
+  margin: 0;
+}
+
 .figureToday {
   font: var(--meta-xs);
   color: var(--text-muted);

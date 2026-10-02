@@ -23,8 +23,11 @@ export interface LeverCardProps {
     valueText: string;
     onChange?: (value: number) => void;
   };
-  /** The two figures it moves most, from the engine's own calculation; `today` once anything moved. */
-  figures: { label: ReactNode; value: ReactNode; today?: ReactNode }[];
+  /**
+   * The two figures it moves most, from the engine's own calculation; `today` once anything moved.
+   * `unknown`: the value is what is missing, in words (« il manque l'ARPA »), set as a note, not a numeral.
+   */
+  figures: { label: ReactNode; value: ReactNode; today?: ReactNode; unknown?: boolean }[];
   /** « Les 8 leviers et ce que le calcul suppose → »: the full panel, unchanged. */
   allLabel: ReactNode;
   onAll?: () => void;
@@ -98,7 +101,7 @@ export function LeverCard({
           // Two figures, always in the same order: the index is their identity.
           <div key={i} className={styles.figure} data-testid={testId ? `${testId}-figure-${i}` : undefined}>
             <dt className={styles.figureLabel}>{figure.label}</dt>
-            <dd className={styles.figureValue}>{figure.value}</dd>
+            <dd className={figure.unknown ? styles.figureUnknown : styles.figureValue}>{figure.value}</dd>
             {figure.today ? <dd className={styles.figureToday}>{figure.today}</dd> : null}
           </div>
         ))}
