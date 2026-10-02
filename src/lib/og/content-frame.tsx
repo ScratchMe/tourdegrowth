@@ -50,7 +50,10 @@ export function renderContentShareImage(
           boxSizing: "border-box",
           padding: "48px 56px",
           border: `2px solid ${OG_INK}`,
-          background: `radial-gradient(at 12% 10%, rgba(255,255,255,0.5), transparent 55%), radial-gradient(at 92% 86%, rgba(0,0,0,0.06), transparent 55%), ${OG_STONE}`,
+          // Each stop fades to its OWN colour at alpha 0, never `transparent`:
+          // Satori blends `transparent` through black, which turned the white
+          // lift into a grey halo (NEXTJS.md §1.10, CHANTIERS.md A17).
+          background: `radial-gradient(at 12% 10%, rgba(255,255,255,0.5), rgba(255,255,255,0) 55%), radial-gradient(at 92% 86%, rgba(0,0,0,0.06), rgba(0,0,0,0) 55%), ${OG_STONE}`,
           position: "relative",
           overflow: "hidden",
           fontFamily: "Inter",
