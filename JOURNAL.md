@@ -516,6 +516,14 @@ Deuxième étape du portage du retour 07, drapeau fermé. L'écran d'un chiffre,
 
 **Vérifié** : `tsc` et `eslint` propres, les tests unitaires, `next build` avec les variables de la CI, les 285 specs du moteur, des cibles et de l'accessibilité (onze échecs à la première passe, tous dans les specs qui visaient l'ancien écran, puis les cinq fichiers repassés : 84 sur 84), et des captures de l'écran en français et en anglais, à 1 280 et 390 px, dans le pas à pas et au tableau, sans défilement horizontal. Le `toggle` du `Disclosure` livré en T0 est exercé en vrai : « Écrire ta définition » déplie la note et y met le focus, vérifié par Playwright.
 
+## D10 : Uneed soumis, Smol Launch écarté (2026-10-02)
+
+**Uneed** : soumis par Antoine le 2026-10-02 dans la file gratuite, avec le lien `directory_uneed` en campagne `relaunch_tour`, le compte créé avec `contact@` et la fiche sous « Tour de Growth ». La session lui avait transmis le logo et les trois captures refaites par A7.12.a (accueil, résultat, sélecteur de ton). Uneed a fixé le lancement au **21 février 2027**, ce que la section E de `CHANTIERS.md` note. Relevé sur leur page de tarifs le même jour : la fiche doit atteindre 10 votes pour rester publiée, et 20 pour le lien en dofollow. On n'en demande jamais (`GROWTH-PLAN.md`).
+
+**Smol Launch**, le premier de l'ordre de `GROWTH-PLAN.md` 1.6, était noté « annoncé gratuit et dofollow » dans le kit depuis le 2026-09-13. Revérifié le 2026-10-02 : le gratuit exige d'afficher leur badge sur notre site, et le dofollow est réservé aux formules payantes (19 $ et plus). Écarté pour l'instant, comme Fazier : un badge tiers sur le site serait du code et une décision. Leur soumission « par un agent » passe par un serveur MCP. Elle n'a pas été utilisée, puisque brancher un connecteur se décide à part (`PLUGINS.md`).
+
+**SaaSHub, le même soir** : soumis par Antoine, avec le lien `directory_saashub` en campagne `relaunch_tour` et l'offre payante refusée. La page bloque les robots (défi Cloudflare), et AlternativeTo aussi : la session n'a rien pu en vérifier, Antoine l'a vue seul. **MicroLaunch et StartupBase** ne se connectent que par Google ou X (StartupBase : Google, LinkedIn ou X, vérifié par la session ; MicroLaunch : constaté par Antoine). Ils sont mis de côté, parce que **le compte X de la marque n'existe pas** : la ligne du 2026-09-14 de `GROWTH-PLAN.md` §7 le disait créé, et la correction y est datée. Le créer reste un geste d'Antoine, sans date (0.6). BetaList accepte aussi un lien magique par e-mail.
+
 ## B9 et B12 : la re-synchro d'A16 et d'A19 (2026-10-02, #289)
 
 **Ce qu'elle emporte**, en une seule synchro vers le projet Claude Design, faite sur `main` à `44f2a2a` :
