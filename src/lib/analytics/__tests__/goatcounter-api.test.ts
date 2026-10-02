@@ -297,7 +297,7 @@ describe("fetchFunnelWindow (GoatCounter API — /admin/stats funnel section)", 
 
     expect(game.entries).toEqual({
       "result/acquisition": 0, "deep_dive/acquisition": 0, "result/retention": 7, "deep_dive/retention": 0,
-      footer: 2, hub: 0, home_strip: 0, space_band: 0,
+      footer: 2, hub: 0, home_strip: 0, space_band: 0, space_band_compact: 0,
     });
     expect(game.started).toEqual({ direct: 4, result: 6, deep_dive: 0, hub: 0, other_level: 1 });
     expect(game.startedByLevel).toEqual({ acquisition: 1, retention: 10 });
@@ -340,11 +340,13 @@ describe("fetchFunnelWindow (GoatCounter API — /admin/stats funnel section)", 
       ...["acquisition", "activation", "retention", "referral", "revenue"].map((s) => `engine_stage_saved/slg-${s}`),
       // The deck's three and the backup, then a reminder and the table's template (§19.12).
       ...["png", "pdf", "text", "json", "ics", "csv"].map((f) => `engine_exported/${f}`),
-      // The doors into it (A7.9): the landing strip and the space band; then a result's owner and the landing's line (§19.10).
+      // The doors into it (A7.9): the landing strip and the space band; then a result's owner and the landing's line (§19.10);
+      // then the compact header's race (design system extension 08).
       "engine_entry_clicked/home_strip",
       "engine_entry_clicked/space_band",
       "engine_entry_clicked/result_owner",
       "engine_entry_clicked/landing_resume",
+      "engine_entry_clicked/space_band_compact",
     ];
     expect([...engineEventPaths()].sort()).toEqual([...expected].sort());
     for (const path of expected) expect(paths).toContain(path);
@@ -388,7 +390,7 @@ describe("fetchFunnelWindow (GoatCounter API — /admin/stats funnel section)", 
       deckOpened: 2,
       exported: { png: 0, pdf: 2, text: 0, json: 5, ics: 3, csv: 1 },
       tourLinked: 1,
-      entries: { home_strip: 0, space_band: 6, result_owner: 0, landing_resume: 2 },
+      entries: { home_strip: 0, space_band: 6, result_owner: 0, landing_resume: 2, space_band_compact: 0 },
     });
   });
 

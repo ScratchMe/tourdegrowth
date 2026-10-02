@@ -38,7 +38,8 @@ function EngineCard({ window }: { window: FunnelWindow }) {
         <li>Opened — {engine.opened}</li>
         <li data-testid="admin-engine-entries">
           Entries — landing strip {engine.entries.home_strip}, space band {engine.entries.space_band}, result (owner){" "}
-          {engine.entries.result_owner}, landing line {engine.entries.landing_resume}
+          {engine.entries.result_owner}, landing line {engine.entries.landing_resume}, compact header race{" "}
+          {engine.entries.space_band_compact}
         </li>
         <li data-testid="admin-engine-setup">
           Set up — self-serve {engine.setup.plg}, sales-assisted {engine.setup.slg}, both {engine.setup.hybrid}

@@ -289,12 +289,14 @@ export const ENGINE_TOUR_LINKED_EVENT = "engine_tour_linked";
  * (CHANTIERS.md A7.9 and A7.4, C7 and C15): the landing's strip, the space
  * band's pill; then the two doors of engine spec §19.10 (A14 T7): the line
  * under a result's action, for its owner, and the landing's « Ton moteur… »
- * line. A7.4 adds the three pages that link to it. Fired on the click,
+ * line. A7.4 adds the three pages that link to it. The compact header's
+ * race counts apart from the band's, as `space_band_compact` (design system
+ * extension 08, Antoine, 2026-10-02). Fired on the click,
  * before the page it opens, so `/admin/stats` can say where the openings
  * come from.
  */
 export const ENGINE_ENTRY_EVENT = "engine_entry_clicked";
-export const ENGINE_ENTRY_DETAILS = ["home_strip", "space_band", "result_owner", "landing_resume"] as const;
+export const ENGINE_ENTRY_DETAILS = ["home_strip", "space_band", "result_owner", "landing_resume", "space_band_compact"] as const;
 export type EngineEntryDetail = (typeof ENGINE_ENTRY_DETAILS)[number];
 
 /**

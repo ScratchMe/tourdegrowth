@@ -375,3 +375,63 @@ Quatorze composants neufs, deux deltas (`Disclosure`, `BulletChart`), aucun chan
 **Ouvert** : **A18**, le portage, en huit étapes (T0 à T7) puis A18.d. La clause rouge du verdict, qui peut nommer une autre étape que le diagnostic (trouvaille 9 du retour), est posée au bon à tirer.
 
 **Consigné** : `design/ds-extension-07-return/COPIE.md`, `docs/decisions.md` (C38, C40 à C42), `CHANTIERS.md` (A18 ouvert, A7.3.d et A14.d absorbés, B10 clos, C sans question ouverte, D14 retiré, D2), `ENGINE.md`, `CLAUDE.md` (l'état), `design/README.md`, `.design-sync/NOTES.md`.
+
+## A19 : l'en-tête compact, le retour 08 recopié et porté (2026-10-02)
+
+**Ce qui est revenu** : Claude Design a répondu au brief 08 le jour même, sous `design/ds-extension-08-return/` (28 fichiers, tout en source). Il suit trois de nos quatre penchants : toute fenêtre en paysage, déclenché par la position, un changement d'état et non un défilement asservi. La hauteur diffère : une ligne de 48 px, pas 56, sur un liseré de 6 px, soit 7,5 % d'un écran de portable au lieu de 16,4 %. Dans cette ligne, la marque, la course (l'étape où l'on est, remplie de la couleur de son espace) et les contrôles de la page, sur la couleur du bandeau réduite à un liseré. `MOTION.md` donne chaque valeur du mouvement, dans les deux sens. Recopié fichier par fichier par `DesignSync`, la planche rejouée par son propre `check.cjs` : 252 états, aucun problème (`COPIE.md`).
+
+**Tranché par Antoine** sur les trois points que le retour laissait à confirmer :
+- **C43** : les clics sur la course compacte se comptent à part, `space_band_compact`, dans les deux listes fermées (jeu et moteur), et `/admin/stats` les montre ;
+- **C44** : le sélecteur de langue passe à 88 px partout, téléphone tenu droit compris (`Segmented` `sm` à 42 px de large) : ses cibles font enfin 44 × 44 ;
+- la règle de `globals.css` qui coupe le `scroll-padding-top` quand le focus est dans l'en-tête est portée telle quelle : elle corrige un défaut d'aujourd'hui, où trois tabulations depuis 800 px ramenaient la page en haut.
+
+**Le portage** :
+- **la boîte de l'en-tête garde sa hauteur** (118, 93 ou 74 px) : seules des couches bougent, par transformation. Le verre devient une couche à part, réduite par `scaleY` depuis le haut ; la ligne monte ; le bandeau se replie sous le verre avec le liseré dont il pend. Rien ne bouge sous l'en-tête, et l'état ne peut pas se nourrir du défilement ;
+- **le comportement** (`compact-header.ts`, navigateur seulement) pose `data-compact` dès que la page a défilé, regroupé par `requestAnimationFrame`. Il garde l'en-tête plein tant qu'un focus `:focus-visible` est dedans, et mesure la ligne, ses décalages et `--sticky-offset-compact` sur la vraie hauteur de la ligne (72, 68 ou 47 px dans le quiz). Le rapprochement à droite de ce qui reste se fait par `translateX`, au-dessus de la place de ce qui part. Les transitions ne s'allument qu'après deux images : une page rechargée à mi-hauteur s'ouvre compacte, sans mouvement. Son seul morceau client est `SiteHeaderCompactor`, un marqueur vide ; sans JavaScript, l'en-tête d'avant ;
+- **tout le visuel est en CSS**, sous `(orientation: landscape)` : un téléphone tenu droit ne voit jamais d'en-tête compact, et la course compacte n'y est pas même dessinée (`display: none`, rien ne peut élargir la page) ;
+- **la course** sort de `SpaceBand` en `SpaceRace`, que le bandeau rend et que l'en-tête reprend en variante compacte. Ses liens sont hors de l'ordre de tabulation, puisqu'une tabulation dans l'en-tête le rend plein, et une seule des deux courses est exposée à la fois (`visibility`). Le détail de ses clics est typé contre les deux listes fermées : une faute de frappe ne compile plus (constat F-1 du relecteur sécurité, vérifié en sabotant le détail) ;
+- **ce qui colle sous l'en-tête le suit** : `--sticky-offset` prend la valeur mesurée en compact, et les chiffres « Et si » du moteur comme la colonne d'un niveau du jeu glissent avec `top` sur `--dur-state` ;
+- sur l'accueil, les deux liens discrets portent la marque `data-header-compact="leave"` sur un `<span>` : posée sur le `Button`, la transition de l'en-tête aurait écrasé celle de son survol.
+
+**Adapté aux gardes du dépôt**, sans rien changer au rendu :
+- le retour écrivait `0s` pour les bascules franches (la visibilité, l'opacité du filet d'un en-tête sans bandeau). Le test de l'échelle de mouvement refuse toute durée littérale, `0s` compris, et exige que chaque `--dur-*` dépasse `--dur-fast`. D'où un jeton nommé pour ce qu'il est, `--flip: 0s`, dans `motion.css`, hors de l'échelle ;
+- ses couches avaient des `z-index` chiffrés (0 à 3) : ils lisent maintenant `--z-raised` et `calc(var(--z-raised) + 1)`, comme le veut le test des couches ;
+- son `tokens/header.css` avait onze jetons ; le test des jetons morts n'en garde que les quatre que le CSS lit par `var()`. Les autres mesures restent en commentaire ;
+- les règles de conteneur du bandeau sont limitées à `.inner` : la ligne de l'en-tête devient un conteneur à son tour, et elles auraient touché la course compacte ;
+- `SpaceRace` et `SiteHeaderCompactor` sont hors de l'inventaire de la design sync (`componentSrcMap` à `null`).
+
+**Mesuré sur un build de production** (le jeu et le moteur ouverts), la hauteur peinte et `--sticky-offset` ensemble :
+- en paysage compact, **54 px avec le bandeau et 50 sans**, et `--sticky-offset` égal, à 1 280 × 720, 1 440 × 900, 1 024 × 768, 844 × 390 et 568 × 320. Un téléphone en paysage passe de 30,3 % de l'écran à 13,8 % ;
+- en portrait, à 390 × 844 et 320 × 568 : 114 et 70 px, `--sticky-offset` à 118 et 74, comme avant ;
+- aucun défilement horizontal ; à 568 × 320, la pastille de la course ne garde que son numéro, comme le retour le prévoit sous 560 px ;
+- la colonne d'un niveau du jeu colle à 140 px sous l'en-tête plein, à 76 sous l'en-tête compact.
+
+Captures relues : l'accueil compact en français, le moteur compact avec ses chiffres, 844 × 390, le quiz à 568 × 320, le portrait, une page de glossaire sans bandeau.
+
+**Une correction à ce que B11 annonçait** : le portage ne rend `--sticky-offset` juste que dans l'état compact, qu'il mesure. Dans l'état plein, le quiz garde 118 px pour un en-tête de 93, comme avant. Rien n'y colle, et les ancres et le focus s'y arrêtent 25 px trop bas sans rien masquer : c'est une ligne de la section E de `CHANTIERS.md`, pas un défaut de ce portage.
+
+**Les specs** : `e2e/site-header-compact.spec.ts`, 22 specs :
+- l'accueil se replie et se déplie dans les deux langues, et une page sans bandeau fait 50 px ;
+- rien ne bouge sous l'en-tête à `scrollY = 1` ;
+- une tabulation ouvre l'en-tête sans faire défiler la page, et rien de caché ne prend le focus ;
+- les cibles du sélecteur font 44 × 44, et la colonne du jeu suit ;
+- le clic sur la course compacte est compté `space_band_compact` ;
+- axe sur l'en-tête compact de quatre pages ;
+- le mouvement réduit, sans JavaScript, le portrait, et 844 × 390.
+
+**Non-vacuité** : sans `SiteHeaderCompactor`, 15 rougissent ; les 7 qui restent vertes sont celles qui gardent l'en-tête d'avant. Trois specs existantes suivent la nouvelle forme :
+- `site-header.spec.ts` lit le flou sur la couche du verre ;
+- `home-strip-doors.spec.ts` remonte en haut de page avant de cliquer la pastille du bandeau : le clic sur la carte avait fait défiler la page, et le bandeau était replié ;
+- `landing-mobile.spec.ts` lit le `display: none` sur l'élément qui porte le lien, désormais le `<span>`.
+
+**Relu par les deux sous-agents** : rien à corriger côté copie (aucune chaîne neuve pour un visiteur ; seul un libellé de `/admin/stats` est aligné entre le jeu et le moteur). Côté sécurité, rien de bloquant : l'île client ne prend aucune prop, et le script ne lit que de la géométrie et n'écrit que des attributs fixes. Le seul constat, F-1, est corrigé.
+
+**Vérifié** :
+- `vitest`, 2 944 tests ;
+- `tsc` et `eslint` propres ;
+- Playwright complet sur un build comme la CI (le jeu ouvert, le moteur fermé), avec l'émulateur et `CI=1` : 904 specs, 898 passées, 6 ignorées par construction.
+
+**Consigné** :
+- `CHANTIERS.md` : A19 clos, B11 clos, B12 ouvert, C43 et C44, D15 retiré, une ligne en E ;
+- `docs/decisions.md`, `design/README.md`, `.design-sync/NOTES.md` ;
+- `design/ds-extension-08-return/COPIE.md`, `CLAUDE.md` (les chiffres de référence).

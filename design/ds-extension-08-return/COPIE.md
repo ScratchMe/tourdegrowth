@@ -58,4 +58,5 @@ tabulation dans l'en-tête faisait remonter la page) : elle est portée telle
 quelle.
 
 Le reste du retour est la réponse de Claude Design au brief, et le portage le
-suit tel quel (A18 de `CHANTIERS.md`).
+suit (A19 de `CHANTIERS.md`), aux adaptations près que demandent les gardes du
+dépôt : le journal les liste, à « A19 ».

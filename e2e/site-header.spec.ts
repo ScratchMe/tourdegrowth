@@ -102,9 +102,11 @@ test.describe("the sticky header", () => {
 
     const box = await header.boundingBox();
     expect(box?.y).toBe(0);
+    // The frosted paper is the header's glass layer since design system
+    // extension 08 (the compact state shrinks it by a transform).
     const look = await header.evaluate((el) => {
-      const cs = getComputedStyle(el);
-      return { position: cs.position, blur: cs.backdropFilter };
+      const glass = el.querySelector("[data-header-glass]")!;
+      return { position: getComputedStyle(el).position, blur: getComputedStyle(glass).backdropFilter };
     });
     expect(look.position).toBe("sticky");
     expect(look.blur).toContain("blur(14px)");

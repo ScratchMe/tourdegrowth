@@ -75,7 +75,10 @@
   letter-spacing: var(--meta-tracking);
   text-transform: uppercase;
   padding: 0 10px;
-  min-width: 40px;
+  /* 42 + the 2px of border its hit layer covers = a 44px-wide target. It was
+     40, so the language switch's EN and FR were 42 × 44 (found by design
+     system extension 08, which keeps the switch in the compact header). */
+  min-width: 42px;
   min-height: calc(var(--hit-compact) - 4px);
   position: relative;
 }

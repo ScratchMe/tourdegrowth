@@ -12,6 +12,7 @@
 @import "../styles/tokens/world-night.css";
 @import "../styles/tokens/game.css";
 @import "../styles/tokens/spaces.css";
+@import "../styles/tokens/header.css";
 
 *,
 *::before,
@@ -47,6 +48,35 @@ html:has(header[data-site-header="plain"]) {
 
 html:has(header[data-site-header="band"]) {
   --sticky-offset: 118px;
+}
+
+/*
+ * The compact header (design system extension 08): in a landscape window,
+ * once the page has scrolled, the header paints 54px (50 without a band)
+ * and what sticks under it follows. `--sticky-offset-compact` is measured by
+ * the header's script (compact-header.ts); the fallback is the band's line
+ * and edge. Those that stick under the header glide to their new place with
+ * `transition: top var(--dur-state) var(--ease-out)` (the engine's « Et si »
+ * figures, the game level's side column). Without the script, or without
+ * `:has()`, the offset stays the full header's: sticky things then sit lower
+ * than they need to, never under the header.
+ */
+@media (orientation: landscape) {
+  html:has(header[data-site-header][data-compact="true"]) {
+    --sticky-offset: var(--sticky-offset-compact, calc(var(--header-line) + var(--header-edge-band)));
+  }
+}
+
+/*
+ * The header is never "under itself" (extension 08, its README Q8.1): the
+ * focused control of a sticky header sits inside `scroll-padding-top`, so a
+ * Tab into it made the browser scroll the page back up to "reveal" it —
+ * three Tabs from 800px down landed at the top. The padding is off only
+ * while focus is in the header, which is always in view; it is back the
+ * moment focus moves into the page.
+ */
+html:has(header[data-site-header]:focus-within) {
+  scroll-padding-top: 0;
 }
 
 body {
