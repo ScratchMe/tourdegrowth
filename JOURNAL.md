@@ -1372,4 +1372,6 @@ Le dernier état débordait **dans le contrat**, et aucun test ne le voyait : s
 
 **Trouvé en mesurant, laissé et noté en E** : `/r/sample` déborde de 8 px à 761 px et de 1 px à 768, à cause de la grille à deux colonnes. La colonne de droite n'y a que 249 px, et l'exemple en demande 257. Les vrais résultats, mesurés à la main de 761 à 1 024 px, n'y débordent pas. C'est hors contrat, et la vraie question est le seuil des deux colonnes : une décision de dessin, pas une marge à rogner dans cette PR.
 
+**Les suites, sur la branche** : 2 942 tests unitaires verts ; 882 specs Playwright, 876 passées en local avec l'émulateur et `CI=1`, 6 ignorées par construction ; `tsc` et `eslint` propres.
+
 **Captures** du vrai build, à 320, 390 et 1 280 px, avant et après, pour le roast, le Deep dive et les deux ensemble. Au téléphone, l'en-tête est fin et les deux tags sont lisibles sur une ligne au-dessus de la carte du score. Au bureau, l'en-tête est inchangé.
