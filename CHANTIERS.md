@@ -295,7 +295,7 @@ copie, « à relire ».
 | T4 | **La page** | `EngineLanding` : le script d'avant le premier rendu (il ne lit que l'existence de la clé ; à hacher si un `script-src` arrive un jour, `next.config.mjs`), la page courte au retour, la promesse en une ligne, « Combien de temps ça prend » sous l'outil ; ce que lisent les moteurs de recherche ne change pas |
 | T5 | **L'hybride** | `TotalBand`, puis un moteur à la fois sous « Moteur affiché » ; la vue de l'assisté (liste, relais, couverture du pipeline, petit échantillon), que la planche ne dessine pas, avec les mêmes composants |
 | T6 | **Les mots** | les renommages de C42 partout où ils s'écrivent, les cinq entrées du glossaire (`?`), la parité FR/EN |
-| T7 | **L'intégration** | les specs e2e du moteur réécrites, contraste et 44 px, de 320 à 1 280 px ; l'avant et l'après mesurés par `scripts/engine-density.capture.ts` ; `ENGINE.md` ; la re-synchro des deux deltas (une B à ouvrir) |
+| T7 | **L'intégration** | les specs e2e du moteur réécrites, contraste et 44 px, de 320 à 1 280 px ; l'avant et l'après mesurés par `scripts/engine-density.capture.ts` (à remettre d'accord avec le départ de T3.a et le pas à pas fondu de T3.b, dont il vise encore les anciens identifiants) ; `ENGINE.md` ; la re-synchro des deux deltas (une B à ouvrir) |
 | A18.d | **Le bon à tirer unique** (C38) | Après T7 : toute la copie neuve et ce qu'A7.3.d et A14.d auraient relu, en une passe, depuis `grep -rn "TODO: à relire" src/`. On y pose aussi la clause rouge du verdict, qui peut nommer une autre étape que le diagnostic (le retour, trouvaille 9) |
 
 

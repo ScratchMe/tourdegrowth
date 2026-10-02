@@ -58,7 +58,7 @@ function unitOf(shape: MetricShape, view: EngineView, value: number | null): Num
   return {};
 }
 
-/** What the sheet is, when it is the whole screen (the step-by-step, a number opened from the board's list): where the number sits, and its heading. */
+/** What the sheet is, when it is the whole screen (a number opened from the board's list, or reached by continuing): where the number sits, and its heading. */
 export interface SheetScreen {
   position: ReactNode;
   headingId: string;
@@ -650,7 +650,8 @@ export function MetricSheet({
           <>
             {/* The copy button of « Je le demande » is that answer's save: the request is what gets recorded. */}
             {draft.mode === "ask" ? (
-              next ? (
+              // « Continue » once the request is copied — its save; before, the ways on are the copy and « Passe ».
+              next && entry?.status === "requested" ? (
                 <Button onClick={next.onSaved} data-testid={`engine-continue-${domId(id)}`}>
                   {strings.sheet.continue}
                 </Button>

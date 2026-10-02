@@ -63,8 +63,9 @@ export interface EngineWorkbenchProps {
 }
 
 /**
- * The screens of the one route (§7): the board, the step-by-step, the
- * slides, the settings, the example, and the two file screens. The current
+ * The screens of the one route (§7): the start and its « Cibles », the
+ * board and a number's own screen (the step-by-step folded into them, A18
+ * T3.b), the slides, the settings, the example, and the file screens. The current
  * screen is NOT persisted — reopening costs a click, the entries are what is
  * kept; an engine found on arrival opens on the board.
  */
@@ -197,7 +198,7 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
     focus("engine-verdict");
   }
 
-  /** Back to the month being filled: every screen but the board works on it (the deck, the settings, the steps, the files). */
+  /** Back to the month being filled: every screen but the board works on it (the deck, the settings, the files). */
   function toCurrentMonth() {
     setMonthIndex(null);
     setCorrecting(false);
@@ -704,14 +705,15 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
         next={
           walking
             ? {
-                // « … et vois ton moteur » when nothing is left to find alone or to ask for (`saveLast`).
+                // « … et vois ton moteur » when nothing is left to find alone or to ask for, the numbers passed aside (`saveLast`).
                 label: after.kind === "board" ? strings.sheet.saveLast : strings.sheet.saveNext,
                 onSaved: () => go(after),
               }
             : undefined
         }
+        // « Passe pour l'instant » leaves a number « à faire »: only on one that is.
         onSkip={
-          walking
+          walking && (lastSnapshot(current).metrics[id]?.status ?? "todo") === "todo"
             ? () => {
                 setSkipped((was) => (was.includes(id) ? was : [...was, id]));
                 go(after);

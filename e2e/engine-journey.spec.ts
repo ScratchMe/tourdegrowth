@@ -87,8 +87,11 @@ test("from the start, « Save and continue » walks the quick numbers; « Skip f
   await expect(page.locator("#engine-acq-top-channel-share-den")).toHaveValue("1,000");
 });
 
-test("the last number to find alone says « Save and see your engine », and leads to the board", async ({ page }) => {
+test("the last number to find alone says « Save and see your engine », and leads to the board; an answered one offers no skip", async ({ page }) => {
   await seedWithout(page, ["act.ttv"]);
+  // A number already answered, opened from the list: nothing to pass, so no « Skip for now ».
+  await openNumber(page, "act-rate");
+  await expect(page.getByTestId("engine-number-skip")).toHaveCount(0);
   await openNumber(page, "act-ttv");
   await expect(page.getByTestId("engine-save-act-ttv")).toHaveText(ENGINE_COPY.sheet.saveLast.en);
   await page.getByTestId("engine-number-skip").click();
@@ -107,6 +110,9 @@ test.describe("one request left", () => {
     await page.getByTestId("engine-number-skip").click();
     await expect(page.getByTestId("engine-number")).toHaveAttribute("data-metric", "rev.gross-margin");
     const sheet = page.getByTestId("engine-sheet-rev-gross-margin");
+    // Before the copy, which is the save, the ways on are the copy and « Skip for now » — no « Continue ».
+    await expect(page.getByTestId("engine-continue-rev-gross-margin")).toHaveCount(0);
+    await expect(page.getByTestId("engine-number-skip")).toBeVisible();
     await sheet.getByRole("button", { name: ENGINE_COPY.request.copy.en }).click();
     await expect.poll(async () => (await stored(page))?.state.snapshots[0]?.metrics["rev.gross-margin"]?.status).toBe("requested");
     await page.getByTestId("engine-continue-rev-gross-margin").click();

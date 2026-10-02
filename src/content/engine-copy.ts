@@ -122,10 +122,10 @@ export const ENGINE_COPY = {
       en: "Of the fifteen sales-assisted ones, {quick} take five minutes to read, {hour} take about an hour each and {ask} have to be asked of someone.",
     },
     durationReadyLabel: { fr: "Tout est sous la main", en: "Everything is at hand" },
-    // TODO: à relire (convention 6) — le 2026-10-02 (A18 T3.b) : le pas à pas, fondu dans le tableau, ne « garde » plus rien ; le moteur, si.
+    // TODO: à relire (convention 6) — le 2026-10-02 (A18 T3.b) : le pas à pas, fondu dans le tableau, ne « garde » plus rien ; le moteur garde ce qui est enregistré (un chiffre tapé sans être enregistré ne vit qu'en mémoire, sheet-drafts.ts).
     durationReady: {
-      fr: "Tu as accès à l'analytics, à la facturation et à la base produit : compte une demi-journée, en plusieurs fois si besoin. Ton moteur garde ce que tu as tapé.",
-      en: "You have access to analytics, billing and the product database: allow half a day, in several sittings if needed. Your engine keeps what you've typed.",
+      fr: "Tu as accès à l'analytics, à la facturation et à la base produit : compte une demi-journée, en plusieurs fois si besoin. Ton moteur garde chaque chiffre que tu enregistres.",
+      en: "You have access to analytics, billing and the product database: allow half a day, in several sittings if needed. Your engine keeps every number you save.",
     },
     durationAskLabel: { fr: "Il faut demander", en: "You have to ask" },
     durationAsk: {
@@ -206,7 +206,7 @@ export const ENGINE_COPY = {
   /**
    * TODO: à relire (convention 6) — neuf le 2026-10-02 (A18 T3.a) : l'écran « Cibles », gardé au début
    * et sautable par Antoine (C40, contre la reco du retour 07, qui ne les mettait que sur l'écran de
-   * chaque chiffre et dans les Réglages). Les cases sont celles du pas à pas (`targetsStart.targetFor`).
+   * chaque chiffre et dans les Réglages). Les cases portent `targetsStart.targetFor`, venue du pas à pas (T3.b).
    */
   targetsStart: {
     title: { fr: "Ton équipe a-t-elle déjà des cibles ?", en: "Does your team already have targets?" },
@@ -217,7 +217,7 @@ export const ENGINE_COPY = {
     },
     /** One label, true whether a target was typed or not: a label that changed on the box's blur changed under the pointer. */
     go: { fr: "Passe à ton premier chiffre →", en: "On to your first number →" },
-    /** Each box's label: the step-by-step's, approved with it (2026-09-25), moved here when it was folded away (A18 T3.b). */
+    /** Each box's label: the step-by-step's, moved here unchanged (A18 T3.b); still to review with A18.d. */
     targetFor: { fr: "Cible pour {metric}", en: "Target for {metric}" },
   },
 
@@ -783,7 +783,10 @@ export const ENGINE_COPY = {
      * TODO: à relire (convention 6) — le 2026-10-02 (A18 T3.b, le retour 07, design/ds-extension-07-return/COPY.md) :
      * le pas à pas fondu dans le tableau, l'écran d'un chiffre mène au suivant. `saveNext` passe à l'impératif,
      * comme les autres flèches (en-tête du fichier) ; `saveLast` quand plus rien ne reste à trouver seul ni à
-     * demander ; `skip` laisse le chiffre « à faire » ; `continue` après une demande copiée, qui est l'enregistrement.
+     * demander, hors les chiffres passés pour l'instant ; `skip` laisse « à faire » un chiffre qui l'est ;
+     * `continue` après une demande copiée, qui est l'enregistrement. Écarts au retour : `saveLast` et `skip` à
+     * l'impératif aussi (le retour : « Enregistrer et voir ton moteur → », « Passer pour l'instant ») ; `continue`
+     * n'y est pas, la session l'a écrit.
      */
     saveNext: { fr: "Enregistre et continue →", en: "Save and continue →" },
     saveLast: { fr: "Enregistre et vois ton moteur →", en: "Save and see your engine →" },

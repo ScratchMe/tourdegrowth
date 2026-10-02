@@ -805,4 +805,12 @@ Le tout est « à relire ».
 - **Huit specs attendaient la ligne « Enregistré »** sous la fiche : enregistrer mène maintenant ailleurs, et la ligne part avec l'écran. Une aide, `expectLeft`, attend que la fiche s'en aille (un refus la garde, avec son message). Seul le mois passé qu'on corrige garde sa ligne.
 - **`openNumber` choisit d'abord le moteur du chiffre dans l'hybride** : continuer vers un chiffre du libre-service affiche la liste du libre-service, et la ligne d'un chiffre de l'assisté n'y est plus.
 
+**La relecture de copie** (`relecteur-copie`), appliquée dans la même PR :
+- **deux comportements que les mots rendaient faux** : « Continue → » apparaissait dès « Je le demande », avant la copie. Cliqué, il menait plus loin sans rien enregistrer, et le chiffre revenait à l'écran suivant. Il n'apparaît plus qu'une fois la demande copiée. Et « Passe pour l'instant » s'offrait sur un chiffre déjà trouvé, estimé ou demandé : il ne s'offre plus que sur un chiffre « à faire » ;
+- **« Ton moteur garde ce que tu as tapé »** promettait trop : un chiffre tapé sans être enregistré ne vit qu'en mémoire. La phrase dit « chaque chiffre que tu enregistres », et la date de la page passe au 2026-10-02 (`updated-at.ts`), puisque c'est du texte pré-rendu ;
+- **la garde des longueurs de bouton** citait les clés du pas à pas supprimées et ne vérifiait plus rien : elle garde maintenant les quatre boutons neufs ;
+- le marqueur de copie dit la vraie condition de `saveLast` (hors les chiffres passés pour l'instant) et les écarts au retour (l'impératif ; « Continue → » écrit par la session) ; `targetFor` n'est pas « approuvée », elle reste à relire avec A18.d ; des commentaires décrivaient encore le pas à pas.
+
+**À T7** : `scripts/engine-density.capture.ts`, qui mesure l'avant et l'après, vise encore les identifiants de l'ancien départ et du pas à pas.
+
 **Vérifié** : RESULTS

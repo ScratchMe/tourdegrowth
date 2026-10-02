@@ -45,7 +45,7 @@ export interface NumberSheetProps {
   compare?: ReactNode;
   /** A folded Disclosure, « Ta définition et une note ». */
   words?: ReactNode;
-  /** One primary (« Enregistrer et continuer → ») and quiet ones. */
+  /** One primary (« Enregistre et continue → ») and quiet ones. */
   actions?: ReactNode;
   /** What the save said: saved, refused and why, the device refusing to keep it. Under the actions. */
   footer?: ReactNode;

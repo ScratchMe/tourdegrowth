@@ -40,7 +40,8 @@ type SlgDerived = Extract<MotionDerived, { motion: "slg" }>;
 
 /**
  * The board (spec §7 E2) — « la façon que tu as actuellement, quand tu
- * connais l'outil » (Antoine, 2026-09-25), next to the step-by-step. Top to
+ * connais l'outil » (Antoine, 2026-09-25) — and, since A18 T3.b, the
+ * step-by-step too, folded into it: each number's screen leads on. Top to
  * bottom (design system extension 07, A18 T2.a): the engine bar (what is on
  * screen, the settings, and the menu that holds the engines, the month and
  * the file), the verdict title (the board's h2 and its focus target), the
@@ -288,7 +289,7 @@ export function Board({
 
           {/* Folded on the board: the funnel it redraws is the one just above, and a
               second full funnel open by default made the longest page of the site
-              longer (Antoine, 2026-09-25). The step-by-step shows it open. */}
+              longer (Antoine, 2026-09-25). */}
           {past ? null : whatIf}
         </>
       )}

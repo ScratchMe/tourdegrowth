@@ -65,8 +65,8 @@ export interface EngineControls {
  * A18 T2.a): the line that says what is on screen, the settings, and the
  * menu — « Ce moteur », « Mois », « Fichier » — that took in the switcher,
  * the month selector and its reminder, and the board's row of file actions.
- * « Reprendre le pas à pas » waits in « Ce moteur » until the step-by-step is
- * folded into the board (T3).
+ * « Reprendre le pas à pas » left « Ce moteur » when the step-by-step was
+ * folded into the board (A18 T3.b).
  */
 export function BoardBar({
   view,
