@@ -1,4 +1,5 @@
 import type { Locator, Page } from "@playwright/test";
+import { expect } from "./helpers";
 import { ENGINE_ENTRY_PREFIX, ENGINE_INDEX_KEY, ENGINE_SCHEMA_VERSION, type EngineIndex, type EngineState, type EngineStore } from "../src/lib/engine/types";
 
 /**
@@ -69,6 +70,8 @@ export async function openWords(sheet: Locator): Promise<void> {
  * fold it again.
  */
 export async function openEngineMenu(page: Page): Promise<void> {
+  // The bar is the board's: from a number's own screen (A18 T2.b), the way back first.
+  await backToBoard(page);
   const menu = page.getByTestId("engine-bar-menu");
   if (!(await menu.evaluate((d) => (d as HTMLDetailsElement).open))) await menu.locator(":scope > summary").click();
 }
@@ -76,4 +79,47 @@ export async function openEngineMenu(page: Page): Promise<void> {
 /** The board's next step (A18 T2.a) when it is that step (`nextStepFor`'s kind): « Démarre {mois} », a past month, the slides… */
 export function nextStep(page: Page, kind: string): Locator {
   return page.locator(`[data-testid="engine-next"][data-step="${kind}"]`);
+}
+
+/**
+ * Back to the board from a number's own screen (A18 T2.b), by « ← Tes
+ * chiffres ». Nothing when the board is already on screen.
+ */
+export async function backToBoard(page: Page): Promise<void> {
+  const back = page.getByTestId("engine-number-back");
+  if (await back.count()) await back.click();
+  await page.getByTestId("engine-board").waitFor();
+}
+
+/**
+ * A number's own screen (A18 T2.b, C41): its row in « Tes chiffres » opens it,
+ * from the board — so from another number's screen, the way back first. The
+ * stage tabs it replaced needed the stage too; the list shows every stage.
+ * Returns the number's sheet.
+ */
+export async function openNumber(page: Page, metricDomId: string): Promise<Locator> {
+  const sheet = page.getByTestId(`engine-sheet-${metricDomId}`);
+  if (await sheet.count()) return sheet;
+  await backToBoard(page);
+  const row = page.getByTestId(`engine-metric-${metricDomId}`);
+  // A row in a closed group (the hybrid's link, at the end of sales-assisted's list): the group opens first.
+  const group = row.locator("xpath=ancestor::details[1]");
+  if ((await group.count()) && !(await group.evaluate((d) => (d as HTMLDetailsElement).open))) await group.locator(":scope > summary").click();
+  await row.click();
+  await sheet.waitFor();
+  return sheet;
+}
+
+/**
+ * How many numbers are found, as « Tes chiffres » says it (A18 T2.b): the
+ * counts after what remains (« 11 found · 2 estimated… »), on the board — the
+ * way back first from a number's screen. 0: no « found » in the counts. The
+ * single-engine board's coverage chips said it before (« 1 of 17 numbers
+ * found »); the hybrid's columns keep theirs until T5.
+ */
+export async function expectFound(page: Page, n: number): Promise<void> {
+  await backToBoard(page);
+  const found = page.getByTestId("engine-progress-counts").filter({ hasText: /\d+ (found|trouvés?)/ });
+  if (n === 0) await expect(found).toHaveCount(0);
+  else await expect(page.getByTestId("engine-progress-counts")).toHaveText(new RegExp(`(^|· )${n} (found|trouvés?)( ·|$)`));
 }

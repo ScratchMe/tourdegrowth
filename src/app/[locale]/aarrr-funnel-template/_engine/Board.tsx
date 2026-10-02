@@ -10,22 +10,20 @@ import { Segmented } from "@/components/core/Segmented";
 import { candidatesOf } from "@/lib/engine/catalog-shape";
 import { totalIn12 } from "@/lib/engine/deck-motions";
 import { findingText } from "@/lib/engine/sentences";
-import type { CandidateId, Interval, MetricId, Motion, MotionDerived, SlideTitle } from "@/lib/engine/types";
+import type { CandidateId, Interval, Motion, MotionDerived, SlideTitle } from "@/lib/engine/types";
 import { knownIn } from "@/lib/engine/values";
 import { knownSharedCount } from "@/lib/engine/shared-counts";
-import type { Pillar } from "@/lib/scoring/pillars";
 import { BoardBar, BoardNextStep, boardNextStep, type EngineControls, type SeriesControls } from "./BoardHead";
 import type { CollectPlan } from "./collect";
 import { CollectHub } from "./CollectHub";
-import { Coverage } from "./Coverage";
 import { Diagnosis } from "./Diagnosis";
 import { Mirror } from "./Mirror";
 import { Peloton } from "./Peloton";
 import { Relays } from "./Relays";
 import { previousLeakLine } from "./series-view";
 import { SlgWhatIfPanel } from "./SlgWhatIfPanel";
-import { defaultStage } from "./stage-tabs";
-import { StageTabs } from "./StageTabs";
+import { BoardLever } from "./BoardLever";
+import { BoardNumbers } from "./BoardNumbers";
 import type { TablePreview } from "./csv";
 import { TableEntry } from "./TableEntry";
 import { fill } from "./text";
@@ -48,7 +46,8 @@ type SlgDerived = Extract<MotionDerived, { motion: "slg" }>;
  * the file), the verdict title (the board's h2 and its focus target), the
  * coverage in fractions, the next step — the screen's one primary — then
  * the diagnosis, the funnel in the screen's one raised card, the five
- * stages as a menu with one panel of folded numbers under it (`StageTabs`),
+ * numbers, every stage in one list whose rows open each number's screen
+ * (`BoardNumbers`, A18 T2.b),
  * « et si », the declared × measured mirror, what is left to go and get
  * (folded), the table entry (folded, opened from the menu), and the slides
  * as a quiet link while they are not the next step.
@@ -56,7 +55,7 @@ type SlgDerived = Extract<MotionDerived, { motion: "slg" }>;
  * Three layouts, by the motions the setup ticked (A7.3.c S3, §18.7):
  * - **self-serve alone**: the v1 board, unchanged to the character;
  * - **sales-assisted alone**: the same board, the relays in place of the
- *   peloton, its own diagnosis, tabs and « et si »;
+ *   peloton, its own diagnosis, list and « et si »;
  * - **the hybrid**, « deux moteurs, un total »: the total band (the verdict
  *   is its title), then the two motions side by side — coverage, diagnosis,
  *   compact funnel — in the fixed order, never by value; a selector picks
@@ -72,10 +71,6 @@ export function Board({
   actions,
   verdict,
   plan,
-  selected,
-  onSelect,
-  panelSeq,
-  focusMetric,
   returningFrom,
   writeFailed,
   motionView,
@@ -96,11 +91,6 @@ export function Board({
   actions: EngineActions;
   verdict: SlideTitle;
   plan: CollectPlan;
-  selected: Pillar | null;
-  onSelect: (stage: Pillar) => void;
-  /** Bumped when a number is opened from elsewhere, so the stage panel remounts with that number open. */
-  panelSeq: number;
-  focusMetric: MetricId | null;
   returningFrom: string | null;
   writeFailed: boolean;
   /** The hybrid's selector (§18.7): whose stages and « et si » show. null: the default — self-serve. */
@@ -129,6 +119,7 @@ export function Board({
   // Opened from the next step (« Copier tes {n} demandes ») and from the menu (« Saisie en tableau »): the person asked for the move.
   const [collectOpen, setCollectOpen] = useState(false);
   const [tableOpen, setTableOpen] = useState(false);
+  const [whatIfOpen, setWhatIfOpen] = useState(false);
   const next = boardNextStep(view, plan, writeFailed, past);
   const slidesNext = next.kind === "slides";
   const reveal = (id: string) =>
@@ -151,15 +142,6 @@ export function Board({
     if (known.kind === "known") candidateValues[id] = known.value;
   }
   const snapshot = state.snapshots[state.snapshots.length - 1]!;
-  // Nobody chose yet: the tab the diagnosis names, PINNED when the board mounts — one per motion. Recomputed
-  // on every render, it would jump under a person's hands the moment a save moved the diagnosis or filled a
-  // stage's last number — and take the sheet they were typing in with it.
-  const [initialStages] = useState<Record<Motion, Pillar>>(() => ({
-    plg: defaultStage(snapshot, plgD?.diagnosis ?? derived.diagnosis, "plg"),
-    slg: slgD ? defaultStage(snapshot, slgD.diagnosis, "slg") : "acquisition",
-  }));
-  const current = selected ?? initialStages[motion];
-
   // « Sur 25 opportunités conclues, un de plus ou de moins bouge le taux de 4 points » — the finding's own sentence.
   const smallSample = derived.findings.find((f) => f.kind === "small-sample" && f.motion === "slg");
   const smallSampleText = smallSample ? findingText(smallSample, state, strings, view.metrics, view.derivedCopy, ctx.locale) : null;
@@ -179,25 +161,26 @@ export function Board({
   const relaysOf = (compact: boolean) =>
     slgD ? <Relays relays={slgD.relays} state={state} strings={strings} locale={ctx.locale} diagnosis={slgD.diagnosis} compact={compact} /> : null;
 
+  // One lever first (design system extension 07, A18 T2.c); « Les {n} leviers » opens the full panel, as it was.
   const whatIf = (
-    <Disclosure summary={strings.board.whatIfTitle} data-testid="engine-board-whatif">
-      <div className={styles.whatIf}>
-        {motion === "plg" ? <WhatIfPanel view={view} onChange={actions.setWhatIf} /> : <SlgWhatIfPanel view={view} onChange={actions.setWhatIf} />}
-      </div>
-    </Disclosure>
+    <>
+      <BoardLever
+        view={view}
+        motion={motion}
+        onChange={actions.setWhatIf}
+        onAll={() => {
+          setWhatIfOpen(true);
+          reveal("engine-whatif-full");
+        }}
+      />
+      <Disclosure summary={strings.lever.panel} open={whatIfOpen} onOpenChange={setWhatIfOpen} id="engine-whatif-full" data-testid="engine-board-whatif">
+        <div className={styles.whatIf}>
+          {motion === "plg" ? <WhatIfPanel view={view} onChange={actions.setWhatIf} /> : <SlgWhatIfPanel view={view} onChange={actions.setWhatIf} />}
+        </div>
+      </Disclosure>
+    </>
   );
-  const tabs = (
-    <StageTabs
-      view={view}
-      actions={actions}
-      current={current}
-      onSelect={onSelect}
-      panelKey={`${current}:${panelSeq}`}
-      focusMetric={focusMetric}
-      motion={motion}
-      readOnly={readOnly}
-    />
-  );
+  const numbers = <BoardNumbers view={view} motion={motion} readOnly={readOnly} onOpen={actions.openMetric} />;
 
   return (
     <div className={styles.board} data-testid="engine-board" data-motions={hybrid ? "hybrid" : motion}>
@@ -223,13 +206,8 @@ export function Board({
               : undefined
           }
         />
-        {/* The hybrid's verdict is the total band's title; its coverage, each column's own. */}
-        {hybrid ? null : (
-          <>
-            <Verdict title={verdict} strings={strings} />
-            <Coverage coverage={derived.coverage} strings={strings} />
-          </>
-        )}
+        {/* The hybrid's verdict is the total band's title. What is found, the list says (« Tes chiffres »). */}
+        {hybrid ? null : <Verdict title={verdict} strings={strings} />}
       </header>
 
       {hybrid && plgD && slgD ? <TotalBand view={view} verdict={verdict} /> : null}
@@ -275,7 +253,7 @@ export function Board({
               )}
             </Field>
           </div>
-          {tabs}
+          {numbers}
           {past ? null : whatIf}
           <TotalIn12 view={view} />
         </>
@@ -292,7 +270,7 @@ export function Board({
               <p>{smallSampleText}</p>
             </Callout>
           ) : null}
-          {tabs}
+          {numbers}
           {past ? null : whatIf}
         </>
       ) : (
@@ -309,7 +287,7 @@ export function Board({
             </Callout>
           ) : null}
 
-          {tabs}
+          {numbers}
 
           {/* Folded on the board: the funnel it redraws is the one just above, and a
               second full funnel open by default made the longest page of the site

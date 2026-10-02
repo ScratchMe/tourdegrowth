@@ -61,9 +61,11 @@ describe("viewport breakpoints are a short, written list (L-11)", () => {
     // The five the audit found on a viewport width (S-18): each now has its
     // own container query, and no viewport rule of the old width.
     // The board keeps one viewport rule of its own, the breakout of the page
-    // column (page layout, on the list above): what moved is its tab strip.
+    // column (page layout, on the list above). What moved was its tab strip;
+    // the tabs left with A18 T2.b, and the hybrid's columns read the same
+    // container query.
     const expectations: [string, RegExp, RegExp][] = [
-      ["app/[locale]/aarrr-funnel-template/_engine/Board.module.css", /@container board \(min-width: 860px\)\s*\{\s*\.tabs/, /@media[^{]*960px\)\s*\{\s*\.tabs/],
+      ["app/[locale]/aarrr-funnel-template/_engine/Board.module.css", /@container board \(min-width: 860px\)\s*\{\s*\.totalBlocks/, /@media[^{]*960px\)\s*\{\s*\.totalBlocks/],
       ["app/[locale]/aarrr-funnel-template/_engine/WhatIfPanel.module.css", /@container whatif \(min-width: 860px\)/, /@media[^{]*960px\)/],
       ["app/[locale]/aarrr-funnel-template/_engine/Screens.module.css", /@container collect \(min-width: 860px\)/, /@media[^{]*960px\)/],
       ["components/game/RevealCells.module.css", /@container \(max-width: 520px\)/, /@media[^{]*560px\)/],

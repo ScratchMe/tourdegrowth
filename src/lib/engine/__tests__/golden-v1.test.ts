@@ -2,7 +2,7 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { collectPlan } from "@/app/[locale]/aarrr-funnel-template/_engine/collect";
-import { stageTabs } from "@/app/[locale]/aarrr-funnel-template/_engine/stage-tabs";
+import { listStages } from "@/app/[locale]/aarrr-funnel-template/_engine/number-list";
 import { resumePosition } from "@/app/[locale]/aarrr-funnel-template/_engine/steps-model";
 import type { StoredResult } from "@/lib/quiz/storage";
 import { buildDeck, deckMarkdown } from "../deck";
@@ -12,7 +12,7 @@ import { buildScenario } from "../scenario";
 import type { DeckModel, EngineDerived, EngineState, MetricEntry } from "../types";
 import { currentSnapshot } from "../values";
 import { EXAMPLE_TODAY, emptyState, exampleState, tourResult, withEntry, withoutTargets } from "./fixtures";
-import { asBeforeT3 } from "./golden-projection";
+import { asBeforeT3, asTabs } from "./golden-projection";
 import { CTX_EN, CTX_FR, EN, FR } from "./props";
 import { fullState } from "./storage-fixtures";
 
@@ -128,7 +128,7 @@ function outputsOf(state: EngineState, tour: StoredResult | null) {
       deck: projectDeck(deck),
       markdown: deckMarkdown(deck, p.strings),
       scenario: buildScenario(state, state.whatIf ?? {}, ctx),
-      tabs: stageTabs(snapshot, derived.diagnosis),
+      tabs: asTabs(listStages(snapshot, derived.diagnosis)),
       resume: resumePosition(snapshot),
       collect: collectPlan(snapshot, EXAMPLE_TODAY),
     };

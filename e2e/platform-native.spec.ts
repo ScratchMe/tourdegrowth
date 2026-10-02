@@ -309,44 +309,23 @@ test.describe("the engine", () => {
     });
   });
 
-  test("a folded number is in the page for Ctrl+F, takes no room, and opens when the browser finds it", async ({ page }) => {
+  // Until A15.12 (2026-10-01) leaving a sheet dropped the typing, « as closing it always did ».
+  // The laws of UX review found it and Antoine took the fix: what was typed comes back, on screen
+  // only (`sheet-drafts.ts`). Since A18 T2.b a number has its own screen, and the way back to the
+  // list is what « folding » was: the typing still comes back, and still never reaches the device.
+  // (The folded rows' `hidden="until-found"` and the tab strip's arrows left with them.)
+  test("leaving a number's screen keeps what was typed and not saved, and writes none of it to the device", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await openExample(page);
-    const toggle = page.getByTestId("engine-metric-act-event");
-    const body = page.locator(`#${await toggle.getAttribute("aria-controls")}`);
-    await expect(body).toHaveAttribute("hidden", "until-found");
-    expect((await body.boundingBox())?.height ?? 0).toBe(0);
-    // Its words are there to be found, not rendered in.
-    await expect(body.getByTestId("engine-sheet-act-event")).toContainText(/\w/);
-    await expect(body.getByTestId("engine-sheet-act-event")).toBeHidden();
-
-    // What the browser does on a match: `beforematch`, then the attribute goes.
-    await body.evaluate((el) => {
-      el.dispatchEvent(new Event("beforematch"));
-      el.removeAttribute("hidden");
-    });
-    await expect(toggle).toHaveAttribute("aria-expanded", "true");
-    await expect(body.getByTestId("engine-sheet-act-event")).toBeVisible();
-    await expect(body).not.toHaveAttribute("hidden");
-  });
-
-  // Until A15.12 (2026-10-01) this test held the opposite: folding dropped
-  // the typing, « as closing it always did » — kept when the folded row
-  // stayed in the page, not decided. The laws of UX review found it (a fold
-  // or a tab change lost a sheet's typing without a word) and Antoine took
-  // the fix: what was typed comes back, on screen only (`sheet-drafts.ts`).
-  test("folding a row keeps what was typed and not saved, and writes none of it to the device", async ({ page }) => {
-    await page.setViewportSize({ width: 1280, height: 900 });
-    await openExample(page);
-    const toggle = page.getByTestId("engine-metric-act-event");
-    await toggle.click();
+    const row = page.getByTestId("engine-metric-act-event");
+    await row.click();
     const field = page.getByTestId("engine-sheet-act-event").getByRole("textbox").first();
     const saved = await field.inputValue();
     expect(saved.length).toBeGreaterThan(0);
     await field.fill("typed, never saved");
-    await toggle.click();
-    await expect(page.getByTestId("engine-sheet-act-event")).toBeHidden();
-    await toggle.click();
+    await page.getByTestId("engine-number-back").click();
+    await expect(page.getByTestId("engine-sheet-act-event")).toHaveCount(0);
+    await row.click();
     await expect(page.getByTestId("engine-sheet-act-event").getByRole("textbox").first()).toHaveValue("typed, never saved");
     // Every key on the device: since A14.c T0 an engine lives under its own.
     const stored = await page.evaluate(() =>
@@ -356,43 +335,6 @@ test.describe("the engine", () => {
     );
     expect(stored).toContain(JSON.stringify(saved).slice(1, -1));
     expect(stored).not.toContain("typed, never saved");
-  });
-
-  test("on a phone the strip says which way more tabs are, and scrolls exactly as far as before", async ({ page }) => {
-    await page.setViewportSize({ width: 390, height: 844 });
-    await openExample(page);
-    const strip = page.getByTestId("engine-tabs");
-    const read = () =>
-      strip.evaluate((t) => ({
-        before: getComputedStyle(t, "::before").content,
-        after: getComputedStyle(t, "::after").content,
-        width: t.scrollWidth,
-      }));
-    const at = async (left: number) => {
-      await strip.evaluate((t, x) => (t.scrollLeft = x), left);
-      await frames(page, 3);
-      return read();
-    };
-    // Arriving on the stage the diagnosis names (the second tab), the strip
-    // keeps that tab clear of the arrow drawn over its edge.
-    const clear = await strip.evaluate((t) => {
-      const tab = t.querySelector<HTMLElement>('[role="tab"][aria-selected="true"]')!.getBoundingClientRect();
-      const box = t.getBoundingClientRect();
-      return { right: box.right - tab.right, left: tab.left - box.left, hint: parseFloat(getComputedStyle(t, "::after").width) || 0 };
-    });
-    expect(clear.hint).toBeGreaterThan(0);
-    expect(clear.right).toBeGreaterThanOrEqual(clear.hint);
-    const start = await at(0);
-    expect(start.before).toBe("none");
-    expect(start.after).toContain("→");
-    const middle = await at(120);
-    expect(middle.before).toContain("←");
-    expect(middle.after).toContain("→");
-    const end = await at(100_000);
-    expect(end.before).toContain("←");
-    expect(end.after).toBe("none");
-    // The arrows give their room back: the strip is as wide with either one as with the other.
-    expect(new Set([start.width, middle.width, end.width]).size).toBe(1);
   });
 
   test("the deck: thumbnails off screen are skipped, and still export whole; its paper asks for light controls", async ({ page }) => {

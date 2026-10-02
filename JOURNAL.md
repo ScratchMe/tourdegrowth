@@ -601,3 +601,107 @@ Troisième étape du portage du retour 07, drapeau fermé. **T2 est coupé en tr
 - `tsc`, `eslint`, les tests unitaires de `brand/`, et la suite Playwright complète sur un build comme la CI.
 
 **Consigné** : `CHANTIERS.md` (B13 emportera les JSDoc de `ProsePage` et `ContentHeader`, et deux aperçus retouchés : la doc de `ContentHeader`, `SiteHeader` « Phone » en `wide`).
+
+## A18 T2.b : « Tes chiffres », une liste à la place des onglets, et l'écran d'un chiffre (2026-10-02, #291)
+
+Quatrième étape du portage du retour 07, drapeau fermé, et la décision C41 d'Antoine : **les cinq onglets d'étape du 2026-09-26 sont remplacés par une liste**. Toutes les étapes sont visibles, chaque chiffre est une ligne (nom, valeur ou statut), et une ligne ouvre l'écran du chiffre, au lieu de déplier sa fiche sur place (1 667 px pour un chiffre, sur un téléphone).
+
+- **« Tes chiffres »** (`NumberList`) : l'en-tête dit d'abord ce qui reste (`EngineProgress` : « 6 à faire », « Plus qu'un », « Plus rien à faire »), puis les comptes (« 11 trouvés · 2 estimés · 1 demandé · 3 introuvables », les zéros omis), puis une marque par chiffre et leur légende.
+- **Chaque étape** dit ses marques et « 2 sur 3 trouvés ». Celle que nomme une cible d'équipe (C1) porte « Freine ici » et le filet rouge du diagnostic ; aucune autre n'a de rouge.
+- **Une ligne** : un chiffre trouvé montre sa valeur, sans étiquette. Les autres portent une étiquette : neutre pour l'estimé et l'introuvable, pointillée pour le demandé et l'à-faire. Une note dessous dit pourquoi un chiffre est introuvable, et de combien il a bougé depuis le mois d'avant.
+- **Un mois clos** : ses lignes se lisent et ne s'ouvrent pas.
+- **Dans l'hybride** : la liste est celle du moteur affiché. La liaison est dans un groupe fermé à la fin de la liste de l'assisté.
+- **L'écran d'un chiffre** (`NumberScreen`) est la fiche de T1, en carte, avec sa place (« Activation · 2 sur 3 ») et ce qui reste à droite. « ← Tes chiffres » ramène à la ligne et lui rend le focus. « Chiffre suivant » de la carte, « Renseigner » de « À aller chercher » et la demande ouvrent ce même écran.
+- **La couverture en pastilles** quitte la tête du tableau à un moteur : la liste la dit. L'hybride garde la sienne dans ses colonnes jusqu'à T5.
+
+**Ce qui part, et pourquoi c'est voulu** :
+- **`hidden="until-found"`** : les fiches repliées étaient dans la page pour Ctrl+F (A4). Elles ne sont plus dans la page, donc ne se trouvent plus par la recherche du navigateur ; chaque nom de chiffre, lui, est dans la liste ;
+- **les positions** en tête de panneau (« Taux d'activation · sous ta cible ») : l'écran de chaque chiffre le dit dans « Comment il se situe », et l'étape nommée le dit par son filet ;
+- **le clavier des onglets** (flèches, Origine, Fin) : la liste est une suite de boutons, que la tabulation parcourt.
+
+**Les goldens tiennent** : `golden-v1` et `golden-v2` figeaient la sortie des onglets. Une projection (`asTabs`, `golden-projection.ts`) reconstruit l'ancienne forme depuis la liste, et les deux passent sans toucher aux fichiers : la liste dit exactement ce que disaient les onglets.
+
+**Code** :
+- `EngineProgress` et `NumberList` dans `src/components/engine/`, avec leurs tests de balisage ;
+- `_engine/number-list.ts`, le modèle pur, prend la place de `stage-tabs.ts`, et ses tests ceux des onglets ;
+- `_engine/BoardNumbers.tsx` et `_engine/NumberScreen.tsx` sont neufs, et l'îlot gagne un écran `number` ;
+- `StageTabs.tsx` part, avec ses règles CSS et les clés `board.stagesLabel`, `tabFound` et `tabNamed`. « Freine ici » passe dans le groupe `list`, avec la copie neuve « à relire » ;
+- neuf jetons quittent la liste d'attente.
+
+Deux tests de gouvernance suivent, chacun avec sa raison écrite :
+- `breakpoints` : la requête de conteneur du tableau est lue par les colonnes de l'hybride, plus par les onglets ;
+- `hard-shadows` : le seuil de non-vacuité passe de 60 à 50, car les ombres des onglets sont parties.
+
+**Les specs** : `engine-board-tabs.spec.ts` devient `engine-numbers.spec.ts`, qui dit maintenant :
+- toutes les étapes sont à l'écran, une seule freine, et ce qui reste est dit ;
+- une ligne ouvre son écran, et le retour rend le focus à la ligne ;
+- « Renseigner » et « Chiffre suivant » ouvrent l'écran d'un chiffre ;
+- les lignes font 48 px à 390 px, sans défilement horizontal.
+
+Trois aides dans `engine-helpers.ts` :
+- `openNumber` ouvre un chiffre depuis la liste, en ouvrant au besoin le groupe fermé ;
+- `backToBoard` revient au tableau ;
+- `expectFound` lit les comptes de la liste.
+
+`openEngineMenu` revient d'abord au tableau. Trois specs de `platform-native` partent ou changent : la recherche dans les fiches repliées et les flèches de la bande d'onglets partent ; « garder ce qui est tapé » se rejoue sur l'écran d'un chiffre.
+
+**Relevé en route** :
+- La première passe e2e a eu 31 échecs, tous dans des specs qui enregistraient sur l'écran d'un chiffre puis cherchaient le tableau. Elles reviennent d'abord à la liste.
+- Un vrai défaut aussi : le retour ne rendait pas le focus à la ligne, faute d'`id` sur le bouton. C'est réparé, et la spec le tient.
+
+**Pas fait ici** : le groupe « Calculés à partir des tiens » du retour. Les chiffres calculés ne sont pas sur le tableau aujourd'hui (seulement dans les slides), donc ce serait un ajout, pas un portage.
+
+**La relecture de copie**, sur la PR ouverte, n'a rien trouvé de bloquant. Ce qui est appliqué :
+- « 3 can't be found » dans les comptes : « can't find » s'y lisait comme un verbe ;
+- l'anglais des quatre phrases des réglages qui renvoient un chiffre à « à faire » cite maintenant « to do », l'étiquette que la liste affiche ;
+- le commentaire de `hybrid.linkBlock` dit où la chaîne s'affiche maintenant.
+
+**Ce qui est laissé pour T6** : les mots de statut ne concordent pas encore partout, surtout en anglais.
+- La liste dit « Can't find » et « Asked », le Miroir « Missing », « À aller chercher » « Requested ».
+- Les pastilles de l'hybride disent « approximate » là où la liste dit « estimated ». Elles disent aussi « 0 chiffres sur 15 trouvés », au pluriel, là où la liste écrit « 0 sur 3 trouvé ».
+
+Ce sont les renommages du retour 07, que C42 range en T6. Enfin, `board.toFill` n'est plus lue en pratique (la liste ne demande pas de cause pour un chiffre à faire) : elle partira au prochain ménage.
+
+**Vérifié** :
+- `tsc` et `eslint` propres ; 3 014 tests unitaires ; `next build` avec les variables de la CI ;
+- les 295 specs du moteur, des cibles, de l'accessibilité et de la plateforme passent (une ignorée par construction), avec `GAME_ENABLED=true` côté serveur ;
+- des captures de la liste et de l'écran d'un chiffre, en français et en anglais, à 1 280 et 390 px, sans défilement horizontal.
+
+## A18 T2.c : « Et si ? » par un seul levier, devant le panneau complet (2026-10-02, #291)
+
+Cinquième étape du portage du retour 07, drapeau fermé, et la dernière de T2, livrée dans la même PR que T2.b. « Et si ? » ne commence plus par un panneau plié de huit curseurs : **une carte à un seul levier** (`LeverCard`) le précède sur le tableau.
+
+- **Le levier** est celui de l'étape qu'une cible d'équipe nomme (C1) : le chiffre nommé quand c'est un levier, sinon le premier levier saisi de cette étape. Sans cible, c'est le premier levier saisi dans l'ordre du funnel, et le titre ne parle pas d'étape. Un levier sans valeur n'a pas de carte, comme il n'a pas de curseur dans le panneau (`cardLever`, testé).
+- **Les deux chiffres** viennent du même calcul que le panneau : le MRR dans 12 mois, puis les nouveaux payants du mois en libre-service (pour 100 inscrits sans le nombre d'inscrits du mois), les nouveaux clients du trimestre en assisté.
+- **Bougé**, le titre dit le mouvement (« Et si : Taux d'activation, 22 % au lieu de 18 % », après la relecture), chaque chiffre dit « aujourd'hui … » dessous, à la précision dont le mouvement a besoin, comme dans le panneau, et « Remettre à aujourd'hui » apparaît.
+- **La cible s'écrit où le panneau l'écrit** (`state.whatIf`), par les mêmes `withTarget` et `targetAt` : la carte et le panneau ne peuvent pas se contredire, et les slides en ont une par levier comme avant.
+- **« Vois les {n} leviers et ce que le calcul suppose → »** ouvre le panneau complet, inchangé, et y met le focus : le `Disclosure` contrôlé de T0, une troisième fois.
+
+**Code** :
+- `LeverCard` dans `src/components/engine/`, avec son test de balisage : un curseur natif, rangée de 44 px, piste de 8 px, pouce de 28 px, encre jusqu'à la valeur ;
+- son câblage dans `_engine/BoardLever.tsx`, avec `cardLever` testé ;
+- les derniers jetons de T2 quittent la liste d'attente (le curseur, `--engine-figure-lg`) ;
+- copie neuve « à relire » : le groupe `lever`. Les deux chiffres et « aujourd'hui » reprennent les libellés du panneau.
+
+**Les specs** : `engine-lever.spec.ts`, qui couvre :
+- le levier de l'exemple ;
+- quatre flèches qui le portent de 18 % à 22 %, les chiffres qui suivent et la cible gardée sur l'appareil ;
+- le retour à aujourd'hui ;
+- le panneau ouvert depuis la carte ;
+- 390 px sans défilement horizontal, en français et en anglais.
+
+Aucune autre spec n'a bougé : le panneau est toujours là, plié, sous la carte.
+
+**Vérifié** :
+- `tsc` et `eslint` propres ; 3 023 tests unitaires ; `next build` avec les variables de la CI ;
+- les 295 specs du moteur, des cibles, de l'accessibilité et de la plateforme, puis les 3 de la carte ;
+- des captures de la carte, intacte et bougée, en français et en anglais, à 1 280 et 390 px. Une capture de l'élément seul coupait le « % » de la sortie : mesurée, la sortie tient dans la carte, au pixel près, et la capture élargie la montre entière.
+
+**La relecture de copie** (`relecteur-copie`), appliquée dans la même PR : aucune règle mécanique enfreinte, mais des phrases que le diagnostic, juste à côté, contredisait. Corrigé :
+- **le titre suit l'état du diagnostic** (`titleKey`, testé) : « une des étapes qui freinent » quand plusieurs freinent autant (`shared`) ; l'invitation simple quand rien ne freine (`level`), là où « Avec une cible… » contredisait « Rien ne freine le moteur » ; « avec des cibles sur au moins deux étapes » quand moins de deux étapes en ont (`not-enough`) ;
+- **les chiffres comptent aussi les leviers bougés dans le panneau** : le titre le dit (« …, avec tes autres leviers », « Bouge aussi ce levier… ») ;
+- **« {to} au lieu de {from} »** : « de 6 à 9 % à 12 % » se lisait mal quand la valeur du jour est une fourchette ;
+- **un chiffre inconnu dit ce qui manque**, comme la tuile du panneau (« il manque l'ARPA »), en note et non en gros chiffre ; plus de « aujourd'hui ? » ;
+- **le second chiffre en libre-service dit sa période** (« Nouveaux payants par mois ») ; les deux boutons vers le panneau passent à l'impératif (« Vois les {n} leviers… ») ; le résumé du panneau plié ne répète plus « Et si ? » (« Tous les leviers ensemble ») ; l'étiquette du curseur passe entre parenthèses, « Taux d'activation (aujourd'hui 18 %) », pour ne plus empiler les virgules sur le lien de l'hybride.
+
+Le tout reste « à relire » pour A18.d. Après la relecture : 3 029 tests unitaires (6 de plus), et les specs du moteur repassées sur le nouveau build.

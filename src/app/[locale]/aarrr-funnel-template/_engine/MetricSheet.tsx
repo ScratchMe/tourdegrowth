@@ -58,11 +58,13 @@ function unitOf(shape: MetricShape, view: EngineView, value: number | null): Num
   return {};
 }
 
-/** What the sheet is, when it is the whole screen (the step-by-step): where the number sits, and its heading. */
+/** What the sheet is, when it is the whole screen (the step-by-step, a number opened from the board's list): where the number sits, and its heading. */
 export interface SheetScreen {
   position: ReactNode;
   headingId: string;
   headingRef?: Ref<HTMLHeadingElement>;
+  /** The header's right: what remains (EngineProgress sm, « 6 à faire »). */
+  progress?: ReactNode;
 }
 
 /**
@@ -97,7 +99,7 @@ export function MetricSheet({
   /** `step`: one number per screen in the step-by-step (Antoine, 2026-09-25), and saving moves on (`onSaved`). */
   variant?: "board" | "step";
   onSaved?: () => void;
-  /** The step-by-step's screen: the sheet carries the heading. Absent on the board, whose row names the number (until A18 T2). */
+  /** The sheet is the whole screen (the step-by-step, a number opened from the board's list): it carries the card and the heading. */
   screen?: SheetScreen;
   /** Quiet actions after the save: the step-by-step's back and skip. */
   extraActions?: ReactNode;
@@ -512,11 +514,12 @@ export function MetricSheet({
   return (
     <div ref={sheetRef} className={styles.sheet} data-testid={`engine-sheet-${domId(id)}`}>
       <NumberSheet
-        framed={variant === "step"}
+        framed={Boolean(screen)}
         name={screen ? metric.name : undefined}
         headingId={screen?.headingId}
         headingRef={screen?.headingRef}
         position={screen?.position}
+        progress={screen?.progress}
         effort={strings.effort[EFFORT_KEY[shape.effort]]}
         definitionLabel={strings.sheet.definition}
         definitionHref={metric.glossaryHref}

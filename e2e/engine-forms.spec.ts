@@ -2,7 +2,7 @@ import type { Locator, Page } from "@playwright/test";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import { exampleState } from "../src/lib/engine/__tests__/fixtures";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
-import { storedEngineEntry, writeEngineSeed, openEngineMenu } from "./engine-helpers";
+import { storedEngineEntry, writeEngineSeed, openEngineMenu, backToBoard, openNumber } from "./engine-helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
 // owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
@@ -78,8 +78,7 @@ async function expectOneSystemRing(page: Page, target: Locator, name: string): P
 test("« 26 000 » typed in French is 26 000: the sheet reads it, and the live rate follows", async ({ page }) => {
   await openEngine(page, "fr");
   await page.getByTestId("engine-setup-board").click();
-  await page.getByTestId("engine-tab-activation").click();
-  await page.getByTestId("engine-metric-act-rate").click();
+  await openNumber(page, "act-rate");
   const sheet = page.getByTestId("engine-sheet-act-rate");
   // Typed as a French reader writes them, with an ordinary space.
   await sheet.locator("#engine-act-rate-num").pressSequentially("4 680");
@@ -121,8 +120,7 @@ test("one focus ring, the system's, on every kind of control the engine draws", 
 
   // A sheet: a number in its box, the source list.
   await page.getByTestId("engine-setup-board").click();
-  await page.getByTestId("engine-tab-activation").click();
-  await page.getByTestId("engine-metric-act-rate").click();
+  await openNumber(page, "act-rate");
   const sheet = page.getByTestId("engine-sheet-act-rate");
   await expectOneSystemRing(page, sheet.locator("#engine-act-rate-num"), "a count");
   // The source describes a value: it is asked once one is typed (A18 T1).
@@ -149,8 +147,7 @@ test("one focus ring, the system's, on every kind of control the engine draws", 
 test("the joiner of a pair sits against the first box, however long its label", async ({ page }) => {
   await openEngine(page, "fr");
   await page.getByTestId("engine-setup-board").click();
-  await page.getByTestId("engine-tab-acquisition").click();
-  await page.getByTestId("engine-metric-acq-cac").click();
+  await openNumber(page, "acq-cac");
   const sheet = page.getByTestId("engine-sheet-acq-cac");
   const measure = await sheet.locator("#engine-acq-cac-num").evaluate((input) => {
     const box = input.parentElement!;
@@ -188,10 +185,7 @@ for (const locale of ["en", "fr"] as const) {
   test(`a refused save puts the focus on the field it names; a rate over 100 is said on leaving it (${locale})`, async ({ page }) => {
     await openEngine(page, locale);
     await page.getByTestId("engine-setup-board").click();
-    const tab = page.getByTestId("engine-tab-activation");
-    if ((await tab.getAttribute("aria-selected")) !== "true") await tab.click();
-    const toggle = page.getByTestId("engine-metric-act-rate");
-    if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.click();
+    await openNumber(page, "act-rate");
     const sheet = page.getByTestId("engine-sheet-act-rate");
 
     // The rate alone, over 100, BEFORE any save: once a save was tried the
@@ -212,16 +206,12 @@ for (const locale of ["en", "fr"] as const) {
   });
 }
 
-/** The board, on a stage's tab, with one number's sheet unfolded. */
-async function openSheet(page: Page, locale: "en" | "fr", stage: string, metric: string): Promise<Locator> {
+/** The board, then one number's own screen (A18 T2.b): the stage stays for the callers' reading. */
+async function openSheet(page: Page, locale: "en" | "fr", _stage: string, metric: string): Promise<Locator> {
   await openEngine(page, locale);
   const board = page.getByTestId("engine-setup-board");
   if (await board.count()) await board.click();
-  const tab = page.getByTestId(`engine-tab-${stage}`);
-  if ((await tab.getAttribute("aria-selected")) !== "true") await tab.click();
-  const toggle = page.getByTestId(`engine-metric-${metric}`);
-  if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.click();
-  return page.getByTestId(`engine-sheet-${metric}`);
+  return openNumber(page, metric);
 }
 
 /*
@@ -246,13 +236,11 @@ for (const locale of ["en", "fr"] as const) {
   });
 }
 
-test("what was typed in a sheet comes back after another tab, unsaved", async ({ page }) => {
+test("what was typed on a number's screen comes back after the list, unsaved", async ({ page }) => {
   await openSheet(page, "en", "activation", "act-rate");
   await page.locator("#engine-act-rate-num").fill("144");
-  await page.getByTestId("engine-tab-acquisition").click();
-  await page.getByTestId("engine-tab-activation").click();
-  const toggle = page.getByTestId("engine-metric-act-rate");
-  if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.click();
+  await backToBoard(page);
+  await openNumber(page, "act-rate");
   await expect(page.locator("#engine-act-rate-num")).toHaveValue("144");
   // Nothing was saved: the device holds no entry for it yet.
   expect((await storedState(page))?.snapshots[0]?.metrics["act.rate"]).toBeUndefined();
@@ -273,6 +261,7 @@ test("an engine imported from the board opens with no half-typed sheet of the on
   // Another engine, with nothing saved for this metric either.
   const other = await storedState(page);
   expect(other?.snapshots[0]?.metrics["act.rate"]).toBeUndefined();
+  await backToBoard(page);
   await openEngineMenu(page);
   await page.getByTestId("engine-import-open-screen").click();
   await page.getByTestId("engine-import-file").setInputFiles({ name: "other.json", mimeType: "application/json", buffer: Buffer.from(JSON.stringify(other)) });
@@ -280,10 +269,7 @@ test("an engine imported from the board opens with no half-typed sheet of the on
   // Back on the board in the same page: `openSheet` navigates, and a reload
   // empties the drafts on its own (they live in memory) — the test would pass
   // on the bug. Measured: it did, until this line stopped reloading.
-  await page.getByTestId("engine-tab-activation").click();
-  const toggle = page.getByTestId("engine-metric-act-rate");
-  if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.click();
-  const reopened = page.getByTestId("engine-sheet-act-rate");
+  const reopened = await openNumber(page, "act-rate");
   await expect(reopened.getByTestId("engine-answer-act-rate")).toHaveAttribute("data-answer", "value");
   await expect(page.locator("#engine-act-rate-num")).toHaveValue("");
 });

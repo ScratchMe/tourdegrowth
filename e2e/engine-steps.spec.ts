@@ -2,7 +2,7 @@ import type { Page } from "@playwright/test";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import { METRIC_SHAPES } from "@/lib/engine/catalog-shape";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
-import { storedEngineEntry, openEngineMenu } from "./engine-helpers";
+import { storedEngineEntry, openEngineMenu, openNumber, expectFound, backToBoard } from "./engine-helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
 // owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
@@ -68,14 +68,12 @@ test("« Start step by step » walks targets → base → one number per screen,
   // The board's activation sheet already carries the 800: typed once, reused.
   await page.getByTestId("engine-steps-board").click();
   await expect(page.getByTestId("engine-board")).toBeVisible();
-  const tab = page.getByTestId("engine-tab-activation");
-  if ((await tab.getAttribute("aria-selected")) !== "true") await tab.click();
-  const toggle = page.getByTestId("engine-metric-act-rate");
-  if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.click();
+  await openNumber(page, "act-rate");
   const sheet = page.getByTestId("engine-sheet-act-rate");
   await expect(sheet.locator("#engine-act-rate-den")).toHaveValue("800");
 
-  // And the peloton says what its 100 are.
+  // And the peloton says what its 100 are, on the board.
+  await backToBoard(page);
   await expect(page.getByTestId("peloton-same-hundred").first()).toContainText("800");
 
   // Back to the steps: it resumes on the first number nobody has touched, not at the targets.
@@ -100,16 +98,13 @@ test("the example shows a filled-in funnel and its slides, and writes nothing on
 test("settings can be changed later; a new activation window sends that number back to « to fill in »", async ({ page }) => {
   await open(page);
   await page.getByTestId("engine-setup-board").click();
-  const tab = page.getByTestId("engine-tab-activation");
-  if ((await tab.getAttribute("aria-selected")) !== "true") await tab.click();
-  const toggle = page.getByTestId("engine-metric-act-rate");
-  if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.click();
+  await openNumber(page, "act-rate");
   const sheet = page.getByTestId("engine-sheet-act-rate");
   await sheet.locator("#engine-act-rate-num").fill("144");
   await sheet.locator("#engine-act-rate-den").fill("800");
   await sheet.locator("#engine-act-rate-source").selectOption({ label: "Amplitude" });
   await sheet.getByTestId("engine-save-act-rate").click();
-  await expect(page.getByTestId("engine-coverage")).toContainText("1 of 17 numbers found");
+  await expectFound(page, 1);
 
   await page.getByTestId("engine-bar-settings").click();
   const settings = page.getByTestId("engine-settings");
@@ -119,7 +114,7 @@ test("settings can be changed later; a new activation window sends that number b
   await page.getByTestId("engine-settings-save").click();
 
   await expect(page.getByTestId("engine-board")).toBeVisible();
-  await expect(page.getByTestId("engine-coverage")).toContainText("0 of 17 numbers found");
+  await expectFound(page, 0);
   const after = await stored(page);
   expect(after?.state.setup.activationWindowDays).toBe(14);
   expect(after?.state.snapshots[0]?.metrics["act.rate"]).toBeUndefined();
@@ -241,15 +236,10 @@ for (const [locale, big, middle, decimal] of [
 }
 
 /** Opens a stage's drawer if it isn't already the one showing, then one metric's sheet on the board. */
-/** The board has one tab per stage since 2026-09-26: select it, then unfold the number. */
-async function boardSheet(page: Page, stage: string, metricDomId: string) {
-  const tab = page.getByTestId(`engine-tab-${stage}`);
-  if ((await tab.getAttribute("aria-selected")) !== "true") await tab.click();
-  const toggle = page.getByTestId(`engine-metric-${metricDomId}`);
-  if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.click();
-  const sheet = page.getByTestId(`engine-sheet-${metricDomId}`);
-  await expect(sheet).toBeVisible();
-  return sheet;
+/** A number's own screen, from its row in « Tes chiffres » (A18 T2.b; the stage tabs of 2026-09-26 are gone). */
+async function boardSheet(page: Page, _stage: string, metricDomId: string) {
+  // The list shows every stage (A18 T2.b): the row is enough, the stage stays for the callers' reading.
+  return openNumber(page, metricDomId);
 }
 
 /*
@@ -281,10 +271,7 @@ test("a typo in a target keeps the stored target, on the step screen and in a sh
   // The same field in a sheet, after a reload: the target came back from the device.
   await page.reload();
   await expect(page.getByTestId("engine-board")).toBeVisible();
-  const tab = page.getByTestId("engine-tab-activation");
-  if ((await tab.getAttribute("aria-selected")) !== "true") await tab.click();
-  const toggle = page.getByTestId("engine-metric-act-rate");
-  if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.click();
+  await openNumber(page, "act-rate");
   const box = page.locator("#engine-act-rate-target");
   await expect(box).toHaveValue("25");
   await box.fill("abc");

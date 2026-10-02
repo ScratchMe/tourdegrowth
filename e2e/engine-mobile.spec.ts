@@ -3,7 +3,7 @@ import type { Locator, Page } from "@playwright/test";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import { exampleState, hybridState } from "../src/lib/engine/__tests__/fixtures";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
-import { engineSeed, nextStep, openEngineMenu, storedEngineEntry } from "./engine-helpers";
+import { engineSeed, nextStep, openEngineMenu, storedEngineEntry, openNumber, backToBoard } from "./engine-helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
 // owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
@@ -62,11 +62,12 @@ async function measureScreens(page: Page, locale: "fr" | "en"): Promise<Record<s
   await seedHybrid(page, locale);
   out.board = await overflow(page);
   await page.getByTestId("engine-motion-selector").getByRole("button", { name: ENGINE_COPY.hybrid.motionName.slg[locale] }).click();
-  await page.getByTestId("engine-metric-slg-rev-win-rate").click();
+  await openNumber(page, "slg-rev-win-rate");
   await expect(page.getByTestId("engine-sheet-slg-rev-win-rate")).toBeVisible();
   out.sheet = await overflow(page);
 
-  // E4 — the collect list, both motions' numbers owed.
+  // E4 — the collect list, both motions' numbers owed (on the board: the way back from the number's screen first).
+  await backToBoard(page);
   await page.getByTestId("engine-collect-disclosure").locator("summary").first().click();
   out.collect = await overflow(page);
 
@@ -150,10 +151,7 @@ test("the keyboard alone: tick sales-assisted, open the board, fill its win rate
   const selector = page.getByTestId("engine-motion-selector").getByRole("button", { name: ENGINE_COPY.hybrid.motionName.slg.en });
   await tabTo(page, selector);
   await page.keyboard.press("Enter");
-  await tabTo(page, page.getByTestId("engine-tab-revenue").or(page.getByRole("tab", { selected: true })).first());
-  // The tabs' own keys (WAI-ARIA): End goes to revenue.
-  await page.keyboard.press("End");
-  await expect(page.getByTestId("engine-tab-revenue")).toHaveAttribute("aria-selected", "true");
+  // Sales-assisted's list (A18 T2.b): its win rate's row, one button; Enter opens its screen.
   await tabTo(page, page.getByTestId("engine-metric-slg-rev-win-rate"));
   await page.keyboard.press("Enter");
   const sheet = page.getByTestId("engine-sheet-slg-rev-win-rate");
@@ -259,15 +257,14 @@ async function measureA14(page: Page, locale: "fr" | "en"): Promise<Record<(type
   out.merge = await overflow(page);
 
   await reopen(page, locale);
-  await page.getByTestId("engine-tab-revenue").click();
-  const toggle = page.getByTestId("engine-metric-rev-gross-margin");
-  if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.click();
+  await openNumber(page, "rev-gross-margin");
   const sheet = page.getByTestId("engine-sheet-rev-gross-margin");
   await sheet.getByRole("button", { name: ENGINE_COPY.sheet.willAsk[locale] }).click();
   await sheet.getByTestId("engine-request-copy").click();
   await expect(sheet.getByTestId("engine-request-remind")).toBeVisible();
   out.reminder = await overflow(page);
 
+  await backToBoard(page);
   await page.getByTestId("engine-open-deck").click();
   await page.getByTestId("deck-white-theme").check();
   await expect(page.getByTestId("slide-peloton")).toHaveAttribute("data-theme", "white");

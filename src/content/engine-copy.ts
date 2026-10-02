@@ -265,13 +265,6 @@ export const ENGINE_COPY = {
       en: "Small numbers: fewer than 100 sign-ups in this cohort. Read the direction, not the decimals.",
     },
     toFill: { fr: "à renseigner", en: "to fill in" },
-    // TODO: à relire — nouveau (2026-09-26, les étapes en onglets : « c'est rude de devoir scroller autant sur chaque chiffre »).
-    /** The tab list's accessible name: five tabs, one per AARRR stage. */
-    stagesLabel: { fr: "Les cinq étapes", en: "The five stages" },
-    /** Under a tab's name, next to its marks: the coverage line's "found", per stage. Built so 1 reads right (« trouvés : 1/3 »). */
-    tabFound: { fr: "trouvés : {n}/{N}", en: "found: {n}/{N}" },
-    /** The stamp on a stage the diagnosis names — its red said in words too. */
-    tabNamed: { fr: "Freine ici", en: "Holds you back" },
     // TODO: à relire — nouveau (2026-09-25, retours d'Antoine sur le moteur).
     settings: { fr: "Réglages", en: "Settings" },
     steps: { fr: "Reprendre le pas à pas", en: "Back to step by step" },
@@ -344,6 +337,80 @@ export const ENGINE_COPY = {
     backupChanged: { fr: "Modifié depuis ta sauvegarde du {date} : Safari peut l'effacer après sept jours d'utilisation sans passage ici.", en: "Changed since you saved it on {date}: Safari may erase it after seven days of use without a visit here." },
     /** At the board's end while the slides are not the next step. */
     slidesQuiet: { fr: "Prépare tes slides avec ce que tu as →", en: "Prepare your slides with what you have →" },
+  },
+  /**
+   * TODO: à relire (convention 6) — neuf le 2026-10-02 (A18 T2.b, le retour 07 de Claude Design,
+   * design/ds-extension-07-return/COPY.md) : « Tes chiffres », la liste par étape qui remplace les onglets
+   * (C41), sa progression par ce qui reste, et l'en-tête de l'écran d'un chiffre ouvert depuis elle. `xOne`
+   * sert aussi pour 0, comme le français le veut (« 0 sur 3 trouvé »).
+   */
+  list: {
+    title: { fr: "Tes chiffres", en: "Your numbers" },
+    found: { fr: "{n} sur {N} trouvés", en: "{n} of {N} found" },
+    foundOne: { fr: "{n} sur {N} trouvé", en: "{n} of {N} found" },
+    /** The stage a team target names (C1): its red said in words too. Was the tab's stamp. */
+    holds: { fr: "Freine ici", en: "Holds you back" },
+    /** What remains, first: never « fini » while a number has no answer. `{n}` ≥ 2. */
+    toGo: { fr: "{n} à faire", en: "{n} to go" },
+    lastOne: { fr: "Plus qu'un", en: "Last one to go" },
+    noneToGo: { fr: "Plus rien à faire", en: "None to go" },
+    countFound: { fr: "{n} trouvés", en: "{n} found" },
+    countFoundOne: { fr: "1 trouvé", en: "1 found" },
+    countEst: { fr: "{n} estimés", en: "{n} estimated" },
+    countEstOne: { fr: "1 estimé", en: "1 estimated" },
+    countAsked: { fr: "{n} demandés", en: "{n} asked" },
+    countAskedOne: { fr: "1 demandé", en: "1 asked" },
+    countCant: { fr: "{n} introuvables", en: "{n} can't be found" },
+    countCantOne: { fr: "1 introuvable", en: "1 can't be found" },
+    /** The marks: their list's name, a stage's (`{list}`: the status words, joined), and their legend. */
+    marksLabel: { fr: "Tes chiffres, étape par étape", en: "Your numbers, stage by stage" },
+    groupLabel: { fr: "{stage} : {list}", en: "{stage}: {list}" },
+    legendLabel: { fr: "Ce que disent les marques", en: "What the marks mean" },
+    /** A number's answer, as a row's tag and the legend say it. */
+    status: {
+      found: { fr: "Trouvé", en: "Found" },
+      est: { fr: "Estimé", en: "Estimated" },
+      asked: { fr: "Demandé", en: "Asked" },
+      cant: { fr: "Introuvable", en: "Can't find" },
+      todo: { fr: "À faire", en: "To do" },
+      na: { fr: "Sans objet", en: "Not applicable" },
+    },
+    /** The number's screen, opened from the list: where it sits, and the way back to its row. */
+    position: { fr: "{stage} · {i} sur {n}", en: "{stage} · {i} of {n}" },
+    back: { fr: "← Tes chiffres", en: "← Your numbers" },
+  },
+  /**
+   * TODO: à relire (convention 6) — neuf le 2026-10-02 (A18 T2.c, le retour 07 de Claude Design,
+   * design/ds-extension-07-return/COPY.md) : « Et si ? » par un seul levier, devant le panneau complet.
+   * `{lever}` : le nom d'un chiffre du catalogue, en étiquette (jamais sujet d'une phrase) ; `{today}` :
+   * `scenario.leverToday` rempli ; `{from}`, `{to}` : des valeurs formatées ; `{n}` ≥ 2.
+   */
+  lever: {
+    untouched: { fr: "Bouge le levier de l'étape qui freine, et vois ce qui suit.", en: "Move the lever of the stage that holds you back, and see what follows." },
+    /** Two stages or more hold back as much (the `shared` diagnosis): the card's lever is one of theirs. */
+    untouchedShared: { fr: "Bouge le levier d'une des étapes qui freinent, et vois ce qui suit.", en: "Move the lever of one of the stages that hold you back, and see what follows." },
+    /** Fewer than two stages have a target: no stage can be named yet (C1). */
+    untouchedNoStage: {
+      fr: "Bouge un levier et vois ce qui suit. Avec des cibles sur au moins deux étapes, le levier de celle qui freine passe en premier.",
+      en: "Move one lever and see what follows. With targets on at least two stages, the lever of the one that holds you back comes first.",
+    },
+    /** Nothing holds back, or a target names a stage none of whose numbers is a lever with a value: the first one typed, in the funnel's order. */
+    untouchedOther: { fr: "Bouge un levier et vois ce qui suit.", en: "Move one lever and see what follows." },
+    /** This lever unmoved, another moved in the full panel: the figures already count it. */
+    untouchedWithOthers: { fr: "Bouge aussi ce levier, avec ceux que tu as déjà bougés.", en: "Move this lever too, with the ones you have already moved." },
+    /** `{from}` may be a range (« 6 à 9 % »): never « de 6 à 9 % à 12 % ». */
+    moved: { fr: "Et si : {lever}, {to} au lieu de {from}", en: "What if: {lever}, {to} instead of {from}" },
+    /** The figures count the levers moved in the full panel too. */
+    movedWithOthers: { fr: "Et si : {lever}, {to} au lieu de {from}, avec tes autres leviers", en: "What if: {lever}, {to} instead of {from}, with your other levers" },
+    label: { fr: "{lever} ({today})", en: "{lever} ({today})" },
+    /** The funnel is the month's: so is this figure, beside « MRR dans 12 mois ». */
+    payingMonth: { fr: "Nouveaux payants par mois", en: "New paying customers a month" },
+    /** Without the month's sign-up count, the funnel reads per 100 sign-ups: so does this figure. */
+    payingPerHundred: { fr: "Nouveaux payants pour 100 inscrits", en: "New paying customers per 100 sign-ups" },
+    all: { fr: "Vois les {n} leviers et ce que le calcul suppose →", en: "See the {n} levers and what the calculation assumes →" },
+    allOne: { fr: "Vois ce que le calcul suppose →", en: "See what the calculation assumes →" },
+    /** The full panel's summary, under the card: not « Et si ? » a second time. */
+    panel: { fr: "Tous les leviers ensemble", en: "All the levers together" },
   },
 
   coverage: {
@@ -890,7 +957,7 @@ export const ENGINE_COPY = {
     motionCount: { fr: "{motion} {n} sur {N}", en: "{motion} {n} of {N}" },
     /** A motion unticked whose numbers are kept, in the import preview (§18.1.2). */
     motionCountHidden: { fr: "{motion} {n} sur {N} (masqué)", en: "{motion} {n} of {N} (hidden)" },
-    /** The link's block, under sales-assisted's three Acquisition numbers (§18.6.3). */
+    /** The link (§18.6.3): the title of its closed group at the end of sales-assisted's list, and its position on its own screen (A18 T2.b). */
     linkBlock: { fr: "Liaison avec le libre-service", en: "Link with self-serve" },
   },
   /**
@@ -2250,13 +2317,14 @@ export const ENGINE_COPY = {
     title: { fr: "Tes réglages", en: "Your settings" },
     save: { fr: "Enregistrer les réglages", en: "Save settings" },
     cancel: { fr: "Annuler", en: "Cancel" },
+    // TODO: à relire (convention 6) — retouché le 2026-10-02 (A18 T2.b) : l'anglais des quatre `*Reset` cite l'étiquette que la liste affiche, « To do » (le français disait déjà « à faire »).
     activationReset: {
       fr: "La fenêtre d'activation fait partie de la définition du taux d'activation : ton chiffre déjà saisi repassera « à faire », pour que tu le remesures sur {n} jours.",
-      en: "The activation window is part of the activation rate's definition: the number you already entered will go back to \"to fill in\", so you can measure it again over {n} days.",
+      en: "The activation window is part of the activation rate's definition: the number you already entered will go back to \"to do\", so you can measure it again over {n} days.",
     },
     paidReset: {
       fr: "La fenêtre de paiement fait partie de la définition de la conversion en payant : ton chiffre déjà saisi repassera « à faire », pour que tu le remesures sur {n} jours.",
-      en: "The payment window is part of the paid conversion's definition: the number you already entered will go back to \"to fill in\", so you can measure it again over {n} days.",
+      en: "The payment window is part of the paid conversion's definition: the number you already entered will go back to \"to do\", so you can measure it again over {n} days.",
     },
     monthsChanged: {
       fr: "Tes chiffres déjà saisis portent sur les mois d'avant. Ils ne sont pas effacés : relis-les.",
@@ -2295,11 +2363,11 @@ export const ENGINE_COPY = {
     motionLast: { fr: "Il faut au moins une façon de vendre.", en: "You need at least one way you sell." },
     qualificationReset: {
       fr: "La fenêtre de qualification fait partie de la définition du passage des leads en opportunités : ton chiffre déjà saisi repassera « à faire », pour que tu le remesures sur {n} jours.",
-      en: "The qualification window is part of the lead-to-opportunity rate's definition: the number you already entered will go back to \"to fill in\", so you can measure it again over {n} days.",
+      en: "The qualification window is part of the lead-to-opportunity rate's definition: the number you already entered will go back to \"to do\", so you can measure it again over {n} days.",
     },
     goLiveReset: {
       fr: "La fenêtre de mise en production fait partie de la définition du taux de mise en production : ton chiffre déjà saisi repassera « à faire », pour que tu le remesures sur {n} jours.",
-      en: "The go-live window is part of the go-live rate's definition: the number you already entered will go back to \"to fill in\", so you can measure it again over {n} days.",
+      en: "The go-live window is part of the go-live rate's definition: the number you already entered will go back to \"to do\", so you can measure it again over {n} days.",
     },
     saved: { fr: "Réglages enregistrés.", en: "Settings saved." },
   },

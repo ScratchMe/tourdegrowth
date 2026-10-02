@@ -1,0 +1,116 @@
+/* NumberList — design system extension 07 (design/ds-extension-07-return/components/engine/NumberList). */
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
+  max-width: var(--engine-measure);
+}
+
+.title {
+  font: var(--display-section);
+  letter-spacing: var(--display-letter-spacing);
+  margin: 0;
+}
+
+.stage {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* The stage a team target names: the diagnosis edge (constraint 5). */
+.holds {
+  padding-left: var(--space-7);
+  border-left: var(--engine-diagnosis-edge);
+}
+
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-5);
+}
+
+.stageName {
+  font: var(--engine-stage-title);
+  letter-spacing: var(--display-letter-spacing);
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.headProgress {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-left: auto;
+}
+
+.found {
+  font: var(--meta-xs);
+  color: var(--text-muted);
+}
+
+.rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.item + .item {
+  border-top: var(--border-rule);
+}
+
+/* The whole row is the target: never under --engine-row-height (48px). */
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-5);
+  width: 100%;
+  min-height: var(--engine-row-height);
+  padding: var(--space-3) 0;
+  border: none;
+  background: none;
+  color: var(--text-body);
+  font: var(--body-md);
+  text-align: start;
+}
+
+button.row {
+  cursor: pointer;
+}
+
+button.row:hover .name {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+button.row:focus-visible {
+  outline: var(--focus-width) solid var(--focus-ring);
+  outline-offset: var(--focus-offset-tight);
+}
+
+.name {
+  flex: 1 1 12em;
+  min-width: 0;
+  font-weight: 600;
+}
+
+.value {
+  font: var(--chart-value-compact);
+  font-variant-numeric: var(--tabular);
+  text-align: end;
+}
+
+/* Words, not a figure: the person's own (an activation event) or a choice. */
+.value[data-kind="words"] {
+  font: var(--body-sm);
+  font-style: italic;
+}
+
+.note {
+  flex-basis: 100%;
+  font: var(--meta-xs);
+  color: var(--text-muted);
+}

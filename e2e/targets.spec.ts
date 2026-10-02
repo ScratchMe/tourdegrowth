@@ -2,7 +2,7 @@ import { ADMIN_PASSWORD, expect, grantOwnerPreview, openFold, seedOwnedResult, S
 import type { Page } from "@playwright/test";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import { exampleState, hybridState } from "../src/lib/engine/__tests__/fixtures";
-import { writeEngineSeed } from "./engine-helpers";
+import { writeEngineSeed, openNumber } from "./engine-helpers";
 import { EMULATOR_HOST, REAL_RESULTS, SKIP_EMULATOR_REASON } from "./real-results";
 
 /**
@@ -383,10 +383,7 @@ test.describe("the quiet text button", () => {
     await page.goto("/en/aarrr-funnel-template");
     await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
     await page.getByTestId("engine-setup-board").click();
-    const tab = page.getByTestId("engine-tab-activation");
-    if ((await tab.getAttribute("aria-selected")) !== "true") await tab.click();
-    const toggle = page.getByTestId("engine-metric-act-rate");
-    if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.click();
+    await openNumber(page, "act-rate");
     const sheet = page.getByTestId("engine-sheet-act-rate");
     const rateOnly = sheet.getByRole("button", { name: "I only have the rate" });
     await expect(rateOnly).toBeVisible();
@@ -469,7 +466,7 @@ test.describe("the small button inside the engine", () => {
     await writeEngineSeed(page, hybridState());
     await page.reload();
     await page.getByTestId("engine-motion-selector").getByRole("button", { name: ENGINE_COPY.hybrid.motionName.slg.fr }).click();
-    await page.getByTestId("engine-metric-slg-rev-gross-margin").click();
+    await openNumber(page, "slg-rev-gross-margin");
     const scope = '[data-testid="engine-sheet-slg-rev-gross-margin"]';
     await expect(page.locator(`${scope} ${SMALL}`)).toBeVisible();
     await expectTapTargets(page, `${scope} ${SMALL}`, 1, SMALL_LOOK);

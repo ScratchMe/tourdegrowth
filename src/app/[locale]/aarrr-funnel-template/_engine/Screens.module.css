@@ -397,3 +397,11 @@
   margin: 0;
 }
 
+
+/* --- A number's own screen, opened from the board's list (A18 T2.b) ----- */
+.numberScreen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  max-width: var(--engine-measure);
+}

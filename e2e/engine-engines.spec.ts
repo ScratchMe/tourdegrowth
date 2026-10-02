@@ -4,7 +4,7 @@ import { ENGINE_COPY } from "@/content/engine-copy";
 import { exampleState, measured, ratio } from "../src/lib/engine/__tests__/fixtures";
 import type { EngineIndex, EngineState } from "../src/lib/engine/types";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test, trackedEvents } from "./helpers";
-import { ENGINE_KEYS, engineSeed, storedEngineEntry, openEngineMenu } from "./engine-helpers";
+import { ENGINE_KEYS, engineSeed, storedEngineEntry, openEngineMenu, expectFound } from "./engine-helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
 // owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
@@ -70,7 +70,7 @@ test("a second engine: created from the switcher, switched to and back, deleted 
   await expect(page.getByTestId("engine-switcher-list").locator("li")).toHaveCount(2);
   await page.getByTestId(`engine-switch-${EXAMPLE_ID}`).click();
   await expect(page.getByTestId("engine-bar-line")).toContainText("Unnamed engine");
-  await expect(page.getByTestId("engine-coverage")).toContainText("11 of 17");
+  await expectFound(page, 11);
   expect((await storedIndex(page))!.activeId).toBe(EXAMPLE_ID);
 
   // Delete the second: the switcher offers its file first, and the first engine is untouched.
