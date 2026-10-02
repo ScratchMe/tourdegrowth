@@ -64,6 +64,15 @@
 
   /* --- Distances --- */
   --dist-step: 8px; /* an arrival rises by this much; a shake swings by it */
+
+  /*
+   * --- A flip, not a motion ---
+   * A discrete property (visibility, a rule handed over in place) changes at
+   * once: no duration, only the delay of the motion it waits for, which is a
+   * token of its own (the compact header, design system extension 08). Not a
+   * --dur-*: nothing moves for this long.
+   */
+  --flip: 0s;
 }
 
 /* The brand's keyframes (the stamp, the slam, the progress pulse) are NOT

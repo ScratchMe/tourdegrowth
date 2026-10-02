@@ -70,12 +70,19 @@ export default async function LandingPage({ params }: PageProps) {
         <WordmarkLink locale={locale} />
         <nav className={styles.nav}>
           <LocaleSwitcher locale={locale} path="/" />
-          <Button href={localePath(locale, "/glossary")} variant="quiet" className={styles.navLink}>
-            {tc(UI_STRINGS.nav.glossary, locale)}
-          </Button>
-          <Button href={localePath(locale, "/how-it-works")} variant="quiet" className={styles.navLink}>
-            {tc(UI_STRINGS.nav.howItWorks, locale)}
-          </Button>
+          {/* The two quiet links leave the compact header (design system
+              extension 08): the footer carries them. The mark is on a span,
+              so the header's motion never overrides the Button's own hover. */}
+          <span className={styles.navLink} data-header-compact="leave">
+            <Button href={localePath(locale, "/glossary")} variant="quiet">
+              {tc(UI_STRINGS.nav.glossary, locale)}
+            </Button>
+          </span>
+          <span className={styles.navLink} data-header-compact="leave">
+            <Button href={localePath(locale, "/how-it-works")} variant="quiet">
+              {tc(UI_STRINGS.nav.howItWorks, locale)}
+            </Button>
+          </span>
           <Button href="/quiz" hard size="sm" className={styles.headerCta}>
             {tc(t.ctaPrimary, locale)}
           </Button>

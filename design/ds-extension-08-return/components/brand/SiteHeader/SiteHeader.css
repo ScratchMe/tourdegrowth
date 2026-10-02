@@ -1,0 +1,344 @@
+/* SiteHeader — design system extension 08. Tokens only.
+ * Port: SiteHeader.module.css (the flat names are the CSS Modules' compiled
+ * ones, as in returns 04 and 05). Reads tokens/header.css and motion.css. */
+
+/* ── Today's header (unchanged look) ────────────────────────────────────── */
+
+.SiteHeader_header {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-header);
+}
+
+/* The row's frosted paper, now a layer of its own: the compact state shrinks
+ * it with a transform, never the header's box (mechanic 1). 92% stays the
+ * contrast bound it is today (README, "Contrast"). */
+.SiteHeader_bar {
+  position: relative;
+}
+
+.SiteHeader_glass {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: color-mix(in srgb, var(--surface-card) 92%, transparent);
+  backdrop-filter: blur(14px) saturate(1.3);
+  transform-origin: top;
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  .SiteHeader_glass {
+    background: var(--surface-card);
+  }
+}
+
+.SiteHeader_row {
+  position: relative;
+  z-index: 2;
+  margin: 0 auto;
+  padding: var(--space-6) 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  container: header-row / inline-size;
+}
+
+.SiteHeader_row.SiteHeader_wide {
+  max-width: var(--content-max-width);
+}
+
+.SiteHeader_row.SiteHeader_reading {
+  max-width: var(--width-reading);
+}
+
+.SiteHeader_row.SiteHeader_narrow {
+  max-width: 720px;
+}
+
+@media (max-width: 760px) {
+  .SiteHeader_row {
+    padding-block: var(--space-5);
+  }
+}
+
+/* The wordmark, and after it (compact only, out of flow) the race. */
+.SiteHeader_lead {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+/* The page's own controls, right. */
+.SiteHeader_end {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+  margin-left: auto;
+}
+
+/* The band sits under the glass: in the compact state it folds up beneath
+ * the row's paper, hanging from the edge, never over the wordmark. */
+.SiteHeader_band {
+  position: relative;
+  z-index: 0;
+}
+
+/* A plain header's edge: the dashed rule, as today — always there where the
+ * browser cannot tell it is stuck, only once stuck where it can. */
+.SiteHeader_header[data-site-header=plain] {
+  border-bottom: var(--border-rule);
+}
+
+@supports (container-type: scroll-state) {
+  .SiteHeader_header {
+    container-type: scroll-state;
+  }
+  .SiteHeader_header[data-site-header=plain] {
+    border-bottom-color: transparent;
+  }
+  @container scroll-state(stuck: top) {
+    .SiteHeader_header[data-site-header=plain]::after {
+      content: "";
+      position: absolute;
+      inset-inline: 0;
+      bottom: -1px;
+      border-bottom: var(--border-rule);
+      pointer-events: none;
+    }
+  }
+}
+
+/* The edge that rises with the compact line. In the full state it lies
+ * exactly on the band's own bottom 6px (4px of its colour, 2px of ink), so it
+ * cannot be told apart from it; a plain header's is invisible until compact. */
+.SiteHeader_edge {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.SiteHeader_header[data-site-header=band] .SiteHeader_edge {
+  height: var(--header-edge-band);
+  border-bottom: var(--border-solid);
+}
+
+.SiteHeader_header[data-space=tour] .SiteHeader_edge {
+  background: var(--space-tour-bg);
+}
+
+.SiteHeader_header[data-space=engine] .SiteHeader_edge {
+  background: var(--space-engine-bg);
+}
+
+.SiteHeader_header[data-space=game] .SiteHeader_edge {
+  background: var(--space-game-bg);
+}
+
+.SiteHeader_header[data-site-header=plain] .SiteHeader_edge {
+  height: var(--header-edge-plain);
+  border-bottom: var(--border-rule);
+  opacity: 0;
+}
+
+/* The compact race waits, out of flow and out of sight, right after the
+ * wordmark. Hidden (visibility), it is out of the accessibility tree too:
+ * only one race is ever exposed. */
+.SiteHeader_lead > .SpaceBand_raceCompact {
+  position: absolute;
+  top: 50%;
+  left: calc(100% + var(--space-8));
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(calc(-50% + var(--header-step)));
+  pointer-events: none;
+}
+
+/* A phone held upright never compacts: there the race is not drawn at all,
+ * so nothing of it can widen the page (must stay 2). */
+@media not (orientation: landscape) {
+  .SiteHeader_lead > .SpaceBand_raceCompact {
+    display: none;
+  }
+}
+
+/* ── The compact state: landscape windows, once the page has scrolled ──── */
+
+@media (orientation: landscape) {
+  .SiteHeader_header[data-compact=true] {
+    /* The box keeps its full height; only the line is painted and hit. */
+    pointer-events: none;
+  }
+
+  .SiteHeader_header[data-compact=true] .SiteHeader_glass {
+    transform: scaleY(var(--header-glass-scale));
+    pointer-events: auto;
+  }
+
+  .SiteHeader_header[data-compact=true] .SiteHeader_row {
+    transform: translateY(var(--header-row-shift));
+  }
+
+  .SiteHeader_header[data-compact=true] .SiteHeader_row > * {
+    pointer-events: auto;
+  }
+
+  /* The band folds up with the edge it hangs from, under the glass: what
+   * shows of it is always exactly the room between the line and the edge. */
+  .SiteHeader_header[data-compact=true] .SiteHeader_band,
+  .SiteHeader_header[data-compact=true] .SiteHeader_edge {
+    transform: translateY(var(--header-edge-shift));
+  }
+
+  .SiteHeader_header[data-compact=true] .SiteHeader_band {
+    visibility: hidden;
+  }
+
+  .SiteHeader_header[data-compact=true][data-site-header=plain] .SiteHeader_edge {
+    opacity: 1;
+  }
+
+  .SiteHeader_header[data-compact=true][data-site-header=plain]::after {
+    opacity: 0;
+  }
+
+  .SiteHeader_header[data-compact=true][data-site-header=plain] {
+    border-bottom-color: transparent;
+  }
+
+  .SiteHeader_header[data-compact=true] [data-header-compact=leave] {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(calc(-1 * var(--header-step)));
+  }
+
+  /* What stays closes up on the right, over the room of what left after it
+   * (compactHeader.js measures it). */
+  .SiteHeader_header[data-compact=true] .SiteHeader_end > [data-header-close-up] {
+    transform: translateX(var(--header-close-up));
+  }
+
+  .SiteHeader_header[data-compact=true] .SiteHeader_lead > .SpaceBand_raceCompact {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(-50%);
+    pointer-events: auto;
+  }
+
+  /* ── The motion (MOTION.md). Only once the enhancement is live, so a page
+   * opened halfway down starts compact without moving. Each element carries,
+   * in each state, the transition that brings it INTO that state. ──────── */
+
+  /* Changes in place, both ways: --dur-state. */
+  .SiteHeader_header[data-compact-ready] .SiteHeader_glass,
+  .SiteHeader_header[data-compact-ready] .SiteHeader_row,
+  .SiteHeader_header[data-compact-ready] .SiteHeader_edge {
+    transition:
+      transform var(--dur-state) var(--ease-out),
+      opacity var(--dur-state) var(--ease-out);
+  }
+
+  /* A plain header: the edge takes over from today's rule in place, at
+   * once, then travels up with the line; coming back, it hands over to the
+   * rule only once it is home. */
+  .SiteHeader_header[data-compact-ready][data-site-header=plain][data-compact=true] .SiteHeader_edge {
+    transition: transform var(--dur-state) var(--ease-out), opacity 0s;
+  }
+
+  .SiteHeader_header[data-compact-ready][data-site-header=plain][data-compact=false] .SiteHeader_edge {
+    transition:
+      transform var(--dur-state) var(--ease-out),
+      opacity 0s linear var(--dur-state);
+  }
+
+  .SiteHeader_header[data-compact-ready][data-site-header=plain][data-compact=false],
+  .SiteHeader_header[data-compact-ready][data-site-header=plain][data-compact=false]::after {
+    transition:
+      border-color 0s linear var(--dur-state),
+      opacity 0s linear var(--dur-state);
+  }
+
+  /* The band folds and unfolds with them; it is out of sight (and out of
+   * the accessibility tree) only once folded. */
+  .SiteHeader_header[data-compact-ready][data-compact=false] .SiteHeader_band {
+    transition: transform var(--dur-state) var(--ease-out);
+  }
+
+  .SiteHeader_header[data-compact-ready][data-compact=true] .SiteHeader_band {
+    transition:
+      transform var(--dur-state) var(--ease-out),
+      visibility 0s linear var(--dur-state);
+  }
+
+  /* The close-up: once what leaves has gone when compacting; at once when
+   * expanding, so the room is open before the links arrive in it. */
+  .SiteHeader_header[data-compact-ready] .SiteHeader_end > [data-header-close-up] {
+    transition: transform var(--dur-state) var(--ease-out);
+  }
+
+  .SiteHeader_header[data-compact-ready][data-compact=true] .SiteHeader_end > [data-header-close-up] {
+    transition: transform var(--dur-state) var(--ease-out) var(--dur-fast);
+  }
+
+  /* Expanding: the controls that left come back (arrive), once the compact
+   * race has gone. */
+  .SiteHeader_header[data-compact-ready][data-compact=false] [data-header-compact=leave] {
+    transition:
+      opacity var(--dur-open) var(--ease-out) var(--dur-fast),
+      transform var(--dur-open) var(--ease-out) var(--dur-fast),
+      visibility 0s linear var(--dur-fast);
+  }
+
+  .SiteHeader_header[data-compact-ready][data-compact=false] .SiteHeader_lead > .SpaceBand_raceCompact {
+    transition:
+      opacity var(--dur-close) var(--ease-out),
+      transform var(--dur-close) var(--ease-out),
+      visibility 0s linear var(--dur-close);
+  }
+
+  /* Compacting: the controls that leave go first (faster); the race
+   * arrives in the line after them. */
+  .SiteHeader_header[data-compact-ready][data-compact=true] [data-header-compact=leave] {
+    transition:
+      opacity var(--dur-close) var(--ease-out),
+      transform var(--dur-close) var(--ease-out),
+      visibility 0s linear var(--dur-close);
+  }
+
+  .SiteHeader_header[data-compact-ready][data-compact=true] .SiteHeader_lead > .SpaceBand_raceCompact {
+    transition:
+      opacity var(--dur-open) var(--ease-out) var(--dur-fast),
+      transform var(--dur-open) var(--ease-out) var(--dur-fast),
+      visibility 0s linear var(--dur-fast);
+  }
+}
+
+/* A narrow line (a phone on its side narrower than about 690px, such as
+ * 667 × 375): the current leg keeps its pictogram and number, its name goes
+ * to screen readers only. */
+@container header-row (max-width: 640px) {
+  .SpaceBand_raceCompact [data-state=current] .SpaceBand_label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .SpaceBand_raceCompact [data-state=current] .SpaceBand_n::after {
+    content: none;
+  }
+}
+
+/* The narrowest line (a 568 × 320 phone on its side, with the quiz's
+ * progress): the current leg is its number in its space's colour, as the
+ * band's own race is on a phone today. */
+@container header-row (max-width: 560px) {
+  .SpaceBand_raceCompact [data-state=current] .SpaceBand_mini {
+    display: none;
+  }
+}

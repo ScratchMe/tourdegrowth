@@ -1,0 +1,26 @@
+<!-- @dsCard group="Extension 08 · proposal" -->
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The header, compact · a page that scrolls</title>
+<!-- Everything here is source: no build step, no CDN. Serve the project over
+     http (ES modules do not load from file://). This folder lives at
+     design/ds-extension-08-return/. -->
+<link rel="stylesheet" href="../../../fonts/fonts.css">
+<link rel="stylesheet" href="system-snapshot.css">
+<link rel="stylesheet" href="../tokens/header.css">
+<link rel="stylesheet" href="../components/brand/SpaceBand/SpaceBand.css">
+<link rel="stylesheet" href="../components/brand/SiteHeader/SiteHeader.css">
+<link rel="stylesheet" href="globals-compact.css">
+<link rel="stylesheet" href="deltas.css">
+<link rel="stylesheet" href="board.css">
+<script type="importmap">{ "imports": { "react": "./react-lite.js", "tour-de-growth": "./sys/index.js", "tour-de-growth/space": "./sys/space.js" } }</script>
+</head>
+<body>
+<div id="root"></div>
+<noscript>Without JavaScript the board cannot draw its stand-in pages; the header itself is server-rendered in the app and, without JavaScript, is today's.</noscript>
+<script type="module" src="board.js"></script>
+</body>
+</html>

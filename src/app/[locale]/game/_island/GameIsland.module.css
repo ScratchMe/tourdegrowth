@@ -49,8 +49,10 @@
 .side {
   grid-area: side;
   position: sticky;
-  /* Under the sticky site header, not beneath it (globals.css). */
+  /* Under the sticky site header, not beneath it (globals.css); it glides
+     with the header when the header compacts (design system extension 08). */
   top: calc(var(--sticky-offset) + var(--space-9));
+  transition: top var(--dur-state) var(--ease-out);
   display: flex;
   flex-direction: column;
   align-items: center;

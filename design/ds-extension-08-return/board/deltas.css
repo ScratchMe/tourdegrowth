@@ -1,0 +1,5 @@
+/* The one change this return proposes outside brand/ (components/core/
+ * Segmented/Segmented.delta.md), applied here so the board shows it. */
+.Segmented_sm .Segmented_option {
+  min-width: 42px;
+}

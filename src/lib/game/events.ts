@@ -34,12 +34,13 @@ export type GameLevelsCovered = AssertNever<Exclude<LevelSlug, (typeof GAME_LEVE
 /**
  * `game_entry_clicked/<detail>` — the doors into the game (§13.3): the four
  * of the brief, then the landing's strip and the space band's pill
- * (CHANTIERS.md A7.9, C15, 2026-09-29).
+ * (CHANTIERS.md A7.9, C15, 2026-09-29), then the compact header's race,
+ * counted apart (design system extension 08, Antoine, 2026-10-02).
  */
 export const GAME_ENTRY_EVENT = "game_entry_clicked";
 export const GAME_ENTRY_DETAILS = [
   "result/acquisition", "deep_dive/acquisition", "result/retention", "deep_dive/retention",
-  "footer", "hub", "home_strip", "space_band",
+  "footer", "hub", "home_strip", "space_band", "space_band_compact",
 ] as const;
 export type GameEntryDetail = (typeof GAME_ENTRY_DETAILS)[number];
 

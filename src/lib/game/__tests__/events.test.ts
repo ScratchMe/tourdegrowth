@@ -26,7 +26,7 @@ describe("game analytics vocabulary (plan §3.8)", () => {
     }
   });
 
-  it("has the four entry doors the brief names (G7's source list), level 2's result doors, then the landing strip's and the band's (A7.9)", () => {
+  it("has the four entry doors the brief names (G7's source list), level 2's result doors, then the landing strip's and the band's (A7.9), then the compact header's race (extension 08)", () => {
     expect(GAME_ENTRY_DETAILS.map((d) => `${GAME_ENTRY_EVENT}/${d}`)).toEqual([
       "game_entry_clicked/result/acquisition",
       "game_entry_clicked/deep_dive/acquisition",
@@ -36,6 +36,7 @@ describe("game analytics vocabulary (plan §3.8)", () => {
       "game_entry_clicked/hub",
       "game_entry_clicked/home_strip",
       "game_entry_clicked/space_band",
+      "game_entry_clicked/space_band_compact",
     ]);
   });
 

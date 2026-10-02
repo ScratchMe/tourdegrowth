@@ -1,0 +1,53 @@
+/* tokens/header.css — design system extension 08: the sticky header,
+ * compact once the page scrolls (landscape windows only).
+ *
+ * Measures of the header in its two states, and the one condition under
+ * which it compacts. No new colour, no new duration, no new curve: the
+ * motion uses tokens/motion.css as it stands (MOTION.md says which, where).
+ */
+
+:root {
+  /* When: the compact state exists in a landscape window only (Q1); a phone
+   * held upright keeps today's header, untouched. Media queries cannot read
+   * a custom property, so SiteHeader.css and globals.css write
+   * `(orientation: landscape)` where it applies. */
+
+  /* ── The full header, as today (measured on the production build) ───── */
+  --header-row: 72px;            /* 14px + a 44px control + 14px */
+  --header-band: 46px;           /* 44px + its 2px solid bottom edge */
+  --header-height-band: 118px;   /* row + band */
+  --header-height-plain: 74px;   /* row + the dashed rule's 2px */
+
+  /* ── The compact header ──────────────────────────────────────────────── */
+
+  /* One line: a 44px target with 2px of air above and below. Every control
+   * kept in it is drawn 28–37px tall and reaches 44px through its hit strip
+   * (styles/hit.module.css, Button sm, Segmented sm). */
+  --header-line: 48px;
+
+  /* The band, slimmed to its colour: 4px of the space's colour over the
+   * band's own 2px solid ink edge. 6px in all. */
+  --header-stripe: 4px;
+  --header-edge-band: 6px;
+  /* A page with no band keeps its edge: the dashed rule, 2px. */
+  --header-edge-plain: 2px;
+
+  --header-height-band-compact: 54px;   /* line 48 + stripe 4 + edge 2 */
+  --header-height-plain-compact: 50px;  /* line 48 + rule 2 */
+
+  /* ── Motion distances (MOTION.md) ────────────────────────────────────── */
+
+  /* What leaves the line and what arrives in it travels one step. (The
+   * band and the edge travel the measured difference between the two
+   * heights: compactHeader.js sets it as --header-edge-shift.) */
+  --header-step: var(--dist-step);
+}
+
+@media (max-width: 760px) {
+  :root {
+    /* Today's row on a narrow window: 12px of padding (68px). */
+    --header-row: 68px;
+    --header-height-band: 114px;
+    --header-height-plain: 70px;
+  }
+}
