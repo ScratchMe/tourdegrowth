@@ -313,21 +313,21 @@ describe("isAnswerMetric / statusQuestionOf — an answer is not « ce chiffre �
     for (const s of METRIC_SHAPES) expect(isAnswerMetric(s.id), s.id).toBe(s.unit === "text" || s.unit === "choice");
   });
 
-  it("an answer is asked where you are « on this point », a number where you are « with this number »", () => {
+  it("an answer is offered « no answer to hand », a number « no figure to hand »", () => {
     for (const p of [FR, EN]) {
       for (const s of METRIC_SHAPES) {
         const question = statusQuestionOf(s.id, p.strings);
         if (ANSWERS.includes(s.id)) {
-          expect(question, s.id).toBe(p.strings.sheet.statusQuestionAnswer);
-          expect(question, s.id).not.toMatch(/chiffre|number/i);
+          expect(question, s.id).toBe(p.strings.sheet.answerLegendAnswer);
+          expect(question, s.id).not.toMatch(/chiffre|number|figure/i);
         } else {
-          expect(question, s.id).toBe(p.strings.sheet.statusQuestion);
+          expect(question, s.id).toBe(p.strings.sheet.answerLegend);
         }
       }
     }
     // The two questions are different sentences in both languages — otherwise the choice above proves nothing.
-    expect(FR.strings.sheet.statusQuestionAnswer).not.toBe(FR.strings.sheet.statusQuestion);
-    expect(EN.strings.sheet.statusQuestionAnswer).not.toBe(EN.strings.sheet.statusQuestion);
+    expect(FR.strings.sheet.answerLegendAnswer).not.toBe(FR.strings.sheet.answerLegend);
+    expect(EN.strings.sheet.answerLegendAnswer).not.toBe(EN.strings.sheet.answerLegend);
   });
 
   it("the step-by-step eyebrow for an answer does not call it a number either", () => {

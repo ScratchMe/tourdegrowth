@@ -388,7 +388,6 @@ test.describe("the quiet text button", () => {
     const toggle = page.getByTestId("engine-metric-act-rate");
     if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.click();
     const sheet = page.getByTestId("engine-sheet-act-rate");
-    await sheet.getByRole("radio", { name: "I have it" }).check();
     const rateOnly = sheet.getByRole("button", { name: "I only have the rate" });
     await expect(rateOnly).toBeVisible();
     // Its fields stand right above it: the neighbours a strip would cover.

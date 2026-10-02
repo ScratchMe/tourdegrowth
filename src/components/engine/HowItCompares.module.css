@@ -1,0 +1,77 @@
+/* HowItCompares — design system extension 07 (design/ds-extension-07-return/components/engine/HowItCompares). */
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding-top: var(--space-5);
+  border-top: var(--border-rule);
+}
+
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-5);
+}
+
+.legend {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-8);
+  margin: 0;
+  padding: 0;
+  font: var(--meta-xs);
+  color: var(--text-body);
+}
+
+.key {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.swatch {
+  display: inline-block;
+  flex: none;
+}
+
+/* The legend draws each mark as the chart does. */
+.value .swatch {
+  width: var(--engine-key-width);
+  height: var(--engine-key-bar);
+  border-radius: var(--radius-tag);
+  background: var(--viz-ink);
+}
+
+.target .swatch {
+  width: var(--engine-key-tick-width);
+  height: var(--engine-key-tick-height);
+  border-radius: var(--engine-key-tick-radius);
+  background: var(--viz-highlight);
+}
+
+.band .swatch {
+  width: var(--engine-key-width);
+  height: var(--viz-band-height);
+  border: var(--viz-band-edge);
+  border-top: none;
+}
+
+.caveat {
+  font: var(--body-sm);
+  color: var(--text-muted);
+  max-width: var(--measure-read);
+  margin: 0;
+}
+
+.note {
+  font: var(--body-sm);
+  color: var(--text-body);
+  margin: 0;
+}
+
+.targetField {
+  padding-top: var(--space-3);
+}

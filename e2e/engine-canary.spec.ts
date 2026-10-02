@@ -3,6 +3,7 @@ import type { Locator, Page, Request } from "@playwright/test";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import { engineEventPaths } from "@/lib/analytics/goatcounter";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test, trackedEvents } from "./helpers";
+import { openWords } from "./engine-helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
 // owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
@@ -67,23 +68,21 @@ test.describe("the growth engine keeps everything in the browser (D16)", () => {
 
     // --- The activation event: the one number that IS a text ---------------
     const event = await openSheet(page, "activation", "act-event");
-    await event.getByRole("radio", { name: ENGINE_COPY.sheet.haveIt.en }).check();
     await event.locator("#engine-act-event-text").fill(EVENT);
     await saveSheet(event, "act-event");
 
     // --- A counted rate, its note and its definition -----------------------
     const rate = await openSheet(page, "activation", "act-rate");
-    await rate.getByRole("radio", { name: ENGINE_COPY.sheet.haveIt.en }).check();
     await rate.locator("#engine-act-rate-num").fill(NUMBER);
     await rate.locator("#engine-act-rate-den").fill("99999999");
     await rate.locator("#engine-act-rate-source").selectOption({ label: "Amplitude" });
+    await openWords(rate);
     await rate.locator("#engine-act-rate-definition").fill(DEFINITION);
     await rate.locator("#engine-act-rate-note").fill(NOTE);
     await saveSheet(rate, "act-rate");
 
     // --- The top channel's name ----------------------------------------------
     const channel = await openSheet(page, "acquisition", "acq-top-channel-share");
-    await channel.getByRole("radio", { name: ENGINE_COPY.sheet.haveIt.en }).check();
     await channel.locator("#engine-acq-top-channel-share-num").fill("300");
     await channel.locator("#engine-acq-top-channel-share-den").fill("1000");
     await channel.locator("#engine-acq-top-channel-share-label").fill(CHANNEL);
@@ -92,7 +91,7 @@ test.describe("the growth engine keeps everything in the browser (D16)", () => {
 
     // --- "I can't find it": the triage and its free comment ---------------
     const triage = await openSheet(page, "retention", "ret-d30");
-    await triage.getByRole("radio", { name: ENGINE_COPY.sheet.cantFind.en }).check();
+    await triage.getByRole("button", { name: ENGINE_COPY.sheet.cantFind.en }).click();
     await triage.getByTestId("engine-triage").getByRole("radio", { name: ENGINE_COPY.cause.notTracked.en }).check();
     await triage.getByTestId("engine-triage").getByRole("radio", { name: ENGINE_COPY.repair.sprint.en }).check();
     await triage.locator("#engine-ret-d30-repair-comment").fill(REPAIR);
@@ -100,7 +99,8 @@ test.describe("the growth engine keeps everything in the browser (D16)", () => {
 
     // --- "I'll ask for it": a definition that travels in the copied request --
     const asked = await openSheet(page, "revenue", "rev-gross-margin");
-    await asked.getByRole("radio", { name: ENGINE_COPY.sheet.willAsk.en }).check();
+    await asked.getByRole("button", { name: ENGINE_COPY.sheet.willAsk.en }).click();
+    await openWords(asked);
     await asked.locator("#engine-rev-gross-margin-definition").fill(ASKED);
     await asked.getByTestId("engine-request-copy").click();
     await expect(asked.getByText(ENGINE_COPY.request.copied.en)).toBeVisible();
@@ -240,13 +240,11 @@ test.describe("sales-assisted keeps everything in the browser too (D16, §18.10.
 
     // What « live » means: sales-assisted's one definition typed as a text.
     const live = await openSheet(page, "activation", "slg-act-live-event");
-    await live.getByRole("radio", { name: ENGINE_COPY.sheet.haveIt.en }).check();
     await live.locator("#engine-slg-act-live-event-text").fill(LIVE);
     await saveSheet(live, "slg-act-live-event");
 
     // Why contracts aren't renewed.
     const loss = await openSheet(page, "retention", "slg-ret-loss-cause");
-    await loss.getByRole("radio", { name: ENGINE_COPY.sheet.haveIt.en }).check();
     await loss.locator("#engine-slg-ret-loss-cause-text").fill(LOSS);
     // A cause is said with how it is known (data, an interview, a hunch): the first answer will do.
     await loss.getByRole("group", { name: ENGINE_COPY.sheet.evidence.en }).getByRole("radio").first().check();
@@ -254,19 +252,19 @@ test.describe("sales-assisted keeps everything in the browser too (D16, §18.10.
 
     // A nine-digit count and a note, on the win rate.
     const win = await openSheet(page, "revenue", "slg-rev-win-rate");
-    await win.getByRole("radio", { name: ENGINE_COPY.sheet.haveIt.en }).check();
     await win.locator("#engine-slg-rev-win-rate-num").fill(COUNT);
     await win.locator("#engine-slg-rev-win-rate-den").fill("999999999");
     await win.locator("#engine-slg-rev-win-rate-source").selectOption({ index: 1 });
+    await openWords(win);
     await win.locator("#engine-slg-rev-win-rate-note").fill(SLG_NOTE);
     await saveSheet(win, "slg-rev-win-rate");
 
     // The link's own definition (its PQL threshold), under sales-assisted's acquisition.
     const link = await openSheet(page, "acquisition", "link-pql-handoff");
-    await link.getByRole("radio", { name: ENGINE_COPY.sheet.haveIt.en }).check();
     await link.locator("#engine-link-pql-handoff-num").fill("31");
     await link.locator("#engine-link-pql-handoff-den").fill("130");
     await link.locator("#engine-link-pql-handoff-source").selectOption({ index: 1 });
+    await openWords(link);
     await link.locator("#engine-link-pql-handoff-definition").fill(PQL);
     await saveSheet(link, "link-pql-handoff");
 

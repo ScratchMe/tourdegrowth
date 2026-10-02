@@ -348,7 +348,6 @@ function NumberStep({
   const s = view.strings.steps;
   const motions = view.state.setup.motions;
   const shape = numberSequence(motions)[index]!;
-  const metric = metricById(view.metrics, shape.id);
   const place = numberPlace(index, motions);
   // Numbered within its motion — « Assisté · chiffre 4 sur 15 », never « 21 sur 32 » — once there is more than self-serve.
   const motionLabel = place.group === "link" ? view.strings.hybrid.linkBlock : view.strings.hybrid.motionName[place.group];
@@ -357,29 +356,38 @@ function NumberStep({
   const answer = isAnswerMetric(shape.id);
   const skip = motions.plg && motions.slg && place.group === "plg" ? s.skipToSlg : place.group !== "plg" ? s.skipToWhatIf : null;
   return (
-    <Card elevation="flat" className={styles.card} data-testid="engine-steps-number" data-metric={shape.id}>
-      <p className={styles.eyebrow}>
-        {/* « Chiffre 4 sur 15 » over the activation event would call a name a number (Antoine, 2026-09-26). */}
-        {fill(single ? (answer ? s.answerOf : s.numberOf) : answer ? s.answerOfMotion : s.numberOfMotion, values)}
-      </p>
-      <h2 id="engine-steps-title" ref={heading} tabIndex={-1} className={styles.title}>
-        {metric.name}
-      </h2>
-      <MetricSheet key={shape.id} id={shape.id} view={view} actions={actions} variant="step" onSaved={onNext} />
-      <div className={styles.nav}>
-        <Button variant="quiet" onClick={onBack} data-testid="engine-steps-back">
-          {s.back}
-        </Button>
-        <Button variant="quiet" onClick={onNext} data-testid="engine-steps-skip">
-          {s.skip}
-        </Button>
-        {skip ? (
-          <Button variant="quiet" onClick={onSkipGroup} data-testid="engine-steps-skip-group">
-            {skip}
-          </Button>
-        ) : null}
-      </div>
-    </Card>
+    // The sheet is the screen (design system extension 07): it carries the card, the heading and the actions.
+    <div className={styles.number} data-testid="engine-steps-number" data-metric={shape.id}>
+      <MetricSheet
+        key={shape.id}
+        id={shape.id}
+        view={view}
+        actions={actions}
+        variant="step"
+        onSaved={onNext}
+        screen={{
+          // « Chiffre 4 sur 15 » over the activation event would call a name a number (Antoine, 2026-09-26).
+          position: fill(single ? (answer ? s.answerOf : s.numberOf) : answer ? s.answerOfMotion : s.numberOfMotion, values),
+          headingId: "engine-steps-title",
+          headingRef: heading,
+        }}
+        extraActions={
+          <>
+            <Button variant="quiet" onClick={onBack} data-testid="engine-steps-back">
+              {s.back}
+            </Button>
+            <Button variant="quiet" onClick={onNext} data-testid="engine-steps-skip">
+              {s.skip}
+            </Button>
+            {skip ? (
+              <Button variant="quiet" onClick={onSkipGroup} data-testid="engine-steps-skip-group">
+                {skip}
+              </Button>
+            ) : null}
+          </>
+        }
+      />
+    </div>
   );
 }
 

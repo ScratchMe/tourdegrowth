@@ -1,0 +1,101 @@
+/* NumberSheet — design system extension 07 (design/ds-extension-07-return/components/engine/NumberSheet). */
+
+.root {
+  max-width: var(--engine-measure);
+  min-width: 0;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  min-width: 0;
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3) var(--space-8);
+}
+
+.identity {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.name {
+  font: var(--engine-number-title);
+  letter-spacing: var(--display-letter-spacing);
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.name:focus {
+  outline: none;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-8);
+}
+
+.lede {
+  font: var(--body-lg);
+  color: var(--text-body);
+  margin: calc(-1 * var(--space-3)) 0 0;
+}
+
+.formula {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-5);
+  margin: calc(-1 * var(--space-5)) 0 0;
+}
+
+.formulaLabel {
+  font: var(--meta-xs);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.formulaText {
+  font: var(--engine-formula);
+  color: var(--text-body);
+  overflow-wrap: anywhere;
+}
+
+.tour {
+  font: var(--body-sm);
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-5) var(--space-10);
+  padding-top: var(--space-3);
+}
+
+@media (max-width: 760px) {
+  .name {
+    font: var(--engine-number-title-mobile);
+  }
+
+  .body {
+    gap: var(--space-7);
+  }
+
+  /* The primary comes first and takes the row on a phone. */
+  .actions > :first-child {
+    flex: 1 1 100%;
+  }
+}
