@@ -337,7 +337,7 @@ describe("lengths", () => {
       ...under("request.copy", "request.copyGroup", "request.copied", "request.remind"),
       ...under("deck.png", "deck.pngHd", "deck.copyImage", "deck.pdf", "deck.copyText", "deck.textCopied"),
       ...under("sheet.save", "sheet.canEstimate", "sheet.willAsk", "sheet.cantFind", "sheet.answerBack", "sheet.answerBackAnswer", "sheet.writeDefinition"),
-      ...under("page.cta", "page.tourFirst", "setup.startSteps", "setup.startBoard", "setup.tourLink"),
+      ...under("page.cta", "page.tourFirst", "setup.tourLink", "start.go", "start.change", "start.example", "start.import", "targetsStart.go"),
       ...under("steps.skipToSlg", "steps.skipToWhatIf", "sheet.companyWide"),
       ...under("engines.open", "engines.new", "engines.delete", "engines.deleteConfirm", "io.addApply", "io.mergeApply"),
       ...under("table.download", "table.read", "table.apply", "table.applyOne", "table.cancel"),

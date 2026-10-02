@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from "react";
 import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
+import { EngineStart, type StartMotion } from "@/components/engine/EngineStart";
 import { motionOfMetric, motionShapes, shapeOf } from "@/lib/engine/catalog-shape";
 import type { EngineStrings, ResolvedBridge, ResolvedDerived, ResolvedMetric } from "@/lib/engine/strings";
 import { MAX_ENGINES, type EngineCalcContext, type EngineDerived, type EngineSetup, type EngineState, type LeverId, type MetricEntry, type MetricId, type Motion, type MotionDerived, type RoleId, type SharedCount, type SlideTitle, type Snapshot, type YearMonth } from "@/lib/engine/types";
@@ -37,6 +38,9 @@ import { NumberScreen } from "./_engine/NumberScreen";
 import { Steps } from "./_engine/Steps";
 import { resumePosition, type StepPosition } from "./_engine/steps-model";
 import { Setup, type SetupChoice } from "./_engine/Setup";
+import { motionsOf, startDefaults, startPlan } from "./_engine/start";
+import { TargetsStart } from "./_engine/TargetsStart";
+import { nextSelfNumber } from "./_engine/next-step";
 import { domId, fill, formatMonth } from "./_engine/text";
 import type { EngineActions, EngineView } from "./_engine/view";
 import screens from "./_engine/Screens.module.css";
@@ -67,7 +71,9 @@ export interface EngineWorkbenchProps {
  */
 // `new` and `delete` since A14 T5 (§19.1.5): another engine's setup, and one engine's deletion.
 // `number` since A18 T2.b: one number's own screen, opened from the board's list.
-type Screen = "board" | "number" | "steps" | "deck" | "import" | "erase" | "settings" | "example" | "new" | "delete";
+// `targets` since A18 T3.a: the « Cibles » screen right after the start (C40); `new-settings`, the full card of another engine.
+// Before an engine exists, `settings` is that full card, opened by the start screen's « Modifier ».
+type Screen = "board" | "number" | "targets" | "steps" | "deck" | "import" | "erase" | "settings" | "example" | "new" | "new-settings" | "delete";
 
 // Once per page session, not per mount (§11.6: "first view of the island in the session").
 let openedTracked = false;
@@ -123,8 +129,10 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
   const [numberId, setNumberId] = useState<MetricId | null>(null);
   // The hybrid's selector (§18.7): the motion of the number opened last in this session, else self-serve.
   const [motionView, setMotionView] = useState<Motion | null>(null);
-  // The motions the setup card had ticked when « Voir un exemple rempli » was pressed (§18.7).
+  // The motions the start screen had chosen when « Voir un exemple rempli » was pressed (§18.7).
   const [exampleMotions, setExampleMotions] = useState<Record<Motion, boolean>>({ plg: true, slg: false });
+  // The start screen's one question (A18 T3.a): kept while the person looks at the example or the full card.
+  const [startMotion, setStartMotion] = useState<StartMotion>("ss");
   const [writeFailed, setWriteFailed] = useState(false);
   // The monthly series (§19.2.4): the month on screen — null, the month being filled — and whether a past one is being corrected.
   const [monthIndex, setMonthIndex] = useState<number | null>(null);
@@ -194,6 +202,31 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
     setCorrecting(false);
   }
 
+  /** Leaves whatever the board was showing — a past month, a number, the engine shown — for another engine's. */
+  function resetBoard() {
+    toCurrentMonth();
+    setNumberId(null);
+    setMotionView(null);
+  }
+
+  /**
+   * A new engine, from the start screen or its full card (A18 T3.a): written
+   * at once — the first visit's, or another beside the device's (`add`) —
+   * then the « Cibles » screen, its heading focused (R-19).
+   */
+  function createEngine(choice: SetupChoice, add = false) {
+    const nowIso = new Date().toISOString();
+    const created = newEngineState(choice.setup, nowIso, { referenceMonth: choice.referenceMonth, cohortMonth: choice.cohortMonth });
+    persist({ ...created, tourLink: choice.tourResultId ? { resultId: choice.tourResultId, linkedAt: nowIso } : null }, { fresh: true, stamp: false, add });
+    // Which motions (Q14): a choice, never a number or a word typed.
+    const motions = engineSetupDetail(choice.setup.motions);
+    trackEngine({ name: "engine_setup", detail: motions });
+    if (choice.tourResultId) trackEngine({ name: "engine_tour_linked" });
+    resetBoard();
+    setScreen("targets");
+    focus("engine-targets-title");
+  }
+
   function openSteps(from: StepPosition) {
     setStepsFrom(from);
     setScreen("steps");
@@ -228,7 +261,7 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
           motions={exampleMotions}
           onBack={() => {
             setScreen("board");
-            focus("engine-setup-title");
+            focus("engine-start-title");
           }}
         />,
       );
@@ -262,7 +295,7 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
             onErase={() => {
               erase();
               setScreen("board");
-              focus("engine-setup-title");
+              focus("engine-start-title");
             }}
             onCancel={() => setScreen("board")}
           />,
@@ -285,37 +318,40 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
       );
     }
     const tour = latestTourWithAnswers(snap.tourResults);
+    if (screen === "settings") {
+      return shell(
+        <Setup
+          strings={strings}
+          locale={locale}
+          today={new Date(snap.openedAt)}
+          tour={tour}
+          startMotions={motionsOf(startMotion)}
+          onCancel={() => {
+            setScreen("board");
+            focus("engine-start-title");
+          }}
+          onStart={(choice) => createEngine(choice)}
+        />,
+      );
+    }
+    const start = startCopy(strings, locale, startMotion, new Date(snap.openedAt));
     return shell(
-      <Setup
-        strings={strings}
-        locale={locale}
-        today={new Date(snap.openedAt)}
-        tour={tour}
+      <EngineStart
+        {...start.props}
+        onMotionChange={setStartMotion}
+        onChange={() => {
+          setScreen("settings");
+          focus("engine-setup-title");
+        }}
+        onStart={() => createEngine({ ...start.defaults, tourResultId: tour?.id ?? null })}
+        exampleLabel={strings.start.example}
+        onExample={() => openExample(motionsOf(startMotion))}
+        importLabel={strings.start.import}
         onImport={() => {
           setScreen("import");
           focus("engine-import-title");
         }}
-        onExample={openExample}
-        onStart={(choice: SetupChoice) => {
-          const nowIso = new Date().toISOString();
-          // The months the setup screen SHOWED, not the engine's fallback: the two can
-          // differ around midnight, and the person chose what they saw.
-          const created = newEngineState(choice.setup, nowIso, {
-            referenceMonth: choice.referenceMonth,
-            cohortMonth: choice.cohortMonth,
-          });
-          const next: EngineState = {
-            ...created,
-            tourLink: choice.tourResultId ? { resultId: choice.tourResultId, linkedAt: nowIso } : null,
-          };
-          persist(next, { fresh: true, stamp: false });
-          // Which boxes were ticked (Q14): a choice, never a number or a word typed.
-          const motions = engineSetupDetail(choice.setup.motions);
-          trackEngine({ name: "engine_setup", detail: motions });
-          if (choice.tourResultId) trackEngine({ name: "engine_tour_linked" });
-          if (choice.start === "steps") openSteps({ phase: "targets" });
-          else openBoard();
-        }}
+        data-testid="engine-start"
       />,
     );
   }
@@ -401,13 +437,6 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
   const engines = snap.engines ?? [];
   const currentName = engineName({ createdAt: current.createdAt, ...(current.setup.companyLabel ? { companyLabel: current.setup.companyLabel } : {}) }, strings, locale);
 
-  /** Leaves whatever the board was showing — a past month, a number, the engine shown — for another engine's. */
-  function resetBoard() {
-    toCurrentMonth();
-    setNumberId(null);
-    setMotionView(null);
-  }
-
   if (screen === "import") {
     return shell(
       <ImportPanel
@@ -437,23 +466,50 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
   }
 
   if (screen === "new") {
+    // Another engine (§19.1.5): the start screen, and « Annuler » back to the engine on screen.
+    const start = startCopy(strings, locale, startMotion, new Date(snap.openedAt));
+    return shell(
+      <EngineStart
+        {...start.props}
+        onMotionChange={setStartMotion}
+        onChange={() => {
+          setScreen("new-settings");
+          focus("engine-setup-title");
+        }}
+        onStart={() => createEngine({ ...start.defaults, tourResultId: view.deviceTour?.id ?? null }, true)}
+        cancelLabel={strings.settings.cancel}
+        onCancel={openBoard}
+        data-testid="engine-start"
+      />,
+    );
+  }
+
+  if (screen === "new-settings") {
     return shell(
       <Setup
         strings={strings}
         locale={locale}
         today={new Date(snap.openedAt)}
         tour={view.deviceTour}
-        onCancel={openBoard}
-        onStart={(choice: SetupChoice) => {
-          const nowIso = new Date().toISOString();
-          const created = newEngineState(choice.setup, nowIso, { referenceMonth: choice.referenceMonth, cohortMonth: choice.cohortMonth });
-          const next: EngineState = { ...created, tourLink: choice.tourResultId ? { resultId: choice.tourResultId, linkedAt: nowIso } : null };
-          persist(next, { fresh: true, stamp: false, add: true });
-          const motions = engineSetupDetail(choice.setup.motions);
-          trackEngine({ name: "engine_setup", detail: motions });
-          if (choice.tourResultId) trackEngine({ name: "engine_tour_linked" });
-          resetBoard();
-          if (choice.start === "steps") openSteps({ phase: "targets" });
+        startMotions={motionsOf(startMotion)}
+        onCancel={() => {
+          setScreen("new");
+          focus("engine-start-title");
+        }}
+        onStart={(choice) => createEngine(choice, true)}
+      />,
+    );
+  }
+
+  if (screen === "targets") {
+    // « Cibles » (C40), then the first number a person can find alone: the quickest, in the funnel's order (NextStep's).
+    return shell(
+      <TargetsStart
+        view={view}
+        actions={actions}
+        onNext={() => {
+          const first = nextSelfNumber(plan, motionShapes(current.setup.motions));
+          if (first) actions.openMetric(first.id);
           else openBoard();
         }}
       />,
@@ -472,8 +528,8 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
           setWriteFailed(!result.ok);
           resetBoard();
           setScreen("board");
-          // The next engine's board, or — the last one gone — the setup.
-          focus(last && result.ok ? "engine-setup-title" : "engine-verdict");
+          // The next engine's board, or — the last one gone — the start screen.
+          focus(last && result.ok ? "engine-start-title" : "engine-verdict");
         }}
         onCancel={openBoard}
       />,
@@ -490,7 +546,7 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
           erase();
           setScreen("board");
           setNumberId(null);
-          focus("engine-setup-title");
+          focus("engine-start-title");
         }}
         onCancel={openBoard}
       />,
@@ -712,8 +768,10 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
               },
               onNew: () => {
                 resetBoard();
+                // The question starts from its default, not from the last engine's answer.
+                setStartMotion("ss");
                 setScreen("new");
-                focus("engine-setup-title");
+                focus("engine-start-title");
               },
               onDelete: () => {
                 resetBoard();
@@ -737,6 +795,35 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
       }}
     />,
   );
+}
+
+/**
+ * The start screen's words and defaults (design system extension 07, A18
+ * T3.a): how the company sells, the plan its answer means, and every other
+ * default in one sentence. A Tour with answers on this device is linked at
+ * « Commencer », as the setup's box was ticked by default (C8); the Settings
+ * and the board's mirror unlink or link it.
+ */
+function startCopy(strings: EngineStrings, locale: Locale, motion: StartMotion, today: Date) {
+  const st = strings.start;
+  const motions = motionsOf(motion);
+  const defaults = startDefaults(motions, today);
+  const props = {
+    title: strings.setup.title,
+    legend: st.legend,
+    options: [
+      { value: "ss" as const, label: st.ss, note: st.ssNote },
+      { value: "sa" as const, label: st.sa, note: st.saNote },
+      { value: "both" as const, label: st.both, note: st.bothNote },
+    ],
+    motion,
+    plan: fill(st.plan, startPlan(motions)),
+    // Sales-assisted alone follows no self-serve cohort (D7): its three months are in the settings.
+    defaults: fill(motions.plg ? st.defaults : st.defaultsSlg, { month: formatMonth(defaults.referenceMonth, locale), cohort: formatMonth(defaults.cohortMonth, locale) }),
+    changeLabel: st.change,
+    startLabel: st.go,
+  };
+  return { props, defaults };
 }
 
 /**

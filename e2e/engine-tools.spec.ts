@@ -23,7 +23,9 @@ async function startEngine(page: Page, locale: "en" | "fr" = "en"): Promise<void
   await page.clock.setFixedTime(EXAMPLE_CLOCK);
   await page.goto(`/${locale}/aarrr-funnel-template`);
   await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
-  await page.getByTestId("engine-setup-board").click();
+  await page.getByTestId("engine-start-go").click();
+  await page.getByTestId("engine-targets-next").click();
+  await page.getByTestId("engine-number-back").click();
   await expect(page.getByTestId("engine-board")).toBeVisible();
 }
 

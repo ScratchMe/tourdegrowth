@@ -104,8 +104,8 @@ test("a v1 file is migrated on import, and the screen says so — in both langua
     await page.goto(`/${locale}/aarrr-funnel-template`);
     await page.evaluate(() => window.localStorage.clear());
     await page.reload();
-    await expect(page.getByTestId("engine-setup")).toBeVisible();
-    await page.getByTestId("engine-setup-import").click();
+    await expect(page.getByTestId("engine-start")).toBeVisible();
+    await page.getByTestId("engine-start-import").click();
     await page.getByTestId("engine-import-file").setInputFiles(file);
     await expect(page.getByTestId("engine-import-migrated")).toHaveText(ENGINE_COPY.io.migrated[locale]);
     await expect(page.getByTestId("engine-import-open")).toBeVisible();
@@ -124,7 +124,7 @@ test("a v2 file opens as it is: no note, the same setup, written as v3", async (
   await page.goto("/en/aarrr-funnel-template");
   await page.evaluate(() => window.localStorage.clear());
   await page.reload();
-  await page.getByTestId("engine-setup-import").click();
+  await page.getByTestId("engine-start-import").click();
   await page.getByTestId("engine-import-file").setInputFiles(file);
   await expect(page.getByTestId("engine-import-open")).toBeVisible();
   await expect(page.getByTestId("engine-import-migrated")).toHaveCount(0);
@@ -138,7 +138,7 @@ test("a file that says nothing of how the company sells is refused", async ({ pa
   const state = exampleState();
   const file = { ...state, setup: { ...state.setup, motions: { plg: false, slg: false } } };
   await page.goto("/en/aarrr-funnel-template");
-  await page.getByTestId("engine-setup-import").click();
+  await page.getByTestId("engine-start-import").click();
   await page.getByTestId("engine-import-file").setInputFiles({ name: "x.json", mimeType: "application/json", buffer: Buffer.from(JSON.stringify(file)) });
   await expect(page.getByTestId("engine-import-refused")).toHaveText(ENGINE_COPY.io.unsupportedSetup.en);
   await expect(page.getByTestId("engine-import-open")).toHaveCount(0);

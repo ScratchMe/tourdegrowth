@@ -34,9 +34,23 @@ async function open(page: Page, locale: "en" | "fr" = "en"): Promise<void> {
   await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
 }
 
-test("« Start step by step » walks targets → base → one number per screen, and the base is typed once", async ({ page }) => {
+/**
+ * The step-by-step, until A18 T3.b folds it into the board: the start, its
+ * « Targets » screen passed, then the menu's « Resume step by step » — at the
+ * targets, for an engine nobody has touched (`resumePosition`).
+ */
+async function openSteps(page: Page): Promise<void> {
+  await page.getByTestId("engine-start-go").click();
+  await page.getByTestId("engine-targets-next").click();
+  await openEngineMenu(page);
+  await expect(page.getByTestId("engine-open-steps")).toBeVisible();
+  await page.getByTestId("engine-open-steps").click();
+  await expect(page.getByTestId("engine-steps")).toHaveAttribute("data-phase", "targets");
+}
+
+test("the step-by-step walks targets → base → one number per screen, and the base is typed once", async ({ page }) => {
   await open(page);
-  await page.getByTestId("engine-setup-start").click();
+  await openSteps(page);
   const steps = page.getByTestId("engine-steps");
   await expect(steps).toHaveAttribute("data-phase", "targets");
   await expect(page.locator("#engine-steps-title")).toHaveText(ENGINE_COPY.steps.targetsTitle.en);
@@ -78,13 +92,14 @@ test("« Start step by step » walks targets → base → one number per screen,
 
   // Back to the steps: it resumes on the first number nobody has touched, not at the targets.
   await openEngineMenu(page);
+  await expect(page.getByTestId("engine-open-steps")).toBeVisible();
   await page.getByTestId("engine-open-steps").click();
   await expect(steps).toHaveAttribute("data-phase", "number");
 });
 
 test("the example shows a filled-in funnel and its slides, and writes nothing on the device", async ({ page }) => {
   await open(page, "fr");
-  await page.getByTestId("engine-setup-example").click();
+  await page.getByTestId("engine-start-example").click();
   const example = page.getByTestId("engine-example");
   await expect(example).toBeVisible();
   await expect(example).toContainText(ENGINE_COPY.example.bannerTitle.fr);
@@ -97,7 +112,9 @@ test("the example shows a filled-in funnel and its slides, and writes nothing on
 
 test("settings can be changed later; a new activation window sends that number back to « to fill in »", async ({ page }) => {
   await open(page);
-  await page.getByTestId("engine-setup-board").click();
+  await page.getByTestId("engine-start-go").click();
+  await page.getByTestId("engine-targets-next").click();
+  await page.getByTestId("engine-number-back").click();
   await openNumber(page, "act-rate");
   const sheet = page.getByTestId("engine-sheet-act-rate");
   await sheet.locator("#engine-act-rate-num").fill("144");
@@ -122,6 +139,8 @@ test("settings can be changed later; a new activation window sends that number b
 
 test("the company field says it is the product's or the company's name", async ({ page }) => {
   await open(page, "fr");
+  // In the full card the start screen's « Modifier » opens (A18 T3.a).
+  await page.getByTestId("engine-start-change").click();
   await expect(page.getByLabel(ENGINE_COPY.setup.companyLabel.fr)).toBeVisible();
   expect(ENGINE_COPY.setup.companyLabel.fr).toMatch(/entreprise|SaaS/);
 });
@@ -140,7 +159,9 @@ test("the company field says it is the product's or the company's name", async (
 test("an answer is offered « Pas de réponse sous la main ? », never « Pas de chiffre »", async ({ page }) => {
   await open(page, "fr");
   const q = ENGINE_COPY.sheet;
-  await page.getByTestId("engine-setup-board").click();
+  await page.getByTestId("engine-start-go").click();
+  await page.getByTestId("engine-targets-next").click();
+  await page.getByTestId("engine-number-back").click();
 
   for (const [stage, metric] of [
     ["activation", "act-event"],
@@ -171,7 +192,7 @@ const N = String(METRIC_SHAPES.length);
 
 test("the step-by-step calls the activation event « Point 4 sur N », not « Chiffre 4 sur N »", async ({ page }) => {
   await open(page, "fr");
-  await page.getByTestId("engine-setup-start").click();
+  await openSteps(page);
   await page.getByTestId("engine-steps-next").click();
   await page.getByTestId("engine-steps-next").click();
   const number = page.getByTestId("engine-steps-number");
@@ -201,7 +222,7 @@ for (const [locale, big, middle, decimal] of [
 ] as const) {
   test(`${locale}: big numbers group as they are typed, the caret stays put, and 2000000 is saved`, async ({ page }) => {
     await open(page, locale);
-    await page.getByTestId("engine-setup-start").click();
+    await openSteps(page);
 
     // A rate field: a trailing decimal separator is half a number, not something to clean up.
     const target = page.locator("#engine-step-target-act-rate");
@@ -256,7 +277,8 @@ async function boardSheet(page: Page, _stage: string, metricDomId: string) {
 test("a typo in a target keeps the stored target, on the step screen and in a sheet; an empty box removes it", async ({ page }) => {
   const target = async () => (await stored(page))?.state.snapshots[0]?.targets["act.rate"];
   await open(page);
-  await page.getByTestId("engine-setup-start").click();
+  // The start's « Targets » screen (A18 T3.a): the same boxes as the step-by-step's.
+  await page.getByTestId("engine-start-go").click();
 
   const step = page.locator("#engine-step-target-act-rate");
   await step.fill("25");
@@ -295,7 +317,7 @@ test("a typo in a target keeps the stored target, on the step screen and in a sh
 for (const locale of ["en", "fr"] as const) {
   test(`the base step keeps nothing in silence: zero or a decimal stops it, on the count (${locale})`, async ({ page }) => {
     await open(page, locale);
-    await page.getByTestId("engine-setup-start").click();
+    await openSteps(page);
     const steps = page.getByTestId("engine-steps");
     await page.getByTestId("engine-steps-next").click();
     await expect(steps).toHaveAttribute("data-phase", "base");
@@ -326,7 +348,7 @@ for (const locale of ["en", "fr"] as const) {
 
 test("a target typed with its percent sign is read, the sign dropped from the box", async ({ page }) => {
   await open(page);
-  await page.getByTestId("engine-setup-start").click();
+  await page.getByTestId("engine-start-go").click();
   const target = page.locator("#engine-step-target-act-rate");
   await target.fill("25 %");
   await target.blur();

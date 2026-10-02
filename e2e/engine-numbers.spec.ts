@@ -41,7 +41,9 @@ async function openExample(page: Page, locale: "en" | "fr" = "en"): Promise<void
 
 async function startEngine(page: Page, locale: "en" | "fr" = "en"): Promise<void> {
   await openEngine(page, locale);
-  await page.getByTestId("engine-setup-board").click();
+  await page.getByTestId("engine-start-go").click();
+  await page.getByTestId("engine-targets-next").click();
+  await page.getByTestId("engine-number-back").click();
   await expect(page.getByTestId("engine-board")).toBeVisible();
 }
 

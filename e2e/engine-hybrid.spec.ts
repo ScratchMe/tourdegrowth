@@ -3,7 +3,7 @@ import { ENGINE_COPY } from "@/content/engine-copy";
 import { hybridState, salesAssistedState } from "../src/lib/engine/__tests__/fixtures";
 import type { EngineState } from "../src/lib/engine/types";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
-import { storedEngineEntry, writeEngineSeed, openNumber } from "./engine-helpers";
+import { storedEngineEntry, writeEngineSeed, openNumber, openEngineMenu } from "./engine-helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
 // owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
@@ -47,17 +47,24 @@ async function noHorizontalScroll(page: Page): Promise<void> {
   expect(scroll).toBe(client);
 }
 
-test.describe("the setup's two boxes (§18.1.1)", () => {
-  test("self-serve ticked by default; sales-assisted unfolds its windows and the months it reads; none ticked is refused", async ({ page }) => {
+test.describe("how the company sells: the start's question, then the full card's two boxes (§18.1.1, A18 T3.a)", () => {
+  test("self-serve by default; « Both » carries into the full card, where sales-assisted unfolds its windows and months; none ticked is refused", async ({ page }) => {
     await page.clock.setFixedTime(EXAMPLE_CLOCK);
     await openEngine(page);
+    await expect(page.locator("#engine-start-motion-ss")).toBeChecked();
+    // Sales-assisted alone follows no self-serve cohort: the sentence names the month of the numbers only.
+    await page.locator("#engine-start-motion-sa").check();
+    await expect(page.getByTestId("engine-start-defaults")).not.toContainText("sign-ups");
+    await page.locator("#engine-start-motion-both").check();
+    await expect(page.getByTestId("engine-start-defaults")).toContainText("sign-ups");
+
+    // « Change »: every setting, the start's answer ticked.
+    await page.getByTestId("engine-start-change").click();
+    await expect(page.locator("#engine-setup-title")).toBeFocused();
     const plg = page.getByTestId("engine-motion-plg");
     const slg = page.getByTestId("engine-motion-slg");
     await expect(plg).toBeChecked();
-    await expect(slg).not.toBeChecked();
-    await expect(page.getByTestId("engine-setup-slg-periods")).toHaveCount(0);
-
-    await slg.check();
+    await expect(slg).toBeChecked();
     await expect(page.getByText(ENGINE_COPY.setup.qualificationWindow.en)).toBeVisible();
     await expect(page.getByText(ENGINE_COPY.setup.goLiveWindow.en)).toBeVisible();
     await expect(page.getByTestId("engine-setup-slg-periods")).toBeVisible();
@@ -68,16 +75,29 @@ test.describe("the setup's two boxes (§18.1.1)", () => {
 
     // Neither: the start is refused, said under the boxes, the focus on the first one.
     await slg.uncheck();
-    await page.getByTestId("engine-setup-board").click();
+    await page.getByTestId("engine-setup-start").click();
     await expect(page.getByText(ENGINE_COPY.setup.motionsRequired.en)).toBeVisible();
     await expect(plg).toBeFocused();
-    await expect(page.getByTestId("engine-board")).toHaveCount(0);
+    await expect(page.getByTestId("engine-targets-start")).toHaveCount(0);
+    expect(await storedMotions(page)).toBeNull();
 
     await plg.check();
     await slg.check();
-    await page.getByTestId("engine-setup-board").click();
+    await page.getByTestId("engine-setup-start").click();
+    await page.getByTestId("engine-targets-next").click();
+    await page.getByTestId("engine-number-back").click();
     await expect(page.getByTestId("engine-board")).toHaveAttribute("data-motions", "hybrid");
     expect(await storedMotions(page)).toEqual({ plg: true, slg: true });
+  });
+
+  test("« Cancel » from the full card goes back to the start, its answer kept and nothing created", async ({ page }) => {
+    await openEngine(page);
+    await page.locator("#engine-start-motion-sa").check();
+    await page.getByTestId("engine-start-change").click();
+    await page.getByTestId("engine-setup-cancel").click();
+    await expect(page.locator("#engine-start-title")).toBeFocused();
+    await expect(page.locator("#engine-start-motion-sa")).toBeChecked();
+    expect(await storedMotions(page)).toBeNull();
   });
 });
 
@@ -261,12 +281,22 @@ test.describe("the settings: a motion unticked is hidden, never erased (§18.1.3
 });
 
 test.describe("the step-by-step, per motion (§18.7 E3)", () => {
-  test("targets grouped by motion, both bases, then skip to sales-assisted and past the optional link", async ({ page }) => {
+  test("the start's targets grouped by motion; the step-by-step's both bases, then skip to sales-assisted and past the optional link", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await page.clock.setFixedTime(EXAMPLE_CLOCK);
     await openEngine(page);
-    await page.getByTestId("engine-motion-slg").check();
-    await page.getByTestId("engine-setup-start").click();
+    await page.locator("#engine-start-motion-both").check();
+    await page.getByTestId("engine-start-go").click();
+    // The « Targets » screen at the start (C40, A18 T3.a): one group per motion, self-serve first.
+    await expect(page.getByTestId("engine-targets-start-plg")).toBeVisible();
+    await expect(page.getByTestId("engine-targets-start-slg")).toBeVisible();
+    await page.getByTestId("engine-targets-next").click();
+    // The first number is self-serve's quickest: the two motions' numbers are taken stage by stage.
+    await expect(page.getByTestId("engine-number")).toHaveAttribute("data-metric", "acq.signup-rate");
+
+    // The step-by-step, until A18 T3.b folds it into the board: from the menu, at the targets of an engine nobody has touched.
+    await openEngineMenu(page);
+    await page.getByTestId("engine-open-steps").click();
     const steps = page.getByTestId("engine-steps");
     await expect(steps).toHaveAttribute("data-phase", "targets");
     await expect(page.getByTestId("engine-steps-targets-plg")).toBeVisible();
@@ -288,13 +318,13 @@ test.describe("the step-by-step, per motion (§18.7 E3)", () => {
   });
 });
 
-test.describe("the example, in the motions ticked", () => {
-  test("both boxes ticked: the example is the hybrid's, with its total", async ({ page }) => {
+test.describe("the example, in the start's answer", () => {
+  test("« Both »: the example is the hybrid's, with its total", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await page.clock.setFixedTime(EXAMPLE_CLOCK);
     await openEngine(page);
-    await page.getByTestId("engine-motion-slg").check();
-    await page.getByTestId("engine-setup-example").click();
+    await page.locator("#engine-start-motion-both").check();
+    await page.getByTestId("engine-start-example").click();
     const example = page.getByTestId("engine-example");
     await expect(example.getByTestId("engine-total-band")).toBeVisible();
     await expect(example.getByTestId("engine-column-slg")).toBeVisible();

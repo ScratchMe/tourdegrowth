@@ -705,3 +705,61 @@ Aucune autre spec n'a bougé : le panneau est toujours là, plié, sous la carte
 - **le second chiffre en libre-service dit sa période** (« Nouveaux payants par mois ») ; les deux boutons vers le panneau passent à l'impératif (« Vois les {n} leviers… ») ; le résumé du panneau plié ne répète plus « Et si ? » (« Tous les leviers ensemble ») ; l'étiquette du curseur passe entre parenthèses, « Taux d'activation (aujourd'hui 18 %) », pour ne plus empiler les virgules sur le lien de l'hybride.
 
 Le tout reste « à relire » pour A18.d. Après la relecture : 3 029 tests unitaires (6 de plus), et les specs du moteur repassées sur le nouveau build.
+
+## A18 T3.a : une question pour commencer, puis l'écran « Cibles » (2026-10-02, #293)
+
+Sixième étape du portage du retour 07, drapeau fermé, et la première de T3 (le parcours), coupé en quatre PR : T3.a (le départ, celle-ci), T3.b (« Enregistre et continue », le pas à pas fondu dans le tableau), T3.c (`AskList` à la place de « À aller chercher »), T3.d (les cibles et les nombres partagés dans les Réglages).
+
+**Avant** : une première visite ouvrait « Avant de commencer », 36 contrôles avant le premier chiffre (le type d'entreprise, les deux façons de vendre et leurs fenêtres, le mois et la cohorte, les périodes de l'assisté, la devise, le nom, les outils, le Tour), puis deux entrées : « Commencer pas à pas » et « Tout voir d'un coup ».
+
+**Maintenant** :
+- **Une question** (`EngineStart`) : « Comment vends-tu ? », libre-service par défaut, comme avant. C'est un vrai groupe radio, qui reste un seul choix sur les deux booléens du modèle (`motionsOf`, `startMotionOf`). Le plan suit la réponse et se lit poliment au changement : « 17 chiffres : 5 se lisent en cinq minutes, 7 demandent environ une heure chacun, 5 sont à demander à quelqu'un », compté depuis les efforts du catalogue (`startPlan`, testé : 17, 15 et 33 comme le retour les mesure, et jamais un compte sous 2, puisque la phrase n'a pas de singulier).
+- **Les autres défauts en une phrase**, puis « Modifier » : le SaaS B2B, les euros, le mois des chiffres et les inscrits suivis. Le mois est écrit après deux-points, parce que l'en-tête de la copie interdit « de {month} » (avril, août, octobre élident). En assisté seul, la phrase ne nomme pas de cohorte, puisqu'il n'en suit pas (D7) : elle dit « trois mois de chiffres jusqu'à {month} », comme la barre du moteur.
+- **« Modifier » ouvre la carte complète** d'avant, avant que le moteur existe : c'est `Setup`, qui garde son rôle de Réglages, avec la réponse de la question déjà cochée. Son bouton principal crée le moteur ; « Annuler » revient à la question, sa réponse gardée, rien de créé.
+- **Une seule action principale**, « Commence → ». L'exemple et l'import sont discrets. « Tout voir d'un coup » disparaît : le tableau est la vue d'ensemble.
+- **Puis l'écran « Cibles »** (`TargetsStart`), gardé par Antoine contre la reco (C40) : les cases de cible du pas à pas, un groupe par façon de vendre dans l'hybride. Son seul bouton, « Passe à ton premier chiffre → », sert qu'une cible soit tapée ou non. Une case illisible arrête le passage, avec son message et le focus : elle n'écrit rien (A15.2), et quitter l'écran l'aurait perdue sans qu'on la voie.
+- **Puis le premier chiffre**, celui que la prochaine étape du tableau choisirait (`nextSelfNumber`) : le plus rapide, dans l'ordre du funnel. C'est le taux d'inscription en libre-service et dans l'hybride, et « Ce que « en production » veut dire » en assisté. « ← Tes chiffres » mène au tableau.
+- **Un autre moteur** (le sélecteur, A14 T5) passe par la même question, sans exemple ni import, avec « Annuler » vers le moteur affiché.
+
+**Trois écarts au retour, voulus** :
+- « Commence → » et non « Commencer par ton premier chiffre → » : l'écran « Cibles » vient avant ;
+- la phrase des défauts n'écrit pas « sur les chiffres d'août 2026 et les inscrits de juillet 2026 » (la règle de l'élision) ;
+- **un Tour présent sur l'appareil est relié à « Commence »**, comme la case de l'ancienne carte était cochée par défaut (C8). Le retour range le lien dans les Réglages et le miroir du tableau, qui le délient ou le relient. À relire au bon à tirer : faut-il le dire dans la phrase des défauts ?
+
+**Code** :
+- `EngineStart` dans `src/components/engine/`, avec son test de balisage ;
+- `_engine/start.ts` (la question, le plan et les défauts, testés), d'où `Setup` tire aussi ses valeurs de départ : une seule source pour la phrase et la carte ;
+- `_engine/TargetsStart.tsx`, et `TargetInput`, sorti du pas à pas, qui le partage jusqu'à T3.b ;
+- dans l'îlot, `createEngine` (le premier moteur, ou un autre à côté) et trois écrans : `targets`, `new-settings`, et `settings` avant qu'un moteur existe ;
+- `SetupChoice.start` disparaît, et avec lui les trois clés de copie des deux anciennes entrées ;
+- copie neuve « à relire » : les groupes `start` et `targetsStart`.
+
+**Le pas à pas reste joignable** depuis le menu (« Reprendre le pas à pas ») jusqu'à T3.b, qui le fond dans le tableau. Ses specs y passent par une aide, `openSteps`.
+
+**Les specs** : l'aide `startEngine` remplace l'ancien « Tout voir d'un coup ». Elle répond à la question, passe les cibles et revient du premier chiffre. Les specs qui tapaient le nom de l'entreprise à la création passent par « Modifier ». Sont neufs ou réécrits :
+- la première visite (la question, le plan qui suit la réponse, rien d'écrit avant « Commencer », le focus sur chaque titre, puis sur la ligne au retour) ;
+- le clavier seul (les flèches dans le groupe radio) ;
+- « Annuler » depuis la carte complète ;
+- la carte complète avec la réponse cochée ;
+- un autre moteur sans exemple ni import ;
+- les écrans de départ mesurés à 390 px ;
+- une case de cible illisible qui arrête le passage ;
+- un Tour déjà sur l'appareil, relié par « Commence » (la case de l'ancienne carte n'avait pas de spec à la création).
+
+**La relecture de copie** (`relecteur-copie`), appliquée dans la même PR :
+- **en assisté seul**, « Mois des chiffres : août 2026 » disait un mois là où la barre en dit trois ;
+- **l'écran « Cibles » promettait deux endroits faux** : « l'écran de chaque chiffre » (seuls les chiffres qui peuvent nommer une étape ont une case, 6 sur 17 et 5 sur 15) et « les Réglages », qui ne les reçoivent qu'avec T3.d. La phrase dit maintenant « sur l'écran de chacun de ces chiffres » ; les Réglages s'y ajouteront avec T3.d ;
+- **le bouton changeait de libellé quand une case perdait le focus**, donc sous le pointeur : une cible tapée partait sous « Passer, pas de cibles ». Un seul libellé, maintenant ;
+- **les flèches passent à l'impératif** (« Commence → »), comme le veut l'en-tête du fichier.
+
+**Laissé au bon à tirer A18.d** :
+- le Tour relié sans le dire ;
+- deux formulations à un clic d'écart : « Mois des chiffres » et « inscrits suivis » sur la question, « Mois des flux » et « Cohorte suivie » sur la carte (les renommages de C42 sont T6) ;
+- « Comment vends-tu ? » d'un côté, « Comment tu vends » de l'autre.
+
+À T3.b, « Le pas à pas garde ta place » (`page.durationReady`) deviendra faux.
+
+**Vérifié** :
+- `tsc` et `eslint` propres ; 3 039 tests unitaires ; `next build` avec les variables de la CI.
+- **Les specs du moteur, des cibles, de l'accessibilité et de la plateforme**, plus les captures : 306 passées et une ignorée par construction, sur le build final. La première passe avait eu quatre échecs, tous des specs qui cherchaient encore le nom de l'entreprise ou le nombre d'écrans d'avant, et un essai instable dans le menu du pas à pas, que T3.b retire. La dernière avait eu un échec : le piège déjà écrit dans la spec de la base, où le message apparaît quand la case perd le focus, pousse le bouton et fait tomber le clic dans le vide. La spec quitte d'abord la case, comme celle de la base ; les specs de la collecte et du Tour repassent ensuite (37).
+- **Captures** de la question (libre-service et assisté), de la carte complète, de l'écran « Cibles » et du premier chiffre, en français et en anglais, à 1 280 et 390 px : aucun défilement horizontal.
