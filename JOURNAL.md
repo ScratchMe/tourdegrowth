@@ -306,6 +306,17 @@ Les suites passaient pourtant sur `main` + #244 : lint, `tsc`, 2 944 tests unita
 
 **Ouvert** : D14 (le lancer, avec le prompt à coller) et C38 (les bons à tirer A7.3.d et A14.d attendent-ils le portage du retour ? Reco : oui, une copie relue avant la refonte serait relue deux fois). `ENGINE.md` dit qu'une refonte est demandée.
 
+## Les suites de C36 : `next` 16.3.7 et les outils de développement alignés (2026-10-02, #277, #278)
+
+**Ce qui s'est passé après #275**, et pourquoi ce n'est pas #276 qui a été mergée : Dependabot recrée sa PR groupée chaque fois que `main` la met en conflit ou que sa configuration change. #244 est devenue #276 après #239, puis #277 après #275, qui avait pris React et fait ignorer `firebase-admin`. Chaque fois, le numéro écrit dans les documents devenait faux (convention 8, une fois de plus) : `docs/decisions.md` nomme maintenant la PR qui a réellement porté la montée.
+
+- **#277 (C37)** : la seule montée de `next` 16.3.6 → 16.3.7, un correctif de Turbopack rétroporté. Mesurée avant le merge sur `main` + React 19.3 + ce reste : 47,84 Mo, aucun écart. CI verte sur sa tête, squash `519436e` identique à elle. Production vérifiée : statut Vercel du commit à `success`, pages servies en 200.
+- **#278 (C39, Antoine)** : les types React passent en 19.3, et `eslint-config-next` en 16.3.7 pour suivre `next`. Ils étaient dans #276 et sont partis dans le groupe de développement. Toutes les entrées du lockfile sont de développement. La PR a été remise à jour sur `main`, `next` 16.3.7 compris, avant le merge, et la CI est passée verte sur cette tête. Squash `f856e45`, identique à cette tête fusionnée avec #279, mergée entre-temps sans toucher aux dépendances. **Une collision de numéros** : le titre de ce squash dit « C38 », parce que la session de #279 avait ouvert sa propre C38 au même moment (les bons à tirer du moteur et le brief 07, encore ouverte). La décision de #278 est donc C39 dans `CHANTIERS.md` et `docs/decisions.md`, et le titre du commit, déjà sur `main`, reste tel quel.
+
+**Un échec de CI qui n'était pas de cette PR** : le premier passage de #280 (doc seule) a échoué au `next build`, « next/font/google queries have exactly one entry » pour chaque fichier de la police Inter. Le même code sur `main` construisait en CI comme en local, et le runner partait sans cache, donc ce n'était pas le `.next` périmé de `NEXTJS.md` §1.9. Il restait la réponse de Google Fonts à ce moment-là. Le job a été relancé une fois, la raison est en commentaire sur la PR, et la CI de la tête mergée, la même doc remise sur `main`, est verte.
+
+**État au soir** : `next` 16.3.7, React 19.3.0, `firebase-admin` 14.3.0 (ignoré à partir de 14.4, C36), `npm audit` à 0. Aucune PR Dependabot ouverte. La ligne de `CLAUDE.md` sur les chiffres de référence le dit.
+
 ## B11 : le brief 08 de l'en-tête collant compact, déposé dans Claude Design (2026-10-02, #281)
 
 **La demande** (Antoine) : l'en-tête collant est agréable sur un téléphone tenu droit, mais sur un écran de bureau, en paysage, il prend beaucoup de place. Il veut le réduire au défilement, en gardant de quoi savoir où l'on est dans l'app, avec une transition élégante, et passer par Claude Design pour la qualité du rendu.
