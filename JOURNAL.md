@@ -631,6 +631,17 @@ Trois aides dans `engine-helpers.ts` :
 
 **Pas fait ici** : le groupe « Calculés à partir des tiens » du retour. Les chiffres calculés ne sont pas sur le tableau aujourd'hui (seulement dans les slides), donc ce serait un ajout, pas un portage.
 
+**La relecture de copie**, sur la PR ouverte, n'a rien trouvé de bloquant. Ce qui est appliqué :
+- « 3 can't be found » dans les comptes : « can't find » s'y lisait comme un verbe ;
+- l'anglais des quatre phrases des réglages qui renvoient un chiffre à « à faire » cite maintenant « to do », l'étiquette que la liste affiche ;
+- le commentaire de `hybrid.linkBlock` dit où la chaîne s'affiche maintenant.
+
+**Ce qui est laissé pour T6** : les mots de statut ne concordent pas encore partout, surtout en anglais.
+- La liste dit « Can't find » et « Asked », le Miroir « Missing », « À aller chercher » « Requested ».
+- Les pastilles de l'hybride disent « approximate » là où la liste dit « estimated ». Elles disent aussi « 0 chiffres sur 15 trouvés », au pluriel, là où la liste écrit « 0 sur 3 trouvé ».
+
+Ce sont les renommages du retour 07, que C42 range en T6. Enfin, `board.toFill` n'est plus lue en pratique (la liste ne demande pas de cause pour un chiffre à faire) : elle partira au prochain ménage.
+
 **Vérifié** :
 - `tsc` et `eslint` propres ; 3 014 tests unitaires ; `next build` avec les variables de la CI ;
 - les 295 specs du moteur, des cibles, de l'accessibilité et de la plateforme passent (une ignorée par construction), avec `GAME_ENABLED=true` côté serveur ;

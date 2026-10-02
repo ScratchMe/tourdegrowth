@@ -360,8 +360,8 @@ export const ENGINE_COPY = {
     countEstOne: { fr: "1 estimé", en: "1 estimated" },
     countAsked: { fr: "{n} demandés", en: "{n} asked" },
     countAskedOne: { fr: "1 demandé", en: "1 asked" },
-    countCant: { fr: "{n} introuvables", en: "{n} can't find" },
-    countCantOne: { fr: "1 introuvable", en: "1 can't find" },
+    countCant: { fr: "{n} introuvables", en: "{n} can't be found" },
+    countCantOne: { fr: "1 introuvable", en: "1 can't be found" },
     /** The marks: their list's name, a stage's (`{list}`: the status words, joined), and their legend. */
     marksLabel: { fr: "Tes chiffres, étape par étape", en: "Your numbers, stage by stage" },
     groupLabel: { fr: "{stage} : {list}", en: "{stage}: {list}" },
@@ -924,7 +924,7 @@ export const ENGINE_COPY = {
     motionCount: { fr: "{motion} {n} sur {N}", en: "{motion} {n} of {N}" },
     /** A motion unticked whose numbers are kept, in the import preview (§18.1.2). */
     motionCountHidden: { fr: "{motion} {n} sur {N} (masqué)", en: "{motion} {n} of {N} (hidden)" },
-    /** The link's block, under sales-assisted's three Acquisition numbers (§18.6.3). */
+    /** The link (§18.6.3): the title of its closed group at the end of sales-assisted's list, and its position on its own screen (A18 T2.b). */
     linkBlock: { fr: "Liaison avec le libre-service", en: "Link with self-serve" },
   },
   /**
@@ -2284,13 +2284,14 @@ export const ENGINE_COPY = {
     title: { fr: "Tes réglages", en: "Your settings" },
     save: { fr: "Enregistrer les réglages", en: "Save settings" },
     cancel: { fr: "Annuler", en: "Cancel" },
+    // TODO: à relire (convention 6) — retouché le 2026-10-02 (A18 T2.b) : l'anglais des quatre `*Reset` cite l'étiquette que la liste affiche, « To do » (le français disait déjà « à faire »).
     activationReset: {
       fr: "La fenêtre d'activation fait partie de la définition du taux d'activation : ton chiffre déjà saisi repassera « à faire », pour que tu le remesures sur {n} jours.",
-      en: "The activation window is part of the activation rate's definition: the number you already entered will go back to \"to fill in\", so you can measure it again over {n} days.",
+      en: "The activation window is part of the activation rate's definition: the number you already entered will go back to \"to do\", so you can measure it again over {n} days.",
     },
     paidReset: {
       fr: "La fenêtre de paiement fait partie de la définition de la conversion en payant : ton chiffre déjà saisi repassera « à faire », pour que tu le remesures sur {n} jours.",
-      en: "The payment window is part of the paid conversion's definition: the number you already entered will go back to \"to fill in\", so you can measure it again over {n} days.",
+      en: "The payment window is part of the paid conversion's definition: the number you already entered will go back to \"to do\", so you can measure it again over {n} days.",
     },
     monthsChanged: {
       fr: "Tes chiffres déjà saisis portent sur les mois d'avant. Ils ne sont pas effacés : relis-les.",
@@ -2329,11 +2330,11 @@ export const ENGINE_COPY = {
     motionLast: { fr: "Il faut au moins une façon de vendre.", en: "You need at least one way you sell." },
     qualificationReset: {
       fr: "La fenêtre de qualification fait partie de la définition du passage des leads en opportunités : ton chiffre déjà saisi repassera « à faire », pour que tu le remesures sur {n} jours.",
-      en: "The qualification window is part of the lead-to-opportunity rate's definition: the number you already entered will go back to \"to fill in\", so you can measure it again over {n} days.",
+      en: "The qualification window is part of the lead-to-opportunity rate's definition: the number you already entered will go back to \"to do\", so you can measure it again over {n} days.",
     },
     goLiveReset: {
       fr: "La fenêtre de mise en production fait partie de la définition du taux de mise en production : ton chiffre déjà saisi repassera « à faire », pour que tu le remesures sur {n} jours.",
-      en: "The go-live window is part of the go-live rate's definition: the number you already entered will go back to \"to fill in\", so you can measure it again over {n} days.",
+      en: "The go-live window is part of the go-live rate's definition: the number you already entered will go back to \"to do\", so you can measure it again over {n} days.",
     },
     saved: { fr: "Réglages enregistrés.", en: "Settings saved." },
   },
