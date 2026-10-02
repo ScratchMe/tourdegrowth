@@ -764,7 +764,7 @@ Sixième étape du portage du retour 07, drapeau fermé, et la première de T3 (
 - **Les specs du moteur, des cibles, de l'accessibilité et de la plateforme**, plus les captures : 306 passées et une ignorée par construction, sur le build final. La première passe avait eu quatre échecs, tous des specs qui cherchaient encore le nom de l'entreprise ou le nombre d'écrans d'avant, et un essai instable dans le menu du pas à pas, que T3.b retire. La dernière avait eu un échec : le piège déjà écrit dans la spec de la base, où le message apparaît quand la case perd le focus, pousse le bouton et fait tomber le clic dans le vide. La spec quitte d'abord la case, comme celle de la base ; les specs de la collecte et du Tour repassent ensuite (37).
 - **Captures** de la question (libre-service et assisté), de la carte complète, de l'écran « Cibles » et du premier chiffre, en français et en anglais, à 1 280 et 390 px : aucun défilement horizontal.
 
-## A18 T3.b : « Enregistre et continue », le pas à pas fondu dans le tableau (2026-10-02, #PR)
+## A18 T3.b : « Enregistre et continue », le pas à pas fondu dans le tableau (2026-10-02, #294)
 
 Septième étape du portage du retour 07, drapeau fermé, et la deuxième de T3 : **le pas à pas et le tableau ne font plus qu'un** (C40).
 
