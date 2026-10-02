@@ -315,8 +315,10 @@ l'état, mesuré, et les chiffres « Et si » du moteur comme la colonne d'un
 niveau du jeu glissent avec lui. Antoine a tranché les deux points que le
 retour laissait (C43 : les clics sur la course compacte comptés à part,
 `space_band_compact` ; C44 : le sélecteur de langue à 88 px partout, 44 × 44
-par cible). **A19 est clos** ; la re-synchro qui l'emporte vers Claude Design
-est B12.
+par cible). **A19.1**, le même jour, sur une question d'Antoine :
+`--sticky-offset` est mesuré aussi dans l'état plein, sur toutes les pages et
+à toutes les largeurs ([#287](https://github.com/ScratchMe/tourdegrowth/pull/287), le journal à « A19.1 »). **A19 est clos** ; la
+re-synchro qui l'emporte vers Claude Design est B12.
 
 ---
 
@@ -455,11 +457,12 @@ le même jour** : recopié dans
 problème. Antoine a tranché C43 et C44 dessus, et **son portage, A19, est
 livré le même jour**. Le retour a suivi trois de nos quatre penchants ;
 la hauteur diffère : une ligne de 48 px, pas 56. **B11 est clos.**
-Une correction à ce que ce paragraphe annonçait : le portage rend
-`--sticky-offset` juste dans l'état compact, partout, parce qu'il le mesure ;
-**dans l'état plein, le quiz garde 118 px pour un en-tête de 93** (106 sur
-téléphone), comme avant. Les ancres et le focus s'y arrêtent 25 px trop bas,
-sans rien masquer (section E).
+Ce que ce paragraphe annonçait du quiz était trop étroit : dans l'état plein,
+`--sticky-offset` était posé à la main (118, 74), juste au bureau seulement.
+Le quiz avait 25 px de trop au bureau, 30 à 390 px de large et 12 à 320 ; sur
+un téléphone tenu droit, chaque page en avait 4 (114 et 70 px peints). Rien
+n'était masqué. **Mesuré lui aussi depuis le 2026-10-02** (A19.1, [#287](https://github.com/ScratchMe/tourdegrowth/pull/287)), 118 et 74
+restant le repli sans script.
 
 **B12, ouvert le 2026-10-02 : la re-synchro d'A19.** Ce qu'elle emporte :
 `SiteHeader` (le verre devient une couche à part, la course compacte vit dans
@@ -531,7 +534,6 @@ rien de privé dans le dépôt, qui est public. Cela vaut pour les chiffres de
 | 50 soumissions | Poser `METRICS_PAGE_ENABLED`, publier la page benchmark (vague 2.5), et C2 de `REVIEW-03.md` (l'étape qui freine le plus ce mois-ci) | `CLAUDE.md`, `GROWTH-PLAN.md` |
 | Quelques centaines de soumissions | Le percentile, « mieux que X % des Tours » (vague 3.4) | `GROWTH-PLAN.md` |
 | Un abus réel | La limite de débit sur un stockage partagé (Upstash) ou le pare-feu Vercel (R-15) | `REVIEW.md` |
-| Un élément collant, ou une ancre, dans le quiz | `--sticky-offset` plein y vaut 118 px pour un en-tête de 93 (106 sur téléphone) : les ancres et le focus s'arrêtent 25 px trop bas, sans rien masquer, et rien ne colle dessous aujourd'hui. Alors, le mesurer comme l'état compact (`compact-header.ts`), avec 118 en repli sans script | `CHANTIERS.md` B11, `JOURNAL.md` (A19) |
 | Le Deep dive à ~70 s devient la norme | Réduire le **nombre** de générations, pas le plafond de temps | `GEMINI.md` §2 |
 | `eslint-config-next` suit | TypeScript 7 et ESLint 10, testés en installant, pas en lisant les plages de peer. Aujourd'hui, `typescript-eslint` refuse TS ≥ 6.1 et `eslint-plugin-react` plante sur ESLint 10 ; Dependabot les ignore en majeure depuis le 2026-09-08 | `GITHUB.md` §1.7 et §2 |
 | Un mois après l'ouverture du jeu | La place de l'encart (C10) et le bouton principal (C16), sur les chiffres | Section C |

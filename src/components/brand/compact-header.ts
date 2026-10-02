@@ -17,8 +17,11 @@
  *    `:focus-visible` keeps it full until focus leaves it. A click does not.
  *  - Measures (mechanic 5): the compact line's scale and shifts are derived
  *    from the row's real height (72, 68 or the quiz's 47px), and `<html>`
- *    gets `--sticky-offset-compact` (54px with a band, 50px without), which
- *    globals.css hands to `--sticky-offset` while the header is compact.
+ *    gets the header's two painted heights, which globals.css hands to
+ *    `--sticky-offset`: `--sticky-offset-full` (the header's box, 118px on a
+ *    laptop, 114 on a phone, 93 in the quiz on a laptop and 88 to 106 on a
+ *    phone, 74 or 70 without a band) and `--sticky-offset-compact` (54px
+ *    with a band, 50px without).
  *  - Close-up: a control that stays in the line slides right, by a
  *    transform, over the room left by the controls that leave after it.
  *
@@ -79,6 +82,10 @@ export function attachCompactHeader(header: HTMLElement): () => void {
     header.style.setProperty("--header-row-shift", `${(line - rowHeight) / 2}px`);
     header.style.setProperty("--header-edge-shift", `${line + edge - full}px`);
     root.style.setProperty("--sticky-offset-compact", `${line + edge}px`);
+    // The box, border included (a plain header's rule): it never changes
+    // with the state, only with the width. Rounded up, so a fractional
+    // height never leaves the offset a hair under the header.
+    root.style.setProperty("--sticky-offset-full", `${Math.ceil(header.getBoundingClientRect().height)}px`);
     closeUp();
   };
 
@@ -140,5 +147,6 @@ export function attachCompactHeader(header: HTMLElement): () => void {
     header.dataset.compact = "false";
     delete header.dataset.compactReady;
     root.style.removeProperty("--sticky-offset-compact");
+    root.style.removeProperty("--sticky-offset-full");
   };
 }
