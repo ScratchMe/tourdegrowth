@@ -125,6 +125,8 @@ test("one focus ring, the system's, on every kind of control the engine draws", 
   await page.getByTestId("engine-metric-act-rate").click();
   const sheet = page.getByTestId("engine-sheet-act-rate");
   await expectOneSystemRing(page, sheet.locator("#engine-act-rate-num"), "a count");
+  // The source describes a value: it is asked once one is typed (A18 T1).
+  await sheet.locator("#engine-act-rate-num").fill("144");
   await expectOneSystemRing(page, sheet.locator("#engine-act-rate-source"), "the source");
 
   // The slide builder: a checkbox, and its own text box.

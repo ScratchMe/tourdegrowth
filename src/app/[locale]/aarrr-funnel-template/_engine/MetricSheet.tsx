@@ -307,29 +307,32 @@ export function MetricSheet({
     target: targetText ? fill(strings.sheet.compareChartTarget, { value: targetText }) : strings.sheet.compareChartNoTarget,
   });
 
+  // The company's margin, offered on both margin sheets in the hybrid whatever the answer shown (C25 Q4): above the answers.
+  const companyWideOffer =
+    marginSheet && draft.basis !== "company-wide" ? (
+      <div className={styles.saveRow}>
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={() =>
+            // Saved as an estimate on the company's margin: approximate, never found (C25 Q4).
+            update({
+              mode: "estimate",
+              basis: "company-wide",
+              low: draft.low ?? companyWideElsewhere?.low ?? null,
+              high: draft.high ?? companyWideElsewhere?.high ?? null,
+            })
+          }
+          data-testid={`engine-company-wide-${domId(id)}`}
+        >
+          {strings.sheet.companyWide}
+        </Button>
+      </div>
+    ) : null;
+
   const value = (
     <>
       {shape.dependsOn === "act.event" && !eventMeasured ? <p className={styles.caveat}>{strings.sheet.dependsOnEvent}</p> : null}
-      {marginSheet && draft.basis !== "company-wide" ? (
-        <div className={styles.saveRow}>
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() =>
-              // Saved as an estimate on the company's margin: approximate, never found (C25 Q4).
-              update({
-                mode: "estimate",
-                basis: "company-wide",
-                low: draft.low ?? companyWideElsewhere?.low ?? null,
-                high: draft.high ?? companyWideElsewhere?.high ?? null,
-              })
-            }
-            data-testid={`engine-company-wide-${domId(id)}`}
-          >
-            {strings.sheet.companyWide}
-          </Button>
-        </div>
-      ) : null}
       {!periodOnDenominator && periodHint ? <p className={styles.caveat}>{periodHint}</p> : null}
       <ValueEditor
         idPrefix={prefix}
@@ -566,18 +569,21 @@ export function MetricSheet({
           ) : null
         }
         answer={
-          <AnswerSwitch
-            legend={statusQuestionOf(id, strings)}
-            options={others}
-            answer={answer}
-            onAnswer={(a) => update({ mode: MODE_OF[a] })}
-            value={value}
-            editor={editor}
-            backLabel={words ? strings.sheet.answerBackAnswer : strings.sheet.answerBack}
-            onBack={() => update({ mode: "have" })}
-            legendId={`${prefix}-answers`}
-            data-testid={`engine-answer-${domId(id)}`}
-          />
+          <>
+            {companyWideOffer}
+            <AnswerSwitch
+              legend={statusQuestionOf(id, strings)}
+              options={others}
+              answer={answer}
+              onAnswer={(a) => update({ mode: MODE_OF[a] })}
+              value={value}
+              editor={editor}
+              backLabel={words ? strings.sheet.answerBackAnswer : strings.sheet.answerBack}
+              onBack={() => update({ mode: "have" })}
+              legendId={`${prefix}-answers`}
+              data-testid={`engine-answer-${domId(id)}`}
+            />
+          </>
         }
         compare={compare}
         words={
