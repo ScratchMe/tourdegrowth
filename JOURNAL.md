@@ -1339,7 +1339,7 @@ Le balisage du composant `Stopwatch` est identique avant et après, au caractèr
 
 **Consigné** : `CHANTIERS.md` (A14.c, A14.d, B5 clos, D12 retirée, D2, et A17 pour le halo grisé des images de contenu, trouvé en route : `transparent` dans un dégradé Satori se mélange à travers le noir), `ENGINE.md`, `docs/engine/moteur-complet.md` §19.11, `NEXTJS.md` §1.10 et §1.11, `design/README.md`, `.design-sync/NOTES.md`, `CLAUDE.md` (l'état et les chiffres).
 
-## A17 : le halo des images de partage, clair et plus gris (2026-10-02, @@PR@@)
+## A17 : le halo des images de partage, clair et plus gris (2026-10-02, #274)
 
 Trouvé par le portage de l'image du moteur (T6.2) et confié par Antoine le même soir.
 
