@@ -394,7 +394,7 @@ Première étape du portage du retour 07 (A18), drapeau fermé : rien ne change 
 
 **Vérifié** : `tsc` et `eslint` propres, 2 977 tests unitaires, `next build` avec les variables de la CI, et les 315 specs e2e du moteur, des niveaux du jeu (le `BulletChart` du tableau de bord), de la composition du résultat (des `Disclosure`) et de l'accessibilité, toutes passées. Un premier passage de la CI a rougi sur le lint (`react/no-children-prop`, dans le test du `Disclosure` réécrit pour `tsc` après le passage d'`eslint`) : le lint se relance après toute retouche, même d'un test.
 
-## A18 T1 : l'écran d'un chiffre, une question et son savoir à côté (2026-10-02)
+## A18 T1 : l'écran d'un chiffre, une question et son savoir à côté (2026-10-02, #285)
 
 Deuxième étape du portage du retour 07, drapeau fermé. L'écran d'un chiffre, au tableau comme dans le pas à pas, suit maintenant l'ordre du `NumberSheet` : ce que le chiffre est et sa formule sur une ligne, le Tour en une ligne, **le piège ouvert avant la valeur**, « Où le trouver » replié avec les outils dans son résumé, **les cases d'abord**, « Comment il se situe » (repère, cible, verdict en un objet), puis « Ta définition et une note » repliées.
 
@@ -412,3 +412,7 @@ Deuxième étape du portage du retour 07, drapeau fermé. L'écran d'un chiffre,
 **Copie neuve**, « à relire » : le piège, les trois autres réponses, « Comment il se situe » et sa légende, le graphique en mots, la définition et la note. Les clés mortes sortent (`haveIt`, `target`, `targetHint`, `declaredAtTour`, `hybridTrapTitle`, `statusQuestion`, `statusQuestionAnswer`).
 
 **Les specs** du moteur suivent : plus de « Je l'ai » à cocher, les trois réponses sont des boutons, `openWords` déplie la définition et la note avant d'y taper, le test « une réponse n'est pas un chiffre » lit la nouvelle légende, celui de la résiliation lit le verdict.
+
+**Relevé en route** : le relecteur de copie a vu que « ← J'ai le chiffre, finalement » restait au-dessus de l'événement d'activation, que la légende avait épargné : « ← J'ai la réponse, finalement » y est. La réponse du Tour est entre guillemets, comme l'ancienne ligne. Et la première passe e2e a trouvé « Reprendre la marge globale » rangé dans les cases : une marge déjà « introuvable » (l'exemple hybride) s'ouvrait sur l'éditeur, sans lui. Il est offert au-dessus des réponses, quelle que soit celle affichée (C25 Q4). Deux specs lisaient la source avant toute valeur : elle n'apparaît qu'une fois un compte tapé, elles en tapent un d'abord.
+
+**Vérifié** : `tsc` et `eslint` propres, les tests unitaires, `next build` avec les variables de la CI, les 285 specs du moteur, des cibles et de l'accessibilité (onze échecs à la première passe, tous dans les specs qui visaient l'ancien écran, puis les cinq fichiers repassés : 84 sur 84), et des captures de l'écran en français et en anglais, à 1 280 et 390 px, dans le pas à pas et au tableau, sans défilement horizontal. Le `toggle` du `Disclosure` livré en T0 est exercé en vrai : « Écrire ta définition » déplie la note et y met le focus, vérifié par Playwright.
