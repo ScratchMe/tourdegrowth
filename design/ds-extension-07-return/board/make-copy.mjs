@@ -7,8 +7,8 @@ import { COPY, frTypo } from "./copy.js";
 import { GLOSSARY } from "./glossary.js";
 
 const here = dirname(fileURLToPath(import.meta.url));
-const cell = (t) => String(t ?? "").replace(/\|/g, "\\|").replace(/\n/g, " ");
-const show = (t) => cell(t).replace(/ /g, " "); // kept as is: U+202F is in the file
+const cell = (t) => String(t ?? "").replace(/\\/g, "\\\\").replace(/\|/g, "\\|").replace(/\n/g, " ");
+const show = (t) => cell(t); // kept as is: U+202F is in the file
 
 const SECTIONS = [
   ["landing.", "The page around the tool"],

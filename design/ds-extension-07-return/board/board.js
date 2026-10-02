@@ -824,6 +824,7 @@ if (!framing) {
   const root = document.getElementById("root");
   document.body.dataset.screen = screenId;
   document.body.dataset.w = String(width);
-  render(RENDER[screenId](), root);
+  const draw = Object.prototype.hasOwnProperty.call(RENDER, screenId) ? RENDER[screenId] : RENDER.return;
+  if (typeof draw === "function") render(draw(), root);
   document.title = `${screenId} · ${lang} · ${width} — engine 07`;
 }

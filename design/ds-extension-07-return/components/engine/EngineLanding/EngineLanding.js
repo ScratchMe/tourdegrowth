@@ -15,8 +15,14 @@ const h = React.createElement;
  * and then vanish. A search engine has no storage: it always reads the first
  * visit's page, H1, promise and all.
  */
+// Escapes what could end the inline <script> or break the line (CodeQL
+// js/bad-code-sanitization). The key is the engine's own constant; this is the
+// same rule a port must keep.
+const SCRIPT_CHARS = { "<": "\\u003C", ">": "\\u003E", "/": "\\u002F", "\u2028": "\\u2028", "\u2029": "\\u2029" };
+const escapeScriptChars = (s) => s.replace(/[<>\/\u2028\u2029]/g, (c) => SCRIPT_CHARS[c]);
+
 export const engineKnownScript = (storageKey) =>
-  `(function(){try{if(window.localStorage.getItem(${JSON.stringify(storageKey)})!==null){document.documentElement.setAttribute("data-engine","known")}}catch(e){}})();`;
+  `(function(){try{if(window.localStorage.getItem(${escapeScriptChars(JSON.stringify(storageKey))})!==null){document.documentElement.setAttribute("data-engine","known")}}catch(e){}})();`;
 
 /**
  * Everything above the tool. First visit: eyebrow, H1, the positioning, the

@@ -402,7 +402,7 @@ bon à tirer. Seize écrans dans `design/ds-extension-07/`, en français à
 tel que la page l'imprime. **Déposé le même jour** dans le projet (28 fichiers,
 un plan à eux, aucune suppression), lancé par Antoine, et **revenu le même
 jour** : recopié dans [`design/ds-extension-07-return/`](design/ds-extension-07-return/README.md),
-101 fichiers identiques au caractère près (`COPIE.md` dit comment), la
+101 fichiers identiques au caractère près, sauf quatre lignes changées pour CodeQL (`COPIE.md` dit lesquelles et comment), la
 planche rejouée sur 162 états. Antoine a tranché C38 et C40 à C42 dessus ;
 **son portage est A18**, qui mesure l'après avec le même script
 (`scripts/engine-density.capture.ts`). **B10 est clos.**

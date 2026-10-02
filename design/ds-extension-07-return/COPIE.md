@@ -21,6 +21,27 @@ Le retour contient 86 U+202F et 2 U+00A0, dont `const NNBSP` dans
 `board/copy.js` (la typographie française de toute la copie) et la regex des
 séparateurs de `board/sys/NumberField.js`.
 
+**Quatre lignes changées après la copie, pour CodeQL** (alertes de la PR
+#282, deux hautes et deux moyennes). La règle du dépôt est de corriger une
+alerte, pas de l'écarter, et deux d'entre elles touchent ce que le portage
+reprendra :
+
+- `components/engine/EngineLanding/EngineLanding.js` : `engineKnownScript`
+  échappe `<`, `>`, `/`, U+2028 et U+2029 dans la clé avant de l'écrire dans le
+  `<script>` en ligne (*bad code sanitization*). La clé est une constante du
+  moteur, mais c'est la règle que le portage doit garder ;
+- `board/board.js` : l'écran demandé dans l'adresse n'appelle une fonction de
+  `RENDER` que si `RENDER` la possède (*unvalidated dynamic method call*) ;
+  sinon, l'écran du retour ;
+- `board/make-copy.mjs` : une cellule échappe les barres obliques inverses
+  avant les `|` (*incomplete string escaping*), et le remplacement de U+202F
+  par lui-même, qui ne faisait rien, est retiré (*replacement of a substring
+  with itself*).
+
+`COPY.md` régénéré par `make-copy.mjs` après ces changements est identique à
+l'octet, et la planche se rejoue de même (ci-dessous). **Hors de ces trois
+fichiers, les 98 autres restent identiques au retour.**
+
 **La planche se rejoue depuis le dépôt**, servie en http (les modules ES ne se
 chargent pas depuis `file://`). `board.html` cherche les polices à
 `../../../fonts/fonts.css`, le chemin du projet Claude Design. Le dépôt ne l'a
