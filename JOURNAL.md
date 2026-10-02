@@ -813,4 +813,10 @@ Le tout est « à relire ».
 
 **À T7** : `scripts/engine-density.capture.ts`, qui mesure l'avant et l'après, vise encore les identifiants de l'ancien départ et du pas à pas.
 
-**Vérifié** : RESULTS
+**Vérifié** :
+- `tsc` et `eslint` propres ; 3 037 tests unitaires ; `next build` avec les variables de la CI.
+- **Les specs du moteur, des cibles, de l'accessibilité et de la plateforme** : 301 passées et une ignorée par construction, sur le build qui porte la relecture.
+  - La première passe a mis au jour les specs qui attendaient la ligne « Enregistré » (huit) et l'aide qui ouvrait un chiffre de l'assisté depuis la liste du libre-service.
+  - La seconde a eu deux échecs : le canari de l'assisté et la place de l'événement d'activation (2 sur 3, le chiffre principal de l'étape passe en premier). Les deux sont corrigés.
+  - La spec du parcours, complétée après la relecture, repasse seule (13).
+- **Captures** du premier chiffre et du dernier, en français et en anglais, à 1 280 et 390 px, sans défilement horizontal : un bouton principal qui dit où il mène, « Passe pour l'instant » discret à côté.
