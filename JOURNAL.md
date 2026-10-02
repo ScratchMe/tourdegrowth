@@ -1369,3 +1369,44 @@ Le PNG est décodé avec `node:zlib` : `sharp` n'arrive que par `next`, en dép
 - Playwright complet sur un build fermé comme la CI, avec l'émulateur et `CI=1` : 865 specs, 859 passées, 6 ignorées par construction.
 
 **Consigné** : `CHANTIERS.md` (A17 clos), `NEXTJS.md` §1.10.
+
+
+## L'en-tête du résultat sur téléphone : les états descendent en tête de page (2026-10-02, #273)
+
+**La demande** (Antoine) : à 320 px, un résultat en roast débordait de 14 px, par le badge roast de l'en-tête (`CHANTIERS.md` E, noté par A16).
+
+**Mesuré sur un vrai build, avec l'émulateur, dans tous les états de l'en-tête** (le logo, puis à droite la langue, le tag Deep dive, le badge roast) et non dans le seul où le défaut avait été vu :
+
+| État | 320 px | 360 px | 375 px | 390 px (contrat) |
+|---|---|---|---|---|
+| l'exemple, sans état | tient | tient | tient | tient |
+| roast | +14 px | tient | tient | tient |
+| Deep dive | +13 px | tient | tient | tient |
+| roast + Deep dive | +79 px | +39 px | +24 px | **+9 px** |
+
+Le dernier état débordait **dans le contrat**, et aucun test ne le voyait : seul `/r/sample`, sans état, était mesuré au téléphone (`landing-mobile.spec.ts` et `result-composition.spec.ts`, entre autres). Les captures ont montré un second défaut, sans débordement : le badge roast se coupait en « 🔥 ROAST / MODE » dès 390 px, et dès 430 px quand le tag Deep dive était à côté, lui-même coupé en « DEEP / DIVE ».
+
+**Pourquoi pas comme R-21** : l'accueil a réglé le même problème en masquant au téléphone ce que le pied de page porte déjà, et en refusant un en-tête sur deux lignes (132 à 171 px). Ici, rien d'autre sur la page ne dit « roast », et ce mot est ce qui prévient le lecteur d'un lien partagé que le ton dur a été choisi. Masquer était exclu.
+
+**Ce qui change**, au point de rupture de l'app (la bascule est en CSS seul, sans JavaScript) :
+- jusqu'à 760 px, l'en-tête garde le logo et la langue, et les deux états descendent sur leur propre ligne en tête de page, là où l'exemple porte son badge d'exemple ;
+- à partir de 761 px, rien ne bouge ;
+- les états sont rendus deux fois (`stateTags`), et celui qui ne s'affiche pas est en `display: none`, donc hors de l'arbre d'accessibilité ;
+- le badge roast ne se coupe plus jamais (`white-space: nowrap`).
+
+**Tests** :
+- un vrai résultat de plus dans l'émulateur, `roastDeep` (roast, avec un Deep dive, 54/100), l'état le plus large de l'en-tête ;
+- `e2e/result-header.spec.ts` couvre les quatre états, aux deux langues. Au téléphone (320, 360, 375, 390, 430 et 760 px), la page ne défile pas de côté, les états sont en tête de page et pas dans l'en-tête, et chacun tient sur une ligne. À 761 et 1 280 px, la ligne de l'en-tête tient et les états y sont ;
+- **non-vacuité, sur un build sans le correctif** : les six cas branchés sur l'émulateur échouent dès 320 px (de 13 à 79 px de trop), et l'exemple passe, comme attendu ;
+- le contrôle « une ligne » est éprouvé à part, sur le même build, avec le badge roast : coupé, il fait 36 px de contenu, et il ressort faux ; sur une ligne, il fait 18 px ;
+- **la relecture de copie a trouvé une borne sans marge** : le premier jet comptait en tailles de police (moins de deux). Or le tag Deep dive est composé plein (`--meta-2xs`, hauteur de ligne 1) : coupé, il fait exactement deux tailles de police, et seul le `<` strict l'attrapait. La borne compte maintenant en hauteurs de ligne (moins d'une et demie), et elle est éprouvée sur le tag Deep dive coupé aussi.
+
+**Trouvé en mesurant, puis réglé à la demande d'Antoine dans la même PR** : `/r/sample` débordait de 8 px à 761 px et de 1 px à 768 (un iPad en portrait), quoi que tienne l'en-tête. La cause n'était ni l'en-tête ni le seuil des deux colonnes, comme je l'avais d'abord écrit, mais **les cartes de forces et de faiblesses** (`.cardGrid`). Au-dessus de 760 px, elles passaient toujours à deux colonnes `1fr 1fr`. À 761 px, la colonne de droite n'a que 249 px (713 − 420 − 44), donc deux cartes de 120 px, avec 76 px de texte par ligne. Un mot de l'exemple n'y tenait pas, et la grille réclamait 281 px (278 en français). Les vrais résultats tenaient seulement parce que leurs mots étaient plus courts, aussi à l'étroit.
+
+**Le correctif** : la grille se règle sur sa propre largeur, `repeat(auto-fill, minmax(min(100%, 240px), 1fr))`, donc deux cartes côte à côte seulement si chacune a 240 px. Concrètement, une carte par ligne de 761 à environ 1 000 px, puis deux, de 260 px à pleine largeur comme avant. `auto-fill` plutôt qu'`auto-fit` : la seule force d'un roast garde sa demi-largeur au bureau, comme avec `1fr 1fr`. Mesuré : 249, 388, puis 240 + 240 et 260 + 260 px à 761, 900, 1 000 et 1 280 px, sans défilement de côté.
+
+**Le test** : à partir de 761 px, `result-header.spec.ts` mesure maintenant toute la page, et non plus la seule ligne de l'en-tête, à 761, 768, 834, 1 024 et 1 280 px. **Non-vacuité** : sur le build sans ce correctif, l'exemple échoue à 761 px dans les deux langues, et les vrais résultats passent.
+
+**Les suites, sur la branche** : 2 942 tests unitaires verts ; 882 specs Playwright, 876 passées en local avec l'émulateur et `CI=1`, 6 ignorées par construction ; `tsc` et `eslint` propres.
+
+**Captures** du vrai build, à 320, 390 et 1 280 px, avant et après, pour le roast, le Deep dive et les deux ensemble. Au téléphone, l'en-tête est fin et les deux tags sont lisibles sur une ligne au-dessus de la carte du score. Au bureau, l'en-tête est inchangé.

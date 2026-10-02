@@ -34,6 +34,7 @@ export default async function globalSetup(): Promise<void> {
   }
   // A re-run against a live emulator finds it already there: "already-present" is fine.
   await saveDeepDive(REAL_RESULTS.deep.id, REAL_DEEP_DIVE);
+  await saveDeepDive(REAL_RESULTS.roastDeep.id, REAL_DEEP_DIVE);
   // Straight into the collection on purpose: this document must NOT go through
   // the flow that would make it valid (`real-results.ts`, MALFORMED_ID).
   await getDb().collection("submissions").doc(MALFORMED_ID).set({ id: MALFORMED_ID, createdAt: REAL_CREATED_AT });
