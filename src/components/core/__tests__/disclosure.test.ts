@@ -11,7 +11,8 @@ import { Disclosure, type DisclosureProps } from "../Disclosure";
  * `onOpenChange` is the browser's own, exercised by its first caller (A18 T1).
  */
 const html = (props: Partial<DisclosureProps> = {}) =>
-  renderToStaticMarkup(createElement(Disclosure, { summary: "Ta définition et une note", children: "body", ...props }));
+  // `children` is required by the props and passed as createElement's third argument (react/no-children-prop).
+  renderToStaticMarkup(createElement(Disclosure, { summary: "Ta définition et une note", ...props } as DisclosureProps, "body"));
 
 const openAttr = (markup: string) => /<details[^>]*\sopen=""/.test(markup);
 
