@@ -1278,7 +1278,7 @@ Le texte du skill `/design-sync` (trouvé en ligne) dit que l'application « cle
 
 **Consigné** : `CHANTIERS.md` (A15 clos, A16 retiré, B7, B9 ouvert), `docs/decisions.md` (C34 et C35 codées), `design/README.md`, `design/LOIS-UX.md` (la loi de similarité : tenue).
 
-## A14.c, T6.2 : l'image de partage du moteur, portée du retour de B5 (2026-10-01, #272)
+## A14.c, T6.2 : l'image de partage du moteur, portée du retour de B5 (2026-10-02, #272)
 
 Antoine a lancé le brief 06 dans Claude Design le soir même du dépôt (D12), puis a dit « Claude Design a terminé ». Cette PR recopie le retour dans le dépôt et le porte : c'était la dernière pièce d'A14.c.
 
@@ -1325,9 +1325,9 @@ Le balisage du composant `Stopwatch` est identique avant et après, au caractèr
 - **Le rendu** : le portage comparé au pixel au rendu des sources du retour par le même Satori (0 écart hors des deux zones voulues). Lu à l'œil en français et en anglais à 1 200 px, puis à 320 px : le titre, le mot bleu, le logo et le chronomètre se lisent.
 - **Les octets** : l'image du résultat est identique avant et après la sortie de son pictogramme ; le balisage du composant `Stopwatch` aussi.
 - **Les mots** : l'alt, la ligne, la promesse, l'eyebrow, la pastille et la coupe du titre sont identiques à `og/strings.og.mjs`, aux deux langues.
-- **Les tests unitaires** : `vitest --coverage`, 2 931 tests dans 229 fichiers, au-dessus des seuils.
+- **Les tests unitaires** : `vitest --coverage`, 2 942 tests dans 230 fichiers, au-dessus des seuils, sur l'arbre rebasé après A16 (#271).
 - **Les contrôles statiques** : `tsc` et `eslint` propres ; `next build` propre moteur fermé et moteur ouvert, l'image prérendue (●) les deux fois.
-- **Playwright complet, build fermé comme la CI**, avec l'émulateur Firestore et `CI=1` : 861 specs, 855 passées, 6 ignorées par construction, aucune au second essai.
+- **Playwright complet, build fermé comme la CI**, avec l'émulateur Firestore et `CI=1` : 861 specs, 855 passées, 6 ignorées par construction, aucune au second essai. Rejoué après le rebase sur A16 (#271), qui touchait le résultat et les jetons : 865 specs, 859 passées, 6 ignorées.
 - **Build `ENGINE_ENABLED=true`**, avec l'émulateur : les specs `engine-*`, `share-previews`, `game-share-images`, `result-real` et `locale-routing`, soit 310. 299 passées et 5 ignorées par construction. Les six de `engine-flag.spec.ts` sont rouges, comme il se doit : elles sont écrites pour un serveur fermé (leur en-tête le dit), et le motif `engine-*` les a prises. L'image y répond à tous, et la page la déclare avec son alt.
 - **Les sabotages** : seize sur les gardes neuves, tous tombés.
   - Un glyphe absent du sous-ensemble dans la ligne (« ≈ » : la flèche, elle, est dans le sous-ensemble d'Inter et passe à juste titre).
