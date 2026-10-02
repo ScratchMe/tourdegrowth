@@ -821,7 +821,7 @@ Le tout est « à relire ».
   - La spec du parcours, complétée après la relecture, repasse seule (13).
 - **Captures** du premier chiffre et du dernier, en français et en anglais, à 1 280 et 390 px, sans défilement horizontal : un bouton principal qui dit où il mène, « Passe pour l'instant » discret à côté.
 
-## A18 T3.c : les demandes en un écran, à la place de « À aller chercher » (2026-10-02, #PR)
+## A18 T3.c : les demandes en un écran, à la place de « À aller chercher » (2026-10-02, #295)
 
 Huitième étape du portage du retour 07, drapeau fermé, et la troisième de T3 : **les chiffres qui viennent de quelqu'un d'autre se demandent sur un écran à eux** (`AskList`, design system extension 07).
 
@@ -843,10 +843,10 @@ Huitième étape du portage du retour 07, drapeau fermé, et la troisième de T3
 - La relecture (`relecteur-copie`) a trouvé ces quatre points ; ils sont appliqués.
 
 **Les specs** :
-- `engine-collect` : « les demandes, un écran » remplace le test de la section (une carte par personne, la copie qui marque les deux chiffres de Finance, la carte qui dit quand, « C'est envoyé » vers les chiffres d'une heure, la demande non copiée restée « à faire »), avec la lecture axe sur l'écran ;
+- `engine-collect` : « les demandes, un écran » remplace le test de la section (une carte par personne, la copie qui marque les deux chiffres de Finance, la carte qui dit quand, « C'est envoyé » vers les chiffres d'une heure, la demande non copiée restée « à faire »), avec l'audit axe de l'écran ;
 - `engine-collect` vérifie aussi que la confirmation n'est dite qu'une fois à l'écran ;
 - `engine-tools` : les outils se lisent dans « Où le trouver » de la fiche, et l'écran des demandes porte ce qu'aucun outil ne donne (on y arrive en passant les chiffres de cinq minutes : le chemin a été vérifié une fois, la spec n'a pas de branche) ;
-- `engine-mobile` : l'écran des demandes mesuré de 320 à 430 px ;
+- `engine-mobile` : l'écran des demandes mesuré à 360, 390 et 430 px ;
 - `engine-numbers` : « Renseigner » part avec la section.
 - Un test unitaire du composant (`ask-list.test.ts`, 4 tests).
 
