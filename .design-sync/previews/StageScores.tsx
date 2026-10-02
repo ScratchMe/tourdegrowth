@@ -23,8 +23,9 @@ const LABELS = {
   moreLabel: "Learn more →",
 };
 
-type Row = { id: string; label: string; score: number };
-const row = (id: string, label: string, score: number): Row => ({ id, label, score });
+type StageId = "acquisition" | "activation" | "retention" | "referral" | "revenue";
+type Row = { id: StageId; label: string; score: number };
+const row = (id: StageId, label: string, score: number): Row => ({ id, label, score });
 
 /** `/r/sample`'s board, 18 · 12 · 8 · 16 · 20 (lib/submissions/sample.ts): a clear bottleneck, Retention. */
 const SAMPLE = [
@@ -35,22 +36,37 @@ const SAMPLE = [
   row("revenue", "Revenue", 20),
 ];
 
-function Sheet({ rows, alert, label = "Score per stage, out of 20" }: { rows: Row[]; alert: string[]; label?: string }) {
+/** As ResultView draws it: every row keeps its « ? »; in a roast, `stamped` names the stage whose row is the stamp. */
+function Sheet({
+  rows,
+  alert,
+  stamped,
+  label = "Score per stage, out of 20",
+}: {
+  rows: Row[];
+  alert: string[];
+  stamped?: string;
+  label?: string;
+}) {
   const [open, setOpen] = React.useState("");
   return (
     <StageScores label={label}>
-      {rows.map((r) => (
-        <StageScore key={r.id} stage={r.label} score={r.score} tone={alert.includes(r.id) ? "alert" : "neutral"}>
-          <GlossaryTerm
-            id={r.id}
-            locale="en"
-            openId={open}
-            onOpenChange={(id) => setOpen(id ?? "")}
-            tone={alert.includes(r.id) ? "alert" : "muted"}
-            {...LABELS}
-          />
-        </StageScore>
-      ))}
+      {rows.map((r) =>
+        r.id === stamped ? (
+          <StampedPillar key={r.id} pillar={r.label} score={r.score} suffix="dead last" />
+        ) : (
+          <StageScore key={r.id} stage={r.label} score={r.score} tone={alert.includes(r.id) ? "alert" : "neutral"}>
+            <GlossaryTerm
+              id={r.id}
+              locale="en"
+              openId={open}
+              onOpenChange={(id) => setOpen(id ?? "")}
+              tone={alert.includes(r.id) ? "alert" : "muted"}
+              {...LABELS}
+            />
+          </StageScore>
+        ),
+      )}
     </StageScores>
   );
 }
@@ -99,19 +115,24 @@ export const Level = () => (
 );
 
 /**
- * Roast, 20 · 13 · 9 · 16 · 16 (a board the quiz can produce): the weakest
- * stage leaves the sheet as StampedPillar, in its own row; the second-lowest
- * takes the red row — emphasis, not a diagnosis.
+ * Roast, 20 · 13 · 9 · 16 · 16 (a board the quiz can produce; resolveBottleneck:
+ * `clear`, Retention): the weakest stage leaves the sheet as StampedPillar, in
+ * its own row; the second-lowest takes the red row — emphasis, not a
+ * diagnosis. Every other row keeps its « ? », as on the calm result.
  */
 export const Roast = () => (
   <div style={{ maxWidth: 420 }}>
-    <StageScores label="Score per stage, out of 20">
-      <StageScore stage="Acquisition" score={20} />
-      <StageScore stage="Activation" score={13} tone="alert" />
-      <StampedPillar pillar="Retention" score={9} suffix="dead last" />
-      <StageScore stage="Referral" score={16} />
-      <StageScore stage="Revenue" score={16} />
-    </StageScores>
+    <Sheet
+      rows={[
+        row("acquisition", "Acquisition", 20),
+        row("activation", "Activation", 13),
+        row("retention", "Retention", 9),
+        row("referral", "Referral", 16),
+        row("revenue", "Revenue", 16),
+      ]}
+      alert={["activation"]}
+      stamped="retention"
+    />
   </div>
 );
 

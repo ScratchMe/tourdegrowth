@@ -492,3 +492,26 @@ L'offset n'était jamais sous la hauteur de l'en-tête : rien n'était masqué, 
 - Playwright complet sur un build comme la CI, `CI=1` : 908 specs, 860 passées et 48 ignorées sans l'émulateur. Les 42 specs des vrais résultats, rejouées avec l'émulateur, passent : 902 passées, 6 ignorées par construction.
 
 **Consigné** : `CHANTIERS.md` (B11 corrigé, A19.1, la ligne de veille du quiz retirée de la section E), `CLAUDE.md` (les chiffres de référence).
+
+## B9 et B12 : la re-synchro d'A16 et d'A19 (2026-10-02)
+
+**Ce qu'elle emporte**, en une seule synchro vers le projet Claude Design, faite sur `main` à `44f2a2a` :
+- B9, la feuille de scores : `StageScore` et `StageScores` (nouveaux), `PillarChip` sorti du projet, `StampedPillar` et `DefinitionTrigger` redessinés, les rangs rouges de C34 ;
+- B12, l'en-tête compact : `SiteHeader`, `SpaceBand` (la course sortie en `SpaceRace`, hors inventaire comme `SiteHeaderCompactor`), `Segmented` à 42 px de large (C44), `tokens/header.css` ;
+- `Disclosure`, qui a gagné `defaultOpen` et une forme contrôlée avec A18 T0.
+
+**Le résultat** : 91 composants, 308 cellules, toutes notées bonnes. Le pilote a classé 5 composants comme changés, 2 comme nouveaux et 1 comme retiré ; la vérification de 18 autres, dont le code a changé sans leur aperçu, les a trouvés conformes. 14 composants envoyés, 77 reportés, 466 fichiers. `report_validate` : 91, 0 mauvais, 0 maigre, 0 identique ; l'index relu identique (91 cartes) ; ancre `59b524b3669b`.
+
+**Cinq aperçus corrigés**, chacun une carte qui s'affichait bien et disait faux :
+- la feuille en roast de `StageScores` et la carte de `StampedPillar` dessinaient les voisins du tampon sans leur « ? », que `ResultView` leur donne ;
+- `Disclosure` passait l'attribut natif `open`, devenu la prop contrôlée avec A18 T0 : `defaultOpen` à la place ;
+- `SiteHeader` disait le filet toujours tracé (il n'apparaît qu'au défilement depuis A19) et ne disait rien de l'état compact. Une carte immobile ne peut pas le montrer : sa documentation le décrit ;
+- `Segmented` ne disait pas les 42 px de C44.
+
+**`design/` dans le projet** : décision d'Antoine, les briefs 04, 05, 06 et 08 et leurs retours en sont retirés, puisqu'ils sont portés. 171 fichiers, listés depuis le projet et non depuis le dépôt : les retours n'y sont pas fichier pour fichier les copies d'ici. Seuls le brief 07 et son retour restent, A18 étant en cours. Tout ce qui est retiré est dans ce dépôt.
+
+**Ce que la synchro a trouvé après coup** : A18 T1 (#285) est arrivé sur `main` pendant qu'elle tournait. Il ajoute cinq composants sous `src/components/engine/` qui ne sont pas dans `componentSrcMap` (la prochaine construction du paquet échouera sur `check-inventory`, et c'est voulu), et retire de la copie que trois aperçus citent encore (`Choices`, `NumberField`, `FieldRow`). A18 n'est pas fini : c'est **B13**, la re-synchro à la fin de son portage, ouverte dans `CHANTIERS.md`.
+
+**Le volet Design System** reste sur sa copie du 2026-09-11 (B8) : l'agent de Claude Design, lui, lit les fichiers à jour.
+
+**Consigné** : `.design-sync/NOTES.md` (« Synced », « Found in the 2026-10-02 re-sync », la méthode de vérification des types, un risque de plus), `CHANTIERS.md` (B9 et B12 clos, B13 ouvert), `CLAUDE.md`.

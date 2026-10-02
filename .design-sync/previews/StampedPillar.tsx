@@ -1,4 +1,4 @@
-import { StageScore, StageScores, StampedPillar } from "tour-de-growth";
+import { DefinitionTrigger, StageScore, StageScores, StampedPillar } from "tour-de-growth";
 
 /*
  * Roast mode only, and only ever for the SINGLE lowest-scoring stage: in a
@@ -16,13 +16,17 @@ import { StageScore, StageScores, StampedPillar } from "tour-de-growth";
  * stage is retention at 9.
  */
 
-/** As it ships, in its row of the sheet — the suffix is `UI_STRINGS.result.stampedSuffix` ("dead last"). */
+/** As it ships, in its row of the sheet — the suffix is `UI_STRINGS.result.stampedSuffix` ("dead last"). Its neighbours keep their « ? » (a GlossaryTerm in the product; its trigger alone here); the stamp has none. */
 export const Stamped = () => (
   <div style={{ maxWidth: 420 }}>
     <StageScores label="Score per stage, out of 20">
-      <StageScore stage="Activation" score={13} tone="alert" />
+      <StageScore stage="Activation" score={13} tone="alert">
+        <DefinitionTrigger term="Activation" label="Definition: Activation" tone="alert" />
+      </StageScore>
       <StampedPillar pillar="Retention" score={9} suffix="dead last" />
-      <StageScore stage="Referral" score={16} />
+      <StageScore stage="Referral" score={16}>
+        <DefinitionTrigger term="Referral" label="Definition: Referral" tone="muted" />
+      </StageScore>
     </StageScores>
   </div>
 );
