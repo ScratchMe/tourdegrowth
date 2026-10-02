@@ -1,0 +1,19 @@
+/* BulletChart — delta proposed by design system extension 07: the `band`.
+ * Add to BulletChart.module.css. Tokens: --viz-band-edge, --viz-band-height
+ * (tokens/engine.css). */
+
+/* The published range, as a bracket under the track: under, not on it, so
+ * the value bar never hides it and it never reads as a second value. */
+.BulletChart_bandRow {
+  position: relative;
+  height: var(--viz-band-height);
+  margin-top: var(--space-1);
+}
+
+.BulletChart_band {
+  position: absolute;
+  top: 0;
+  height: var(--viz-band-height);
+  border: var(--viz-band-edge);
+  border-top: none;
+}

@@ -1,0 +1,92 @@
+/* NumberSheet — design system extension 07. Tokens only. */
+.NumberSheet_root {
+  max-width: var(--engine-measure);
+}
+
+.NumberSheet_form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.NumberSheet_header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3) var(--space-8);
+}
+
+.NumberSheet_identity {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.NumberSheet_name {
+  font: var(--engine-number-title);
+  letter-spacing: var(--display-letter-spacing);
+  text-transform: uppercase;
+}
+
+.NumberSheet_name:focus {
+  outline: none;
+}
+
+.NumberSheet_meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-8);
+}
+
+.NumberSheet_lede {
+  font: var(--body-lg);
+  color: var(--text-body);
+  margin-top: calc(-1 * var(--space-3));
+}
+
+.NumberSheet_formula {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-5);
+  margin-top: calc(-1 * var(--space-5));
+}
+
+.NumberSheet_formulaLabel {
+  font: var(--meta-xs);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.NumberSheet_formulaText {
+  font: var(--engine-formula);
+  color: var(--text-body);
+}
+
+.NumberSheet_tour {
+  font: var(--body-sm);
+  color: var(--text-muted);
+}
+
+.NumberSheet_actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-5) var(--space-10);
+  padding-top: var(--space-3);
+}
+
+@media (max-width: 760px) {
+  .NumberSheet_name {
+    font: var(--engine-number-title-mobile);
+  }
+  .NumberSheet_form {
+    gap: var(--space-7);
+  }
+  .NumberSheet_actions .Button_primary {
+    width: 100%;
+  }
+}

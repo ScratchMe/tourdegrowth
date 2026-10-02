@@ -1,0 +1,476 @@
+/* The board's own layout: frames, the page stand-ins, the journey. Board
+ * only — never ported. Tokens only, like everything else in the return. */
+
+body {
+  margin: 0;
+}
+
+body.Board_framing {
+  background: var(--surface-desk);
+  padding: var(--space-8);
+}
+
+.Board_frame {
+  display: block;
+  border: var(--border-solid);
+  background: var(--surface-page);
+}
+
+/* ── Page stand-ins (app.js) ── */
+.App_header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 72px;
+  padding: 0 var(--gutter-desktop);
+  background: var(--surface-card);
+}
+
+.App_wordmark {
+  font: var(--display-wordmark);
+  letter-spacing: var(--display-letter-spacing);
+  color: var(--text-body);
+}
+
+.App_wordmarkRed {
+  color: var(--paint-red);
+}
+
+.App_band {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  height: 46px;
+  padding: 0 var(--gutter-desktop);
+  background: var(--space-engine-bg);
+  color: var(--space-engine-text);
+  border-bottom: var(--border-solid);
+  font: var(--meta-2xs);
+  letter-spacing: var(--meta-tracking);
+}
+
+.App_bandTitle {
+  font: var(--display-wordmark);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.App_main {
+  padding: var(--space-12) var(--gutter-desktop) var(--space-15);
+}
+
+.Board_pageInner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-13);
+  max-width: var(--width-desktop);
+  margin: 0 auto;
+}
+
+[data-engine=known].Board_pageInner {
+  gap: var(--space-10);
+}
+
+.Board_toolOnly {
+  padding: var(--space-11) var(--gutter-desktop) var(--space-15);
+}
+
+.Board_tool {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-11);
+  max-width: var(--engine-measure);
+}
+
+.Board_toolOnly .Board_tool {
+  margin: 0 auto;
+}
+
+.Board_wide {
+  padding: var(--space-11) var(--gutter-desktop) var(--space-15);
+  max-width: var(--width-desktop);
+  margin: 0 auto;
+}
+
+.Board_below {
+  max-width: var(--engine-measure);
+}
+
+.Board_note {
+  font: var(--meta-xs);
+  color: var(--text-muted);
+  max-width: var(--engine-measure);
+  margin-bottom: calc(-1 * var(--space-10));
+}
+
+.Board_p {
+  font: var(--body-md);
+  color: var(--text-body);
+}
+
+.Board_h2 {
+  font: var(--display-section);
+  letter-spacing: var(--display-letter-spacing);
+}
+
+.Board_h3 {
+  font: var(--title-card);
+}
+
+.Board_noStage {
+  color: var(--text-muted);
+}
+
+/* The verdict (app): the first slide's title, at --engine-verdict. */
+.App_verdict {
+  font: var(--engine-verdict);
+  letter-spacing: var(--display-letter-spacing);
+  text-transform: uppercase;
+  color: var(--text-body);
+  text-wrap: balance;
+}
+
+.App_verdictRed {
+  color: var(--paint-red);
+}
+
+.App_verdictPending {
+  padding: var(--space-7);
+  border: var(--engine-pending-edge);
+  border-radius: var(--radius-panel);
+  font: var(--body-md);
+  color: var(--text-muted);
+}
+
+.App_diag {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.App_diagStage {
+  font: var(--display-section);
+  letter-spacing: var(--display-letter-spacing);
+  text-transform: uppercase;
+  color: var(--paint-red);
+}
+
+.App_diagValue {
+  font: var(--body-lg);
+}
+
+.App_diagHiding {
+  font: var(--body-md);
+  color: var(--text-alert);
+  max-width: var(--measure-read);
+}
+
+.App_diagTop {
+  font: var(--meta-xs);
+  color: var(--text-muted);
+  max-width: var(--measure-read);
+}
+
+.App_peloton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.App_pelotonTitle {
+  font: var(--title-card);
+}
+
+.App_pelotonLead {
+  font: var(--meta-xs);
+  color: var(--text-muted);
+}
+
+.App_pelotonCols {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-8);
+}
+
+.App_pelotonCol {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+.App_pelotonN {
+  font: var(--chart-value-xl);
+}
+
+.App_pelotonLabel {
+  font: var(--engine-stage-title);
+  text-transform: uppercase;
+  margin-bottom: var(--space-3);
+}
+
+.App_pelotonSrc {
+  font: var(--meta-xs);
+  color: var(--text-muted);
+}
+
+/* ── Board compositions around the components ── */
+.Board_listBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.Board_ratio {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.Board_sharedHint {
+  max-width: var(--measure-read);
+}
+
+.Board_result {
+  font: var(--field-label);
+}
+
+.Board_onlyRate {
+  align-self: flex-start;
+}
+
+.Board_source,
+.Board_editor,
+.Board_words {
+  display: flex;
+  flex-direction: column;
+  gap: var(--form-gap-sm);
+}
+
+.Board_request {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.Board_settings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--form-gap-md);
+}
+
+.Board_settingsGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--form-gap-sm);
+  padding-top: var(--space-8);
+  border-top: var(--border-rule);
+}
+
+.Board_targets {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--form-gap-sm) var(--space-10);
+}
+
+.Board_tools {
+  border: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.Board_toolsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0 var(--space-7);
+}
+
+.Board_settingsActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-5) var(--space-10);
+}
+
+.Board_motion {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-7);
+}
+
+.Board_slidesQuiet {
+  align-self: flex-start;
+}
+
+/* ── Beside today ── */
+.Board_compare {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-10);
+  padding: var(--space-11) var(--gutter-desktop);
+  align-items: start;
+}
+
+.Board_compareCol {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.Board_compareCap {
+  font: var(--meta-sm);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.Board_compareFrame {
+  width: calc(var(--compare-natural) * var(--compare-scale));
+  overflow: hidden;
+}
+
+.Board_compareImg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.Board_compareLive {
+  width: var(--compare-natural);
+  transform: scale(var(--compare-scale));
+  transform-origin: top left;
+}
+
+/* ── The journey ── */
+.Journey_root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.Journey_title {
+  font: var(--display-title);
+  letter-spacing: var(--display-letter-spacing);
+}
+
+.Journey_section {
+  font: var(--title-card);
+  padding-top: var(--space-5);
+  border-top: var(--border-rule);
+}
+
+.Journey_pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-10);
+}
+
+.Journey_path {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding: var(--pad-card);
+  border-radius: var(--radius-card);
+}
+
+.Journey_today {
+  border: var(--border-dashed);
+}
+
+.Journey_proposed {
+  background: var(--surface-card);
+  border: var(--border-solid);
+}
+
+.Journey_steps {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.Journey_step {
+  display: grid;
+  grid-template-columns: var(--hit-compact) minmax(0, 1fr);
+  gap: var(--space-5);
+  align-items: start;
+}
+
+.Journey_num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: var(--border-solid);
+  border-radius: var(--radius-round);
+  font: var(--meta-sm);
+}
+
+.Journey_stepText {
+  display: flex;
+  flex-direction: column;
+  font: var(--body-sm);
+  color: var(--text-muted);
+}
+
+.Journey_stepText strong {
+  font: var(--field-label);
+  color: var(--text-body);
+}
+
+.Journey_facts {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-top: var(--space-5);
+  border-top: var(--border-rule);
+  font: var(--meta-xs);
+  color: var(--text-body);
+}
+
+@media (max-width: 760px) {
+  .App_header,
+  .App_band {
+    padding: 0 var(--gutter-mobile);
+  }
+  .App_main {
+    padding: var(--space-10) var(--gutter-mobile) var(--space-14);
+  }
+  .Board_pageInner {
+    gap: var(--space-11);
+  }
+  .Board_toolOnly,
+  .Board_wide {
+    padding: var(--space-8) var(--gutter-mobile) var(--space-14);
+  }
+  .Board_tool {
+    gap: var(--space-10);
+  }
+  .App_verdict {
+    font: var(--engine-verdict-mobile);
+  }
+  .App_pelotonCols {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-8) var(--space-7);
+  }
+  .App_pelotonN {
+    font: var(--display-section);
+  }
+  .Board_targets,
+  .Journey_pair {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .Board_toolsGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .Board_compare {
+    grid-template-columns: minmax(0, 1fr);
+    padding: var(--space-8) var(--gutter-mobile);
+    gap: var(--space-3);
+  }
+}

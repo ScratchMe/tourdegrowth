@@ -1,0 +1,55 @@
+/* AskList — design system extension 07. Tokens only. */
+.AskList_root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+  max-width: var(--engine-measure);
+}
+
+.AskList_title {
+  font: var(--display-section);
+  letter-spacing: var(--display-letter-spacing);
+}
+
+.AskList_lead {
+  font: var(--body-lg);
+}
+
+.AskList_groups {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+}
+
+.AskList_card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-5);
+}
+
+.AskList_numbers {
+  font: var(--field-label);
+}
+
+.AskList_request {
+  align-self: stretch;
+  padding: var(--space-6) var(--space-7);
+  background: var(--surface-sunken);
+  border-radius: var(--radius-field);
+  font: var(--body-sm);
+  color: var(--text-body);
+}
+
+.AskList_copied {
+  padding-left: var(--space-5);
+  border-left: var(--engine-pending-edge);
+  font: var(--body-sm);
+}
+
+@media (max-width: 760px) {
+  .AskList_done .Button_primary {
+    width: 100%;
+  }
+}

@@ -348,3 +348,30 @@ Seize captures dans `design/ds-extension-08/`, toutes relues à l'œil et toutes
 **Consigné** : `CHANTIERS.md` (vue d'ensemble, B11, D15), `design/README.md`, `.design-sync/NOTES.md` (« Synced »). Il n'y a que de la doc et des images sous `design/`, donc `vercel-ignore.sh` ne déploie pas.
 
 **Ce qui reste** : D15 (le lancer). Le retour va dans `design/ds-extension-08-return/`, une session le recopie dans le dépôt et ouvre son portage en A.
+
+## B10 : le retour 07 de Claude Design recopié, C38 et C40 à C42 tranchées (2026-10-02)
+
+**Ce qui est revenu** : Claude Design a répondu au brief 07 le jour même, sous `design/ds-extension-07-return/`, et rien d'autre n'a changé dans le projet (les seuls ajouts hors de ce dossier sont le brief 08 et ses captures, déposés par B11). Le retour tient en cinq mouvements :
+- la page sait qu'on revient **avant son premier rendu** : un script en tête ne lit que l'existence de la clé du moteur, et la page courte se dessine par CSS. L'outil commence à 287 px au lieu de 1 267 ;
+- **le tableau est la progression** : sous le verdict, une seule carte (`NextStep`) dit ce qui a changé et propose **une** action, choisie dans un ordre fixe ;
+- **le réglage pose une question**, « Comment vends-tu ? », déjà répondue par défaut ;
+- **un chiffre, une question** : les cases de la valeur sont la question, le piège est ouvert juste au-dessus, « Où le trouver » nomme les outils dans son résumé, repère et cible ne font plus qu'un objet ;
+- **une liste par étape** à la place des onglets, les demandes en un écran, « Et si » par un seul levier, l'hybride un moteur à la fois sous le total.
+
+Quatorze composants neufs, deux deltas (`Disclosure`, `BulletChart`), aucun changement du modèle de données. `INVENTORY.md` dit où va chaque ligne des 41 fiches du catalogue et chaque bloc d'aujourd'hui. Le rôle par défaut d'une demande, que le retour demandait de confirmer, existe déjà (`defaultRole`).
+
+**Recopié au caractère près, une première.** Les retours 04 et 05 avaient perdu leurs espaces insécables en passant par un modèle (`COPIE.md` de chacun le dit). Les sous-agents lancés en arrière-plan n'avaient pas `DesignSync` (trois lots sur cinq n'ont rien copié), ceux du premier plan l'avaient. Après une première copie, **les 101 fichiers ont été réécrits par un script depuis les réponses brutes de `get_file`**, que les transcriptions de la session gardent en JSON. 95 étaient déjà identiques, 6 ne différaient que par des insécables, dont `const NNBSP` de `board/copy.js` : la typographie française de toute la copie. Après, les 101 sont identiques : 86 U+202F et 2 U+00A0 retrouvées. Un sous-agent a aussi vu l'outil Write transformer des échappements `—` du source en tirets réels ; le passage par script l'a rattrapé.
+
+**CodeQL a rougi sur la PR** : quatre alertes dans le code recopié (deux hautes, deux moyennes). Elles sont corrigées sur place plutôt qu'écartées, comme les précédentes du dépôt, et `COPIE.md` en tient la liste. Le script d'avant le premier rendu échappe ce qui pourrait fermer un `<script>` en ligne, une règle que le portage gardera. La planche n'appelle un écran que si elle le connaît. Le générateur de `COPY.md` échappe les barres obliques inverses, et perd un remplacement qui ne faisait rien. `COPY.md` régénéré reste identique à l'octet ; 98 fichiers sur 101 restent identiques au retour.
+
+**La planche rejouée** dans Chromium, servie en http avec les polices de `.design-sync/fonts/` : les 27 écrans, deux langues, 1 280, 390 et 320 px, soit 162 états, sans erreur de script ni défilement horizontal. À 320 px, elle s'ouvre sans `w=` : elle ne connaît que 390 et 1 280. `tsc` passe avec les `.d.ts` du retour, le lint ignore `design/`.
+
+**Tranché par Antoine**, planche sous les yeux :
+- **C40** : le pas à pas et le tableau fondus en un, **mais un écran « Cibles » gardé au début**, sautable, contre la reco ;
+- **C41** : une liste par étape, la reco, qui renverse la décision du 2026-09-26 ;
+- **C42** : tous les renommages, relus au bon à tirer ;
+- **C38** : le portage d'abord, puis un seul bon à tirer, A18.d, qui absorbe A7.3.d et A14.d.
+
+**Ouvert** : **A18**, le portage, en huit étapes (T0 à T7) puis A18.d. La clause rouge du verdict, qui peut nommer une autre étape que le diagnostic (trouvaille 9 du retour), est posée au bon à tirer.
+
+**Consigné** : `design/ds-extension-07-return/COPIE.md`, `docs/decisions.md` (C38, C40 à C42), `CHANTIERS.md` (A18 ouvert, A7.3.d et A14.d absorbés, B10 clos, C sans question ouverte, D14 retiré, D2), `ENGINE.md`, `CLAUDE.md` (l'état), `design/README.md`, `.design-sync/NOTES.md`.

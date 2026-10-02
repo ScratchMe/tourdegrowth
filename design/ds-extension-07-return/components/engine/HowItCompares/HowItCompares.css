@@ -1,0 +1,72 @@
+/* HowItCompares — design system extension 07. Tokens only. */
+.HowItCompares_root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding-top: var(--space-5);
+  border-top: var(--border-rule);
+}
+
+.HowItCompares_head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-5);
+}
+
+.HowItCompares_legend {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-8);
+  font: var(--meta-xs);
+  color: var(--text-body);
+}
+
+.HowItCompares_key {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.HowItCompares_swatch {
+  display: inline-block;
+  flex: none;
+}
+
+/* The legend draws each mark as the chart does. */
+.HowItCompares_key-value .HowItCompares_swatch {
+  width: var(--engine-key-width);
+  height: var(--engine-key-bar);
+  border-radius: var(--radius-tag);
+  background: var(--viz-ink);
+}
+
+.HowItCompares_key-target .HowItCompares_swatch {
+  width: var(--engine-key-tick-width);
+  height: var(--engine-key-tick-height);
+  border-radius: var(--engine-key-tick-radius);
+  background: var(--viz-highlight);
+}
+
+.HowItCompares_key-band .HowItCompares_swatch {
+  width: var(--engine-key-width);
+  height: var(--viz-band-height);
+  border: var(--viz-band-edge);
+  border-top: none;
+}
+
+.HowItCompares_caveat {
+  font: var(--body-sm);
+  color: var(--text-muted);
+  max-width: var(--measure-read);
+}
+
+.HowItCompares_note {
+  font: var(--body-sm);
+  color: var(--text-body);
+}
+
+.HowItCompares_targetField {
+  padding-top: var(--space-3);
+}

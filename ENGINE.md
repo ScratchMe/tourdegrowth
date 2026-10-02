@@ -16,13 +16,16 @@ puis son image de partage, T6.2, [#272](https://github.com/ScratchMe/tourdegrowt
 fermé ; sa copie neuve attend le bon à tirer A14.d, et l'ouverture l'attend, en
 plus du reste de `CHANTIERS.md` D2.
 
-**Une refonte de la saisie est demandée à Claude Design le 2026-10-02** (brief 07,
-[`design/DS-EXTENSION-BRIEF-07.md`](design/DS-EXTENSION-BRIEF-07.md), `CHANTIERS.md`
-B10) : le moteur jugé « extrêmement dense » par Antoine, au retour comme dans le
-pas à pas, à rendre plus simple sans rien perdre de son expertise. En attendant
-le retour, une session ne refond pas la présentation du moteur de son côté ; un
-correctif reste bienvenu. C38 demande si les bons à tirer du moteur attendent ce
-retour.
+**Le moteur simplifié (2026-10-02)** : Antoine jugeait la saisie « extrêmement
+dense », au retour comme dans le pas à pas. Claude Design l'a redessinée (brief
+07, [retour](design/ds-extension-07-return/README.md), `CHANTIERS.md` B10), et
+Antoine a tranché sur la planche : **le pas à pas et le tableau ne font plus
+qu'un**, avec une seule prochaine étape et **un écran « Cibles » gardé au
+début** (C40), **une liste par étape à la place des onglets** (C41, qui
+renverse le bloc du 2026-09-27 ci-dessous), **les renommages** relus au bon à
+tirer (C42), et **le portage avant un bon à tirer unique** (C38). Le portage
+est `CHANTIERS.md` A18 ; tant qu'il n'est pas livré, les blocs ci-dessous
+décrivent le code. Le modèle de données ne change pas.
 
 **Décisions prises par défaut le 2026-09-24 pour que le travail avance** —
 chacune se renverse en une phrase :
