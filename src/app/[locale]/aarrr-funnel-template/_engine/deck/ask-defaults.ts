@@ -1,6 +1,6 @@
-import { CANDIDATE_IDS, METRIC_SHAPES, TEXT_LIMITS } from "@/lib/engine/catalog-shape";
+import { candidatesOf, motionShapes, TEXT_LIMITS } from "@/lib/engine/catalog-shape";
 import { impactTarget } from "@/lib/engine/diagnose";
-import type { EngineAsk, EngineDerived, EngineState, MetricId, RepairScale, YearMonth } from "@/lib/engine/types";
+import type { CandidateId, EngineAsk, EngineDerived, EngineSetup, EngineState, MetricId, RepairScale, YearMonth } from "@/lib/engine/types";
 import { currentSnapshot } from "@/lib/engine/values";
 
 /**
@@ -19,7 +19,9 @@ const REPAIR_ORDER: readonly RepairScale[] = ["meeting", "afternoon", "sprint", 
  */
 export function missingByRepairCost(state: EngineState): MetricId[] {
   const entries = currentSnapshot(state).metrics;
-  return METRIC_SHAPES.map((shape, index) => ({ id: shape.id, index, repair: entries[shape.id]?.missing?.repair }))
+  // Both motions' numbers in the hybrid (§18.8.2), self-serve's first: the catalogue's order breaks the ties.
+  return motionShapes(state.setup.motions)
+    .map((shape, index) => ({ id: shape.id, index, repair: entries[shape.id]?.missing?.repair }))
     .filter((m): m is { id: MetricId; index: number; repair: RepairScale } =>
       entries[m.id]?.status === "missing" && m.repair !== undefined,
     )
@@ -38,11 +40,13 @@ export function missingByRepairCost(state: EngineState): MetricId[] {
  * deciding for the user.
  */
 export function suggestedSuccess(derived: EngineDerived): Pick<EngineAsk, "successMetric" | "successTarget"> {
-  const { state, named, positions } = derived.diagnosis;
-  if (state !== "clear" && state !== "shared") return {};
-  const metric = named[0];
-  if (!metric) return {};
-  const comparator = positions[metric]?.comparator;
+  // Each ticked motion's own diagnosis. When BOTH name a stage, nothing is proposed: picking one would be the
+  // tool choosing between the two motions for the team, and the form offers both without ranking them (Q13).
+  const naming = derived.motions.map((m) => m.diagnosis).filter((d) => (d.state === "clear" || d.state === "shared") && d.named.length > 0);
+  if (naming.length !== 1) return {};
+  const { named, positions } = naming[0]!;
+  const metric = named[0] as CandidateId;
+  const comparator = (positions as Record<CandidateId, { comparator?: Parameters<typeof impactTarget>[0] }>)[metric]?.comparator;
   if (!comparator) return { successMetric: metric };
   return { successMetric: metric, successTarget: impactTarget(comparator) };
 }
@@ -69,8 +73,13 @@ export function askDefaults(state: EngineState, derived: EngineDerived): EngineA
   };
 }
 
-/** The success metrics the form offers: the six rates a diagnosis can name (§6.6). */
-export const SUCCESS_METRICS: readonly MetricId[] = CANDIDATE_IDS;
+/**
+ * The success metrics the form offers: the rates a diagnosis can name (§6.6), each ticked motion's —
+ * self-serve's six, then sales-assisted's (§18.5.2), in catalogue order, never by value.
+ */
+export function successMetrics(setup: Pick<EngineSetup, "motions">): readonly MetricId[] {
+  return (["plg", "slg"] as const).filter((m) => setup.motions[m]).flatMap((m) => candidatesOf(m));
+}
 
 /**
  * The quarters the horizon offers: the eight that follow the flows' month.

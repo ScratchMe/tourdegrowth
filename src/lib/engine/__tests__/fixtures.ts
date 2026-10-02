@@ -1,6 +1,7 @@
 import type { StoredResult } from "../../quiz/storage";
 import { exampleEngine, exampleMetrics } from "../example";
-import type { CandidateId, EngineState, MetricEntry, MetricId, MetricValue, SourceRef, ToolId } from "../types";
+import { previousMonth } from "../cohort";
+import type { CandidateId, EngineState, MetricEntry, MetricId, MetricValue, Snapshot, SourceRef, ToolId } from "../types";
 
 /**
  * The engine spec's §6.0 example — ONE data set for every unit test and
@@ -41,11 +42,32 @@ export function missing(cause: NonNullable<MetricEntry["missing"]>["cause"], rep
 
 /** §6.0, entry by entry — the page's example (`lib/engine/example.ts`), in French. */
 const EXAMPLE_WORDS = { event: "a créé un premier projet", channel: "Recherche naturelle" };
+/** §18.9's words, for the hybrid: what « live » means, the reason for non-renewal, the PQL threshold. */
+const HYBRID_WORDS = {
+  ...EXAMPLE_WORDS,
+  liveEvent: "premier rapport partagé avec l'équipe du client",
+  lossCause: "départ du sponsor chez le client",
+  pqlThreshold: "espace avec 3 membres actifs",
+};
 export const EXAMPLE_METRICS: Partial<Record<MetricId, MetricEntry>> = exampleMetrics(EXAMPLE_WORDS);
 
 /** A fresh, deep-copied §6.0 state: tests mutate it freely. */
 export function exampleState(): EngineState {
   return exampleEngine(EXAMPLE_WORDS);
+}
+
+/**
+ * The §18.9 hybrid: self-serve is exactly §6.0, sales-assisted and the link
+ * are new — flows June to August, leads May to July, new customers March to
+ * May, its own targets (18 %, 32 %, 92 %) and its three counts (130, 18, 100).
+ */
+export function hybridState(): EngineState {
+  return exampleEngine(HYBRID_WORDS, { plg: true, slg: true });
+}
+
+/** The §18.9 sales-assisted half on its own: no self-serve number, no link, no total. */
+export function salesAssistedState(): EngineState {
+  return exampleEngine(HYBRID_WORDS, { plg: false, slg: true });
 }
 
 /** The state with one entry replaced (or removed with `undefined`). */
@@ -57,7 +79,7 @@ export function withEntry(state: EngineState, id: MetricId, entry: MetricEntry |
   return next;
 }
 
-export function withTarget(state: EngineState, id: CandidateId, target: number): EngineState {
+export function withTarget(state: EngineState, id: CandidateId | MetricId, target: number): EngineState {
   const next = structuredClone(state);
   next.snapshots[next.snapshots.length - 1]!.targets[id] = target;
   return next;
@@ -67,6 +89,32 @@ export function withTarget(state: EngineState, id: CandidateId, target: number):
 export function withoutTargets(state: EngineState): EngineState {
   const next = structuredClone(state);
   next.snapshots[next.snapshots.length - 1]!.targets = {};
+  return next;
+}
+
+/**
+ * The engine with one more month BEFORE the one it holds (A14 T1, §19.2):
+ * the current month's numbers copied a month earlier, that month closed on
+ * the 3rd of the next with the setup's windows. The current month — the
+ * example's August by default — stays exactly what it was, so every reading
+ * of it is the one the other tests check. `change` rewrites the earlier
+ * month: what moved since.
+ */
+export function withMonthBefore(state: EngineState, change: (before: Snapshot) => void = () => {}): EngineState {
+  const next = structuredClone(state);
+  const now = next.snapshots[next.snapshots.length - 1]!;
+  const { activationWindowDays, paidWindowDays, qualificationWindowDays, goLiveWindowDays } = next.setup;
+  const before: Snapshot = {
+    ...structuredClone(now),
+    id: `${now.id}-before`,
+    referenceMonth: previousMonth(now.referenceMonth),
+    cohortMonth: previousMonth(now.cohortMonth),
+    closedAt: `${now.referenceMonth}-03T09:00:00.000Z`,
+    windows: { activationWindowDays, paidWindowDays, qualificationWindowDays, goLiveWindowDays },
+  };
+  for (const entry of Object.values(before.metrics)) if (entry?.cohortMonth) entry.cohortMonth = previousMonth(entry.cohortMonth);
+  change(before);
+  next.snapshots = [...next.snapshots.slice(0, -1), before, now];
   return next;
 }
 

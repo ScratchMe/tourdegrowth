@@ -12,7 +12,7 @@ import { SLIDE_ORDER } from "../types";
 import type { EngineState, FindingKind, MetricEntry, SanityId, SlideTitleKey, SourceRef, ToolId } from "../types";
 import { knownIn } from "../values";
 import { CTX_EN, CTX_FR, EN, FR } from "./props";
-import { emptyState, estimated, exampleState, measured, missing, ratio, tourResult, withEntry, withTarget, withoutTargets } from "./fixtures";
+import { emptyState, estimated, exampleState, hybridState, measured, missing, ratio, salesAssistedState, tourResult, withEntry, withMonthBefore, withTarget, withoutTargets } from "./fixtures";
 
 /**
  * The guard: every sentence the engine can produce, read as a reader would.
@@ -95,9 +95,11 @@ function vowelMonths(state: EngineState): EngineState {
   return state;
 }
 
-/** Every slide included — the mirror too, so its rows are swept. */
+/** Every slide included — the mirror too, so its rows are swept, and « Ce qui a bougé », unticked by default. */
 function includeAll(state: EngineState): EngineState {
   for (const id of SLIDE_ORDER) state.deck.include[id] = true;
+  state.deck.include.evolution = true;
+  state.deck.include["slg:evolution"] = true;
   return state;
 }
 
@@ -136,15 +138,35 @@ const SCENARIOS: { name: string; build: () => { state: EngineState; result?: Ret
   { name: "not enough targets", build: () => ({ state: withEntry(exampleState(), "ret.logo-churn", undefined) }) },
   { name: "no target at all (C1: the references name nothing)", build: () => ({ state: withoutTargets(exampleState()) }) },
   { name: "not enough targets, behind a raised one", build: () => ({ state: withTarget(withEntry(exampleState(), "ret.logo-churn", undefined), "act.rate", 25) }) },
-  { name: "referred share behind a target (unpriced)", build: () => ({ state: withTarget(within(), "ref.referred-share", 10) }) },
+  { name: "referred share behind a target (priced, §19.3.2)", build: () => ({ state: withTarget(within(), "ref.referred-share", 10) }) },
+  { name: "referred share behind a target past 50 % (unpriced)", build: () => ({ state: withTarget(within(), "ref.referred-share", 60) }) },
   {
-    // C9: the one stage behind is one the model can't price — its slide exists, with no amount.
-    name: "day 30 named alone (unpriced slide)",
+    // §19.3.1: day 30 named alone is priced, with its own assumption.
+    name: "day 30 named alone (priced)",
     build: () => ({
       state: withTarget(
         withEntry(withEntry(within(), "ret.logo-churn", measured(ratio(6, 400), tool("stripe"))), "ret.d30", measured(ratio(40, 800), tool("amplitude"))),
         "ret.d30",
         20,
+      ),
+    }),
+  },
+  {
+    // C9: the one stage behind is one the model can't price — its slide exists, with no amount.
+    name: "referred share named alone past 50 % (unpriced slide)",
+    build: () => ({ state: withTarget(withEntry(within(), "ret.logo-churn", measured(ratio(6, 400), tool("stripe"))), "ref.referred-share", 60) }),
+  },
+  {
+    name: "referred share named alone, no N (per 100 sign-ups)",
+    build: () => ({
+      state: withTarget(
+        withEntry(
+          withEntry(withEntry(within(), "ret.logo-churn", measured(ratio(6, 400), tool("stripe"))), "acq.cac", measured({ kind: "amount", amount: 500 }, tool("stripe"))),
+          "acq.signup-rate",
+          measured({ kind: "rate", percent: 3.2 }, tool("ga4")),
+        ),
+        "ref.referred-share",
+        10,
       ),
     }),
   },
@@ -214,6 +236,80 @@ const SCENARIOS: { name: string; build: () => { state: EngineState; result?: Ret
   { name: "what if: every lever", build: () => ({ state: withWhatIf(allDocumented(), { "acq.signup-rate": 4, "ref.referred-share": 20, "act.rate": 24, "rev.paid-conversion": 10, "ret.logo-churn": 1.5, "rev.expansion": 5, "rev.contraction": 0.5, "rev.arpa": 150 }) }) },
   { name: "what if: two levers, both a loss", build: () => ({ state: withWhatIf(exampleState(), { "act.rate": 12, "rev.arpa": 90 }) }) },
   { name: "what if: a lever, no ARPA (unpriced)", build: () => ({ state: withWhatIf(noArpa(), { "act.rate": 24 }) }) },
+  // Sales-assisted and the hybrid (A7.3.c S4): every title the two motions add, each on a state that fires it.
+  { name: "hybrid §18.9", build: () => ({ state: withWhatIf(hybridState(), { "act.rate": 24, "slg.rev.win-rate": 30, "link.pql-handoff": 40 }) }) },
+  { name: "hybrid, Tour linked", build: () => linked(hybridState(), TOUR_ANSWERS) },
+  { name: "hybrid, relays complete", build: () => ({ state: withEntry(hybridState(), "slg.act.go-live", measured(ratio(12, 20), tool("hubspot"))) }) },
+  { name: "hybrid, relays gap of one", build: () => ({ state: withEntry(withEntry(hybridState(), "slg.rev.win-rate", missing("not-tracked", "sprint")), "slg.act.go-live", measured(ratio(12, 20))) }) },
+  { name: "hybrid, relays gap of two", build: () => ({ state: withEntry(hybridState(), "slg.acq.lead-to-opp", missing("not-tracked", "sprint")) }) },
+  { name: "hybrid, relays broken twice at the tail", build: () => ({ state: withEntry(hybridState(), "slg.rev.win-rate", missing("not-tracked", "sprint")) }) },
+  { name: "hybrid, relays empty", build: () => ({ state: withEntry(withEntry(hybridState(), "slg.rev.win-rate", undefined), "slg.acq.lead-to-opp", undefined) }) },
+  { name: "hybrid, no sales-assisted ACV", build: () => ({ state: withEntry(hybridState(), "slg.rev.acv", undefined) }) },
+  {
+    // §19.4 (A14 T3.2): the pipeline coverage under the relays, under the team's threshold, with the month before's.
+    name: "sales-assisted, pipeline coverage",
+    build: () => {
+      const s = withMonthBefore(salesAssistedState(), (july) => void (july.pipelineOpen = 420_000));
+      s.setup.pipeline = { quarterTarget: 200_000, threshold: 3 };
+      s.snapshots[s.snapshots.length - 1]!.pipelineOpen = 520_000;
+      return { state: s };
+    },
+  },
+  {
+    // §19.3.2: the referred share of opportunities named, priced on W; then past its 50 % ceiling; then without W.
+    name: "hybrid, referred share named (priced)",
+    build: () => ({ state: withTarget(withTarget(withTarget(hybridState(), "slg.rev.win-rate", 20), "slg.acq.lead-to-opp", 12), "slg.ref.referred-share", 30) }),
+  },
+  {
+    name: "hybrid, referred share named past 50 % (unpriced)",
+    build: () => ({
+      state: withTarget(withTarget(withTarget(withTarget(hybridState(), "slg.rev.win-rate", 20), "slg.acq.lead-to-opp", 12), "slg.ret.renewal", 85), "slg.ref.referred-share", 60),
+    }),
+  },
+  {
+    name: "sales-assisted, referred share named, no W (per 100 opportunities created)",
+    build: () => {
+      let s = withEntry(salesAssistedState(), "slg.rev.win-rate", measured({ kind: "rate", percent: 24 }, tool("hubspot")));
+      s = withEntry(withEntry(s, "slg.rev.acv", measured({ kind: "amount", amount: 24_000 }, tool("hubspot"))), "slg.acq.cac", measured({ kind: "amount", amount: 19_000 }, tool("hubspot")));
+      s = withTarget(withTarget(withTarget(withTarget(s, "slg.rev.win-rate", 20), "slg.acq.lead-to-opp", 12), "slg.ret.renewal", 85), "slg.ref.referred-share", 30);
+      return { state: { ...s, snapshots: [{ ...s.snapshots[0]!, base: { slgOppsCreated: 130, slgCustomers: 100 } }] } };
+    },
+  },
+  {
+    name: "hybrid, renewal named, no sales-assisted ARPA, one contract kept",
+    build: () => ({ state: withEntry(withEntry(withEntry(hybridState(), "slg.rev.win-rate", measured(ratio(25, 75))), "slg.acq.lead-to-opp", measured(ratio(90, 480))), "slg.rev.arpa", undefined) }),
+  },
+  {
+    name: "hybrid, renewal named, no sales-assisted ARPA, contracts kept",
+    build: () => ({
+      state: withTarget(withEntry(withEntry(withEntry(hybridState(), "slg.rev.win-rate", measured(ratio(25, 75))), "slg.acq.lead-to-opp", measured(ratio(90, 480))), "slg.rev.arpa", undefined), "slg.ret.renewal", 96),
+    }),
+  },
+  { name: "hybrid, neither MRR", build: () => ({ state: withEntry(withEntry(hybridState(), "slg.rev.arpa", undefined), "rev.arpa", undefined) }) },
+  { name: "hybrid, both margins", build: () => ({ state: withEntry(withEntry(hybridState(), "rev.gross-margin", measured(ratio(80, 100), tool("stripe"))), "slg.rev.gross-margin", measured(ratio(75, 100), tool("stripe"))) }) },
+  { name: "hybrid, self-serve's margin only", build: () => ({ state: withEntry(hybridState(), "rev.gross-margin", measured(ratio(80, 100), tool("stripe"))) }) },
+  { name: "hybrid, sales-assisted's margin only", build: () => ({ state: withEntry(hybridState(), "slg.rev.gross-margin", measured(ratio(75, 100), tool("stripe"))) }) },
+  {
+    name: "hybrid, different inputs missing",
+    build: () => ({ state: withEntry(withEntry(hybridState(), "slg.rev.gross-margin", measured(ratio(75, 100), tool("stripe"))), "slg.acq.cac", undefined) }),
+  },
+  {
+    name: "sales-assisted alone, no count of new customers",
+    build: () => {
+      const s = withEntry(withEntry(withEntry(salesAssistedState(), "slg.rev.win-rate", measured({ kind: "rate", percent: 24 })), "slg.rev.acv", undefined), "slg.acq.cac", undefined);
+      delete s.snapshots[0]!.base;
+      return { state: s };
+    },
+  },
+  {
+    name: "sales-assisted alone, one new customer more",
+    build: () => {
+      let s = withEntry(withEntry(salesAssistedState(), "slg.rev.win-rate", measured(ratio(3, 12))), "slg.rev.acv", undefined);
+      s = withEntry(withEntry(s, "slg.acq.cac", undefined), "slg.rev.arpa", undefined);
+      delete s.snapshots[0]!.base;
+      return { state: s };
+    },
+  },
   {
     name: "company named, credit off",
     build: () => {
@@ -223,6 +319,58 @@ const SCENARIOS: { name: string; build: () => { state: EngineState; result?: Ret
       s.deck.showSiteCredit = false;
       return { state: s };
     },
+  },
+  // The monthly series (A14 T1, §19.2): July closed before the example's August, each time with something else moved.
+  {
+    name: "two months, numbers moved, the leak stays",
+    build: () => ({
+      state: withMonthBefore(exampleState(), (july) => {
+        july.metrics["act.rate"] = measured(ratio(120, 800), tool("amplitude"));
+        july.metrics["ret.logo-churn"] = measured(ratio(12, 400), tool("stripe"));
+        july.metrics["rev.arpa"] = measured(ratio(46_000, 400), tool("stripe"));
+        july.metrics["acq.cac"] = measured(ratio(19_000, 40), { kind: "person", role: "finance" }, { variant: "media-only" });
+      }),
+    }),
+  },
+  { name: "two months, one number moved", build: () => ({ state: withMonthBefore(exampleState(), (july) => void (july.metrics["act.rate"] = measured(ratio(120, 800), tool("amplitude")))) }) },
+  { name: "two months, nothing moved", build: () => ({ state: withMonthBefore(exampleState()) }) },
+  {
+    // July: activation above its target, churn behind — July's leak was churn, August's is activation.
+    name: "two months, the leak changes",
+    build: () => ({
+      state: withMonthBefore(exampleState(), (july) => {
+        july.metrics["act.rate"] = measured(ratio(200, 800), tool("amplitude"));
+        july.metrics["ret.logo-churn"] = measured(ratio(16, 400), tool("stripe"));
+      }),
+    }),
+  },
+  {
+    // Every number of July read differently: nothing compares, and the slide says why for each.
+    name: "two months that don't compare",
+    build: () => ({
+      state: withMonthBefore(exampleState(), (july) => {
+        const m = july.metrics;
+        m["acq.signup-rate"] = estimated(2.5, 3.5);
+        m["acq.top-channel-share"] = conflicting;
+        m["acq.cac"] = { ...m["acq.cac"]!, variant: "fully-loaded" };
+        m["act.rate"] = { ...m["act.rate"]!, definitionNote: "un projet créé" };
+        delete m["ret.logo-churn"];
+        m["ref.referred-share"] = measured({ kind: "rate", percent: 6 }, tool("product-db"));
+        m["rev.arpa"] = missing("not-tracked", "meeting");
+        m["rev.expansion"] = estimated(2, 4);
+        m["rev.contraction"] = estimated(1, 2);
+      }),
+    }),
+  },
+  {
+    name: "two months of the hybrid",
+    build: () => ({
+      state: withMonthBefore(hybridState(), (july) => {
+        july.metrics["act.rate"] = measured(ratio(120, 800), tool("amplitude"));
+        july.metrics["slg.rev.win-rate"] = measured(ratio(15, 75), tool("hubspot"));
+        july.metrics["slg.acq.cycle"] = measured({ kind: "duration", value: 70, unit: "days", statistic: "median" }, tool("hubspot"));
+      }),
+    }),
   },
 ];
 
@@ -463,6 +611,7 @@ describe("the sweep reaches every sentence it claims to", () => {
     for (const locale of ["fr", "en"] as const) expect(SWEEP.samples.filter((s) => s.locale === locale).length).toBeGreaterThan(1_000);
   });
 
+  // Since A7.3.c S4 the sales-assisted and hybrid titles are in the deck too: nothing waits any more.
   it("fires every slide title template", () => {
     const all = Object.keys(FR.strings.slideTitles) as SlideTitleKey[];
     expect(all.filter((k) => !SWEEP.titleKeys.has(k))).toEqual([]);

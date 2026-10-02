@@ -4,6 +4,7 @@ import { resetRateLimitsForTests } from "@/lib/rate-limit";
 import { config, constantTimeEqual, isAuthorizedForAdmin, proxy } from "../proxy";
 import { ENGINE_PREVIEW_COOKIE } from "@/lib/engine/access";
 import { GAME_PREVIEW_COOKIE } from "@/lib/game/access";
+import { enabledLevelSlugs } from "@/lib/game/levels";
 import { ownerPreviewToken } from "@/lib/owner-preview";
 
 function requestWithAuth(pathname: string, authHeader?: string): NextRequest {
@@ -359,6 +360,21 @@ describe("proxy (game flag and owner preview)", () => {
     expect(rewriteOf(await proxy(request("/en/game/retention")))).toBe("https://tourdegrowth.com/en/game-unavailable");
   });
 
+  it("closes every level that exists, its page and its image, in both languages — not a list of names", async () => {
+    // Convention 11: what is held is what exists. A level added to the table
+    // (level 2, A12.f) is checked here without anyone naming it, so narrowing
+    // isGamePath to known slugs could not open a level by forgetting it.
+    const slugs = enabledLevelSlugs();
+    expect(slugs).toContain("acquisition");
+    for (const slug of slugs) {
+      for (const locale of ["en", "fr"]) {
+        for (const path of [`/${locale}/game/${slug}`, `/${locale}/game/${slug}/opengraph-image/${locale}`]) {
+          expect(rewriteOf(await proxy(request(path))), path).toBe(`https://tourdegrowth.com/${locale}/game-unavailable`);
+        }
+      }
+    }
+  });
+
   it("closes the game's share images with the pages, and opens them with the same signed cookie (X20)", async () => {
     const cookie = `${GAME_PREVIEW_COOKIE}=${await ownerPreviewToken("game", PASSWORD)}`;
     for (const path of ["/fr/game/opengraph-image/fr", "/en/game/retention/opengraph-image/en"]) {
@@ -438,6 +454,17 @@ describe("proxy (engine flag and owner preview)", () => {
     expect(rewriteOf(await proxy(request("/en/aarrr-funnel-template", { cookie: `${ENGINE_PREVIEW_COOKIE}=1` })))).toBe(
       "https://tourdegrowth.com/en/engine-unavailable",
     );
+  });
+
+  it("closes the engine's share image with the page, and opens it with the same signed cookie (T6.2)", async () => {
+    const cookie = `${ENGINE_PREVIEW_COOKIE}=${await ownerPreviewToken("engine", PASSWORD)}`;
+    for (const locale of ["en", "fr"]) {
+      const path = `/${locale}/aarrr-funnel-template/opengraph-image/${locale}`;
+      expect(rewriteOf(await proxy(request(path))), path).toBe(`https://tourdegrowth.com/${locale}/engine-unavailable`);
+      expect(rewriteOf(await proxy(request(path, { cookie }))), path).toBeNull();
+    }
+    process.env.ENGINE_ENABLED = "true";
+    expect(rewriteOf(await proxy(request("/fr/aarrr-funnel-template/opengraph-image/fr")))).toBeNull();
   });
 
   it("?engine=preview is inert now: no cookie set, the engine stays closed", async () => {

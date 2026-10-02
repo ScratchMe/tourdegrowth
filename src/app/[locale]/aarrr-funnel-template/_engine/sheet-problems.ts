@@ -17,7 +17,10 @@ import { fill, midSentence } from "./text";
 const RULES: readonly DraftProblem[] = [
   "denominator-zero",
   "num-gt-den",
+  "count-negative",
   "percent-range",
+  "amount-negative",
+  "duration-negative",
   "low-above-high",
   "text-too-long",
   "label-too-long",
@@ -42,6 +45,12 @@ export function ruleMessage(problem: DraftProblem, metric: ResolvedMetric, strin
       });
     case "percent-range":
       return strings.workbench.percentRange;
+    case "count-negative":
+      return strings.workbench.countNegative;
+    case "amount-negative":
+      return strings.workbench.amountNegative;
+    case "duration-negative":
+      return strings.workbench.durationNegative;
     case "low-above-high":
       return strings.sheet.lowAboveHigh;
     case "text-too-long":
@@ -70,6 +79,8 @@ export function missingLabel(problem: DraftProblem, metric: ResolvedMetric, stri
       return metric.inputs?.denominator ?? metric.name;
     case "source":
       return strings.sheet.source;
+    case "denominator-source":
+      return strings.sheet.denominatorSource;
     case "variant":
       return strings.sheet.variant;
     case "evidence":

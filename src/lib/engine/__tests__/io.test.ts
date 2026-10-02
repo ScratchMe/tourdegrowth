@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { engineFileName, parseEngineFile, serializeEngine } from "../io";
 import type { EngineState } from "../types";
-import { fullState } from "./storage-fixtures";
+import { fullState, toV1 } from "./storage-fixtures";
 
 /**
  * The file is the engine's only durable copy (spec §4.3). What these tests
@@ -62,11 +62,11 @@ describe("serializeEngine / parseEngineFile", () => {
   });
 
   it("a newer schema version is refused, not opened with errors", () => {
-    const future = { ...JSON.parse(serializeEngine(fullState())), schemaVersion: 2 };
+    const future = { ...JSON.parse(serializeEngine(fullState())), schemaVersion: 4 };
     const parsed = parseEngineFile(JSON.stringify(future));
     expect(parsed).toMatchObject({ state: null, refusal: "unknown-version" });
     // Even when the newer version moved its fields around, it still reads as "newer", not "wrong file".
-    const moved = { schemaVersion: 3, id: "x", snapshots: [], somethingNew: {} };
+    const moved = { schemaVersion: 4, id: "x", snapshots: [], somethingNew: {} };
     expect(parseEngineFile(JSON.stringify(moved)).refusal).toBe("unknown-version");
   });
 
@@ -84,6 +84,41 @@ describe("serializeEngine / parseEngineFile", () => {
     expect(parsed.refusal).toBeUndefined();
     expect(parsed.state?.snapshots[0]?.metrics["acq.signup-rate"]).toEqual(fullState().snapshots[0]!.metrics["acq.signup-rate"]);
     expect(parsed.errors).toEqual(["snapshots[0].metrics.acq.cac.estimate.basis: missing or unknown"]);
+  });
+});
+
+describe("a v1 file and the v2 setup (engine spec §18.3.2)", () => {
+  it("a v1 file is migrated, then validated: same numbers, no warning, and the screen is told", () => {
+    const parsed = parseEngineFile(JSON.stringify(toV1(fullState())));
+    expect(parsed.refusal).toBeUndefined();
+    expect(parsed.migratedFrom).toBe(1);
+    expect(parsed.errors).toEqual([]);
+    expect(parsed.state).toEqual(fullState());
+  });
+
+  it("a v1 file with a warning keeps its warning after the migration", () => {
+    const state = fullState();
+    delete (state.snapshots[0]!.metrics["acq.cac"]!.estimate as { basis?: string }).basis;
+    const parsed = parseEngineFile(JSON.stringify(toV1(state)));
+    expect(parsed.errors).toEqual(["snapshots[0].metrics.acq.cac.estimate.basis: missing or unknown"]);
+    expect(parsed.migratedFrom).toBe(1);
+  });
+
+  it("a setup that says nothing of how the company sells is refused, not opened empty", () => {
+    const noMotion = { ...fullState(), setup: { ...fullState().setup, motions: { plg: false, slg: false } } };
+    const unknownType = { ...fullState(), setup: { ...fullState().setup, type: "consumer-app" } };
+    const v1Other = { ...toV1(fullState()), setup: { ...(toV1(fullState()).setup as object), profile: "sales-led" } };
+    for (const file of [noMotion, unknownType, v1Other]) {
+      expect(parseEngineFile(JSON.stringify(file))).toMatchObject({ state: null, refusal: "unsupported-setup" });
+    }
+  });
+
+  it("a sales-assisted engine opens without a word about migration", () => {
+    const slg = { ...fullState(), setup: { ...fullState().setup, motions: { plg: false, slg: true } } };
+    const parsed = parseEngineFile(serializeEngine(slg));
+    expect(parsed.refusal).toBeUndefined();
+    expect(parsed.migratedFrom).toBeUndefined();
+    expect(parsed.errors).toEqual([]);
   });
 });
 

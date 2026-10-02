@@ -1,3 +1,4 @@
+import { migrateToV3 } from "./migrate";
 import type { EngineStrings } from "./strings";
 import { ENGINE_SCHEMA_VERSION, YEAR_MONTH_PATTERN, type EngineState } from "./types";
 import { validateEngine } from "./validate";
@@ -37,7 +38,9 @@ function sortedKeys(_key: string, value: unknown): unknown {
 export interface ParsedEngineFile {
   state: EngineState | null;
   errors: string[];
-  refusal?: "unknown-version" | "not-engine" | "unreadable";
+  refusal?: "unknown-version" | "not-engine" | "unreadable" | "unsupported-setup";
+  /** 1 or 2 when the file was an older engine, migrated on the way in (§18.3.2, §19.1.3): the import screen says so. */
+  migratedFrom?: 1 | 2;
 }
 
 /**
@@ -71,11 +74,31 @@ export function parseEngineFile(text: string): ParsedEngineFile {
   if (typeof o.schemaVersion === "number" && o.schemaVersion > ENGINE_SCHEMA_VERSION && looksLikeAnyEngine(o)) {
     return { state: null, errors: [`schemaVersion: ${o.schemaVersion}`], refusal: "unknown-version" };
   }
-  if (o.schemaVersion !== ENGINE_SCHEMA_VERSION || !looksLikeEngine(o)) {
+  if (!READABLE_VERSIONS.includes(o.schemaVersion as number) || !looksLikeEngine(o)) {
     return { state: null, errors: ["file: not a growth engine"], refusal: "not-engine" };
   }
-  const state = o as unknown as EngineState;
-  return { state, errors: validateEngine(state) };
+  // An older engine is migrated, then validated like any v3 one (§18.3.2, §19.1.3): nothing in its numbers changes.
+  const migrated = migrateToV3(o);
+  if (!migrated || !sellsSomehow(migrated.state)) {
+    return { state: null, errors: ["setup: no known type or no way of selling"], refusal: "unsupported-setup" };
+  }
+  const { state, from } = migrated;
+  return { state, errors: validateEngine(state), ...(from !== ENGINE_SCHEMA_VERSION ? { migratedFrom: from } : {}) };
+}
+
+/** Every version this build reads: the older ones are migrated on the way in. */
+const READABLE_VERSIONS: readonly number[] = [1, 2, ENGINE_SCHEMA_VERSION];
+
+/**
+ * A setup the board can show at all (§18.3.2): a known type, and at least one
+ * way of selling ticked. Refused rather than opened with errors — there
+ * would be nothing to draw, and « Remplacer » would replace an engine with
+ * an empty one.
+ */
+function sellsSomehow(state: EngineState): boolean {
+  const setup = state.setup as unknown as Record<string, unknown>;
+  const motions = setup.motions as Record<string, unknown> | undefined;
+  return setup.type === "b2b-saas" && typeof motions === "object" && motions !== null && (motions.plg === true || motions.slg === true);
 }
 
 /**
@@ -106,7 +129,12 @@ function looksLikeAnyEngine(o: Record<string, unknown>): boolean {
  * month rather than putting arbitrary text in a file name.
  */
 export function engineFileName(state: EngineState, words: EngineStrings["io"]): string {
+  return monthFileName(state, words.fileName);
+}
+
+/** Any of the engine's files named by its month (the `.json`, the table's template, A14 T5) — the same guard for each. */
+export function monthFileName(state: EngineState, template: string): string {
   const latest = state.snapshots.at(-1)?.referenceMonth;
   const month = latest && YEAR_MONTH_PATTERN.test(latest) ? latest : state.createdAt.slice(0, 7);
-  return words.fileName.replace("{month}", month);
+  return template.replace("{month}", month);
 }

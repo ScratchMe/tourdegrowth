@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { ACQUISITION_LEVEL, type AcquisitionCardId } from "../levels/acquisition";
+import { ACQUISITION_LEVEL } from "../levels/acquisition";
 import { RETENTION_LEVEL } from "../levels/retention";
 import {
   cardGain,
@@ -15,56 +15,31 @@ import {
   trustMult,
   visibleEffect,
 } from "../model";
-import { gameReducer } from "../reducer";
-import type { EndingId, GameState, LevelDefinition, ModelSlug, Mood } from "../types";
+import type { EndingId, GameState, Mood } from "../types";
 import { dashboardView, decemberView, driverRows, reportView } from "../view";
 import { deepFreeze } from "./paths";
+import {
+  PATH_A,
+  PATH_B,
+  PATH_C,
+  PATH_CLEAN_MISS,
+  PATH_D,
+  PATH_FIRED_DARK,
+  PATH_LABYRINTH,
+  PATH_REPENTANT,
+  playPath,
+  type Id,
+  type Level,
+  type Path,
+} from "./paths-acquisition";
 
-// GAME-BRIEF.md §17: level 2, « Comment les gens vous trouvent », a DRAFT
+// GAME-BRIEF.md §17: level 2, « Comment les gens vous trouvent », the model
 // the spec quotes number for number. Its four reference years are the
 // mirror of level 1's (§6): same picks by role, same shape of year. A
 // rebalancing that moves one regenerates the table and §17.6, it does not
 // loosen the tolerance.
 
-type Id = AcquisitionCardId;
-type Level = LevelDefinition<Id, ModelSlug>;
-type Pick2 = readonly [Id, Id];
-type Path = readonly Pick2[];
-
 const L: Level = ACQUISITION_LEVEL;
-
-/** §17.6 A — honest, refuses the three orders, presents its data (level 1's A, card for card by role). */
-const PATH_A: Path = [["delivery", "origin"], ["guides", "present"], ["specs", "compare"], ["allin", "present"]];
-/** §17.6 B — honest, variant. */
-const PATH_B: Path = [["delivery", "origin"], ["guides", "specs"], ["compare", "present"], ["verified", "present"]];
-/** §17.6 C — obeys everything; the DGCCRF comes in the third quarter. */
-const PATH_C: Path = [["stock", "reviews"], ["anchor", "countdown"], ["native", "teaser"], ["delivery", "allin"]];
-/** §17.6 D — honest with nothing strong: fired in June. */
-const PATH_D: Path = [["origin", "allin"], ["present", "compare"]];
-/** The three endings no reference year reaches, found by search and pinned so they stay reachable. */
-const PATH_CLEAN_MISS: Path = [["origin", "guides"], ["compare", "present"], ["specs", "verified"], ["present", "allin"]];
-const PATH_REPENTANT: Path = [["compare", "countdown"], ["watchers", "guides"], ["allin", "delivery"], ["specs", "clean"]];
-const PATH_LABYRINTH: Path = [["origin", "stock"], ["delivery", "specs"], ["clean", "reviews"], ["anchor", "allin"]];
-const PATH_FIRED_DARK: Path = [["reviews", "allin"], ["origin", "guides"]];
-
-function playQuarter(state: GameState<Id>, picks: Pick2, level: Level = L): GameState<Id> {
-  const reduce = gameReducer(level);
-  let s = reduce(state, { type: "hangup" });
-  for (const card of picks) s = reduce(s, { type: "toggle", card });
-  const next = reduce(s, { type: "run" });
-  if (next === s) throw new Error(`quarter ${state.q + 1} refused picks ${picks.join(" + ")}`);
-  return next;
-}
-
-function playPath(path: Path, level: Level = L): GameState<Id>[] {
-  let s = fresh(level);
-  const states = [s];
-  for (const picks of path) {
-    s = playQuarter(s, picks, level);
-    states.push(s);
-  }
-  return states;
-}
 
 interface Fixture {
   path: Path;

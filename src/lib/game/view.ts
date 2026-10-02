@@ -13,14 +13,13 @@
  */
 import type { Locale } from "@/lib/i18n/locale";
 
-import { deltaSign, type DeltaKind } from "./format";
+import { deltaSign, metricDeltaKind, type DeltaKind } from "./format";
 import type { RetentionCardId } from "./levels/retention";
 import { targetFor } from "./model";
 import type {
   GameEvent,
   GameState,
   LevelDefinition,
-  MetricDisplay,
   MetricDrivers,
   ModelSlug,
   Mood,
@@ -75,10 +74,7 @@ export interface DashboardView {
   deltas: { metric: Delta; customers: Delta; revenue: Delta; patience: Delta } | null;
 }
 
-/** The formatter a level's number takes in a delta: points of a rate, or a whole count. */
-export function metricDeltaKind(display: Pick<MetricDisplay, "kind">): DeltaKind {
-  return display.kind === "rate" ? "rate" : "int";
-}
+export { metricDeltaKind } from "./format";
 
 function delta(kind: DeltaKind, a: number, b: number, upIsGood: boolean): Delta {
   const dir = deltaSign(kind, a, b);
@@ -154,8 +150,8 @@ export type PhoneItem =
 
 type Rid = RetentionCardId;
 
-/** What the phone reflects: the cards in production AND the ones ticked but not yet played. */
-export function phoneIds(state: GameState<Rid>): Rid[] {
+/** What a level's phone reflects: the cards in production AND the ones ticked but not yet played. */
+export function phoneIds<Id extends string>(state: GameState<Id>): Id[] {
   return [...new Set([...state.active, ...state.picks])];
 }
 

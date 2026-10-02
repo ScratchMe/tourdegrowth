@@ -3,31 +3,41 @@
 import { useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from "react";
 import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
-import { shapeOf } from "@/lib/engine/catalog-shape";
+import { motionOfMetric, motionShapes, shapeOf } from "@/lib/engine/catalog-shape";
 import type { EngineStrings, ResolvedBridge, ResolvedDerived, ResolvedMetric } from "@/lib/engine/strings";
-import type { EngineSetup, EngineState, LeverId, MetricEntry, MetricId, RoleId, SharedCount, Snapshot, YearMonth } from "@/lib/engine/types";
+import { MAX_ENGINES, type EngineCalcContext, type EngineDerived, type EngineSetup, type EngineState, type LeverId, type MetricEntry, type MetricId, type Motion, type MotionDerived, type RoleId, type SharedCount, type SlideTitle, type Snapshot, type YearMonth } from "@/lib/engine/types";
 import type { Locale } from "@/lib/i18n/locale";
 import type { Pillar } from "@/lib/scoring/pillars";
 import { Board } from "./_engine/Board";
+import type { SeriesControls } from "./_engine/MonthBar";
 import { DeckView } from "./_engine/deck/DeckView";
 import { collectPlan } from "./_engine/collect";
 import { latestTourWithAnswers } from "@/lib/engine/bridge";
 import { pelotonTitle } from "@/lib/engine/deck";
+import { relaysTitle, totalTitle } from "@/lib/engine/deck-motions";
 import { deriveEngine } from "@/lib/engine/derive";
-import { engineFileName, serializeEngine } from "@/lib/engine/io";
+import { calendarFile, nextMonthStart } from "@/lib/engine/ics";
+import { engineFileName, monthFileName, serializeEngine } from "@/lib/engine/io";
+import { mergeEngines } from "@/lib/engine/merge";
 import { markReminded, markRequested } from "@/lib/engine/request";
+import { monthView, nextMonthOf, startNextMonth, withMonth } from "@/lib/engine/series";
+import { teamTools } from "@/lib/engine/tools";
 import { requestPersistence } from "@/lib/engine/storage";
 import { newEngineState } from "@/lib/engine/validate";
 import { propagateFrom, withSharedCount } from "@/lib/engine/shared-counts";
-import { trackEngine } from "./_engine/engine-events";
-import { commit, erase, getClientSnapshot, getServerSnapshot, subscribe, type CommitResult } from "./_engine/engine-store";
+import { engineSetupDetail, engineStageDetail, trackEngine, type EngineStageDetail } from "./_engine/engine-events";
+import { commit, erase, getClientSnapshot, getServerSnapshot, removeEngine, subscribe, switchEngine, type CommitResult } from "./_engine/engine-store";
+import { tableTemplate, type TablePreview } from "./_engine/csv";
+import { DeleteEngineDialog } from "./_engine/DeleteEngineDialog";
+import { download, enginePageUrl } from "./_engine/download";
+import { EngineSwitcher, engineName } from "./_engine/EngineSwitcher";
 import { EraseDialog } from "./_engine/EraseDialog";
 import { ExampleView } from "./_engine/ExampleView";
-import { ImportPanel } from "./_engine/ImportPanel";
+import { ImportPanel, type ImportChoice } from "./_engine/ImportPanel";
 import { Steps } from "./_engine/Steps";
 import { resumePosition, type StepPosition } from "./_engine/steps-model";
 import { Setup, type SetupChoice } from "./_engine/Setup";
-import { domId } from "./_engine/text";
+import { domId, fill, formatMonth } from "./_engine/text";
 import type { EngineActions, EngineView } from "./_engine/view";
 import screens from "./_engine/Screens.module.css";
 
@@ -55,14 +65,28 @@ export interface EngineWorkbenchProps {
  * screen is NOT persisted — reopening costs a click, the entries are what is
  * kept; an engine found on arrival opens on the board.
  */
-type Screen = "board" | "steps" | "deck" | "import" | "erase" | "settings" | "example";
+// `new` and `delete` since A14 T5 (§19.1.5): another engine's setup, and one engine's deletion.
+type Screen = "board" | "steps" | "deck" | "import" | "erase" | "settings" | "example" | "new" | "delete";
 
 // Once per page session, not per mount (§11.6: "first view of the island in the session").
 let openedTracked = false;
 // "The first save of a number of that stage in the session" (§11.6) — the stage, never the number.
-const savedStages = new Set<Pillar>();
+const savedStages = new Set<EngineStageDetail>();
 // navigator.storage.persist() asked once, at the first successful write (§4.3).
 let persistenceAsked = false;
+
+/** The first save of a number of its stage in the session (§11.6). Sales-assisted's stages count apart, prefixed (Q14); the link's block sits under its acquisition. */
+function stageSaved(id: MetricId): void {
+  const stageDetail = engineStageDetail(shapeOf(id).stage, motionOfMetric(id));
+  if (savedStages.has(stageDetail)) return;
+  savedStages.add(stageDetail);
+  trackEngine({ name: "engine_stage_saved", detail: stageDetail });
+}
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const newId = (): string => globalThis.crypto.randomUUID();
+/** A file opened on an empty device keeps its id when it is one this build would have made; anything else gets a new one. */
+const importedId = (id: unknown): string => (typeof id === "string" && UUID.test(id) ? id : newId());
 
 function lastSnapshot(state: EngineState): Snapshot {
   return state.snapshots[state.snapshots.length - 1]!;
@@ -70,19 +94,6 @@ function lastSnapshot(state: EngineState): Snapshot {
 
 function withSnapshot(state: EngineState, change: (snapshot: Snapshot) => Snapshot): EngineState {
   return { ...state, snapshots: [...state.snapshots.slice(0, -1), change(lastSnapshot(state))] };
-}
-
-/** A download that never touches the network: a Blob URL on an anchor IN the document (a detached one doesn't download everywhere), revoked later so a slow start isn't cut. */
-function download(text: string, fileName: string) {
-  const url = URL.createObjectURL(new Blob([text], { type: "application/json" }));
-  const anchor = document.createElement("a");
-  anchor.href = url;
-  anchor.download = fileName;
-  anchor.hidden = true;
-  document.body.appendChild(anchor);
-  anchor.click();
-  anchor.remove();
-  window.setTimeout(() => URL.revokeObjectURL(url), 10_000);
 }
 
 /**
@@ -111,7 +122,14 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
   const [selected, setSelected] = useState<Pillar | null>(null);
   const [panelSeq, setPanelSeq] = useState(0);
   const [focusMetric, setFocusMetric] = useState<MetricId | null>(null);
+  // The hybrid's selector (§18.7): the motion of the number opened last in this session, else self-serve.
+  const [motionView, setMotionView] = useState<Motion | null>(null);
+  // The motions the setup card had ticked when « Voir un exemple rempli » was pressed (§18.7).
+  const [exampleMotions, setExampleMotions] = useState<Record<Motion, boolean>>({ plg: true, slg: false });
   const [writeFailed, setWriteFailed] = useState(false);
+  // The monthly series (§19.2.4): the month on screen — null, the month being filled — and whether a past one is being corrected.
+  const [monthIndex, setMonthIndex] = useState<number | null>(null);
+  const [correcting, setCorrecting] = useState(false);
   const [focusRequest, setFocusRequest] = useState<{ id: string; n: number } | null>(null);
 
   useEffect(() => {
@@ -130,24 +148,32 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
   const tourResults = snap?.tourResults;
   const computed = useMemo(() => {
     if (!state || !openedAt) return null;
-    const ctx = { today: new Date(openedAt), locale };
+    // A past month is read as it was seen (§19.2.3): the months up to it, its windows, the day it was closed.
+    // Every screen below reads the LAST month of the state it gets, so the past month is simply that state's last.
+    const month = monthIndex !== null && monthIndex < state.snapshots.length - 1 ? monthIndex : null;
+    const lens = month === null ? { state, today: new Date(openedAt) } : monthView(state, month, new Date(openedAt));
+    const ctx = { today: lens.today, locale };
     const tourResult = state.tourLink ? (tourResults?.find((r) => r.id === state.tourLink?.resultId) ?? null) : null;
-    const derived = deriveEngine(state, ctx, tourResult, bridges, strings.units);
-    // The board's title is the peloton slide's title, from the same function (§7 E2, §9.3):
+    const derived = deriveEngine(lens.state, ctx, tourResult, bridges, strings.units);
+    // The board's title is its first slide's title, from the same function (§7 E2, §9.3, §18.8):
     // the screen and the slide cannot word one engine two ways.
-    const verdict = pelotonTitle(state, derived.peloton, strings, metrics, ctx);
-    const plan = collectPlan(lastSnapshot(state), ctx.today);
+    const verdict = verdictOf(lens.state, derived, strings, metrics, ctx);
+    // The team's tools, when ticked (§19.5.2): « À faire toi-même » by tool, with each number's `where` in the catalogue's order.
+    const selected = teamTools(lens.state.setup.tools);
+    const citedBy = (id: MetricId) =>
+      (metrics.find((m) => m.id === id)?.where ?? []).flatMap((w) => (w.source.kind === "tool" ? [w.source.tool] : []));
+    const plan = collectPlan(lastSnapshot(lens.state), ctx.today, motionShapes(lens.state.setup.motions), { selected, citedBy });
     const deviceTour = latestTourWithAnswers(tourResults ?? []);
     const tourOnDevice = deviceTour !== null;
-    const view: EngineView = { state, derived, strings, metrics, derivedCopy, bridges, ctx, tourResult, tourOnDevice, deviceTour };
-    return { view, verdict, plan };
-  }, [state, openedAt, tourResults, locale, bridges, strings, metrics, derivedCopy]);
+    const view: EngineView = { state: lens.state, derived, strings, metrics, derivedCopy, bridges, ctx, tourResult, tourOnDevice, deviceTour };
+    return { view, verdict, plan, month };
+  }, [state, openedAt, tourResults, locale, bridges, strings, metrics, derivedCopy, monthIndex]);
 
   const focus = (id: string) => setFocusRequest((current) => ({ id, n: (current?.n ?? 0) + 1 }));
 
-  function persist(next: EngineState, options: { fresh?: boolean; stamp?: boolean; replace?: boolean } = {}): CommitResult {
+  function persist(next: EngineState, options: { fresh?: boolean; stamp?: boolean; overUnreadable?: boolean; add?: boolean } = {}): CommitResult {
     const stamped = options.stamp === false ? next : { ...next, updatedAt: new Date().toISOString() };
-    const result = commit(stamped, { fresh: options.fresh, replace: options.replace });
+    const result = commit(stamped, { fresh: options.fresh, overUnreadable: options.overUnreadable, add: options.add });
     setWriteFailed(!result.ok);
     if (result.ok && !persistenceAsked) {
       persistenceAsked = true;
@@ -161,13 +187,20 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
     focus("engine-verdict");
   }
 
+  /** Back to the month being filled: every screen but the board works on it (the deck, the settings, the steps, the files). */
+  function toCurrentMonth() {
+    setMonthIndex(null);
+    setCorrecting(false);
+  }
+
   function openSteps(from: StepPosition) {
     setStepsFrom(from);
     setScreen("steps");
     focus("engine-steps-title");
   }
 
-  function openExample() {
+  function openExample(motions?: Record<Motion, boolean>) {
+    if (motions) setExampleMotions(motions);
     setScreen("example");
     focus("engine-example-title");
   }
@@ -191,6 +224,7 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
           metrics={metrics}
           derivedCopy={derivedCopy}
           bridges={bridges}
+          motions={exampleMotions}
           onBack={() => {
             setScreen("board");
             focus("engine-setup-title");
@@ -203,11 +237,14 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
         <ImportPanel
           strings={strings}
           locale={locale}
-          hasEngine={false}
+          metrics={metrics}
+          device={null}
           onOpen={(imported) => {
             // Over an unreadable store the device refuses to write (it will not overwrite what it
             // can't read). Choosing a file here IS the confirmed way past it, so clear first.
-            persist(imported, { fresh: true, stamp: false, replace: snap.result.kind === "unreadable" });
+            // Over an unreadable store, under an id of its own: it must not land on an entry nobody could read (A14 T5).
+            if (snap.result.kind === "unreadable") persist({ ...imported, id: newId() }, { fresh: true, stamp: false, overUnreadable: true });
+            else persist({ ...imported, id: importedId(imported.id) }, { fresh: true, stamp: false });
             openBoard();
           }}
           onCancel={() => setScreen("board")}
@@ -219,6 +256,7 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
         return shell(
           <EraseDialog
             strings={strings}
+            engines={snap.stored}
             companyLabel={undefined}
             onErase={() => {
               erase();
@@ -270,6 +308,9 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
             tourLink: choice.tourResultId ? { resultId: choice.tourResultId, linkedAt: nowIso } : null,
           };
           persist(next, { fresh: true, stamp: false });
+          // Which boxes were ticked (Q14): a choice, never a number or a word typed.
+          const motions = engineSetupDetail(choice.setup.motions);
+          trackEngine({ name: "engine_setup", detail: motions });
           if (choice.tourResultId) trackEngine({ name: "engine_tour_linked" });
           if (choice.start === "steps") openSteps({ phase: "targets" });
           else openBoard();
@@ -278,24 +319,24 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
     );
   }
 
-  const { view, verdict, plan } = computed;
+  const { view, verdict, plan, month } = computed;
   const current = state;
+  // What the board's actions edit: the month on screen. A past month is written back in its place (`withMonth`),
+  // and only while it is being corrected — read only, nothing on screen offers to write.
+  const lensState = view.state;
+  const write = (next: EngineState): CommitResult => persist(month === null ? next : withMonth(current, month, next));
 
   const actions: EngineActions = {
     saveEntry(id: MetricId, entry: MetricEntry) {
       // A count this number shares with others (shared-counts.ts) becomes the base and is
       // written into them: typed once, never contradicting itself across the board.
-      const result = persist(withSnapshot(current, (s) => propagateFrom({ ...s, metrics: { ...s.metrics, [id]: entry } }, id)));
-      const stage = shapeOf(id).stage;
-      if (result.ok && !savedStages.has(stage)) {
-        savedStages.add(stage);
-        trackEngine({ name: "engine_stage_saved", detail: stage });
-      }
+      const result = write(withSnapshot(lensState, (s) => propagateFrom({ ...s, metrics: { ...s.metrics, [id]: entry } }, id)));
+      if (result.ok) stageSaved(id);
       return result;
     },
     setTarget(id: MetricId, target: number | null) {
-      persist(
-        withSnapshot(current, (s) => {
+      write(
+        withSnapshot(lensState, (s) => {
           const targets = { ...s.targets };
           if (target === null) delete targets[id];
           else targets[id] = target;
@@ -306,10 +347,18 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
     // Every count in ONE write: two calls in the same tick would both start from the
     // same `current`, and the second would silently drop the first.
     setBase(counts: Partial<Record<SharedCount, number>>) {
-      persist(
-        withSnapshot(current, (s) =>
+      write(
+        withSnapshot(lensState, (s) =>
           (Object.entries(counts) as [SharedCount, number][]).reduce((acc, [count, value]) => withSharedCount(acc, count, value), s),
         ),
+      );
+    },
+    setPipelineOpen(open: number | null) {
+      write(
+        withSnapshot(lensState, (s) => {
+          const { pipelineOpen: _previous, ...rest } = s;
+          return open === null ? rest : { ...rest, pipelineOpen: open };
+        }),
       );
     },
     setWhatIf(targets: Partial<Record<LeverId, number>>) {
@@ -318,13 +367,15 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
       persist(Object.keys(targets).length > 0 ? { ...rest, whatIf: targets } : rest);
     },
     markRequested(ids: MetricId[], role: RoleId) {
-      persist(withSnapshot(current, (s) => markRequested(s, ids, role, new Date().toISOString())));
+      write(withSnapshot(lensState, (s) => markRequested(s, ids, role, new Date().toISOString())));
     },
     markReminded(ids: MetricId[]) {
-      persist(withSnapshot(current, (s) => markReminded(s, ids, new Date().toISOString())));
+      write(withSnapshot(lensState, (s) => markReminded(s, ids, new Date().toISOString())));
     },
     openMetric(id: MetricId) {
       setScreen("board");
+      // The link sits in sales-assisted's Acquisition panel: its motion, for the selector.
+      setMotionView(motionOfMetric(id));
       setSelected(shapeOf(id).stage);
       setFocusMetric(id);
       setPanelSeq((n) => n + 1);
@@ -346,16 +397,84 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
     trackEngine({ name: "engine_exported", detail: "json" });
   }
 
+  // The engines on this device (§19.1.5): the switcher's list, the name the import and the deletion say.
+  const engines = snap.engines ?? [];
+  const currentName = engineName({ createdAt: current.createdAt, ...(current.setup.companyLabel ? { companyLabel: current.setup.companyLabel } : {}) }, strings, locale);
+
+  /** Leaves whatever the board was showing — a past month, a stage, a sheet — for another engine's. */
+  function resetBoard() {
+    toCurrentMonth();
+    setSelected(null);
+    setFocusMetric(null);
+    setMotionView(null);
+  }
+
   if (screen === "import") {
     return shell(
       <ImportPanel
         strings={strings}
         locale={locale}
-        hasEngine
-        onOpen={(imported) => {
-          persist(imported, { fresh: true, stamp: false });
-          setSelected(null);
+        metrics={metrics}
+        device={{ state: current, name: currentName, canAdd: engines.length < MAX_ENGINES }}
+        onOpen={(imported, choice: ImportChoice | null) => {
+          if (choice === "merge") {
+            const merged = mergeEngines(current, imported);
+            if (merged.kind !== "ok") return;
+            persist(merged.state);
+          } else if (choice === "add") {
+            // Beside the others, always under a new id: the file's own may be another engine of the device
+            // (one's own save reopened), an entry nobody could read, or no id at all (the security review of A14 T5).
+            persist({ ...imported, id: newId() }, { fresh: true, stamp: false, add: true });
+          } else {
+            // « Remplacer » the engine on screen — and only it: the file takes its id, so it is written in its place.
+            persist({ ...imported, id: current.id }, { fresh: true, stamp: false });
+          }
+          resetBoard();
           openBoard();
+        }}
+        onCancel={openBoard}
+      />,
+    );
+  }
+
+  if (screen === "new") {
+    return shell(
+      <Setup
+        strings={strings}
+        locale={locale}
+        today={new Date(snap.openedAt)}
+        tour={view.deviceTour}
+        onCancel={openBoard}
+        onStart={(choice: SetupChoice) => {
+          const nowIso = new Date().toISOString();
+          const created = newEngineState(choice.setup, nowIso, { referenceMonth: choice.referenceMonth, cohortMonth: choice.cohortMonth });
+          const next: EngineState = { ...created, tourLink: choice.tourResultId ? { resultId: choice.tourResultId, linkedAt: nowIso } : null };
+          persist(next, { fresh: true, stamp: false, add: true });
+          const motions = engineSetupDetail(choice.setup.motions);
+          trackEngine({ name: "engine_setup", detail: motions });
+          if (choice.tourResultId) trackEngine({ name: "engine_tour_linked" });
+          resetBoard();
+          if (choice.start === "steps") openSteps({ phase: "targets" });
+          else openBoard();
+        }}
+      />,
+    );
+  }
+
+  if (screen === "delete") {
+    return shell(
+      <DeleteEngineDialog
+        name={currentName}
+        strings={strings}
+        onSave={exportJson}
+        onDelete={() => {
+          const last = engines.length <= 1;
+          const result = removeEngine(current.id);
+          setWriteFailed(!result.ok);
+          resetBoard();
+          setScreen("board");
+          // The next engine's board, or — the last one gone — the setup.
+          focus(last && result.ok ? "engine-setup-title" : "engine-verdict");
         }}
         onCancel={openBoard}
       />,
@@ -366,6 +485,7 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
     return shell(
       <EraseDialog
         strings={strings}
+        engines={snap.stored}
         companyLabel={current.setup.companyLabel}
         onErase={() => {
           erase();
@@ -387,11 +507,15 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
         today={view.ctx.today}
         tour={view.deviceTour}
         linked={current.tourLink !== null}
+        after={current.snapshots[current.snapshots.length - 2]?.referenceMonth}
         initial={{ setup: current.setup, referenceMonth: snapshot.referenceMonth, cohortMonth: snapshot.cohortMonth }}
         existing={{
           activation: snapshot.metrics["act.rate"] !== undefined,
           paid: snapshot.metrics["rev.paid-conversion"] !== undefined,
+          qualification: snapshot.metrics["slg.acq.lead-to-opp"] !== undefined,
+          goLive: snapshot.metrics["slg.act.go-live"] !== undefined,
           any: Object.keys(snapshot.metrics).length > 0,
+          entered: enteredCounts(snapshot),
         }}
         onCancel={openBoard}
         onStart={(choice) => {
@@ -402,6 +526,9 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
           const tourLink = choice.tourResultId === null ? null : (current.tourLink ?? { resultId: choice.tourResultId, linkedAt: new Date().toISOString() });
           const result = persist({ ...settled, tourLink });
           if (result.ok && linking) trackEngine({ name: "engine_tour_linked" });
+          // A motion ticked or unticked after the fact is a new choice of motions (Q14).
+          const changed = engineSetupDetail(choice.setup.motions);
+          if (result.ok && changed !== engineSetupDetail(current.setup.motions)) trackEngine({ name: "engine_setup", detail: changed });
           openBoard();
         }}
       />,
@@ -410,7 +537,7 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
 
   if (screen === "example") {
     return shell(
-      <ExampleView locale={locale} strings={strings} metrics={metrics} derivedCopy={derivedCopy} bridges={bridges} onBack={openBoard} />,
+      <ExampleView locale={locale} strings={strings} metrics={metrics} derivedCopy={derivedCopy} bridges={bridges} motions={current.setup.motions} onBack={openBoard} />,
     );
   }
 
@@ -452,11 +579,70 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
     );
   }
 
+  // The monthly series (§19.2): every month by its flows' month, the next month once its flows are over.
+  const lastIndex = current.snapshots.length - 1;
+  const today = new Date(snap.openedAt);
+  const next = nextMonthOf(current, today);
+  const series: SeriesControls = {
+    months: current.snapshots.map((s, index) => ({ index, label: formatMonth(s.referenceMonth, locale) })),
+    shown: month ?? lastIndex,
+    correcting: month !== null && correcting,
+    next:
+      next.kind === "ready"
+        ? { kind: "ready", label: formatMonth(next.referenceMonth, locale) }
+        : next.kind === "full"
+          ? { kind: "full" }
+          : { kind: "later", label: formatMonth(nextMonthStart(current).month, locale) },
+    onPick(index) {
+      setMonthIndex(index === lastIndex ? null : index);
+      setCorrecting(false);
+      setSelected(null);
+      setFocusMetric(null);
+      focus("engine-verdict");
+    },
+    onCorrect() {
+      setCorrecting(true);
+    },
+    onDoneCorrecting() {
+      setCorrecting(false);
+    },
+    onRemind() {
+      // The day the next month can start (§19.9): its flows' month name, never a number of the engine.
+      const r = strings.reminders;
+      const { month, day } = nextMonthStart(current);
+      const label = formatMonth(month, locale);
+      const file = calendarFile({
+        uid: `${globalThis.crypto.randomUUID()}@tourdegrowth.com`,
+        stamp: new Date(),
+        day,
+        title: fill(r.monthTitle, { month: label }),
+        description: `${fill(r.monthDescription, { month: label })}\n\n${enginePageUrl()}`,
+        url: enginePageUrl(),
+      });
+      const date = `${day.year}-${String(day.month).padStart(2, "0")}-${String(day.date).padStart(2, "0")}`;
+      download(file, fill(r.fileName, { date }), "text/calendar;charset=utf-8");
+      trackEngine({ name: "engine_exported", detail: "ics" });
+    },
+    onStart() {
+      // The month that ends is closed with today's date and the setup's windows; the new one starts with its targets only (§19.2.2).
+      const started = startNextMonth(current, today, new Date().toISOString());
+      if (!started) return;
+      // The one sign of a series in use (§19.12) — counted once the device holds it, never which month.
+      if (persist(started).ok) trackEngine({ name: "engine_month_started" });
+      toCurrentMonth();
+      setSelected(null);
+      focus("engine-verdict");
+    },
+  };
+
   return shell(
+    // Keyed by the engine: another engine's board starts fresh — no pasted table, open sheet or pinned tab follows it (A14 T5).
     <Board
+      key={current.id}
       view={view}
       actions={actions}
       verdict={verdict}
+      series={series}
       plan={plan}
       selected={selected}
       onSelect={(stage) => {
@@ -466,26 +652,73 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
       panelSeq={panelSeq}
       focusMetric={focusMetric}
       returningFrom={snap.returningFrom}
+      motionView={motionView}
+      onMotion={setMotionView}
       writeFailed={writeFailed}
       onDeck={() => {
+        toCurrentMonth();
         setScreen("deck");
         trackEngine({ name: "engine_deck_opened" });
         focus("engine-deck-title");
       }}
       onSave={exportJson}
       onImport={() => {
+        toCurrentMonth();
         setScreen("import");
         focus("engine-import-title");
       }}
       onErase={() => {
+        toCurrentMonth();
         setScreen("erase");
         focus("engine-erase-title");
       }}
       onSettings={() => {
+        toCurrentMonth();
         setScreen("settings");
         focus("engine-setup-title");
       }}
-      onSteps={() => openSteps(resumePosition(lastSnapshot(current)))}
+      onSteps={() => {
+        toCurrentMonth();
+        openSteps(resumePosition(lastSnapshot(current), current.setup.motions));
+      }}
+      switcher={
+        engines.length > 0 ? (
+          <EngineSwitcher
+            engines={engines}
+            currentId={current.id}
+            strings={strings}
+            locale={locale}
+            onSwitch={(id) => {
+              const result = switchEngine(id);
+              if (!result.ok) return;
+              resetBoard();
+              focus("engine-verdict");
+            }}
+            onNew={() => {
+              resetBoard();
+              setScreen("new");
+              focus("engine-setup-title");
+            }}
+            onDelete={() => {
+              resetBoard();
+              setScreen("delete");
+              focus("engine-delete-title");
+            }}
+          />
+        ) : null
+      }
+      onTemplate={() => {
+        // The month being filled, its ticked motions, the page's language: « ; » and the decimal comma in French.
+        const text = tableTemplate(current, motionShapes(current.setup.motions), metrics, strings, locale);
+        download(`\uFEFF${text}`, monthFileName(current, strings.table.fileName), "text/csv;charset=utf-8");
+        trackEngine({ name: "engine_exported", detail: "csv" });
+      }}
+      onApplyTable={(preview: TablePreview) => {
+        const result = persist(withSnapshot(current, () => preview.snapshot));
+        // A pasted number is a number saved (§19.12): the first of each stage counts once, as from its sheet.
+        if (result.ok) for (const row of preview.rows) if (row.kind === "new" || row.kind === "changed") stageSaved(row.id);
+        return result.ok;
+      }}
     />,
   );
 }
@@ -503,13 +736,40 @@ function withSettings(state: EngineState, setup: EngineSetup, referenceMonth: Ye
   const metrics = { ...snapshot.metrics };
   if (setup.activationWindowDays !== state.setup.activationWindowDays) delete metrics["act.rate"];
   if (setup.paidWindowDays !== state.setup.paidWindowDays) delete metrics["rev.paid-conversion"];
+  // The sales-assisted windows are part of their numbers' definitions too (§18.1.2): the same rule.
+  if (setup.qualificationWindowDays !== state.setup.qualificationWindowDays) delete metrics["slg.acq.lead-to-opp"];
+  if (setup.goLiveWindowDays !== state.setup.goLiveWindowDays) delete metrics["slg.act.go-live"];
   const hadCompany = Boolean(state.setup.companyLabel);
   return {
     ...state,
-    // The model is not editable (one profile in v1), nor is anything the card doesn't show.
-    setup: { ...setup, profile: state.setup.profile },
+    // Unticking a motion loses nothing (§18.1.2): its entries, targets, what-ifs and slide boxes stay in
+    // the state, the storage and the file; the board, the coverage, the diagnosis and the deck ignore them.
+    setup,
     // A name given for the first time goes on the slides, as it does at creation.
     deck: !hadCompany && setup.companyLabel ? { ...state.deck, showCompany: true } : state.deck,
     snapshots: [...state.snapshots.slice(0, -1), { ...snapshot, referenceMonth, cohortMonth, metrics }],
   };
+}
+
+/**
+ * The board's verdict, by the motions (§18.7, §18.8): self-serve alone, the
+ * peloton's title (v1, to the character); sales-assisted alone, the relays';
+ * the hybrid, « deux moteurs, un total ». Each is its deck's first slide.
+ */
+function verdictOf(state: EngineState, derived: EngineDerived, strings: EngineStrings, metrics: ResolvedMetric[], ctx: EngineCalcContext): SlideTitle {
+  const { plg, slg } = state.setup.motions;
+  if (plg && slg && derived.total) return totalTitle(derived.total, state, strings, ctx);
+  const relays = derived.motions.find((m): m is Extract<MotionDerived, { motion: "slg" }> => m.motion === "slg");
+  if (!plg && relays) return relaysTitle(state, relays.relays, strings, metrics, ctx);
+  return pelotonTitle(state, derived.peloton, strings, metrics, ctx);
+}
+
+/** The numbers already entered on each side (anything but « à faire »): what the settings say a motion keeps (§18.1.2). */
+function enteredCounts(snapshot: Snapshot): Record<Motion, number> {
+  const counts: Record<Motion, number> = { plg: 0, slg: 0 };
+  for (const [id, entry] of Object.entries(snapshot.metrics)) {
+    if (!entry || entry.status === "todo") continue;
+    counts[motionOfMetric(id as MetricId)] += 1;
+  }
+  return counts;
 }

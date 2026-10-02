@@ -8,7 +8,7 @@ import type { GlossaryTermId } from "./glossary-terms";
  * implicit in acq-3 ("coût d'acquisition"), LTV (rev-2), churn (ret-3),
  * coefficient viral (ref-3), upsell/cross-sell (rev-3). The 5 pillar names
  * themselves get their own trigger wherever they appear as a tag/label
- * (PillarChip), not inline in question text — see ResultView.
+ * (StageScore), not inline in question text — see ResultView.
  *
  * Matched against the exact copy-library.ts question strings; if that copy
  * ever changes, update the anchor here too (there's no automatic sync,

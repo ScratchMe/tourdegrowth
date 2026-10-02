@@ -15,7 +15,7 @@ réel.
 
 **Ce fichier est le volume courant.** Le 2026-10-01, à 834 000 caractères, les
 entrées d'avant le 2026-09-30 sont parties dans `docs/journal/`, déplacées
-telles quelles, en huit volumes rangés par période. **Quand ce fichier dépasse
+telles quelles, en huit volumes rangés par période (un neuvième, le même jour, pour celles du 2026-09-30). **Quand ce fichier dépasse
 200 000 caractères** (`src/__tests__/claude-md-budget.test.ts` rougit), ses
 entrées les plus anciennes partent dans un volume de plus, par entrées
 entières et sans rien réécrire, et la table ci-dessous gagne sa ligne.
@@ -36,810 +36,8 @@ les leçons et les conventions numérotées, elles, sont restées dans `CLAUDE.m
 | [6. Le SEO, le glossaire et le poids sur Vercel](docs/journal/06-seo-glossaire-vercel.md) | 2026-09-14 → 15 | Les portes ouvertes, le glossaire à 24 termes, « AARRR vs X », Functions Storage |
 | [7. Le jeu, le moteur et l'outillage Claude Code](docs/journal/07-jeu-moteur-outillage.md) | 2026-09-23 → 28 | Le jeu et le moteur fermés, l'aperçu propriétaire, les plug-ins, l'audit du kit |
 | [8. La synthèse I + B et la séance des décisions](docs/journal/08-synthese-i-b-et-decisions.md) | 2026-09-28 → 29 | Le kit I + B, les lots A1 à A6, les vingt-deux décisions |
-| Ce fichier | depuis le 2026-09-30 | C23 et A7, l'extension 04, les design syncs B3, C25 à C29, le niveau 2 du jeu, et la suite |
-
-## C23 : le jeu attend le moteur (2026-09-30)
-
-**La question**, née de C4 la veille : puisque le moteur attend le lot A7.3 (le B2B assisté), le jeu, prêt bien plus tôt, doit-il l'attendre ? C19 disait « rien ne part avant que les deux soient prêts ».
-
-**Vérifié avant de la poser** :
-- **L'avancement des deux produits** : aucun item A7 livré. Le bon à tirer nº7 (le jeu) n'a aucune carte tranchée sur 38. Le nº8 (le moteur) en a 5 sur 82, et sera à refaire après A7.
-- **La date du Digital Fairness Act**, sur laquelle reposait la reco écrite la veille : la Commission vise novembre 2026, le 18 étant une date envisagée (MLex, 23/09/2026). Le programme de travail 2026 disait « quatrième trimestre ».
-- **Le créneau réactif** du calendrier des campagnes, qui ne joue « que si C est ouvert ».
-
-**La réponse d'Antoine : on attend les deux, le moteur d'abord.** La recommandation était de lancer le jeu seul pour profiter du DFA, sans jamais sauter la recette ni la relecture juridique. Elle n'a pas été suivie, en connaissance de ce coût. C19 tient, le calendrier garde B puis C, et le créneau du DFA est abandonné.
-
-**Ce qui en découle** : la copie du jeu dit la proposition du DFA « attendue fin 2026 » (`content/game/retention.ts:487-488`). Le jeu ouvrira après la proposition, et la phrase serait alors fausse. Un déclencheur en section E de `CHANTIERS.md`, et D2, imposent de la réécrire d'après le texte publié avant l'ouverture. Le créneau réactif est barré dans `marketing/campaigns/README.md` §5 et §8, et dans `game/social.md`, gardé pour mémoire.
-
-**Consigné** : `marketing/campaigns/README.md` §10 (réponse du 2026-09-30), `GAME-BRIEF.md` §3, `CHANTIERS.md` (C, D2, E), `CLAUDE.md` (la ligne des décisions, où C24 prend la place de C23).
-
-## A7.1 : aucun repère ne désigne l'étape qui freine (2026-09-30)
-
-La décision 5 renversée par Antoine le 2026-09-29 (C1), codée. **Seule une cible d'équipe nomme l'étape qui freine.** Les repères publiés (activation 20-40 %, churn logo 1-2 %/mois, et tous les autres) restent affichés, avec leur réserve, « pour situer, sans désigner d'étape ».
-
-**Le choix d'implémentation** : le comparateur « repère » est retiré du moteur, pas seulement éteint. Un drapeau `designates` laissé à `false` partout aurait gardé vivants une branche de `comparatorOf`, cinq mots `side`, deux phrases du tableau, deux gabarits du « Et si » et la réserve du pied de la slide « fuite ». Tout cela était du code sans chemin, qu'un `true` suffisait à rallumer. Ce qui disparaît :
-- `Benchmark.designates` ;
-- `Comparator.kind` et `Comparator.term` : un comparateur est la cible, un point `lo === hi` ;
-- les mots `side.*Reference`, `diagnosis.belowReference` / `aboveReference` / `maybeBelow` (ce dernier était déjà mort) ;
-- `whatIf.targetReference` / `targetReferenceHigh`, `sheet.referenceDesignates`, `slide.leakCaveat`, et le segment `{caveat}` du pied de la slide.
-
-**L'exemple §6.0** porte les cibles de son équipe fictive (`EXAMPLE_TARGETS` : activation 20 %, churn 2 %). Ce sont les bornes que les deux repères lui prêtaient : son diagnostic ne bouge pas (activation nommée, ~600 € contre ~240 €, `clear`), mais la slide dit maintenant « 20 % (cible de l'équipe) ». Son bandeau le dit aussi, avec des valeurs lues dans les données plutôt que recopiées : « l'équipe fictive vise 20 % d'activation et 2 % de churn logo par mois ».
-
-**La copie**, toute « à relire » :
-- **Moteur** : la promesse, l'encart de durée, l'écran des cibles, la FAQ « D'où viennent les repères ? », « Pas assez de cibles pour conclure », les titres `leakShared` / `leakLevel`, et les trois « sans cible » (ligne du tableau, slide, note d'orateur).
-- **Catalogue** : la réserve du churn devient « pour le SaaS B2B à panier élevé ; les petits paniers tournent bien plus haut, les contrats entreprise bien plus bas ».
-- **Glossaire** : la page churn cite ChartMogul (médiane de 6,1 %/mois sous 25 $ d'ARPA mensuel, 2,2 % au-dessus de 500 $, vérifié sur leur page le jour même), et la page rétention reprend la même population. C'est de la copie validée qui change : elle repasse « à relire ».
-
-**Vérifié** :
-- **Non-vacuité** : remettre un repère désignant dans `comparatorOf` (le churn, sans cible) fait rougir exactement « no reference ever names ». Un test du catalogue refuse aussi tout champ de plus sur un repère.
-- lint et `tsc` propres, 2 237 tests unitaires. Deux tests fusionnés : les mots de position n'ont plus qu'une famille.
-- Les 110 e2e du moteur passent sur un build de production.
-- À l'écran, en FR et en EN, à 1 280 et 390 px : le bandeau de l'exemple, « 18 %, sous ta cible (20 %) », le tampon « Sous la cible », et la slide « fuite » « Ramener l'activation à 20 % (cible de l'équipe)… », sans réserve de repère au pied.
-
-**Pièges** :
-- La copie française porte des espaces insécables U+00A0 avant `:` `;` `?` `%` `»` et après `«`. Un remplacement scripté écrit avec des espaces ordinaires ne trouve pas son texte, et une chaîne neuve tapée ainsi échouerait au test de typographie. Le remplacement cherche donc « espace ou insécable », et pose l'insécable dans les chaînes `fr`.
-- `emptyState()` (fixtures) partait de l'exemple, et héritait donc de ses nouvelles cibles : le pas à pas reprenait à « base » au lieu de « cibles ». Un état vide n'a pas de cible : c'est corrigé dans la fixture, pas dans le test.
-
-**Le relecteur de copie** a trouvé ce que la première passe avait laissé, tout corrigé avant la PR :
-- un marqueur manquant sur le pied de la slide ;
-- « fixe-en une », qui s'écrit « fixes-en une » (l'impératif reprend son *s* devant *en*) ;
-- deux phrases qui contredisaient encore C1 : l'aide du champ cible (« une cible d'équipe sert de repère ») et la réserve du taux d'inscription (« donc ce repère ne désigne jamais », qui isolait ce repère comme si les autres désignaient) ;
-- les dates de contenu : `updatedAt` des pages churn et rétention, et celle du moteur dans `updated-at.ts`.
-
-Il signale aussi, pour le bon à tirer, un écart qui existait déjà et devient visible : la page rétention donne 97-99 % de rétention mensuelle (1 à 3 % de churn), la page churn 1-2 %, pour la même population désormais nommée à l'identique. Les chiffres validés ne sont pas touchés ici.
-
-**Hors code** : `ENGINE.md` suit (D8 et décision 5 marquées, §5.1, §5.3, §6.0, §6.6, §9.3, §13.1, §14). Le bon à tirer nº8 cite l'exemple et ces phrases : sa page est à remettre d'accord avec le code par l'agent des bons à tirer, comme A7.2 et A7.3 le demanderont aussi.
-
-**En production** : PR [#203](https://github.com/ScratchMe/tourdegrowth/pull/203), mergée le 2026-09-30 à 9 h 42 UTC (squash `c8ec215`, 36 fichiers, identique à la tête de la PR), servie à 9 h 43 UTC. Relevé par HTTP, entités décodées : `/fr/glossary/churn` porte « panier élevé » et « ChartMogul », et plus « petites entreprises » ; `/en/glossary/retention` porte « high-ticket ». Le moteur reste en 404 derrière son drapeau.
-
-## La design sync depuis une session cloud : B1, B2, et B3 jusqu'à A5 (2026-09-29 → 2026-09-30)
-
-**La demande d'Antoine** : la section B de `CHANTIERS.md`, par son prompt B — pousser le bundle vers le projet Claude Design existant (`23b9671c-a55b-452e-aa41-39906ee71ba8`), écrire le brief S-15, tenir les documents à jour ; tout avertissement autre que les trois connus, s'arrêter et lui expliquer.
-
-**Ce que le prompt supposait, et qui était faux** : « sur ta machine ». La session tournait dans le cloud, et c'est là qu'elle a tout fait. `DesignSync` y répond avec la connexion claude.ai ; le convertisseur vient avec le skill `/design-sync` ; Chromium est préinstallé. L'autorisation locale qui manquait le 2026-09-11 n'est plus un prérequis.
-
-**Deux envois, par le chemin atomique** (ancre relue juste avant, sentinelle, contenu par paquets, sentinelle, `_ds_sync.json` en dernier, `list_files` relu) :
-- **2026-09-29** : 77 composants, 238 cellules, 398 fichiers, ancre `17cca5e0909b` ;
-- **2026-09-30**, après la fusion d'A2, A4 et A5 : **79 composants, 244 cellules, 79/79 rendus**, 408 fichiers, aucune suppression, `report_validate` 79/0/0/0, ancre `f3b4bf9eb3c5`. Un premier bundle d'après A2 n'est pas parti : main avait pris A4 et A5 entre-temps, il aurait été périmé en arrivant.
-
-**La notation a trouvé ce que le rendu ne montrait pas** : 64 cellules sur 245, dans 43 composants, rendaient proprement et disaient faux (copie des maquettes, chiffres plausibles que le modèle ne produit pas, commentaires qui promettent plus que la cellule). Antoine a choisi « corriger puis pousser » ; chaque aperçu a été refait depuis les sources du produit, le détail est dans `.design-sync/NOTES.md`. Une seule était un défaut du produit : la coupure de journal en pilule, livrée à part (#192, son entrée du 2026-09-29).
-
-**Les avertissements** : `ActionCard` en a levé un quatrième (`GRID_OVERFLOW`, ses cartes à leur vraie largeur de 294 px) ; Antoine a choisi la carte en colonne. `GlossaryTerm` en a levé un autre après A4, que B3 annonçait : un seul popover ouvert par page, dans la couche supérieure, donc l'histoire `French` s'affichait fermée et le panneau d'`Open` pendait sous sa cellule. Antoine a choisi le 2026-09-30 de l'accepter et de rendre la carte honnête (`French` fermée exprès, de la place sous `Open`). Il y a donc **quatre** avertissements permanents.
-
-**Le compte annoncé n'était pas le bon** : A1 puis A2 comptaient à partir de 244 (245, puis 251). La notation du 2026-09-29 avait retiré sept cellules, doublons ou fausses (245 → 238) ; 238 + 3 + 3 = 244. Le compte vient de ce que les aperçus exportent, pas des annonces.
-
-**B2** : `design/DS-EXTENSION-BRIEF-04.md`, sur la forme des briefs 01 et 03, avec neuf captures du moteur et de l'audit dans `design/ds-extension-04/`. Il attend la relecture d'Antoine et son envoi (D3). Rien n'est parti vers Claude Design.
-
-**Pièges** :
-- **Le driver ne lance pas `cfg.buildCmd`.** Après A5, le rendu était à jour (il se construit depuis `src/`) mais les contrats disaient encore `Button compact` et `Segmented size="compact"` : `dist/types/` datait de la fusion précédente. Vu en relisant les `.prompt.md` avant l'envoi, pas par un avertissement.
-- **Une note suit l'aperçu, pas le composant.** A4 et A5 ont changé neuf composants dont l'aperçu n'a pas bougé ; leurs notes auraient été reportées sans capture. Recapturés en contrôle, c'est comme ça que `GlossaryTerm` s'est vu.
-- **Fusionner main au milieu d'une synchro** : onze aperçus en conflit avec les renommages d'A5, et deux valeurs retirées restées sur des lignes que seule la branche avait ajoutées (`StatTile size="responsive"`, `DgFace size="avatar"`). Une valeur inconnue retombe sur le défaut sans rien casser à l'œil ; seul un `grep` des valeurs retirées les trouve.
-- **Le conteneur a redémarré deux fois.** `ds-bundle/` et les notes (`.design-sync/.cache/`, non commités) ont survécu ; l'ancre relue avant chaque envoi dit si quelqu'un a poussé entre-temps.
-- **La capture par histoire fait 900 × 700** : les cellules hautes (le jeu) sont coupées, et `SpaceBand`, qui n'a sa mise en page large qu'à partir de 950 px, a été noté sur un rendu à 1 200.
-
-**Trouvé dans le produit, laissé en A9 de `CHANTIERS.md`** après re-mesure sur main d'après A5 : les guillemets de l'audit à espaces ordinaires (17 lignes de copie, hors de la garde de typographie), « 100,000 » coupé en deux entre 761 et 850 px dans le tableau de bord du jeu, la courbe de churn qui touche l'étiquette d'objectif dans `EndingCharts`, et une règle morte dans `SpaceBand.module.css`. **Deux constats de la notation se sont révélés faux à la re-mesure** et n'y sont pas : l'état `locked` d'`ActionCard` n'est pas mort (`island-view.ts` le pose), et le premier compte de l'audit (69 lignes) comptait les commentaires.
-
-**Consigné** : `.design-sync/NOTES.md` (« Synced », les quatre avertissements, le piège de `dist/types`, les risques de re-synchro), `.design-sync/conventions.md` (le `medium="slide"` qu'A5 avait laissé en `size`), `CHANTIERS.md` (B réécrite : B1 retiré, B2 en attente, B3 après A7.10 ; D3 ; le prompt B ; A9), `CLAUDE.md` (le paragraphe de synchro, la ligne des avertissements, la ligne « Design system → Claude Design »).
-
-**Vérifié, et comment** : 79 aperçus sur 79 rendus sans erreur (aucun vide, fin ou identique) ; les 244 cellules notées « good » une à une sur leur capture, plus dix composants recapturés en contrôle ; les contrats relus après régénération (`grep` des props retirées : zéro) ; `conventions.md` confronté au build (noms de composants, jetons retirés) ; l'envoi relu par `list_files`. Aucun code de `src/` dans cette PR : que de la doc, des aperçus et des captures sous `design/`, que `vercel-ignore.sh` ne déploie pas.
-
-## A7.2 : « Moteur de growth » (2026-09-30)
-
-Le nom tranché par Antoine le 2026-09-29 (C2), codé. En français, le moteur s'appelle « Moteur de growth » (« Ton moteur de growth », minuscule dans le texte courant). En anglais, il reste "Growth engine". **L'adresse `/aarrr-funnel-template` ne change pas.**
-
-**Ce qui change** :
-- **La copie**, « à relire » : le fil d'Ariane (donc aussi le nom du `WebApplication` et du fil en JSON-LD, qui le lisent), le titre de la page, l'en-tête du tableau et le kicker des slides.
-- **La confidentialité** : ses deux paragraphes sur le moteur, et sa date, qui passe au 2026-09-30.
-- **L'aperçu propriétaire**, et les commentaires qui nommaient l'outil.
-- **Hors `src/`** : `ENGINE.md`, `CLAUDE.md`, les textes de lancement (`marketing/kit.md`, `README.md`, `campaigns/README.md`, `competitive-brief.md`, `campaigns/engine/*.md`) et le relecteur de sécurité.
-
-**Ce qui ne change pas**, par décision : les deux demandes à copier (« un point sur notre moteur de croissance ») parlent du moteur **de l'entreprise**, pas de l'outil. La comparaison OKR (« pas un moteur de croissance ») est l'usage générique. Le titre `meta.title` (« Modèle de funnel AARRR… ») porte la requête. Le nom court « Le moteur » du bandeau et de la bande de l'accueil reste aussi.
-
-**Et ce qu'A7.1 rendait faux dans les textes de lancement** : cinq textes du lancement B disaient encore qu'une fuite peut être nommée « contre une fourchette publiée » (Show HN, Reddit, Indie Hackers, newsletters, fil X/Bluesky, annuaires, brief concurrentiel). Ils disent maintenant « contre une cible que tu fixes ; les fourchettes publiées servent à situer ». Le récit d'Indie Hackers gagne l'histoire du churn 1-2 % qui signalait l'exemple à tort. Les longueurs déclarées des annuaires sont recalculées par `check-lengths.mjs --fix`.
-
-**Vérifié** : `grep -rn "oteur de croissance"` ne trouve plus dans `src/`, `e2e/` et `marketing/` que les trois usages génériques gardés.
-
-**En production** : PR [#204](https://github.com/ScratchMe/tourdegrowth/pull/204), mergée le 2026-09-30 à 10 h 07 UTC (squash `9417d70`, 25 fichiers, identique à la tête de la PR), servie à 10 h 08 UTC. Relevé par HTTP, entités décodées : `/fr/privacy` porte « moteur de growth » dans ses deux paragraphes et la date du 30 septembre 2026. Le moteur reste en 404 derrière son drapeau.
-
-## A7.6 : la slide « fuite » d'une étape sans prix (2026-09-30)
-
-C9, tranché par Antoine le 2026-09-29, codé. Quand le diagnostic nomme **seule** une étape que le modèle ne sait pas chiffrer en argent (la rétention à J30, la part d'inscrits recommandés), la slide « fuite » **existe**. Jusque-là, `buildLeak` l'omettait sans rien dire, et le deck perdait la conclusion que le tableau affiche. Quand combler l'écart rapporterait **moins d'un client** par mois, l'omission est gardée : ce n'est pas un argument de comité.
-
-**Ce qui la compose** :
-- **Le titre** `leakClearUnpriced`, qui nomme la valeur et la cible sans montant : « **La rétention à J30 freine le moteur** : 5 %, pour 20 % (cible de l'équipe). »
-- **Le pied** `leakFooterUnpriced`, qui dit pourquoi il n'y a pas de montant : « Sans montant : le moteur ne relie pas ce chiffre au MRR ».
-- **Pas de carte « Le calcul »**, puisqu'il n'y a pas de chaîne à montrer. La colonne « À côté » prend alors toute la largeur (`.leak[data-calc="false"]`), plutôt que de laisser une colonne vide.
-- **L'export texte et les notes** suivent sans code à part, puisqu'ils lisent le même modèle de slide.
-- Les deux gabarits neufs sont « à relire ». Les deux conditions que `!impact || less-than-one` confondait sont maintenant deux branches.
-
-**Vérifié** :
-- **Non-vacuité** : remettre l'omission fait rougir le test de la slide, et le garde-fou des phrases, qui exige qu'un scénario déclenche chaque titre.
-- **Tests unitaires** : une rétention à J30 seule sous sa cible donne une slide avec un titre sans « € » ni « MRR », sans ligne de calcul, et « ## 2. » dans l'export, en FR et en EN. Un gain d'un tiers de client ne donne pas de slide.
-- **Un e2e**, en FR et en EN, à 1 280 et 390 px : la slide rendue, sans « Le calcul », avec « À côté » et le pied, sans défilement horizontal.
-
-**En production** : PR [#206](https://github.com/ScratchMe/tourdegrowth/pull/206), mergée le 2026-09-30 à 10 h 20 UTC (squash `2bded69`, 12 fichiers, identique au diff de la PR ; #205, d'une autre session, s'était glissée entre les deux). Déploiement de production Vercel `READY` sur ce commit, lu par l'API. La slide n'est pas observable en production : le moteur reste en 404 derrière son drapeau.
-
-## D10 : le Tour au seul SEO, l'indexation anglaise et Launching Next (2026-09-29 → 30)
-
-**La demande** : la suite de la section D, pas à pas avec Antoine (prompt D). L'action a commencé sous le nom de D6, semaine S1 du calendrier des campagnes. La séance des décisions ([#193](https://github.com/ScratchMe/tourdegrowth/pull/193)), mergée en parallèle, l'a renommée D10 (C20 : le Tour au seul SEO, sans post). Rien de ce qui a été fait ne la contredit.
-
-**Le relevé de départ d'abord** : `stats.yml` (portée `both`), déclenché avant toute soumission, déchiffré dans le scratchpad de la session. Les chiffres sont restés dans la conversation.
-
-**Search Console, le 2026-09-29** :
-- **Anglais** : `/en` était déjà sur Google. Les deux pages « porte ouverte » et les cinq « AARRR vs X » ne l'étaient pas, deux semaines après leur mise en ligne. Indexation demandée pour les huit. Le rapport chiffré le disait déjà : aucune impression sur ces pages.
-- **Le sitemap** : lu par Google le jour même, avec ses 74 pages. Google connaît donc les adresses et ne les a pas encore explorées. Ce n'est pas un problème de découverte.
-- **D8, clos** : pour `/en/glossary/viral-coefficient`, `activation` et `aha-moment`, les deux canoniques (« déclarée » et « sélectionnée par Google ») s'affichent « Sans objet ». Cela veut dire que Google ne les a jamais explorées : s'il les avait lues, il afficherait au moins la canonique déclarée, qui est la bonne (revérifié en production, avec `hreflang` en, fr et `x-default`). Google n'a donc pas choisi l'ancienne adresse contre la nouvelle. Rien à coder. Indexation demandée.
-- **Français** : le 2026-09-30 au matin, le quota était encore dépassé. Il se compte sur une fenêtre glissante de 24 heures, pas par jour calendaire. `/fr` est déjà sur Google. Les sept autres adresses sont listées dans D10.
-
-**Launching Next, soumis le 2026-09-30** : formulaire revérifié la veille depuis la session, identique à la table de `marketing/kit.md`. Lien `directory_launchingnext` en campagne `relaunch_tour`, soumetteur « Tour de Growth » et `contact@`, option payante refusée. Les 15 questions, les 10 du Deep dive, les 24 termes du glossaire et la licence AGPL de la description ont été revérifiés contre le code avant de coller. Le titre de 5 à 8 mots (« A 3-minute AARRR growth check-up, with roast mode ») est neuf : il est tiré de la tagline du kit et relu par Antoine en le collant.
-
-**Les annuaires suivants attendent A7.12.a** : les captures du Tour sont antérieures à I + B, et la décision C20 les fait refaire avant. Launching Next ne prend aucune image, donc rien de périmé n'est parti.
-
-**Au passage** : cette session a été lancée avec le prompt D d'avant C22 (« jamais mon nom »), que la séance des décisions a réécrit depuis dans `CHANTIERS.md`. C22 fait nommer Antoine en réponse à « qui est derrière ? ». Sans effet ici : aucun post ne part, et le champ soumetteur d'un annuaire reçoit « Tour de Growth ».
-
-## A7.5 : relier un Tour après coup (2026-09-30)
-
-C8, tranché par Antoine le 2026-09-29, codé. La case « Comparer avec ce Tour » n'existait que sur la carte de départ. Un Tour fait après le début du moteur, ou une case décochée par mégarde, ne pouvait donc plus jamais être relié. Le tableau n'affichait alors rien, alors que le miroir sans Tour invite justement à en faire un : une impasse.
-
-**Ce qui change** :
-- **Le miroir a un troisième état**, `data-state="unlinked"`, quand un Tour avec réponses est sur l'appareil et que le moteur n'y est pas relié. Il affiche le titre du miroir, une ligne avec la date et le score du Tour (ou sans score, `unlinkedNoScore`), et un bouton « Relier ce Tour ». Le bouton pose `tourLink`, comme la carte de départ, et compte `engine_tour_linked`.
-- **Les Réglages portent la case**. Elle s'ouvre sur l'état actuel. Cochée, elle garde le lien existant ou relie ce Tour. Décochée, elle délie, et une ligne dit que le Tour reste sur l'appareil.
-- **Seul l'identifiant du Tour est stocké** (D13) : relier ne fait que lire `tdg.results.v1`.
-- **La copie neuve** (la ligne, sa variante sans score, le bouton, la ligne des Réglages) est « à relire ».
-- **La date du Tour passe par le formateur du moteur** (`formatDate`), dans le miroir relié comme non relié : « 1er septembre 2026 », "September 1, 2026", comme la carte des Réglages qui nomme le même Tour. Le miroir la formatait à la main, en `en-GB` en anglais et sans « 1er » en français. Trouvé par `relecteur-copie`. Le Tour de l'e2e est daté du 1er septembre : remettre l'ancien format fait rougir les quatre parcours « relier depuis le tableau », en FR et en EN, et eux seuls.
-
-**Vérifié** : `e2e/engine-tour-link.spec.ts`, en FR et en EN.
-- **Le parcours complet, à 1 280 et 390 px** : moteur commencé sans Tour, invitation (`none`), un Tour déposé sur l'appareil, retour au tableau, état `unlinked` avec le score, « Relier ce Tour », état `linked`, qui tient au rechargement. L'événement est compté, le Tour reste intact dans `tdg.results.v1`, aucune requête autre qu'un GET ne part (hors compteur), et la page ne défile pas de côté.
-- **Relier puis délier par les Réglages** : la ligne « Délier garde ton Tour… » s'affiche, et le Tour reste sur l'appareil.
-- **La suite Playwright complète** sur la branche rebasée : 630 specs, 625 passées, 5 ignorées par construction, aucun échec. Puis les 120 specs du moteur après le correctif de date.
-
-**En production** : PR [#209](https://github.com/ScratchMe/tourdegrowth/pull/209), mergée le 2026-09-30 à 10 h 47 UTC (squash `8fcdb4a`, 11 fichiers, identique à la tête de la PR ; #207, d'une autre session, était passée avant, d'où un rebase). Déploiement de production Vercel `READY` sur ce commit, lu par l'API. Le moteur reste en 404 derrière son drapeau : le miroir n'est pas observable en production.
-
-## Le brief 04 déposé dans le projet Claude Design (D3, 2026-09-30)
-
-**La demande d'Antoine** : lancée pour porter S-15, la session s'est arrêtée à l'étape 0, parce que le retour de Claude Design n'existait pas : ni `design/ds-extension-04-return/` (cherché sur `main` et sur les trois branches du dépôt), ni « Send to Claude Code Web ». Antoine a répondu : « Envoie-le à Claude Design ».
-
-**Ce qui est parti** : `design/DS-EXTENSION-BRIEF-04.md` (la version de #205) et ses neuf captures, **aux mêmes chemins que dans le dépôt**, pour que les renvois du brief (`design/ds-extension-04/…png`) se lisent tels quels dans le projet. Dix fichiers, écrits par `DesignSync` sous un plan qui ne nommait qu'eux (`design/DS-EXTENSION-BRIEF-04.md`, `design/ds-extension-04/*.png`, aucune suppression). Aucun fichier du design system n'a été touché : ni le bundle, ni la sentinelle, ni `_ds_sync.json`, dont l'ancre `bundleSha12` est toujours `f3b4bf9eb3c5`.
-
-**Ce que « envoyer » veut dire ici, et ce que ça ne veut pas dire** : les briefs 01 à 03 avaient été déposés par Antoine lui-même dans une conversation Claude Design. La session, elle, n'écrit que des fichiers dans le projet : **rien ne tourne côté Claude Design tant que personne ne le lui demande**. D3 devient donc « lancer le brief », avec le prompt à coller dans `CHANTIERS.md`.
-
-**Un piège évité d'avance** : le projet porte maintenant un dossier `design/` que le bundle ne connaît pas. `.design-sync/NOTES.md` dit de vérifier qu'`upload.deletePaths` n'y touche pas lors de la prochaine re-synchro (B3), et de le retirer exprès une fois le retour porté.
-
-**Vérifié** : les neuf captures sont distinctes (sommes de contrôle ; le brief 03 avait envoyé deux fois la même image, `JOURNAL.md` 2026-09-09) ; `list_files` relu après l'envoi, et les dix chemins y sont ; l'ancre relue après l'envoi. Le contenu n'a pas été relu octet par octet côté projet.
-
-**Consigné** : `CHANTIERS.md` (vue d'ensemble, B2, D3 avec son prompt), `CLAUDE.md` (la ligne « Design system → Claude Design »), `.design-sync/NOTES.md` (« Synced »). Que de la doc : `vercel-ignore.sh` ne déploie pas.
-
-## L'instrument d'audit entre parenthèses, les entretiens réorientés vers le moteur (2026-09-30)
-
-**La décision d'Antoine**, prise pendant la session D (prompt D, action D5) : « mettre le projet d'audit entre parenthèses et se concentrer sur le moteur à la place ». Elle devance ce que la mission de la phase 1 bis devait trancher (C6 : l'instrument fait-il doublon avec le moteur ?). Trois précisions ont été demandées avant d'écrire, et Antoine y a répondu :
-
-- **Le périmètre** : tout est suspendu, sauf l'usage personnel. La mission de la phase 1 bis (D4), le bon à tirer nº4 et les phases 2 et 3 s'arrêtent. Antoine peut se servir de l'outil en mission quand ça l'arrange, mais ce n'est plus un chantier : une friction ne devient une PR que s'il la demande. **Le code reste** : `/admin/audit`, `lib/audit`, le catalogue et leurs tests. Rouvrir ne coûte rien.
-- **Les entretiens** (D5) sont gardés et réorientés vers le moteur. Leur question de fond était déjà la sienne : « quelqu'un taperait-il ses chiffres à la main, et pour obtenir quoi ? ». D5 perd ce qui ne servait que la phase 3 de l'audit.
-- **Ce que le dépôt en dit** : la décision seulement.
-
-**Écrit** : un en-tête daté dans `AUDIT-PLAN.md` (le plan reste tel quel, pour le jour où il rouvre), une ligne en tête d'`AUDIT.md`, la suite de la décision 6 d'`ENGINE.md`, la ligne C6 et D5 de `CHANTIERS.md`, D4 retiré. Dans `CLAUDE.md` : le paragraphe de l'instrument, sa ligne dans « ce qui reste ouvert », et le nº4 marqué suspendu. A9.1 (les guillemets de l'audit) reste en section A : c'est une correction typographique et une garde, pas un chantier de l'audit.
-
-**La trame d'entretien**, écrite avec Antoine et validée le jour même, est rangée en annexe d'`ENGINE.md` (« Les entretiens ») : qui interroger (dont au moins deux profils en vente assistée ou hybrides), huit questions sur ce que la personne a fait, une démo en fin d'entretien, ce qu'on note, et la règle du dépôt (notes hors du dépôt, synthèse anonyme à partir de cinq).
-
-**Les entretiens sont ensuite reportés par Antoine, sans date** : la trame attend, et aucune session ne les relance d'elle-même.
-
-**Ce qui ne change pas pour le moteur** : la décision 6 d'`ENGINE.md` dit déjà « public, gratuit et local », aucun connecteur, rien ne quitte le navigateur, pas un produit commercial. La changer passe par Antoine.
-
-## A7.8 : l'amende du jeu plafonnée à 75 000 € (2026-09-30)
-
-C14, tranché par Antoine le 2026-09-29, codé. Le contrôle de la DGCCRF inflige **75 000 €**, quel que soit le radar. La formule d'avant (60 000 + radar × 500) donnait de 97 500 € à 110 000 €, au-dessus de ce que la loi permet, dans un jeu qui tient sa crédibilité de faits vérifiés.
-
-**La source, lue sur Légifrance le 2026-09-30** (par un sous-agent, WebFetch, quatre lectures concordantes ; `curl` direct reçoit un 403) :
-- Code de la consommation, **art. L. 241-3-1**, créé par la loi nº 2022-1158 du 16 août 2022 (art. 15). Il est en vigueur depuis le 18 août 2022, et aucune autre version n'est listée.
-- Le texte : « Tout manquement aux dispositions de l'article L. 215-1-1 relatives aux modalités de résiliation par voie électronique des contrats est passible d'une amende administrative dont le montant ne peut excéder 15 000 € pour une personne physique et 75 000 € pour une personne morale. »
-- L'amende est prononcée par la DGCCRF (L. 522-1, R. 522-1), sur décision motivée après procédure contradictoire (L. 522-5).
-- Il n'y a pas de doublement en cas de réitération. Plusieurs manquements se cumulent (L. 522-7), mais le jeu n'en compte qu'un.
-
-L'article cité par CHANTIERS était présumé « L. 242-… » : c'est L. 241-3-1, et le montant est bien celui attendu. Il n'y avait donc pas lieu de remonter en section C.
-
-**Ce qui change** :
-- `control.fineBase` et `control.finePerPoint` deviennent `control.fine: 75_000`, avec la citation en commentaire dans `levels/retention.ts`. `GAME-BRIEF.md`, règle 5, cite l'article.
-- Le texte de l'événement (« amende de {fine} ») ne change pas : seul le nombre change. Aucun texte de lancement ne citait de montant (`grep` sur 97 500, 110 000, 106 000).
-
-**Vérifié** :
-- **Non-vacuité** : l'ancienne formule fait rougir le test du contrôle et le nouveau test « 75 000 € à radar 75 et à radar 100 ».
-- L'e2e des nouvelles (le trimestre de l'inspection, chemin C) attend maintenant « 75 000 » sur le tampon, au lieu de « 106 ».
-- **La suite complète**, lancée une fois sur le haut de la pile A7.8 → A7.13 (2026-09-30) : 642 specs Playwright, 637 passées, 5 ignorées par construction, aucun échec ; 2 245 tests unitaires avec la couverture, `tsc` et lint propres.
-
-**En production** : PR [#211](https://github.com/ScratchMe/tourdegrowth/pull/211), mergée le 2026-09-30 à 11 h 20 UTC (squash `11688b6`, 9 fichiers, identique au commit de la PR). Déploiement de production Vercel `READY` sur ce commit, lu par l'API. Le jeu reste en 404 derrière son drapeau (`/fr/jeu`, `/en/game`) : l'amende n'est pas observable en production.
-
-## A7.7 : l'encart du jeu sous le bouton principal, sur desktop (2026-09-30)
-
-C10, tranché par Antoine le 2026-09-29, codé. Sur desktop, l'encart du jeu passe **sous** la rangée de boutons du résultat, dans la colonne de droite. Placé au-dessus, il faisait descendre de 350 px le « Fais ton propre Tour » du visiteur, qui est le cœur de la boucle `?ref=`. Sur mobile, rien ne change : l'encart vient déjà après le bouton et la carte de partage.
-
-**Comment** :
-- **Dans le JSX**, `GameEntry` suit maintenant la rangée de boutons, juste avant l'avertissement. C'est la même place pour le visiteur et le propriétaire : le premier rendu est celui du visiteur, et un ordre qui dépendrait d'`isOwner` décalerait la page après le montage.
-- **Dans la feuille de style**, la réinitialisation desktop `.slotGame { order: 6 }` disparaît. La valeur mobile (9) est aussi la bonne dans la colonne de droite (CTA 7, jeu 9, avertissement 10). L'ordre de chaque colonne desktop est donc à nouveau son ordre source, sans exception.
-
-**Vérifié** :
-- `result-reading-order.test.ts` : les huit variantes gardent leurs coûts sur mobile (1 et 2 sans l'encart, 2 et 3 avec ; `slotShare` reste le bloc le plus déplacé, recalculé). Le test desktop exige « sous le CTA, au-dessus de l'avertissement », et aucune réinitialisation.
-- `game-entry.spec.ts`, à 1 280 px : le bas du bouton principal est au-dessus du haut de l'encart. À 390 px : le bouton, puis le partage, puis l'encart.
-- **Non-vacuité** : l'ancien ordre source fait rougir le test desktop, dans l'unitaire comme dans l'e2e.
-- **La suite complète** sur le haut de la pile A7.8 → A7.13 : 642 specs Playwright, 637 passées, 5 ignorées par construction, aucun échec. Plus tard, 49 specs du résultat et du jeu sur l'émulateur Firestore (A7.11), vue propriétaire comprise.
-
-**En production** : PR [#212](https://github.com/ScratchMe/tourdegrowth/pull/212), mergée le 2026-09-30 à 11 h 28 UTC (squash `5cf4bca`, 7 fichiers, identique à la tête de la PR). Déploiement de production Vercel `READY` sur ce commit, lu par l'API. Le jeu reste en 404 derrière son drapeau : l'encart ne s'affiche pas en production.
-
-## A7.9 et C24 : la bande de l'accueil en portes mesurées, et l'exemple qui suit le ton (2026-09-30)
-
-C15, tranché par Antoine le 2026-09-29, et C24, tranchée le 2026-09-30 (« OK pour C24 »), codés.
-
-**La bande « Le Tour en trois parties »** (`SpaceStrip`) : chaque carte d'un espace **ouvert** devient une porte.
-- **Un seul lien par carte** : son nom (le `h3`), étiré sur toute la carte par un `::after`. Un clic n'importe où sur la carte y mène, et un lecteur d'écran entend un nom, pas toute la carte. Le pitch sert de description (`aria-describedby`).
-- **Les destinations** : le Tour mène à `/quiz` par un `<a>` simple (un chargement de document, comme toutes les entrées du quiz), le moteur à `/{locale}/aarrr-funnel-template`, le jeu à `/{locale}/game`.
-- **Une carte fermée n'a pas de lien.** C'est le cas du moteur sur le build de la CI.
-- **Visuellement secondaire** : pas de remplissage rouge. Le survol souligne le nom et soulève la carte (`--shadow-hover`, sauf le Tour qui a déjà la sienne), et le focus clavier entoure toute la carte. Aucune couleur de texte ne change, donc le contraste ne bouge pas (convention 7).
-
-**La mesure** :
-- **Le jeu** : `game_entry_clicked/home_strip` depuis la bande, `game_entry_clicked/space_band` depuis la pastille du bandeau.
-- **Le moteur** : un événement d'entrée neuf, `engine_entry_clicked/<source>`, avec les mêmes deux sources. A7.4 y ajoutera ses trois pages.
-- **Le Tour** : un **clic à part**, `tour_entry_clicked/home_strip`, et non une source sur `quiz_started`. CHANTIERS disait « l'événement de démarrage existant, avec la source home_strip ». Mais `quiz_started` est le dénominateur du funnel depuis R-11, et lui ajouter un détail l'aurait coupé en deux chemins (la raison de `retake_started`, écrite dans `goatcounter.ts`). Le clic se lit donc à côté des démarrages, sur la même ligne de `/admin/stats`.
-- **Pas la pastille du Tour** : elle ramène à l'accueil, ce n'est l'entrée de rien.
-- **`/admin/stats`** affiche les nouvelles sources : entrées du jeu et du moteur, clics de la carte du Tour.
-
-**C24** : « Voir un résultat d'exemple » suit le sélecteur de ton de l'aperçu. En roast, il mène à `/r/sample?tone=roast`, l'exemple roast d'A3.3 avec sa propre carte de partage.
-- L'aperçu et le bouton sont deux îlots dans deux colonnes. Ils partagent le ton par une petite valeur de module lue avec `useSyncExternalStore` (`sample-tone.ts`), sans fournisseur de contexte.
-- L'instantané serveur est « Direct », donc le premier rendu et la page hydratée disent la même chose.
-
-**Vérifié** :
-- `e2e/home-strip-doors.spec.ts`, en FR et en EN, à 1 280 et 390 px : un clic dans le coin de la carte du Tour mène à `/quiz`, compte `tour_entry_clicked/home_strip`, et ne déclenche pas `quiz_started`. La carte du moteur, fermée, n'a pas de lien. La carte et la pastille du jeu comptent chacune leur source. Le bouton d'exemple suit le ton, aller et retour. Le survol souligne, et le focus entoure la carte.
-- `spaces-kit.spec.ts` ne dit plus « pas de portes » : un lien par carte ouverte, aucun sur une fermée.
-- `accessibility.spec.ts` passe (axe sur l'accueil, FR et EN).
-- **Non-vacuité**, sur un build saboté (le bouton figé sur l'exemple direct, un détail `home` au lieu de `home_strip`) : 8 tests rougissent (les quatre du Tour, les deux du jeu, les deux de C24). Les 3 qui restent verts (la carte fermée, le survol) ne portent pas sur ce qui a été cassé.
-- **Piège** : dans le test, la carte est sous le pli à toutes les largeurs. Un `page.mouse.click` sur les coordonnées de sa boîte, sans la faire défiler d'abord, ne touche rien et ne dit rien.
-
-**En production** : PR [#213](https://github.com/ScratchMe/tourdegrowth/pull/213), mergée le 2026-09-30 à 11 h 40 UTC (squash `ab25349`, 21 fichiers, identique à la tête de la PR). Déploiement de production Vercel `READY` sur ce commit, lu par l'API. Relevé par HTTP, en FR et en EN : la carte du Tour porte `space-strip-link-tour`, et celles du moteur et du jeu, fermés en production, n'ont pas de lien. Le bouton d'exemple mène à `/r/sample` avec `data-tone="straight"`, et `/r/sample?tone=roast` répond 200.
-
-## A7.3.a : la spécification du B2B assisté et de l'hybride (2026-09-30)
-
-La décision 3 renversée par Antoine le 2026-09-29 (C4) : le B2B assisté (SLG) entre dans la v1 du moteur, et l'hybride se lit en « deux moteurs, un total ». Sa spécification est écrite dans **`ENGINE.md` §18**, sur la forme des §4 à §9. Elle attend la validation d'Antoine (**C25**), et rien ne se code avant.
-
-**Comment elle a été écrite** :
-- **Le premier jet** vient d'un sous-agent, écrit contre le code de `main` après A7.1 (types, catalogue, validation, stockage, diagnostic, deck, exemple, réglage) et non contre les documents. Son arithmétique d'exemple a été refaite au script.
-- **La relecture** d'intégration a vérifié les points qui ne se discutent pas :
-  - C1 vaut dans les deux motions ;
-  - aucun chiffre de marché n'est inventé : le seul repère gardé, NRR 110-130 %, est lu mot pour mot dans `glossary-deep.ts` ;
-  - les ordres de grandeur de l'instrument d'audit restent dehors (non relus au nº4, et la décision 6 interdit l'import) ;
-  - aucun gabarit ne met les deux motions en face-à-face, et un test est prévu pour le garder.
-- **La numérotation** : la section devient §18, et non §15, déjà pris par « Reporté ». Les §15 à §17 ne bougent pas.
-
-**Ce qu'elle tranche, sous réserve de C25** :
-- **Le réglage** porte deux axes, `type` et `motions: {plg, slg}`. L'hybride se dérive, il n'est jamais stocké. Décocher une motion ne perd rien.
-- **Les chiffres assistés** vivent dans le même `Snapshot.metrics`, sous des ids `slg.*` ; les ids du libre-service ne changent pas. La marge brute est commune aux deux motions.
-- **Le catalogue assisté** compte 14 chiffres (trois au plus par étape), plus la liaison `link.pql-handoff`, facultative et hors couverture.
-- **Le funnel assisté** se dessine en **trois relais**, chacun sur sa propre base de 100, jamais en chaîne multipliée. Tout l'assisté se lit sur trois mois glissants.
-- **Le fichier** passe en `schemaVersion` 2, avec une migration pure. Un test « golden » exige qu'un moteur v1 donne, après migration, le même tableau et les mêmes slides au caractère près.
-- **Un correctif de validation** est nécessaire : le refus au-dessus de 100 % ne doit plus valoir que pour les chiffres bornés, sinon une NRR réelle ne s'enregistre pas.
-
-**Les seize questions** sont en §18.12, chacune avec sa reco et ce qui casse si on se trompe. C25 recommande de trancher d'abord Q3 (un client compte dans la motion qui a signé son contrat en cours : c'est ce qui évite de compter deux fois le MRR total), Q1 (l'activation assistée est la mise en production) et Q2 (trois mois glissants), puis les autres en bloc.
-
-**En production** : PR [#214](https://github.com/ScratchMe/tourdegrowth/pull/214), mergée le 2026-09-30 à 11 h 49 UTC (squash `62e3618`, 4 fichiers, identique à la tête de la PR). Doc seule : Vercel ignore le build, et rien ne change sur le site.
-
-## A8 : l'audit GEO, et la date sur la page (2026-09-30)
-
-L'angle **GEO** (être lu et cité par les moteurs de réponse IA) n'avait jamais été audité. Le plug-in « claude-site-audit », proposé par Antoine le 2026-09-29, a été lu mais **pas installé** : ses contrôles, sa notation et son générateur ne sont pas dans l'archive, et il n'a pas de licence. L'audit a donc été joué à la main. **Si l'amont publie les fichiers manquants, la question repart en section C.**
-
-**A8.1, le relevé**, en lecture seule contre `www.tourdegrowth.com`, sur 74 pages dans les deux langues :
-- **Ce qui tenait déjà** : tout le JSON-LD se parse ; chaque page porte son `lang` et ses trois `hreflang` ; la définition d'un terme est en tête du HTML servi sans JavaScript ; l'auteur est nommé au pied de chaque page. Neuf robots d'IA ou de recherche (GPTBot, OAI-SearchBot, ChatGPT-User, ClaudeBot, Claude-User, PerplexityBot, CCBot, Bytespider, Applebot) reçoivent la même page que Googlebot, au même octet.
-- **`/robots.txt`** laisse tout passer (`User-Agent: *`, `Allow: /`). **`/llms.txt`** répond par la page 404 du site.
-- **Deux trous** : `/how-it-works`, la page qui explique le score, était la seule page de prose sans `Article` ni date. Et **aucune page n'affichait sa date**, alors que le JSON-LD et le sitemap la portaient : ni un lecteur, ni un moteur qui cite la page, ne pouvait distinguer une définition revue la semaine dernière d'une définition vieille d'un an.
-
-**A8.2, ce qui ne demandait aucun choix** :
-- **`/how-it-works` devient un `Article`**, publié le 2026-08-28 (#14, lu dans l'historique) et mis à jour le 2026-09-24. Son `og:type` passe à `article`, avec les mêmes dates.
-- **La ligne de date** « Dernière mise à jour : … » / "Last updated: …" s'imprime sur :
-  - les huit articles, au-dessus du titre, comme sur les pages légales ;
-  - les 24 termes, sous le titre, puisque le lien de retour tient la place au-dessus.
-- **Le jour affiché est toujours celui du `<lastmod>`**, dans un `<time dateTime>`. `termUpdatedAt()` devient la source unique du sitemap et de la page de terme. `formatLongDate()` est partagée avec les pages légales.
-- **Le libellé** était celui des pages légales (`LEGAL_UI`, validé avec elles). Il passe dans le dictionnaire (`UI_STRINGS.prosePage.updatedAt`) et repart « à relire », pour son usage neuf.
-- **Pas de nouveau composant** dans `src/components/` : `UpdatedLine` vit sous `src/app/[locale]/_prose/`. C'est de l'assemblage de page, et un composant du système demanderait un aperçu de design sync qu'une session cloud ne peut pas reconstruire.
-- **Pas de date en JSON-LD sur les termes** : `DefinedTerm` n'est pas une `CreativeWork`, et `dateModified` n'y est pas défini. Le sitemap et la page portent la date.
-
-**A8.3, ce qui est une décision**, en section C avec une reco :
-- **C26, les robots d'IA** : tout laisser, et l'écrire.
-- **C27, `llms.txt`** : oui, court et généré, sans `llms-full.txt`. Le fichier n'est encore lu par presque personne : 97 % des fichiers sans aucune requête d'IA en mai 2026 selon [PPC Land](https://ppc.land/llms-txt-adoption-rises-8-8x-but-97-of-files-get-zero-ai-requests/), et Google a dit en juillet 2025 ne pas le lire. D'où « court » : le gain est faible, le coût aussi.
-- **`FAQPage` n'est pas rouvert** : le refus de septembre tient.
-
-**Vérifié** :
-- **Gardes** :
-  - `e2e/structured-data.spec.ts` inclut `/how-it-works` dans ses deux tests d'`Article`, sur une liste unique.
-  - Un test neuf parcourt le sitemap et exige, sur chaque article, terme et page légale dans les deux langues, la ligne de date. Son `<time>` doit valoir le `<lastmod>` et son texte le jour écrit dans la langue de la page. Il compte 68 pages, pour qu'une famille perdue par le sitemap ne passe pas en silence.
-  - Tests unitaires : `formatLongDate` en FR et en EN, sans glisser au jour d'avant ; `termUpdatedAt` ; la liste des pages `Article`.
-- **Non-vacuité**, dans un seul build, en retirant l'`Article` et la ligne de `/how-it-works` et en affichant la date de repli sur les termes : les trois tests rougissent. Ils nomment exactement `/en` et `/fr/how-it-works`, puis chacun des 24 termes dans les deux langues, et rien d'autre.
-- **À l'écran**, en FR et en EN, à 1 280 et 390 px (`/how-it-works`, `/aarrr-vs-okr`, `/glossary/churn`, `/privacy`) : la ligne est à sa place, sans défilement horizontal.
-
-**Au passage, `CLAUDE.md`** frôlait son budget de 40 000 caractères. La ligne « Hygiène de dépôt public », close depuis le 2026-09-29, en sort. Sa seule règle encore utile, l'épinglage par SHA de tous les workflows et le test qui l'exige, passe dans `GITHUB.md` §2 : c'est le fichier qu'on ouvre avant de toucher un workflow.
-
-**En production** : PR [#215](https://github.com/ScratchMe/tourdegrowth/pull/215), mergée le 2026-09-30 à 12 h 00 UTC (squash `382eb99`, 20 fichiers, identique à la tête de la PR). Déploiement de production Vercel `READY` sur ce commit, lu par l'API. Relevé par HTTP : `/fr/how-it-works` et `/en/how-it-works` portent un `Article` en JSON-LD, `og:type` à `article` et la ligne « 24 septembre 2026 » / "September 24, 2026" ; `/fr/glossary/churn` et `/en/glossary/churn` portent le 30 septembre, et le sitemap dit `2026-09-24` et `2026-09-30` pour les mêmes adresses. `/en/aarrr-vs-okr` et `/fr/privacy` portent aussi leur ligne.
-
-## A7.13 : « Qui est derrière ? », une réponse qui nomme Antoine (2026-09-30)
-
-C22, tranché par Antoine le 2026-09-29 : c'est une question de calendrier, pas d'anonymat. La réponse le nomme, simplement. La promotion reste discrète pour l'instant : pas de LinkedIn, pas de lancement en grande pompe, et `linkedin` reste dans `EXCLUDED` (`scripts/utm-channels.mjs`).
-
-**Ce qui change** :
-- **La FAQ des trois Show HN** (le Tour, le moteur, le jeu) répond à "Who's behind this?" : « I'm Antoine Berthaud, a growth PM; this is a side project, posted from its own account. My name is in the site's footer, and the About page says how it's made. » Pas de lien, donc aucun lien nu, et aucun LinkedIn. « À relire ». Show HN est en anglais seulement : il n'y a pas de texte français à suivre.
-- **La règle de `marketing/README.md`** passe de « Jamais le nom » à « Discret pour l'instant : le nom seulement si on le demande, jamais LinkedIn ». Le compte qui poste reste celui du projet, `tourdegrowth`.
-- **`brand-review.md`** : le crédit de l'auteur et le relevé d'anonymat sont redatés. Le nom figure désormais dans une ligne collable par Show HN, et nulle part ailleurs ; `LinkedIn` et `cv.` restent absents. Le §8 des campagnes parle d'un « compte de projet », discret pour l'instant.
-- **L'outillage d'abord**, puisqu'il aurait arrêté cet item : `relecteur-copie` §5 et `/livrer` §3 ne disent plus « jamais le nom d'Antoine », mais « seulement dans la réponse à « qui est derrière ? », jamais LinkedIn ». Le commentaire de `utm-channels.test.ts` dit « pas maintenant », et le test garde `linkedin` exclu.
-
-**Ne change pas** : les mentions « pseudonyme » qui désignent le compte `tourdegrowth` (le kit, le calendrier des Show HN), `GROWTH-PLAN.md` (déjà précisé le 2026-09-29) et le relevé de référence de `brand-review.md` (ce qui a été appliqué le 2026-09-24).
-
-**Vérifié** : `grep` de `Antoine`, `Berthaud`, `LinkedIn` et `cv.` dans les lignes collables de `marketing/` : le nom n'apparaît que dans les trois réponses, et ni LinkedIn ni le CV nulle part. `check-lengths.mjs` : 71 longueurs, aucun écart. `utm-channels.test.ts` : 15 tests passent.
-
-**En production** : PR [#216](https://github.com/ScratchMe/tourdegrowth/pull/216), mergée le 2026-09-30 à 12 h 12 UTC (squash `e456679`, 11 fichiers, identique à la tête de la PR). Déploiement de production Vercel `READY` sur ce commit, lu par l'API : le commentaire d'un test sous `src/` déclenche un build, sans rien changer au site. Le texte vit dans `marketing/`, pas sur une page.
-
-## A7.11 : les e2e de `/r/<id>` par le vrai chemin, sur l'émulateur Firestore (2026-09-30)
-
-C17, délégué à la session le 2026-09-29 : **aucune porte de test dans le code de production**, un vrai `/r/<id>` lu dans l'émulateur Firestore. Jusqu'ici, toute spec de composition passait par `/r/sample`, une branche à part qui ne lit jamais Firestore et ne rend jamais la vue propriétaire. Le chemin des lecteurs (un document stocké, rétréci par le modèle de vue, sérialisé vers le client) n'avait aucun e2e.
-
-**Comment** :
-- **L'émulateur est le jar** que la CLI Firebase téléchargerait (v1.22.0, 136 Mo). La CI le télécharge directement, vérifie son SHA-256 et le lance sur le JDK 21 de l'image. C'était l'option la plus légère des trois chiffrées : `firebase-tools` en `devDependency` télécharge le même jar en plus du paquet, et l'image Docker gcloud dépasse le gigaoctet. **Pas de dépendance npm**, donc pas de barrière §0.
-- **Les identifiants sont inventés pour le job** : un projet `demo-` (que l'émulateur traite hors ligne) et une clé RSA générée à la volée, que `cert()` exige bien formée et que l'émulateur ne vérifie pas. **`admin.ts` ne change pas.** Vérifié en local avant d'écrire la CI : `firebase-admin` écrit et relit l'émulateur avec cette clé.
-- **Les données** : `e2e/global-setup.ts` écrit quatre résultats par `createSubmissionFlow` et le vrai `saveSubmission`, le chemin de `/api/submissions` : un goulot net (la rétention), un partagé, un « à niveau », et un résultat avec un Deep dive écrit par le vrai `saveDeepDive`. Il écrit aussi un document **volontairement mal formé**. Il refuse une adresse d'émulateur qui ne serait pas locale.
-- **La spec** `e2e/result-real.spec.ts` (12 tests) :
-  - **la garde de payload compte ce qui traverse** (convention 11). Elle lit le document stocké, en tire **toutes** ses clés, et exige qu'aucune ne traverse, hors une liste de clés publiques qui donne chacune sa raison. Une valeur sentinelle ne doit jamais apparaître non plus ;
-  - l'étape et l'action pour un visiteur ;
-  - l'image de partage, qui se charge ;
-  - l'encart du jeu ;
-  - la vue propriétaire (le détail du score et le Deep dive) ;
-  - les deux autres états du bloc goulot ;
-  - l'action du Deep dive.
-- **`seedOwnedResult` prend les réponses en option** : le détail du score les lit sur l'appareil, jamais sur la page (R-12).
-
-**Ce que la relecture de sécurité a trouvé, et corrigé avant la PR** :
-- **La clé jetable serait partie en clair dans le log public** : le runner imprime les variables de `$GITHUB_ENV` en tête de chaque étape suivante. Elle n'ouvrait rien, mais c'était une « clé privée dans un log » à trier pour chaque scanner. Elle attend maintenant dans un fichier de `$RUNNER_TEMP`, que seule l'étape e2e lit.
-- **`error-page.spec.ts` serait devenue vacante** : elle comptait sur l'absence de Firestore pour qu'un UUID inconnu fasse échouer la lecture. Avec l'émulateur, c'est une 404, que sa regex acceptait aussi. L'écran d'erreur (R2-23) se prouve maintenant sur le document mal formé, et la 404 a son propre test.
-- **La garde ne voyait pas les champs du Deep dive** tant que tous les résultats avaient `deepDive: null`. Le résultat `deep` porte `modelUsed` et les deux champs hérités d'avant R2-20 (`contextAnswers`, `freeContext`), marqués d'une sentinelle.
-- **La recette locale** vérifie aussi le SHA-256. Six commentaires qui disaient « la CI n'a pas Firestore » sont remis à jour.
-
-**Vérifié** :
-- **Non-vacuité, deux fois** :
-  - remettre `resolveBottleneck(submission.pillars)` (la fuite historique de `rawPoints`) fait rougir la garde sur les deux résultats qui nomment une étape, et sur `rawPoints` seul ;
-  - passer le Deep dive brut au lieu de `toDeepDiveView` la fait rougir sur le résultat `deep` seul, en nommant exactement les six clés stockées.
-- **Sans l'émulateur**, les 12 tests sautent avec leur raison, comme le nouveau test de 404, et `global-setup.ts` n'écrit rien.
-- **La suite complète avec l'émulateur** : 639 specs, 634 passées, 5 ignorées par construction, aucun échec. Aucune spec existante n'a changé de comportement.
-- `relecteur-securite` est passé sur le diff. Ses trois constats sont traités, et ses deux angles morts aussi (le SHA n'est pas recoupé contre Google, mais un faux hash échoue fermé ; les champs du Deep dive sont couverts ci-dessus).
-
-**En production** : PR [#217](https://github.com/ScratchMe/tourdegrowth/pull/217), mergée le 2026-09-30 à 12 h 22 UTC (squash `47f8e75`, 18 fichiers, identique à la tête de la PR). **Le premier passage de la CI avec l'émulateur**, lu dans le log du job : 650 specs passées et 5 ignorées, les cinq « jeu fermé » par construction, donc les 12 de `result-real.spec.ts` et le test de 404 ont tourné, et le processus `java` de l'émulateur est arrêté au nettoyage. Déploiement de production Vercel `READY` sur ce commit, lu par l'API : rien ne change sur le site, seuls la CI, les e2e et un commentaire de test bougent.
-
-## A7.10 : chez le propriétaire, « Partager » est le primaire (2026-09-30)
-
-C16, tranché par Antoine le 2026-09-29, captures de la vue propriétaire à l'appui. Sur son propre résultat, le propriétaire a **« Partager ce résultat » comme seul bouton plein**. « Refaire le Tour » passe secondaire. Le visiteur ne change pas : son primaire reste « Fais ton propre Tour → », et le bouton de la carte de partage reste secondaire chez lui.
-
-**Ce qui change** :
-- **`ShareCard`** prend `shareVariant` (`secondary` par défaut). C'est la page qui le choisit, d'après `isOwner`, jamais le défaut. Aucune copie neuve : les libellés existaient.
-- **`ResultView`** : « Refaire le Tour » passe en `secondary`, et la racine porte `data-owner` chez le propriétaire.
-- **Sur mobile, chez le propriétaire, la carte de partage passe au-dessus de la rangée de boutons** (`.layout[data-owner]`). C'est ce qui avait fait annuler le premier essai : un primaire sous un secondaire. Sur desktop, rien ne bouge, puisque les deux sont dans des colonnes différentes.
-- **Le coût, mesuré et épinglé** : le lecteur d'écran du propriétaire entend la carte de partage en dernier, mais la voit avant les boutons. Son pire écart d'ordre de lecture passe de 2 à 3, et de 3 à 4 avec l'encart du jeu. `slotShare` est le pire dans les quatre cas. `result-reading-order.test.ts` lit maintenant l'ordre propriétaire dans la feuille, et vérifie aussi que, sur desktop, chaque colonne reste dans l'ordre de la source. Remonter la carte dans la source ferait payer chaque visiteur, le lecteur de la boucle de croissance. Les chiffres du visiteur ne bougent pas.
-- **Le contrat de design** : `ShareCard.prompt.md` (retour 03), `.design-sync/conventions.md` et l'aperçu disent « secondaire pour un visiteur, primaire pour le propriétaire ». L'aperçu gagne une histoire `Owner`, d'où 245 cellules attendues à la prochaine synchro (B3).
-- **Le commentaire de la rangée de boutons** raconte la décision au lieu de l'essai annulé.
-
-**La mesure** : l'événement de partage existe déjà. **Le changement date du merge de cette PR, le 2026-09-30** : c'est la date à partir de laquelle lire l'avant et l'après dans `/admin/stats`.
-
-**Vérifié** : un vrai `/r/<id>` sur l'émulateur (A7.11), dans `result-real.spec.ts`.
-- **Le propriétaire, en FR et en EN, à 1 280 et 390 px** :
-  - le seul bouton plein visible est « Partager », et « Refaire le Tour » est en contour ;
-  - à 390 px, la carte de partage est au-dessus de la rangée ;
-  - le décalage de mise en page qui suit le montage reste sous 0,1, le seuil « bon » des Web Vitals. La bascule se fait sous le premier écran d'un téléphone.
-- **Le visiteur** : son Tour reste le seul primaire, et le partage vient après, à 390 px.
-- **Non-vacuité** : remettre l'ancien primaire et retirer l'ordre propriétaire fait rougir les quatre tests propriétaire, et eux seuls, ainsi que trois variantes du test d'ordre de lecture.
-- **À l'écran**, en FR et en EN, à 1 280 et 390 px.
-
-**En production** : PR [#219](https://github.com/ScratchMe/tourdegrowth/pull/219), mergée le 2026-09-30 à 12 h 33 UTC (squash `6d6f2bc`, 11 fichiers, identique à la tête de la PR ; #218, d'une autre session, a pris le numéro d'avant). Le log de sa CI : 655 specs passées, 5 ignorées par construction. Déploiement de production Vercel `READY` sur ce commit, lu par l'API. Relevé par HTTP : la feuille servie par `/r/sample` porte la règle `data-owner`, et la page du visiteur n'a ni `data-owner` ni d'autre bouton plein que « Take your own Tour → » ; le partage y reste en contour. La vue propriétaire n'est pas observable en production sans le cookie de l'appareil : elle est prouvée par `result-real.spec.ts` sur l'émulateur.
-
-## Extension 04 du design system, lot a : les primitives de formulaire, rien de câblé (2026-09-30)
-
-**Le retour.** Déposé dans le projet Claude Design par la session (#208), lancé par Antoine, écrit par Claude Design dans le projet même, sous `design/ds-extension-04-return/`. Recopié ici par la session, fichier par fichier : **les sous-agents n'ont pas `DesignSync`** (« disabled for this session, in subagents as well »), quatre l'ont confirmé. 46 fichiers texte ; les huit planches PNG, le build de la planche et son instantané de feuilles sont restés dans le projet (`design/ds-extension-04-return/COPIE.md` dit pourquoi, et que les espaces insécables de la prose ont pu devenir des espaces). Le retour fait autorité, comme 01 et 03.
-
-**Les dix-huit réponses, pour ne pas rouvrir le document** : le libellé est une phrase en Inter (`--field-label`), jamais le méta-libellé mono ; une erreur se lit sans couleur (bord à 3 px, message en 600 derrière un filet de 3 px) ; seul un champ facultatif porte un mot ; un rayon de champ à 6 px pour qu'un champ et un bouton ne se ressemblent plus ; le compteur d'une ligne va dans la rangée du libellé, à partir de 80 % ; un nombre ressemble à un nombre (chiffres tabulaires en Inter, boîte à la taille de la grandeur, unité dans la boîte, placée par la langue) ; une erreur de lecture et une règle ont le même traitement, une règle sur deux champs appartient à la paire ; le chevron de la plateforme reste (le système n'a pas de glyphe vers le bas) ; un mois est une liste, un jour trois listes natives ; un seul rond de radio, celui d'`AnswerOption` ; `Choices` n'est pas `AnswerOption` généralisé ; une case à cocher dessinée ; une liste de cases est un fieldset de lignes, pas des cartes ; `Segmented` reçoit `labelledBy` et `SegmentedField` disparaît ; les noms suivent le système, plus un axe `fit` ; deux densités sur `size` ; et onze choses que les copies faisaient mal, dont la raison d'une option « bientôt » à **1,91:1** (l'opacité, que la CI ne mesure pas), les champs à 15 px qui font zoomer iOS et l'anneau rouge de l'audit. **Aucune ne contredit une contrainte du brief** : vérifié sur les fichiers eux-mêmes (aucune couleur en dur, aucun primitif, aucune opacité, 44 px partout, natif dessous, aucune icône).
-
-**Une question, tranchée par Antoine le même jour** : l'audit venait d'être mis entre parenthèses (#210, après la mission S-15). Le porter quand même ? Oui : c'est un portage qui retire une copie, pas une fonctionnalité.
-
-**Ce qui est porté** : `Field` (et `FieldRow`, dont la mise en page nomme les parties de `Field` et vit donc dans sa feuille), `TextField`, `NumberField`, `Select`, `DateField`, `Choices`, `Checkbox`, `FormSummary` dans `src/components/core/` ; `TextArea` selon son delta ; `Segmented` avec `labelledBy` ; `AnswerOption` lit `--size-mark` et `--mark-inset`. Les jetons sont **répartis dans leurs couches** plutôt que dans un `forms.css` à part : `colors.css` et `tokens.ts` (seize dérivés), `typography.css`, `shape.css`, `spacing.css`. La logique pure va dans `src/lib/forms/` : `number.ts` **déplacé du moteur** (plus complet que le `groupAsTyped` du retour : suppression vers l'avant, apostrophes, décimale en cours de frappe), `field.ts`, `date.ts`. Aucun écran ne monte les primitives : le moteur et l'audit les prennent en b et c.
-
-**Écarts assumés, signalés plutôt qu'absorbés** :
-- **`NumberField` prend un nombre** (`number | null`) et garde le texte tapé, comme le moteur ; le retour le voulait en texte analysé par l'appelant, ce qui aurait redonné une copie de la logique de brouillon au moteur et à l'audit. Son erreur de lecture (`parseError`) paraît quand on quitte la case, comme le retour le demande.
-- **`--mark-color: currentColor` n'est pas un jeton** : `token-sources.test.ts` exige une couleur littérale. Les marques écrivent `currentColor`.
-- **Trois seuils ne sont pas des jetons** (80 %, 480 px, 560 px) : aucune feuille ne pourrait les lire. `--form-gap-*` arrive en b avec son premier lecteur (`dead-tokens.test.ts`).
-
-**Ce qui change en production** : seul le `TextArea` du Deep dive, selon son delta. Mesuré dans le navigateur : rayon de 14 à **6 px**, corps de 15 à **16 px**, anneau décalé de **2 px**, bord à 3 px au-delà de la limite. Vu en EN à 1 280 et en FR à 390.
-
-**Trouvé en vérifiant, et corrigé** : au clavier, l'`<input>` d'un `TextField` traçait son propre anneau sous le bord de la boîte, en plus de celui de la boîte. La règle globale `:focus-visible` pèse ce que pèse `.control` et vient après ; `.control:focus-visible { outline: none }` la reprend.
-
-**Gardes, chacune avec sa non-vacuité** :
-- `form-controls.test.ts` : un seul anneau (`--field-focus-ring`, qui est `--focus-ring`) sur toutes les feuilles de contrôle, aucune ne lit `--focus-ring-invert` ; l'input dans la boîte ne trace pas le sien ; aucune opacité autre que `1` pour dessiner un état. Rouge sur les trois erreurs remises une à une (l'anneau rouge sur `Select`, la règle de l'input retirée, `opacity: 0.45` sur une option désactivée), vert sur le code porté.
-- Les paires de contraste des nouveaux jetons, papier (16) et nuit (22) : **toutes les valeurs du tableau du retour sont exactes**, au centième.
-- 23 tests de balisage par rendu statique (libellé relié, message lu avant l'indice puis le compteur, jamais `type="number"`, « 26 000 » affiché avec U+00A0, rien de pré-sélectionné, trois listes natives pour un jour, raison d'une option désactivée lue avec elle, `labelledBy`), et les tests de `lib/forms` (mois à cheval sur une année, 31 février, aller-retour `aaaa-mm-jj`, seuil du compteur).
-
-**Vérifié à l'écran** sur une page d'échafaudage jamais commitée qui rejoue la planche du retour avec les vrais composants : papier et nuit, FR et EN, 390 et 1 280, **aucun débordement horizontal dans les huit** ; sections relues en papier/EN/1 280 et nuit/FR/390, anneau au clavier de nuit sur les quatre familles, et `--select-inset` mesuré au pixel : la valeur d'un `Select` commence sur la même colonne que celle d'un `TextField` (18 px du bord, écart nul, Chromium seulement). La ligne choisie en ambre est grande dans une feuille compacte de nuit, comme Claude Design le signalait : c'est le langage de sélection du système, à revoir sur le vrai écran du moteur en b.
-
-**Design sync** : les neuf primitives sont dans `componentSrcMap` avec leurs aperçus, les conventions ont une section « Forms » et l'axe `fit` ; rien n'est envoyé (la session n'avait pas le skill `/design-sync`). Les aperçus ont été vérifiés par le compilateur contre les vrais composants, pas rendus par le pilote.
-
-**Vérifié** : `tsc` et `eslint` propres, `next build` propre, **2 328 tests unitaires** (194 fichiers) après la fusion de `main`, couverture au-dessus des seuils, et la suite Playwright complète sur un build de production (`GAME_ENABLED=true`, comme la CI) : **636 passées, aucun échec, 5 ignorées par construction** sur 641, dont le moteur, l'audit, l'accessibilité et le contraste.
-
-**Reste** : A10.b, c et d ; `--select-inset` dans WebKit et Gecko ; la re-synchro.
-
-## A7.12.a et A7.12.b : les captures du Tour refaites, celles du moteur et du jeu provisoires (2026-09-30)
-
-C21, tranché par Antoine le 2026-09-29 : capturer maintenant, refaire à l'ouverture.
-
-**A7.12.a, le Tour** : les 22 fichiers de `marketing/assets/` (`01` à `05`, `og-*`) sont refaits par `scripts/kit-screenshots.mjs`. Ils sont pris contre un build de production local **aux produits fermés**, comme la production : le bandeau dit « bientôt » pour le moteur et le jeu. Le code est celui du haut de la pile, donc après I + B, l'encart du jeu sous le bouton (A7.7) et la carte de partage du propriétaire (A7.10). Les 13,8 Mo passent à 3,05 Mo en palette. Les annuaires de D10 peuvent partir.
-
-**A7.12.b, le moteur et le jeu** : douze fichiers `provisoire-*`, listés comme tels dans `kit.md`, avec la consigne de ne jamais les publier tels quels. On y trouve :
-- le tableau du moteur sur l'exemple rempli (§6.0), en FR et en EN, desktop et mobile ;
-- le hub du jeu, aux mêmes quatre formats ;
-- un trimestre et décembre (le chemin A), en desktop.
-
-Ils sont pris par `scripts/kit-provisional.capture.ts`, un fichier Playwright avec sa propre configuration (`scripts/kit-capture.config.ts`), hors de `e2e/`, donc jamais lancé par la CI. Il reprend les aides du jeu et les fixtures du moteur des specs : les mêmes données que les tests. Refaire ces captures à l'ouverture (A7.12.c) se fait donc en une commande.
-
-**Relues avant d'être nommées**, et deux corrections en route :
-- la première capture « tableau du moteur » montrait l'intro, le tableau étant sous la ligne de flottaison. Elle défile maintenant jusqu'au tableau ;
-- les pages du jeu, prérendues, affichaient le moteur « bientôt » : le bandeau lit le drapeau du moteur au build. Le build des captures pose donc les deux drapeaux, et la configuration le dit.
-
-**Reste A7.12.c** : refaire à l'ouverture de chaque produit, puis retirer le préfixe.
-
-**En production** : PR [#220](https://github.com/ScratchMe/tourdegrowth/pull/220), mergée le 2026-09-30 à 13 h 00 UTC (squash `9a359c3`, 40 fichiers, identique à la tête de la PR, rebasée sur #218 d'une autre session). Les captures sont servies par le dépôt public à ce commit, au même poids que dans la branche (`01-landing-fr-desktop.png` : 266 313 octets ; `provisoire-07-game-hub-fr-desktop.png` : 156 163). Le déploiement de production Vercel de ce commit porte aussi le code de #218, arrivé juste avant : `READY`, lu par l'API. Rien de cette PR ne change le site.
-
-## Extension 04 du design system, lot b : le moteur sur les primitives (2026-09-30)
-
-**Ce qui est porté** : tous les champs du moteur passent sur les primitives de `src/components/core/`. Cela couvre les réglages et la mise en route (`Setup`), les deux écrans d'étapes (la cible, la base), la fiche d'un chiffre (`MetricSheet`, `ValueEditor`), le triage « Je ne le trouve pas » et ses deux lectures, la confirmation d'effacement, l'import et la copie de secours d'une demande. Le constructeur de slides suit : `deck/AskForm.tsx` perd son `Field`, son `DraftInput` et son analyseur, et les cinq cases à cocher de l'écran du deck deviennent des `Checkbox`. `deck.module.css` perd `.field`, `.control`, `.check` et leurs voisines. Plus aucun fichier du moteur n'importe `_engine/_ui/`, que A10.d supprime avec les autres copies. Densités, comme le retour le fixe : `md` pour la mise en route et les étapes à une question, `sm` pour une fiche et pour le deck. `--form-gap-sm` et `--form-gap-md` arrivent avec leurs premiers lecteurs.
-
-**Ce qui change à l'écran** :
-- Les libellés sont des phrases en Inter, et non plus du méta en capitales.
-- L'unité est dans la boîte : « % » (« 30 % » avec son espace insécable en français), et la devise placée par la langue (« €26,000 », « 26 000 € »). Elle est cachée des lecteurs d'écran, qui entendent à la place un mot pris dans `Intl` (« per cent », « euros »). **Aucun mot de copie neuve.**
-- Deux comptes forment une `FieldRow` avec « sur » : les boîtes restent sur une ligne quelle que soit la hauteur des libellés et des indices partagés, et le bloc qui plaçait ces indices sous la paire disparaît.
-- « Au moins » et « Au plus » forment une paire sans joint (`FieldRow` le permet désormais : le joint vide reste en place, caché). « Le minimum dépasse le maximum » appartient à la paire.
-- Le mois est un `DateField`, la devise un `Select` à sa taille, et les deux fenêtres un `Field group` avec `Segmented labelledBy`.
-- Les modèles « bientôt » sont en tirets, à pleine lisibilité : l'opacité à 0,45 mettait leur raison à 1,91:1.
-- Une pièce qui manque à l'enregistrement se dit aussi sous son propre champ. La ligne sous le bouton reste l'index de toutes. Aucune copie neuve : c'est `saveNeeds`, rempli avec le seul nom du champ.
-
-**Deux défauts corrigés** :
-- **Le constructeur de slides lisait « 26,000 » (anglais) comme 26.** Son montant passe maintenant par `NumberField`, qui lit comme le lecteur écrit.
-- **Un défaut d'A10.a, vu à l'écran ici.** Quand une unité a son nom pour les lecteurs d'écran, le `span` caché était le dernier enfant de la boîte ; `.affix:last-child` ne trouvait plus le signe, qui collait à 3 px du bord au lieu de 14. Le `span` sort de la boîte. La page d'échafaudage d'A10.a ne l'avait pas montré : elle ne donnait pas de nom à une unité qui suit. Un test de balisage le garde : il rougit sur l'ancien code.
-
-**Deux choix, signalés** :
-- La limite des textes du deck devient souple, comme partout. Au-delà, le texte reste à l'écran avec son compte et son message, mais n'est pas transmis : `validate.ts` refuserait tout l'état pour une puce trop longue. Avant, un `maxlength` dur coupait un collage au milieu d'un mot.
-- Le montant du deck garde sa devise dans le libellé (« Montant (€) ») : pas de signe dans la boîte en plus, pour ne pas toucher à la copie.
-
-**Gardes, avec leur non-vacuité** :
-- `e2e/engine-forms.spec.ts` vérifie trois choses (non-vacuité : sur un build où `NumberField` lit avec `Number(text)` et où `Select` reprend l'anneau rouge, les trois rougissent) :
-  - « 26 000 » tapé en français est lu 26 000 : le taux vivant suit, et la boîte se regroupe avec l'espace insécable ;
-  - « 26,000 » tapé en anglais dans le deck est stocké 26 000 ;
-  - un seul anneau de focus, celui du système, sur chaque sorte de contrôle du moteur : une rangée de choix, un mois, la devise, un texte, un compte, la source, une case, le texte du deck.
-- Côté unitaire, quatre ajouts :
-  - `sources.test.ts` : la place de l'unité par langue, son nom, et l'ordre de la liste des sources ;
-  - le signe d'une unité reste le dernier enfant de la boîte ;
-  - la `FieldRow` sans joint ;
-  - les `data-testid` posés sur le contrôle natif.
-
-**Vérifié** : `tsc`, `eslint` et `next build` propres ; **2 335 tests unitaires** (195 fichiers), avec la couverture au-dessus de ses seuils. La suite Playwright complète tourne sur un build de production (`GAME_ENABLED=true`) : **663 specs, 640 passées, aucun échec**. Les 23 ignorées le sont par construction : 5 « jeu fermé », et les specs d'A7.11 sans l'émulateur Firestore local. Cela inclut les e2e du moteur, de l'accessibilité et du contraste. **À l'écran**, en FR et EN, à 390 et 1 280 px :
-- la mise en route ;
-- une fiche, sous quatre états : deux comptes, un enregistrement refusé, une estimation inversée, deux lectures en conflit ;
-- le constructeur de slides et ses réglages.
-
-Aucun débordement horizontal sur les seize vues mesurées. Le « % » de la cible a été re-mesuré après correctif : à 14 px du bord intérieur. Le monde nuit ne concerne pas le moteur, qui est sur papier.
-
-**Hors d'A10, noté** : la ligne « Pour enregistrer, il manque : … » deviendrait naturellement un `FormSummary`. Il faudrait pour cela un titre qui compte, donc de la copie neuve, et c'est une décision qui ne relève pas du portage.
-
-## Extension 04 du design system, lot c : l'audit sur les primitives, avec A9.1 (2026-09-30)
-
-**Porté, bien que l'audit soit entre parenthèses** (#210) : Antoine l'a tranché avant le lot a. C'est un portage qui retire une copie, pas une fonctionnalité. Tous les écrans de `/admin/audit` qui saisissent quelque chose passent sur `src/components/core/` : la nouvelle mission, la ligne et sa définition, les observations, le repère, le contexte, la matrice, le constat et la purge. Tous en densité `sm`, une fiche de champs. Plus rien n'importe `admin/audit/_ui/`, que A10.d supprime.
-
-**Le gros du portage est mécanique** : chaque `Field` + `TextInput`, `NumberInput`, `DateInput` ou `TextArea` devient le champ du système, 82 des 85 champs réécrits par un script jamais commité. Il ne touchait que la forme exacte « un `Field`, un seul contrôle dedans » et laissait le reste à la main : les listes à option vide, devenues des `placeholder`, le mandat en `Segmented` et les deux cases à cocher. En le relisant, une chose avait disparu : la `key` d'un `Field` dans une boucle de la matrice. Le lint l'a vue.
-
-**Ce qui change à l'écran** :
-- **Un nombre se lit comme on l'écrit** : « 1 200 000 » ou « 26 000 » sont lus, là où l'ancien `type="number"` les lisait comme rien du tout.
-- **Une date se choisit en trois listes, en français** : jour, mois (« janvier »…), année. Plus de `<input type="date">` à la langue du navigateur. Le format du fichier ne change pas (`aaaa-mm-jj`) : `IsoDateField`, une composition de `DateField` et non une copie, fait la traduction. Une date à moitié choisie reste à l'écran sans s'enregistrer, et le 31 février le dit.
-- **Le paragraphe rouge des champs manquants disparaît** : c'était la chose la plus bruyante de l'écran, pour un état qui enregistre quand même. Chaque champ requis de la définition porte maintenant l'état `missing`, en tirets, avec « À compléter — l'export signalera cette ligne comme incomplète. » L'argument d'un seuil argumenté porte sa phrase d'origine. Un `FormSummary` au-dessus du bouton les liste, un lien par champ, qui y porte le focus.
-- **L'anneau de focus est à l'encre partout**, bouton d'import compris : le rouge donnait au rouge un quatrième sens.
-
-**A9.1 dans la même PR** : 46 guillemets et 26 chaînes à ponctuation haute passent à l'espace insécable. `copy-typography.test.ts` lit désormais le dossier de l'audit, commentaires retirés. Les guillemets sont vérifiés partout, la ponctuation haute seulement dans les chaînes entre guillemets droits : `a ? b : c` est du code. Le texte entre balises JSX n'est pas lu pour la ponctuation haute, aucun motif ne le distingue du code.
-
-**Copie neuve, « à relire »** (`FORM_COPY` dans `labels.ts`) :
-- la phrase de lecture, reprise du moteur ;
-- la phrase « à compléter » et les trois libellés de la date, repris de la planche du retour ;
-- le titre compté du résumé ;
-- deux phrases pour une date à moitié choisie et pour un jour qui n'existe pas.
-
-Le paragraphe d'ouverture du résumé reprend la phrase de l'ancien paragraphe rouge.
-
-**Relu par le sous-agent `relecteur-copie`, qui a trouvé trois choses justes** :
-- **Un marqueur manquait** sur la phrase de l'argument, devenue une constante reprise dans le résumé.
-- **Il restait 18 espaces ordinaires** avant « : » ou « ; » dans du texte JSX que la garde ne lit pas, un dans un gabarit, et un avant « % ». Corrigés.
-- **Cette phrase promettait « l'export refusera cette ligne »**, ce qui est faux : l'export écrit le fichier, c'est le validateur qui signale. La même correction avait déjà été faite une fois sur la définition, en phase 1.3b. Elle dit maintenant « le validateur signalera cette ligne », marquée « à relire ».
-
-**Gardes, avec leur non-vacuité** :
-- **« 1 200 000 » tapé dans la valeur d'une observation est exporté 1200000** (`audit-rows.spec.ts`). Sur un build où `NumberField` lit avec `Number(text)`, la spec rougit : la valeur manque.
-- **La typographie du dossier** (`copy-typography.test.ts`) : remettre des espaces ordinaires dans un seul indice de `DefinitionEditor.tsx` fait rougir les deux vérifications.
-
-**Les e2e de l'audit suivent l'écran** :
-- les dates se choisissent par `pickDay` (trois listes) ;
-- le résumé remplace les deux paragraphes : `row-missing` contient « Unité », puis disparaît ;
-- son lien porte le focus dans le champ ;
-- le champ lui-même annonce « À compléter ».
-
-**Vérifié** :
-- `tsc`, `eslint` et `next build` propres ; **2 338 tests unitaires**.
-- La suite Playwright complète : **663 specs, 640 passées, aucun échec**. Les 23 ignorées le sont par construction : 5 « jeu fermé », et celles d'A7.11 sans l'émulateur.
-- **À l'écran**, à 390 et 1 280 px :
-  - la nouvelle mission ;
-  - une ligne mesurée : définition en `missing`, « 26 000 » dans sa boîte, un 31 février refusé, une date à moitié choisie, et le résumé au-dessus du bouton.
-
-  Aucun débordement horizontal.
-
-## Extension 04 du design system, lot d : les trois copies supprimées, et une garde contre une quatrième (2026-09-30)
-
-**Supprimé** : `_engine/_ui/` (neuf fichiers) et `admin/audit/_ui/` (six fichiers). Le `Field` local et le `.control` du constructeur de slides étaient partis avec A10.b, dont c'étaient les seuls lecteurs. Plus rien ne dessine un contrôle de formulaire hors de `src/components/core/`.
-
-**La garde** (`form-controls-source.test.ts`) lit tous les `.tsx` de `src/` hors de `core/`, commentaires retirés. Elle refuse tout `<select>`, et tout `<input>` dont le `type` n'est pas `file` ou `range`. Restent donc, par leur type, le bouton de fichier de l'import (moteur et audit) et le curseur du « et si ». Le retour pose ses conditions pour les porter : un `Button` secondaire sur un `input` caché, et un curseur toujours à côté d'un `NumberField` qui tient la même valeur. Ce portage est hors A10. **Non-vacuité** : lancée avant la suppression, elle rougissait sur les neuf contrôles des deux copies, un par un.
-
-**Décisions remplacées, et dites** : D17 d'`ENGINE.md` (« composants de saisie locaux à la route ») et la décision 1 de la phase 1 d'`AUDIT-PLAN.md` (« `_ui/` sous la route, jamais ajouté à `src/components/` ») portent une note datée. Le commentaire de `form-controls.test.ts` suit : seul `core/` dessine un contrôle.
-
-**Vérifié** : `tsc`, `eslint` et `next build` propres, **2 340 tests unitaires**. La suite Playwright complète tourne sur la pile c + d : **663 specs, 640 passées, aucun échec**, 23 ignorées par construction. Ni le moteur ni l'audit n'importaient plus rien des dossiers supprimés : `tsc` le confirme, et aucune spec ne bouge.
-
-**En production, A10 (2026-09-30)** :
-- **A10.a** ([#218](https://github.com/ScratchMe/tourdegrowth/pull/218), squash `675f4f3`) et **A10.b** ([#221](https://github.com/ScratchMe/tourdegrowth/pull/221), squash `ce0f91d`) sont déployées. Vérifié par le statut `Vercel` du commit (`success`) et par les jetons servis : `--radius-field`, `--field-value`, puis `--form-gap-sm/md`. Le moteur reste fermé (404).
-- **A10.c** ([#223](https://github.com/ScratchMe/tourdegrowth/pull/223), `cb13646`) et **A10.d** ([#224](https://github.com/ScratchMe/tourdegrowth/pull/224), `bd32dab`) sont sur `main`, squashs vérifiés (25 et 23 fichiers, arbres identiques aux têtes). Mais **leurs déploiements ont été refusés par Vercel** : « Deployment rate limited — retry in 24 hours », le quota quotidien du compte, un jour de merges en parallèle. Le site répond (200), `/admin/audit` reste fermé (401), et la production tourne sur A10.b. Le piège est dans `VERCEL.md` §1.12, le geste dans `CHANTIERS.md` D11.
-- **La re-synchro vers Claude Design** (B3 : 88 composants, 284 cellules attendus) n'est pas faite : cette session n'avait pas `/design-sync`.
-
-## Design sync B3 : les primitives de formulaire dans Claude Design (2026-09-30)
-
-**Envoyé** au projet Claude Design existant (`23b9671c…`), par le chemin atomique : 453 fichiers, aucune suppression, le dossier `design/` du projet laissé tel quel. **88 composants, 292 cellules, 88 aperçus sur 88 rendus**, toutes les cellules notées « bonnes ». Seuls les quatre avertissements connus sont sortis : « Impact », et `GRID_OVERFLOW` sur `DefinitionPopover`, `QuarterNews` et `GlossaryTerm`. L'en-tête de conventions a été relu contre le build : ses 41 jetons et ses noms de composants existent, il n'a pas changé. Ancre : `d1835d51cffd`.
-
-**Les aperçus des primitives ont été refaits**, et c'est le gros du travail. A10.a les avait écrits depuis la planche du brief 04, avant qu'A10.b et A10.c ne les branchent, et seul le compilateur les avait vus. Rendus et notés, huit composants sur onze disaient des choses fausses :
-- de la copie de la planche ou de mémoire (« Northwind », une liste de sources inventée, le message « à compléter » de l'audit avec deux-points au lieu du tiret) ;
-- un message qui contredisait sa cellule : « moins de 120 caractères » au-dessus d'un compteur à 104/120 ;
-- des états qu'aucun appel ne produit : champs désactivés avec une raison inventée, `Select` à compléter, case invalide, ligne invalide du résumé ;
-- un doublon : `Segmented.InAForm` refaisait `Field.AroundSegmented`.
-
-Trois agents les ont repris en parallèle, chacun sur des composants distincts, depuis les vrais appels du moteur et de l'audit : copie mot pour mot, valeurs tirées des fonctions du produit sur le moteur d'exemple (`sourceOptions`, `moneyUnit`, `missingByRepairCost`…). Les états jamais produits sont retirés plutôt que réécrits, parce qu'une carte enseigne un usage à l'agent de design. De 46 cellules, les onze composants passent à 54 : d'où 292 et non les 284 annoncés.
-
-**La recapture de contrôle a trouvé deux aperçus faux dans des notes reportées**, sans qu'aucun composant ne soit en cause :
-- l'amende du jeu, fixée à 75 000 € par A7.8 dans `levels/retention.ts` : `EventClipping` et `QuarterNews` disaient encore 106 000 € et l'ancien barème ;
-- `SpaceStrip`, dont la doc affirmait « the cards are not links » alors qu'A7.9 en a fait des portes.
-
-La méthode pour les trouver la prochaine fois est dans `.design-sync/NOTES.md` (« Re-sync risks ») : lister les commits du modèle et de la copie depuis le dernier envoi, puis chercher les anciennes valeurs dans les aperçus.
-
-**Un défaut du produit corrigé dans la même PR** : les rangées de `Checkbox` étaient arrondies, si bien que le trait tireté posé sur leur bord supérieur s'enroulait vers le bas à ses deux bouts, dans toutes les listes de cases du produit. L'arrondi ne dessinait rien d'autre. `form-controls.test.ts` garde qu'une rangée qui porte un trait n'est pas arrondie ; le test rougissait sur l'ancien CSS. Vérifié à l'écran, à 4×, avant et après.
-
-**Vu et laissé au produit**, sans rien « corriger » dans un aperçu :
-- `CHANTIERS.md` A11 : « 1 jours », pas de bord rouge sur un 31 février, le joint de `FieldRow` qui s'écarte de sa boîte, et une espace ordinaire entre un nombre et son mot dans trois chaînes du moteur ;
-- deux questions de design : C28, les 6 px entre une unité et son chiffre (c'est le dessin du retour lui-même, « € 500 ») ; C29, « facultatif » écrit dans les libellés alors que la prop `optional` n'est passée par aucun appel.
-
-**Vérifié** : le driver final a reporté les 15 notes sans en effacer aucune et n'a rien laissé en attente. `report_validate` : 88, 0 défaut. Après l'envoi, `list_files` montre les 88 dossiers de composants.
-
-## A11, C28 et C29 : ce que B3 avait trouvé, livré le soir même, et Claude Design re-synchronisé (2026-09-30)
-
-**Les deux décisions d'Antoine**, prises le soir même dans une séance « point par point, plusieurs options et une reco » :
-- **C28** : l'unité porte son espace, la boîte n'en ajoute plus (la reco). `Field.module.css` retire les 6 px entre l'affixe et le chiffre ; `NumberField` réserve la même largeur. La chaîne donne « €500 » et « 20% » en anglais, « 21 000 € » et « 20 % » en français. `moneyUnit` reprend l'espace qu'`Intl` met à côté du signe, au lieu de la supposer : aucune dans « €500 », une insécable dans « 500 € » comme dans « CHF 500 ».
-- **C29** : « facultatif » passe par la prop `optional` (la reco). Le mot sort des quatre libellés du moteur (`companyLabel`, `definitionNote`, `target`, `repairComment`) et se dessine plus discret après eux, comme le dessine le retour 04. La nouvelle clé `workbench.optional` et les quatre libellés raccourcis sont « à relire » (convention 6).
-
-**A11, livré** ([#227](https://github.com/ScratchMe/tourdegrowth/pull/227)) :
-- **A11.1** : `wordUnit` choisit le mot par `Intl.PluralRules`, avec la nouvelle clé `workbench.day`, « à relire ». On lit « 1 jour », « 1,5 jour », « 2 jours », « 1 day », « 0 days ». Chaque borne de l'estimation prend l'unité de son propre chiffre.
-- **A11.2** : quand les trois parties d'une date sont choisies et que le jour n'existe pas, les trois passent en invalide. Une date incomplète ne marque que ses parties vides.
-- **A11.3** : le premier champ d'une `FieldRow` couvre aussi la colonne du joint, et son libellé ne dimensionne plus les colonnes (`contain: inline-size`). « sur » se pose contre la boîte.
-
-**A11.4 est clos sans changement, après mesure.** La copie validée n'a pas de convention unique entre un nombre et son mot. Sur les chaînes françaises évaluées, « {n} jours » prend une espace ordinaire dans 25 chaînes (glossaire, catalogue d'audit, jeu, moteur) et l'insécable dans 16 ; « mois » et « min » sont partagés de même, et un compte de choses prend partout l'espace ordinaire. Une garde limitée aux jours a été écrite, puis retirée : elle rougissait sur ces 25 chaînes validées. Harmoniser serait une passe de copie à faire relire par Antoine, pas un correctif.
-
-**Gardes, chacune rouge sur l'ancien code** :
-- `sources.test.ts` : l'espace de l'unité (« €500 », « 500 € », « CHF 500 », « 20 % ») et les pluriels. Quatre tests rougissent sur l'ancien `sources.ts`.
-- `form-controls.test.ts` : aucun `padding` entre l'affixe et le chiffre. Rouge sur l'ancien CSS.
-- `form-primitives.test.ts` : le 31 février donne trois `aria-invalid`, une date incomplète aucun. Rouge sur l'ancien `DateField`.
-- `engine-copy.test.ts` : aucun libellé ne contient « facultatif » ou « optional ». Rouge sur l'ancienne copie.
-- `engine-forms.spec.ts`, sur la fiche du CAC en français : le joint est à 9 px de la boîte, pour un écart de colonne de 12. Il était à 114 px avant.
-
-**Vérifié** :
-- `tsc` et `eslint` propres, **2 345 tests unitaires** ;
-- les e2e d'accessibilité (bureau et mobile), de l'audit, du moteur et des contrôles natifs : **221 passées** sur un build de production ;
-- à l'écran, en français et en anglais, à 390 et 1 280 px : « 21 000 € », « €21,000 », « 1 jour / 3 jours », « 1 day / 3 days », les mots « facultatif » et « optional » après leur libellé, le joint contre sa boîte, et le 31 février bordé de rouge sur ses trois listes.
-
-**Claude Design, re-synchronisé deux fois ce soir-là.** Le premier envoi porte l'ancre `f8933d513a1e` : cinq composants recapturés et renotés (26 cellules). Ensuite, le relecteur de copie (`relecteur-copie`, lancé sur le diff avant la PR) n'a rien trouvé dans le produit, mais trois choses dans ce qui part vers l'agent de design :
-- l'en-tête de l'aperçu `TextField` disait encore qu'aucun appel ne passe `optional` ;
-- celui de `FieldRow` décrivait encore le joint d'avant A11.3 ;
-- des numéros de ligne cités par les aperçus étaient décalés par le diff lui-même, et les exemples de l'insécable (`conventions.md`, `NumberField`) étaient tapés avec des espaces ordinaires.
-
-Corrigés, les numéros de ligne remplacés par les noms de clés, qui ne bougent pas. `conventions.md` dit aussi maintenant son exception : le contexte libre du quiz, écran à une question, écrit « (optionnel) » dans la question. Second envoi : rendus identiques, sources seules ; 88 composants, 292 cellules, 453 fichiers, ancre `8235f4e6de01`.
-
-**En production le soir même, et D11 n'a plus d'objet.** Le squash de #227 (`c8b869a`, 23 fichiers, arbre identique à la tête) a été déployé à 21 h 12 UTC : statut `Vercel` du commit à `success`, là où celui d'A10.d (`bd32dab`) dit encore « Deployment rate limited ». Le quota s'était libéré. Comme `main` porte tout, ce déploiement emporte aussi A10.c, A10.d et B3, que Vercel avait refusés. D11 est retiré de `CHANTIERS.md`, et le rappel du lendemain est supprimé.
-
-Vérifié en HTTP :
-- `/en`, `/fr` et `/en/glossary` en 200 ;
-- le moteur et le jeu fermés (404) ;
-- `/admin/audit` en 401.
-
-Les champs eux-mêmes sont derrière l'aperçu propriétaire et le mot de passe admin : ils ne se vérifient pas d'ici. Ce que la production sert est le build que la CI a fait passer sur la même tête.
-
-## C26 et C27 : les robots d'IA laissés et nommés, `/llms.txt` et `/llms-full.txt` générés (2026-09-30)
-
-**Les deux décisions**, prises par Antoine le 2026-09-30, une question à la fois, chacune avec sa reco :
-- **C26, « tout laisser, et l'écrire »** (la reco). `robots.txt` servait `User-Agent: *` / `Allow: /` sans rien dire des robots d'IA : c'était un défaut, c'est maintenant un choix écrit.
-- **C27, « court et généré, plus `llms-full.txt` »**. La reco était le fichier court seul : l'entrée A8 ci-dessus disait « sans `llms-full.txt` ». Antoine a choisi d'y ajouter le texte intégral.
-
-**C26.** `src/lib/seo/ai-agents.ts` tient deux listes, et `robots.ts` les sert en deux groupes, tous en `Allow: /`, avant le groupe `*` :
-- les robots d'**entraînement** : GPTBot, ClaudeBot, Google-Extended, Applebot-Extended, CCBot ;
-- les robots de **réponse**, qui lisent une page pour répondre à quelqu'un ou l'indexer pour une recherche par IA : OAI-SearchBot, ChatGPT-User, Claude-SearchBot, Claude-User, PerplexityBot, Perplexity-User.
-
-Google-Extended et Applebot-Extended sont des jetons, pas des robots : ils ne visitent rien, ils disent ce que Google et Apple peuvent faire de ce que leurs robots de recherche ont lu. Le commentaire le dit, pour qu'une session future ne les « corrige » pas. `robots.test.ts` refuse tout `Disallow` dans n'importe quel groupe : en ajouter un, c'est rouvrir C26, et le test est l'endroit qui le dit.
-
-**C27.** Deux routes statiques (`force-static`), `src/app/llms.txt/route.ts` et `llms-full.txt/route.ts`, qui ne font qu'appeler un constructeur de `src/lib/seo/` :
-- **`/llms.txt`** (~10 Ko) suit la forme de llmstxt.org : un H1, un résumé cité, un paragraphe, puis une section H2 de liens par famille de pages. Chaque titre est le H1 de la page, chaque description sa méta-description ou sa définition : rien n'y est écrit à la main, hors l'en-tête. **Sa portée est celle du sitemap, drapeaux compris** : le jeu et le moteur n'y figurent que s'ils sont ouverts au build. En anglais, chaque ligne porte l'adresse française à côté.
-- **`/llms-full.txt`** (~188 Ko) porte le texte anglais de `/how-it-works`, des deux pages « porte ouverte », des cinq comparaisons et des 24 termes, construit depuis les champs que les pages impriment et dans leur ordre. Chaque intertitre est un libellé que la page imprime déjà (`UI_STRINGS`), et chaque partie s'ouvre sur ses deux adresses et le jour de sa mise à jour, celui que la page affiche depuis A8. Il laisse de côté la landing et About, déjà listées, les pages légales, et le jeu et le moteur, qui sont des outils et non du texte.
-- **Les deux constructeurs ne s'importent pas l'un l'autre** : ce qu'ils partagent (le résumé, la forme d'une adresse) est dans `llms-shared.ts`, pour que la route du texte intégral n'embarque ni le moteur ni le jeu.
-
-**Ce qui les tient aux pages** (`llms.test.ts`) :
-- l'ensemble des liens de `/llms.txt` est exactement celui du sitemap, jeu et moteur fermés comme ouverts ;
-- `/llms-full.txt` couvre chaque clé de `CONTENT_PUBLISHED_AT` et chaque terme, une fois chacun ;
-- il contient chaque définition, chaque verdict, chaque question du Tour, la première réponse de chaque FAQ et le texte du barème ;
-- il n'a ni français ni gabarit non rendu (`{n}`, `[object`, `NaN`).
-
-La garde « undefined » a dû être resserrée : le glossaire dit lui-même « an undefined moment ».
-
-**Non-vacuité** :
-- un `disallow` ajouté à un groupe fait rougir `robots.test.ts` ;
-- retirer une comparaison ou un terme de `/llms-full.txt` fait rougir quatre tests.
-
-**Le poids, mesuré plutôt que supposé.** Les plafonds de `content-fan-in.test.ts` ont rougi sur sept modules de contenu, puisque deux points d'entrée de plus les atteignent. Un `vercel build --prod` hors ligne a montré que :
-- les deux routes sont préconstruites, mais leur fonction est un lien vers le bundle partagé de `quiz/share/[locale]`, avec `robots.txt` et `sitemap.xml` ;
-- elles l'alourdissent de 386 Ko, dont 284 Ko pour le morceau du glossaire, soit 6,35 Mo au total ;
-- c'est sous le seuil d'~1 Mo de `/livrer` §0, donc pas de question à Antoine.
-
-Les plafonds sont relevés, chacun avec sa raison, et le paragraphe du test cite la mesure.
-
-**La relecture de la copie** (`relecteur-copie`) a trouvé deux chaînes neuves sans marqueur : le libellé de la version française dans `/llms.txt` (en minuscule, alors que l'autre fichier écrivait `French`) et les deux libellés de langue de chaque adresse de `/llms-full.txt`. Les deux sont maintenant sous un marqueur. Elle a aussi relevé quatre inexactitudes, toutes corrigées :
-- « Full text of these pages » alors que le fichier ne les couvre pas toutes ;
-- « The Tour » comme titre d'une section qui n'est pas le Tour ;
-- « each link » alors que le lien du texte intégral n'a pas de version française ;
-- un résumé qui promettait toujours une étape, alors que l'état « level » n'en nomme aucune.
-
-Tout l'en-tête est « à relire » et hors de tout bon à tirer, comme `CLAUDE.md` le liste.
-
-**La relecture de sécurité** (`relecteur-securite`) n'a rien trouvé de bloquant. Elle a vérifié quatre points :
-- rien de non public dans les deux fichiers, ni nom, ni LinkedIn, ni variable d'environnement autre que `SITE_URL` ;
-- aucune lecture par requête ;
-- l'aperçu propriétaire ne peut pas fuir dans un fichier construit, puisque les deux drapeaux sont lus avec `ownerPreview: false` ;
-- le proxy n'est pas touché.
-
-Elle a relevé un trou : seules les lignes d'adresse de `/llms-full.txt` étaient comparées au sitemap, pas ses autres liens (termes liés, étapes du diagnostic). Un test le comble : toute adresse du texte intégral doit être dans le sitemap le plus petit, jeu et moteur fermés. Il rougit sur un lien vers `/r/sample` ajouté pour l'essai.
-
-**CodeQL** a levé une alerte haute sur la PR : « Incomplete string escaping ». Les cellules du tableau des comparaisons échappaient `|` sans échapper d'abord `\`, si bien qu'une barre oblique déjà dans le texte aurait rendu la barre verticale à la colonne. Aucune copie n'en contient aujourd'hui, et la sortie est identique. `tableCell` échappe maintenant les deux, dans le bon ordre. Son test rougit sans l'échappement de la barre oblique.
-
-**Un piège de mesure, pas un bug** : un build avec `GAME_ENABLED=true` servi par un `next start` sans la variable liste `/en/game` dans `/llms.txt`, et le proxy y répond 404. C'est le « construit ouvert, fermé à l'exécution » que décrit `build-flag.ts`, qui n'existe qu'en local : la CI pose la variable au niveau du workflow, pour le build comme pour le serveur.
-
-**Vérifié** : `tsc` et `eslint` propres, **2 352 tests unitaires** (onze de plus), `vitest --coverage` au-dessus de ses seuils, `next build` propre, avec les trois routes en statique. La suite Playwright complète, avec les variables de la CI : **666 specs, 643 passées, aucun échec**, 23 ignorées par construction. `llms-robots.spec.ts` (trois specs, dont une qui demande chaque adresse listée et exige un 200) a été rejouée après les corrections de la relecture, sur un build refait.
-
-**`main` a bougé deux fois pendant la PR** : A11, C28 et C29 (#227), puis la ligne de production d'A11 (#229), touchaient les mêmes lignes de `CHANTIERS.md`, de `CLAUDE.md` et de la fin du journal. `main` a été fusionné deux fois dans la branche en gardant les deux côtés, et la ligne des décisions de `CLAUDE.md` a été resserrée pour rester sous le budget de 40 000 caractères : seule C25 y reste ouverte. Re-mesuré sur l'arbre fusionné : **2 356 tests unitaires**, **667 specs, 644 passées, aucun échec**, 23 ignorées par construction.
-
-**En production (2026-09-30)** : [#228](https://github.com/ScratchMe/tourdegrowth/pull/228), squash `4f804ea`, 15 fichiers, arbre identique à la tête. Déployé : le statut `Vercel` du commit est à `success`. Vérifié en HTTP sur `www.tourdegrowth.com` :
-- `/robots.txt`, `/llms.txt` et `/llms-full.txt` répondent 200 en `text/plain; charset=utf-8`, pour 369 o, 10 403 o et 188 394 o ;
-- `robots.txt` sert les deux groupes nommés et le groupe `*`, tous en `Allow: /`, sans aucun `Disallow` ;
-- les adresses de `/llms.txt` sont exactement les 74 du sitemap de production, plus le lien du texte intégral. Chacune répond 200. Ni le jeu ni le moteur n'y figurent, puisqu'ils sont fermés ;
-- `/llms-full.txt` a ses 32 parties et ne cite ni `/r/`, ni `/admin`, ni le moteur.
-
-## C25 : la spécification du B2B assisté et de l'hybride, validée (2026-09-30)
-
-Antoine a tranché C25 dans sa propre session, avec le prompt C25 : les seize questions du §18.12 d'`ENGINE.md` (A7.3.a, [#214](https://github.com/ScratchMe/tourdegrowth/pull/214)). **A7.3.b est close**, et le code (A7.3.c) peut partir dans l'ordre du §18.11. Chaque réponse est datée dans une colonne « Tranché » du §18.12, et **les sections qu'elle change sont corrigées le même jour**. Aucune ligne de code.
-
-**Avant de poser** : `src/lib/engine/` n'a pas bougé depuis `62e3618`. A10 n'a changé que les écrans, que le §18 écrivait déjà avec `Choices` et `Segmented`. Ni le journal ni le nº8 (une seule carte tranchée, C1) ne contenaient de réponse. Un écart mineur est corrigé en passant : le §18.10.3 « étendait » `engine-mobile.spec.ts`, qui n'a jamais existé.
-
-**Q3, Q1 et Q2, une par une, sur l'exemple §18.9** :
-- **Q3, oui : un client compte dans la motion qui a signé son contrat en cours.** Le double compte a été montré sur l'exemple : 5 comptes à 2 000 € par mois comptés par Stripe et par HubSpot donnent 228 000 € affichés pour 218 000 € réels. Rien à l'écran ne le montre. **Un ajout de la séance** : un passage du libre-service à l'assisté n'est pas un départ du libre-service. Compté comme tel, il ajoute ~0,4 point à un churn de 2,5 % dont la cible est 2 %. S8 et §18.4.6 (une ligne de piège sur cinq fiches du libre-service, en hybride seulement) sont corrigés.
-- **Q1, oui : l'activation assistée est la mise en production.**
-- **Q2, oui : trois mois glissants, fixes.** Montré : au mois (~6 signées sur 25), une seule signature de plus fait passer l'étape nommée du taux de closing au passage lead → opportunité. Sur trois mois, elle ne la change pas.
-
-**Q4 à Q16 en bloc** : dix recos retenues. Q10 et Q12 ont été posées sur l'écran actuel du moteur (build local, aperçu propriétaire, l'exemple rempli à 1 280 et 390 px) et sur un croquis de l'écran hybride fait avec les chiffres de §18.9. Les images sont restées dans le scratchpad. **Constat en posant Q12** : le bloc de diagnostic du tableau ne montre aucun montant (`Diagnosis.tsx`). Les deux montants (~600 € et ~4 000 €) ne vivent que sur deux slides, à deux slides d'écart. La reco « oui » tient donc à plus forte raison.
-
-**Trois reprises, posées une par une** :
-- **Q4 : une marge brute par motion.** Antoine : « ça change tout, il faut qu'on ait la différence ». L'assisté gagne `slg.rev.gross-margin` : 15 chiffres propres, une union de 32, plus de chiffre « commun ». **Aucune migration**, puisque `rev.gross-margin` reste au libre-service. Un repli « Reprendre la marge globale » existe en hybride seulement : la valeur s'enregistre en estimation (base `company-wide`), comptée approximative, jamais trouvée. Par symétrie, la fiche du libre-service offre le même repli. Montré : payback assisté de 13 mois à 75 % de marge, de 16 à 60 %. Quatorze sections sont corrigées, dont l'exemple (« 24 chiffres sur 32 ») et un gabarit neuf pour « les deux marges manquent ».
-- **Q7 : la liaison devient un levier « Et si » dès la v1.** Antoine : « c'est justement un point important dans ces organisations hybrides ». Le levier se chiffre **en nombre** d'opportunités venues du libre-service par trimestre, et non en part, qui monte aussi quand les autres baissent. Il est **jamais candidat** : une cible sur la liaison ferait dire au diagnostic de l'assisté « le libre-service ne passe pas assez ». Son gain s'écrit dans l'assisté et le total, et rien n'est retiré au libre-service. Exemple : 31 → 40 donne +1,25 signature par trimestre, soit ~830 € de MRR nouveau par mois.
-- **Q8 : quatre termes de glossaire dès la v1, par une session à part.** Ce sont « taux de closing », « cycle de vente », « ACV » et « conversion lead → opportunité » ; le §18.4.2 annonçait ce quatrième, que Q8 oubliait. Ils deviennent l'item **A7.3.e**, avec son prompt dans `CHANTIERS.md`, en parallèle d'A7.3.c. S2 attend leurs slugs. Le glossaire passera à 28 termes et 56 pages.
-
-**Mis d'accord en passant** : C29, tranchée entre-temps par une autre session, fait passer « facultatif » par la prop `optional`. Le bloc de liaison du §18.6.3 le suit.
-
-**Aucune question neuve** pour la section C. Chiffrage revu : ≈ 12 jours-agent avec A7.3.e, et le même chemin critique de ~6 jours.
-
-**`main` a bougé pendant la séance** : A11, C28, C29 (#227, #229), puis C26 et C27 (#228, #230). Ces PR touchaient `CHANTIERS.md`, `CLAUDE.md` et la fin de ce journal. `main` a été fusionné avant d'y écrire, en gardant les deux côtés. `CLAUDE.md` reste sous 40 000 caractères.
-
-## Le niveau 2 du jeu : la spécification, le moteur généralisé, le modèle en brouillon (2026-09-30)
-
-**La demande.** Antoine veut un deuxième niveau du jeu avant le lancement, et demande lequel. La comparaison des quatre esquisses du §11 avec le vrai catalogue du niveau 1 a désigné l'acquisition : six astuces sur huit absentes du niveau 1 (contre trois pour l'activation et le referral), la DGCCRF comme autorité, des cas publics récents, et aucun terrain déjà occupé, alors que le bandeau cookies de l'activation l'est par le quiz de la CNIL et Cookie Consent Speed.Run. Antoine a répondu « OK go ». Tout est dans `GAME-BRIEF.md` §17 ; la construction attend C30.
-
-**Le brief se trompait sur le moteur.** Le §11 promettait « le même modèle, avec deux constantes renommées ». Le code disait autre chose : 35 mentions du churn dans `model.ts`, 25 dans `view.ts`, 11 composants, une formule qui ne sait que faire baisser un chiffre, une économie d'abonnement. Le moteur est donc généralisé, sans rien changer au niveau 1 :
-- `direction` : le chiffre du board baisse (le churn) ou monte (les nouveaux clients). `shortfall` et `reachesBoard` lisent le signe à un seul endroit ;
-- `economy` : abonnement ou boutique, une union plutôt que des champs facultatifs ;
-- le `red` du brief devient `gain`, le `mrr` d'une carte `revenueMult`, `ChurnDrivers` devient `MetricDrivers` ;
-- l'état passe en `v: 2` (`metric`, `customers`, `revenue`) sous une clé de sauvegarde `v2`. Le jeu est fermé : seules les parties de l'aperçu sont perdues ;
-- `DraftLevelSlug` : un niveau peut exister comme modèle testé avant d'avoir une page. Mettre `"acquisition"` dans `LevelSlug` aurait exigé une clé de sauvegarde, un encart et un vocabulaire analytique pour un niveau que personne ne peut jouer.
-
-Les composants de `components/game` gardent leurs noms d'emplacement (`churn`, `subs`, `mrr`) : ce sont des contrats synchronisés avec Claude Design, et les renommer demande une re-synchro. L'îlot du niveau 1 traduit. Ce sera A12.d.
-
-**Vérifié au bit près.** Avant de toucher au code, 3 000 années ont été jouées au hasard et enregistrées en entier : états, tableaux de bord, rapports, lignes du « pourquoi », décembres, téléphones. Rejouées après la refonte, une fois les noms rendus, elles sont identiques au JSON près, et les fixtures F1 à F5 restent vertes sans une tolérance touchée. La formule du niveau 1 garde son ordre de facteurs exact, pour cette raison.
-
-**Le modèle du niveau 2, en brouillon.** Chaque carte tient le rôle d'une carte du niveau 1. Le premier réglage, avec les mêmes chiffres, ratait les quatre années de référence : un gain de x fait moins qu'une baisse de x (A virée en septembre, C sans atteindre le T2). Les gains ×1,3 et les plafonds 0,43 et 0,82 (≈ 1/0,70 et 1/0,55) rendent le profil : l'année A a exactement la patience du niveau 1 (51, 42, 46, 73), C subit le contrôle au T3, D est virée en juin. Joué au hasard, le niveau 2 pardonne un peu plus au joueur honnête (43 % d'applaudissements contre 35 %) : noté en §17.6, la recette tranchera.
-
-**Trouvé en route** : `driverRows` divisait par zéro pour un pas d'une dizaine de clients, puisque `Math.round(1 / 10)` vaut 0. C'est le test du niveau 2 qui l'a vu. Un pas inférieur à un se compte en multipliant par son inverse, exactement le produit de toujours (`x * 1000`, jamais `x / 0.001`), un pas d'un ou plus en divisant.
-
-**Le droit, vérifié sur les sources primaires** (Légifrance, DGCCRF, Commission, FTC, CMA), par un agent de recherche, relancé une fois pour le cas de la publicité déguisée. Le §11.1 avait quatre erreurs, corrigées en place :
-- « DSA article 27 » ne s'applique pas à une boutique qui vend son propre stock : c'est le L121-4 25° ;
-- les faux avis relèvent du L121-4 28° et 27°, pas du seul L121-2 ;
-- « prix total obligatoire » allait trop loin : la livraison peut s'afficher à part si elle est annoncée (L121-3 3°, arrêté du 3 décembre 1987) ;
-- le faux prix barré n'a pas d'amende administrative à lui : l'article L131-5 ne vise que l'article L112-1 et ses arrêtés, et l'arrêté de 2015 sur les annonces de réduction est abrogé. C'est une pratique commerciale trompeuse, un délit, que la DGCCRF règle par transaction pénale.
-
-D'où le contrôle du niveau 2 : une transaction de 150 000 €, à trancher (C30 Q3). Deux pièges pour la copie à venir : la mention « Publicité » ou « Collaboration commerciale » n'est plus une obligation littérale depuis l'ordonnance du 8 novembre 2024, et les fiches de la DGCCRF citent encore des peines d'avant l'aggravation en ligne de 2024.
-
-**Le nom.** « Braquet », premier candidat, est porté par deux magasins de vélos. « Pédalix » ne sort nulle part ; l'INPI reste à consulter (C30 Q2).
-
-**`CLAUDE.md` dépassait son budget avant cette entrée** (40 529 caractères pour 40 000). Il repasse dessous en resserrant deux lignes que le journal raconte déjà (le nº5, le flake de `locale-routing`) et la convention 13, qui n'est plus une contrainte et dont le détail chiffré est dans `VERCEL.md` §2.3.
-
-**Vérifié** : `tsc` et `eslint` propres, **2 382 tests unitaires** (vingt-six de plus, ceux du niveau 2 et du sens « vers le haut »), `vitest --coverage` au-dessus de ses seuils, `next build` propre avec les variables de la CI. La suite Playwright complète, avec l'émulateur Firestore et le mot de passe d'administration posés : **667 specs, 662 passées, aucun échec**, 5 ignorées par construction (les specs « jeu fermé »). À l'écran, sur un second serveur du même build : la première vue du niveau 1 en français à 1 280 px et en anglais à 390 px, et décembre des années A (anglais, 1 280 px) et C (français, 390 px), chiffres, fins et courbes compris, les placeholders renommés remplis.
-
-**La relecture de la copie** (`relecteur-copie`) a confirmé qu'aucun texte lu par un joueur n'a changé dans `content/game/retention.ts`, en français comme en anglais : seules les clés et les noms de placeholders bougent, des deux côtés de chaque paire. Dans les premiers jets du §17, elle a relevé :
-- un `{titre}` là où le contrat attend `{title}` ;
-- un cas Temu qui présentait comme établi ce qu'une notification énonce ;
-- surtout, des textes d'événements et de fins qui nommaient des cartes (« les guides », « les prix barrés », « avis vérifiés »), alors que ces événements se déclenchent sur des seuils de radar et de confiance, pas sur ce qui a été joué. L'année D, virée, n'a écrit aucun guide.
-
-Tout est corrigé, et le §17.8 pose la règle. Elle a aussi mis en doute, de mémoire, que le faux prix barré échappe à l'amende administrative. La vérification sur Légifrance le confirme, et le texte le dit maintenant avec sa source plutôt qu'en une phrase absolue.
-
-**En production (2026-10-01)** : [#232](https://github.com/ScratchMe/tourdegrowth/pull/232), squash `24c862a`, 36 fichiers, arbre identique à la tête. Déployé, mais prouvé après coup. Sur le moment, la seule preuve était l'en-tête `age` de `/en` : reparti de zéro une minute après le merge, puis monté sans nouvelle remise à zéro pendant cinq minutes. L'API de Vercel répond 403 à cette session. Or `VERCEL.md` §1.12 prévient qu'un site qui répond ne prouve rien quand le quota de déploiements est épuisé, et il l'était le soir même : la prévisualisation de #234 a été refusée, « more than 100 » par jour. La preuve est venue de #235, mergée après #232 : ses pages (`/en/glossary/win-rate`) sont servies en production, et un déploiement emporte tout `main`. Vérifié en HTTP sur `www.tourdegrowth.com` :
-- `/fr` et `/en` répondent 200 ;
-- `/fr/game`, `/fr/game/retention`, `/en/game/retention` et `/en/aarrr-funnel-template` répondent 404, puisque le jeu et le moteur restent fermés ;
-- `/r/sample` répond 200, sans l'encart du jeu, et le sitemap ne cite aucune adresse du jeu.
-
-Ce que la refonte change pour un joueur ne se voit qu'avec le jeu ouvert. C'est vérifié dans la suite Playwright et à l'écran sur le build local, pas en production.
-
-## A7.3.e : les quatre termes de la vente assistée, avant le code qui les cite (2026-09-30)
-
-**La demande** : l'item A7.3.e de `CHANTIERS.md`, né de C25 (Q8). Quatre pages de glossaire, FR et EN, sur le modèle de la vague 2.2 : « taux de closing », « cycle de vente », « ACV » et « conversion lead → opportunité ». Elles s'écrivent **avant** A7.3.c, qu'une autre session construit en même temps, pour que chaque fiche assistée du moteur puisse renvoyer à son terme. Rien sous `lib/engine/`, `content/engine-*.ts` ni `aarrr-funnel-template/` n'a été touché.
-
-**Les requêtes d'abord.** `stats.yml` (portée `gsc`), clé `age` créée dans le scratchpad, rapport déchiffré sur place : aucun chiffre n'entre ici. **Aucune requête ne touche encore la vente assistée**, ce qui était attendu, puisque le site n'a aucune page pour en recevoir. Le rapport confirme en revanche la **forme** de ce qui arrive : des définitions courtes, des développements de sigle et des traductions. Les recherches du jour confirment les quatre slugs proposés (« win rate », « sales cycle length », « ACV », « lead to opportunity conversion rate »). Les FAQ sont donc écrites sur ces variantes : « comment calculer », « c'est quoi un bon… », « ACV, ça veut dire quoi ? », « ACV ou ARR », « MQL, SQL, opportunité : dans quel ordre ? ».
-
-**Les choix, un par un** :
-- **Slugs** : `win-rate`, `sales-cycle`, `acv` et `lead-to-opportunity`, en anglais dans les deux langues (R2-16). Les titres suivent la requête de chaque langue : « Taux de closing — win rate » et « Win rate », « Cycle de vente » et « Sales cycle length », « ACV — Annual Contract Value » (le sigle développé, comme ARPU et NPS), « Conversion lead → opportunité » et « Lead-to-opportunity rate », le nom de la fiche du moteur. « Conversion rate » est dans la définition anglaise, pour la requête. Aucun titre ne dépasse 56 caractères.
-- **Les exemples reprennent le §18.9, rien d'autre** : 72 opportunités sur 480 MQL, 18 gagnées sur 75 conclues et 130 créées, 64 jours de cycle médian, 432 000 € sur 18 contrats, un CAC de 19 000 €, 180 000 € de MRR sur 100 clients et les cibles de 18 % et 32 %. Les marges de 75 % et 60 % sont les cas de test du §18.9.6, et la page les pose en hypothèses. Chaque exemple en tire une leçon qui n'existait pas encore. **Le dénominateur** : 18 ÷ 130 donnerait 14 % au lieu de 24 %. **La médiane** : allonger d'un an la plus longue des 18 affaires ajoute 365 ÷ 18 ≈ 20 jours à la moyenne et rien à la médiane. **L'ACV n'est pas l'ARPA × 12** : 2 000 € contre 1 800 €, parce que les deux ne comptent pas les mêmes clients. **La cohorte n'est pas le flux** : 130 ÷ 480 donnerait 27 %, en mélangeant un flux et une cohorte.
-- **Aucun ordre de grandeur de l'instrument d'audit.** Les recherches du jour répètent partout le « 25-35 % » de l'audit : c'est exactement ainsi qu'il serait entré. Les sections « Ordres de grandeur » disent donc ce qu'un chiffre publié vaut, ou donnent un ordre de grandeur **interne** : sur 75 affaires, une affaire vaut 1,3 point, et sur 480 MQL une opportunité vaut 0,2 point. **Une seule source primaire est citée**, en contexte : Christoph Janz, « Five ways to build a $100 million business » (5 octobre 2014), relu le jour même. Il y parle de revenu par compte et non d'ACV, et la page le dit. C'est un cadrage de modèle économique : il ne désigne rien (C1), et ce n'est pas un repère de fiche.
-- **« Dans le Tour »** : le Tour ne pose aucune de ces questions. Chaque page prend la question la plus proche et dit honnêtement le lien. `win-rate` va à `rev-1` (une perte dont la raison est écrite est un test de prix), `sales-cycle` à `acq-3` (le cycle décide si le CAC est une mesure ou un ordre de grandeur). `acv` va à `rev-2` (la première entrée de la LTV), `lead-to-opportunity` à `acq-1` (un canal est mesuré quand on connaît ses opportunités, pas ses leads).
-
-**Le maillage était saturé**, comme le lot 2 l'avait prévu. Toutes les pages voisines étaient au plafond de quatre liens. Le plafond n'a pas été desserré : **huit échanges**, chacun contre un lien plus lâche vers une page qui en reçoit beaucoup. `revenue` passe de 7 liens entrants à 4, et `activation` de 8 à 6. `cac` et `revenue` mènent à `win-rate`, `cac-payback` et `time-to-value` (le dernier créneau libre utile) à `sales-cycle`. `arpu` et `ltv` mènent à `acv`, `acquisition` et `pql` à `lead-to-opportunity`. La règle mesurée à la main après chaque lot de 2.2 devient un test : tout terme reçoit au moins deux liens, et les quatre neufs en reçoivent deux de pages qui existaient avant eux. Les pages qui ne gagnent qu'un lien gardent leur date : un lien n'est pas du contenu.
-
-**Deux défauts vus à l'écran, pas à la relecture** (leçon nº1, encore) : « 5 » seul en fin de ligne avant « octobre 2014 », et « 13 » séparé de « mois ». Les nombres de ce corpus n'avaient reçu l'insécable que dans les groupes de chiffres et avant « % ». Les chaînes neuves la portent aussi entre un nombre et son unité de temps, et dans les dates. La flèche de « lead → opportunité » est liée au mot qui la suit : liée au mot d'avant, elle faisait passer le titre sur trois lignes à 390 px.
-
-**Les gardes, avec leur non-vacuité** (écrite dans les fichiers) :
-- `glossary.test.ts` lit les ordres de grandeur **dans** `audit-catalog.ts` (24 ce jour-là, dont 25-35, 12-18 et 3×) et exige qu'aucun n'apparaisse sur les quatre pages. Écrire « 25-35 % » dans le français de `win-rate` et « 3× » dans l'anglais d'`acv` fait tomber exactement les deux cas de langue, et rien d'autre.
-- La règle des deux liens entrants : remettre `activation` dans `pql.related` la fait tomber seule.
-- `acronyms.test.ts` développe ACV, et les sigles empruntés : ARR, TCV et ARPA sur `acv`, MQL, SQL et PQL sur `lead-to-opportunity`.
-- Un e2e par terme, par langue et par largeur : les six sections, la vraie question du Tour, les liens voisins, et aucun débordement. `french-typography.spec.ts` couvre `acv` et `win-rate`.
-
-**Copie neuve, donc `TODO: à relire`** (convention 6). Elle ira au bon à tirer d'A7.3.d, qui les comprend déjà.
-
-**Le relecteur-copie** a trouvé six choses, toutes corrigées :
-- un « vous » au milieu du tutoiement ;
-- une durée inventée (« deux semaines ») ;
-- un seul marqueur « à relire » pour les quatre entrées longues, alors que `/bon-a-tirer` regroupe par terme ;
-- une définition anglaise de `lead-to-opportunity` qui ne disait pas la même chose que la française ;
-- deux ordres de grandeur sans source dans le texte d'`acv` ;
-- « la TCV » au féminin, quand l'ACV est au masculin partout ailleurs.
-
-**Vérifié** :
-- `tsc` et `eslint` propres, **2 400 tests unitaires** (après la fusion de #232), `vitest --coverage` au-dessus de ses seuils, `next build` propre, avec 56 pages de terme prérendues.
-- La suite Playwright complète, avec les variables de la CI et l'émulateur Firestore : **688 specs, 683 passées, 5 ignorées par construction, aucun échec ni rejeu**. Elle a tourné trois fois : avant les retours du relecteur, après, puis sur la tête fusionnée.
-- À l'écran, les quatre pages, en FR et en EN, à 1 280 et 390 px : réponse 200, aucun débordement, `hreflang` fr, en et x-default, JSON-LD `DefinedTerm` et fil d'Ariane, ligne de date.
-- Le sitemap porte 56 pages de terme, `/llms.txt` les 28 termes, et `/llms-full.txt` les quatre parties neuves.
-- Mesuré : 1 143 à 1 468 mots par langue et par terme, des extraits de 122 à 160 caractères et des titres de 34 à 56.
-
-**Trouvé en se vérifiant, hors de cette PR** : `npm audit --omit=dev` n'est plus à zéro sur `main`. Il relève trois alertes, dont une **critique sur `next`**, dans `ImageResponse` de `next/og`, que le site utilise pour ses images de partage. Elles deviennent **A13** de `CHANTIERS.md` : une PR à part. Son merge attend l'accord d'Antoine, parce qu'elle touche une dépendance (`/livrer` §0).
-
-**`main` a bougé pendant la PR** : #232 (le niveau 2 du jeu) a pris le numéro A12, et les alertes sont donc devenues A13. `main` a été fusionné en gardant les deux côtés de `CHANTIERS.md`, de `CLAUDE.md` et de ce journal.
-
-**En production (2026-10-01)** : [#235](https://github.com/ScratchMe/tourdegrowth/pull/235), squash `bf06fc2`, 16 fichiers, arbre identique à la tête. Vérifié en HTTP sur `www.tourdegrowth.com` :
-- les huit pages répondent 200 avec leur titre, leur canonique, leur `hreflang` fr, en et x-default, leur `DefinedTerm`, et la date « 30 septembre 2026 » ;
-- l'index du glossaire liste les quatre termes ;
-- le sitemap porte 82 adresses, les 74 d'avant et les huit neuves, dont 56 pages de terme ;
-- `/llms.txt` liste les quatre termes, et `/llms-full.txt` porte leurs quatre parties ;
-- les liens échangés sont servis : `pql` mène à `lead-to-opportunity`, et `revenue` à `win-rate`.
-
-IndexNow a été lancé à la main le même soir (run 20, succès). La demande d'indexation des huit adresses dans Search Console revient à Antoine : elles sont ajoutées à D10.
+| [9. Les décisions codées, l'extension 04 et C25](docs/journal/09-decisions-codees-et-extension-04.md) | 2026-09-30 | C23 et A7, A8, l'extension 04, la design sync B3, C25 à C29, la spécification du niveau 2 du jeu, S0 d'A7.3.c |
+| Ce fichier | depuis le 2026-10-01 | Le journal découpé, C30, A7.3.c de S1 à S5, A12 et A13, les textes de lancement, le moteur complet, et la suite |
 
 ## La documentation remise d'accord avec le code, et le journal découpé en volumes (2026-10-01, demandé par Antoine)
 
@@ -969,6 +167,57 @@ unitaire changent, aucun fichier que le build lit ; la CI les passe quand même.
 
 **Fusionné avec la documentation en volumes** (#237, mergée pendant cette PR) : C30 gagne sa ligne dans `docs/decisions.md`, où C11 renvoie désormais à A12.f, et le découpage de `GAME-BRIEF.md` (section E) n'attend plus qu'A7.3.c.
 
+## A7.3.c, S1 : le calcul de l'assisté, son diagnostic, son total et le levier de la liaison (2026-10-01)
+
+Deuxième étape du lot, sur la même PR brouillon d'intégration ([#233](https://github.com/ScratchMe/tourdegrowth/pull/233)). Antoine a dit « Go pour S1 ». Tout est pur, dans `lib/engine`, et l'écran ne change pas encore : S3 et S4 le liront.
+
+**Ce que S1 calcule** :
+- **les trois relais** (`relays.ts`), chacun sur sa base de 100, sans chaîne multipliée : 15 sur 100 MQL, 24 sur 100 opportunités conclues, la mise en production inconnue, et « ~160 MQL par mois » en amont ;
+- **le diagnostic de l'assisté**, par la même règle que le libre-service appliquée à ses cinq candidats (`diagnose(state, ctx, "slg")`) : la fonction qui nomme une étape est unique, et aucune ne voit les candidats des deux motions ;
+- **l'impact en €** (`slg-impact.ts`), compté sur le trimestre puis ramené au mois : « 18 × 32/24 = 24 (+6) », « 6 × 2 000 € = 12 000 € de MRR nouveau par trimestre », « soit ~4 000 € par mois » ;
+- **les unit economics de l'assisté**, sur l'ACV des nouveaux contrats et sa propre marge (Q4), avec la durée de vie plafonnée à 36 mois (Q6) et « clients perdus sur un an » des deux côtés (Q5) ;
+- **le total** (`total.ts`) : un total n'existe que si ses deux parties existent (S9), et la somme affichée est la somme des parties affichées ;
+- **le « Et si » de l'assisté** (`slg-scenario.ts`), levier de la liaison compris (Q7) : 31 → 40 opportunités venues du libre-service donnent +1,25 signature par trimestre, ~830 € de MRR nouveau par mois, et rien n'est retiré au libre-service ;
+- les contrôles, les constats, le miroir du Tour, la couverture et la demande copiée, qui apprennent leur motion ; l'exemple hybride §18.9.
+
+**L'exemple §18.9 sort exact, chiffre par chiffre** : couverture 21, 3, 3 et 5 sur 32 ; le taux de closing nommé, `clear`, à ~4 000 € par mois contre 2 400 et 600 ; à 30 % de cible, `shared` avec le passage lead → opportunité ; MRR 228 000 € exact ; nouveau MRR « ~5 000 € + ~12 000 € = ~17 000 € » ; MRR dans 12 mois « ~100 000 € + ~330 000 € à 340 000 € = ~430 000 € à 440 000 € » ; payback assisté 12,7 mois à 75 % de marge, 15,8 à 60 % (Q4).
+
+**Deux écarts à la forme de §18.2.1, voulus, écrits dans `ENGINE.md` §18.11** :
+- `Diagnosis` est générique sur ses candidats, le libre-service par défaut : ses positions ne portent que ceux de sa motion, et le compilateur refuse qu'on lise un candidat de l'autre ;
+- `EngineDerived` garde le peloton, le diagnostic et les unit economics du libre-service en plus de `motions` et `total`. Ce sont les mêmes objets, et chaque écran et le deck v1 les lisent ; ils partent quand S4 aura déplacé le dernier lecteur.
+
+**Trois précisions de la spécification, découvertes en codant** (§18.5.3 et §18.5.8) :
+- **le « → » des gabarits ne passe pas sur une slide** : les trois fontes ne portent pas la flèche, et le test des glyphes l'a refusé. La copie écrit « , soit », comme en libre-service ;
+- la seconde voie de W (« opportunités conclues × taux de closing ») n'existe pas dans les données : un taux saisi en comptes porte déjà W ;
+- un seul constat « petits effectifs », sur le ★ au plus petit dénominateur, comme la phrase du tableau.
+
+**La copie neuve** est le strict nécessaire au calcul, « à relire » : sujets et entrées manquantes de l'assisté, la chaîne `slgChain`, les constats et contrôles assistés, les mots de l'exemple hybride, les intertitres de la demande. La prose des 15 chiffres reste à S2.
+
+**Le golden v1 reste vert** sans qu'un octet de ses fichiers bouge. Seule sa projection laisse de côté ce que S1 ajoute (`motions`, `total`, et le champ `motion` des diagnostics, contrôles, constats et lignes du miroir), comme son en-tête le prévoit.
+
+**Non-vacuité, mesurée par sabotage** : trente-sept sabotages, le détail en tête de chaque test.
+- **Indépendance des motions** : mille états tirés au hasard (graine fixe) de chaque côté. Un diagnostic du libre-service qui lirait le taux de closing fait tomber l'indépendance, le golden v1 et les constats hybrides. Un diagnostic assisté qui surveillerait l'ARPA du libre-service ne fait tomber que l'indépendance : aucun autre test ne voit cette fuite.
+- **Trois de mes commentaires de non-vacuité étaient faux avant la mesure**, et sont corrigés :
+  - la tolérance flottante de `clearlyAbove` est nécessaire aussi à la borne de 30 % de l'assisté ;
+  - un relais de mise en production qui lirait l'activation fait aussi tomber les tests des relais ;
+  - le renouvellement classé sur W ne fait tomber que la valeur de classement, la chaîne lisant D d'elle-même.
+- **Un sabotage passait à travers** : arrondir chaque partie d'un total à ses propres deux chiffres. Une partie ronde au millier l'est aussi à la centaine, et la grille ne vérifiait que l'unité commune. Elle vérifie maintenant que chaque partie s'affiche à moins d'une demi-unité commune de sa valeur, et le sabotage tombe.
+- Le tri final des constats, qu'aucun test ne faisait tomber jusqu'ici, est désormais tenu par l'ordre hybride : sans lui, tous les constats du libre-service passeraient avant la rupture de rang 1 de l'assisté.
+
+**La relecture de la copie** (`relecteur-copie`) n'a trouvé aucune règle enfreinte, et deux vrais écarts à la spécification, corrigés avant le commit :
+- le cas « moins d'un » du renouvellement disait « client » : il compte des contrats gardés, et a maintenant ses deux phrases ;
+- les lignes « pour 100 » (sans compte de nouveaux clients) ne nommaient ni la base ni ce qu'on compte. Elles disent maintenant « 8 signatures de plus pour 100 opportunités conclues » ; la base voyage dans l'impact sous forme de clé de copie, jamais de mot.
+
+Deux points restent pour le bon à tirer : la phrase des contrats mensuels sur un an n'a pas de formulation dans la spécification, et « lis la direction », texte exact de §18.5.1, tutoie. Ça va pour la fiche, pas pour une slide. Le message de `slg-cycle-long` tutoie aussi : la note d'orateur de S4 s'écrira à part (`ENGINE.md` §18.11).
+
+**`main` a bougé pendant S1** : les quatre termes d'A7.3.e (#235), la documentation remise d'accord avec le code et le journal découpé en volumes (#237), puis C30 (#234). `main` est fusionné dans la branche en gardant les deux côtés. L'entrée de S0 reste à sa date, entre A7.3.e et la refonte de la doc, et les lignes d'A7.3.c de `CHANTIERS.md` disent S0 et S1 livrés, avec les slugs d'A7.3.e en place pour S2.
+
+**Vérifié** : `eslint` et `tsc` propres, **2 529 tests unitaires** avant la fusion, **2 550 après**, `vitest --coverage` au-dessus de ses seuils (lignes 97 %). Build de production avec les variables de la CI, puis :
+- les 150 specs Playwright du moteur, de `targets` et de `platform-native` passent ;
+- la suite complète passe aussi : **670 specs, 647 passées, aucun échec**, 23 ignorées par construction.
+
+Ces deux passages ont tourné avant les deux correctifs de la relecture. Ceux-ci ne touchent qu'une copie qu'aucun écran n'affiche encore.
+
 ## ENGINE.md et GAME-BRIEF.md découpés à leur tour (2026-10-01, demandé par Antoine)
 
 Le matin, ce découpage avait été reporté : #233 (A7.3.c) écrivait dans le §18
@@ -1031,3 +280,1133 @@ la fusion à trois de #233 avec le nouvel `ENGINE.md` est propre (simulée par
 - `npm audit` à 0, en production comme en développement, après un `npm ci` depuis le lockfile neuf.
 - `eslint` et `tsc` propres, **2 403 tests unitaires** (2 405 après la fusion de #240, qui ajoute la garde des liens des documents), `vitest --coverage` au-dessus de ses seuils, et `next build` propre sous « Next.js 16.3.6 ».
 - La suite Playwright complète, avec les variables de la CI et l'émulateur Firestore : **688 specs, 683 passées, 5 ignorées par construction, aucun échec ni rejeu**. Elle comprend les specs des images de partage (`share-previews`, `game-share-images`, `result-real`), qui exercent `ImageResponse`.
+
+**En production (2026-10-01)** : [#241](https://github.com/ScratchMe/tourdegrowth/pull/241), squash `e82eeae`, 5 fichiers, arbre identique à la tête. Le statut `Vercel` du commit est `success` : le quota quotidien, épuisé la veille au soir (`VERCEL.md` §1.12), était rétabli. Vérifié en HTTP sur `www.tourdegrowth.com` : `/en`, `/quiz`, `/r/sample`, `/en/how-it-works` et `/fr/glossary/acv` répondent 200. Les images de partage de l'accueil, du résultat d'exemple et de `/fr/glossary/win-rate` sont servies en PNG 1200 × 630.
+
+## A12.c : la copie du niveau 2 du jeu, relue sur les sources (2026-10-01)
+
+**Ce qui est livré** ([#242](https://github.com/ScratchMe/tourdegrowth/pull/242)) : tout le texte du niveau 2 « Comment les gens vous trouvent », sans rien brancher (`content/game/acquisition.ts`, le chapeau et les métadonnées dans `meta.ts`). Aucune route ne l'importe : le joueur ne voit rien de neuf, et le niveau 1 ne change pas d'un mot. Tout est « à relire », d'après les premiers jets du §17.
+
+**Les choix** :
+- **Ce que le niveau 1 dit de toute année est repris par référence**, pas recopié : les mois, la frise, la visio, les nouvelles du trimestre, les mots du DG, le playbook, la boucle vers le Tour, le pied de page. Une correction faite au niveau 1, par exemple par le bon à tirer nº7, vaut pour les deux. Un test le tient (`ACQUISITION_CONTENT.months === RETENTION_CONTENT.months`, etc.).
+- **Le téléphone et la pastille deviennent propres à chaque niveau** (`RetentionCopy`, `AcquisitionCopy` dans `lib/game/copy.ts`), comme `effects.extra`, qu'aucune carte du niveau 2 ne produit. Les gabarits suivent (`RETENTION_COPY_TEMPLATES`, `ACQUISITION_COPY_TEMPLATES`). La pastille du niveau 2 dit ce que le panier ajoute au prix affiché (« +29 € au panier »), un fait que la loi encadre, comme les clics du niveau 1.
+- **Les règles de la série C sont extraites du test du niveau 1** (`game-copy-checks.ts`) : le niveau 2 y est tenu à l'identique. Trois tests de plus : **C12** (les espaces insécables des nombres, que la garde de typographie du dépôt ne voit pas), **C13** (l'arithmétique du téléphone : 1 290 + 29 = 1 319, + 19 = 1 338, −19 %, et des avis triés moins nombreux), **C14** (jamais « amende » pour une transaction pénale ; la règle rougit sur le texte du niveau 1).
+- **Deux noms fictifs changés** : le vélo devient « Pédalix Ville 7 », parce qu'un « Urban 7 » réel (MAXTRON) était trop proche du « Urbain 7 » de la spec ; la marque partenaire inventée est « Ferlune », introuvable à la recherche du jour.
+
+**C31, posée et tranchée en route** (Antoine était dans la session, la question s'est posée tout de suite) : à la fin du niveau 2, le bloc « Niveau suivant » renvoie vers le niveau 1, « jouable ». Les deux niveaux se renvoient l'un à l'autre ; écartés : un niveau 3 « bientôt », ni spécifié ni décidé, et pas de bloc du tout. Les liens viennent avec A12.f. `docs/decisions.md`, `GAME-BRIEF.md` §17.8.
+
+**Deux relectures, et ce qu'elles ont trouvé** :
+- **La relecture de copie** (`relecteur-copie`) : rien de bloquant, mais un téléphone qui contredisait sa carte. Trier et modérer les avis ne fait pas passer « 38 avis » à « 1 204 », et « dont 31 vérifiés » ne tient pas dans 29 avis : c'est maintenant « 4,6 ★ · 29 avis », « dont 24 vérifiés », et C13 le tient. Aussi : le titre anglais qui ne disait pas la même chose que le français, un chapeau qui supposait le niveau 1 joué, la fin `fine` qui disait que les clients « ne sont pas revenus » quand le modèle les fait revenir moins.
+- **La vérification juridique**, sur Légifrance, la DGCCRF, la Commission, la CMA et la FTC : huit corrections, le détail dans `GAME-BRIEF.md` §17.9. Les plus importantes : le 28° dit « modifier » des avis, pas « déformer » (le mot de la directive) ; l'article 5-2 de la loi influenceurs accepte « une mention équivalente » depuis l'ordonnance de 2024 ; seule la livraison peut s'indiquer à part, **avec son montant** ; l'action CPC contre Temu est **toujours en cours**, et l'amende de 200 M€ du 28 mai 2026 porte sur le DSA, pas sur les fausses échéances. Une veille est posée en section E pour le jour où l'action se conclut.
+
+**Piège** : un remplacement scripté a glissé des guillemets droits dans une chaîne anglaise elle-même entre guillemets droits ; le parseur a cassé l'import du module, et la garde de typographie a rougi sur « reads a French corpus » avant toute autre chose. Le test qui dit « le corpus existe » est aussi celui qui voit un module qui ne se charge plus.
+
+**Vérifié** : `tsc` et `eslint` propres ; la suite unitaire complète verte (dont 38 tests du niveau 2 et les 37 du niveau 1, inchangés sur les règles extraites) ; un nouveau test refuse un mot « ordinaire » que plus aucun cas n'emploie : il a trouvé « Une », resté de la première version du cas Temu. Ni build ni Playwright : aucune route ne lit ces fichiers, la CI construit quand même.
+
+**Reste au §17 et en lecture humaine** : le 28° et l'article 5-2 ont été lus par un outil de lecture, à relire à l'œil sur Légifrance avant l'ouverture (D9) ; le chapeau qui nomme Flixo, et les ajouts aux fins par rapport au premier jet du §17 (« La vraie vie non plus. », « Regarde la confiance… »), sont à montrer dans le bon à tirer du niveau 2 (A12.h).
+
+**Fusionné avec le découpage de `GAME-BRIEF.md`** (#240, mergée pendant cette PR) : le §17 vit maintenant dans `docs/game/niveau-2.md`. Les cinq passages que cette PR y changeait (l'en-tête, le téléphone, décembre, les corrections du §17.9, le §17.11) y sont reportés tels quels ; les renvois « `GAME-BRIEF.md` §17.x » restent valides par la règle du nouveau fichier.
+
+**En production (2026-10-01)** : [#242](https://github.com/ScratchMe/tourdegrowth/pull/242), squash `48bc535`, 14 fichiers, arbre identique à la tête. Le statut `Vercel` du commit est `success` ; `/en` et `/fr` répondent 200 sur le nouveau build (`age: 0`, `PRERENDER`). Rien de visible : aucune route n'importe encore la copie du niveau 2.
+
+## A12.d : l'îlot du jeu, le même pour tout niveau (2026-10-01, #245)
+
+**Ce qui change** : l'îlot du niveau 1 (le tableau de bord, la visio, la main, le rapport, les nouvelles, décembre) quitte `app/[locale]/game/retention/` pour `app/[locale]/game/_island/`, un dossier privé que Next ne route pas. Il ne sait plus rien du niveau 1 : un niveau y apporte son modèle, sa copie, le format de son chiffre et son téléphone. La page du niveau 1 lui passe `slug="retention"` ; rien ne change à l'écran.
+
+**Les choix** :
+- **Le format du chiffre vient du niveau** (`metricFormat` dans `lib/game/format.ts`, lu dans `level.display`) : le churn au dixième de point, les nouveaux clients à la dizaine (« 2 150 »). Un écart manqué se dit dans l'unité du niveau (« manqué de 170 clients ») et **jamais sous un pas** : le modèle compare des valeurs brutes, donc un trimestre peut manquer de 4 clients en affichant 2 150 pour un objectif de 2 150, et « manqué de 0 client » contredirait le verdict. La même règle vaut au niveau 1, où le cas pouvait déjà arriver en dixièmes (« manqué de 0,0 pt » devient « 0,1 pt ») : le seul changement visible du niveau 1, sur un cas rare. Une variation de clients s'arrondit à la dizaine (`DeltaKind "tens"`), comme les tuiles.
+- **Le téléphone et sa pastille sont le « côté » d'un niveau** (`_island/sides.tsx`, `IslandSide`) : ce qu'il dessine, la forme courte de sa pastille pour la barre d'action, et ce que la région vivante dit quand une carte la change. Les fonctions de clics du niveau 1 y ont déménagé. `ISLAND_SIDES` est typé par `LevelSlug` : un niveau rendu jouable ne compile pas sans son côté.
+- **Six composants perdent les noms du niveau 1** : `Dashboard` (`metric`, `customers`, `revenue`, et leurs `data-testid`), `EndingCharts` et `RevealCells` (`metric`), `QuarterReport` (les clés de ses chiffres), `ActionBar` (`pill`), `GameEntry` (`band.metric`). Les specs e2e et les aperçus de `.design-sync/previews/` suivent ; les aperçus sont vérifiés au type près contre les composants, par un `tsc` sur un barrel jetable (le bundle `tour-de-growth` n'existe que chez Claude Design). **Claude Design montre encore les anciens contrats** : la re-synchro est `CHANTIERS.md` B4, groupée avec A12.e et son composant neuf.
+- **Les années de référence du niveau 2 sont partagées** (`lib/game/__tests__/paths-acquisition.ts`) entre les fixtures du modèle et l'îlot.
+
+**Vérifié** :
+- `tsc` et `eslint` propres, **2 464 tests unitaires**. Le test de l'îlot passe inchangé sur le niveau 1 (41 tests), et un nouveau le fait tourner sur **le niveau 2**, qu'aucune page ne joue encore : chaque écran de chaque fin, dans les deux langues, sans gabarit ni `undefined` ; jamais « % » ni « pt » à côté des nouveaux clients ; l'écart en clients ; le « pourquoi » en dizaines, dont les lignes font le mouvement de la tuile ; la courbe de décembre graduée en clients jusqu'à « objectif 3 000 » ; le tampon « Transaction · 150 000 € ».
+- Build de production avec les variables de la CI, puis Playwright : **les 99 specs du jeu** (94 passées, 5 ignorées par construction, les specs « jeu fermé ») et les 76 des autres specs qui visitent ses pages (accessibilité, mouvement, en-tête, bande de l'accueil…).
+- À l'écran, sur le même build : le tableau de bord du niveau 1 au 1er janvier (FR, 1 280 px) et décembre d'une année C (EN, 390 px), identiques à avant.
+
+**En production (2026-10-01)** : [#245](https://github.com/ScratchMe/tourdegrowth/pull/245), squash `3bb1b1e`, 41 fichiers, arbre identique à la tête. Le statut `Vercel` du commit est `success` et `/fr` répond 200. Rien de visible : le jeu est fermé, et le niveau 1 ne change pas à l'écran.
+
+## A12.e : le téléphone de Pédalix et sa pastille (2026-10-01, #246)
+
+**Ce qui est livré** : le téléphone du niveau 2 et la pastille qui le suit (§17.7), sans rien brancher. Aucune page ne joue encore le niveau 2 : c'est A12.f qui l'inscrit dans `ISLAND_SIDES`.
+
+**Les choix** :
+- **Le dessin du téléphone est séparé de son écran.** Le cadre (légende, coque, écran, barre d'appli, éclair « ce qui vient de changer ») sort de `PhoneMock.module.css` vers `PhoneFrame.module.css`, partagé par les deux niveaux ; chaque téléphone ne garde que son contenu. Le point de couleur de la barre lit `--phone-brand`, que chaque téléphone pose : le bleu de Flixo, le vert de Pédalix. L'éclair passe dans un hook commun (`phone-flash.ts`) ; `PhoneMock` garde ses exports.
+- **Ce que montre le téléphone est calculé, pas dessiné** (`lib/game/shop-phone.ts`, pur comme `view.ts`) : `shopPhoneView` donne la liste des éléments dans l'ordre où un visiteur fait défiler la page, `basketFor` ce que le panier ajoute. La livraison compte comme « en plus » tant que la fiche ne l'annonce pas (`delivery` ou `allin`) ; seuls des frais de service hors du prix (`teaser`) font passer la pastille au corail. Les montants (29 €, 19 €) sont des constantes que C13 tient d'accord avec la copie : la pastille et les lignes du panier ne peuvent pas se contredire.
+- **`BasketPill` reprend les styles de `ClickPill`** : un seul objet sous le téléphone, dans les deux niveaux. Le montant arrive déjà formaté dans la langue de la page.
+- **Un vert à Pédalix** (`--shop-brand`, 6,47:1 en texte sur blanc), mesuré par `game-token-contrast.test.ts` ; le prix lit un pas de l'échelle de l'appli (`--app-text-price`).
+
+**Les gardes du design system ont attrapé trois écarts** avant la PR, tous dans le CSS neuf : une taille de prix en pixels (A1.5), des bordures en pixels pour le triangle de lecture et les roues (S-17), et un jeton « blanc sur le vert » que rien ne lisait (A1.6). Le triangle est maintenant un `clip-path`, les roues lisent `--border-width`, et le jeton orphelin est retiré avec sa paire de contraste.
+
+**CodeQL a rougi sur la PR** (une alerte « high », *double unescaping*) : l'assistant de test qui lit le texte d'un rendu décodait `&amp;` avant `&quot;` et `&#x27;`, donc un `&amp;quot;` échappé serait devenu un guillemet. Sans conséquence dans un test, mais l'alerte est juste : `&amp;` se décode en dernier.
+
+**Pour Claude Design** : deux aperçus neufs (`ShopPhone` : le départ, une année honnête, le bureau du troisième trimestre d'une année C, toutes les cartes sombres en français ; `BasketPill` : ses trois états, en français, en petit), construits sur des états que le jeu atteint vraiment, puis vérifiés au type près contre les composants. Les deux sont inscrits dans `componentSrcMap`, et `ShopPhone` dans `dtsPropsFor`, comme `PhoneMock` : la liste de ses éléments vient de `lib/`, et sans épingle le contrat n'en montrerait que le nom. La synchro elle-même est B4.
+
+**Vérifié** :
+- `tsc` et `eslint` propres, **2 479 tests unitaires**, dont 14 neufs sur le téléphone et la pastille : chaque carte a sa place à l'écran (sauf la revue des données, une réunion, et le retour en arrière, qui remet le téléphone comme avant), l'éclair ne marque que ce qu'une carte change, la phrase annoncée est mot pour mot celle de la pastille, aucun contrôle dans le dessin, et la remise affichée seulement à côté du prix de rayon.
+- À l'écran, sur une page de développement jetable (non commitée), en français et en anglais, à 1 280 et 390 px : le départ, une année honnête, le bureau d'une année C, toutes les cartes sombres, toutes les cartes à la fois. Rien ne déborde de l'écran du téléphone, aucune erreur en console ; cocher `anchor` fait clignoter le prix, puis `allin` le prix et le panier, rien d'autre.
+
+**Mergée, pas encore en production (2026-10-01)** : [#246](https://github.com/ScratchMe/tourdegrowth/pull/246), squash `a8d0456`, 19 fichiers, arbre identique à la tête. Le statut `Vercel` du commit est **`failure`** : « Deployment rate limited — retry in 24 hours », le quota quotidien de déploiements du compte épuisé (`VERCEL.md` §1.12). La production reste sur A12.d, sans dommage (le jeu est fermé, rien de visible), et le prochain déploiement de production, une fois la fenêtre passée, emportera tout ce qui aura été mergé entre-temps. Sans merge d'ici là, il faudra un « Redeploy » du dernier commit de `main`.
+
+## A7.3.c, S2 : la prose de l'assisté, `{period}` et toute la copie neuve de l'hybride (2026-10-01)
+
+Antoine : « Go pour S2 ». Trois commits sur la PR brouillon [#233](https://github.com/ScratchMe/tourdegrowth/pull/233) : `78f9abd` (la prose et `{period}`), `222f34e` (la copie et ses gardes), puis les corrections de la relecture. Rien n'est encore lu par un écran ni par une slide : S3 et S4 posent cette copie, et `ENGINE.md` §18.11 liste ce que chacun reprend.
+
+**La prose du catalogue** (`engine-catalog.ts`) : les quinze chiffres de l'assisté, la liaison et les trois calculés, « à relire ». Les deux dictionnaires sont maintenant typés sur **tous** les identifiants (`Record<MetricId, …>`), si bien qu'une fiche sans prose ne compile plus. Le serveur résout tout le catalogue ; c'est l'îlot qui filtre par `shapesOf(motions)`, et la fiche ne propose « aussi dans cet outil » que les chiffres que la configuration demande. Les quatre fiches d'A7.3.e pointent vers leurs termes. Les trois comptes partagés de l'assisté ont un libellé identique dans chaque groupe, et le test des libellés partagés les couvre désormais, dans les deux langues.
+
+**`{period}` porte sa préposition** : « de mai à juillet 2026 », « d'août à octobre 2026 », « en août 2026 » pour un seul mois, et l'année n'est écrite qu'une fois. Une préposition dans le gabarit aurait buté sur l'élision (« de août »), la même raison qui interdit « de {month} ». Trois remplisseurs l'ont : `catalogueValues` (demandes, annexe), la page statique (« [sur trois mois] ») et `catalogFill`. Ce dernier, le remplisseur propre à la fiche, aurait laissé passer « Leads créés {period} » comme libellé de champ : aucun test de `lib/engine` ne le lisait, et un test le garde maintenant.
+
+**La copie neuve**, toute « à relire » : le réglage (type, motions, fenêtres, périodes de l'assisté), les réglages après coup (§18.1.2), `hybrid`, `total`, `relays`, les titres et pieds des slides des deux motions, les notes d'orateur de §18.8.3, la fiche (période, marge globale, pièges hybrides), le pas à pas par motion, le panneau « Et si » de l'assisté avec ses dix hypothèses, la reprise, l'import, et la sixième question de la FAQ, qui s'affiche déjà sur la page fermée (sa date passe au 2026-10-01). Les pièges hybrides des cinq fiches du libre-service ne sortent qu'en hybride (`phrases.ts#hybridTrapOf`).
+
+**Trois formulations s'écartent de §18.8.2**, écrites dans `ENGINE.md` §18.11 :
+- les titres des relais disent « on ne mesure pas {étapes} » : le taux de closing et la mise en production n'ont pas le même genre, et l'accord ne peut pas suivre les deux ;
+- le cas « un seul payback » dit « il manque {entrée} », comme la slide du libre-service ;
+- ce cas a deux gabarits plutôt qu'un `{libre-service|assisté}` : le libre-service est nommé d'abord même quand seul l'assisté est calculable. Le tableau de §18.8.2 contredisait la règle 1 de §18.6.4 ; la règle gagne. C'est la relecture qui l'a vu.
+
+**Les gardes** :
+- aucun comparatif dans `hybrid.*`, `total.*` et les titres des deux motions. La phrase fixe « chacune se lit contre ses cibles, pas contre l'autre » est la seule exception, et l'exception porte sur la phrase entière, pas sur le mot ;
+- le libre-service avant l'assisté, dans les placeholders et dans les mots, partout où les deux sont nommés côte à côte ;
+- aucune préposition devant `{period}`, et `{period}` absent des fiches du libre-service ;
+- le contrat exact des dix-neuf titres neufs. Le test qui exige que chaque titre soit produit par le deck les tient dans `AWAITING_DECK` : S4 vide la liste, et le test tombe dès qu'un titre de la liste est produit sans en avoir été retiré.
+
+**Non-vacuité, mesurée par sabotage** (onze plus deux) : chaque sabotage fait tomber au moins un test. Il y en a un par garde ci-dessus, plus `catalogFill` sans `{period}`, la page statique sans `{period}`, un libellé de compte partagé qui diverge, un libellé d'un autre groupe recopié, et le serveur réduit au catalogue du libre-service. **Un sabotage n'est tombé que par chance** : `{period}` glissé dans une fiche du libre-service, en anglais seulement. C'est la parité des placeholders qui l'a attrapé, pas le test fait pour ça, qui ne lisait que le français. Il lit maintenant les deux langues ; resaboté, il tombe.
+
+**La relecture de la copie** (`relecteur-copie`), rien de bloquant :
+- **corrigé** : l'ordre des motions dans le cas « un seul payback » (ci-dessus) ; la date de la page ; la réserve « beaucoup de praticiens » perdue dans la note de plafond de la LTV assistée ; « tout se lit sur trois mois », faux pour la NRR à douze mois ; « came » au passé en anglais face au présent français ; la note du levier de la liaison, dont le « en » n'avait d'antécédent qu'après la phrase de liaison ; « reporting de la direction, souvent trimestriel », sans source et différent de l'anglais ; « trois ordres de grandeur » sur l'ACV, quand son terme de glossaire dit « plusieurs » ; un piège de mise en production faux à 30 jours ; la ligne amont des relais, qui lisait « ~1 leads » ; le nom accessible du sélecteur, qui finissait sur « de » ; « Leads passés en opportunité » devenu « Passage des leads en opportunités » ; et la coquille « Quatre fiches » de §18.4.6, qui en liste cinq ;
+- **pour le bon à tirer** : « Passer à l'assisté → » est à l'infinitif, comme dans la spécification et comme les boutons voisins, alors que l'en-tête de la copie veut des impératifs ; et la phrase de liaison nomme « assistées » avant « libre-service ». C'est le texte de §18.6.3, une phrase sur l'une des motions, pas une liste.
+
+**Vérifié** : `tsc` et `eslint` propres, **2 560 tests unitaires** (contre 2 550 avant S2), couverture au-dessus de ses seuils. Build de production avec les variables de la CI : les 151 specs Playwright du moteur et de l'accessibilité passent, puis, après les corrections, les 137 du moteur, des données structurées et de `llms`. La page du moteur pèse ~242 Ko en HTML (FR), catalogue de l'assisté compris.
+
+## A7.3.c, S3 : les écrans du moteur à deux motions (2026-10-01)
+
+Antoine : « Go pour S3, S4 puis S5 ». Deux commits sur la PR brouillon [#233](https://github.com/ScratchMe/tourdegrowth/pull/233) : `da3f2c4` (les écrans), puis `74fef3a` (les tests de la vue, les e2e et les retours des captures).
+
+**La configuration** choisit ses motions : deux cases, au moins une, chacune dépliant ses fenêtres (activation et paiement, qualification et mise en production), la cohorte suivie seulement si le libre-service est coché, et la ligne des trois mois que lit l'assisté. Dans les réglages, la dernière case cochée ne se décoche pas, et chaque changement de motion dit avant l'enregistrement ce qui reste sur l'appareil (« Décocher l'assisté le retire du tableau et des slides. Ses 15 chiffres… restent ») : décocher masque, n'efface jamais.
+
+**Le tableau a trois mises en page** : le libre-service seul est celui de la v1 ; l'assisté seul a ses relais et son diagnostic ; l'hybride ouvre sur « Deux moteurs, un total » (le titre en pochoir est celui de la slide `total`, deux blocs de texte, le libre-service toujours à gauche, la liaison entre eux avec sa flèche dessinée et ce qu'elle n'est pas, puis les sommes), puis deux colonnes (couverture, diagnostic, peloton ou relais), la phrase « deux motions, deux segments », et un sélecteur qui montre les étapes et les « Et si » d'une motion à la fois. La liaison a son bloc sous l'acquisition de l'assisté, facultatif. Les titres des relais et du total vivent dans `lib/engine/deck-motions.ts`, lus par le tableau comme par le deck.
+
+**Le reste** : la fiche (les trois mois, la phrase des petits effectifs, « Reprendre la marge globale » sur les deux fiches de marge en hybride, les pièges hybrides), le pas à pas par motion (les cibles groupées, les deux bases, « Passer à l'assisté → » puis « Passer aux « Et si » → », la liaison sautée), le « Et si » de l'assisté (ses leviers dont la liaison en opportunités entières, son trimestre, et le MRR total dans 12 mois sous les deux panneaux ; « tout remettre » ne touche que ses propres leviers), la reprise et l'import qui comptent par motion, l'exemple dans les motions cochées, et la page statique avec les deux catalogues et le lien.
+
+**Vérifié en réel** : captures FR et EN à 390 et 1 280, relues. Elles ont trouvé deux défauts, corrigés : la ligne des mois de l'assisté était à l'encre d'alerte (une information n'est pas une mise en garde), et le « Et si » de l'assisté parlait du « funnel du mois » et intitulait « Levier » la colonne de son trimestre. Tests de la vue par motion (onglets, collecte, scénario) ; **un sabotage n'a rien fait tomber** : afficher chaque bloc du total avec son propre arrondi passait, parce que les parts de l'exemple sont exactes. Un cas de somme approchée les sépare maintenant. e2e : `engine-hybrid.spec.ts`, et quatre specs existantes mises au pas (la page compte 41 fiches, la configuration n'a plus de « modèle »).
+
+## A7.3.c, S4 : le deck des deux motions (2026-10-01)
+
+Commit `65728bb`. **Le modèle** : en hybride, `total`, puis les slides du libre-service, puis celles de l'assisté (relais, fuite, « Et si », la liaison en dernier, leur cumul), puis visibilité, unit economics, miroir, demande et annexe. L'assisté seul garde cet ordre sans total ni slide du libre-service. Le libre-service seul reste le deck v1 au caractère près : `buildDeck` n'emprunte le nouveau chemin que si l'assisté est coché, et le golden v1 est resté vert à chaque étape. La fuite est une seule fonction pour les deux motions (`buildLeak` lit le diagnostic qu'on lui donne) ; les slides neuves sont dans `lib/engine/deck-slg.ts`. Une motion qui a moins de deux ★ connus perd sa fuite et garde son funnel ; les deux aveugles, la visibilité monte après le total.
+
+**Chaque motion porte son kicker, sa pastille et son pied** (`DeckModel.byMotion`) : « · assisté » dans le kicker, ses propres comptes, « Flux assistés de juin à août 2026 · leads de mai à juillet 2026 · sources : HubSpot et Stripe ». Les unit economics de l'hybride sont un tableau de cinq lignes en regard, jamais trié ; la visibilité, des pastilles par étape et par motion ; l'annexe, trois groupes avec leur en-tête (la pagination compte la place de ces en-têtes) ; le formulaire de la demande ne propose plus rien quand les deux motions nomment une étape. Le balayage des phrases (`sentences-guard`) a vu sa liste `AWAITING_DECK` vidée : chaque titre neuf est produit par un état du balayage, et toutes les règles de forme passent dessus.
+
+**Ce que la vérification a trouvé**, trois défauts corrigés avec leur test :
+- la slide de visibilité de l'hybride débordait sous le pied (trente-deux noms et huit cartes). Elle suit maintenant le texte de §18.8.2, « deux colonnes d'étapes × pastilles », et ses introuvables tiennent sur deux colonnes ;
+- le miroir plantait dès qu'un Tour était relié à un hybride : il cherchait la LTV de l'assisté parmi les calculés du seul libre-service. C'est l'e2e qui l'a vu (le test unitaire du contrat des lignes utilisait un Tour à quatre réponses, sans ce pont) ;
+- le miroir de l'hybride, une ligne par question et par motion, débordait de 170 px : deux colonnes, une par motion.
+
+Deux sabotages ne sont d'abord pas tombés : une motion aveugle gardant sa fuite (le cas de test n'avait de toute façon pas de fuite) et une proposition faite quand les deux motions nomment (aucun test ne le couvrait). Les deux ont maintenant leur cas.
+
+## A7.3.c, S5 : l'intégration (2026-10-01)
+
+Commit `70bdec2`. **Q14** (C25, tranchée oui) : `engine_setup/<plg|slg|hybrid>` à la création du moteur et quand les réglages changent les motions, et les étapes de l'assisté comptées à part (`engine_stage_saved/slg-revenue`). Les listes sont épelées dans `lib/analytics/goatcounter.ts`, jamais construites ; la porte de l'îlot, le tableau de bord `/admin/stats` et la règle 5 de `engine-boundary.test.ts` lisent les mêmes. **La phrase de confidentialité** (D16) le dit : « la façon de vendre cochée (libre-service, assisté ou les deux), le premier chiffre enregistré dans chaque étape de chaque motion » ; elle repart « à relire », et la page est datée du 2026-10-01.
+
+**Les e2e de §18.10.3** : le parcours hybride FR/EN × 1 280/390 (l'assisté saisi par ses fiches, le total exact, les deux diagnostics, la couverture de chaque motion, un rechargement, l'assisté décoché puis recoché, le fichier exporté, l'appareil vidé, le fichier réimporté) ; le canari étendu aux textes de l'assisté, à un compte à neuf chiffres et au changement de motions (aucune requête autre que GET) ; `engine-deck-hybrid.spec.ts` ; `engine-mobile.spec.ts`, qui n'existait pas (largeurs 360, 390 et 430 tenues, 320 mesuré à 0 partout, relais dans leur carte, colonnes de même hauteur, axe sur le tableau hybride, le clavier seul jusqu'au taux de closing).
+
+**Deux pièges de mesure, à connaître** :
+- un sabotage CSS peut être vide sans que la garde le soit : un `min-width: 400px` écrit au-dessus du `min-width: 0` de la même règle était annulé au build. Forcé pour de bon, il fait déborder le tableau de 190 à 260 px et les six tests de largeur tombent ;
+- la lecture d'une vignette du deck juste après l'avoir fait défiler est revenue vide une fois sur huit (`content-visibility: auto`). La spec attend maintenant que chaque slide ait son texte avant de le lire, plutôt que d'accepter un vide.
+
+**CodeQL a relevé un vrai défaut sur la PR** (*overly permissive regular expression range*) : la classe des glyphes permis d'`engine-deck-hybrid.spec.ts`, recopiée d'`engine-deck.spec.ts`, avait perdu l'espace insécable qui ouvre sa seconde plage. « ` -ÿ` » partait alors de l'espace ordinaire et laissait passer U+007F à U+009F, les contrôles C1 compris. Les deux plages sont maintenant écrites en échappements (` -~ -ÿ`), pour qu'une copie ne les perde plus. **Une plage de caractères copiée se relit en code point**, pas à l'œil.
+
+**Vérifié** (sur la tête de branche, après la fusion d'A12.e) :
+- `eslint` et `tsc` propres. **2 684 tests unitaires**, couverture au-dessus de ses seuils.
+- Build de production avec les variables de la CI, puis **toute la suite Playwright** : 732 specs, 709 passées, 23 ignorées. Les 18 qui lisent un vrai `/r/<id>` sautent sans l'émulateur Firestore, et les 5 « jeu fermé » par construction. Une première suite complète, avant la fusion, était passée sans échec.
+- **Une spec a échoué une fois, puis passé au second essai** : `platform-native.spec.ts:291`, la hauteur du `Disclosure` cinq images après son ouverture. Elle mesurait 46 px, la hauteur fermée, au lieu d'une valeur intermédiaire. Le test vient de #196, et cette PR ne lui change que la clé de stockage. Rejoué 30 fois seul, puis 36 fois à côté des specs qui impriment un PDF, il n'a plus échoué. Cause non trouvée, test non durci : un prochain échec se lit à partir d'ici.
+- Le poids des bundles serveur (`VERCEL.md` §1.2) passe de 46,72 Mo sur `main` à 46,89 Mo sur la branche, soit +0,17 Mo. Tout l'écart est sur la page du moteur (6,75 → 6,92 Mo), sous le seuil de `/livrer` §0.
+
+**Ce qui reste, et qui n'est pas du code de ce lot** :
+- le bon à tirer de la copie neuve (A7.3.d), construit depuis `grep -rn "TODO: à relire" src/` ;
+- `EngineDerived` garde ses trois champs du libre-service (`peloton`, `diagnosis`, `unit`), que §18.11 prévoyait de retirer après S4 : chaque écran du libre-service et le golden v1 les lisent, et les retirer n'apporte rien à l'utilisateur ;
+- les textes de lancement : `marketing/kit.md`, `marketing/campaigns/README.md` §8, et la campagne du moteur, qui dit encore « quinze chiffres, trois par étape », « seulement le libre-service, pour l'instant » et traduit les noms d'étape (la relecture de S3 l'a relevé) ;
+- sortir le §18 d'`ENGINE.md` vers `docs/engine/`, une fois #233 mergé (`CHANTIERS.md`, section E).
+
+**En production (2026-10-01)** : [#233](https://github.com/ScratchMe/tourdegrowth/pull/233), squash `bed81fb`, 149 fichiers, arbre identique à la tête de branche. Le statut `Vercel` du commit est `success` : le quota de déploiements, épuisé pour les aperçus de la PR, n'a pas bloqué la production. `/fr/privacy` et `/en/privacy` portent la nouvelle phrase et la date du 1er octobre, et `/fr/aarrr-funnel-template` comme `/en/aarrr-funnel-template` répondent 404, drapeau fermé. Les deux derniers points ci-dessus sont livrés le même jour (l'entrée « Les textes de lancement du moteur… », plus bas).
+
+## A12.f.1 : le niveau 2 jouable (2026-10-01, #247)
+
+**Ce qui change** : le niveau 2 « Comment les gens vous trouvent » a sa page, `/{locale}/game/acquisition`, son image de partage, sa sauvegarde, sa place au sitemap et au hub, « jouable ». Le jeu reste fermé derrière son drapeau : rien de visible pour le public, tout pour l'aperçu propriétaire. A12.f est coupé en deux, parce que l'encart qui propose les deux niveaux (C30 Q5) touche la page la plus exposée et un composant du design system : A12.f.2 le fera seul. D'ici là, un goulot partagé entre acquisition et rétention offre l'acquisition seule, la première dans l'ordre AARRR.
+
+**Les choix** :
+- **Déplacer le slug, et laisser le compilateur lister le reste.** `LevelSlug` gagne `acquisition` ; `DraftLevelSlug` devient `never`, gardé pour le niveau suivant. Le compilateur a demandé la clé de sauvegarde (`tdg.game.acquisition.v1`), la copie de l'encart du résultat, le modèle et le côté dans l'îlot, les deux portes du résultat dans le vocabulaire. Ce qu'il ne voit pas (`GAME_LEVEL_SLUGS`, une liste) est maintenant gardé par un type, `GameLevelsCovered`, comme les fins et les humeurs.
+- **Une page de niveau commune** (`app/[locale]/game/_level/LevelPage.tsx`), plutôt qu'une copie de celle du niveau 1 : la règle « une feuille de style de page reste avec sa page » (`page-styles-scope.test.ts`) interdisait de reprendre `retention/page.module.css` depuis un autre dossier, et deux pages identiques auraient dérivé. Chaque `page.tsx` n'apporte que son intro, ses deux mots du glossaire (acquisition et CAC au niveau 2), sa copie et son îlot.
+- **L'îlot devient générique sur le niveau** (`GameIsland<S extends LevelSlug>`) : avec deux niveaux, une union de props perdait le lien entre le slug, la copie et le téléphone ; un paramètre de type le garde, et une page ne peut pas donner la copie du niveau 1 au téléphone du niveau 2.
+- **Les deux niveaux se renvoient l'un à l'autre** (C31) : la zone de l'autre niveau devient un lien dans la navigation des zones, et le bloc qui clôt décembre aussi, avec un bord plein au lieu du pointillé du « pas encore ». Celui du niveau 1 dit « jouable ». Les liens portent `?from=other_level`, une porte nouvelle du vocabulaire.
+- **Les fins se comptent par niveau** (`game_ending/<niveau>/<fin>`) : une amende chez Flixo et une transaction chez Pédalix ne sont pas la même année. Le jeu étant fermé, aucun compte n'est perdu ; plus tard, le changement aurait coupé la série. Le tableau de bord montre les fins et les années commencées par niveau, et le passage résultat → jeu se calcule sur tout goulot qui a un niveau, par la règle même de l'encart (`gameEntryFor`), pour que les deux ne dérivent pas.
+- **L'image de partage reçoit le niveau en paramètre** : celle du niveau 1 ne tire pas la copie du niveau 2 dans sa fonction. La page et l'image du niveau 2 tirent en revanche celle du niveau 1, que sa copie reprend par référence (A12.c) : les plafonds de `content-fan-in.test.ts` montent, chacun avec sa raison.
+- **Le chiffre de l'encart et de l'image vient du format du niveau** (`metricFormat`) : « Nouveaux clients 2 000 », jamais un pourcentage.
+
+**Copie neuve, « à relire »** : l'encart du résultat du niveau 2 (titre, corps, bouton, « Nouveaux clients {metric} »), la fin du hub « le contrôle et la transaction », Pédalix nommé dans sa zone du hub comme Flixo dans la sienne, le texte de l'image du hub (« dont deux sont ouvertes »), le bloc de décembre du niveau 1 passé à « jouable ».
+
+**Piège** : le budget de la requête GoatCounter (3 000 caractères d'URL) a rougi à 3 118, avec les fins par niveau. Il passe à 4 000, la moitié des ~8 Ko où les proxys refusent un GET, avec la raison dans le test.
+
+**Deux relectures** (les sous-agents du dépôt) : rien de bloquant. La copie : deux chaînes neuves n'étaient couvertes que par le marqueur d'en-tête de leur fichier, que le bon à tirer nº7 a déjà absorbé ; elles ont maintenant leur marqueur daté. « Des nouveaux clients » devient « de nouveaux clients ». Et le nº7 ne dit plus ce que dit le code (« jouable », la zone et l'image du hub, la bande `{metric}`) : noté dans `CLAUDE.md`, à remettre d'accord ou à renvoyer au bon à tirer du niveau 2. La sécurité : aucun test ne disait que le jeu fermé ferme aussi la nouvelle page et son image. C'est le préfixe `/game/` qui les ferme, mais un jour quelqu'un pourrait le resserrer en une liste de noms. `proxy.test.ts` boucle maintenant sur les niveaux ouverts, sans en nommer aucun, et rougit si `isGamePath` ne couvre plus que `retention` (essayé).
+
+**Vérifié** :
+- `tsc` et `eslint` propres, **2 487 tests unitaires**.
+- Build de production avec les variables de la CI, émulateur Firestore lancé : **la suite Playwright complète, 695 passées, 6 ignorées par construction, aucun échec**, dont les specs neuves : les deux niveaux au sitemap, au hub et en hreflang, chaque fin nommée par son niveau sur le hub, la page du niveau 2 et ses mots du glossaire, les zones qui se renvoient d'un niveau à l'autre, l'image du niveau 2, son accessibilité, et sur un vrai résultat lu dans l'émulateur l'encart du niveau 2, porte Deep dive, « New customers 2,000 ».
+- Après la dernière retouche (l'étiquette « jouable » pleine), les specs du jeu et d'accessibilité repassées sur le nouveau build : 129 passées.
+- À l'écran, à 1 280 et 390 px, en français et en anglais : l'intro de Pédalix, le bureau avec son téléphone et la pastille dans la barre d'action, une année C jusqu'à la transaction, le bloc de décembre qui mène au niveau 1, le hub à deux zones jouables. Aucun défilement horizontal.
+
+**En production (2026-10-01)** : [#247](https://github.com/ScratchMe/tourdegrowth/pull/247), squash `9b8bfb3`, 57 fichiers, arbre identique à la tête (après une fusion de `main`, qui avait reçu A7.3.c). Cette fois, le statut `Vercel` du commit est `success` : le déploiement de production a emporté A12.e (#246), refusé le matin par le quota, avec A12.f.1 et A7.3.c. Le jeu reste fermé : `/fr/game`, `/fr/game/acquisition` et son image répondent 404, et le sitemap ne nomme aucune page du jeu.
+
+## A12.f.2 : une carte, les deux niveaux (2026-10-01, #248)
+
+**Ce qui change** : quand l'acquisition et la rétention freinent ensemble, l'encart du résultat propose les deux niveaux sur une seule carte, étape par étape (C30 Q5). Jusqu'ici, l'ordre AARRR choisissait à la place du lecteur. Une carte à un seul niveau ne change pas d'un pixel, et la bande reste à 44 px sur ordinateur.
+
+**Les choix** :
+- **`gameEntryFor` devient `gameEntriesFor` et rend une liste** : chaque étape du goulot qui a un niveau, la plus faible d'abord, sans doublon. Le renommage casse chaque appel à la compilation, ce qui est voulu pour un changement de sens. Le dénominateur de `/admin/stats` suit la même règle (`.length > 0`).
+- **`GameEntry` reçoit `levels`**, une entrée par niveau proposé (l'étape, le lien, le bouton, le chiffre, la porte analytique). Le titre, le corps, la mention et la confiance absente sont communs à la carte. Il n'y a aucun chemin analytique neuf : chaque bouton compte la porte de son niveau.
+- **La mise en page de la carte à plusieurs niveaux** : la bande toujours empilée, un chiffre par ligne puis la confiance ; une rangée par étape, son nom au-dessus de son bouton ; la mention une seule fois.
+
+**Ce que l'écran a trouvé** (à 1 280 px, avant la correction) : un « · » suspendu en fin de première ligne quand la bande passait à la ligne, et deux mises en page dans la même carte, le nom « Acquisition » renvoyé au-dessus d'un bouton trop long alors que « Retention » restait à côté du sien. D'où la bande empilée et le nom toujours au-dessus.
+
+**Copie neuve, « à relire »** : `GAME_ENTRY_SEVERAL` (« Le côté obscur de tes étapes », son corps, « vingt minutes par niveau, gratuit »). La relecture de copie a trouvé une phrase fausse sur certains résultats : « un niveau pour chacune des étapes qui te freinent » ne tient pas quand trois étapes sont à égalité et que deux seulement ont un niveau, alors que la page au-dessus dit « 3 étapes te freinent ». C'est devenu « les étapes ci-dessous » et « huit astuces par niveau », et un test tient le cas.
+
+**Vérifié** :
+- `tsc` et `eslint` propres, **2 698 tests unitaires**, dont les cas de la liste : deux niveaux dans l'ordre du goulot, un seul quand une seule étape du goulot en a un, jamais deux fois le même, l'ouverture Deep dive pour toute la carte.
+- Une fixture e2e neuve : un vrai résultat lu dans l'émulateur, avec l'acquisition et la rétention à 0/20. Sa spec voit une carte, deux boutons dans l'ordre, les deux chiffres.
+- Les specs du jeu, des résultats et d'accessibilité : 160 passées, 6 ignorées par construction.
+- À l'écran, en français et en anglais, à 1 280, 390 et 360 px : la carte à deux niveaux et celle à un niveau, sans défilement horizontal.
+
+**Mergée, pas encore en production (2026-10-01)** : [#248](https://github.com/ScratchMe/tourdegrowth/pull/248), squash `976e3e9`, 17 fichiers, arbre identique à la tête. Le déploiement de production a été refusé par le quota du jour (`VERCEL.md` §1.12), comme celui d'A12.e le matin. Le jeu étant fermé, rien n'est en retard pour le public, et le prochain déploiement l'emportera.
+
+## Les textes de lancement du moteur, et le §18 d'`ENGINE.md` sorti dans `docs/engine/` (2026-10-01)
+
+Demandé par Antoine après le merge d'A7.3.c : « ce qui reste, hors code », sauf le bon à tirer A7.3.d, qu'il mène avec un autre agent.
+
+**Les textes de lancement** (`CHANTIERS.md` A7.3, ligne « Hors code ») : `marketing/kit.md`, `campaigns/README.md` (§0, §3, §8), `competitive-brief.md` et les six textes de `campaigns/engine/` disent maintenant ce que fait le moteur livré.
+- **Deux motions à cocher** : dix-sept chiffres en libre-service (trois par étape, cinq au revenu), quinze en vente assistée (lus sur trois mois), ou les deux. L'hybride se montre en « deux moteurs, un total », jamais l'un contre l'autre (C4) : une ligne de risque neuve, au §8 du brief, le tient.
+- **La FAQ du Show HN** « Only self-serve SaaS? » devient « What about sales-led B2B? ». La limite connue ne garde que l'appli grand public et la place de marché.
+- **Le fil social ne nomme plus les étapes** : il les traduisait en français, alors que le produit les garde en anglais.
+- **Aucun texte n'annonce plus un nombre de slides.** « 4 à 7 » était faux avant même l'assisté. Mesuré sur les jeux d'exemple des tests, le deck compte 5 slides en libre-service sans aucun chiffre, 7 sur l'exemple, 7 sur l'exemple assisté et 13 sur l'exemple hybride, puis une de plus par levier « Et si » déplacé, et une slide de cumul dès que deux leviers d'un même moteur bougent (17 avec trois leviers, dont deux sur l'assisté). Le kit dit maintenant de ne jamais en annoncer un.
+
+**Trouvé en relisant, hors de la liste de `CHANTIERS.md`** :
+- le kit et le §3 du brief laissaient encore une des deux fourchettes publiées désigner la fuite. C'était la décision 5 du 2026-09-24, que C1 a remplacée le 2026-09-29. Les textes prêts à coller le disaient déjà juste ; les deux documents qui servent à les vérifier, non ;
+- le post Indie Hackers avançait « ~7 KB » pour la bibliothèque PNG, ce que le kit range parmi ce qu'il ne faut pas avancer tant que ce n'est pas remesuré. Il dit maintenant « a small library » ;
+- la liste des événements du kit gagne `engine_setup/<plg|slg|hybrid>` (Q14).
+
+**Le §18 d'`ENGINE.md`** (le B2B assisté et l'hybride) est sorti dans `docs/engine/assiste-et-hybride.md`, à côté de `v1.md`. Le texte est déplacé tel quel : ses 2 071 lignes sont identiques, à l'octet près, à celles de `main`. `ENGINE.md` passe de 2 371 à 300 lignes, et son tableau « Où vit la spécification » pointe le nouveau fichier : les renvois « `ENGINE.md` §18.12 » du code et des documents restent valides. Suivent l'en-tête de `v1.md`, l'index du `README.md`, la carte du dépôt de `CLAUDE.md`, et deux renvois d'`ENGINE.md` : « §18 de ce document », et « §4, §7 et §8 plus bas », périmé depuis le premier découpage.
+
+**Vérifié** :
+- `node marketing/check-lengths.mjs` : 71 longueurs, aucune au-delà de sa limite. Les deux descriptions de 800 caractères ont perdu « deux moteurs, un total » pour tenir.
+- `vitest` : 2 699 tests passent, sur la tête fusionnée avec A12.f.2,, dont les liens de la documentation et les plafonds du journal et de `CLAUDE.md`. `main` compte 745 specs Playwright depuis A12.f.1 ; les chiffres de référence de `CLAUDE.md` restent ceux d'A7.3.c, mesurés avant.
+- `relecteur-copie` sur le diff de `marketing/` : rien de bloquant sur les règles de la promotion ni sur la typographie. Il a relevé trois affirmations de la FAQ du Show HN contraires au code, toutes corrigées : « only two » repères (il y en a plusieurs, qui tous situent), « the one deliberate simplification » (chaque slide de fuite porte la sienne en pied depuis l'assisté) et une liste d'événements donnée pour complète qui en omettait trois. Corrigés aussi : « deux fourchettes » dans le kit et le brief, la règle du brief « Antoine n'est jamais nommé », qui contredisait C22, « moteur de croissance » (C2), le NRR assisté lu sur douze mois et non trois, une slide de cumul que le compte oubliait, et le marqueur `TODO : à relire` du Show HN, écrit avec une insécable que le grep ne voit pas. Laissés tels quels : deux écarts de parité anciens (« four tools » / « quatre onglets », et une demi-phrase absente de la description française de 800 caractères, qui la ferait dépasser).
+- Un merge de documentation seule ne déploie rien (`scripts/vercel-ignore.sh`).
+
+## A12.g : les specs Playwright du niveau 2 (2026-10-01, #250)
+
+**Ce qui est livré** : `e2e/game-level2.spec.ts`, huit specs sur le modèle de celles du niveau 1. Les années de référence y sont écrites telles que le §17.6 les tabule, jamais recalculées : les tests unitaires tiennent le moteur à ces tables, ces specs tiennent l'écran. Les nouveaux clients s'affichent à la dizaine, sans « % » ni « pt ».
+- **P1, P2** : le premier écran, en nouveaux clients, avec le téléphone de Pédalix et « +29 € au panier » ; aucune carte ne dit ce qu'elle rapporte.
+- **P5** : un badge de pression apparaît sur la fiche sans changer le panier, et une livraison annoncée vide la pastille.
+- **A, en français** : les ordres refusés, chaque trimestre au chiffre près, des applaudissements en décembre et le lien vers le niveau 1 (C31).
+- **C, en anglais** : les frais de service du panier signalés en toutes lettres au T3, le contrôle au T3 et jamais avant, une transaction et jamais une amende, six astuces retirées.
+- **D** : l'année renvoyée en juin, « Année interrompue » là où était la main.
+- **La sauvegarde** sous `tdg.game.acquisition.v1`, sans toucher à celle du niveau 1.
+- **P17** : 390 px à chaque phase. **P21** : axe sur décembre.
+- **P20** : `game_started/acquisition/…` et `game_ending/acquisition/…`.
+
+**Les assistants** (`game-helpers.ts`) prennent maintenant le niveau en paramètre : `seedGame` reçoit la clé et la version du modèle de chaque niveau, et `pickAndRun` accepte les cartes de l'un ou de l'autre.
+
+**Vérifié** : la non-vacuité, d'abord. Avec les frais de service désactivés exprès dans `basketFor` puis reconstruit, l'année C rougit exactement sur `data-fees` et sur rien d'autre ; le code a été remis en place avant de reconstruire. Ensuite, sur le build final, les specs du jeu et d'accessibilité : 137 passées, 6 ignorées par construction. `tsc` et `eslint` sont propres.
+
+
+## A14.a : la spécification du moteur complet, et le journal archivé une fois de plus (2026-10-01)
+
+Demandé par Antoine : « on devrait gérer tout ce que tu listes dans le point 3 ». C'est-à-dire tout ce qui manque au moteur pour le SaaS B2B, avant l'app grand public et la place de marché. La spécification est le §19 d'`ENGINE.md`, écrite directement dans `docs/engine/moteur-complet.md` pour n'avoir pas à la déplacer après. Elle compte onze chantiers, un découpage en huit PR (~16,5 jours-agent), et dix-neuf questions pour C32, chacune avec sa recommandation. L'export PowerPoint reste hors du lot, comme la spec v1 le voulait.
+
+**Écrite contre le code, pas contre les documents.** Trois relevés en parallèle (série et stockage ; outils et collecte ; chiffrage et surfaces) ont lu le code de `main`, avec un renvoi `fichier:ligne` pour chaque fait. Ce qu'ils ont trouvé et qui change la spec :
+- **les périodes d'un mois dépendent de la date du jour** (`values.ts:141-142`, `cohort.ts:155-168`). Relu plus tard, un mois clos changerait de période et de confiance. La série pose donc `closedAt` et `windows` sur chaque mois clos ;
+- **la source est stockée une fois par chiffre**, pas une fois par numérateur et par dénominateur : le contrôle « deux outils » demande un champ de plus (`denominatorSource`) ;
+- **la formule de la boucle de recommandation existe déjà** dans le « Et si » (`scenario.ts:260-265`). Le chiffrage en € la reprend, pour que la slide de fuite et le « Et si » ne puissent pas se contredire ;
+- **le design system n'a pas de blanc pur** : sa surface la plus claire, `--paper-0`, tire sur le crème. Le fond blanc demande un jeton primitif, et c'est une question (Q14) ;
+- **un défaut** : `ALL_TOOLS` (`_engine/sources.ts`) oublie Pipedrive et la plateforme de customer success, qui ne paraissent donc jamais sous « Autres outils ». Le correctif entre dans T0.
+
+**Le golden v1 ne bougera pas** : aucun de ses sept jeux n'a de cible sur la rétention J30 ni sur la part recommandée, vérifié dans `golden-v1-inputs.json`. Les chiffrer en € ne change donc ni une slide ni une ligne pour un fichier v1. Un golden v2 sera figé sur les jeux de l'hybride avant la première ligne de T0, comme le v1 l'avait été avant A7.3.c.
+
+**Le journal, archivé une fois de plus.** À environ 197 000 caractères pour un plafond de 200 000, avec plusieurs sessions qui y écrivent le même jour, les entrées du 2026-09-30 sont parties telles quelles dans `docs/journal/09-decisions-codees-et-extension-04.md`. La table des volumes gagne sa ligne, et ce fichier repart à environ 72 000 caractères.
+
+**Vérifié** :
+- `vitest` : les liens de la documentation et les plafonds du journal et de `CLAUDE.md` passent. La spec, le neuvième volume et les index sont lus par le test des liens.
+- Documentation seule : rien n'est déployé (`scripts/vercel-ignore.sh`).
+
+
+## C32 : le moteur complet, validé (2026-10-01)
+
+Les dix-neuf questions de `docs/engine/moteur-complet.md` §19.15, tranchées dans la session qui les avait écrites : les quatre plus lourdes d'abord, puis par groupes de quatre, Antoine ayant préféré les voir une par une plutôt qu'en bloc. Les réponses sont datées dans la spec, et les sections qu'elles changent sont corrigées.
+
+**Deux reprises de la reco, une précision** :
+- **Q1 : l'ouverture du moteur attend A14**, bon à tirer compris. Conséquence pour la livraison : sans ouverture d'ici là, chaque PR du lot se merge sur `main` dès qu'elle est verte, drapeau fermé, comme celles du niveau 2 du jeu. La branche d'intégration n'avait de raison que si le moteur ouvrait pendant le lot. Le bon à tirer A14.d passe avant l'ouverture (D2).
+- **Q17 : l'image de partage passe d'abord par Claude Design.** Elle devient le brief B5 de la design sync, et T6 attend son retour pour la porter dans `lib/og/`.
+- **Q5 : la slide « Ce qui a bougé » existe, mais décochée par défaut.**
+
+Le reste suit la reco : le mois suivant reprend les cibles et les définitions, jamais une valeur ; les mois passés en lecture seule avec « Corriger » ; des écarts sans couleur ; la rétention J30 et la part recommandée en € ; la couverture du pipeline comme indicateur avancé ; les outils, le contrôle « deux outils », le modèle de tableau, dix moteurs au plus, la fusion avec aperçu, le blanc pur, les deux rappels `.ics`, les deux portes d'entrée, trois ajouts à GoatCounter, et pas de PowerPoint.
+
+**Une question d'Antoine en route** (Q16) : la carte « Le moteur » de l'accueil et la pastille de la bande noire deviendront-elles cliquables ? Oui, et sans rien à construire : C15 (A7.9) les a câblées sur le même drapeau que l'ouverture, mesurées par `home_strip` et `space_band`. La bande reste sans lien dans le questionnaire et le Deep dive (`bandLinked={false}`), pour ne faire sortir personne en plein parcours. Avis donné : la garder cliquable ailleurs, puisque c'est la seule navigation entre les trois espaces.
+
+**Un numéro rattrapé** : la décision s'appelait C31 dans le premier jet. `docs/decisions.md` montrait C31 déjà prise le matin même par le jeu (le bloc « Niveau suivant »), que la liste de `CHANTIERS.md` ne reportait pas encore. Renumérotée C32 avant le merge. Comme pour un numéro de PR (convention 8), un numéro de décision se lit dans l'index, pas dans une liste qui peut être en retard.
+
+## Design sync B4 : le niveau 2 et A7.3.c dans Claude Design, et ce que la régénération a trouvé (2026-10-01, #253)
+
+Antoine a lancé `/design-sync`. B4 devait recapturer les neuf composants changés par A12 et les deux nouveaux (`ShopPhone`, `BasketPill`) ; le projet est à jour avec **90 composants, 303 cellules** (ancre `fee6cc7084fe`, 463 fichiers, aucune suppression, `design/` laissé tel quel).
+
+**Deux méthodes ont trouvé plus que la liste de B4**, et aucune n'était de regarder une planche :
+- **La recherche de dérive** de `.design-sync/NOTES.md`, passée en script (chaque chaîne retirée du produit depuis le dernier envoi, cherchée dans les aperçus) : `ZoneNav` montrait encore la zone acquisition « bientôt », `Choices` citait le choix de modèle d'avant A7.3.c, `Tag` un « coming soon » qui n'existe plus. Lire les nouveaux appels a ajouté `Checkbox.LastMotion` : A7.3.c a branché l'état désactivé avec sa raison.
+- **Régénérer chaque aperçu du jeu** avec les fonctions de l'îlot (`dashboardProps`, `decemberContent`, `reportContent`, `newsContent`, `timelineSegments`, `journalEntries`, `phoneView`, `shopPhoneView`, `basketFor`, `clicksFor`) et comparer octet par octet : `RevealCells` (4,1 % / 18 / 81) et `QuarterTimeline` montraient des chiffres qu'aucune année n'atteint, notés « bon » depuis le 2026-09-29. Ils viennent maintenant d'années jouées ; une marche aléatoire sur le reducer trouve en secondes une année de la forme voulue (le labyrinthe : 4,0 % pile, confiance 31, radar 74).
+
+**Un défaut du produit, trouvé en mesurant `LastMotion` dans un navigateur** : `.disabled .input`, de même poids que `.input:checked` et plus loin dans la feuille, repeignait le fond d'une case cochée et désactivée. Dans les réglages du moteur, la dernière façon de vendre avait l'air décochée juste au-dessus de « Il faut au moins une façon de vendre ». Corrigé dans `Checkbox.module.css` (le remplissage, coupé à l'intérieur du bord en tirets) avec une mesure du fond calculé dans `engine-hybrid.spec.ts` ; non-vacuité : sans la règle, 1 test sur 11 tombe, sur cette ligne.
+
+**Ce qui ne part pas** : le motif par défaut des guides incluait `docs/*.md`, et le build copiait `docs/decisions.md` comme guide de design ; `guidelinesGlob: []`. `relecteur-copie` a confirmé chaque chaîne affichée et corrigé six affirmations des commentaires et de `conventions.md`.
+
+**Vérifié** : 2 699 tests unitaires, `tsc`, `eslint` ; les specs du moteur et d'accessibilité (28) sur un build de production ; le rendu des 90 composants (0 « bad ») ; chaque fichier envoyé relu dans la liste du projet.
+
+**Pour la prochaine synchro** : une note reportée dit que la planche avait l'air juste, pas que ses chiffres sont ceux du modèle. Les aperçus du jeu que B4 n'a pas régénérés sont listés dans `NOTES.md`, avec la recette.
+
+## A15 : la finition UI et UX, d'après les reels et les lois de l'UX (2026-10-01)
+
+Une seule PR pour tout le lot, à la demande d'Antoine (moins de déploiements Vercel). Le numéro était A14 jusqu'à ce que #254 prenne A14 pour le moteur complet, mergée la première : la section, les commentaires et les specs sont passés à A15 à la fusion.
+
+### Le premier reel : le bouton
+
+Parti d'un reel envoyé par Antoine, lu par sa légende : six règles pour un bouton principal (taille, libellé, contraste, relief, détail, mouvement). Confrontées à `Button` :
+- **quatre déjà tenues** : la taille par défaut fait 47 px de haut sur 24 px de côté, le contraste est gardé par la CI (convention 7), le retour visuel part à l'image suivante (la transition de 120 ms n'est pas un délai), les libellés sont un verbe et un objet (« Démarre ton Tour → ») ;
+- **deux écartées** : le rayon égal à la demi-hauteur et le relief doux, lumière venue du haut, sont un style, contraire à l'autocollant de la direction I (2026-09-28) ;
+- **un écart réel** : `size="sm"`, dessiné et touché à 39 px, sous `--hit-min` (« jamais moins »).
+
+**Ce qui change** : `.sm` porte la bande transparente de `quiet` (`::before`, 44 px au moins sur chaque axe, centrée sur le bouton). 39 px dessinés, 44 touchés, rien ne bouge autour. Côté public : l'appel de l'en-tête de l'accueil (masqué sous 760 px, visible sur une tablette), « Reprendre la marge globale » du moteur, le « réessayer » d'un graphique en erreur, « Copier le Markdown » du badge ; et les boutons de l'audit. La bande plutôt qu'un `min-height` sur écran tactile, parce que c'est déjà la règle du système pour ce qui est dessiné petit (`quiet`, `Segmented` compact, les `?` du glossaire).
+
+**Vérifié** :
+- `targets.spec.ts` : les aides de `quiet` deviennent `expectTapTargets`, pour tout bouton, et trois tests neufs (l'en-tête à 820 px, la marge de l'hybride à 390 px, le badge d'un vrai résultat lu dans l'émulateur) tiennent les trois mêmes affirmations. Non-vacuité : sans `.sm::before`, exactement ces trois tombent, sur la bande (39,5, 40 et 39,75 px), les neuf autres passent.
+- Le doigt volé à un voisin, balayé : la bande dépasse de 2,5 px, et le voisin le plus proche d'un petit bouton est à 12 px (l'audit), 20 px (l'en-tête), 36 px (le résultat) et 50 px (le moteur, dont les deux fiches de marge sont les seules, sur 130 ouvertes en trois états à 390 et 1 280 px, à en porter un). La spec le dit, plutôt que d'exiger un voisin qui n'existe pas.
+- À l'écran, en français et en anglais : l'en-tête, le badge et la fiche du moteur inchangés.
+- `tsc`, `eslint`, `next build` propres ; `vitest --coverage` : 2 699 tests, seuils tenus. La suite Playwright complète, avec l'émulateur : 750 specs, 743 passées, 6 ignorées par construction (« jeu fermé »), une tombée : la miniature « total » du deck hybride lue vide (`engine-deck-hybrid.spec.ts:87`, en anglais), pendant que `vitest` tournait à côté. C'est la lecture que le commentaire de la spec décrit déjà ; rejouée seule six fois dans les deux langues, 12 sur 12.
+- Pas de re-synchro Claude Design : rien de visible. Le contrat de `Button.tsx` dit la bande ; la prochaine re-synchro l'emportera.
+
+
+### A15.1 à A15.6, livrés dans la même PR
+
+- **A15.1, les autres cibles sous 44 px** : pastilles de la bande d'espace, logo, retour et termes liés du glossaire, étapes de « Comment ça marche » et de la checklist, comparaisons. Une bande partagée, `styles/hit.module.css`, composée. Les termes liés tiennent en rangées : à 12 px d'écart, les bandes de deux rangées se rencontraient (« LTV » touché sur 31 px) ; elles passent à 26 px. Non-vacuité : sans la bande, les sept tests tombent ; rangées à 10 px, seul celui des termes liés.
+- **A15.2, un objectif effacé par une faute de frappe** : `isUnreadableNumber` sort de `NumberField` vers `lib/forms/number.ts`, et les deux champs d'objectif n'écrivent rien tant que la case ne se lit pas. Non-vacuité, un champ à la fois.
+- **A15.3, l'enregistrement refusé d'une fiche** : le focus va au premier champ en cause ; un taux hors de 0 à 100, un montant ou une durée négatifs se disent en quittant la case ; un négatif n'est plus « manquant » ; les bornes estimées d'un taux sont tenues à 0–100. Le double message (sous le champ et sous le bouton) est gardé : c'est la règle écrite en tête de `sheet-problems.ts`. **Un sabotage a passé** : la vérification au départ de la case, retirée, laissait le test vert, parce que le test tapait le taux APRÈS un enregistrement refusé, et qu'une fiche déjà essayée relit ses règles à chaque frappe. Test réordonné, puis les deux sabotages tombent chacun sur leur ligne.
+- **A15.4, l'écran d'erreur** : REVIEW.md R-04 voulait le code court et stable sous la phrase, pour le support ; il est gardé. Ce qui change : la phrase dit la panne (hors ligne, limite horaire avec l'attente lue dans `Retry-After`, ou nous), et le code n'est jamais ce qu'a levé la requête (`Failed to fetch`, `Request failed (504)`, une phrase de validation) : `HTTP_504`, `NETWORK`. `lib/quiz/request-failure.ts`, quiz et Deep dive.
+- **A15.5, « Réessayer »** : `reset()` → `retry()`, stable depuis Next 16.3 (lu dans `node_modules/next/dist/docs`). Testé par le comportement : un clic envoie une requête pour la page ; avec `reset`, aucune.
+- **A15.6, l'attente du Deep dive**, validée par Antoine : un message, une barre qui suit l'horloge contre la minute habituelle sans jamais se remplir (`lib/quiz/wait-progress.ts`), le temps écoulé, la ligne R2-09 à 5,2 s. Testé à l'horloge de Playwright, avancée de deux minutes. À l'écran, la première version dessinait le rouge entre deux pointillés : le contour passe en pseudo-élément, sous une pastille pleine. `message2` et `--dur-wait` partent, sans lecteur (`motion-scale.test.ts` l'a dit).
+
+**Copie neuve ou réécrite, « à relire »** : `errorOffline`, `errorRateLimited` ; dans le moteur, `notANumber` (« Écris un nombre, par exemple 1 250 ou 18,5 »), `lowAboveHigh` (« Échange les deux… »), `amountNegative`, `durationNegative`. Elles changent la copie du nº8, à remettre d'accord.
+
+**Vérifié sur la tête finale** (fusionnée avec #254) : `eslint`, `tsc`, `next build` propres ; `vitest --coverage` 2 719 tests, seuils tenus ; la suite Playwright complète avec l'émulateur et `CI=1`, 770 passées et 6 ignorées par construction, sur 776.
+
+**Claude Design** : trois contrats changent (`ErrorScreen` prend `retry`, `LoadingScreen` dessine autrement, `Button` `sm` décrit sa bande) ; aperçus et conventions suivent dans le dépôt, la re-synchro reste à faire (B).
+
+### Les lois de l'UX
+
+Le recueil Laws of UX (30 lois), confronté au code par trois agents en lecture seule, un par parcours ; chaque écart retenu revérifié à la source. Les règles sont dans `design/LOIS-UX.md` ; huit correctifs (A15.7 à A15.14) et six décisions (A15.15 à A15.20) dans `CHANTIERS.md`. Antoine a retenu les cinq recos qui se codent le même jour, et choisi de merger cette PR seule : correctifs et décisions suivent dans une seconde. Écartés : l'effet esthétique-utilisabilité, les biais cognitifs (déjà « never claim more than the numbers support »), Occam, Pareto, Parkinson, Prägnanz, la connexion uniforme, et le flow du jeu, où rien n'est à corriger.
+
+**Trois autres reels, le même jour** (chargement, validation de formulaire, cartes), confrontés au code par trois agents en lecture seule, chaque constat retenu revérifié à la source. Retenus : A15.2 à A15.6 dans `CHANTIERS.md`. Écartés, avec la raison :
+- les squelettes : aucune page n'attend de données mises en page ;
+- la coche verte sur un champ juste : « Enregistré » existe déjà ;
+- « pas de récapitulatif en tête » : contraire au GOV.UK Design System, qui met le message sous le champ *et* un récapitulatif à liens ;
+- la grille de 8 stricte : l'échelle est hors grille à dessein (`spacing.css`) ;
+- le rouge réservé à l'action : c'est la marque ;
+- l'ombre venue du haut : la direction I ;
+- 150 à 300 ms : notre 120 ms au survol est plus rapide, et le reel du bouton du même compte demandait un retour en moins de 100 ms ;
+- les rayons concentriques d'un bouton dans une carte : 2 px au lieu de 12 casseraient le bouton.
+
+
+## A14.c, T0 : le socle v3, plusieurs moteurs par appareil (2026-10-01, #255)
+
+La première PR du moteur complet (`docs/engine/moteur-complet.md` §19.1 et §19.13), drapeau fermé. Rien ne change à l'écran : T0 pose ce que T1 à T6 vont remplir.
+
+**Le golden v2, figé avant la première ligne.** Six états v2 (l'exemple en libre-service, l'hybride, l'hybride avec « Et si » et Tour lié, l'hybride sans chiffre de l'assisté, l'assisté seul et l'assisté vide), et ce que le build v2 en tirait en français et en anglais : le tableau dérivé entier, le deck entier et son export texte, les deux scénarios, les onglets de chaque motion, la reprise et le plan de collecte. Écrits une fois, au commit « golden v2 figé », par le code v2. Comme pour le golden v1, seule la fonction qui ouvre un v2 peut suivre la version suivante ; ce que le v2 imprimait, non.
+
+**Le fichier passe en version 3.** Un v2 n'y gagne que son numéro : `setup.tools`, `setup.pipeline`, `deck.theme`, et sur un mois `closedAt`, `windows` et `pipelineOpen`, sont **optionnels**, absents voulant dire « pas dit » ou « papier ». C'est un écart à la spec, qui prévoyait d'écrire `tools: []` et `theme: "paper"` à la migration ; il est noté au §19.1.2. Un build v2 refuse proprement un fichier v3 (« version inconnue »), et ce build refuse un v4 de la même façon.
+
+**Plusieurs moteurs par appareil.** Un index sous `tdg.engines.v3` (le moteur à l'écran et l'ordre), et une entrée par moteur sous `tdg.engine.v3.<id>`, de la même forme que l'ancienne clé unique. Dix moteurs au plus (Q12), refusés en `full` au-delà. Les trois règles d'avant tiennent pour chaque clé : une écriture qui échoue est rendue à l'appelant, une entrée illisible n'est jamais prise pour un appareil vide ni écrasée, et l'ancienne copie (`tdg.engine.v2`, ou `v1` derrière elle) reste jusqu'à une sauvegarde exportée plus récente. L'îlot appelle toujours `loadEngine`, `saveEngine` et `clearEngine`, et rien ne change pour lui : sans `add`, un autre moteur **remplace** celui à l'écran, comme l'import « Remplacer » le faisait. `listEngines`, `setActiveEngine`, `deleteEngine` et `saveEngine(…, { add: true })` attendent leur écran, en T5.
+
+**La validation** connaît les règles neuves du §19.1.6 : au plus 36 mois, des mois strictement croissants, `closedAt` sur chacun sauf le dernier, des outils connus et sans doublon, un pipeline positif, un dénominateur venu d'un autre outil vérifié comme une source, et un deck papier ou blanc.
+
+**Le défaut trouvé en écrivant la spec est corrigé** : Pipedrive et la plateforme de customer success manquaient à `ALL_TOOLS`, et donc à « Autres outils ». La liste se déduit maintenant d'un objet typé `satisfies Record<ToolId, true>` : un outil ajouté au type sans être ajouté là ne compile plus.
+
+**Les specs e2e écrivaient l'ancienne clé** : quatorze fichiers posaient `tdg.engine.v2` avec des états v3, que le lecteur de l'ancienne clé refuse (il exige un état v2 dedans). Un assistant, `e2e/engine-helpers.ts`, construit les deux clés comme `storage.ts` les écrit et relit l'entrée du moteur à l'écran. `engine-migration.spec.ts` couvre maintenant un appareil v1 **et** un appareil v2, plus un fichier v2 ouvert sans note de migration.
+
+**Non-vacuité**, mesurée en sabotant puis en restaurant le code. Chaque sabotage fait tomber les tests qui le visent, et aucun autre :
+- garder l'entrée remplacée, revenir au premier moteur après une suppression, oublier les entrées dans « Tout effacer », lever le plafond de dix ;
+- côté validation : un mois ouvert avant le dernier, deux fois le même mois, un outil en double, un objectif à zéro, un dénominateur non vérifié ;
+- faire refuser le v3 par `io.ts` (six tests) ;
+- perdre `whatIf` à la migration : les deux goldens, sur leurs états avec « Et si ».
+
+**Un test était trop faible, et le sabotage l'a montré** : une migration v2 → v3 qui étale l'état au lieu de le copier en profondeur passait tout. Le test « laisse l'objet v2 tel quel » ne regardait que l'objet lui-même. Il modifie maintenant l'intérieur de l'état migré et vérifie que la copie v2 n'a pas bougé.
+
+**Un test lent sous charge** : « a row never says a change… » (`deck.test.ts`) prend 1,5 s seul. Il a dépassé ses 5 s une fois, pendant qu'un sabotage tournait à côté de la suite Playwright. Seul, il passe. Relevé ici, pas durci.
+
+**Vérifié** :
+- `vitest --coverage` : 2 727 tests passés sur la branche seule, 2 747 une fois fusionnée avec B4 et A15, au-dessus des seuils ;
+- `tsc`, `eslint` et `next build` (avec `GAME_ENABLED=true`, comme la CI) propres ;
+- Playwright sur la branche seule : 757 specs, 730 passées et 27 ignorées, aucune au second essai. Puis, fusionnée avec B4 et A15 (`CI=1`) : 778 specs, 750 passées et 28 ignorées (22 faute d'émulateur, dont la spec d'A15 dans `targets.spec.ts` ; 6 « jeu fermé », par construction), aucun échec. Les cinq specs de migration, dont les deux appareils v1 et v2, passent du premier coup.
+- **Deux fusions de `main` en route**, B4 (#253) puis A15 (#252), mergées pendant que la PR attendait. Tant que la PR était en conflit, GitHub ne lançait pas `ci.yml` : seul CodeQL tournait, et rien ne le disait. La seconde fusion a aussi apporté une graine d'A15 qui écrivait encore l'ancienne clé `tdg.engine.v2` ; elle passe par `writeEngineSeed`. Relevé dans `GITHUB.md` avec T1.
+- la barrière de `/livrer` §0 relève deux fichiers non TypeScript ajoutés sous `src/` : `golden-v2-inputs.json` et `golden-v2.json` (1 Mo à eux deux). Ce sont des données de test lues par `readFileSync` dans Vitest seulement, comme celles du golden v1 ; aucun `.nft.json` du build ne les trace, donc aucun bundle serveur ne les porte.
+
+
+## A15.7 à A15.20 : ce que les lois de l'UX laissaient à faire (2026-10-01, #257)
+
+La seconde PR d'A15, comme Antoine l'a choisi (#252 mergée seule d'abord). Huit correctifs et quatre des cinq décisions qu'il a tranchées sur les recos ; la cinquième, A15.18, n'a pas tenu à l'écran et lui revient (C33). A15.19 part à Claude Design (B7).
+
+**Les correctifs** :
+- **A15.7, le quiz se corrige après la 15ᵉ réponse** : un retour discret sur les écrans du profil et du ton, et leur en-tête dit ce qui reste (« Plus que deux écrans », puis « Dernier écran ») au lieu de « 15 / 15 répondues ».
+- **A15.8, les centimes d'un montant** : cinq taux dont les deux termes sont des montants (marge brute, expansion, contraction, NRR, marge assistée) portent `amounts` dans `catalog-shape.ts` ; leurs deux cases prennent les décimales, l'unité « € » et le message d'un montant.
+- **A15.9, l'étape « base » ne jette plus rien** : une valeur illisible, décimale ou nulle arrête l'étape et dit pourquoi (« Un nombre plus grand que zéro : on compte des personnes. »). Elle lit la case brute : `NumberField` rend `null` pour une case illisible comme pour une case vide.
+- **A15.10, Postel** : « 18 % », « 1 200 € », « €1,200 » se lisent (`lib/forms/number.ts` retire les signes d'unité, que la case affiche déjà) ; un compte négatif est refusé dans la fiche comme à l'import. Le test d'A15.2 qui tapait « 25 %% » comme exemple illisible tape maintenant « 25 kg ».
+- **A15.11** : « Imprimer ou enregistrer en PDF », le geste que fait le bouton.
+- **A15.12, une fiche garde sa saisie** d'un onglet à l'autre ou repliée : `sheet-drafts.ts`, en mémoire seulement (l'appareil garde ce qui est enregistré, jamais une saisie à moitié), effacé avec le moteur ou à l'import. **Il renverse un comportement tenu par un test** : `platform-native.spec.ts` gardait « replier une ligne jette ce qui a été tapé, comme la fermer l'a toujours fait », écrit le 2026-09-29 quand la ligne repliée est restée dans la page (`hidden="until-found"`) pour garder l'ancien comportement, pas pour le décider. La suite complète l'a montré ; le test tient maintenant le contraire, et vérifie que rien de la saisie n'atteint l'appareil.
+- **A15.13, les sections du résultat sont des titres** : `MetaLabel` prend `as` (`h2` pour les forces et les faiblesses). Son rendu par défaut ne change pas ; le contrat part à la re-synchro (B6).
+- **A15.14** : quand une des forces montrées est faible, la section dit « Ce qui tient le mieux », pas « Points forts ». Une fixture d'émulateur neuve, `low` (toutes les réponses au plus bas), le montre. Sur ce tableau à zéro partout, la section nomme encore deux étapes ex aequo : honnête avec ce titre, gardé.
+
+**Les décisions** :
+- **A15.15** : sur téléphone, l'accueil se ferme sur « Démarre ton Tour », sous l'encart du fondateur ; sur un écran plus large, l'en-tête collant garde le sien et le bloc est masqué (deux primaires seraient en vue).
+- **A15.16, « Reprends ton Tour »** : `TourCta` lit les réponses gardées après le montage et dit où l'on reprend. **La vérification à l'écran a changé la copie** : « Reprends ton Tour (question 4 sur 15) → » laissait « 15) → » seul sur une seconde ligne à 390 px. Mesuré sur six formulations : « (Q 8 / 15) », le compteur du quiz lui-même, tient sur une ligne jusqu'à 360 px, lié par des espaces insécables pour se reporter entier à 320. Les quinze réponses données : « Termine ton Tour → ».
+- **A15.17, finir sur le partage** : le bloc Markdown du badge, pour développeurs, est replié (`Disclosure`) et passe avant la carte de partage. Sur téléphone, la mention légale reste après le partage, comme une note de bas de page : la remonter mettrait une mention entre le score et l'action, et l'ordre de lecture est tenu par `result-reading-order.test.ts`.
+- **A15.20, Entrée enregistre une fiche** : d'abord fait avec un `<form>`. **`engine-boundary.test.ts` l'a refusé** (règle 3 : un formulaire est un porteur ; si son envoi partait un jour sans notre code, avant l'hydratation ou sur une erreur, le navigateur mettrait ce qui a été tapé dans une URL, et rien de ce qui est tapé dans le moteur ne quitte l'appareil, `ENGINE.md` §11.4). La fiche garde son `div` et lit la touche : Entrée dans une case de texte, hors composition, quand le bouton Enregistrer prendrait le clic.
+
+**A15.18, revenu à Antoine (C33)** : « dans le jeu » sur la bande de la carte du jeu. Trois placements essayés (un élément à part, en ligne, raccourci en « Jeu : ») ; les trois cassent P23, une ligne de 44 px sur ordinateur et 56 px au plus à 360 px, et il ne reste que 9 px en français sur ordinateur. Rien n'a été gardé du code. La reco, un surtitre hors de la bande, est en C33.
+
+**Non-vacuité** : un build saboté sur tous les items à la fois fait tomber les 17 tests neufs, et aucun test existant. Puis, après la vérification à l'écran et le passage d'A15.20 sans formulaire, un second : la touche ignorée, « Termine » jamais choisi et l'ancienne copie de reprise font tomber exactement les trois tests qui les tiennent (Entrée, « Termine ton Tour », la ligne à 360 px, 72 px au lieu de 55), les douze autres des deux fichiers passent.
+
+**Ce que les deux relecteurs ont trouvé**, corrigé dans la même PR :
+- **sécurité** : les brouillons d'A15.12 ne partaient qu'avec un import par-dessus un stockage illisible (`replace`). Un import depuis le tableau les gardait, et une métrique que le nouveau moteur n'a pas remplie a la même clé (`id@new`) : la saisie de l'entreprise A revenait dans la fiche de l'entreprise B, à un Entrée de son export. Tout moteur qui arrive (`fresh`) les efface maintenant ; un test e2e importe un moteur depuis le tableau et rouvre la fiche. **Sa première version passait sur le bug** : elle rouvrait la fiche avec l'aide `openSheet`, qui recharge la page, et un rechargement vide à lui seul des brouillons gardés en mémoire. Rouverte sans naviguer, elle tombe sur le build saboté (`dropAllDrafts()` sous `replace` seul, comme avant), la case « je l'ai » cochée par la saisie de l'autre moteur ;
+- **copie** : un marqueur « à relire » décalé d'une ligne (`amountNegative`) ; « un compte ne peut pas être négatif » dit d'un montant en euros (le second terme d'une marge, l'MRR de l'ARPA), qui dit maintenant « un montant » comme la case qu'il dessine ; et « on compte des personnes » sur la base assistée, qui compte des opportunités, des affaires et des clients (`countPositiveSlg`). **Le même défaut existait avant** dans `workbench.notAWholeNumber` (« Un nombre entier : on compte des personnes »), sur les mêmes cases de la base assistée : copie validée, hors de cette PR, à porter au bon à tirer A7.3.d.
+
+**Copie neuve ou réécrite, « à relire »** : `toneSelector.headerTwoLeft`, `headerLast` (le retour reprend le « Retour » du quiz) ; `landing.ctaResume`, `ctaResumeLast` ; `result.strengthsTitleRelative` ; dans le moteur, `steps.countPositive`, `countPositiveSlg`, `workbench.countNegative`, `pdf`. Celles du moteur changent la copie du nº8.
+
+**Vérifié** : à l'écran, en français et en anglais (le retour et l'en-tête du ton, l'appel de fin à 390 px, l'étape « base » en erreur, le tableau `low`, le badge replié, puis la reprise mesurée à 390, 360 et 320 px). `eslint`, `tsc`, `next build` propres ; `vitest --coverage` 2 724 tests, seuils tenus. La suite Playwright complète avec l'émulateur et `CI=1`, sur la tête d'avant les relectures : 788 passées, 6 ignorées par construction (« jeu fermé »), une tombée, le test du repli qu'A15.12 renverse (plus haut), réécrit. Puis, sur la tête finale, les 193 specs du moteur et de `platform-native` : 192 passées, une au second essai, la miniature du deck hybride déjà relevée dans l'entrée d'A15 (`engine-deck-hybrid.spec.ts:87`). **Fusionnée avec A14.c T0 (#255)**, mergée pendant ce temps, et qui range chaque moteur sous sa propre clé : le test du repli lit tout le stockage de l'appareil, et A14.c note pour T2 et T5 que changer de mois ou de moteur doit vider les brouillons. Sur la tête fusionnée : `vitest --coverage` 2 752 tests, et la suite Playwright complète avec l'émulateur et `CI=1`, 792 passées et 6 ignorées par construction sur 798, aucune au second essai.
+
+
+## A14.c, T1 : la série mensuelle, moteur pur (2026-10-01, #256)
+
+La deuxième PR du moteur complet (`docs/engine/moteur-complet.md` §19.2), drapeau fermé. T0 est en production le même jour (#255, squash `647834a`). Aucun écran ne permet encore de démarrer un deuxième mois, c'est T2 ; mais un fichier v3 à deux mois s'importe déjà, et il se lit en entier.
+
+**`lib/engine/series.ts`**, pur, sans horloge :
+- `monthView` relit un mois clos tel qu'il a été vu : les mois jusqu'à lui, ses fenêtres (`windows`), et le jour de sa clôture (`closedAt`) pour « aujourd'hui ». Chaque module dérivé lit le dernier mois ; il suffit donc de lui passer cette vue pour qu'un mois d'août relu en novembre garde sa période et sa confiance. Le test le montre, et montre aussi qu'une lecture naïve, sur la date du jour, aurait changé la confiance ;
+- `nextMonthOf` et `startNextMonth` : le mois suivant s'ouvre quand le mois des flux est clos, avec les cibles du précédent et rien d'autre (§19.2.2). Les définitions, variantes et sources sont proposées par la fiche (`proposedFromBefore`), jamais copiées ; après un trou de plusieurs mois, c'est le dernier mois clos qui s'ouvre, et la cohorte suivie avance d'autant. Au-delà de 36 mois, `full` ;
+- `comparable` et `delta` (§19.2.5) : deux mois se comparent quand les deux valeurs sont mesurées, saisies de la même façon (des comptes les deux fois, ou un taux les deux fois), avec la même variante, la même note de définition et la même fenêtre. Sinon, la raison : « définition changée », « saisi autrement », « pas mesuré en juillet », « estimé », « deux lectures ». L'écart s'écrit en points pour un taux, en valeur et en pour cent pour un montant ou une durée ;
+- `deriveSeries`, appelé par `deriveEngine` à partir du deuxième mois seulement : sans lui, aucune clé `series`, et les goldens v1 et v2 ne bougent pas d'un caractère. La fuite du mois d'avant est celle que l'équipe a vue alors, puisque ce mois est relu par `monthView`.
+
+**« Ce qui a bougé »** (`deck-series.ts`, §19.2.6), une par motion, juste après la fuite et ses « Et si », **décochée par défaut** (Q5). Trois lectures :
+- des chiffres ont bougé : « 3 chiffres ont bougé depuis juillet 2026 ; l'activation reste la fuite », et au plus six lignes dans l'ordre du catalogue ;
+- rien n'a bougé : « Rien n'a bougé depuis juillet 2026 », avec les chiffres restés stables ;
+- rien ne se compare : « juillet 2026 et août 2026 ne se comparent pas encore », et la raison de chaque chiffre.
+
+`notes.series` remplace `notes.seasonal` dès le deuxième mois, sur les quatre slides qui la portaient. Toute la copie neuve porte « TODO: à relire ».
+
+**Écarts à la spec**, notés au §19.2.6 :
+- une ligne s'écrit « 15 %, puis 18 % (+3 points) », sans flèche : les polices des slides ne dessinent pas « → », et la garde de `engine-copy.test.ts` l'a refusée ;
+- « vers la cible » ne se dit que d'un chiffre **en retard** le mois d'avant qui a bougé dans le bon sens. La lecture littérale (« s'en rapprocher ») écrivait « vers la cible » sous une activation tombée de 25 % à 18 % pour une cible à 20 %. Le sondage de la slide l'a montré avant tout test ;
+- la slide existe dès le deuxième mois, même quand rien ne se compare ; ses identifiants forment un type à part, `SeriesSlideId` ;
+- son composant est livré dès T1, en version minimale (les lignes « À côté » de la slide de fuite), pour qu'aucune slide du modèle ne reste sans rendu. La mise en page vient avec T2.
+
+**Les gardes existantes ont fait leur travail.** Avant tout test neuf, cinq ont refusé la première version :
+- une flèche sur une slide ;
+- « vers ta cible » (une slide ne tutoie pas) ;
+- les quatre titres neufs, ni remplis par l'échantillon, ni déclenchés par le balayage des phrases ;
+- deux sortes de lignes que le contrat des lignes ne connaissait pas.
+
+Le balayage des phrases a gagné six scénarios à deux mois, et le contrat des lignes deux états.
+
+**Non-vacuité**, mesurée en sabotant puis en restaurant le code. Chaque sabotage fait tomber les tests qui le visent :
+- un mois clos lu à la date du jour : 2 tests ; avec les fenêtres du jour : 1 ;
+- une note de définition ou une fenêtre ignorées à la comparaison ;
+- le mois suivant qui reprend les valeurs ;
+- `leakChanged` inversé ;
+- la slide cochée par défaut ;
+- `notes.seasonal` gardée au deuxième mois ;
+- les lignes triées par écart ;
+- « reste la fuite » écrit quand la fuite a changé ;
+- une série calculée sur un seul mois : 130 tests, dont tout le deck.
+
+**Un sabotage est d'abord passé** : « vers la cible » sans la condition « en retard le mois d'avant » laissait les 1 001 tests verts. Il manquait le cas d'un chiffre déjà au-delà de sa cible qui progresse encore. Ce cas est ajouté, et le sabotage tombe.
+
+**Un piège de Git, consigné dans `GITHUB.md` §1.9.** T1 s'est construit dans un worktree, pendant que la suite Playwright de T0 occupait le dépôt principal, avec un `node_modules` partagé par lien symbolique. Le `git add -A` du worktree a suivi ce lien, parce que la règle `/node_modules/` ne vise que les dossiers. Rejouer les commits sur `main` a remplacé le vrai `node_modules` par le lien, puis l'a supprimé. Un `npm ci` a réparé (lockfile intact). La règle de `.gitignore` s'écrit maintenant sans barre finale. Turbopack, lui, refuse de construire avec un `node_modules` lié : le build se fait dans le dépôt principal.
+
+**Vérifié** :
+- `vitest --coverage` : 2 780 tests passés, au-dessus des seuils ;
+- `tsc`, `eslint` et `next build` (avec `GAME_ENABLED=true`) propres ;
+- `e2e/engine-series.spec.ts`, nouveau : deux mois offrent la slide décochée, et cochée elle imprime ses trois lignes en FR et en EN, sans déborder ; un moteur à un mois n'en a pas ; l'hybride en a une par motion. Captures relues dans les deux langues ;
+- Playwright complet (`CI=1`) : 782 specs, 754 passées dont une au second essai, et 28 ignorées (22 faute d'émulateur, 6 par construction).
+- après la fusion d'A15.7-A15.20 (#257), mergée pendant que la CI de T1 tournait : 2 785 tests unitaires, et Playwright complet sur l'arbre fusionné, 802 specs, 771 passées et 31 ignorées (25 faute d'émulateur, 6 par construction), aucune au second essai.
+
+**Le test passé au second essai** : « every slide prints filled templates… » de `engine-deck-hybrid.spec.ts`, en anglais, avec « total is empty ». Il est antérieur à T1, qui ne touche pas au deck d'un moteur à un mois. Le test connaissait déjà le piège de `content-visibility: auto` (une vignette lue hors écran rend un texte vide) et attendait que chaque vignette soit rendue. Mais il relisait ensuite toutes les vignettes une seconde fois, en remontant à la première, et cette seconde lecture est tombée trop tôt une fois sous charge. Il lit maintenant chaque vignette une seule fois, au moment où le sondage voit son texte : 10 passages sur 10 sans nouvel essai, en français et en anglais.
+
+**La relecture de copie** (`relecteur-copie`) a relevé trois points, corrigés :
+- des marqueurs « à relire » qui ne nommaient pas les clés qu'ils couvraient : `/bon-a-tirer` part d'un `grep` et n'aurait pas su lesquelles relire ;
+- `notes.series` renvoyait à « la slide « Ce qui a bougé » ». Cette slide est décochée par défaut, et aucun de ses titres ne porte ce nom. La note ne renvoie plus à rien ;
+- un commentaire de `SlideEvolution` décrivait encore une flèche.
+
+## A14.c, T2 : les écrans de la série (2026-10-01, #258)
+
+La troisième PR du moteur complet (`docs/engine/moteur-complet.md` §19.2.2 à §19.2.6), drapeau fermé. T1 est sur `main` le même jour (#256, squash `9d78ef5`). Avec T2, un moteur passe d'un mois au suivant sans quitter la page.
+
+**Ce qui change à l'écran** :
+- **« Démarrer septembre »** : dès que le mois des flux est clos, un bandeau au-dessus du tableau dit « Mois clos : août 2026 » et propose le suivant. Le mois s'ouvre vide, avec les cibles du précédent (`startNextMonth`). Au-delà de 36 mois, le bandeau dit de sauvegarder le fichier et de démarrer un nouveau moteur ;
+- **le sélecteur de mois**, dès deux mois, le plus récent en tête. Un mois passé se relit à sa date (`monthView`), en lecture seule : ses lignes ne s'ouvrent pas, et les « Et si », la liste « À aller chercher », le bandeau de reprise et les boutons de fichier et de slides sont cachés ;
+- **« Corriger ce mois »** rend la saisie d'un mois passé. Ce qui s'enregistre retourne dans ce mois, et les mois suivants sont recollés derrière (`withMonth`) : l'écart du mois suivant se recalcule. Le réglage, le deck et le Tour restent ceux du moteur. Partir vers le deck, les Réglages, le pas à pas, l'import ou l'effacement ramène au mois en cours ;
+- **un écart sur chaque ligne** : « +3 points depuis juillet 2026, vers ta cible », « stable depuis juillet 2026 », ou la raison (« estimé en juillet 2026 », « définition changée »). Les chiffres sont imprimés par les mêmes fonctions que la slide (`evolutionPrinted`, `evolutionApartText`) ; seule la phrase autour est celle du tableau, au « tu » (`_engine/series-view.ts`) ;
+- **« En juillet 2026, la fuite était le churn logo. »** sous le diagnostic, quand la fuite a changé d'étape ;
+- **la fiche d'un nouveau mois** propose la variante, le libellé, la note de définition et la source du mois d'avant, jamais la valeur (`withProposals`), et seulement sur un chiffre que personne n'a encore touché ce mois-ci ;
+- **les Réglages** ne proposent plus un mois des flux antérieur à celui du mois d'avant : la validation l'aurait refusé au chargement suivant ;
+- **la slide « Ce qui a bougé »** reçoit sa mise en page : une ligne par chiffre, avec son nom, le mois d'avant, une flèche dessinée (les polices des slides n'ont pas « → »), ce mois-ci et l'écart, signé, jamais coloré. « vers la cible » s'écrit dessous quand il le faut.
+
+Les écarts à la spec sont notés au §19.2.4.
+
+**La rencontre avec A15.12** (#257, mergée pendant la CI de T1). Une fiche garde maintenant sa saisie non enregistrée quand elle est remontée. Au rebase de T2, les deux se sont rencontrées dans `MetricSheet` : le brouillon gardé passe d'abord, sinon les propositions du mois d'avant. La clé d'un brouillon porte aussi son mois. Sans cela, un chiffre pas encore saisi ce mois-ci et le même chiffre corrigé dans un mois passé, tous deux sans entrée, auraient partagé leur saisie.
+
+**Pièges rencontrés** :
+- la copie disait d'abord « {month} est clos ». Un mois en tête de phrase s'écrit en minuscule (« août 2026 est clos »), et « de {month} » est refusé par la garde d'élision (« de août »). D'où « Mois clos : {month}. » ;
+- le tableau affichait « estimé en août » à côté de l'étiquette « Estimé » : `rowDelta` tait les raisons qui portent sur le mois en cours ;
+- un test supposait que la variante d'une fiche était une liste déroulante. C'est un groupe de boutons radio (`Choices`) ;
+- un build de T1 laissé en place a servi les specs de T2. Reconstruire après chaque changement de branche ;
+- un test de `withMonth` se contredisait : il changeait la fenêtre du réglage, donc la définition. Il est coupé en deux.
+
+**Non-vacuité** : neuf sabotages, chacun fait tomber les tests qui le visent :
+- `withMonth` qui garde le réglage du mois relu : 1 test ; qui laisse tomber les mois suivants : 2 ;
+- les propositions posées sur une fiche déjà remplie : 1 ; qui perdent la source : 2 ;
+- l'écart qui dit la raison du mois en cours : 1 ; qui ne dit jamais « vers ta cible » : 1 ;
+- la fuite du mois d'avant dite même quand elle n'a pas changé : 1 ;
+- en e2e, les lignes d'un mois passé qui s'ouvrent : la spec du mois suivant, en FR et en EN ; une correction enregistrée sans les mois suivants : la spec de la correction, en FR et en EN.
+
+**La relecture de copie** (`relecteur-copie`) a relevé quatre points, corrigés :
+- des marqueurs « à relire » manquants, dont celui de `slide.evolutionToward` ;
+- `{list}` et `{max}` non documentés ;
+- « read only » sans son trait d'union ;
+- le plafond de 36 mois écrit en dur, devenu `{max}`.
+
+**Vérifié** :
+- `vitest --coverage` : 2 797 tests, au-dessus des seuils ;
+- `tsc`, `eslint` et `next build` (avec `GAME_ENABLED=true`) propres ;
+- `e2e/engine-series.spec.ts` gagne neuf specs, 13 en tout : démarrer le mois, la lecture seule, la correction et son recalcul, la fuite du mois d'avant, les propositions de la fiche, les largeurs à 390 et 1 280 px, la garde des Réglages ;
+- Playwright complet (`CI=1`), sur l'arbre rebasé sur T1 : 811 specs, 780 passées, aucune au second essai, et 31 ignorées (25 faute d'émulateur, 6 par construction) ;
+- captures relues en FR et en EN, à 1 280 et 390 px : le bandeau du mois suivant, le tableau avec ses écarts, un mois passé en lecture seule, la correction, et la slide.
+
+## A14.c, T3 : la rétention J30 et la part recommandée chiffrées, et leurs leviers (2026-10-01, #259)
+
+La quatrième PR du moteur complet (`docs/engine/moteur-complet.md` §19.3), drapeau fermé. Elle part de T2 (#258). La couverture du pipeline (§19.4), prévue dans le même lot, part dans la PR suivante : elle demande trois champs de saisie neufs, ce que le chiffrage n'a pas.
+
+**Ce qui se chiffre maintenant** :
+- **la rétention à J30**, comme l'activation. Les payants sont supposés parmi les inscrits encore actifs à J30, donc N les suit : `N × (t/r − 1) × ARPA`. Le pied de slide dit l'hypothèse ;
+- **la part recommandée, dans les deux motions**, avec la règle du « Et si » (`referral-on-top`) : les recommandés s'ajoutent aux autres, qui restent les mêmes, donc les nouveaux clients croissent de `(1 − r) ÷ (1 − t) − 1`. La chaîne s'écrit « 42 × (100 – 6)/(100 – 10) = 44 (+2) », et se recalcule à la main ;
+- **la borne de 50 %** : au-delà, rien n'est chiffré. La slide de fuite reste, sans montant, et son pied dit « au-delà d'une cible de 50 %, le moteur ne chiffre plus la part des recommandations » ;
+- **la mise en production** (assisté) reste seule sans montant (`UNPRICED_CANDIDATES`). Une seule fonction, `isPricedAt`, dit ce qui se chiffre : le classement, les chaînes et les slides la lisent toutes.
+
+**Les deux leviers neufs** :
+- **J30 en libre-service** : quand il bouge, les payants le suivent, et l'activation ne fait que le plafonner ;
+- **la part des opportunités recommandées en assisté** : les opportunités créées et W croissent du même facteur. Le panneau et la slide lisent les opportunités projetées sur le scénario lui-même (`opps`), et non plus sur la seule liaison.
+
+**Écarts à la spec**, notés au §19.3.3 :
+- la part recommandée se chiffre sur N et W, les nouveaux clients, et non sur les inscrits (S) ni sur les opportunités (O). C'est le même N et le même W que les autres flux et que le « Et si ». Sur l'exemple, S × la conversion donne 49 à 74 payants pour 42 comptés, et O × le taux de closing 31 clients pour 18 gagnés. La slide et le « Et si » se seraient contredits ;
+- sans W, la part recommandée de l'assisté se lit pour 100 opportunités créées ;
+- la couverture du pipeline part dans sa propre PR.
+
+**Les goldens v1 et v2 ne bougent pas.** Ils avaient échoué : les deux leviers neufs entraient dans le scénario de chaque moteur, et `opps` dans celui de l'assisté. Aucun titre, aucune slide, aucun texte n'avait bougé. Leur projection retire ces champs ajoutés, et rien d'autre (`__tests__/golden-projection.ts`), comme la règle des goldens le permet. Un test vérifie que ces champs sont bien là avant d'être retirés.
+
+**Sabotages** : douze, dont dix font tomber les tests qui les visent :
+- le gain de la part recommandée sans son dénominateur (100 − t) : 5 tests ;
+- pas de borne à 50 % : 9 ;
+- une part au-delà de 50 % qui fait passer tout le classement en écart relatif : 2 ;
+- la chaîne de la part recommandée en t/r : 4 ;
+- les payants qui ignorent le levier J30 : 1 ;
+- le levier de la part assistée qui ne bouge rien : 2 ;
+- le pied « sans montant » à la place de celui de la borne : 2 ;
+- l'hypothèse de J30 absente du pied : 1 ;
+- la projection des goldens qui ne retire rien : 14 ;
+- les opportunités du panneau lues sur la seule liaison : 2.
+
+Deux sont d'abord passés :
+- **la chaîne de la part recommandée imprimée avec le gabarit d'un flux.** Les tests vérifiaient le gabarit, jamais la slide. Un test du deck lit maintenant la ligne imprimée, et le sabotage tombe ;
+- **J30 retirée des flux du classement.** C'est un mutant équivalent : l'appartenance aux flux ne sert qu'à vérifier qu'ils sont tous chiffrés ensemble, et ils partagent le même N et le même ARPA. J30 reste dans la liste, pour dire ce qu'elle est.
+
+**La relecture de copie** (`relecteur-copie`) :
+- un marqueur « à relire » manquait (`leverSubject["slg.ref.referred-share"]`) ;
+- la ligne « pour 100 opportunités créées » disait « 114 sur 100 », elle dit maintenant « pour 100 opportunités créées aujourd'hui » ;
+- l'anglais de la part assistée nomme sa base (« 20% of opportunities referred ») ;
+- « ne chiffre plus une part » est devenu « ne chiffre plus la part des recommandations » ;
+- « the paying » est devenu « paying customers ».
+
+**Vérifié** :
+- `vitest --coverage` : 2 812 tests, au-dessus des seuils ;
+- `tsc`, `eslint` et `next build` (avec `GAME_ENABLED=true`) propres ;
+- Playwright complet (`CI=1`), sur l'arbre rebasé sur T2 : 813 specs, 782 passées, aucune au second essai, et 31 ignorées (25 faute d'émulateur, 6 par construction). La première passe en avait fait tomber six : la slide « ensemble » à neuf leviers débordait de 4 px sur son pied (un cran plus serré à partir de neuf leviers), et la spec de la slide sans montant prenait J30, chiffrée désormais (elle prend la part recommandée au-delà de 50 %) ;
+- `engine-deck-whatif.spec.ts` imprime maintenant neuf leviers et « ensemble », rien sous 18 px, chaque corps au-dessus de son pied ; deux specs neuves bougent le levier J30 et celui de la part assistée ;
+- captures relues en FR et en EN : la slide « ensemble » à neuf leviers, la fuite de J30 chiffrée, celle de la part assistée.
+
+## A14.c, T3.2 : la couverture du pipeline (2026-10-01, #260)
+
+La cinquième PR du moteur complet (`docs/engine/moteur-complet.md` §19.4, C32 Q8), drapeau fermé. Elle était prévue dans T3 et part seule, juste après lui (#259) : elle demande trois champs de saisie neufs.
+
+**Ce que fait la couverture** : c'est un indicateur avancé sous la carte des relais. Ce n'est jamais un seizième chiffre, jamais une étape que le diagnostic peut nommer, jamais un montant, jamais une comparaison avec un repère publié (C1). Concrètement :
+- `lib/engine/pipeline.ts`, pur : le pipeline ouvert du trimestre, divisé par l'objectif de nouveaux contrats du trimestre, tous deux en ACV. « Sous » ne se dit que contre le seuil de l'équipe, quand elle en a saisi un. Sans les deux nombres, ou hors de l'assisté, pas de couverture ;
+- le tableau affiche « Couverture : 2,6× l'objectif du trimestre, sous ton seuil de 3× », puis « En juillet 2026 : 2,1× » ;
+- le pipeline ouvert se saisit sous les relais, chaque mois. Il s'enregistre en quittant la case, comme une cible (A15.2). Un mois passé montre sa couverture sans case ;
+- l'objectif et le seuil se saisissent dans les Réglages. Sans objectif, la carte dit où l'ajouter ;
+- la slide des relais porte la ligne sans « ton », et la couverture du mois d'avant va dans les notes.
+
+**La slide des relais n'avait pas la place.** La ligne posée sous les grilles prenait leur hauteur : la colonne du milieu passait sous elle (fin à 855, ligne à 815). Posée sur la ligne de la légende, elle chevauchait encore cette colonne (884 contre 873). Ce second écart existait déjà sans la couverture : quand l'en-tête « Opportunités conclues · juin à août 2026 » passe sur deux lignes, la colonne descend de 11 px dans la ligne de la légende. L'écart entre les éléments d'une colonne passe de 12 à 8 px, la ligne de couverture tient sur une seule ligne à droite de la légende, et le mois d'avant va dans les notes. Une spec e2e le mesure : chaque colonne au-dessus de la légende, la ligne au-dessus du pied, rien sous 18 px.
+
+**Au passage** : les Réglages perdaient les outils (`tools`, §19.5) qu'un fichier v3 apportait, parce qu'ils reconstruisent tout le réglage. Ils les gardent maintenant.
+
+**Sabotages** : huit, chacun fait tomber les tests qui le visent :
+- « sous » sans seuil : 2 ;
+- une couverture hors de l'assisté : 1 ;
+- le mois d'avant lu sur le mois en cours : 2 ;
+- le rapport à l'envers : 4 ;
+- la slide qui tutoie : 2, dont la garde des phrases ;
+- la note du mois d'avant absente : 1 ;
+- la ligne absente de la slide : 3, dont le contrat des lignes ;
+- en e2e, la case de saisie laissée sur un mois passé : 1.
+
+**La relecture de copie** (`relecteur-copie`) a relevé cinq points, tous corrigés :
+- le « × » s'écrivait dans le code : il passe par une clé (`pipeline.ratio`), sous le marqueur, pour que le bon à tirer le voie. Le choix entre « × » et « fois » en français lui revient ;
+- les gardes des slides (glyphes, tutoiement) ne voyaient pas les trois clés qui vont sur la slide et dans ses notes ;
+- en anglais, « target » servait pour l'objectif du trimestre alors qu'il désigne la cible d'équipe (C1) : c'est « goal » ;
+- les libellés anglais prenaient un article que leurs voisins n'ont pas ;
+- l'aide disait « ce mois-ci » pour une case qui se remplit pour le mois du tableau : « ce mois-là ».
+
+**Vérifié** :
+- `vitest --coverage` : 2 817 tests, au-dessus des seuils ;
+- `tsc`, `eslint` et `next build` (avec `GAME_ENABLED=true`) propres ;
+- Playwright complet (`CI=1`) : 819 specs, 788 passées, aucune au second essai, et 31 ignorées (25 faute d'émulateur, 6 par construction) ;
+- `e2e/engine-pipeline.spec.ts`, nouveau : l'objectif saisi dans les Réglages, la couverture qui apparaît, le mois d'avant, un mois passé sans case, la slide mesurée en FR et en EN, 390 px sans défilement de côté ;
+- captures relues : le tableau, les Réglages, la slide, la colonne de l'hybride à 390 px.
+
+## A14.c, T4 : les outils de l'équipe (2026-10-01, #261)
+
+La sixième PR du moteur complet (`docs/engine/moteur-complet.md` §19.5, C32 Q9 et Q10), drapeau fermé.
+
+**Ce que font les outils** : l'équipe coche ses outils, et rien n'est obligatoire. Sans outil coché, le moteur se lit exactement comme avant : les goldens v1 et v2 n'ont pas bougé. Avec des outils cochés :
+- `lib/engine/tools.ts`, pur : cinq familles (analytique, facturation, CRM, publicité, autres), dans l'ordre où le réglage les montre. App Store Connect et Play Console ne sont pas proposés : aucun chiffre ne les cite, ils attendent l'app grand public (C32 Q9). Un fichier qui les apporte les garde, sans les lire ;
+- « Tes outils » est un repli facultatif, au premier réglage comme dans les Réglages, avec une case par outil sous le nom de sa famille ;
+- la fiche propose les outils de l'équipe d'abord, en commençant par ceux qu'on attend pour ce chiffre. Les autres outils attendus restent proposés, sous « Autres outils » ;
+- « À faire toi-même » se range par outil, et chaque chiffre y porte le chemin de menu du catalogue. Un chiffre est rangé sous le premier outil coché que cite son `where`. Un chiffre qu'aucun outil coché ne donne passe dans « À demander », au rôle qui le tient ;
+- la fiche a une case « Le dénominateur vient d'un autre outil », qui ouvre une seconde liste de sources. Quand les deux comptes d'un taux viennent de deux outils, le contrôle « deux outils » le dit, sans jamais bloquer. Il paraît dans la fiche et dans la liste « à vérifier » de l'écran du deck, précédé du nom du chiffre. Il ne paraît pas sur la slide de visibilité, où aucun contrôle ne figure aujourd'hui.
+
+**Un bug trouvé par l'e2e avant la PR** : dans la liste par outil, le chemin de menu sortait brut (« Événements › {event} »). La fiche le remplit, la liste ne le faisait pas. Elle passe maintenant par le même remplissage (`catalogFill`), et la spec vérifie qu'aucune accolade ne reste.
+
+**Sabotages** : huit. Sept tombent du premier coup :
+- un chiffre non couvert gardé dans « À faire toi-même » : 2 ;
+- `byTool` présent sans outil coché : 14, dont les goldens v1 ;
+- les outils de l'équipe ignorés dans la fiche : 1 ;
+- « deux outils » pour un seul outil : 1 ;
+- la source du dénominateur non enregistrée : 2 ;
+- la case cochée sans source exigée : 1 ;
+- les outils hors de l'ordre des familles : 1.
+
+Le huitième passait : le dernier outil cité à la place du premier. Aucun chiffre du test n'était cité par deux des outils cochés. Un test couvre maintenant ce cas, et le sabotage tombe.
+
+**La relecture de copie** (`relecteur-copie`) a relevé trois défauts, tous corrigés :
+- l'aide de « Tes outils » disait que « À aller chercher » se range par outil. C'est « À faire toi-même » ;
+- dans la liste « à vérifier » du deck, la phrase « deux outils » ne nommait pas le chiffre, et deux taux tirés des mêmes outils auraient donné deux lignes identiques. Le nom du chiffre la précède, comme pour « premier compte plus grand que le second » ;
+- le nom de l'outil de customer success porte déjà des parenthèses (« Gainsight, Vitally, Planhat… »). La phrase les retire, pour ne pas imbriquer deux parenthèses.
+
+Trois points de vocabulaire vont au bon à tirer A14.d :
+- la fiche dit maintenant « numérateur / dénominateur » (le libellé du §19.5.3), alors que ses messages voisins disent « premier compte / second compte » ;
+- la case promet « un autre outil », alors que la liste qu'elle ouvre propose aussi une personne et « Autre » ;
+- l'anglais dit « the sheet » dans l'aide des outils, et « the cards » pour la même fiche dans `catalogueToggle`.
+
+**Vérifié** :
+- `vitest --coverage` : 2 832 tests, au-dessus des seuils ;
+- `tsc`, `eslint` et `next build` (avec `GAME_ENABLED=true`) propres ;
+- Playwright complet (`CI=1`) : 823 specs, 792 passées, aucune au second essai, et 31 ignorées (25 faute d'émulateur, 6 par construction) ;
+- `e2e/engine-tools.spec.ts`, nouveau, quatre specs : les outils cochés et enregistrés dans l'ordre des familles, la liste rangée par outil sans accolade brute ; un chiffre qu'aucun outil ne donne, passé dans « À demander » ; la fiche avec Mixpanel d'abord, la seconde source, le contrôle « deux outils », puis la liste du deck ; à 390 px en français, sans défilement de côté ;
+- captures relues : le repli des outils dans les Réglages (FR, 1280 px), « À faire toi-même » rangé par GA4, Stripe et HubSpot avec ses chemins remplis, et la fiche à 390 px en anglais avec le contrôle « deux outils ».
+
+
+## C33 : « Dans le jeu » au-dessus de la carte du jeu (2026-10-01, #262)
+
+A15.18, revenue à Antoine parce que « dans le jeu » ne tenait pas sur la bande de la carte (une ligne de 44 px sur desktop, deux de 56 px au plus à 360 px, P23 ; 9 px de reste en français). **Tranché sur captures** : avant, la reco (un surtitre au-dessus de la carte, hors de la bande) et une variante plus explicite, « Dans le jeu, pas dans tes chiffres », chacune capturée sur `/r/sample` à 1 280, 390 et 360 px depuis un vrai build d'essai, jamais poussé. Antoine a pris la version courte.
+
+**Ce qui change** : `GameEntry` prend `eyebrow`, un `MetaLabel wide` à 10 px au-dessus de la carte, le rythme des sections du résultat (« Ce qui tient le mieux »). Ce n'est pas un titre : celui de la carte l'est. Le surtitre vaut pour la carte à un niveau comme pour celle qui en propose plusieurs (`GAME_ENTRY_EYEBROW`, à relire, pour le bon à tirer nº7 ou celui du niveau 2, A12.h). `className` place maintenant l'ensemble, surtitre et carte, dans la page. La bande ne bouge pas d'un pixel : ses tests P23 de hauteur passent tels quels.
+
+**Vérifié** :
+- un test unitaire (les deux langues, et la carte à plusieurs niveaux) et trois e2e : le surtitre au-dessus de la bande, à moins de 16 px, aligné, sur une ligne, en français et en anglais à 1 280 px et en français à 390 px ;
+- **non-vacuité** : un build où le surtitre n'est pas rendu fait tomber exactement ces trois e2e, les neuf autres de `game-entry.spec.ts` passent ;
+- `eslint`, `tsc`, `next build` propres ; `vitest --coverage` 2 833 tests, seuils tenus ; la suite Playwright complète avec l'émulateur et `CI=1` : 816 passées, 6 ignorées par construction, 4 tombées, toutes dans `game-entry.spec.ts` et toutes du test, pas du produit. Mes trois tests comparaient le surtitre au bord de la bande, qui commence 2 px plus loin, dans la bordure de la carte : ils le comparent maintenant au bord de la carte, comme tout intitulé de section. Et le test du téléphone mesurait les 22 px entre la carte de partage et la carte du jeu, où le surtitre s'intercale maintenant : il les mesure jusqu'au surtitre, puis du surtitre à la carte. Rejoué sur le même build, `game-entry.spec.ts` passe en entier (12, et 3 ignorées « jeu fermé ») : 820 passées sur 826.
+
+**Claude Design** : le contrat de `GameEntry` change, son aperçu est à jour dans le dépôt ; la re-synchro rejoint B6.
+## A14.c, T5 : plusieurs moteurs, la fusion, la saisie en tableau (2026-10-01, #263)
+
+La septième PR du moteur complet (`docs/engine/moteur-complet.md` §19.1.5, §19.6 et §19.7, C32 Q11 à Q13), drapeau fermé. Le stockage à plusieurs moteurs existait depuis T0 : T5 y met les écrans, la fusion et le tableau.
+
+**Ce que fait T5** :
+- **Plusieurs moteurs** : « Moteur : {nom} » en tête du tableau, un repli qui liste les moteurs de l'appareil (« Ouvrir » sur chacun), « Nouveau moteur » (grisé à dix, avec sa raison) et « Supprimer ce moteur », qui propose d'abord la sauvegarde. « Tout effacer » dit combien de moteurs partent.
+- **L'import à trois choix** : « Ajouter comme nouveau moteur » par défaut, « Remplacer », « Fusionner », grisé avec sa raison quand les deux moteurs ne mesurent pas la même chose (motions, devise, fenêtres, plus de 36 mois).
+- **La fusion**, `lib/engine/merge.ts`, pure : mois par mois, un côté vide prend l'autre, deux lectures différentes gardent la plus récente, les cibles, les comptes partagés et le pipeline du fichier ne comblent que ce qui manque. Chaque changement est listé avant d'écrire.
+- **« Saisie en tableau »**, `_engine/csv.ts`, dans l'îlot : le modèle CSV (« ; » et virgule décimale en français), pré-rempli des chiffres trouvés, et un tableau collé depuis un tableur, lu et montré ligne par ligne (nouveau, modifié avec l'ancienne valeur, inchangé, refusé avec sa raison) avant « Appliquer ». Chaque ligne passe par les règles de la fiche (`entryFromDraft`), et un chiffre que le tableau déplace par un compte partagé est listé aussi.
+
+**La relecture de sécurité** (`relecteur-securite`) a trouvé huit constats, tous corrigés avant la PR :
+- **L'id d'un fichier importé était repris tel quel.** Un id vide verrouillait l'index, et le seul chemin de sortie (« Ouvrir un fichier » sur l'écran « illisible ») effaçait alors tous les moteurs. « Ajouter » donne maintenant toujours un id neuf, « Remplacer » donne l'id du moteur à l'écran. Le stockage refuse (`conflict`) un ajout dont l'id est déjà listé, un id vide, et l'écriture d'un moteur que l'appareil ne liste plus.
+- **Ce dernier cas fermait aussi un piège entre deux onglets** : un moteur supprimé dans un onglet, enregistré dans l'autre, prenait la place du moteur à l'écran et le supprimait.
+- **Un fichier ouvert sur l'écran « illisible » vidait l'appareil** (`clearEngine`) : avec dix moteurs, un seul illisible coûtait les neuf autres. `saveOverUnreadable` garde les moteurs encore lisibles, reconstruit un index illisible à partir des entrées, et laisse en place l'entrée qu'il n'a pas pu lire.
+- **Un tableau collé suivait le changement de moteur**, et « Appliquer » l'aurait écrit dans le second. Le tableau de bord est maintenant monté par moteur (`key`).
+- **Une cellule du modèle pouvait devenir une formule** : un compte arrivé en texte par un fichier fusionné partait tel quel dans le CSV. Seul un nombre fini est écrit, et une cellule qui commence comme une formule est écrite en texte.
+- **La fusion plantait la page sur une clé inconnue** (un chiffre ou un compte d'une version ultérieure) : elle ne prend plus que les clés du catalogue.
+- **Le nom du fichier CSV** passe par le même contrôle de mois que celui du `.json` (`monthFileName`).
+- **Le choix d'import restait d'un fichier à l'autre** : chaque fichier repart du choix par défaut.
+- Pour information, sans correctif : la zone de collage n'a pas de limite dure. Seul l'onglet de la personne peut geler.
+
+**La relecture de copie** (`relecteur-copie`) a relevé neuf constats et deux remarques hors copie, tous corrigés :
+- « Remplacer celui de cet appareil » ne désignait plus un seul moteur : le bouton dit « Remplacer », le choix dit lequel ;
+- « Rien ne s'écrit avant l'aperçu » était faux : c'est avant « Appliquer » ;
+- « cible de {name} » et « celui de {other} » écrivaient « de Expansion mensuelle » : les deux phrases sont tournées autrement, et le test qui interdit « de {month} » couvre maintenant `{name}` et `{other}` ;
+- « motions » et « façons de vendre » dans le même diff : « façons de vendre », comme au réglage ;
+- les limites (36 mois, dix moteurs) sont écrites avec `{max}`, depuis les constantes ;
+- « 1 ligne sans chiffre » a sa variante, et le bouton « Appliquer 0 chiffres » ne s'affiche plus ;
+- un marqueur manquait sur les noms de comptes, et l'anglais de la question du choix est aligné ;
+- hors copie, un modèle téléchargé dans l'autre langue était lu comme vide, sans message : il se relit dans l'ordre du modèle ;
+- les nouveaux boutons entrent dans la garde de longueur ;
+- « Tout effacer », avec plusieurs moteurs, demande « EFFACER » plutôt que le nom du moteur affiché.
+
+Points pour le bon à tirer A14.d : ce que « Remplacer » change exactement (le nom, les réglages, les cibles, « Et si »), « Moteur : Moteur sans nom, créé le… », et « le fichier est dans tes téléchargements », affirmé dès le clic.
+
+**Sabotages** : dix-neuf sur les modules purs, et chacun fait tomber au moins un test. Deux de plus sur un build, pour les specs neuves de la relecture de sécurité : sans la `key` du tableau de bord, le tableau collé suit le changement de moteur ; avec l'ancien effacement, l'import sur l'écran « illisible » perd l'autre moteur. Les deux specs tombent.
+
+**Vérifié** :
+- `vitest --coverage` : 2 876 tests, au-dessus des seuils ;
+- `tsc`, `eslint` et `next build` (avec `GAME_ENABLED=true`) propres ;
+- Playwright complet (`CI=1`) : 833 specs, 802 passées, aucune au second essai, et 31 ignorées (25 faute d'émulateur, 6 par construction) ;
+- après la fusion de C33 (#262), mergée pendant la PR : 2 877 tests unitaires, et Playwright complet sur l'arbre fusionné, cette fois avec l'émulateur Firestore comme la CI : 836 specs, 830 passées, aucune au second essai, 6 ignorées par construction ;
+- `e2e/engine-engines.spec.ts`, nouveau, dix specs : deux moteurs créés, basculés et supprimés ; la limite de dix ; une sauvegarde rouverte ajoutée sous un id neuf ; la fusion avec son aperçu, refusée pour une autre devise ; le tableau en français (modèle, aperçu, application, `engine_stage_saved`) ; les tabulations d'un tableur en anglais et « Annuler » ; un tableau qui ne suit pas le changement de moteur ; l'import sur un moteur illisible qui garde l'autre ; « Tout effacer » qui compte les moteurs ; 390 px sans défilement de côté ;
+- le canari passe maintenant aussi par le modèle, un tableau collé et une fusion ;
+- captures relues : le sélecteur, le tableau collé avec son aperçu, l'import à trois choix avec l'aperçu de la fusion, et la suppression, en français à 1 280 px et en anglais à 390 px.
+
+## A14.c, T6 : le fond blanc, les rappels d'agenda, les deux portes (2026-10-01, #264)
+
+La huitième PR du moteur complet (`docs/engine/moteur-complet.md` §19.8 à §19.10, C32 Q14 à Q16), drapeau fermé. L'image de partage du moteur (§19.11) n'en fait pas partie : elle attend la passe de Claude Design (B5).
+
+**Ce que fait T6** :
+- **« Fond blanc »** au deck : une case, décochée par défaut, qui peint chaque slide en blanc pur (`--paper-white`, `--surface-white`), sans le relief du papier, à l'écran, au PNG et au PDF. Le choix est rangé avec le moteur (`deck.theme`).
+- **Deux rappels d'agenda**, `lib/engine/ics.ts`, pur. « Me le rappeler » paraît une fois une demande copiée : le rappel tombe cinq jours plus tard, le jour où le tableau dit « à relancer ». « Me rappeler de démarrer {mois} » remplace le bandeau du mois suivant tant que ses flux ne sont pas clos : le rappel tombe le premier jour ouvré du mois qui suit. Chaque rappel est un fichier `.ics` téléchargé, à 9 h à l'heure de l'agenda : rien n'est envoyé, rien n'est programmé par le site. Il ne porte jamais une valeur ni le nom de l'entreprise, parce qu'un agenda se partage et s'affiche sur un écran verrouillé.
+- **Deux portes vers le moteur**, ouvertes seulement sur un build où le moteur l'est :
+  - sous le coup prioritaire d'un résultat, pour son propriétaire, quand une étape est nommée : « Tu mesures déjà cette étape ? Mets tes vrais chiffres dans le moteur → » ;
+  - sur l'accueil, quand l'appareil porte un moteur : « Ton moteur : août 2026, 11 sur 17 chiffres — le reprendre → ». La ligne est lue par `lib/engine/resume.ts`.
+
+**La relecture de sécurité** (`relecteur-securite`) a relevé cinq constats, tous traités :
+- **Le canari ne passait pas par les rappels.** Il télécharge maintenant les deux `.ics` et vérifie qu'aucune valeur saisie ni le nom de l'entreprise n'y figure.
+- **L'accueil lisait le stockage du moteur hors de sa route, sans règle.** La lecture vit dans son propre composant, `app/[locale]/EngineResume.tsx`. Une règle 8 de `engine-boundary.test.ts` en fait le seul lecteur hors de la route, sans primitive réseau ni appel d'analytics : un compte affiché là ne peut pas devenir le détail d'un événement.
+- **Une entrée de forme lisible mais de contenu incomptable faisait planter l'accueil** (un brouillon sans façon de vendre, un mois mal écrit). `engineResume` rend maintenant `null` plutôt que de jeter, et l'`import()` a son `.catch`.
+- **Le texte d'un rappel pouvait ouvrir une propriété**, parce qu'un retour chariot seul et les autres caractères de contrôle passaient. Désormais :
+  - tout saut de ligne est échappé et les autres caractères de contrôle sont retirés ;
+  - une adresse qui n'est pas un `http(s)` sans espace laisse le champ URL de côté.
+
+  Tous les textes viennent aujourd'hui de la copie ou du catalogue ; l'échappement tient pour un appelant futur.
+- **Un accueil construit moteur fermé portait-il le code du moteur ?** Deux verrous l'en empêchent :
+  - `page.tsx` ne passe la ligne qu'à un build ouvert ;
+  - `EngineResume` lit le drapeau du build par l'accès littéral à `process.env` que Next remplace, avant l'`import()`.
+
+  Sur le build fermé, aucun morceau ne porte plus `engineResume` : l'import est retiré à la construction, pas seulement jamais appelé. L'e2e des portes lit tous les scripts que la page charge vraiment et y cherche la clé de stockage du moteur. Il n'en trouve aucun sur un build fermé, et au moins un sur un build ouvert. Une première vérification, statique, sur les balises `<script>` de l'accueil ne voyait rien non plus sur le build ouvert, parce que le morceau s'atteint par un chargeur rangé dans un autre fichier : elle a été jetée.
+
+**La relecture de copie** (`relecteur-copie`) a relevé neuf constats, dont trois défauts, tous traités :
+- « 1 chiffres sur 17 » : la ligne de l'accueil s'accorde avec le total, « 11 sur 17 chiffres » ;
+- « Demandés à Finance : » pour un seul chiffre : la description a sa variante au singulier ;
+- « septembre 2026 est clos » commençait par une minuscule : « Mois clos : septembre 2026. » ;
+- « Reprendre → » après un tiret : « le reprendre → », comme « le revoir → » du même bloc, et « pick it up → » en anglais ;
+- « template » avait trois sens en anglais : « company slide template » ;
+- l'adresse de la page entre aussi dans la description, que tous les agendas affichent, alors que le champ URL ne s'affiche pas partout ;
+- les deux boutons de rappel entrent dans la garde de longueur, mois rempli.
+
+Points pour le bon à tirer A14.d : le rôle placé dans la phrase (« Relancer Commercial : … ») ou en étiquette ; « cette étape » plutôt que le nom de l'étape, que la carte du dessus porte déjà ; « le reprendre → » à l'infinitif ou « reprends-le → ».
+
+**Un piège de test** : la suite unitaire tourne en UTC, où l'heure locale et l'heure UTC se confondent. Un `DTSTAMP` écrit en heure locale passait (le sabotage « stamp local »). Un test sous `Pacific/Kiritimati`, quatorze heures d'avance, les sépare, et le sabotage tombe maintenant.
+
+**Sabotages** :
+- quinze sur les modules purs, dont quatorze font tomber au moins un test ;
+- le quinzième (`resume.ts` qui ne refuse plus que le cas « vide ») est devenu équivalent avec la relecture de sécurité : un moteur illisible jette, et le `try` rend `null` quand même ;
+- un de plus sur un build fermé, pour l'e2e des portes : la ligne toujours montée et le drapeau lu après l'`import()`. La ligne reste absente, mais le code du moteur se charge, et l'e2e tombe sur « a closed build loaded the engine's code on the landing ». Un premier essai, qui ne retirait que le second verrou, passait : sans le premier, la ligne n'est jamais montée.
+
+**Vérifié** :
+- `vitest --coverage` : 2 896 tests, au-dessus des seuils ;
+- `tsc`, `eslint` et `next build` propres, moteur fermé comme la CI et moteur ouvert ;
+- Playwright complet sur le build fermé, avec l'émulateur Firestore et `CI=1` : 845 specs, 839 passées, aucune au second essai, 6 ignorées par construction ;
+- sur un build `ENGINE_ENABLED=true`, avec l'émulateur : les specs des portes, de la porte du résultat (`result-real.spec.ts`), des rappels, du fond blanc, du canari et du retour à l'accueil, 42, toutes passées ;
+- neuf specs neuves : `e2e/engine-deck-theme.spec.ts` (la couleur peinte d'une slide à l'écran et un pixel du PNG, dans les deux thèmes, en français et en anglais), `e2e/engine-reminders.spec.ts` (les deux `.ics` téléchargés, leur jour, leur nom, sans valeur ni nom d'entreprise), `e2e/engine-entries.spec.ts` (la ligne de l'accueil et le code qu'elle charge, selon le build) et une de plus dans `result-real.spec.ts` ;
+- captures relues : l'accueil en français à 1 280 px (le moteur seul) et en anglais à 390 px (sous le dernier score), la demande copiée avec « Me le rappeler », le rappel du mois sous les comptes, et la slide en blanc à 1 280 et 390 px.
+
+
+## Design sync B6 : Claude Design à jour d'A15 et de C33, et les douze aperçus du jeu rejoués (2026-10-01, #265)
+
+**Ce qui est parti** : les cinq contrats qui avaient changé depuis l'ancre de B4 (`fee6cc7084fe`). Ce sont `ErrorScreen` (`retry`), `LoadingScreen` (la variante `deep` racontée par l'horloge), `Button` (la bande de 44 px de `sm`), `MetaLabel` (`as`) et `GameEntry` (le surtitre de C33). La synchro passe par le chemin atomique, celui d'un projet épinglé : sentinelle d'abord, le contenu en quatre appels (96, 5, 180, 180), aucune suppression, la sentinelle de nouveau, puis `_ds_sync.json` seul et en dernier. `list_files` confirme les 463 fichiers, et `design/` (le brief 04 et son retour) n'a pas bougé. Ancre `edc539adcbbf`, 14 composants téléversés, 76 reportés avec leur note.
+
+**Une seconde passe, le même soir** : A14 T6 (#264) a été mergé pendant la relecture de cette PR. Il ajoute deux jetons, `--paper-white` et `--surface-white` (le fond blanc du deck), et les confiait à B6. Le pilote, relancé sur la branche rebasée et contre l'ancre que la première passe venait de poser, ne trouve aucun composant changé : sources et rendus sont identiques. Seuls partent les fichiers partagés (101 : aperçus compilés, `_vendor/`, polices, bundle, CSS, README), entre les deux sentinelles, puis `_ds_sync.json`. Le rendu est revérifié (90 sur 90, aucun mauvais), et l'ancre devient `6da5e42a15ef`.
+
+**Trois méthodes, trois trouvailles** :
+- **la recherche de dérive** (chaque aperçu relu contre la copie qu'il cite) : `NumberField` et `FieldRow` citaient encore les deux messages du moteur qu'A15.2 et A15.3 ont réécrits. Une erreur de saisie ne se rend pas dans une image fixe, donc aucune capture ne pouvait le montrer : la phrase partait vers l'agent de design par les exemples du `.prompt.md` ;
+- **le contrôle ponctuel** des composants dont le code avait changé sans leur aperçu (`Button`, `MetaLabel`, `SpaceBand`, `WordmarkLink`) : les rendus sont justes, mais la doc de `MetaLabel` disait « ce n'est pas un titre », faux depuis A15.13. Son histoire `Tracking` dessine maintenant les deux titres du résultat comme `ResultView` (`as="h2" wide`) ;
+- **la régénération des douze aperçus du jeu que B4 avait laissés** (Antoine : « Tout maintenant »). Chaque chiffre est rejoué par `playPath`, `finalState` et `endingState` et les fonctions de l'îlot, chaque feuille comparée octet par octet. Sept étaient justes. Cinq ne l'étaient pas, tous notés « bon » depuis le 2026-09-29 :
+  - `ShareRow` : un texte de partage tapé à la main, que le modèle ne produit pas ;
+  - `ResumePrompt` : deux taux qu'aucune année n'atteint, la même paire inventée que `QuarterTimeline` en B4 ;
+  - `PatternCatalogue` : 4 et 3 entrées sous « les huit ficelles », et des répartitions qu'aucune année ne donne. `ThreeGroups` vient maintenant d'une année trouvée par une marche aléatoire, nommée dans l'histoire ;
+  - `EventClipping` : une seule des deux coupures du trimestre en français ;
+  - `VideoCall` : `Ringing` passait un message vide, alors que l'îlot passe toujours `bossMessage`.
+
+**Dans le produit** :
+- la JSDoc de `framing` dans `DgFace` plaçait l'avatar dans « le journal », qui ne dessine aucun visage : c'est le rapport et l'écran des nouvelles. Corrigé. Elle n'avait jamais atteint Claude Design, parce que le `.d.ts` émis coupe une JSDoc vers 120 caractères, avant ce membre de phrase ;
+- **A12.i**, ouvert dans `CHANTIERS.md` : rien ne passe `refId` à `TourLoop`. Le lien de fin de niveau « Où en est ta croissance ? » ne porte donc jamais `?ref=`, contre GAME-BRIEF 13.3 D. Le jeu est fermé, rien ne fuit ;
+- noté sans y toucher : « 83 / 100 » garde des espaces simples autour de la barre en français.
+
+**Vérifié** :
+- `dist/types` n'a pas été reconstruit après la correction de `DgFace` (`cfg.buildCmd` se lance à la main, le pilote ne le fait pas). C'est sans effet ici : le `.d.ts` émis coupe avant la phrase corrigée. Mais une correction de JSDoc plus courte, elle, ne partirait qu'après `cfg.buildCmd` ;
+- trois passes du pilote ;
+- `package-validate` : 90 aperçus rendus sur 90, aucun mauvais, mince ou identique (`report_validate` envoyé), 303 cellules, et seulement les quatre avertissements permanents ;
+- les 13 composants modifiés sont notés « bon », cellule par cellule, sur leurs captures ;
+- `conventions.md` relu contre le build : tous les noms qu'il cite existent, rien à changer.
+
+## A14.c, T7 : l'intégration — les comptes, la confidentialité, les écrans ensemble (2026-10-01, #266)
+
+La dernière PR du code du moteur complet (`docs/engine/moteur-complet.md` §19.12 à §19.14), drapeau fermé. **Avec elle, A14.c est fini**, sauf T6.2, l'image de partage, qui attend la passe de Claude Design (B5). Reste le bon à tirer A14.d, puis l'ouverture (D2). Neuf PR en un jour : #255, #256, #258, #259, #260, #261, #263, #264 et celle-ci.
+
+**Ce que fait T7** :
+- **Cinq chemins d'analytics de plus** (§19.12), dans le vocabulaire fermé et au tableau de bord `/admin/stats` :
+  - `engine_month_started`, le seul signal d'un usage répété : compté une fois le mois enregistré sur l'appareil, jamais lequel ;
+  - `engine_exported/ics` et `engine_exported/csv` : un rappel et le modèle de tableau ;
+  - `engine_entry_clicked/result_owner` et `engine_entry_clicked/landing_resume` : les deux portes de T6.
+- **Une porte se compte par `trackEngineEntry`**, typé sur la liste : jamais une chaîne libre, donc ni l'étape ni le score de la page autour.
+- **La porte de l'accueil compte son clic sans rien voir.** `EngineResume`, seul lecteur du moteur hors de sa route, n'a pas le droit d'appeler l'analytics (règle 8). Il reçoit de `LastResult` un rappel `onFollow`, appelé une fois, sur le clic, sans argument ; le côté qui compte est une flèche sans paramètre.
+- **La phrase de confidentialité** dit maintenant tout ce qui est compté : le démarrage d'un nouveau mois, l'ouverture des slides, leur export ou la copie de leur texte, l'export d'un fichier (sauvegarde, rappel ou modèle) et le lien par lequel on entre dans le moteur. Elle disait « l'ouverture ou l'export des slides », et taisait la sauvegarde `.json` et les portes, comptées depuis la v1 et A7.9. Elle repart « à relire », et elle est visible dès le merge, comme celle de S5.
+- **Les écrans d'A14, mesurés ensemble** (§19.13). Chaque PR avait tenu les siens à la largeur où elle les construisait. `engine-mobile.spec.ts` les reprend tous, comme ceux des deux motions :
+  - les dix écrans : le bandeau du mois suivant, un mois démarré, un mois passé en lecture seule, le sélecteur, le réglage d'un nouveau moteur, la suppression, l'aperçu d'un tableau collé, la fusion, le rappel d'une demande et le deck en blanc ;
+  - à 360, 390 et 430 px dans les deux langues, sans un pixel de trop ; à 320 px, mesurés sans être tenus, 0 partout ;
+  - puis axe sur les panneaux : le sélecteur, le tableau, les choix d'import et la suppression.
+- **Le fond blanc à l'impression.** Le PDF est l'impression du navigateur, sans fichier à lire au pixel. La spec lit donc la feuille d'impression là où elle s'applique : en média d'impression, la slide garde son blanc, ou son papier, avec `print-color-adjust: exact`.
+- **L'état** d'`ENGINE.md`, de `CHANTIERS.md` et de `CLAUDE.md`.
+
+Hors de ce qui précède, §19.13 ne manquait de rien : la série, les deux moteurs, la fusion, le tableau collé, les `.ics` et les portes avaient leurs specs depuis leur PR. Les gardes statiques aussi : le collage par la règle 7, `ics.ts` par la règle 3.
+
+**La relecture de sécurité** (`relecteur-securite`) n'a trouvé aucune fuite, mais des gardes nominales (convention 11). Ses quatre constats sont traités :
+- **La vérification d'`onFollow` regardait la forme de l'appel, pas ce qui traverse.** Un appel vide dans une boucle ou dans un effet passait encore, et transmettait un compte ou un bit sans clic. Le côté qui compte n'était tenu par rien. La règle 8 exige maintenant :
+  - trois mentions d'`onFollow` dans `EngineResume` (la prop, sa déstructuration, un seul appel) ;
+  - cet appel sur le clic, sans argument ;
+  - côté `LastResult`, exactement `onFollow={() => trackEngineEntry("landing_resume")}`.
+- **La règle 8 ne voyait que les imports directs** : un `TrackedLink` dans `EngineResume` l'aurait contournée. Elle suit maintenant les imports de proche en proche, et le module d'analytics ne doit pas être atteint.
+- **Les deux portes envoyaient une chaîne libre, et la CI, qui construit moteur fermé, ne les joue jamais.** D'où `trackEngineEntry`, et une règle 9 : hors de la route, chaque porte passe par lui avec un littéral de la liste. Seuls les deux anciens composants, `SpaceStrip` et `SpaceBand`, nomment encore l'événement, et aucun fichier n'écrit un événement du moteur en toutes lettres.
+- **La phrase de confidentialité oubliait la copie du texte des slides, et les portes** : complétée, voir plus haut.
+
+**La relecture de copie** (`relecteur-copie`) a relevé dix constats. Les huit mécaniques ou d'exactitude sont corrigés :
+- la phrase de confidentialité et le commentaire de son marqueur ;
+- dans `CHANTIERS.md`, l'ordre conseillé qui se contredisait, la ligne D qui ne nommait pas A14, et la place de la copie de T6.2 ;
+- dans `ENGINE.md`, les conditions d'ouverture, qui se lisaient comme complètes, et le compte des PR ;
+- « the deck's four » : le deck exporte trois formats, plus la sauvegarde.
+
+Points pour le bon à tirer A14.d : la phrase de confidentialité elle-même, plus longue qu'au nº6, et « ton moteur » au singulier dans le paragraphe qui la précède, alors qu'un appareil en garde jusqu'à dix depuis T5.
+
+**Un piège de git, rattrapé avant la PR** : regrouper les commits de T7 avec `git reset --soft origin/main`, juste après un `fetch` qui venait d'amener B6 (#265, mergée par une autre session pendant la vérification), a produit un commit qui défaisait B6 : 36 fichiers au lieu de 24. Poussé sur la branche, jamais en PR : le `--stat` l'a montré. Le commit a été reconstruit sur sa vraie base, puis rebasé sur B6, les deux entrées du journal gardées. La règle est dans `GITHUB.md` §1.10.
+
+**Sabotages** :
+- sur un build fermé, trois : une largeur forcée sur l'aperçu du tableau fait tomber les six tests de largeur d'A14 ; la règle d'impression retirée fait tomber la spec du PDF ; l'événement du mois retiré fait tomber les deux specs de la série ;
+- sur un build ouvert, les deux clics de porte retirés font tomber les deux specs de l'accueil et celle du résultat ;
+- sept sur les gardes statiques, et chacun fait tomber la règle 8 ou la règle 9 :
+  - `onFollow` appelé depuis un effet ;
+  - `onFollow` qui porte la ligne ;
+  - un `TrackedLink` importé dans `EngineResume` ;
+  - `LastResult` qui lit un argument ;
+  - l'étape du résultat dans la porte ;
+  - un `trackEvent` libre à la place de la porte typée ;
+  - le même, à côté d'elle. Celui-ci n'est tombé qu'avec la dernière vérification, celle qui interdit d'écrire un événement en toutes lettres : avant, le sabotage précédent ne tombait que parce qu'il retirait l'appel typé.
+
+**Vérifié** :
+- `vitest --coverage` : 2 897 tests, au-dessus des seuils ;
+- `tsc`, `eslint` et `next build` propres, moteur fermé comme la CI et moteur ouvert ;
+- Playwright complet sur le build fermé, avec l'émulateur Firestore et `CI=1` : 855 specs, 849 passées, aucune au second essai, 6 ignorées par construction ;
+- sur un build `ENGINE_ENABLED=true`, avec l'émulateur : les specs des portes, de la porte du résultat, des rappels et du canari, 30, toutes passées, clics comptés compris ;
+- dix specs neuves : neuf dans `engine-mobile.spec.ts` (les largeurs dans les deux langues, 320 px mesuré, axe) et une dans `engine-deck-theme.spec.ts` (l'impression) ; les événements neufs sont lus dans les specs de la série, du tableau, des rappels, des portes et du canari ;
+- captures relues : les dix écrans d'A14 en français à 390 px et en anglais à 1 280 px, et la page de confidentialité dans les deux langues.
+
+
+## B7 : le brief 05 des puces d'étape, déposé dans Claude Design (2026-10-01, #268)
+
+**La demande d'Antoine** : A15.19, le seul écart que les lois de l'UX ont laissé (`design/LOIS-UX.md`, similarité). Écrire et déposer un brief pour Claude Design, sans toucher au composant.
+
+**Le constat, relu dans le code et mesuré dans un vrai build** : `PillarChip` est une valeur dessinée comme un `Button` secondaire. Même rayon (`--radius-button`, le jeton des boutons), même bord plein de 2 px, presque la même hauteur (54,5 px au bureau, 50 px au téléphone et en `sm`, contre 47 et 55 px pour le bouton), aucune ombre au repos. Seuls la police (mono contre Inter) et une nuance de bord les séparent sur papier. **La nuit, même cette nuance disparaît** : le monde nuit lie `--border-soft` et `--border-hard` au même `--night-line`. Le fond n'y est pour rien : dans la carte de l'accueil, il est celui de la carte, et la puce n'y est plus qu'un bord, comme un bouton secondaire transparent. Sur le résultat, seul le `?` se touche ; **sur l'accueil, la puce entière est un lien** vers sa page du glossaire (R2-13), sans survol, et son nom accessible est le seul nom de l'étape, sans la note. Les deux vont dans le brief comme questions, pas comme correctifs.
+
+**Les captures** (`design/ds-extension-05/`, dix PNG) : `/r/sample` et l'accueil, en français et en anglais, à 1 280 et 390 px, tirés d'un `next build` puis `next start` comme la CI (`GAME_ENABLED=true`, d'où la carte du jeu sur le résultat, dite dans le brief). S'y ajoutent deux gros plans à 3× d'une puce normale et de la rouge à côté du vrai « Partager ce résultat », clonés depuis la même page pour que la CSS de production dessine les trois. **Deux pièges de capture** :
+- `fullPage` avec un cadrage coupait le fond de la page net à 900 px, un artefact de l'outil et pas du produit. Les captures défilent maintenant la vraie fenêtre ;
+- l'en-tête est collant aux deux largeurs (118 px au bureau, 114 au téléphone) et translucide (alpha 0,92, voulu). Le premier cadrage glissait le titre du profil dessous. Le défilement retranche maintenant sa hauteur.
+
+À l'accueil, à 1 280 px, « Voir un résultat d'exemple » et la première rangée de puces partent à 2 px l'un de l'autre sur la même ligne : la confusion en place, sans montage.
+
+**Le brief** (`design/DS-EXTENSION-BRIEF-05.md`, en anglais, sur la forme du 04) :
+- ce qui doit rester : la note sur 20, le rouge de l'étape qui freine (un diagnostic, jamais en tirets), le `?` et sa cible de 44 px, et le contraste AA de la CI ; la jauge aussi, sauf avis contraire ;
+- ce qu'on attend : une puce qui se lit comme une valeur, en papier comme en nuit ;
+- les contrastes d'aujourd'hui, mesurés composés sur leur vrai fond, aux deux mondes ;
+- huit questions, les dix contraintes, et les états à dessiner ;
+- le retour demandé dans `design/ds-extension-05-return/`, sous la forme du 04. Une précision vient de `ds-extension-04-return/COPIE.md` : la planche doit s'ouvrir depuis sa source, puisque ses PNG et son `board.js` construit n'avaient pas pu être rapatriés.
+
+**Le dépôt** : onze fichiers écrits par `DesignSync` dans le projet `23b9671c-…`, aux mêmes chemins que dans le dépôt, sous un plan qui ne nommait qu'eux, sans suppression. Le bundle, la sentinelle et `_ds_sync.json` ne sont pas touchés (ancre `6da5e42a15ef`, relue avant). Comme pour le 04, **rien ne tourne côté Claude Design tant qu'Antoine ne le lance pas** : c'est D11, avec le prompt à coller.
+
+**Vérifié** :
+- `list_files` relu après l'envoi : les onze chemins y sont, et le brief 04 et son retour n'ont pas bougé ;
+- le brief relu côté projet par `get_file` : identique au fichier du dépôt ;
+- les dix captures sont distinctes (sommes de contrôle) et relues à l'œil une par une ;
+- chaque chaîne citée relue dans `dictionary.ts` et `glossary-terms.ts`, chaque contraste recalculé depuis les jetons.
+
+**Consigné** : `CHANTIERS.md` (vue d'ensemble, A15.19, B7, D11), `design/README.md` (l'index), `design/LOIS-UX.md` (la ligne de la similarité), `.design-sync/NOTES.md` (« Synced » : ce que le projet garde sous `design/`). Que de la doc et des images sous `design/` : `vercel-ignore.sh` ne déploie pas.
+
+## B5 : le brief 06 de l'image de partage du moteur (2026-10-01, #267)
+
+Antoine a demandé le brief de B5 le soir de la fin d'A14.c : l'image de partage du moteur se dessine d'abord dans Claude Design (C32 Q17), puis se porte en T6.2. Personne d'autre ne s'en occupait : la seule autre session de design en cours écrivait le brief des puces d'étape (B7).
+
+**Ce qui est livré** : `design/DS-EXTENSION-BRIEF-06.md`, en anglais comme les briefs précédents. Ses captures sont dans `design/ds-extension-06/`, prises sur un build de production du jour, moteur ouvert :
+- les images de partage du site telles qu'elles sont : l'accueil (ce que montre aujourd'hui un lien vers le moteur, comme toutes les pages de contenu), un résultat, et les deux images du jeu ;
+- le haut de la page du moteur, en français à 1 280 px et en anglais à 390 px ;
+- le peloton de l'exemple public, sur la page et en slide. Les captures passent par le bouton « exemple » de la page : aucun vrai chiffre.
+
+**Ce que le brief pose** :
+- le constat : un lien vers le moteur se déplie aujourd'hui en « № 15 questions », c'est-à-dire en Tour ;
+- le cadre commun des images du site, à garder ;
+- les contraintes du produit : jamais de vrais chiffres (l'image est la même pour tous, et rien ne quitte le navigateur), le titre dans les deux langues, et les chaînes existantes, toutes à relire ;
+- les contraintes du moteur de rendu, Satori : flex seulement, pas de variables CSS, les cinq polices et leur sous-ensemble, le contraste ;
+- quatre questions : le fond (papier ou outremer), l'image (le chronomètre, le peloton, les deux ou aucun), les mots, la pastille « 2/3 » ;
+- ce qu'on attend en retour : les deux images en cadre portable, mesures en px et couleurs par jeton, le contrôle à 320 px, le texte alternatif, la liste des chaînes et un README des réponses, le tout en sources lisibles depuis le projet. Cette dernière exigence vient du retour du 04, dont la planche construite n'avait pas pu être rapatriée.
+
+**Une course de numéros, rattrapée avant le merge.** Le brief est d'abord parti sous le numéro 05. Pendant sa CI, B7 a été mergée (#268) avec son propre brief 05, ses captures dans `design/ds-extension-05/` et la même ligne d'index. Avant le merge, la branche a été refaite sur le nouveau `main` : le brief de B5 devient le 06, ses captures passent dans `ds-extension-06/`, et l'index, B5 et le journal sont réécrits sur le texte de B7, sans toucher au sien.
+
+**Une erreur corrigée en route.** La première version de cette entrée disait que `DesignSync` ne servait pas à envoyer un brief. B7 a montré le contraire : un brief se dépose dans le projet Claude Design par `DesignSync`, sous `design/`, sous un plan qui ne nomme que ses fichiers, puis Antoine le lance (D11).
+
+**Le dépôt**, à la demande d'Antoine, le même soir : onze fichiers écrits par `DesignSync` dans le projet `23b9671c-…`, aux mêmes chemins que dans le dépôt, sous un plan qui ne nommait qu'eux, sans suppression. Le bundle, la sentinelle et `_ds_sync.json` ne sont pas touchés. Vérifié :
+- `get_project` avant l'envoi : un design system, modifiable ;
+- `list_files` avant : rien sous `design/ds-extension-06/` ; après : les onze chemins y sont, et les briefs 04 et 05 comme le retour du 04 n'ont pas bougé ;
+- le brief relu côté projet par `get_file`, en entier : le même texte que dans le dépôt ;
+- les fichiers envoyés sont ceux du commit de la PR (`git diff` vide sur `design/`).
+
+`.design-sync/NOTES.md` (« Synced ») dit maintenant ce que le projet garde sous `design/`, brief 06 compris.
+
+**Ce qui reste** : D12 (le lancer). Le retour va dans `design/ds-extension-06-return/`, une session le recopie dans le dépôt et le porte en T6.2 ; sa copie rejoint le bon à tirer du moteur.
+
+## B8 : l'index du volet Design System, resté au 11 septembre (2026-10-01, #269)
+
+**Ce qu'Antoine a vu** : pas de borne kilométrique dans le projet Claude Design. Ses deux captures montraient un `Bottleneck` qui ouvrait sur le chiffre au pochoir et sur « Solid engine, one flat tyre », une copie de maquette retirée le 2026-09-29, et un `LoadingScreen` à trois messages et trois barres, d'avant A15.
+
+**Ce qui était en ligne, lu par `DesignSync` (lecture seule d'abord)** :
+- les fichiers sont à jour : `_preview/Bottleneck.js` ouvre sur `ScoreDisplay variant="marker"` et « Retention is lagging… » ; `_preview/ScoreDisplay.js` exporte `Marker` et `MarkerSmall` ; le `.prompt.md` de `ScoreDisplay` documente la variante ; `_ds_sync.json` porte l'ancre de B6 (`6da5e42a15ef`, 90 composants) ;
+- **`_ds_manifest.json`, l'index dont le volet tire ses cartes, est celui de l'envoi du 2026-09-11** : 34 composants, 34 cartes en cinq groupes, sans jeu, sans graphiques, sans les primitives de formulaire de l'extension 04. Ses 123 jetons sont aux valeurs de septembre (`--radius-tag: 4px`, `--radius-panel: 8px`) ;
+- la sentinelle `_ds_needs_recompile` est toujours là : la recompilation qu'elle demande à Claude Design n'a tourné après aucun des six envois depuis le 11 septembre.
+
+**Pourquoi personne ne l'a vu** : chaque synchro relisait `list_files` (les fichiers) et l'ancre de `_ds_sync.json`. Aucun des deux ne dit ce que montre le volet. Un ticket public décrit le même cas : rien ne déclenche la compilation pour des fichiers écrits par `DesignSync`, et le contournement est d'écrire le manifeste.
+
+**Ce qui est fait, avec le feu vert d'Antoine** :
+- **les 90 marqueurs `@dsCard` relus en ligne, un par un.** Groupe = dossier du composant, `viewport="900x700"` exactement pour les 30 cartes en colonne de `config.json`, sans exception ;
+- **un nouvel index** : 90 composants, 90 cartes en sept groupes, et 368 jetons. Ce sont les déclarations de `globals.css` et de ses imports dont le sélecteur contient `:root`. Un premier jet n'acceptait que `:root` seul et perdait les 34 jetons sémantiques déclarés sous `:root, [data-world="paper"]` (`--surface-card`, `--text-body`…) : rattrapé en comparant à l'ancien index. Trois anciens jetons manquent, retirés exprès du produit (`--dur-message`, `--texture-spray-strong`, `--width-mobile`, gardés dehors par des tests de jetons morts) ;
+- **l'envoi** : un plan qui ne nommait que `_ds_manifest.json`, sans suppression. Ni la sentinelle, ni le bundle, ni `_ds_sync.json`, ni `design/` ne sont touchés. L'index en ligne a été relu juste avant, inchangé.
+
+**Vérifié** :
+- l'index relu en ligne après l'envoi est identique, octet pour octet, au fichier envoyé ;
+- `.design-sync/build-manifest.mjs` produit le même fichier, octet pour octet, par ses deux chemins : depuis `config.json`, et depuis un bundle dont chaque carte porte le marqueur relu en ligne ;
+- non-vacuité : un `viewport` faussé dans une carte change la sortie, et une carte sans marqueur fait échouer le script.
+
+**Ce que l'index n'a pas réparé** : Antoine a rechargé le volet après l'envoi, et rien n'a changé. Le volet ne lit donc ni l'index du projet en direct, ni les fichiers de ses cartes : il montre une copie compilée le 2026-09-11. Les captures le laissaient prévoir, puisque `Bottleneck` et `LoadingScreen` étaient déjà indexés et montraient pourtant leur rendu de septembre. La sentinelle est toujours là après le rechargement.
+
+**Ce qui n'est pas touché** : l'agent de Claude Design lit les fichiers du jour. Le retour du brief 05 contient sa copie du `_ds_bundle.css` en ligne (`design/ds-extension-05-return/board/system-snapshot.css`, datée du 2026-10-02), avec `--radius-tag: 999px`, `--paper-white` et le monde nuit. Les maquettes sont construites sur le design system actuel ; seul le catalogue du volet est figé.
+
+**Le diagnostic, avec Antoine** :
+- la piste de la publication est écartée : il n'y a ni bouton « Publier » ni état « brouillon » dans le projet ;
+- le bouton « Actualiser » ne change rien ;
+- une fenêtre privée montre la même chose, ce n'est donc pas un cache du navigateur.
+
+Le texte du skill `/design-sync` (trouvé en ligne) dit que l'application « clears the sentinel whenever the user opens the project » et que les nouvelles cartes « appear next time the user opens or refreshes the project ». Chez nous, la sentinelle survit à chaque ouverture : **le rafraîchissement de Claude Design échoue sur ce projet**, au moins depuis le premier envoi après le 11 septembre, donc avant que `design/` ne contienne quoi que ce soit. Aucun fichier envoyé par la synchro ne le relance. Le signalement à Anthropic est prêt (D13, texte à coller). **Antoine, le même soir : « on laisse comme ça, ce n'est pas si dérangeant »** ; D13 devient facultatif. Le script et l'index restent : l'index est juste, et le script le tiendra juste quand le rafraîchissement remarchera.
+
+**Consigné** : `.design-sync/NOTES.md` (« `_ds_manifest.json` », le chemin d'envoi, « Synced », « Re-sync risks », les 30 cartes en colonne), `CHANTIERS.md` (B8, la vue d'ensemble, le prompt B), `CLAUDE.md` (la correction de « les 90 composants y sont »). Que de la doc et un script hors de `src/` : `vercel-ignore.sh` ne déploie pas.
+
+
+## B7 : le retour 05 de Claude Design recopié, C34 et C35 tranchées (2026-10-02, #270)
+
+**Ce qui est revenu** : Claude Design a répondu au brief 05 dans le projet, sous `design/ds-extension-05-return/`, et rien hors de ce dossier n'a changé. La liste des fichiers est celle d'avant, le dossier `ds-extension-06` étant celui de B5. `DefinitionTrigger.jsx` garde l'empreinte de `_ds_sync.json` (`sha256`, 12 caractères : la méthode est trouvée ici, elle servira), et les deux contrats qu'un agent de design aurait pu retoucher ne parlent pas de l'extension 05. La consigne ajoutée au prompt de lancement (« ne change aucun fichier hors de ce dossier ») a tenu.
+
+**La réponse** : la puce devient **une ligne d'une feuille de score**, sous le profil du parcours dont elle est la table. La ligne porte la note, une jauge, le nom de l'étape, puis le `?`. Sans cadre, sans rayon de bouton, réglée comme `DataTable` (un filet plein en tête, des tirets fins entre les lignes). Les huit réponses :
+- l'étape qui freine prend un lavis et un filet rouge plein de 3 px ;
+- la jauge rouge passe au rouge du texte, l'autre mesurait 2,65:1 contre sa piste ;
+- une seule colonne à toutes les largeurs : fini Revenue seul sur sa ligne au téléphone ;
+- le `?` devient plein, avec un survol, et prend le remplissage inverse une fois ouvert ;
+- à l'accueil, le lien passe sur le nom de l'étape ;
+- le tampon du roast perd le rouge plein de l'action principale et devient un tampon encré ;
+- les noms `StageScore`, `StageScores`, et `StageStamp` proposé ;
+- six trouvailles hors du brief.
+
+**Recopié** : les 22 fichiers, par `get_file`, aux mêmes chemins. Pour la première fois, rien ne reste dans le projet, puisque la planche est toute en source comme le brief le demandait. Le sous-agent lancé pour la planche n'avait pas l'outil `DesignSync` et n'a rien fait : tout est passé par la session. Une insécable déclarée par `board.js` est remise ; ailleurs, `COPIE.md` dit où une insécable a pu devenir une espace.
+
+**La planche rejouée** dans Chromium, servie en http avec les polices de `.design-sync/fonts/` (elle les cherche à la racine du projet Claude Design, que le dépôt n'a pas), aux huit cadres : aucune erreur de script, aucun défilement horizontal, des lignes de 44 px au moins, les cinq jauges d'une feuille de même longueur (220 et 166 px ; le retour annonce 223 et 163 avec ses polices).
+
+**Tranché par Antoine**, planche sous les yeux, dans la session (la règle d'A : poser tout de suite quand il est là) :
+- **C34** : sur un frein partagé, **toutes les étapes ex aequo en rouge**, comme le profil, qui les signale déjà. Aujourd'hui une seule puce l'est, et l'écran se contredit ;
+- **C35** : le nouveau `?` **partout, quiz compris** ;
+- le portage dans la même session : **A16**.
+
+**Consigné** : `design/ds-extension-05-return/COPIE.md`, `docs/decisions.md` (C34, C35), `CHANTIERS.md` (B7 fait, A15.19, A16 ouvert, D11 retiré), `design/README.md`, `design/LOIS-UX.md`, `.design-sync/NOTES.md` (« Synced »). Que de la doc sous `design/`, `docs/` et à la racine : rien ne se déploie.
+
+
+## A16 : la feuille de score portée, C34 et C35 codées (2026-10-02, #271)
+
+**Ce qui change à l'écran** : les cinq puces d'étape du résultat et de l'aperçu de l'accueil deviennent **une feuille de score** (`StageScores`, une `<ol>` nommée « Score par étape, sur 20 »), juste sous le profil du parcours dont elle est la table. Une ligne par étape (`StageScore`, un `<li>`) : la note, une jauge, le nom, le `?`. Ni boîte, ni coin arrondi : un filet plein en tête, des tirets fins entre les lignes, comme `DataTable`. Une seule colonne à toutes les largeurs, 48 px par ligne sur le résultat, 44 px au téléphone et sur l'accueil. La liste est la grille et chaque ligne une sous-grille : les cinq jauges partent du même x et se comparent. `PillarChip` est retiré, ses deux jetons de rembourrage avec lui (le test des jetons morts l'a exigé).
+
+**C34, codée** : le rouge de la feuille suit la netteté du frein. Une ligne sur `clear`, sur `shared`, tout le groupe que nomme le frein (`bottleneck.pillars` : les étapes à moins de 4 points de la plus basse, `CLEAR_GAP`, et pas fortes), aucune sur `level`, comme le profil. En roast, l'étape la plus basse sort de la feuille en tampon et la deuxième prend le rouge, sauf sur `level`. La prop `weakestPillar`, qui ne servait qu'à la puce rouge unique, disparaît de `ResultView`.
+
+**C35, codée** : le `?` (`DefinitionTrigger`) a un vrai bord plein de la couleur du texte au repos, un survol (seulement sur un appareil qui survole), et le remplissage inverse de `--state-selected-*` une fois ouvert. Partout, quiz compris.
+
+**Le tampon du roast** (`StampedPillar`) : encre rouge sur le lavis, bord plein de 3 px, coins de 4 px (`--radius-stamp`), un degré de travers. C'était le rouge plein de l'action principale. Il devient une ligne de la feuille (un `<li>`), lu en mots, ses points cachés.
+
+**À l'accueil**, le lien quitte la puce entière pour le **nom de l'étape**, souligné, nommé « Activation — définition » (nouvelle clé `stageLinkLabelTemplate`, avec `stageScoresLabel` : les deux « à relire », convention 6). La note reste hors du lien. Une bande de 44 px, centrée sur le nom, garde la cible tactile.
+
+**Les jetons, un écart assumé avec le retour** : `tokens/scores.css` proposait onze alias de couleur (`--score-alert-bg: var(--surface-alert)`…) et une dizaine de tailles. Le portage lit les jetons sémantiques directement : un alias qui ne fait que renommer un jeton est un nom de plus à tenir, pour aucun changement de valeur. Restent trois jetons neufs, ceux qui portent une valeur que le système n'avait pas : `--score-row-height-md` et `--score-row-height-sm` (48 et 44 px) et `--radius-stamp`. Le `-1deg` du tampon reste écrit en dur : `individual-transforms.test.ts` compte ces littéraux, et le tampon n'en est qu'un de plus.
+
+**Le contraste, vérifié par les tests de jetons** (le retour l'annonçait, la CI le tient) : le texte rouge sur le lavis mesure 5,28 sur papier et 5,56 la nuit, la jauge rouge 5,28 contre le lavis, et le filet rouge 3,47.
+
+**Tests** :
+- unitaires : `stage-scores.test.ts` fixe le balisage (une liste ordonnée nommée, le texte d'une ligne est toute sa lecture, la jauge cachée et à l'échelle, le lien sur le nom seul, le tampon lu en mots) ;
+- e2e : `result-composition.spec.ts` mesure la feuille à 1280 en anglais et à 390 en français (aucun rayon, aucun fond hors de la ligne rouge, lignes de 44 px au moins, sans chevauchement, colonnes alignées) ; `result-real.spec.ts` tient C34 sur deux vrais résultats (un frein partagé : deux lignes rouges ; un profil plat : aucune) ; `targets.spec.ts` déclare la bande de 44 px des noms de l'accueil ;
+- **non-vacuité, sur un build muté** : un rayon de bouton sur la ligne fait échouer la mesure de la feuille (« 12px » au lieu de « 0px ») ; le rouge calculé sur la seule première étape du frein fait échouer le test du frein partagé (une ligne rouge au lieu de deux) ; le test du profil plat, lui, reste vert, comme attendu. Mutations retirées, build refait.
+
+**Les suites, sur la branche** : 2 908 tests unitaires verts ; 859 specs Playwright, 853 passées en local avec l'émulateur et `CI=1`, 6 ignorées par construction (les specs « jeu fermé ») ; `tsc` et `eslint` propres.
+
+**CodeQL a rougi sur la PR** (une alerte « high », *incomplete multi-character sanitization*) : l'assistant de `stage-scores.test.ts` qui lit le texte d'un rendu retirait les balises en une seule passe. Sans conséquence dans un test, mais l'alerte est juste : il retire maintenant jusqu'à ce que rien ne change, comme celui de `game-shop-phone.test.ts`, déjà corrigé pour la même famille d'alerte. Un assistant de ce genre se copie depuis un test existant, pas de mémoire.
+
+**À 320 px** (hors contrat, remesuré parce que `CHANTIERS.md` E citait la puce) : la feuille tient, tampon compris, et `/r/sample` ne déborde plus (il débordait de 37 px). Un résultat en roast déborde encore de 14 px, par le badge de l'en-tête, hors d'A16 : noté en E.
+
+**Le tampon garde son suffixe** (`stampedSuffix`, « bon dernier ») mais sa composition change : « RETENTION · 8/20 · BON DERNIER » au lieu de « 8/20 RETENTION — bon dernier », capitales comprises. La chaîne n'a pas bougé, donc le grep du bon à tirer ne la verrait pas : elle reprend un « TODO: à relire » pour que le prochain bon à tirer la montre.
+
+**Captures** du vrai build, avant et après, aux deux langues, 1280 et 390 (le résultat, le `?` ouvert, le roast au téléphone avec le tampon et l'Activation en rouge, l'accueil, le `?` du quiz) : conformes à la planche du retour.
+
+**Le design system** : `.design-sync/config.json` retire `PillarChip` et ajoute `StageScore` et `StageScores` (91 composants, `check-inventory` vert) ; les aperçus de `StampedPillar`, `GlossaryTerm` et `DefinitionTrigger` sont réécrits sur la feuille, ceux de `Tag` et `StageProfile` corrigés dans leurs commentaires, ceux de `StageScore` et `StageScores` neufs ; `conventions.md` suit. **La re-synchro vers Claude Design est B9**, pas faite ici.
+
+**Consigné** : `CHANTIERS.md` (A15 clos, A16 retiré, B7, B9 ouvert), `docs/decisions.md` (C34 et C35 codées), `design/README.md`, `design/LOIS-UX.md` (la loi de similarité : tenue).
+
+## A14.c, T6.2 : l'image de partage du moteur, portée du retour de B5 (2026-10-02, #272)
+
+Antoine a lancé le brief 06 dans Claude Design le soir même du dépôt (D12), puis a dit « Claude Design a terminé ». Cette PR recopie le retour dans le dépôt et le porte : c'était la dernière pièce d'A14.c.
+
+**Le retour, recopié** (`design/ds-extension-06-return/`) : les huit fichiers texte, lus un par un par `DesignSync` (`get_file`) et traités comme des données. Ce sont le README des quatre réponses, les quatre sources de `og/` (le cadre, le chronomètre, les jetons, les chaînes) et l'aperçu navigateur. Les quatre PNG de `render/` restent dans le projet : l'outil ne rapatrie pas une image. Ils ne manquent pas, parce que les sources ont été rendues telles quelles par le Satori du dépôt (`next/og`, les cinq polices de `src/lib/og/fonts/`). `COPIE.md` le dit, avec l'insécable de `NB` remise à U+00A0. Les réponses de Claude Design :
+- **le fond** : du papier ;
+- **l'image** : le chronomètre seul, sans peloton, parce qu'en fil les chiffres de l'exemple se liraient comme ceux de qui partage ;
+- **les mots** : l'eyebrow, le titre de la page sur deux lignes avec « moteur » en outremer, une ligne neuve et une promesse neuve en capitales mono ;
+- **la pastille** : « 2/3 · CONTRE-LA-MONTRE », oui, à la place où le résultat porte « 1/3 · PLAINE ».
+
+**Le portage** : `lib/og/engine-frame.tsx`, servi par `aarrr-funnel-template/opengraph-image.tsx`, une image par langue, prérendue (●), sur le modèle du jeu. La page déclare son image par la convention de fichier (`ownShareImage`). Les mesures sont celles du retour, sans exception. **Rendu par le même Satori, le portage est identique au pixel aux sources du retour partout, sauf deux zones voulues**, mesurées au seuil de 16 sur 255 par canal : 0 pixel d'écart hors du chronomètre et du pictogramme, aux deux langues.
+
+**Les deux dessins repris du produit plutôt que du retour.** Claude Design a redessiné à la main le chronomètre et le pictogramme de la pastille, en disant reprendre ceux de la page et du bandeau. Ses versions s'en écartent : la lunette est hors du cadran au lieu d'être dedans, le temps couru fait 38 % au lieu de 70 %, les boutons sont autres, et les traits de vitesse du pictogramme sont placés ailleurs. Un second dessin aurait fait un second emblème le jour où l'un des deux bouge. Leurs formes sont donc devenues des données :
+- `components/brand/stopwatch-geometry.ts`, que `Stopwatch.tsx` peint en CSS et l'image en littéraux ;
+- `components/brand/space-pictos.ts`, d'où `SpaceBand` tire ses trois pictogrammes. L'image du résultat y prend celui du Tour, dont elle gardait une copie.
+
+Le balisage du composant `Stopwatch` est identique avant et après, au caractère près. Celui des pictogrammes l'est attribut par attribut, à un `fill="none"` explicite près sur trois lignes ouvertes. L'image du résultat rend les mêmes octets avant et après : sa version d'adresse (`SHARE_IMAGE_VERSION`) ne bouge pas. Pas de re-synchro due à Claude Design (`.design-sync/NOTES.md`).
+
+**Les autres écarts** (`docs/engine/moteur-complet.md` §19.11) :
+- La route ne lit pas le drapeau elle-même. `isEnginePath` couvre désormais tout ce qui est sous la page, comme `isGamePath`, et le proxy rend l'image en 404 avec la page ; l'aperçu propriétaire l'ouvre avec elle. La spec disait « comme le jeu, elle le vérifie elle-même », mais le jeu ne le fait pas.
+- Les capitales sont posées dans `lib/og/engine-share-text.ts`, comme pour les images du jeu, pas par `textTransform` : `fonts.test.ts` vérifie ainsi ce qui est dessiné.
+- Le titre et l'eyebrow de la page vivent maintenant dans `content/engine-share.ts`, que lit `engine-copy.ts`. Le titre dessiné et le H1 sont une seule chaîne. L'image n'atteint que ce module de la copie du moteur (budget de fan-in : 3 routes), pas `engine-copy.ts`.
+- L'outremer entre dans les jetons typés (`SPACE_PRIMITIVES`, tenu égal à `spaces.css`), d'où `OG_ULTRAMARINE`.
+- Le texte alternatif est un gabarit rempli avec ce qui est dessiné (la pastille, le H1, la ligne, la promesse, l'adresse), et il ne peut pas en dériver. Vérifié une fois contre le retour : identique au caractère près dans les deux langues, insécables comprises. En production, l'adresse est celle de `NEXT_PUBLIC_SITE_URL` (`www.`), comme le badge dessiné.
+
+**Les gardes** :
+- `engine-share-text.test.ts` : le titre est le H1, un seul mot est en outremer, la pastille porte les mots du bandeau, l'alt est sans trou, et les règles françaises sont tenues. Un H1 renommé sous l'image, ou un mot accentué perdu, fait échouer le build plutôt que de dessiner un demi-titre.
+- `brand-marks.test.ts` : les épaisseurs de trait de `Stopwatch.module.css` et le mélange du temps couru sont ceux que l'image dessine. Aucun fichier source n'écrit le tracé d'un pictogramme hors de `space-pictos.ts`.
+- `token-sources.test.ts` : l'outremer typé est celui de `spaces.css`.
+- `engine-boundary.test.ts`, règle 1 : la route d'image est la seule porte de l'OG sous la route du moteur. Elle n'atteint rien du moteur que son titre, et rien du moteur ne l'atteint.
+- `fonts.test.ts` lit les chaînes par `engineShareText`.
+- `proxy.test.ts` ferme et ouvre l'image avec la page.
+- `e2e/engine-share-image.spec.ts` couvre trois choses :
+  - moteur fermé, un 404 sans aperçu et avec un cookie deviné ;
+  - le PNG en 1 200 × 630, différent d'une langue à l'autre ;
+  - l'unique `og:image` de la page, qui pointe sur elle, avec son alt.
+
+**Relectures** :
+- sécurité : un constat réel, et un durcissement.
+  - **Le constat** : moteur fermé, `/xx/aarrr-funnel-template/opengraph-image/en` répondait 200 avec l'image anglaise, et de même pour tout premier segment autre que `en` ou `fr`, `/EN/` compris. **Les images du jeu, fermé en production, avaient le même défaut depuis G4b**, et celle de l'accueil coûtait un rendu Satori par segment inventé. La cause : le proxy ne ferme que ce que `splitLocalePath` reconnaît, et `dynamicParams = false` ne s'applique pas à une route de métadonnées. Next la rend à la demande, et le loader retire même ce réglage des réexports (`NEXTJS.md` §1.11). Reproduit sur un build de production : 200 et un PNG pour `/xx/game/opengraph-image/en` comme pour `/xx/opengraph-image/en`. **Corrigé pour toutes les routes d'image** par `lib/og/image-metadata.ts` : aucune image pour une langue inconnue, et le `GET` généré par Next répond 404 avant tout rendu. `share-image-routes.test.ts` parcourt chaque fichier `opengraph-image` de l'arbre (huit). La spec de `share-previews` vérifie les huit adresses sous `xx`, `EN` et `en-US`, avec un témoin qui répond 200 ; elle a été vue rouge sur l'ancien build avant le correctif.
+  - **Le durcissement** : la garde de la règle 1 nommait quatre modules. Elle compte maintenant tout ce que l'image atteint contre la liste interdite, et exige que le reste du moteur n'atteigne de `lib/og` que `tokens.ts` (pour `OG_SIZE`, par `meta.ts`). Deux sabotages la font tomber : un fichier de l'îlot qui importe `lib/og/picto`, et le texte de l'image qui atteint le dictionnaire. ;
+- copie : un défaut, traité. L'eyebrow déplacé avait perdu la couverture du marqueur de tête d'`engine-copy.ts` : il a maintenant le sien. Toute la copie neuve (la ligne, la promesse, le gabarit de l'alt) va au bon à tirer A14.d. La carte doit montrer l'alt de production, qui finit en `www.tourdegrowth.com`.
+
+**Vérifié** :
+- **Le rendu** : le portage comparé au pixel au rendu des sources du retour par le même Satori (0 écart hors des deux zones voulues). Lu à l'œil en français et en anglais à 1 200 px, puis à 320 px : le titre, le mot bleu, le logo et le chronomètre se lisent.
+- **Les octets** : l'image du résultat est identique avant et après la sortie de son pictogramme ; le balisage du composant `Stopwatch` aussi.
+- **Les mots** : l'alt, la ligne, la promesse, l'eyebrow, la pastille et la coupe du titre sont identiques à `og/strings.og.mjs`, aux deux langues.
+- **Les tests unitaires** : `vitest --coverage`, 2 942 tests dans 230 fichiers, au-dessus des seuils, sur l'arbre rebasé après A16 (#271).
+- **Les contrôles statiques** : `tsc` et `eslint` propres ; `next build` propre moteur fermé et moteur ouvert, l'image prérendue (●) les deux fois.
+- **Playwright complet, build fermé comme la CI**, avec l'émulateur Firestore et `CI=1` : 861 specs, 855 passées, 6 ignorées par construction, aucune au second essai. Rejoué après le rebase sur A16 (#271), qui touchait le résultat et les jetons : 865 specs, 859 passées, 6 ignorées.
+- **Build `ENGINE_ENABLED=true`**, avec l'émulateur : les specs `engine-*`, `share-previews`, `game-share-images`, `result-real` et `locale-routing`, soit 310. 299 passées et 5 ignorées par construction. Les six de `engine-flag.spec.ts` sont rouges, comme il se doit : elles sont écrites pour un serveur fermé (leur en-tête le dit), et le motif `engine-*` les a prises. L'image y répond à tous, et la page la déclare avec son alt.
+- **Les sabotages** : seize sur les gardes neuves, tous tombés.
+  - Un glyphe absent du sous-ensemble dans la ligne (« ≈ » : la flèche, elle, est dans le sous-ensemble d'Inter et passe à juste titre).
+  - L'outremer typé décalé de `spaces.css`, et `OG_STONE_3` sur le mauvais papier.
+  - La lunette à 7 px en CSS, le temps couru à 20 %, une seconde copie d'un pictogramme.
+  - Un H1 renommé et un mot accentué perdu (le module ne se charge plus), un trou dans l'alt.
+  - L'îlot qui importe `lib/og`, l'image qui atteint `engine-copy.ts` (la règle et le fan-in tombent) ou `lib/engine`, et les deux sabotages de la garde durcie.
+  - `isEnginePath` remis au chemin exact (le proxy et l'accès tombent), et le repli `"en"` remis à l'image du jeu.
+
+**Consigné** : `CHANTIERS.md` (A14.c, A14.d, B5 clos, D12 retirée, D2, et A17 pour le halo grisé des images de contenu, trouvé en route : `transparent` dans un dégradé Satori se mélange à travers le noir), `ENGINE.md`, `docs/engine/moteur-complet.md` §19.11, `NEXTJS.md` §1.10 et §1.11, `design/README.md`, `.design-sync/NOTES.md`, `CLAUDE.md` (l'état et les chiffres).
+
+## A17 : le halo des images de partage, clair et plus gris (2026-10-02, #274)
+
+Trouvé par le portage de l'image du moteur (T6.2) et confié par Antoine le même soir.
+
+**Le défaut** : l'image de partage de l'accueil, que reprennent « Comment ça marche », le glossaire et le quiz (`lib/og/content-frame.tsx`), pose sur le papier un halo blanc en haut à gauche. Son dégradé finissait sur `transparent`, que Satori mélange à travers le noir. Le halo dessinait donc une bande grise : le fond tombait à (204, 199, 188) sous le sous-titre, contre (231, 225, 210) pour le papier nu. Rien ne cassait, et seule une comparaison au rendu correct du moteur l'a montré. **Ce que ça coûtait** : l'accent rouge « cale-t-elle ? » descendait à 2,76:1 sur ce gris, sous les 3:1 de sa taille d'affichage, et le sous-titre à 4,50:1. La lampe de la nuit du jeu (`game-frame.tsx`) avait la même forme, sans dommage visible à 6 %.
+
+**Le correctif** : chaque dégradé finit sur sa propre couleur à alpha nul. Celui du halo et celui de la lampe changent. Ceux des ombres noires sont écrits `rgba(0, 0, 0, 0)` au lieu de `transparent`, au pixel près pareil, pour que la règle se lise sans exception.
+
+**Mesuré sur les dix images** (accueil, quiz, hub et deux niveaux du jeu, aux deux langues), avant contre après :
+- **sens des écarts** : chaque pixel qui change s'éclaircit, aucun ne s'assombrit ;
+- **amplitude** : jusqu'à 32 niveaux de luminance sur le papier, 4 sur la nuit ;
+- **contrastes au pire** dans la bande sans texte : le sous-titre passe de 4,50 à 5,81:1, l'accent rouge de 2,76 à 3,57:1. Ce sont les valeurs du papier nu, que le halo ne fait plus qu'éclaircir.
+
+Sur la nuit, la lampe la plus claire ne change pas : seul son milieu remonte. Le gris clair de la nuit reste au-dessus de 7,6:1.
+
+**La garde** (`src/lib/og/ground-lift.test.ts`) :
+- aucun cadre d'image (`lib/og`, et les routes `opengraph-image` et `share`) n'écrit `transparent` dans un dégradé ;
+- l'image de l'accueil, rendue, n'est nulle part plus sombre que son papier, dans la bande de 46 px que le texte ne traverse pas, hors de la ligne de route.
+
+Le PNG est décodé avec `node:zlib` : `sharp` n'arrive que par `next`, en dépendance optionnelle, et un test ne s'y adosse pas. **Deux sabotages** : `transparent` remis fait tomber les deux gardes ; le même défaut écrit `rgba(0,0,0,0)` ne fait tomber que la seconde, comme prévu.
+
+**Ce qui ne bouge pas** : l'adresse de l'image de l'accueil garde son `?hash`, qui est celui du fichier de la route et non de l'image (`lib/i18n/meta.ts`). Une plateforme qui l'a déjà en cache la garde jusqu'à sa prochaine lecture. Rien n'est encore lancé sur les réseaux (C22), donc rien à forcer.
+
+**Vérifié** :
+- les dix images relues avant et après, en paires ;
+- `vitest`, 2 944 tests ;
+- `tsc` et `eslint` propres ;
+- Playwright complet sur un build fermé comme la CI, avec l'émulateur et `CI=1` : 865 specs, 859 passées, 6 ignorées par construction.
+
+**Consigné** : `CHANTIERS.md` (A17 clos), `NEXTJS.md` §1.10.
+
+
+## L'en-tête du résultat sur téléphone : les états descendent en tête de page (2026-10-02, #273)
+
+**La demande** (Antoine) : à 320 px, un résultat en roast débordait de 14 px, par le badge roast de l'en-tête (`CHANTIERS.md` E, noté par A16).
+
+**Mesuré sur un vrai build, avec l'émulateur, dans tous les états de l'en-tête** (le logo, puis à droite la langue, le tag Deep dive, le badge roast) et non dans le seul où le défaut avait été vu :
+
+| État | 320 px | 360 px | 375 px | 390 px (contrat) |
+|---|---|---|---|---|
+| l'exemple, sans état | tient | tient | tient | tient |
+| roast | +14 px | tient | tient | tient |
+| Deep dive | +13 px | tient | tient | tient |
+| roast + Deep dive | +79 px | +39 px | +24 px | **+9 px** |
+
+Le dernier état débordait **dans le contrat**, et aucun test ne le voyait : seul `/r/sample`, sans état, était mesuré au téléphone (`landing-mobile.spec.ts` et `result-composition.spec.ts`, entre autres). Les captures ont montré un second défaut, sans débordement : le badge roast se coupait en « 🔥 ROAST / MODE » dès 390 px, et dès 430 px quand le tag Deep dive était à côté, lui-même coupé en « DEEP / DIVE ».
+
+**Pourquoi pas comme R-21** : l'accueil a réglé le même problème en masquant au téléphone ce que le pied de page porte déjà, et en refusant un en-tête sur deux lignes (132 à 171 px). Ici, rien d'autre sur la page ne dit « roast », et ce mot est ce qui prévient le lecteur d'un lien partagé que le ton dur a été choisi. Masquer était exclu.
+
+**Ce qui change**, au point de rupture de l'app (la bascule est en CSS seul, sans JavaScript) :
+- jusqu'à 760 px, l'en-tête garde le logo et la langue, et les deux états descendent sur leur propre ligne en tête de page, là où l'exemple porte son badge d'exemple ;
+- à partir de 761 px, rien ne bouge ;
+- les états sont rendus deux fois (`stateTags`), et celui qui ne s'affiche pas est en `display: none`, donc hors de l'arbre d'accessibilité ;
+- le badge roast ne se coupe plus jamais (`white-space: nowrap`).
+
+**Tests** :
+- un vrai résultat de plus dans l'émulateur, `roastDeep` (roast, avec un Deep dive, 54/100), l'état le plus large de l'en-tête ;
+- `e2e/result-header.spec.ts` couvre les quatre états, aux deux langues. Au téléphone (320, 360, 375, 390, 430 et 760 px), la page ne défile pas de côté, les états sont en tête de page et pas dans l'en-tête, et chacun tient sur une ligne. À 761 et 1 280 px, la ligne de l'en-tête tient et les états y sont ;
+- **non-vacuité, sur un build sans le correctif** : les six cas branchés sur l'émulateur échouent dès 320 px (de 13 à 79 px de trop), et l'exemple passe, comme attendu ;
+- le contrôle « une ligne » est éprouvé à part, sur le même build, avec le badge roast : coupé, il fait 36 px de contenu, et il ressort faux ; sur une ligne, il fait 18 px ;
+- **la relecture de copie a trouvé une borne sans marge** : le premier jet comptait en tailles de police (moins de deux). Or le tag Deep dive est composé plein (`--meta-2xs`, hauteur de ligne 1) : coupé, il fait exactement deux tailles de police, et seul le `<` strict l'attrapait. La borne compte maintenant en hauteurs de ligne (moins d'une et demie), et elle est éprouvée sur le tag Deep dive coupé aussi.
+
+**Trouvé en mesurant, puis réglé à la demande d'Antoine dans la même PR** : `/r/sample` débordait de 8 px à 761 px et de 1 px à 768 (un iPad en portrait), quoi que tienne l'en-tête. La cause n'était ni l'en-tête ni le seuil des deux colonnes, comme je l'avais d'abord écrit, mais **les cartes de forces et de faiblesses** (`.cardGrid`). Au-dessus de 760 px, elles passaient toujours à deux colonnes `1fr 1fr`. À 761 px, la colonne de droite n'a que 249 px (713 − 420 − 44), donc deux cartes de 120 px, avec 76 px de texte par ligne. Un mot de l'exemple n'y tenait pas, et la grille réclamait 281 px (278 en français). Les vrais résultats tenaient seulement parce que leurs mots étaient plus courts, aussi à l'étroit.
+
+**Le correctif** : la grille se règle sur sa propre largeur, `repeat(auto-fill, minmax(min(100%, 240px), 1fr))`, donc deux cartes côte à côte seulement si chacune a 240 px. Concrètement, une carte par ligne de 761 à environ 1 000 px, puis deux, de 260 px à pleine largeur comme avant. `auto-fill` plutôt qu'`auto-fit` : la seule force d'un roast garde sa demi-largeur au bureau, comme avec `1fr 1fr`. Mesuré : 249, 388, puis 240 + 240 et 260 + 260 px à 761, 900, 1 000 et 1 280 px, sans défilement de côté.
+
+**Le test** : à partir de 761 px, `result-header.spec.ts` mesure maintenant toute la page, et non plus la seule ligne de l'en-tête, à 761, 768, 834, 1 024 et 1 280 px. **Non-vacuité** : sur le build sans ce correctif, l'exemple échoue à 761 px dans les deux langues, et les vrais résultats passent.
+
+**Les suites, sur la branche** : 2 942 tests unitaires verts ; 882 specs Playwright, 876 passées en local avec l'émulateur et `CI=1`, 6 ignorées par construction ; `tsc` et `eslint` propres.
+
+**Captures** du vrai build, à 320, 390 et 1 280 px, avant et après, pour le roast, le Deep dive et les deux ensemble. Au téléphone, l'en-tête est fin et les deux tags sont lisibles sur une ligne au-dessus de la carte du score. Au bureau, l'en-tête est inchangé.

@@ -6,15 +6,17 @@ export interface DefinitionTriggerProps extends Omit<ButtonHTMLAttributes<HTMLBu
   term: string;
   /** Full accessible label, e.g. "Definition: Retention" / "Définition : Retention" — localized by the caller. Defaults to `term` alone. */
   label?: string;
-  /** Whether its popover is currently open. Drives aria-expanded and the darker outline. */
+  /** Whether its popover is currently open. Drives aria-expanded and the inverse fill. */
   open?: boolean;
-  /** Match the surrounding text colour: muted on paper, alert inside a red wash chip. */
+  /** Match the surrounding text colour: muted on paper, alert on the stalling stage's red wash. */
   tone?: "muted" | "ink" | "alert";
 }
 
 /**
- * The 16px dashed "?" that opens a glossary definition — 16px drawn, 44px
- * tapped (a transparent disc around it takes the hit). Always a real
+ * The 16px "?" that opens a glossary definition: a solid ring at rest, body
+ * ink under the pointer, the inverse fill while its definition is open
+ * (design system extension 05, C35). 16px drawn, 44px tapped (a transparent
+ * disc around it takes the hit). Always a real
  * `<button>`: keyboard-reachable and screen-reader labelled, never a `<span>`
  * with a click handler. Use immediately after a jargon term — first
  * occurrence per screen only, never on every repeat — and pair it with

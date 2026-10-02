@@ -1,7 +1,19 @@
 import { LTV_CAP_MONTHS, derivedShapeOf } from "./catalog-shape";
 import { div, mapBounds, mul, scale } from "./interval";
-import type { Confidence, DerivedId, DerivedValue, EngineCalcContext, EngineState, Interval, Known, MetricId, UnitEconomics } from "./types";
-import { currentSnapshot, knownIn } from "./values";
+import type {
+  Confidence,
+  DerivedId,
+  DerivedValue,
+  EngineCalcContext,
+  EngineState,
+  Interval,
+  Known,
+  MetricId,
+  Motion,
+  SlgUnitEconomics,
+  UnitEconomics,
+} from "./types";
+import { currentSnapshot, entryOf, knownIn } from "./values";
 
 /**
  * unit-economics.ts — what a customer is worth (engine spec §5.7, §6.8).
@@ -106,4 +118,100 @@ export function unitEconomics(state: EngineState, ctx: EngineCalcContext): UnitE
     grr: approximate("rev.grr", retention?.grr ?? null),
     nrr: approximate("rev.nrr", retention?.nrr ?? null),
   };
+}
+
+// --- Sales-assisted (§18.5.6) ------------------------------------------------
+
+/**
+ * Months a sales-assisted customer is counted for, from the renewal of
+ * contracts up for renewal (C25 Q6: the same 36-month cap as self-serve).
+ * An annual contract that renews at r % lives 12 ÷ (1 − r/100) months; a
+ * monthly one, 1 ÷ (1 − r/100). A higher renewal gives a longer life: no
+ * bound swaps here, unlike churn.
+ */
+export function slgLifetimeMonths(renewalPercent: Interval, term: "annual" | "monthly"): Interval {
+  const months = (r: number) => (r >= 100 ? LTV_CAP_MONTHS : Math.min((term === "annual" ? 12 : 1) / (1 - r / 100), LTV_CAP_MONTHS));
+  return { lo: months(renewalPercent.lo), hi: months(renewalPercent.hi) };
+}
+
+/**
+ * The sales-assisted computed figures: from the NEW contracts' ACV (the CAC
+ * is spent on them, §18.4.7) and the motion's OWN margin (C25 Q4). A margin
+ * unknown makes all three uncomputable — never a fallback on revenue, never
+ * self-serve's margin. A margin taken from the company's (`company-wide`) is
+ * an estimate: the three come out approximate, as any estimate does.
+ */
+export function slgUnitEconomics(state: EngineState, ctx: EngineCalcContext): SlgUnitEconomics {
+  const ids: MetricId[] = ["slg.acq.cac", "slg.rev.acv", "slg.rev.gross-margin", "slg.ret.renewal"];
+  const knowns = Object.fromEntries(ids.map((id) => [id, knownIn(state, id, ctx)])) as Partial<Knowns>;
+
+  const cac = known(knowns["slg.acq.cac"]);
+  const acv = known(knowns["slg.rev.acv"]);
+  const margin = known(knowns["slg.rev.gross-margin"]);
+  const renewal = known(knowns["slg.ret.renewal"]);
+  const term = renewal ? (entryOf(currentSnapshot(state), "slg.ret.renewal")?.variant === "monthly" ? "monthly" : "annual") : null;
+
+  // Gross profit per new contract per month: ACV ÷ 12 × margin — never the ACV alone.
+  const monthlyMargin = acv && margin ? mul(scale(acv, 1 / 12), scale(margin, 1 / 100)) : null;
+  const lifetime = renewal && term ? slgLifetimeMonths(renewal, term) : null;
+
+  const result = (id: DerivedId, value: Interval | null): DerivedValue =>
+    value
+      ? { kind: "known", value, confidence: confidenceOfInputs(id, knowns) }
+      : { kind: "uncomputable", missing: missingOf(id, knowns) };
+
+  const ltvValue = monthlyMargin && lifetime ? mul(monthlyMargin, lifetime) : null;
+  const paybackValue = cac && monthlyMargin ? div(cac, monthlyMargin) : null;
+  const ltvCacValue = ltvValue && cac ? div(ltvValue, cac) : null;
+  const renewalKnown = knowns["slg.ret.renewal"];
+
+  const entry = currentSnapshot(state).metrics["slg.acq.cac"];
+  return {
+    cacVariant: entry?.variant ?? null,
+    renewalTerm: term,
+    lifetimeMonths:
+      lifetime && renewalKnown?.kind === "known"
+        ? { kind: "known", value: lifetime, confidence: renewalKnown.confidence }
+        : { kind: "uncomputable", missing: ["slg.ret.renewal"] },
+    ltv: result("slg.rev.ltv", ltvValue),
+    payback: result("slg.rev.cac-payback", paybackValue && mapBounds(paybackValue, (v) => Math.max(0, v))),
+    ltvCac: result("slg.rev.ltv-cac", ltvCacValue),
+  };
+}
+
+/**
+ * « Clients perdus sur un an », the line the two motions share on the slide
+ * that sets them side by side (C25 Q5) — one unit per line, never a monthly
+ * rate next to an annual one. Self-serve: the monthly logo churn compounded,
+ * 100 × (1 − (1 − c)^12), always approximate (it assumes the churn holds all
+ * year). Sales-assisted: the contracts up for renewal that weren't renewed,
+ * 100 − r for annual contracts; monthly ones compound like self-serve.
+ */
+export function lostInAYear(state: EngineState, ctx: EngineCalcContext, motion: Motion): DerivedValue {
+  if (motion === "plg") {
+    const churn = knownIn(state, "ret.logo-churn", ctx);
+    if (churn.kind !== "known") return { kind: "uncomputable", missing: ["ret.logo-churn"] };
+    const lost = (c: number) => 100 * (1 - Math.pow(1 - Math.min(100, Math.max(0, c)) / 100, 12));
+    return { kind: "known", value: { lo: lost(churn.value.lo), hi: lost(churn.value.hi) }, confidence: "approximate" };
+  }
+  const renewal = knownIn(state, "slg.ret.renewal", ctx);
+  if (renewal.kind !== "known") return { kind: "uncomputable", missing: ["slg.ret.renewal"] };
+  const monthly = entryOf(currentSnapshot(state), "slg.ret.renewal")?.variant === "monthly";
+  // A higher renewal loses fewer: the bounds swap.
+  const lost = (r: number) => (monthly ? 100 * (1 - Math.pow(Math.min(100, Math.max(0, r)) / 100, 12)) : 100 - r);
+  return {
+    kind: "known",
+    value: { lo: lost(renewal.value.hi), hi: lost(renewal.value.lo) },
+    confidence: monthly ? "approximate" : renewal.confidence,
+  };
+}
+
+/**
+ * Whether a motion's margin is the company's, taken in the hybrid (C25 Q4):
+ * the slide's footer says « marge globale reprise ». An estimate whose basis
+ * is `company-wide`, and nothing else.
+ */
+export function marginIsCompanyWide(state: EngineState, motion: Motion): boolean {
+  const entry = entryOf(currentSnapshot(state), motion === "plg" ? "rev.gross-margin" : "slg.rev.gross-margin");
+  return entry?.status === "estimated" && entry.estimate?.basis === "company-wide";
 }

@@ -175,12 +175,12 @@ become the WHOLE list. The first DS v3 pass pinned four components to fix
 their contracts and the bundle silently shrank from 70 components to 4 —
 with 36 previews left pointing at components that no longer existed.
 
-So `componentSrcMap` now pins all 88 exported components to their file
+So `componentSrcMap` now pins all 90 exported components to their file
 (`"LegalPage": null` stays), and `.design-sync/check-inventory.mjs`, chained
 last in `cfg.buildCmd`, fails the build if a component exported from
 `src/components/**` is missing from the map, pinned to the wrong file, or
 pinned but no longer exported. Its success line is
-`[inventory] 88 components pinned, 1 excluded on purpose, none missing`.
+`[inventory] 90 components pinned, 1 excluded on purpose, none missing`.
 `QuarterNews` (the game's news screen, 2026-09-26) shipped without its entry
 and broke this build for two days — caught by the design audit of
 2026-09-27, not by anything that runs on a PR, since CI does not build the
@@ -233,7 +233,8 @@ All four are non-blocking and all are expected:
   and `cardMode: "single"` stays refused for the same reason as the others.
 
 Wide components get `cardMode: "column"` in `cfg.overrides` (one full-width
-card per story) — 29 of them now: most of `game` (`ActionCard` joined on
+card per story) — 30 of them now (counted in `config.json` on 2026-10-01; each
+carries `viewport="900x700"` in its `@dsCard` marker): most of `game` (`ActionCard` joined on
 2026-09-29, once its cards took their real 294px width), the two charts,
 `Button` (its `States` grid) and `GlossaryTerm`. Add one when validate prints
 `[GRID_OVERFLOW] … stories render wider than their grid cells`; that warning
@@ -243,7 +244,7 @@ viewport media query, not the cell) overlapped its own figure labels.
 
 ## Previews are all repo-owned
 
-All 88 live in `.design-sync/previews/` — none are generated (cell count: see
+All 91 live in `.design-sync/previews/` — none are generated (cell count: see
 "Synced"). Copy is the product's own and numbers are the model's own — **and
 that was not true until the 2026-09-29 re-sync**: this paragraph already said
 so, while 64 of 245 cells carried retired copy, mockup copy, hand-typed game
@@ -259,7 +260,7 @@ pasting their output:
 - game: a reference year played through the reducer
   (`lib/game/__tests__/paths.ts`: `PATH_A`, `PATH_C`, `PATH_M`, fired years…),
   turned into props by the island's builders
-  (`app/[locale]/game/retention/island-view.ts`: `dashboardProps`, `handView`,
+  (`app/[locale]/game/_island/island-view.ts`: `dashboardProps`, `handView`,
   `journalEntries`, `newsContent`, `reportContent`, `decemberContent`,
   `bossMessage`, `moodNow`);
 - result: `computeScore`, `resolveBottleneck`, `buildQuickVerdict`,
@@ -291,8 +292,9 @@ December components) are previewed bare.
 
 Three kinds of state a still cannot show, and each story says so rather than
 pretending: **viewport** forms (`ActionBar`'s phone bar with counter and
-clicks pill, `ZoneNav`'s compact line, `RevealCells` stacking — all chosen by
-`@media`, not by the card width), **closed disclosures** (`ChartFrame`'s
+clicks pill, `ZoneNav`'s compact line — both chosen by `@media`, not by the
+card width; `RevealCells` stacks on a container query, so a card 520px wide
+or less would draw it), **closed disclosures** (`ChartFrame`'s
 data table, `GameJournal`'s entries, `PatternCatalogue`'s turned-down and
 unseen groups), and **hover/press/animation** (`Button`'s `HoverAndPress`,
 `VideoCall`'s typing and clock, the December unblur and stamp).
@@ -309,7 +311,8 @@ story alone at 900×700 (`fullPage: false`), and the review sheet caps a cell at
   `ContentHeader` InTheEngine and `ProsePage` NightIntro show the band in its
   narrow form at card width, and say so.
 - Tall cells lose their bottom (`ProsePage` Page and NightIntro, all three
-  `QuarterReport` cells, `PatternCatalogue` ThreeGroups, `PhoneMock` Dark):
+  `QuarterReport` cells, both `PatternCatalogue` cells since B6 showed all eight
+  tricks, `PhoneMock` Dark):
   graded from the render-check shots or a scratch full-page shot, never from
   the cut sheet alone.
 - `Hand` shows 6 of its cards for the same reason; its doc says which.
@@ -329,22 +332,31 @@ doc comment says why the layout uses an auto margin rather than
 ## Synced
 
 Project `23b9671c-a55b-452e-aa41-39906ee71ba8` ("Tour de Growth"), pinned as
-`projectId` in `config.json`. **Last upload: 2026-09-30, after A11, C28 and
-C29**, from a claude.ai/code cloud session, the same evening as B3 — **88
-components, 292 story cells**, all graded good; the driver re-captured the
-five components those changes touch (`DateField`, `Field`, `FieldRow`,
-`NumberField`, `TextField`, 26 cells regraded) and carried the others forward.
-453 files (352 component files, 88 compiled previews, `_vendor/`, `fonts/`,
-bundle, CSS, README, the sentinel and the anchor), no delete. Pushed twice
-that evening: first with anchor `f8933d513a1e`, then again once the copy
-reviewer (`relecteur-copie`) found four preview docs and `conventions.md`
-still saying what A11 and C29 had just changed (the TextField header, the
-FieldRow joiner, line numbers shifted by the diff, plain spaces in the
-no-break examples) — renders identical, sources only. `report_validate`: 88
-total, 0 bad, 0 thin, 0 identical; anchor `bundleSha12` `8235f4e6de01`. The next re-sync skips every component whose sources did not
-change. Earlier uploads: 2026-09-30 B3 (88, 292, `d1835d51cffd`), 2026-09-30
-before A10 (79 components, 244 cells, anchor `f3b4bf9eb3c5`), 2026-09-29 (77,
-238, `17cca5e0909b`), 2026-09-11 (34, 116).
+`projectId` in `config.json`. **Last upload: 2026-10-01, B6 (A15 and
+C33)**, from a claude.ai/code cloud session — **90 components, 303 story
+cells**, all graded good. The driver keyed 13 components as changed
+(`ErrorScreen`, `LoadingScreen`, `MetaLabel`, `GameEntry`, `NumberField`,
+`FieldRow`, and the seven game previews regenerated from the model, see
+"Found in the 2026-10-01 re-sync (B6)"), all regraded. `NightSurface` went up
+with them: its emitted `.d.ts` and `.prompt.md` differed from the anchor's
+while its sources and render hash did not (not chased further). 14
+components uploaded, 76 carried forward. 463 files, no delete, `design/` untouched. Three driver
+runs; `report_validate`: 90 total, 0 bad, 0 thin, 0 identical; anchor
+`bundleSha12` `edc539adcbbf`. **A second pass the same evening** carried the
+two tokens A14 T6 (#264) added while B6 was in review, `--paper-white` and
+`--surface-white`: no component changed (0 changed, sources and render hashes
+identical), so only the shared files went up (`_preview/`, `_vendor/`,
+`fonts/`, bundle, CSS, README: 101 files), between the two sentinels, then
+`_ds_sync.json`. Render check 90/0/0/0; anchor `6da5e42a15ef`. **None of these
+uploads reached the Design System pane**, which still shows what was compiled on
+2026-09-11. Writing `_ds_manifest.json` by hand later that evening (90 cards)
+did not change it either; the design agent, though, reads the live files (see
+"`_ds_manifest.json`" below). Earlier uploads: 2026-10-01 B4, the game's
+level 2 and A7.3.c's engine (90, 303, 19 components uploaded, eight driver
+runs, `fee6cc7084fe`), 2026-09-30 after A11 (88, 292, `8235f4e6de01`),
+2026-09-30 B3 (88, 292, `d1835d51cffd`), 2026-09-30 before A10 (79
+components, 244 cells, anchor `f3b4bf9eb3c5`), 2026-09-29 (77, 238,
+`17cca5e0909b`), 2026-09-11 (34, 116).
 
 The cell count is what the previews export, not a sum of what each session
 announced. `CHANTIERS.md` B3 expected 284 (244, plus `ShareCard.Owner`, plus
@@ -359,9 +371,27 @@ number). The 2026-09-29 note on 245 → 238 → 244 is in the journal.
 `design/DS-EXTENSION-BRIEF-04.md` and the nine PNGs under
 `design/ds-extension-04/` (ten files, written alone under their own plan,
 anchor untouched), and Claude Design wrote its return next to them,
-`design/ds-extension-04-return/` (56 files). A re-sync must leave them: before applying
+`design/ds-extension-04-return/` (56 files). On 2026-10-01 brief 05 (the stage
+chips, B7) went in the same way: `design/DS-EXTENSION-BRIEF-05.md` and the ten
+PNGs under `design/ds-extension-05/` (eleven files, their own plan, no delete,
+anchor `6da5e42a15ef` untouched), and Claude Design wrote its return next to
+them on 2026-10-02, `design/ds-extension-05-return/` (22 files, all source,
+copied to the repo the same day; nothing outside that folder changed). Brief 06 (the growth engine's share image,
+B5) followed the same evening: `design/DS-EXTENSION-BRIEF-06.md` and the ten
+PNGs under `design/ds-extension-06/` (eleven files, their own plan, no delete,
+anchor untouched); Claude Design returned it the same evening, under
+`design/ds-extension-06-return/`, copied into this repo and ported (T6.2). A
+re-sync must leave them: before applying
 `upload.deletePaths`, check it names nothing under `design/`. Remove them on
 purpose once the return is ported, not as a side effect of a sync.
+
+**T6.2 (2026-10-01) moved two drawings into data, with the same markup.**
+`brand/Stopwatch` reads its shapes from `stopwatch-geometry.ts` and
+`brand/SpaceBand`'s three pictograms come from `space-pictos.ts`, because the
+engine's share image draws them too. The rendered SVG is the same, attribute
+for attribute (an explicit `fill="none"` on three open lines of the
+pictograms aside), so no re-sync is owed for it; the next one uploads the two
+components with nothing to see.
 
 **Sessions do upload now.** The `DesignSync` tool answered from a cloud session
 with the claude.ai login — no `/design-login`, no local machine. The
@@ -372,8 +402,10 @@ upload asks its own approval once per run (`finalize_plan`).
 The upload path for a pinned project is the skill's **atomic** one: re-fetch
 `_ds_sync.json` right before `finalize_plan` (a moved `bundleSha12` means a
 concurrent sync), sentinel `_ds_needs_recompile` first, content in chunks,
-`upload.deletePaths` verbatim, sentinel again, `_ds_sync.json` last,
-`list_files` to confirm. No size error in either upload of 2026-09-30: first
+`upload.deletePaths` verbatim, sentinel again, **`_ds_manifest.json` from
+`build-manifest.mjs`** (see "`_ds_manifest.json`" below: Claude Design does not
+rebuild it), `_ds_sync.json` last, `list_files` and a `get_file` of the
+manifest to confirm. No size error in either upload of 2026-09-30: first
 two chunks of 200 then `styles.css` then `fonts/`; at B3, `_preview/` +
 `_vendor/` + the root files in one call (94 files, 2.3 MB), `fonts/`, then
 `components/` in two halves of 176. Build the chunk lists from the live
@@ -423,10 +455,11 @@ alone because both previews pass the literal shape (`{ pillar, score }`,
 so the agent has the shape from the code that actually runs. Hand-writing the
 bodies would duplicate the contract and silently rot.
 
-Seven components **are** pinned in `cfg.dtsPropsFor`: `NotFoundScreen`
+Eight components **are** pinned in `cfg.dtsPropsFor`: `NotFoundScreen`
 (below), `ProseText`, `ProseActions`, `StatTile` (a union of known / unknown /
-hidden), `Sparkline`, `EventClipping` (a discriminated union on `kind`) and
-`PhoneMock`. Other named object types (`HandCard`, `DashboardChurnTile`,
+hidden), `Sparkline`, `EventClipping` (a discriminated union on `kind`),
+`PhoneMock` and `ShopPhone` (both phones' element unions live in `lib/game/`).
+Other named object types (`HandCard`, `DashboardMetricTile`,
 `DataTableColumn`, `ChartLegendItem`, `TypingPace`, …) still print as bare
 names; their previews pass the literal shape. Each pin is a drift risk.
 
@@ -435,6 +468,17 @@ four props typed `Translatable` (a `Record`, so never expanded) and examples
 that spread a `{...UNKNOWN_PAGE}` constant defined off-screen. **Drift risk:** a
 prop added to `NotFoundScreen` will not appear in its contract until this entry
 is updated by hand.
+
+## No guidelines are shipped: `guidelinesGlob` is `[]` on purpose
+
+The converter's default `guidelinesGlob` includes `docs/*.md`. This repo had
+no `docs/` until 2026-10-01, when the journal's archived volumes and the
+decisions index moved there; the B4 build then copied `docs/decisions.md`
+(the product decisions' index) into `guidelines/`, ready to upload as design
+guidance. It is not design guidance, and nothing in `docs/` is. The design
+agent's guidance is `conventions.md` (the README's header) and each
+component's `.prompt.md`. If a real design guideline is ever written, point
+`guidelinesGlob` at that file by name rather than restoring the default.
 
 ## Per-component docs are deliberately NOT wired
 
@@ -574,8 +618,172 @@ A native `<select>` is closed in a still: its groups and order are never on
 the card, so the `Select` stories say in their doc comments what the list
 holds.
 
+### Found in the 2026-10-01 re-sync (B4), by regenerating and by the drift search
+
+B4 was meant to recapture the nine components A12 had changed and the two it
+added. Two methods found more, and neither was reading a sheet:
+
+- **The drift search** (Re-sync risks, third bullet, run as a script: every
+  string literal of 10+ characters removed from `src/content`, `src/lib/i18n`
+  and the game and engine libs since the last upload, looked up in the
+  previews). It found `ZoneNav` still showing the acquisition zone « coming
+  soon » (open since A12.f.1), `Choices` quoting the engine's model list that
+  A7.3.c replaced by a type of company plus two motion checkboxes, and `Tag`
+  labelling its outline tone with a « coming soon » no call site prints any
+  more. Reading the new call sites added `Checkbox.LastMotion`: A7.3.c wired
+  `disabled` + `disabledReason` (the last motion left in the settings), the
+  state B3 had dropped for want of a call site.
+- **Regenerating every game preview in scope** with the island's own builders
+  (`dashboardProps`, `decemberContent`, `reportContent`, `newsContent`,
+  `timelineSegments`, `journalEntries`, `phoneView`, `shopPhoneView`,
+  `basketFor`, `clicksFor`) and comparing string by string, NBSP included.
+  Most matched exactly. Two held numbers no year reaches, and both had been
+  graded good since 2026-09-29: `RevealCells` (4.1% / 18 / 81 and
+  4,4 % / 71 / 6 — no year ends there; 81 is the very radar the 09-29 pass
+  flagged elsewhere) and `QuarterTimeline` (5.7% then 5.0%, and 5,7/5,0/4,4/4,3
+  — no reference year plays those quarters). Both now come from a played
+  year. A third, `PhoneMock`, had the right states but wrote its phone number
+  with plain spaces where the copy has no-break ones.
+- **A product defect**, seen by measuring `LastMotion` in a browser: a box
+  both ticked and disabled lost its fill, because `.disabled .input` (same
+  weight as `.input:checked`, later) repainted it beige, so the one motion
+  left in the engine's settings read as unticked. Fixed in
+  `Checkbox.module.css` (`.disabled .input:checked`, fill clipped inside the
+  dashed edge) with an e2e measure in `engine-hybrid.spec.ts` (non-vacuity:
+  1 test of 11 fails without the rule).
+
+What to take from it: **a carried grade says the sheet looked right, not that
+its numbers are the model's.** (Done in B6, below.) The game previews B4 did NOT regenerate —
+`ActionCard`, `DgFace`, `DgMail`, `EndingHero`, `EventClipping`, `Hand`,
+`PatternCatalogue`, `Playbook`, `ResumePrompt`, `ShareRow`, `TourLoop`,
+`VideoCall` — are the next sync's first job, with the same scripts: bundle a
+scratch entry with `.ds-sync/node_modules/.bin/esbuild --bundle
+--platform=node --format=esm --tsconfig=./tsconfig.json --alias:@=./src
+--loader:.css=empty`, play the path the story's doc names
+(`lib/game/__tests__/paths.ts`, `paths-acquisition.ts`), call the builder,
+and check that every string it returns is in the preview byte for byte. A
+story whose doc names no path, or names one that does not produce it, gets a
+real one: a random walk over the reducer (`handIds` + `toggle` + `run`)
+finds a year with the wanted shape in seconds.
+
+### Found in the 2026-10-01 re-sync (B6), by the drift search and by regenerating
+
+B6 carried A15 (`ErrorScreen` `retry`, `LoadingScreen` told by the clock,
+`Button` `sm`'s 44px strip, `MetaLabel` `as`) and C33 (`GameEntry` `eyebrow`).
+What the three methods found beyond that:
+
+- **The drift search** found `NumberField` and `FieldRow` still quoting the two
+  engine messages A15.2 and A15.3 rewrote (« Ce n'est pas un nombre lisible »,
+  « Le minimum dépasse le maximum »). Parse errors never render in a still, so
+  no sheet could show it: the strings were going to the design agent through
+  the `.prompt.md` examples.
+- **The spot check** of components whose code changed without their preview
+  (`Button`, `MetaLabel`, `SpaceBand`, `WordmarkLink`) rendered as graded, but
+  `MetaLabel`'s doc said « It is not a heading », false since A15.13; its
+  `Tracking` story now draws the result's two titles as `ResultView` does
+  (`as="h2" wide`, default size).
+- **Regenerating the twelve game previews B4 left** (three agents in parallel,
+  `playPath` / `finalState` / `endingState` and the island's builders, every
+  leaf compared byte for byte, then the lists by length): seven matched
+  (`Playbook` 38/38, `EndingHero`, `DgMail`, `Hand` 96/96, `TourLoop`;
+  `ActionCard` and `DgFace` right but with comments naming no year, or a wrong
+  place), five did not, all graded good since 2026-09-29:
+  `ShareRow` (a share text typed by hand, « 3.9 %, trust at 71 »: the model says
+  « 4.0 %, trust at 83 / 100 »), `ResumePrompt` (5.7 % then 5.0 %, which no
+  year reaches: the same invented pair as `QuarterTimeline` in B4),
+  `PatternCatalogue` (4 and 3 entries under « the eight tricks », pre-2026-09-25
+  cases, splits no year produces; `ThreeGroups` now comes from a year found by
+  a random walk, named in the story), `EventClipping` (one of the quarter's two
+  clippings in French) and `VideoCall` (`Ringing` passed `message=""`, the
+  island always passes `bossMessage`).
+- **A product doc defect**, fixed in the same PR: `DgFace`'s `framing` JSDoc
+  placed the avatar in « the journal », which draws no face (it is the report
+  and the news screen). It never reached Claude Design: the emitted `.d.ts`
+  cuts a JSDoc at about 120 characters, before that clause. A long JSDoc is
+  read in full only in the repo.
+- **Seen, left to the product** (`CHANTIERS.md`): nothing passes
+  `TourLoop.refId`, so the end-of-level « Où en est ta croissance ? » link never
+  carries `?ref=` though GAME-BRIEF 13.3 D says it should when a result id is
+  known; and « 83 / 100 » keeps plain spaces around the slash in French
+  (`december.cells.outOf`), outside the NBSP list above.
+
+## `_ds_manifest.json` — Claude Design never rebuilt it, and writing it was not enough
+
+**What Antoine saw on 2026-10-01**: no kilometre marker anywhere in the
+project. The `Bottleneck` card opened on a stencil numeral with « Solid engine,
+one flat tyre » (mockup copy removed on 2026-09-29), and `LoadingScreen` still
+showed three messages and three bars (before A15). Every file under them was
+current: `_preview/Bottleneck.js` opened on `ScoreDisplay variant="marker"`,
+`_preview/ScoreDisplay.js` exported `Marker` and `MarkerSmall`, and
+`_ds_sync.json` held the B6 anchor with 90 components.
+
+**The cause**: `_ds_manifest.json`, the index the Design System pane builds
+its cards from, was still the one of the **2026-09-11** upload: 34 components,
+34 cards in five groups (no `game`, no `viz`, none of extension 04's form
+primitives, no `SpaceBand`…), and 123 tokens at their September values (`--radius-tag: 4px`,
+`--radius-panel: 8px`). The `_ds_needs_recompile` sentinel, which asks Claude
+Design to recompile that index from the cards' `@dsCard` first lines, was
+still there. No upload since 2026-09-11 had been indexed, across six syncs.
+Nobody saw it because every sync checked `list_files` (the files) and
+`_ds_sync.json` (the anchor), and neither says what the pane shows. A public
+report describes the same thing: nothing triggers the compile for files
+written through `DesignSync` alone, and the workaround is to write the
+manifest.
+
+**The fix, 2026-10-01**: a new manifest went up alone, under a plan that named
+only `_ds_manifest.json`. It was first built by a scratch script from the 90
+markers read live; `build-manifest.mjs` was then written and produces the same
+file byte for byte. That upload had no delete and
+did not touch the sentinel, the bundle, `_ds_sync.json` or `design/`. It holds
+90 components and 90 cards in seven groups, and 368 tokens (the :root
+declarations, `:root, [data-world="paper"]` included). Read back with
+`get_file`, it is byte-identical to the file sent. The September manifest was
+kept only in that session's scratchpad: it described a bundle that no longer
+exists, so there is nothing to roll back to.
+
+**Every upload now ends with it**, after the converter and before
+`_ds_sync.json`:
+
+```sh
+node .design-sync/build-manifest.mjs --bundle ./ds-bundle
+```
+
+It reads each card's own first line from the bundle (without `--bundle` it
+derives them from `config.json`: group = the component's folder,
+`viewport="900x700"` iff `cardMode: "column"`, checked against all 90 live
+cards on 2026-10-01). Put `_ds_manifest.json` in the plan's writes, then
+`get_file` it after the upload: its card count must equal the component
+count. If the converter ever ships its own `_ds_manifest.json` again, diff
+the two before choosing one.
+
+**What the manifest did not fix** (checked by Antoine the same evening): after
+the write and a reload, the pane was unchanged. It neither reads the
+project's `_ds_manifest.json` live nor renders the project's card files: it
+shows a copy compiled on 2026-09-11, and the sentinel was still there
+afterwards. **The design agent is not affected**: brief 05's return carries
+`design/ds-extension-05-return/board/system-snapshot.css`, its own copy of the
+live `_ds_bundle.css` dated 2026-10-02, with `--radius-tag: 999px`,
+`--paper-white` and the night world. Designs are built on the current
+system; only the pane's catalogue is stale.
+
+**Where it breaks: Claude Design's refresh on open.** The skill's own text
+says the sentinel "fences the app's manifest/copy machinery against a
+half-uploaded state", that "the app clears the sentinel whenever the user
+opens the project", and that new cards "appear next time the user opens or
+refreshes the project". On this project none of that happens. Antoine opened
+it in the project itself, clicked its « Actualiser » button, and tried a
+private window: no publish button or draft state exists, the pane is
+unchanged, and the sentinel written by B6 is still there. Since the pane
+also shows content removed on 2026-09-29, the refresh has failed since at
+least the first upload after 2026-09-11, before `design/` held anything. No
+file the sync can write restarts it. It is a Claude Design defect to report
+(`CHANTIERS.md`, B8 and D13), not a step this repo is missing.
+
 ## Re-sync risks
 
+- **`list_files` and the anchor do not prove what the pane shows**, and neither
+  does `_ds_manifest.json` (section above). Six uploads passed every check while
+  the pane stayed on 2026-09-11. Only someone looking at the pane can say.
 - **Merging `main` in the middle of a re-sync.** A5 renamed variant props and
   stories (`mobile`/`desktop`/`compact` → `sm`/`md`, `Frame` → `Call`,
   `tone="red"` → `alert`, `DotGrid size` → `medium`, `DgFace size` →
@@ -611,7 +819,7 @@ holds.
   build change, spot-check that
   `ds-bundle/components/brand/ContentHeader/ContentHeader.d.ts` says
   `locale: "en" | "fr"` and not `locale: Locale`.
-- **The seven `cfg.dtsPropsFor` entries are hand-written** and will not follow
+- **The eight `cfg.dtsPropsFor` entries are hand-written** and will not follow
   their components. If one gains or renames a prop, update the config entry
   or the contract lies.
 - **`componentSrcMap` is the component list** (see above). `check-inventory`
@@ -621,7 +829,7 @@ holds.
   Executable doesn't exist`); re-run `npx playwright install chromium`.
 - **The grades in `.design-sync/.cache/` are not committed.** What makes
   verification durable is the uploaded `_ds_sync.json`. If that anchor is ever
-  lost or the project is recreated, every component (88 on 2026-09-30) re-verifies from scratch —
+  lost or the project is recreated, every component (90 on 2026-10-01) re-verifies from scratch —
   which is a few hours of reading sheets, not minutes.
 - **The `--entry ./dist/index.js` trick breaks the day the repo gains a real
   `dist/`.** If a build is ever added, drop the flag and set `cfg.buildCmd`.

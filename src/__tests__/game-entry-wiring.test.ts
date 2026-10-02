@@ -17,7 +17,7 @@ import { reachable } from "./helpers/import-graph";
  * - the page gives `ResultView` a card only through `resultGameEntry`, on
  *   both branches (the sample and a real submission), with the access read
  *   from the flag and the preview cookie exactly as the proxy reads it;
- * - `resultGameEntry` only has a card to give when `gameEntryFor` says so;
+ * - `resultGameEntry` only has a card to give when `gameEntriesFor` gives it a level;
  * - `ResultView` renders `GameEntry` from that prop and nothing else, and
  *   renders nothing when it is null;
  * - the card's link is a bare anchor, because the game lives under the other
@@ -60,12 +60,13 @@ describe("the game card's wiring (P24/P25 hold on the page, not just on the reso
   it("the page neither builds a card by hand nor reaches past the resolver", () => {
     expect(PAGE).not.toMatch(/from\s+["']@\/content\/game\//);
     expect(PAGE).not.toMatch(/from\s+["']@\/components\/game\/GameEntry["']/);
-    expect(PAGE).not.toMatch(/gameEntryFor\(/);
+    expect(PAGE).not.toMatch(/gameEntr(y|ies)For\(/);
   });
 
-  it("the resolver's only source of a card is gameEntryFor, and no target means no card", () => {
-    expect(RESOLVER).toMatch(/const target = gameEntryFor\(\{[^}]*access[^}]*\}\);\s*if \(!target\) return null;/);
-    expect(RESOLVER.match(/gameEntryFor\(/g)).toHaveLength(1);
+  it("the resolver's only source of a card is gameEntriesFor, and no level means no card", () => {
+    // A list since C30 Q5 (A12.f.2): every stage of the bottleneck that has a level.
+    expect(RESOLVER).toMatch(/const targets = gameEntriesFor\(\{[^}]*access[^}]*\}\);\s*if \(targets\.length === 0\) return null;/);
+    expect(RESOLVER.match(/gameEntriesFor\(/g)).toHaveLength(1);
   });
 
   it("ResultView renders GameEntry once, from a non-null prop, spreading exactly that prop", () => {

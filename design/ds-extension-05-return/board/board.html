@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stage scores · states</title>
+<!-- Everything here is source: no build step, no CDN. The project's own fonts
+     (this folder lives at design/ds-extension-05-return/); without them the
+     board falls back to the system's font stacks and still reads. -->
+<link rel="stylesheet" href="../../../fonts/fonts.css">
+<link rel="stylesheet" href="system-snapshot.css">
+<link rel="stylesheet" href="../tokens/scores.css">
+<link rel="stylesheet" href="../components/result/StageScores/StageScores.css">
+<link rel="stylesheet" href="../components/result/StampedPillar/StampedPillar.css">
+<link rel="stylesheet" href="../components/glossary/DefinitionTrigger/DefinitionTrigger.css">
+<link rel="stylesheet" href="board.css">
+<!-- The components import React from "react"; on the board that is react-lite.js. -->
+<script type="importmap">{ "imports": { "react": "./react-lite.js" } }</script>
+</head>
+<body>
+<div id="root"></div>
+<noscript>The board draws its states with a small script (react-lite.js + board.js); the components themselves need none.</noscript>
+<script type="module" src="board.js"></script>
+</body>
+</html>

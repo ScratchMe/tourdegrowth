@@ -109,3 +109,15 @@
   align-items: center;
   gap: var(--space-4);
 }
+
+/* The hybrid's targets (§18.7): one group per motion on the one screen, self-serve first. */
+.groupTitle {
+  grid-column: 1 / -1;
+  font: var(--label-button);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-body);
+  margin: var(--space-4) 0 0;
+  padding-bottom: var(--space-2);
+  border-bottom: var(--border-rule);
+}

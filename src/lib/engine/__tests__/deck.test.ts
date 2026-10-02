@@ -69,11 +69,11 @@ describe("§9.2 — presence, default inclusion, order", () => {
    * measured 2026-09-30: putting back the old omission (an unpriced stage
    * returns `absent`) fails the first test on `present`.
    */
-  it("C9: day-30 retention named alone gets its leak slide — its value and target, no amount, no calculation", () => {
-    // Activation past its target, churn under its own, day 30 at 5 % against the team's 20 %: the only stage behind.
+  it("C9: a referred share past a 50 % target, named alone, gets its leak slide — value and target, no amount, the ceiling said", () => {
+    // Activation past its target, churn under its own, the referred share at 6 % against the team's 60 %: the only stage behind.
     let s = withEntry(exampleState(), "act.rate", measured(ratio(200, 800), tool));
     s = withEntry(s, "ret.logo-churn", measured(ratio(6, 400), tool));
-    s = withTarget(withEntry(s, "ret.d30", measured(ratio(40, 800), tool)), "ret.d30", 20);
+    s = withTarget(s, "ref.referred-share", 60);
     for (const locale of ["fr", "en"] as const) {
       const leak = slide(deck(s, locale), "leak");
       const strings = props[locale].strings;
@@ -82,16 +82,46 @@ describe("§9.2 — presence, default inclusion, order", () => {
       const title = renderTitle(leak.title, strings);
       expect(title).toBe(
         locale === "fr"
-          ? "**La rétention à J30 freine le moteur**\u00a0: 5\u00a0%, pour 20\u00a0% (cible de l'équipe)."
-          : "**Day-30 retention is holding the engine back**: 5%, against 20% (team target).",
+          ? "**La part des inscrits recommandés freine le moteur**\u00a0: 6\u00a0%, pour 60\u00a0% (cible de l'équipe)."
+          : "**The referred share of sign-ups is holding the engine back**: 6%, against 60% (team target).",
       );
       // No money anywhere on it, and no chain: the calculation card has nothing to show.
       expect(title).not.toMatch(/€|MRR/);
       expect(leak.lines.filter((l) => l.row === "calc")).toEqual([]);
-      expect(leak.lines.find((l) => l.row === "footer")!.text).toBe(strings.slide.leakFooterUnpriced);
+      expect(leak.lines.find((l) => l.row === "footer")!.text).toBe(
+        locale === "fr"
+          ? "Sans montant\u00a0: au-delà d'une cible de 50\u00a0%, le moteur ne chiffre plus la part des recommandations"
+          : "No amount: past a target of 50%, the engine no longer prices a referred share",
+      );
       // The others still stand alongside, and the text export carries the same slide.
       expect(leak.lines.filter((l) => l.row === "aside")).toHaveLength(5);
       expect(deckMarkdown(deck(s, locale), strings)).toContain(`## 2. ${title}`);
+    }
+  });
+
+  it("the referred share named alone, under 50 %: the chain the reader recomputes, (100 – r)/(100 – t) (§19.3.2)", () => {
+    let s = withEntry(exampleState(), "act.rate", measured(ratio(200, 800), tool));
+    s = withEntry(s, "ret.logo-churn", measured(ratio(6, 400), tool));
+    s = withTarget(s, "ref.referred-share", 10);
+    const fr = slide(deck(s, "fr"), "leak");
+    expect(fr.title.key).toBe("leakClearMrrNew");
+    expect(fr.lines.find((l) => l.row === "calc" && l.key === "then")!.text).toBe("42 × (100 – 6)/(100 – 10) = 44 (+2)");
+    expect(fr.lines.find((l) => l.row === "footer")!.text).toContain(props.fr.strings.slide.plgLeakAssumption["ref.referred-share"]);
+    expect(slide(deck(s, "en"), "leak").lines.find((l) => l.row === "calc" && l.key === "then")!.text).toBe("42 × (100 – 6)/(100 – 10) = 44 (+2)");
+  });
+
+  it("day-30 retention named alone has its chain and says its assumption (§19.3.1)", () => {
+    let s = withEntry(exampleState(), "act.rate", measured(ratio(200, 800), tool));
+    s = withEntry(s, "ret.logo-churn", measured(ratio(6, 400), tool));
+    s = withTarget(withEntry(s, "ret.d30", measured(ratio(40, 800), tool)), "ret.d30", 20);
+    for (const locale of ["fr", "en"] as const) {
+      const leak = slide(deck(s, locale), "leak");
+      const strings = props[locale].strings;
+      expect(leak.title.key, locale).toBe("leakClearMrrNew");
+      // 42 × 20/5 = 168 (+126), × 120 € = 15 120 €: the title quotes the chain's amount.
+      expect(renderTitle(leak.title, strings)).toMatch(/15[\u00a0,]000/);
+      expect(leak.lines.filter((l) => l.row === "calc").map((l) => l.key)).toEqual(["today", "if", "then", "times", "annual"]);
+      expect(leak.lines.find((l) => l.row === "footer")!.text).toContain(strings.slide.plgLeakAssumption["ret.d30"]);
     }
   });
 

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { TEXT_LIMITS, shapeOf } from "../catalog-shape";
-import type { EngineState, MetricEntry } from "../types";
+import { ALL_METRIC_SHAPES, TEXT_LIMITS, shapeOf } from "../catalog-shape";
+import { SHEET_BASES } from "../strings";
+import { MAX_MONTHS, type EngineState, type MetricEntry, type ToolId } from "../types";
 import { defaultDeck, newEngineState, validateEngine, validateEntry } from "../validate";
 import { SETUP, fullState } from "./storage-fixtures";
 
@@ -106,6 +107,177 @@ describe("validateEngine — the what-if levers and the MRR base (2026-09-26)", 
     const s = fullState();
     s.snapshots[0]!.base = { cohortSignups: 800.5 };
     expect(validateEngine(s)).toContain("snapshots[0].base.cohortSignups: not a whole number > 0");
+  });
+});
+
+describe("validateEngine — the v2 setup and the sales-assisted numbers (engine spec §18.3.3, A7.3.c S0)", () => {
+  // Non-vacuity, measured on 2026-09-30: keeping « > 100 refused » for every percent fails « a 106 % NRR »
+  // (three readings) and nothing else; dropping the company-wide rule fails « the company-wide margin »
+  // only; dropping the whole-number rule of the link's lever fails « the link's lever » only.
+  const slgEntry = (value: MetricEntry["value"]): MetricEntry => ({ status: "measured", value, source: { kind: "tool", tool: "hubspot" }, updatedAt: at });
+
+  it("the setup: a known type, two booleans with at least one ticked, the two sales-assisted windows", () => {
+    const s = fullState();
+    expect(validateEngine({ ...s, setup: { ...s.setup, motions: { plg: false, slg: false } } })).toEqual(["setup.motions: none ticked"]);
+    expect(validateEngine({ ...s, setup: { ...s.setup, motions: { plg: true } as never } })).toEqual(["setup.motions: not two booleans (plg, slg)"]);
+    expect(validateEngine({ ...s, setup: { ...s.setup, type: "marketplace" as never } })).toEqual(["setup.type: unknown type"]);
+    expect(validateEngine({ ...s, setup: { ...s.setup, qualificationWindowDays: 45 as never, goLiveWindowDays: 7 as never } })).toEqual([
+      "setup.qualificationWindowDays: not 30, 60 or 90",
+      "setup.goLiveWindowDays: not 30, 60 or 90",
+    ]);
+    // Sales-assisted alone, and the hybrid, are both valid setups.
+    for (const motions of [{ plg: false, slg: true }, { plg: true, slg: true }]) expect(validateEngine({ ...s, setup: { ...s.setup, motions } })).toEqual([]);
+  });
+
+  it("the sales-assisted numbers and the link are accepted whatever is ticked — unticking keeps them (§18.1.2)", () => {
+    const s = fullState();
+    s.snapshots[0]!.metrics["slg.rev.win-rate"] = slgEntry({ kind: "ratio", numerator: 18, denominator: 75 });
+    s.snapshots[0]!.metrics["link.pql-handoff"] = slgEntry({ kind: "ratio", numerator: 31, denominator: 130 });
+    s.snapshots[0]!.targets["slg.rev.win-rate"] = 32;
+    s.deck.ask.measureFirst = ["slg.act.go-live"];
+    expect(s.setup.motions).toEqual({ plg: true, slg: false });
+    expect(validateEngine(s)).toEqual([]);
+  });
+
+  it("a 106 % NRR is accepted as a rate, an estimate and counts; a 106 % renewal rate is refused (bounded)", () => {
+    const nrr = shapeOf("slg.ret.nrr");
+    expect(validateEntry(slgEntry({ kind: "rate", percent: 106 }), nrr)).toEqual([]);
+    expect(validateEntry(entry({ status: "estimated", estimate: { low: 104, high: 108, basis: "old-number" } }), nrr)).toEqual([]);
+    expect(validateEntry(slgEntry({ kind: "ratio", numerator: 212_000, denominator: 200_000 }), nrr)).toEqual([]);
+    const renewal = shapeOf("slg.ret.renewal");
+    expect(validateEntry(slgEntry({ kind: "rate", percent: 106 }), renewal)).toEqual(["slg.ret.renewal.value.percent: not within 0-100"]);
+    expect(validateEntry(entry({ status: "estimated", estimate: { low: 90, high: 106, basis: "old-number" } }), renewal)).toEqual(["slg.ret.renewal.estimate: above 100"]);
+    expect(validateEntry(slgEntry({ kind: "ratio", numerator: 26, denominator: 25 }), renewal)).toEqual(["slg.ret.renewal.value: numerator > denominator"]);
+  });
+
+  it("the company-wide margin stands in for a gross margin, of either motion, and for nothing else (C25 Q4)", () => {
+    const companyWide = entry({ status: "estimated", estimate: { low: 75, high: 75, basis: "company-wide" } });
+    expect(validateEntry(companyWide, shapeOf("slg.rev.gross-margin"))).toEqual([]);
+    expect(validateEntry(companyWide, shapeOf("rev.gross-margin"))).toEqual([]);
+    expect(validateEntry(companyWide, shapeOf("slg.rev.win-rate"))).toEqual(["slg.rev.win-rate.estimate.basis: company-wide is for a gross margin only"]);
+  });
+
+  it("a sheet never offers the company-wide margin as a basis, and every basis it offers passes on every number", () => {
+    // Found by the copy review of S0 (2026-09-30): the sheet listed every key of BASIS_KEY, so « la marge
+    // globale » was offered on all 33 sheets, and saved an estimate the importer then refused.
+    expect(SHEET_BASES).toEqual(["team-hunch", "old-number", "sample", "other"]);
+    for (const shape of ALL_METRIC_SHAPES.filter((sh) => sh.unit === "percent" || sh.unit === "money"))
+      for (const basis of SHEET_BASES)
+        expect(validateEntry(entry({ status: "estimated", estimate: { low: 1, high: 2, basis } }), shape), `${shape.id} ${basis}`).toEqual([]);
+  });
+
+  it("the link's lever is a whole number of opportunities per quarter, and may pass 100 (C25 Q7)", () => {
+    const s = fullState();
+    s.whatIf = { "link.pql-handoff": 140, "slg.rev.win-rate": 32, "slg.rev.acv": 26_000 };
+    expect(validateEngine(s)).toEqual([]);
+    s.whatIf = { "link.pql-handoff": 40.5 };
+    expect(validateEngine(s)).toEqual(["whatIf.link.pql-handoff: not a whole number"]);
+  });
+
+  it("the deck accepts the hybrid's « total », the sales-assisted slides and their what-ifs", () => {
+    const s = fullState();
+    s.deck.include = { ...s.deck.include, total: true, "slg:peloton": true, "slg:leak": false, "slg:scenario": true, "whatif:slg.rev.win-rate": true, "whatif:link.pql-handoff": true };
+    expect(validateEngine(s)).toEqual([]);
+    s.deck.include = { ...s.deck.include, ["slg:unknown" as never]: true };
+    expect(validateEngine(s)).toEqual(["deck.include.slg:unknown: unknown slide"]);
+  });
+});
+
+describe("validateEngine — the v3 fields: the series, the tools, the pipeline, the white deck (§19, A14 T0)", () => {
+  // Non-vacuity, measured on 2026-10-01: allowing an open month before the last, the same month twice, a tool
+  // listed twice, a zero quarter target, or an unchecked denominator source each fails one test of this block, its own.
+  /** Two months of the series: August closed, September open. */
+  function twoMonths(): EngineState {
+    const s = fullState();
+    const august = s.snapshots[0]!;
+    august.closedAt = "2026-10-01T08:00:00.000Z";
+    august.windows = { activationWindowDays: 7, paidWindowDays: 30, qualificationWindowDays: 30, goLiveWindowDays: 90 };
+    const september = { ...structuredClone(august), id: "s-2", referenceMonth: "2026-09", cohortMonth: "2026-08" };
+    delete september.closedAt;
+    delete september.windows;
+    s.snapshots.push(september);
+    return s;
+  }
+
+  it("a series of months, oldest first, every one closed but the last, is valid", () => {
+    expect(validateEngine(twoMonths())).toEqual([]);
+  });
+
+  it("refuses two snapshots of the same month, months out of order, and a month before the last left open", () => {
+    const same = twoMonths();
+    same.snapshots[1]!.referenceMonth = "2026-08";
+    expect(validateEngine(same)).toEqual(["snapshots[1].referenceMonth: not after the month before"]);
+    const backwards = twoMonths();
+    backwards.snapshots[1]!.referenceMonth = "2026-07";
+    expect(validateEngine(backwards)).toEqual(["snapshots[1].referenceMonth: not after the month before"]);
+    const open = twoMonths();
+    delete open.snapshots[0]!.closedAt;
+    expect(validateEngine(open)).toEqual(["snapshots[0].closedAt: missing on a month that is not the last"]);
+  });
+
+  it(`keeps at most ${MAX_MONTHS} months`, () => {
+    const s = fullState();
+    const first = s.snapshots[0]!;
+    first.closedAt = at;
+    const months = Array.from({ length: MAX_MONTHS + 1 }, (_, i) => {
+      const y = 2024 + Math.floor(i / 12);
+      const m = String((i % 12) + 1).padStart(2, "0");
+      return { ...structuredClone(first), id: `s-${i}`, referenceMonth: `${y}-${m}`, cohortMonth: `${y}-${m}` };
+    });
+    delete months.at(-1)!.closedAt;
+    expect(validateEngine({ ...s, snapshots: months.slice(0, MAX_MONTHS) })).toEqual([]);
+    expect(validateEngine({ ...s, snapshots: months })).toEqual([`snapshots: more than ${MAX_MONTHS} months`]);
+  });
+
+  it("a month's own fields: a closing date, the four windows it was read with, the open pipeline", () => {
+    const s = twoMonths();
+    s.snapshots[0]!.closedAt = "last tuesday";
+    s.snapshots[0]!.windows = { activationWindowDays: 7, paidWindowDays: 30, qualificationWindowDays: 45 } as never;
+    s.snapshots[1]!.pipelineOpen = -1;
+    expect(validateEngine(s)).toEqual([
+      "snapshots[0].closedAt: not a date",
+      "snapshots[0].windows: not the four windows of a setup",
+      "snapshots[1].pipelineOpen: not a number >= 0",
+    ]);
+    const zero = twoMonths();
+    zero.snapshots[1]!.pipelineOpen = 0;
+    expect(validateEngine(zero)).toEqual([]);
+  });
+
+  it("the tools: optional, empty allowed, every one known, none twice — pipedrive and the CS platform included", () => {
+    const s = fullState();
+    for (const tools of [[], ["hubspot", "pipedrive", "cs-platform"]] as ToolId[][]) expect(validateEngine({ ...s, setup: { ...s.setup, tools } })).toEqual([]);
+    expect(validateEngine({ ...s, setup: { ...s.setup, tools: ["hubspot", "excel-of-doom"] as never } })).toEqual(["setup.tools[1]: unknown tool"]);
+    expect(validateEngine({ ...s, setup: { ...s.setup, tools: ["hubspot", "hubspot"] } })).toEqual(["setup.tools: a tool listed twice"]);
+    expect(validateEngine({ ...s, setup: { ...s.setup, tools: "hubspot" as never } })).toEqual(["setup.tools: not a list"]);
+  });
+
+  it("the pipeline: both numbers optional, both > 0 when there", () => {
+    const s = fullState();
+    for (const pipeline of [{}, { quarterTarget: 120000 }, { threshold: 2.5 }, { quarterTarget: 120000, threshold: 3 }])
+      expect(validateEngine({ ...s, setup: { ...s.setup, pipeline } })).toEqual([]);
+    expect(validateEngine({ ...s, setup: { ...s.setup, pipeline: { quarterTarget: 0, threshold: -2 } } })).toEqual([
+      "setup.pipeline.quarterTarget: not a number > 0",
+      "setup.pipeline.threshold: not a number > 0",
+    ]);
+    expect(validateEngine({ ...s, setup: { ...s.setup, pipeline: 3 as never } })).toEqual(["setup.pipeline: not an object"]);
+  });
+
+  it("a denominator from another tool is a source like any other; the deck is paper or white", () => {
+    const s = fullState();
+    const rate: MetricEntry = {
+      status: "measured",
+      value: { kind: "ratio", numerator: 40, denominator: 400 },
+      source: { kind: "tool", tool: "amplitude" },
+      denominatorSource: { kind: "tool", tool: "stripe" },
+      updatedAt: at,
+    };
+    expect(validateEntry(rate, shapeOf("act.rate"))).toEqual([]);
+    expect(validateEntry({ ...rate, denominatorSource: { kind: "tool", tool: "abacus" } as never }, shapeOf("act.rate"))).toEqual([
+      "act.rate.denominatorSource.tool: unknown tool",
+    ]);
+    for (const theme of ["paper", "white"] as const) expect(validateEngine({ ...s, deck: { ...s.deck, theme } })).toEqual([]);
+    expect(validateEngine({ ...s, deck: { ...s.deck, theme: "black" as never } })).toEqual(["deck.theme: not paper or white"]);
   });
 });
 

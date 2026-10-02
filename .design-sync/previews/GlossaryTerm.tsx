@@ -1,5 +1,5 @@
 import * as React from "react";
-import { GlossaryTerm, PillarChip } from "tour-de-growth";
+import { GlossaryTerm, StageScore, StageScores } from "tour-de-growth";
 
 /*
  * Trigger and popover wired together — this is what the product actually
@@ -22,11 +22,12 @@ const LABELS = {
 };
 
 /**
- * The five pillar names on a result screen — every one carries a trigger.
- * Scores are the product's own sample result (lib/submissions/sample.ts),
- * whose weakest pillar is Retention: its chip is red and its "?" alert.
+ * The five stage names on a result screen's score sheet — every one carries
+ * a trigger. Scores are the product's own sample result
+ * (lib/submissions/sample.ts), whose weakest stage is Retention: its row is
+ * red and its "?" alert.
  */
-export const InPillarChips = () => {
+export const InStageScores = () => {
   const [open, setOpen] = React.useState("");
   const rows = [
     { id: "acquisition", label: "Acquisition", score: 18 },
@@ -36,9 +37,9 @@ export const InPillarChips = () => {
     { id: "revenue", label: "Revenue", score: 20 },
   ] as const;
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 8, maxWidth: 400 }}>
+    <StageScores label="Score per stage, out of 20" style={{ maxWidth: 420 }}>
       {rows.map((r) => (
-        <PillarChip key={r.id} pillar={r.label} score={r.score} total={20} weak={r.id === "retention"} stretch>
+        <StageScore key={r.id} stage={r.label} score={r.score} tone={r.id === "retention" ? "alert" : "neutral"}>
           <GlossaryTerm
             id={r.id}
             locale="en"
@@ -47,9 +48,9 @@ export const InPillarChips = () => {
             tone={r.id === "retention" ? "alert" : "muted"}
             {...LABELS}
           />
-        </PillarChip>
+        </StageScore>
       ))}
-    </div>
+    </StageScores>
   );
 };
 

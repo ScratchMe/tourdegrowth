@@ -106,6 +106,13 @@ export const UI_STRINGS = {
       fr: "Tu repars avec un score sur 100, l'étape qui te freine et une action à mener.",
     },
     ctaPrimary: { en: "Start your Tour →", fr: "Démarre ton Tour →" },
+    // TODO: à relire (convention 6). A15.16 (2026-10-01): a Tour in progress on this device.
+    // « Q n / 15 » is the quiz's own counter, the one the next screen shows. Bound
+    // with no-break spaces: one line down to 360px, and at 320 the counter wraps
+    // whole (« (question 8 sur 15) » left « 15) → » alone on a second line at 390).
+    ctaResume: { en: "Resume your Tour (Q {n} / 15) →", fr: "Reprends ton Tour (Q {n} / 15) →" },
+    // TODO: à relire (convention 6). All fifteen answered: the segment and the tone are left.
+    ctaResumeLast: { en: "Finish your Tour →", fr: "Termine ton Tour →" },
     ctaSecondary: { en: "See a sample result", fr: "Voir un résultat d'exemple" },
   },
 
@@ -161,6 +168,10 @@ export const UI_STRINGS = {
       fr: "Ton dernier score : {score}/100 — le revoir →",
     },
     withoutScore: { en: "See your last result →", fr: "Revoir ton dernier résultat →" },
+    // TODO: à relire (convention 6) — neuf le 2026-10-01 (A14 T6, engine spec §19.10) : la reprise du moteur sur l'accueil,
+    // quand un moteur existe sur l'appareil et que le moteur est ouvert au build. Un mois et deux comptes, jamais une valeur.
+    engine: { en: "Your engine: {month}, {n} of {N} numbers", fr: "Ton moteur : {month}, {n} sur {N} chiffres" },
+    engineCta: { en: "pick it up →", fr: "le reprendre →" },
     /**
      * REVIEW-03.md C1 — the 30-day nudge on the landing.
      *
@@ -196,7 +207,7 @@ export const UI_STRINGS = {
   },
 
   /**
-   * The stage profile over the pillar chips (`viz/StageProfile`) — design
+   * The stage profile over the score sheet (`viz/StageProfile`) — design
    * I + B, retained by Antoine on 2026-09-28. « Parcours » and never
    * « étape »: the five climbs ARE the étapes, and « profil de l'étape »
    * would ask which one. The abbreviations (`profileAbbr`, below) are the
@@ -363,12 +374,28 @@ export const UI_STRINGS = {
       en: "Your 15 answers are still saved on this device — retrying doesn't restart the questionnaire.",
       fr: "Tes 15 réponses sont toujours enregistrées sur cet appareil — réessayer ne relance pas le questionnaire.",
     },
+    // TODO: à relire (convention 6). A15.4 (2026-10-01): `errorBody` says « in a moment »,
+    // which a dropped connection and the hourly limit both make false. `{m}` is in minutes.
+    errorOffline: {
+      en: "The connection dropped before our answer reached you — check your network, then try again.",
+      fr: "La connexion a coupé avant que notre réponse t'arrive — vérifie ton réseau, puis réessaie.",
+    },
+    // TODO: à relire (convention 6).
+    errorRateLimited: {
+      en: "That's a lot of requests from this connection in an hour — you can try again in {m} min.",
+      fr: "Beaucoup de demandes depuis cette connexion en une heure — tu pourras réessayer dans {m} min.",
+    },
   },
 
   /** Tone selector (DESIGN-BRIEF.md §06a). SPEC.md §6bis: "Straight up" /
    * neutral is the explicit default. */
   toneSelector: {
     headerLabel: { en: "15 / 15 answered", fr: "15 / 15 répondues" },
+    // TODO: à relire (convention 6). A15.7 (2026-10-01): the profile and tone screens said
+    // « 15 / 15 answered » with two screens still to pass — what is left, instead.
+    headerTwoLeft: { en: "Two screens to go", fr: "Plus que deux écrans" },
+    // TODO: à relire (convention 6).
+    headerLast: { en: "Last screen", fr: "Dernier écran" },
     title: { en: "How do you want your results?", fr: "Comment veux-tu tes résultats ?" },
     neutralTitle: { en: "Straight up", fr: "Neutre" },
     neutralDescription: {
@@ -402,19 +429,18 @@ export const UI_STRINGS = {
     },
   },
 
-  /** Loading — DESIGN-BRIEF.md §06b's 3 rotating messages. Quick mode now
+  /** Loading — DESIGN-BRIEF.md §06b had 3 rotating messages. Quick mode
    * only ever shows message1, briefly (SPEC-ADDENDUM-01.md §0: no real wait
-   * left to narrate); the Deep dive keeps the full 3-message sequence,
-   * since it still makes a real Gemini call. */
+   * left to narrate). Since A15.6 (2026-10-01) the Deep dive shows message3
+   * alone, the one true for its whole wait, over a bar told by the clock;
+   * « Calcul de tes temps par étape » went with the steps it promised. */
   loading: {
     message1: { en: "Reviewing your answers...", fr: "Relecture de tes réponses…" },
-    message2: { en: "Calculating your stage times...", fr: "Calcul de tes temps par étape…" },
     message3: { en: "Drafting your race report...", fr: "Rédaction de ton rapport de course…" },
-    // Relu et validé par Antoine (2026-09-09) — R2-09. Shown once the three messages have
-    // run their course and the Deep dive is still generating: a real Deep
-    // dive was measured at ~70 s in production, and nothing on this screen
-    // said so. Not a fourth message (the three segments are the design), a
-    // line under them.
+    // Relu et validé par Antoine (2026-09-09) — R2-09. Shown once the first
+    // seconds of the Deep dive have passed and it is still generating: a real
+    // Deep dive was measured at ~70 s in production, and nothing on this
+    // screen said so. A line under the bar.
     stillWorkingHint: {
       en: "About a minute in total — nothing is stuck.",
       fr: "Environ une minute en tout — rien n'est bloqué.",
@@ -544,6 +570,11 @@ export const UI_STRINGS = {
        level board — which one you push, not which one you fix.
        Relu et validé par Antoine (2026-09-11). */
     roomTitle: { en: "Where there's still room", fr: "Là où il reste de la marge" },
+    /* TODO: à relire (convention 6). A15.14 (2026-10-01): the same defect the other way
+       round — the two highest stages are listed under « Strengths » even
+       when one of them is weak, a weak-band sentence under a title that says
+       strong. Relative, then: which ones hold up best, in both tones. */
+    strengthsTitleRelative: { en: "What holds up best", fr: "Ce qui tient le mieux" },
     // Replaces the mute "✓" the copy fallback used to show — on desktop,
     // where there is no native share sheet, that tick was the ONLY feedback
     // that anything had happened (REVIEW.md R-10).
@@ -564,6 +595,9 @@ export const UI_STRINGS = {
        which the SAME card switches to once a Deep dive has made it specific.
        Relu et validé par Antoine (2026-09-11). */
     nextMoveLabel: { en: "Next move", fr: "Prochaine action" },
+    // TODO: à relire (convention 6) — neuf le 2026-10-01 (A14 T6, engine spec §19.10) : sous l'action prioritaire, pour son
+    // propriétaire seulement, quand le moteur est ouvert au build. « Cette étape » : celle que la carte vient de nommer.
+    engineEntry: { en: "Already measuring this stage? Put your real numbers in the engine →", fr: "Tu mesures déjà cette étape ? Mets tes vrais chiffres dans le moteur →" },
     /* Design system extension 03 §3 — the share block. The caption says what
        the picture IS, since a reader is otherwise looking at their own result
        twice without being told why.
@@ -595,8 +629,19 @@ export const UI_STRINGS = {
       en: "Share image: {total}/100, with no stage named as a bottleneck.",
       fr: "Image de partage : {total}/100, sans étape désignée comme frein.",
     },
-    // Roast-only stamped tag on the weakest pillar (DESIGN-BRIEF.md §04: "08/20 RETENTION — dead last").
+    // Roast-only stamp on the weakest stage, redrawn by design system extension 05 ("RETENTION · 8/20 · DEAD LAST").
+    // TODO: à relire (convention 6) — the string is unchanged, the stamp around it is not: A16 reorders it and sets it in capitals.
     stampedSuffix: { en: "dead last", fr: "bon dernier" },
+    /*
+     * The score sheet (design system extension 05, A16): the list's accessible
+     * name, and on the landing's preview the name of each stage's link to its
+     * glossary page — it contains the visible stage name and says where the
+     * link goes; the score is read with the row, not with the link.
+     */
+    // TODO: à relire (convention 6).
+    stageScoresLabel: { en: "Score per stage, out of 20", fr: "Score par étape, sur 20" },
+    // TODO: à relire (convention 6).
+    stageLinkLabelTemplate: { en: "{stage} — definition", fr: "{stage} — définition" },
     sampleBadge: { en: "Sample result — not your data", fr: "Résultat d'exemple — pas tes données" },
     /* Design system extension 01 names this case's eyebrow separately from the generic detour. */
     notFoundEyebrow: { en: "Lost result", fr: "Résultat introuvable" },

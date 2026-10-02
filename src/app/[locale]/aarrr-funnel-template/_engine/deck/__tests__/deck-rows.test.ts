@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { exampleState, measured, ratio, tourResult, withEntry, withTarget } from "@/lib/engine/__tests__/fixtures";
+import { exampleState, hybridState, measured, ratio, salesAssistedState, tourResult, withEntry, withMonthBefore, withTarget } from "@/lib/engine/__tests__/fixtures";
 import { CTX_EN, CTX_FR, EN, FR } from "@/lib/engine/__tests__/props";
 import { buildDeck } from "@/lib/engine/deck";
 import { deriveEngine } from "@/lib/engine/derive";
 import type { DeckModel, EngineState } from "@/lib/engine/types";
-import { ROW_FIELDS, type RowKind } from "../deck-rows";
+import { OPTIONAL_FIELDS, ROW_FIELDS, type RowKind } from "../deck-rows";
 
 /**
  * The contract between the model and the slides (deck-rows.ts): every record
@@ -29,7 +29,11 @@ import { ROW_FIELDS, type RowKind } from "../deck-rows";
  * exercised" in both languages, naming bullet, know and measure — the rows
  * only a written ask produces; dropping `margin` fails it naming cap — the
  * lifetime cap is written only when an LTV exists to be capped; dropping
- * `whatIf` fails it naming kpi, funnelStep, lever and together.
+ * `whatIf` fails it naming kpi, funnelStep, lever and together; dropping
+ * `hybrid` and `hybridLinked` (2026-10-01) fails it naming totalBlock, link,
+ * sum and unitRow — the hybrid's own rows (`salesAssisted` still writes the
+ * relays); dropping `series` and `seriesApart` (A14 T1) fails it naming
+ * evolution and apart.
  */
 
 const props = { fr: { ...FR, ctx: CTX_FR }, en: { ...EN, ctx: CTX_EN } } as const;
@@ -76,7 +80,47 @@ function whatIf(): EngineState {
   return { ...exampleState(), whatIf: { "act.rate": 24, "ret.logo-churn": 1.5 } };
 }
 
-const STATES: Record<string, () => EngineState> = { example: exampleState, linked, filledAsk, teamAsk, margin, whatIf };
+/**
+ * The two motions (A7.3.c S4): the §18.9 hybrid writes the total, the relays,
+ * sales-assisted's leak and the side-by-side unit economics; with its levers
+ * moved, sales-assisted's what-if slides; sales-assisted alone, its own
+ * unit-economics tiles; the hybrid linked to a Tour, a bridge per motion.
+ */
+function hybrid(): EngineState {
+  return { ...hybridState(), whatIf: { "slg.rev.win-rate": 30, "link.pql-handoff": 40 } };
+}
+function hybridLinked(): EngineState {
+  const s = hybridState();
+  s.tourLink = { resultId: RESULT.id, linkedAt: "2026-09-24T09:00:00.000Z" };
+  s.deck.include.mirror = true;
+  return s;
+}
+function salesAssisted(): EngineState {
+  return withEntry(salesAssistedState(), "slg.rev.gross-margin", measured(ratio(75, 100), { kind: "person", role: "finance" }));
+}
+
+/**
+ * The monthly series (A14 T1): a second month writes « Ce qui a bougé » —
+ * evolution rows when numbers compare, apart rows when nothing does.
+ */
+function series(): EngineState {
+  return withMonthBefore(exampleState(), (july) => void (july.metrics["act.rate"] = measured(ratio(120, 800), { kind: "tool", tool: "amplitude" })));
+}
+function seriesApart(): EngineState {
+  return withMonthBefore(exampleState(), (july) => {
+    for (const id of Object.keys(july.metrics) as (keyof typeof july.metrics)[]) delete july.metrics[id];
+  });
+}
+
+/** Pipeline coverage (A14 T3.2, §19.4): sales-assisted with its open pipeline, a target and a threshold, over two months. */
+function pipeline(): EngineState {
+  const s = withMonthBefore(salesAssisted(), (july) => void (july.pipelineOpen = 420_000));
+  s.setup.pipeline = { quarterTarget: 200_000, threshold: 3 };
+  s.snapshots[s.snapshots.length - 1]!.pipelineOpen = 520_000;
+  return s;
+}
+
+const STATES: Record<string, () => EngineState> = { example: exampleState, linked, filledAsk, teamAsk, margin, whatIf, hybrid, hybridLinked, salesAssisted, series, seriesApart, pipeline };
 
 function model(state: EngineState, locale: "fr" | "en"): DeckModel {
   const p = props[locale];
@@ -97,7 +141,8 @@ describe.each(["fr", "en"] as const)("deck rows — %s", (locale) => {
       const kind = line.row as RowKind | undefined;
       if (!kind || !(kind in ROW_FIELDS)) return [`${where}: unknown row kind ${String(line.row)}`];
       const expected = [...ROW_FIELDS[kind]].map(String).sort();
-      const actual = Object.keys(line).filter((k) => k !== "row").sort();
+      const optional = OPTIONAL_FIELDS[kind] ?? [];
+      const actual = Object.keys(line).filter((k) => k !== "row" && !optional.includes(k)).sort();
       const problems: string[] = [];
       if (JSON.stringify(expected) !== JSON.stringify(actual)) problems.push(`${where}: ${kind} has [${actual}] not [${expected}]`);
       for (const [k, v] of Object.entries(line)) if (typeof v !== "string") problems.push(`${where}: ${kind}.${k} is ${typeof v}`);

@@ -11,7 +11,10 @@ import type { Translatable } from "@/lib/i18n/translatable";
  * anything goes live. The band's three labels are new copy written by the
  * code session, reusing the words the level's dashboard already says
  * (`content/game/retention.ts`, `dashboard.churn` and
- * `dashboard.notOnDashboard`).
+ * `dashboard.notOnDashboard`). Level 2's card (2026-10-01, A12.f) is new copy
+ * written by the code session on the model of level 1's, the two openings
+ * and the mention shared; so is the card offering several levels
+ * (`GAME_ENTRY_SEVERAL`, A12.f.2), with its own title, body and mention.
  *
  * Its own module, and only the result page imports it: the level's text
  * (`retention.ts`, ~800 lines) must not ride into the result page's server
@@ -39,34 +42,89 @@ export interface GameEntryCopy {
   /**
    * The night band across the top of the card: the object of the game in one
    * glance — the one number the CEO watches, and the one that is missing from
-   * his dashboard. `{churn}` is the level's starting churn, formatted by the
-   * caller from the level model rather than written here, so the card cannot
-   * quote a number the game does not start from.
+   * his dashboard. `{metric}` is the level's starting number (churn, new
+   * customers), formatted by the caller from the level model rather than
+   * written here, so the card cannot quote a number the game does not start
+   * from.
    */
   band: {
-    churn: Translatable;
+    metric: Translatable;
     trust: Translatable;
     notOnDashboard: Translatable;
   };
 }
 
+/** The card's first sentence, the same for every level: it answers the result above it, not the level. */
+const OPENING = {
+  result: t("Tu sais maintenant quoi faire.", "Now you know what to do."),
+  deepDive: t("Tes recommandations sont au-dessus.", "Your recommendations are above."),
+};
+const META = t("vingt minutes, gratuit", "twenty minutes, free");
+const TRUST = t("Confiance", "Trust");
+const NOT_ON_DASHBOARD = t("pas sur ton dashboard", "not on your dashboard");
+
 export const GAME_ENTRY_COPY = {
+  // TODO: à relire — nouveau (2026-10-01, CHANTIERS.md A12.f) : toute la carte du niveau 2.
+  acquisition: {
+    title: t("Le côté obscur de l'acquisition", "The dark side of acquisition"),
+    opening: OPENING,
+    body: t(
+      "Voici ce qu'il ne faut pas faire : joue une année comme PM growth d'une boutique de vélos en ligne, un DG qui veut de nouveaux clients, et huit astuces que tu reconnaîtras ensuite partout.",
+      "Here is what not to do: play a year as the growth PM of an online bike shop, with a CEO who wants new customers, and eight tricks you will recognise everywhere afterwards.",
+    ),
+    cta: t("Jouer le niveau « Comment les gens vous trouvent »", 'Play the level "How people find you"'),
+    meta: META,
+    band: {
+      metric: t("Nouveaux clients {metric}", "New customers {metric}"),
+      trust: TRUST,
+      notOnDashboard: NOT_ON_DASHBOARD,
+    },
+  },
   retention: {
     title: t("Le côté obscur de la rétention", "The dark side of retention"),
-    opening: {
-      result: t("Tu sais maintenant quoi faire.", "Now you know what to do."),
-      deepDive: t("Tes recommandations sont au-dessus.", "Your recommendations are above."),
-    },
+    opening: OPENING,
     body: t(
       "Voici ce qu'il ne faut pas faire : joue une année comme PM growth d'une appli de streaming, un DG qui veut du chiffre, et huit astuces que tu reconnaîtras ensuite partout.",
       "Here is what not to do: play a year as the growth PM of a streaming app, with a CEO who wants the number, and eight tricks you will recognise everywhere afterwards.",
     ),
     cta: t("Jouer le niveau « S'ils reviennent »", 'Play the level "If they come back"'),
-    meta: t("vingt minutes, gratuit", "twenty minutes, free"),
+    meta: META,
     band: {
-      churn: t("Résiliations {churn}", "Churn {churn}"),
-      trust: t("Confiance", "Trust"),
-      notOnDashboard: t("pas sur ton dashboard", "not on your dashboard"),
+      metric: t("Résiliations {metric}", "Churn {metric}"),
+      trust: TRUST,
+      notOnDashboard: NOT_ON_DASHBOARD,
     },
   },
 } as const satisfies Record<LevelSlug, GameEntryCopy>;
+
+/**
+ * The card when the bottleneck holds several stages that each have a level
+ * (C30 Q5, Antoine, 2026-10-01): one card offers them all, stage by stage,
+ * and the reader chooses. « Les étapes ci-dessous », not « celles qui te
+ * freinent »: three stages can tie at the bottom with only two levels among
+ * them, and the page above says « 3 étapes te freinent ». The shared title, body and mention; each level
+ * keeps its own button and its own number in the band (`GAME_ENTRY_COPY`).
+ * The opening sentence is the same as a one-level card's (`OPENING`).
+ *
+ * TODO: à relire — nouveau (2026-10-01, CHANTIERS.md A12.f.2) : le titre, le corps et la mention.
+ */
+export const GAME_ENTRY_SEVERAL = {
+  title: t("Le côté obscur de tes étapes", "The dark side of your stages"),
+  body: t(
+    "Voici ce qu'il ne faut pas faire : un niveau pour chacune des étapes ci-dessous, une année comme PM growth, un DG qui veut du chiffre, et huit astuces par niveau que tu reconnaîtras ensuite partout.",
+    "Here is what not to do: a level for each of the stages below, a year as a growth PM, a CEO who wants the number, and eight tricks a level you will recognise everywhere afterwards.",
+  ),
+  meta: t("vingt minutes par niveau, gratuit", "twenty minutes a level, free"),
+} as const;
+
+export { OPENING as GAME_ENTRY_OPENING };
+
+/**
+ * TODO: à relire (convention 6) — C33, tranchée par Antoine le 2026-10-01 :
+ * the line above the card, outside its band. The band's « Résiliations
+ * 6,0 % » is the game's number, read under the reader's own, and nothing
+ * said so (the law of selective attention, design/LOIS-UX.md). « Dans le jeu »
+ * on the band itself did not fit its one 44px line (P23); above the card it
+ * is the result's own section voice, like « Ce qui tient le mieux ».
+ */
+export const GAME_ENTRY_EYEBROW = t("Dans le jeu", "In the game");

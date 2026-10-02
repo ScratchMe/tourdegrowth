@@ -1,4 +1,14 @@
 /*
+ * The eyebrow and the card (C33, 2026-10-01): the result's own section
+ * rhythm, a MetaLabel 10px above what it names (ResultView's `.section`).
+ */
+.entry {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/*
  * Game plan §2.6 `GameEntry` — a flat paper card with a strip of the night
  * across its top. Semantic tokens only: inside the band, `data-world="night"`
  * (NightSurface) rebinds them to the night's ground, text and edges.
@@ -118,6 +128,36 @@
   gap: var(--space-4) var(--space-6);
 }
 
+/*
+ * Several levels (C30 Q5): one row per stage, lowest stage first, its name
+ * above its button. Above rather than beside: a long French title (« Jouer
+ * le niveau « Comment les gens vous trouvent » ») pushed its name onto a line
+ * of its own while the shorter one stayed beside its button, two layouts in
+ * one card (seen at 1 280 px, 2026-10-01).
+ */
+.levels {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.level {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+.stage {
+  font: var(--meta-sm);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
 .meta {
   font: var(--meta-xs);
   letter-spacing: var(--meta-tracking);
@@ -171,6 +211,21 @@
   }
 }
 
+/*
+ * Several levels: the band always stacks, one number per line, then the
+ * missing trust. On one line it needs more than any card is wide, and a wrap
+ * left a « · » dangling at the end of the first line (seen at 1 280 px).
+ */
+.bandStacked {
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.bandStacked .bandSep {
+  display: none;
+}
+
 @media (max-width: 760px) {
   .body {
     padding: var(--pad-card-mobile);
@@ -178,6 +233,10 @@
 
   .actions {
     flex-direction: column;
+    align-items: stretch;
+  }
+
+  .level {
     align-items: stretch;
   }
 }

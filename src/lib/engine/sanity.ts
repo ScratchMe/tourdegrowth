@@ -1,9 +1,19 @@
-import { CHURN_HIGH_PERCENT, MARGIN_ODD, METRIC_SHAPES, PELOTON_METRICS, RECONCILE_BAND, shapeOf } from "./catalog-shape";
+import {
+  CHURN_HIGH_PERCENT,
+  MARGIN_ODD,
+  PELOTON_METRICS,
+  RECONCILE_BAND,
+  SLG_ACV_ARPA_BAND,
+  SLG_CYCLE_LONG_DAYS,
+  motionOfMetric,
+  shapeOf,
+  shapesOf,
+} from "./catalog-shape";
 import type { MetricShape } from "./catalog-shape";
 import { periodOf } from "./cohort";
-import { formatCountInterval, formatMonth, formatNumber, type UnitWords } from "./format";
+import { formatCountInterval, formatInterval, formatMonth, formatNumber, type UnitWords } from "./format";
 import { mapBounds } from "./interval";
-import type { EngineCalcContext, EngineState, Interval, MetricEntry, MetricId, MetricValue, SanityCheck } from "./types";
+import type { EngineCalcContext, EngineState, Interval, MetricEntry, MetricId, MetricValue, Motion, SanityCheck } from "./types";
 import { countsOf, currentSnapshot, entryOf, knownIn } from "./values";
 
 /**
@@ -65,18 +75,66 @@ export function reconcile(state: EngineState, ctx: EngineCalcContext): { predict
   return { predicted, billed, ratio: { lo: predicted.lo / billed, hi: predicted.hi / billed } };
 }
 
+/** A duration whose statistic is the mean — on the value, or declared as the variant of an estimate. */
+function isMeanDuration(entry: MetricEntry | undefined): boolean {
+  return entry !== undefined && (entry.variant === "mean" || readings(entry).some((v) => v.kind === "duration" && v.statistic === "mean"));
+}
+
+/**
+ * The checks of the ticked motions, each tagged with its motion — in
+ * `MOTIONS` order, then the hybrid's one check across both. A motion
+ * unticked keeps its numbers (§18.1.2) but raises nothing: the board, the
+ * deck and these checks ignore it.
+ */
 export function sanityChecks(state: EngineState, ctx: EngineCalcContext, words: UnitWords): SanityCheck[] {
   const snapshot = currentSnapshot(state);
+  const { motions } = state.setup;
   const checks: SanityCheck[] = [];
-  const add = (id: SanityCheck["id"], metrics: MetricId[], values: Record<string, string> = {}, count?: Interval) =>
-    checks.push({ id, blocking: false, metrics, values, ...(count ? { count } : {}) });
+  const addFor =
+    (motion: Motion | undefined) =>
+    (id: SanityCheck["id"], metrics: MetricId[], values: Record<string, string> = {}, count?: Interval) =>
+      checks.push({ id, ...(motion ? { motion } : {}), blocking: false, metrics, values, ...(count ? { count } : {}) });
 
-  for (const shape of METRIC_SHAPES) {
+  for (const shape of shapesOf(motions)) {
     const entry = entryOf(snapshot, shape.id);
     const blocking = entry ? blockingCheck(entry, shape, ctx.locale) : null;
-    if (blocking) checks.push(blocking); // an imported file can carry what the sheet would have refused
+    // An imported file can carry what the sheet would have refused.
+    if (blocking) checks.push({ ...blocking, motion: motionOfMetric(shape.id) });
+    // The numerator from one tool, the denominator from another (§19.5.3): they may not count the same thing.
+    const two = entry ? twoToolsOf(entry) : null;
+    if (two) addFor(motionOfMetric(shape.id))("two-tools", [shape.id], two);
   }
 
+  if (motions.plg) selfServeChecks(state, ctx, words, addFor("plg"));
+  if (motions.slg) salesAssistedChecks(state, ctx, words, addFor("slg"));
+  if (motions.plg && motions.slg) {
+    // The two CACs measured on different spend: neither is wrong, but side by side they don't compare.
+    const plg = entryOf(snapshot, "acq.cac");
+    const slg = entryOf(snapshot, "slg.acq.cac");
+    if (knownValue(state, "acq.cac", ctx) && knownValue(state, "slg.acq.cac", ctx) && plg?.variant && slg?.variant && plg.variant !== slg.variant) {
+      // Variant ids, not labels: the sentence resolves them (`sentences.ts#sanityText`).
+      addFor(undefined)("cac-variants-differ", ["acq.cac", "slg.acq.cac"], { plg: plg.variant, slg: slg.variant });
+    }
+  }
+  return checks;
+}
+
+type Add = (id: SanityCheck["id"], metrics: MetricId[], values?: Record<string, string>, count?: Interval) => void;
+
+/**
+ * A measured rate whose counts come from two different tools (§19.5.3, A14
+ * T4): `{ a, b }`, the numerator's and the denominator's tool ids, for the
+ * sentence to name. null otherwise — one tool, a person, or no second source.
+ */
+export function twoToolsOf(entry: Pick<MetricEntry, "status" | "value" | "source" | "denominatorSource">): { a: string; b: string } | null {
+  if (entry.status !== "measured" || entry.value?.kind !== "ratio") return null;
+  const { source, denominatorSource } = entry;
+  if (source?.kind !== "tool" || denominatorSource?.kind !== "tool" || source.tool === denominatorSource.tool) return null;
+  return { a: source.tool, b: denominatorSource.tool };
+}
+
+function selfServeChecks(state: EngineState, ctx: EngineCalcContext, words: UnitWords, add: Add): void {
+  const snapshot = currentSnapshot(state);
   const activated = knownValue(state, "act.rate", ctx);
   const d30 = knownValue(state, "ret.d30", ctx);
   const paid = knownValue(state, "rev.paid-conversion", ctx);
@@ -91,10 +149,7 @@ export function sanityChecks(state: EngineState, ctx: EngineCalcContext, words: 
   if (margin && (margin.lo > MARGIN_ODD.hi || margin.hi < MARGIN_ODD.lo)) add("margin-odd", ["rev.gross-margin"]);
 
   // A mean time-to-value flatters itself as the stragglers give up: the statistic is on the value, or declared as the variant of an estimate.
-  const ttv = entryOf(snapshot, "act.ttv");
-  if (ttv && knownValue(state, "act.ttv", ctx) && (ttv.variant === "mean" || readings(ttv).some((v) => v.kind === "duration" && v.statistic === "mean"))) {
-    add("ttv-mean", ["act.ttv"]);
-  }
+  if (knownValue(state, "act.ttv", ctx) && isMeanDuration(entryOf(snapshot, "act.ttv"))) add("ttv-mean", ["act.ttv"]);
 
   const periods = PELOTON_METRICS.filter((id) => knownValue(state, id, ctx)).map((id) => periodOf(shapeOf(id), entryOf(snapshot, id), snapshot));
   if (new Set(periods).size > 1) add("cohort-mismatch", [...PELOTON_METRICS]);
@@ -113,5 +168,29 @@ export function sanityChecks(state: EngineState, ctx: EngineCalcContext, words: 
       mapBounds(r.predicted, Math.round),
     );
   }
-  return checks;
+}
+
+/** §18.5.7. Triggers to re-read, never references: the thresholds appear on no slide as a norm. */
+function salesAssistedChecks(state: EngineState, ctx: EngineCalcContext, words: UnitWords, add: Add): void {
+  const snapshot = currentSnapshot(state);
+
+  // Past the three-month window, the quarter's CAC divides its spend by customers of earlier spend.
+  const cycle = knownValue(state, "slg.acq.cycle", ctx);
+  if (cycle && cycle.lo > SLG_CYCLE_LONG_DAYS) add("slg-cycle-long", ["slg.acq.cycle", "slg.acq.cac"]);
+
+  // A 400-day deal moves a mean by weeks: the same rule as the time-to-value.
+  if (cycle && isMeanDuration(entryOf(snapshot, "slg.acq.cycle"))) add("slg-cycle-mean", ["slg.acq.cycle"]);
+  if (knownValue(state, "slg.act.time-to-live", ctx) && isMeanDuration(entryOf(snapshot, "slg.act.time-to-live"))) {
+    add("slg-ttl-mean", ["slg.act.time-to-live"]);
+  }
+
+  // A new contract worth half or twice the book's average, ENTIRELY: a price rise, a new segment, or two revenues.
+  const acv = knownValue(state, "slg.rev.acv", ctx);
+  const arpa = knownValue(state, "slg.rev.arpa", ctx);
+  if (acv && arpa && arpa.lo > 0) {
+    const ratio = { lo: acv.lo / 12 / arpa.hi, hi: acv.hi / 12 / arpa.lo };
+    if (ratio.hi < SLG_ACV_ARPA_BAND.lo || ratio.lo > SLG_ACV_ARPA_BAND.hi) {
+      add("slg-acv-vs-arpa", ["slg.rev.acv", "slg.rev.arpa"], { x: formatInterval(ratio, "ratio", ctx, words) });
+    }
+  }
 }

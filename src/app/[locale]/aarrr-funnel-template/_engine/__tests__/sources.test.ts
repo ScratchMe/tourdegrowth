@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { METRIC_SHAPES } from "@/lib/engine/catalog-shape";
 import { EN } from "@/lib/engine/__tests__/props";
-import { moneyUnit, percentUnit, sourceOptions, wordUnit } from "../sources";
+import { ALL_TOOLS, moneyUnit, percentUnit, sourceOptions, wordUnit } from "../sources";
 
 /**
  * Where a NumberField's unit goes, by language (design system extension 04,
@@ -68,5 +68,33 @@ describe("the source list", () => {
     expect(flat.slice(shape.sources.length)).toEqual(["person", "other"]);
     const group = list.find((item) => "options" in item);
     expect(group && "options" in group ? group.options.length : 0).toBeGreaterThan(0);
+  });
+
+  it("offers every tool somewhere, the sales-assisted ones included (A14 T0: Pipedrive and the CS platform were missing)", () => {
+    const strings = EN.strings;
+    // A number with no usual tool: everything sits under « Other tools ».
+    const shape = { ...METRIC_SHAPES.find((s) => s.id === "act.rate")!, sources: [] };
+    const group = sourceOptions(shape, strings).find((item) => "options" in item);
+    const offered = group && "options" in group ? group.options.map((o) => o.value) : [];
+    expect(offered).toEqual(ALL_TOOLS.map((tool) => `tool:${tool}`));
+    expect(offered).toContain("tool:pipedrive");
+    expect(offered).toContain("tool:cs-platform");
+    expect(new Set(ALL_TOOLS).size).toBe(Object.keys(strings.tools).length);
+  });
+});
+
+describe("the source list with the team's tools (§19.5.2, A14 T4)", () => {
+  const values = (opts: ReturnType<typeof sourceOptions>) => opts.flatMap((o) => ("options" in o ? [] : [o.value]));
+  const others = (opts: ReturnType<typeof sourceOptions>) => opts.flatMap((o) => ("options" in o ? o.options.map((x) => x.value) : []));
+
+  it("the team's tools first — this number's usual ones among them first — then the rest under « Autres outils »", () => {
+    const shape = METRIC_SHAPES.find((s) => s.id === "act.rate")!;
+    const opts = sourceOptions(shape, EN.strings, ["stripe", "amplitude"]);
+    expect(values(opts).slice(0, 2)).toEqual(["tool:amplitude", "tool:stripe"]);
+    // A usual tool the team didn't tick is offered with the others, never hidden.
+    expect(others(opts)).toContain("tool:mixpanel");
+    expect(others(opts)).not.toContain("tool:stripe");
+    // Nothing ticked: the list is the one before the complete engine.
+    expect(sourceOptions(shape, EN.strings, [])).toEqual(sourceOptions(shape, EN.strings));
   });
 });

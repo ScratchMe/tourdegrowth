@@ -71,14 +71,15 @@ parcours », never « profil de l'étape ».
 Each space wears its colour and its sign, and only where it is the subject:
 the Tour in ink (its pictogram red), the engine in ultramarine
 (`--space-engine-accent`, its labels and rules, and the `Stopwatch` beside its
-intro), the game in ochre on paper and amber at night (`HubMountain` on its
-hub's night poster, `ProsePage introWorld="night"`). `SpaceStrip` is the one
+intro), the game in ochre (on paper, and the open cols of `HubMountain` on its hub's
+night poster, `ProsePage introWorld="night"`, where amber marks only the
+moon, the flags and the titles). `SpaceStrip` is the one
 place the three stand side by side, on the landing. Ochre is never text on
 paper (1.87); the night's amber never leaves the night.
 
 ## Responsive
 
-Sizing is CSS-only. `ScoreDisplay`, `PillarChip`, `QuestionCard`,
+Sizing is CSS-only. `ScoreDisplay`, `StageScores`, `QuestionCard`,
 `AnswerOption`, `StageProgress`, `Bottleneck` and a `hero` `StatTile` shrink
 themselves below 760px — you do not detect a viewport in JS. `size="sm"` is
 the explicit override for the rare case of forcing the small scale on a wide
@@ -108,7 +109,13 @@ Target 390px. Nothing may scroll horizontally at 360px.
   props, not a new component.
 - `DetourCard` is the one dead-end. 404s and error screens are the same family
   at two temperatures.
-- Pillar-and-sentence is `InsightCard`. Pillar-and-score is `PillarChip`.
+- Pillar-and-sentence is `InsightCard`. A stage and its score is a
+  `StageScore`, five of them a `StageScores` — a ruled score sheet, one column,
+  never a box: it is a value, and a value that looks like a button breaks the
+  law of similarity (A15.19, extension 05). Its red follows the bottleneck as
+  the profile does: one row on `clear`, the tied group on `shared`, none on
+  `level`. The only thing to touch on a row is its « ? », or on the landing
+  the stage name, which is the link.
 - A prose page is `ProsePage` plus `ProseSection`/`ProseText`/`ProseList`/
   `ProseActions`; its aside is `Callout`.
 - A figure is `StatTile`; a series over time is `Sparkline`; a value against a
@@ -122,8 +129,8 @@ Target 390px. Nothing may scroll horizontally at 360px.
 - The five pillar scores as a shape are `StageProfile` (« Profil du
   parcours » / "Route profile") — one climb per stage,
   as high as the points it is missing, the named stage flagged « HC ». It
-  sits over the five `PillarChip`s, which are its table: it is hidden from
-  assistive technology and never shown without them.
+  sits over the `StageScores` sheet, which is its table: it is hidden from
+  assistive technology and never shown without it.
 - On a result, the score is a kilometre marker (`ScoreDisplay
   variant="marker"`) standing beside the stage that stalls: it goes in
   `Bottleneck`'s `lead`, never on its own.
@@ -132,7 +139,8 @@ Target 390px. Nothing may scroll horizontally at 360px.
   primary is their own Tour, and primary on the owner's own result
   (`shareVariant`, C16), where "Take the Tour again" becomes secondary.
   The offer to play the game (`GameEntry`) is not a third: a flat paper card
-  with a secondary button, and a thin band of night across its top.
+  with one secondary button per level it offers, each under its stage's name
+  when there are several, and a thin band of night across its top.
 - The `game` group is presentation only. Every string arrives resolved, and
   every number arrives formatted — a game component never computes a score,
   a date or a sentence. They are drawn inside a `NightSurface` except the
@@ -153,7 +161,8 @@ smaller than that and extend their hit area on the element itself: a
 room the group keeps above and below it; the 16px `DefinitionTrigger` glyph
 takes taps on a 44px disc around it; `Button variant="quiet"` is drawn as a
 line of underlined text (31px, 27px at `sm`) and takes taps on a 44px strip
-centred on it. Never strip that surrounding room to tighten a header — it is
+centred on it; a boxed `Button size="sm"` is drawn 39px tall and takes taps
+on the same strip. Never strip that surrounding room to tighten a header — it is
 where the taps land. The system has one text button, `quiet`: an action in
 text is that, never a styled `<button>` of its own. A link inside a sentence
 is a link, set in the sentence's type.
@@ -194,8 +203,10 @@ Rules the night world adds:
 - `--paint-red` is never text at night (3.76:1). Red text is the night's
   `--text-alert`; the primary button keeps its red fill because its label sits
   on its own fill.
-- The phone mock (`PhoneMock`) is someone else's product: white, with its own
-  `--app-*` tokens, and it does not follow the world around it.
+- The two phones (`PhoneMock`, Flixo's streaming app in level 1, and
+  `ShopPhone`, Pédalix's bike shop in level 2) are someone else's product:
+  white, with their own `--app-*` tokens (the shop adds its green,
+  `--shop-brand`), and they do not follow the world around them.
 - There is still no user-facing dark mode. The night is a place in the story,
   not a theme preference.
 
@@ -206,8 +217,7 @@ Every duration is a token of `tokens/motion.css`, never a literal:
 leaving — leaving is faster), `--dur-state` (a change in place),
 `--dur-stamp` with `--ease-stamp` (the stamp overshoots once; only an
 entrance may overshoot), `--dur-shake`, `--dur-pulse`, `--dur-reveal`,
-`--dur-draw`, and three loops for waiting (`--dur-wait`, `--dur-breathe`,
-`--dur-dots`). An arrival rises by `--dist-step` (8px). The shared keyframes
+`--dur-draw`, and two loops for waiting (`--dur-breathe`, `--dur-dots`). An arrival rises by `--dist-step` (8px). The shared keyframes
 (the score's `stamp`, the verdict's `slam`, the progress `pulse`) reach a
 component through `composes` from `styles/motion.module.css`. Reduced motion
 switches all of it off; every element rests in its final state, so nothing
@@ -357,7 +367,7 @@ Retired names, and where each went, one family at a time
 
 | Was | Now | Family |
 |---|---|---|
-| `size="desktop"` / `"mobile"` | `size="md"` / `"sm"` | quiz and result: `AnswerOption`, `QuestionCard`, `StageProgress`, `Bottleneck`, `PillarChip`, `ScoreDisplay`, `ShareCard` — done |
+| `size="desktop"` / `"mobile"` | `size="md"` / `"sm"` | quiz and result: `AnswerOption`, `QuestionCard`, `StageProgress`, `Bottleneck`, `StageScores`, `ScoreDisplay`, `ShareCard` — done |
 | `size="compact"`, `Button compact` | `size="sm"` | core: `Segmented`, `ToneToggle`, `Button` — done |
 | `tone="red"` | `tone="alert"` | core: `Tag` — done |
 | `size="hero"` / `"compact"` / `"responsive"`, `size="mini"` | `size="lg"` / `"sm"` / `"auto"`, `size="sm"` | viz: `StatTile`, `BulletChart` — done |
@@ -372,5 +382,5 @@ Retired names, and where each went, one family at a time
 - Named object types (`DataTableColumn`, `HandCard`, `ReportFigure`, …) print
   as their name. The previews show every one of them with its real shape — copy
   from those. The few whose contract would otherwise be wrong (`StatTile`,
-  `Sparkline`, `EventClipping`, `PhoneMock`, `NotFoundScreen`) are written out
-  in full.
+  `Sparkline`, `EventClipping`, `PhoneMock`, `ShopPhone`, `NotFoundScreen`,
+  `ProseText`, `ProseActions`) are written out in full.

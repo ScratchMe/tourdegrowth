@@ -219,6 +219,13 @@
   color: var(--text-muted);
 }
 
+/* A number's menu path in the team's tool (§19.5.2), under its name: where to click, not a sentence. */
+.itemPath {
+  display: block;
+  font: var(--meta-xs);
+  color: var(--text-muted);
+}
+
 .itemStale {
   font: var(--meta-xs);
   color: var(--text-alert);
@@ -232,6 +239,13 @@
 }
 
 /* --- Resume (E6) ------------------------------------------------------- */
+/* The month selector and, on a past month, its band (A14 T2, §19.2.4). */
+.monthBar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
 .resume {
   display: flex;
   flex-direction: column;
@@ -285,6 +299,13 @@
   margin: 0;
 }
 
+/* Sales-assisted's months (§18.1.2): information, not a warning — the field hints' ink, not the alert's. */
+.periodsLine {
+  font: var(--body-sm);
+  color: var(--text-muted);
+  margin: 0;
+}
+
 /* --- The example's banner title (2026-09-25) ---------------------------- */
 .exampleTitle {
   font: var(--title-card);
@@ -294,4 +315,132 @@
 
 .exampleTitle:focus {
   outline: none;
+}
+
+/*
+ * How the company sells (engine spec §18.1.1, A7.3.c S3): two boxes, each
+ * motion's own windows unfolded under its box — indented under the sentence
+ * they belong to, so a window is never read as the other motion's.
+ */
+.motions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.motion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.motionSettings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding-inline-start: var(--space-7);
+  border-inline-start: var(--border-rule);
+}
+
+/* « Tes outils » (§19.5.1): one fieldset per family, its tools as boxes. */
+.toolFamily {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3) var(--space-6);
+  margin-top: var(--space-4);
+}
+
+.toolFamilyTitle {
+  width: 100%;
+  padding: 0;
+  margin-bottom: var(--space-2);
+  font: var(--meta-sm);
+  color: var(--text-muted);
+}
+
+/* --- Several engines (§19.1.5, A14 T5) -------------------------------- */
+.switcher {
+  margin-bottom: var(--space-4);
+}
+
+.switcherList {
+  list-style: none;
+  margin: 0 0 var(--space-4);
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.switcherItem {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2) var(--space-4);
+}
+
+.switcherName {
+  font: var(--body-md);
+  color: var(--text-body);
+  overflow-wrap: anywhere;
+}
+
+.switcherItem[aria-current="true"] .switcherName {
+  font-weight: 600;
+}
+
+.switcherMeta {
+  font: var(--meta-xs);
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* --- « Saisie en tableau » (§19.6, A14 T5) ----------------------------- */
+.table {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.tablePreview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  background: var(--surface-sunken);
+  border-radius: var(--radius-button);
+  padding: var(--space-5);
+}
+
+.tablePreviewTitle {
+  font: var(--meta-md);
+  font-weight: 600;
+  color: var(--text-body);
+  margin: 0;
+}
+
+.tableRows {
+  margin: 0;
+  padding-left: 1.25em;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  font: var(--meta-md);
+  color: var(--text-body);
+  overflow-wrap: anywhere;
+}
+
+.tableLine {
+  font: var(--meta-xs);
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* --- « Me rappeler de démarrer {mois} » (§19.9, A14 T6) ----------------- */
+.remind {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: calc(-1 * var(--space-2));
 }

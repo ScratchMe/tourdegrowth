@@ -4,7 +4,10 @@ import { Suspense } from "react";
 import { LocaleSwitcher } from "@/components/brand/LocaleSwitcher";
 import { SiteHeader } from "@/components/brand/SiteHeader";
 import { SpaceStrip } from "@/components/brand/SpaceStrip";
+import { SPACE_OPEN_AT_BUILD } from "@/components/brand/SpaceBand";
 import { SampleCta } from "./SampleCta";
+import { QUESTION_COUNT } from "@/lib/quiz/navigation";
+import { TourCta } from "./TourCta";
 import { WordmarkLink } from "@/components/brand/WordmarkLink";
 import { Button } from "@/components/core/Button";
 import { SiteFooter } from "@/components/brand/SiteFooter";
@@ -102,9 +105,13 @@ export default async function LandingPage({ params }: PageProps) {
             </p>
 
             <div className={styles.ctaRow} data-testid="landing-cta-row">
-              <Button size="lg" href="/quiz" hard data-testid="hero-cta">
-                {tc(t.ctaPrimary, locale)}
-              </Button>
+              <TourCta
+                label={tc(t.ctaPrimary, locale)}
+                resumeLabel={tc(t.ctaResume, locale)}
+                resumeLastLabel={tc(t.ctaResumeLast, locale)}
+                testId="hero-cta"
+                total={QUESTION_COUNT}
+              />
               {/* C24 (2026-09-30): follows the preview's tone — the roast sample in roast. */}
               <SampleCta label={tc(t.ctaSecondary, locale)} />
             </div>
@@ -123,6 +130,16 @@ export default async function LandingPage({ params }: PageProps) {
                 months: tc(UI_STRINGS.lastResult.retakeNudgeMonths, locale),
                 cta: tc(UI_STRINGS.lastResult.retakeNudgeCta, locale),
               }}
+              {...(SPACE_OPEN_AT_BUILD.engine
+                ? {
+                    engine: {
+                      line: tc(UI_STRINGS.lastResult.engine, locale),
+                      cta: tc(UI_STRINGS.lastResult.engineCta, locale),
+                      href: localePath(locale, "/aarrr-funnel-template"),
+                      locale,
+                    },
+                  }
+                : {})}
             />
           </div>
 
@@ -151,12 +168,17 @@ export default async function LandingPage({ params }: PageProps) {
                 straight: sampleVerdicts.neutral.headline,
                 roast: sampleVerdicts.roast.headline,
               }}
-              chips={SAMPLE_RESULT.pillars.map((p) => ({
-                label: tc(UI_STRINGS.pillars[p.pillar], locale),
-                score: p.score,
-                href: localePath(locale, `/glossary/${p.pillar}`),
-                weak: p.pillar === SAMPLE_RESULT.weakestPillar,
-              }))}
+              scoresLabel={tc(UI_STRINGS.result.stageScoresLabel, locale)}
+              stages={SAMPLE_RESULT.pillars.map((p) => {
+                const label = tc(UI_STRINGS.pillars[p.pillar], locale);
+                return {
+                  label,
+                  score: p.score,
+                  href: localePath(locale, `/glossary/${p.pillar}`),
+                  linkLabel: tc(UI_STRINGS.result.stageLinkLabelTemplate, locale).replace("{stage}", label),
+                  weak: p.pillar === SAMPLE_RESULT.weakestPillar,
+                };
+              })}
               moveLabel={tc(UI_STRINGS.result.nextMoveLabel, locale)}
               move={getSampleNextMove(locale)}
             />
@@ -182,6 +204,22 @@ export default async function LandingPage({ params }: PageProps) {
             </Link>
           </p>
         </aside>
+
+        {/* A15.15 (2026-10-01, decided by Antoine): on a phone the header's
+            « Start your Tour » is hidden (page.module.css), so a visitor who
+            scrolled down to here could only start by scrolling back up. The
+            same button, at the end, on a phone only — a wider screen keeps
+            the sticky header's own, and two primaries would be in view. */}
+        <div className={styles.closingCta}>
+          <TourCta
+            label={tc(t.ctaPrimary, locale)}
+            resumeLabel={tc(t.ctaResume, locale)}
+            resumeLastLabel={tc(t.ctaResumeLast, locale)}
+            testId="closing-cta"
+            fullWidth
+            total={QUESTION_COUNT}
+          />
+        </div>
       </main>
 
       <SiteFooter locale={locale} />

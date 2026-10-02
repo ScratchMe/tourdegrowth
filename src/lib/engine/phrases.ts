@@ -1,7 +1,7 @@
-import { CANDIDATE_IDS, DERIVED_SHAPES, PELOTON_METRICS, shapeOf } from "./catalog-shape";
-import { windowDaysOf } from "./cohort";
+import { ALL_DERIVED_SHAPES, CANDIDATE_IDS, PELOTON_METRICS, SLG_CANDIDATE_IDS, candidatesOf, motionOfMetric, shapeOf } from "./catalog-shape";
+import { periodRangeOf, windowDaysOf } from "./cohort";
 import { CHAIN_VERB } from "./findings";
-import { capitalise, fillTemplate, formatMonth, joinList, lowerFirst } from "./format";
+import { capitalise, fillTemplate, formatMonth, formatMonthRange, joinList, lowerFirst } from "./format";
 import { impactHeadline } from "./impact";
 import type { EngineStrings, ResolvedMetric } from "./strings";
 import type {
@@ -14,7 +14,10 @@ import type {
   ImpactLine,
   Interval,
   MetricId,
+  Motion,
+  PlgCandidateId,
   Position,
+  SlgDiagnosis,
   SourceRef,
   UnitInputId,
 } from "./types";
@@ -58,7 +61,20 @@ function nameOf(metrics: ResolvedMetric[], id: MetricId): string {
 }
 
 export function isCandidate(id: MetricId): id is CandidateId {
-  return (CANDIDATE_IDS as readonly string[]).includes(id);
+  return (CANDIDATE_IDS as readonly string[]).includes(id) || (SLG_CANDIDATE_IDS as readonly string[]).includes(id);
+}
+
+/** Either motion's diagnosis — the sentences below word both alike (§18.5.2). */
+export type AnyDiagnosis = Diagnosis<PlgCandidateId> | SlgDiagnosis;
+
+/** A candidate's position in its own motion's diagnosis; undefined for another motion's candidate. */
+export function positionIn(diagnosis: AnyDiagnosis, id: CandidateId): { position: Position; comparator?: Comparator; impact?: Impact } | undefined {
+  return (diagnosis.positions as Partial<Record<CandidateId, { position: Position; comparator?: Comparator; impact?: Impact }>>)[id];
+}
+
+/** The candidate priced on the customer base, which ranks only in money: churn, or the renewal. */
+function retentionOf(diagnosis: AnyDiagnosis): CandidateId {
+  return diagnosis.motion === "plg" ? "ret.logo-churn" : "slg.ret.renewal";
 }
 
 // --- Numbers and answers -----------------------------------------------------------
@@ -113,7 +129,7 @@ export function stagePhrase(id: MetricId, strings: Words, metrics: ResolvedMetri
 }
 
 /** The inputs of the computed figures: the only ids « il manque » / "missing:" ever names. */
-const UNIT_INPUTS: ReadonlySet<MetricId> = new Set(DERIVED_SHAPES.flatMap((s) => s.inputs));
+const UNIT_INPUTS: ReadonlySet<MetricId> = new Set(ALL_DERIVED_SHAPES.flatMap((s) => s.inputs));
 
 /** « la marge brute », « le CAC et l'ARPA mensuel » — what « il manque » is followed by. */
 export function unitInputsPhrase(ids: readonly MetricId[], strings: Words, metrics: ResolvedMetric[]): string {
@@ -149,15 +165,18 @@ export function catalogueValues(
   strings: Words,
   metrics: ResolvedMetric[],
   ctx: EngineCalcContext,
-): Record<"month" | "cohort" | "n" | "event" | "variant", string> {
+): Record<CatalogueSlot, string> {
   const snapshot = currentSnapshot(state);
   const shape = shapeOf(id);
   const entry = entryOf(snapshot, id);
   const variantId = entry?.variant ?? shape.variants?.[0];
   const variant = metrics.find((m) => m.id === id)?.variants?.find((v) => v.id === variantId)?.label ?? "";
+  // The months the number covers: three for sales-assisted (C25 Q2), « de mai à juillet 2026 ».
+  const range = periodRangeOf(shape, entry, snapshot, state.setup, ctx.today) ?? { from: snapshot.referenceMonth, to: snapshot.referenceMonth };
   return {
     month: formatMonth(snapshot.referenceMonth, ctx.locale),
     cohort: formatMonth(entry?.cohortMonth ?? snapshot.cohortMonth, ctx.locale),
+    period: formatMonthRange(range, ctx.locale, strings.units, "from"),
     n: String(windowDaysOf(shape, state.setup)),
     event: eventPhrase(state, strings),
     // A label (« Média seul ») sits mid-sentence here: « (média seul) ».
@@ -165,10 +184,13 @@ export function catalogueValues(
   };
 }
 
-/** The same five, for the static catalogue page: bracketed slots, never a made-up month. */
-export function staticCatalogueValues(strings: Words): Record<"month" | "cohort" | "n" | "event" | "variant", string> {
+/** The placeholders every catalogue string may carry — `{period}` since the sales-assisted catalogue (A7.3.c S2). */
+export type CatalogueSlot = "month" | "cohort" | "period" | "n" | "event" | "variant";
+
+/** The same six, for the static catalogue page: bracketed slots, never a made-up month. */
+export function staticCatalogueValues(strings: Words): Record<CatalogueSlot, string> {
   const v = strings.visual;
-  return { event: v.staticEvent, n: v.staticWindow, cohort: v.staticCohort, month: v.staticMonth, variant: v.staticVariant };
+  return { event: v.staticEvent, n: v.staticWindow, cohort: v.staticCohort, month: v.staticMonth, period: v.staticPeriod, variant: v.staticVariant };
 }
 
 /** A source after « selon » / "according to": a tool's name, a role, or « une autre source » — never the label « Autre ». */
@@ -249,22 +271,22 @@ export function blindSentence(ids: readonly MetricId[], strings: Words, metrics:
 }
 
 /** `not-enough` with a stage behind: which one, and where it sits — the title's and the board's values alike. */
-export function notEnoughBelowValues(diagnosis: Diagnosis, strings: Words, metrics: ResolvedMetric[]): { stage: string; side: string } | null {
+export function notEnoughBelowValues(diagnosis: AnyDiagnosis, strings: Words, metrics: ResolvedMetric[]): { stage: string; side: string } | null {
   if (diagnosis.state !== "not-enough") return null;
-  const id = CANDIDATE_IDS.find((c) => diagnosis.positions[c].position === "below");
+  const id = candidatesOf(diagnosis.motion).find((c) => positionIn(diagnosis, c)?.position === "below");
   if (!id) return null;
-  const side = sideText("below", diagnosis.positions[id].comparator, strings);
+  const side = sideText("below", positionIn(diagnosis, id)?.comparator, strings);
   return side ? { stage: capitalise(subjectOf(id, strings, metrics)), side } : null;
 }
 
-export function notEnoughBelowSentence(diagnosis: Diagnosis, strings: Words, metrics: ResolvedMetric[]): string | null {
+export function notEnoughBelowSentence(diagnosis: AnyDiagnosis, strings: Words, metrics: ResolvedMetric[]): string | null {
   const values = notEnoughBelowValues(diagnosis, strings, metrics);
   return values ? fillTemplate(strings.diagnosis.notEnoughBelow, values) : null;
 }
 
-/** Whether churn is behind but cannot be ranked: the flows have no amount to set its money next to. */
-export function churnWithoutCommonAmount(diagnosis: Diagnosis): boolean {
-  return diagnosis.basis === "relative-gap" && diagnosis.positions["ret.logo-churn"].position === "below";
+/** Whether churn (the renewal, in sales-assisted) is behind but cannot be ranked: the flows have no amount to set its money next to. */
+export function churnWithoutCommonAmount(diagnosis: AnyDiagnosis): boolean {
+  return diagnosis.basis === "relative-gap" && positionIn(diagnosis, retentionOf(diagnosis))?.position === "below";
 }
 
 /**
@@ -272,8 +294,9 @@ export function churnWithoutCommonAmount(diagnosis: Diagnosis): boolean {
  * names after the colon, as labels. Churn is left out when `noArpa` already
  * says why it stands apart: one reason, said once.
  */
-export function unpricedSentence(diagnosis: Diagnosis, strings: Words, metrics: ResolvedMetric[]): string | null {
-  const ids = diagnosis.belowUnpriced.filter((id) => !(id === "ret.logo-churn" && churnWithoutCommonAmount(diagnosis)));
+export function unpricedSentence(diagnosis: AnyDiagnosis, strings: Words, metrics: ResolvedMetric[]): string | null {
+  const retention = retentionOf(diagnosis);
+  const ids = (diagnosis.belowUnpriced as CandidateId[]).filter((id) => !(id === retention && churnWithoutCommonAmount(diagnosis)));
   if (ids.length === 0) return null;
   return fillTemplate(strings.diagnosis.unpriced, { stages: joinList(ids.map((id) => nameOf(metrics, id)), strings.grammar) });
 }
@@ -287,10 +310,25 @@ export function unpricedSentence(diagnosis: Diagnosis, strings: Words, metrics: 
  */
 export function worthOf(impact: Impact, strings: Words, locale: Locale): string | null {
   const w = strings.worth;
-  if (impact.lines.some((l) => l.key === "less-than-one")) return w.lessThanOne;
+  // Sales-assisted counts a quarter (§18.5.3); its money is said a month, like self-serve's.
+  const slg = motionOfMetric(impact.metric) === "slg";
+  const renewal = impact.metric === "slg.ret.renewal";
+  if (impact.lines.some((l) => l.key === "less-than-one")) return slg ? (renewal ? w.lessThanOneKept : w.lessThanOneQuarter) : w.lessThanOne;
   const head = impactHeadline(impact);
   if (head.amount) return fillTemplate(impact.kind === "retained-mrr" ? w.retainedMrr : w.newMrr, { amount: head.amount });
   if (!head.n) return null;
+  if (slg) {
+    if (impact.kind === "per-hundred") {
+      // Named: what is counted, and on which 100 — « 8 signatures de plus pour 100 opportunités conclues ».
+      // The lead and the referred share both add opportunities: « 14,3 opportunités de plus pour 100 opportunités créées ».
+      const opportunities = impact.metric === "slg.acq.lead-to-opp" || impact.metric === "slg.ref.referred-share";
+      const key = renewal ? "perHundredRenewal" : opportunities ? "perHundredLead" : "perHundredWin";
+      const base = strings.findings.base[impact.perHundredBase ?? "leads"];
+      return fillTemplate(w[numbered(key, head.count, locale)], { n: head.n, base });
+    }
+    const key = renewal ? "keptQuarter" : "customersQuarter";
+    return fillTemplate(w[numbered(key, head.count, locale)], { n: head.n });
+  }
   const key = impact.kind === "per-hundred" ? "perHundred" : impact.metric === "ret.logo-churn" ? "kept" : "customers";
   return fillTemplate(w[numbered(key, head.count, locale)], { n: head.n });
 }
@@ -321,13 +359,60 @@ export function chainTemplate(
     case "if":
       return { label: words.if, template: words.ifFlow };
     case "then":
-      return { label: words.then, template: churn ? pick(numbered("thenChurn", line.count, locale)) : words.thenFlow };
+      if (churn) return { label: words.then, template: pick(numbered("thenChurn", line.count, locale)) };
+      // The referred come on top of the others (§19.3.2): « 42 × (100 – 6)/(100 – 10) ».
+      return { label: words.then, template: impact.metric === "ref.referred-share" ? words.thenReferral : words.thenFlow };
     case "times":
       return { label: words.times, template: churn ? words.timesChurn : words.timesFlow };
     case "annual":
       return { label: null, template: words.annual };
     case "less-than-one":
       return { label: null, template: words.lessThanOne };
+    case "per-month":
+      throw new Error("A self-serve chain has no per-month line: it counts a month already");
+  }
+}
+
+/**
+ * The same for a sales-assisted chain (§18.5.3): « Aujourd'hui · 24 % de
+ * closing → 18 nouveaux clients sur 3 mois », « Alors · 18 × 32/24 = 24 (+6)
+ * sur 3 mois », « × ACV ÷ 12 · 6 × 2 000 € = 12 000 € de MRR nouveau par
+ * trimestre », « soit ~4 000 € par mois ». `values` adds what the line's
+ * template needs beyond its numbers — the rate's `{phrase}`.
+ */
+export function slgChainTemplate(
+  line: ImpactLine,
+  impact: Pick<Impact, "metric" | "kind" | "perHundredBase">,
+  strings: Words,
+  locale: Locale,
+  term: "annual" | "monthly" | null,
+): { label: string | null; template: string; values: Record<string, string> } {
+  const words = strings.whatIf;
+  const c = strings.slgChain;
+  const renewal = impact.metric === "slg.ret.renewal";
+  const perHundred = impact.kind === "per-hundred";
+  const referral = impact.metric === "slg.ref.referred-share";
+  const phrase = impact.metric in c.phrase ? c.phrase[impact.metric as keyof typeof c.phrase] : "";
+  const base = strings.findings.base[impact.perHundredBase ?? "leads"];
+  const plain = (label: string | null, template: string) => ({ label, template, values: {} });
+  switch (line.key) {
+    case "today":
+      if (perHundred) return { label: words.today, template: c.todayPerHundred, values: { base } };
+      if (renewal) return plain(words.today, c[numbered("todayRenewal", line.count, locale)]);
+      return { label: words.today, template: c[numbered("todayFlow", line.count, locale)], values: { phrase } };
+    case "if":
+      return plain(words.if, words.ifFlow);
+    case "then":
+      if (perHundred) return { label: words.then, template: referral ? c.thenReferralPerHundred : c.thenPerHundred, values: { base } };
+      return plain(words.then, renewal ? c[numbered("thenRenewal", line.count, locale)] : referral ? c.thenReferral : c.thenFlow);
+    case "times":
+      return plain(renewal ? c.timesArpa : c.timesAcv, renewal ? c.timesRenewal : c.timesFlow);
+    case "per-month":
+      return plain(null, c.perMonth);
+    case "annual":
+      return plain(null, term === "monthly" ? c.annualMonthly : c.annual);
+    case "less-than-one":
+      return plain(null, renewal ? c.lessThanOneKept : c.lessThanOne);
   }
 }
 
@@ -344,4 +429,25 @@ export function fillSegments(template: string, values: Record<string, string>): 
     .filter((segment) => [...segment.matchAll(/\{(\w+)\}/g)].every(([, key]) => (values[key!] ?? "").trim() !== ""))
     .map((segment) => fillTemplate(segment, values))
     .join(" · ");
+}
+
+/** Which hybrid-only trap a self-serve sheet carries (C25 Q3, §18.4.6), by the copy's `sheet.hybridTrap` keys. */
+const HYBRID_TRAPS: Partial<Record<MetricId, keyof Words["sheet"]["hybridTrap"]>> = {
+  // An account moved to sales-assisted is neither lost, downgraded nor expanded: it leaves self-serve.
+  "ret.logo-churn": "leaves",
+  "rev.contraction": "leaves",
+  "rev.expansion": "leaves",
+  // An account signed by a salesperson counts in sales-assisted, even born in self-serve (S8).
+  "rev.paid-conversion": "signedBySales",
+  "rev.arpa": "signedBySales",
+};
+
+/**
+ * The extra trap line a self-serve sheet shows in the hybrid, and ONLY in
+ * the hybrid (A7.3.c S2): with self-serve alone, the company's accounts are
+ * all self-serve and these lines would warn about nothing. null otherwise.
+ */
+export function hybridTrapOf(id: MetricId, motions: Readonly<Record<Motion, boolean>>): keyof Words["sheet"]["hybridTrap"] | null {
+  if (!(motions.plg && motions.slg)) return null;
+  return HYBRID_TRAPS[id] ?? null;
 }

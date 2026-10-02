@@ -104,21 +104,23 @@ export const Invalid = () => (
 );
 
 /**
- * The setup card's model (`_engine/Setup.tsx`), `md` — the one Choices at that
- * size. The self-serve model is the only live one; the three others are shown,
- * not hidden, so a sales-led team learns why the numbers below won't fit it
- * yet: dashed, their reason (`disabledNote`) at full contrast, never faded.
+ * The setup card's type of company (`_engine/Setup.tsx`, since A7.3.c), `md`
+ * — the one Choices at that size. B2B SaaS is the only type open; the two
+ * others are shown, not hidden, so a consumer app learns why the numbers
+ * below won't fit it yet: dashed, their reason (`disabledNote`) at full
+ * contrast, never faded. « Later », never « Coming soon » (C25 Q16). How the
+ * company sells — self-serve, sales-assisted, or both — is no longer a
+ * choice here: it is two checkboxes under this list (Checkbox, `LastMotion`).
  */
 export const DisabledWithAReason = () => (
   <div style={{ maxWidth: 496 }}>
     <Live
-      initial="selfserve"
-      legend="Your model"
+      initial="b2b-saas"
+      legend="Your type of company"
       options={[
-        { value: "selfserve", label: "SaaS or web product, self-serve (trial or freemium)" },
-        { value: "sales-led", label: "B2B with a sales team", disabled: true, disabledNote: "Coming soon — their funnel has a different shape." },
-        { value: "consumer-app", label: "Consumer app", disabled: true, disabledNote: "Coming soon — their funnel has a different shape." },
-        { value: "marketplace", label: "Marketplace", disabled: true, disabledNote: "Coming soon — their funnel has a different shape." },
+        { value: "b2b-saas", label: "B2B SaaS" },
+        { value: "consumer-app", label: "Consumer app", disabled: true, disabledNote: "Later: their funnel has a different shape." },
+        { value: "marketplace", label: "Marketplace", disabled: true, disabledNote: "Later: their funnel has a different shape." },
       ]}
     />
   </div>

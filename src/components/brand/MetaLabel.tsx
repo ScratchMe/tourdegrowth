@@ -8,6 +8,13 @@ export interface MetaLabelProps extends HTMLAttributes<HTMLDivElement> {
   uppercase?: boolean;
   /** Wider tracking (0.12em) for section eyebrows like "Strengths". */
   wide?: boolean;
+  /**
+   * The element: a `div` by default; `h2` / `h3` where the eyebrow IS the
+   * section's title, so a screen reader can go from section to section — the
+   * result's « Strengths » and « Where you're losing time » were `div`s, and
+   * the page's only heading a hidden `h1` (A15.13). Looks the same either way.
+   */
+  as?: "div" | "h2" | "h3";
   children?: ReactNode;
 }
 
@@ -22,6 +29,7 @@ export function MetaLabel({
   tone = "muted",
   uppercase = true,
   wide = false,
+  as: Element = "div",
   className,
   children,
   ...rest
@@ -38,8 +46,8 @@ export function MetaLabel({
     .join(" ");
 
   return (
-    <div className={classes} {...rest}>
+    <Element className={classes} {...rest}>
       {children}
-    </div>
+    </Element>
   );
 }

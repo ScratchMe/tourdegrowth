@@ -6,6 +6,7 @@ import { HubMountain } from "@/components/game/HubMountain";
 import { GAME_HUB } from "@/content/game/hub";
 import { GAME_META } from "@/content/game/meta";
 import { GAME_LEVELS_BY_PILLAR } from "@/lib/game/levels";
+import type { LevelSlug } from "@/lib/game/types";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { isLocale, type Locale } from "@/lib/i18n/locale";
 import { localePath } from "@/lib/i18n/routes";
@@ -40,9 +41,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
  */
 export default async function GameHubPage({ params }: PageProps) {
   const locale = (await params).locale as Locale;
-  const endingLabels = Object.fromEntries(
-    Object.entries(GAME_HUB.endings).map(([id, label]) => [id, tc(label, locale)]),
-  ) as Record<keyof typeof GAME_HUB.endings, string>;
+  // Each level's ending labels: the shared ones, with the level's own words
+  // where it names an ending differently (a settlement at Pédalix, never a fine).
+  const endingLabelsFor = (slug: LevelSlug) =>
+    Object.fromEntries(
+      Object.entries({ ...GAME_HUB.endings, ...GAME_HUB.endingsByLevel[slug] }).map(
+        ([id, label]) => [id, tc(label, locale)],
+      ),
+    ) as Record<keyof typeof GAME_HUB.endings, string>;
 
   const playable = PILLARS.flatMap((pillar) => {
     const level = GAME_LEVELS_BY_PILLAR[pillar];
@@ -115,7 +121,7 @@ export default async function GameHubPage({ params }: PageProps) {
                         slug={level.slug}
                         locale={locale}
                         template={tc(GAME_HUB.lastEnding, locale)}
-                        endingLabels={endingLabels}
+                        endingLabels={endingLabelsFor(level.slug)}
                         className={own.progress}
                       />
                       <PlayLevelLink href={`${localePath(locale, `/game/${level.slug}`)}?from=hub`} slug={level.slug}>

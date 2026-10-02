@@ -30,9 +30,10 @@ export const GAME_META = {
       "Five stages of the Tour, five companies, one CEO who wants the number. A free game to spot dark patterns before you ever ship one.",
     ),
     breadcrumb: t("Le jeu", "The game"),
+    // TODO: à relire — retouché (2026-10-01, A12.f) : « dont deux sont ouvertes ».
     shareImageAlt: t(
-      "Le côté obscur de Tour de Growth : les cinq étapes du Tour, dont une seule est ouverte.",
-      "The dark side of Tour de Growth: the five stages of the Tour, one of them open.",
+      "Le côté obscur de Tour de Growth : les cinq étapes du Tour, dont deux sont ouvertes.",
+      "The dark side of Tour de Growth: the five stages of the Tour, two of them open.",
     ),
   },
   retention: {
@@ -45,6 +46,19 @@ export const GAME_META = {
     shareImageAlt: t(
       "Une année chez Flixo : résiliations à 6,0 % par mois, la confiance et le radar DGCCRF absents du dashboard.",
       "A year at Flixo: churn at 6.0% a month, subscriber trust and the regulator's radar missing from the dashboard.",
+    ),
+  },
+  // TODO: à relire — nouveau (2026-10-01, CHANTIERS.md A12.c) : le niveau 2, tout le bloc.
+  acquisition: {
+    title: t("Pédalix : le jeu de l'acquisition — Tour de Growth", "Pédalix: the acquisition game — Tour de Growth"),
+    description: t(
+      "Joue une année comme PM growth d'une boutique de vélos en ligne : un DG qui veut 3 000 nouveaux clients par mois, et huit astuces à reconnaître.",
+      "Play a year as the growth PM of an online bike shop: a CEO who wants 3,000 new customers a month, and eight tricks to learn to spot.",
+    ),
+    breadcrumb: t("Une année chez Pédalix", "A year at Pédalix"),
+    shareImageAlt: t(
+      "Une année chez Pédalix : 2 000 nouveaux clients par mois, la confiance et le radar DGCCRF absents du dashboard.",
+      "A year at Pédalix: 2,000 new customers a month, customer trust and the regulator's radar missing from the dashboard.",
     ),
   },
 } as const satisfies Record<string, Record<string, Translatable>>;
@@ -84,4 +98,22 @@ export const RETENTION_INTRO = {
   // Plan §1.4 (23): the context help is ordinary links to the glossary, not a
   // popover — and these two pages are the ones whose readers already care.
   glossaryLead: t("Les deux mots du jeu, s'ils te manquent :", "The game's two words, if you need them:"),
+} as const;
+
+/**
+ * Level 2's intro (GAME-BRIEF §17). The three steps and the glossary lead
+ * say how any year plays, so they are level 1's own objects.
+ *
+ * TODO: à relire — nouveau (2026-10-01, CHANTIERS.md A12.c) : le bandeau, le titre et le chapeau.
+ */
+export const ACQUISITION_INTRO = {
+  eyebrow: t("Le côté obscur · niveau 2", "The dark side · level 2"),
+  title: t("Une année chez Pédalix", "A year at Pédalix"),
+  lead: t(
+    "Ton DG a quitté Flixo, une appli de streaming, pour diriger Pédalix, une boutique en ligne de vélos, et il t'a emmené avec lui comme PM growth. 2 000 nouveaux clients par mois, et le board en veut 3 000 d'ici décembre. Chaque trimestre, le DG t'appelle en visio, puis tu as droit à deux actions, nommées comme on les nomme en réunion. Tu ne sauras ce qu'elles valent qu'une fois le trimestre passé. Le DG, lui, sait déjà ce qu'il veut.",
+    "Your CEO has left Flixo, a streaming app, to run Pédalix, an online bike shop, and he brought you along as growth PM. 2,000 new customers a month, and the board wants 3,000 by December. Every quarter the CEO calls you on video, then you get two actions, named the way they are named in meetings. You will only learn what they are worth once the quarter is over. The CEO already knows what he wants.",
+  ),
+  stepsTitle: RETENTION_INTRO.stepsTitle,
+  steps: RETENTION_INTRO.steps,
+  glossaryLead: RETENTION_INTRO.glossaryLead,
 } as const;

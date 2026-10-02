@@ -1,5 +1,6 @@
 import { ImageResponse } from "next/og";
 import type { OgFonts } from "@/lib/og/fonts";
+import { OgPicto } from "@/lib/og/picto";
 import type { ShareImageModel, ShareImageStrings } from "@/lib/og/share-image";
 import {
   OG_INK as INK,
@@ -41,14 +42,6 @@ const PROFILE_H = 190;
  * and the road's line, with the labels under it.
  */
 const PROFILE_BOX = { width: PROFILE_W, height: PROFILE_H, top: 50, base: 162, floor: 3 };
-
-/** The Tour's pictogram, the band's (`brand/SpaceBand`): a flat stage and its finish flag. */
-const TOUR_PICTO = [
-  { d: "M1 20.5H33", stroke: true, width: 2.2 },
-  { d: "M1 19V15.2C5 14.2 8 15.6 12 14.8S20 13.9 24 14.6 30 14.2 33 14.4V19Z", stroke: false, width: 0 },
-  { d: "M28.6 14V4.2", stroke: true, width: 1.8 },
-  { d: "M28.6 4.4H33V8.6H28.6Z", stroke: false, width: 0 },
-];
 
 export function renderResultShareImage(
   model: ShareImageModel,
@@ -104,15 +97,8 @@ export function renderResultShareImage(
                 borderRadius: 999,
               }}
             >
-              <svg width={30} height={19} viewBox="0 0 34 22" style={{ marginRight: 10 }}>
-                {TOUR_PICTO.map((part) =>
-                  part.stroke ? (
-                    <path key={part.d} d={part.d} stroke={RED} strokeWidth={part.width} fill="none" />
-                  ) : (
-                    <path key={part.d} d={part.d} fill={RED} />
-                  ),
-                )}
-              </svg>
+              {/* The Tour's pictogram, the band's own (`space-pictos.ts`): a flat stage and its finish flag. */}
+              <OgPicto space="tour" color={RED} width={30} height={19} style={{ marginRight: 10 }} />
               {strings.space}
             </div>
           </div>

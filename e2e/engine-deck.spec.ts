@@ -6,6 +6,7 @@ import { METRIC_SHAPES } from "../src/lib/engine/catalog-shape";
 import { exampleState, measured, missing, ratio, tourResult, withEntry, withTarget } from "../src/lib/engine/__tests__/fixtures";
 import { ENGINE_COPY } from "../src/content/engine-copy";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, readEachOnScreen, SKIP_ADMIN_REASON, test } from "./helpers";
+import { engineSeed } from "./engine-helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
 // owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
@@ -45,24 +46,24 @@ const LONG_DEFINITION = {
 /** Every answer given, so `tdg.results.v1` accepts it and the mirror has a verdict per bridge. */
 const TOUR = tourResult(Object.fromEntries(QUESTIONS.map((q, i) => [q.id, (i % 3) as 0 | 1 | 2])));
 
-function exampleStore() {
+function namedExample() {
   const state = exampleState();
   state.setup.companyLabel = COMPANY_CANARY;
   state.deck.showCompany = true;
   state.tourLink = { resultId: TOUR.id, linkedAt: "2026-09-24T09:00:00.000Z" };
-  return { schemaVersion: 1, state };
+  return state;
 }
 
 /** Seeds once per test: a reload must keep what the test changed, not re-seed over it. */
 async function seed(page: Page) {
   await page.addInitScript(
-    ([store, tour]) => {
+    ([items, tour]) => {
       if (sessionStorage.getItem("e2e-engine-seeded")) return;
-      localStorage.setItem("tdg.engine.v1", JSON.stringify(store));
+      for (const [key, value] of items) localStorage.setItem(key, value);
       localStorage.setItem("tdg.results.v1", JSON.stringify([tour]));
       sessionStorage.setItem("e2e-engine-seeded", "1");
     },
-    [exampleStore(), TOUR] as const,
+    [engineSeed(namedExample()), TOUR] as const,
   );
 }
 
@@ -268,14 +269,14 @@ for (const locale of ["fr", "en"] as const) {
      */
     test("the appendix: every definition at its limit adds pages that still fit, and each one exports", async ({ page }) => {
       // Every number of the catalogue gets the definition, the ones nobody found included.
-      const store = exampleStore();
-      const metrics = store.state.snapshots[store.state.snapshots.length - 1]!.metrics;
+      const state = namedExample();
+      const metrics = state.snapshots[state.snapshots.length - 1]!.metrics;
       for (const { id } of METRIC_SHAPES) metrics[id] = { ...(metrics[id] ?? missing("not-tracked", "sprint")), definitionNote: LONG_DEFINITION[locale] };
-      await page.addInitScript((seeded) => {
+      await page.addInitScript((items) => {
         if (sessionStorage.getItem("e2e-engine-seeded")) return;
-        localStorage.setItem("tdg.engine.v1", JSON.stringify(seeded));
+        for (const [key, value] of items) localStorage.setItem(key, value);
         sessionStorage.setItem("e2e-engine-seeded", "1");
-      }, store);
+      }, engineSeed(state));
       await page.goto(`/${locale}/aarrr-funnel-template`);
       await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
       await page.getByTestId("engine-open-deck").click();
@@ -502,18 +503,22 @@ for (const locale of ["fr", "en"] as const) {
     });
 
     /**
-     * C9 (ENGINE.md §9.3): day-30 retention, which the model can't price, is
-     * the only stage behind its target. The leak slide exists — it used to be
-     * dropped without a word — names the stage, and draws no calculation
-     * card, and no amount, at both widths.
+     * C9 (ENGINE.md §9.3): a stage the model can't price is the only one
+     * behind its target — since §19.3 (A14 T3), the referred share past a
+     * 50 % target (day-30 retention, the v1 case, is priced now). The leak
+     * slide exists — it used to be dropped without a word — names the stage,
+     * draws no calculation card and no amount, and says the ceiling, at both
+     * widths.
      */
     for (const width of [1280, 390]) {
       test(`an unpriced stage named alone has its leak slide, without an amount or a calculation, at ${width}px`, async ({ page }) => {
         await page.setViewportSize({ width, height: 900 });
         let state = withEntry(exampleState(), "act.rate", measured(ratio(200, 800)));
         state = withEntry(state, "ret.logo-churn", measured(ratio(6, 400)));
-        state = withTarget(withEntry(state, "ret.d30", measured(ratio(40, 800))), "ret.d30", 20);
-        await page.addInitScript((store) => localStorage.setItem("tdg.engine.v1", JSON.stringify(store)), { schemaVersion: 1, state });
+        state = withTarget(state, "ref.referred-share", 60);
+        await page.addInitScript((items) => {
+          for (const [key, value] of items) localStorage.setItem(key, value);
+        }, engineSeed(state));
         await page.goto(`/${locale}/aarrr-funnel-template`);
         await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
         const opener = page.getByTestId("engine-open-deck");
@@ -521,11 +526,11 @@ for (const locale of ["fr", "en"] as const) {
         const leak = page.locator('[data-slide="leak"]');
         await expect(leak).toHaveCount(1);
         const title = leak.locator("h3");
-        await expect(title).toContainText(locale === "fr" ? "La rétention à J30" : "Day-30 retention");
+        await expect(title).toContainText(locale === "fr" ? "La part des inscrits recommandés" : "The referred share of sign-ups");
         await expect(title).not.toContainText(/€|MRR/);
         await expect(leak.getByText(ENGINE_COPY.slide.calcTitle[locale], { exact: true })).toHaveCount(0);
         await expect(leak.getByText(ENGINE_COPY.slide.leakAside[locale], { exact: true })).toHaveCount(1);
-        await expect(leak).toContainText(ENGINE_COPY.slide.leakFooterUnpriced[locale]);
+        await expect(leak).toContainText(ENGINE_COPY.slide.leakFooterCeiling[locale].split("{max}")[0]!);
         const [scroll, client] = await page.evaluate(() => [document.documentElement.scrollWidth, document.documentElement.clientWidth]);
         expect(scroll).toBe(client);
       });

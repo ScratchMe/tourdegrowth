@@ -1,4 +1,4 @@
-import type { EngineState, MetricEntry, MetricId, MetricValue, SourceRef, ToolId } from "./types";
+import { ENGINE_SCHEMA_VERSION, type EngineState, type MetricEntry, type MetricId, type MetricValue, type Motion, type SharedCount, type SourceRef, type ToolId } from "./types";
 
 /**
  * The engine spec's §6.0 example — a fictional self-serve SaaS, reference
@@ -33,6 +33,10 @@ export interface ExampleWords {
   channel: string;
   /** Printed on the slides when given. */
   company?: string;
+  /** The hybrid's words (§18.9.1): what « live » means, the main reason for non-renewal, the PQL threshold. Only read when sales-assisted is shown. */
+  liveEvent?: string;
+  lossCause?: string;
+  pqlThreshold?: string;
 }
 
 export function exampleMetrics(words: ExampleWords): Partial<Record<MetricId, MetricEntry>> {
@@ -68,18 +72,70 @@ export function exampleMetrics(words: ExampleWords): Partial<Record<MetricId, Me
  */
 export const EXAMPLE_TARGETS: Partial<Record<MetricId, number>> = { "act.rate": 20, "ret.logo-churn": 2 };
 
-/** A fresh copy each call: callers may change it (the example's own slide choices live in memory only). */
-export function exampleEngine(words: ExampleWords): EngineState {
+/**
+ * The engine spec's §18.9 example — the same fictional company, now also
+ * selling through a sales team (§18.9.1). Periods: flows June to August, the
+ * leads of May to July (July is mature at 30 days), the new customers of
+ * March to May (May is mature at 90 days). Fictional, targets included.
+ */
+export function exampleSlgMetrics(words: ExampleWords): Partial<Record<MetricId, MetricEntry>> {
+  return {
+    "slg.acq.lead-to-opp": measured(ratio(72, 480), tool("hubspot"), { variant: "mql", cohortMonth: "2026-07" }),
+    "slg.acq.cac": measured(ratio(342_000, 18), { kind: "person", role: "finance" }, { variant: "fully-loaded" }),
+    "slg.acq.cycle": measured({ kind: "duration", value: 64, unit: "days", statistic: "median" }, tool("hubspot")),
+    "slg.act.live-event": measured({ kind: "text", text: words.liveEvent ?? "" }, { kind: "other" }),
+    "slg.act.go-live": { status: "missing", missing: { cause: "not-tracked", repair: "sprint", ownerRole: "customer-success" }, updatedAt: at },
+    "slg.ret.renewal": measured(ratio(22, 25), tool("hubspot"), { variant: "annual" }),
+    "slg.ret.nrr": { status: "estimated", estimate: { low: 104, high: 108, basis: "old-number" }, updatedAt: at },
+    "slg.ret.loss-cause": measured({ kind: "text", text: words.lossCause ?? "" }, { kind: "other" }, { evidence: "hunch" }),
+    "slg.ref.referred-share": measured(ratio(26, 130), tool("hubspot"), { variant: "customers-and-partners" }),
+    "slg.ref.referenceable": { status: "requested", request: { role: "marketing", requestedAt: "2026-09-21T09:00:00.000Z" }, updatedAt: at },
+    "slg.rev.win-rate": measured(ratio(18, 75), tool("hubspot")),
+    "slg.rev.acv": measured(ratio(432_000, 18), tool("hubspot")),
+    "slg.rev.arpa": measured(ratio(180_000, 100), tool("stripe")),
+    "slg.rev.gross-margin": { status: "missing", missing: { cause: "no-access", repair: "meeting", ownerRole: "finance" }, updatedAt: at },
+  };
+}
+
+/** The link, the hybrid's only: 31 of the 130 opportunities came from self-serve accounts (§18.9.1). */
+export function exampleLinkMetrics(words: ExampleWords): Partial<Record<MetricId, MetricEntry>> {
+  return {
+    "link.pql-handoff": measured(ratio(31, 130), tool("hubspot"), words.pqlThreshold ? { definitionNote: words.pqlThreshold } : {}),
+  };
+}
+
+/** The fictional sales team's targets (§18.9.1): lead → opportunity 18 %, win rate 32 %, renewal 92 %. */
+export const EXAMPLE_SLG_TARGETS: Partial<Record<MetricId, number>> = { "slg.acq.lead-to-opp": 18, "slg.rev.win-rate": 32, "slg.ret.renewal": 92 };
+
+/** The three sales-assisted counts, typed once (S6). */
+export const EXAMPLE_SLG_BASE: Partial<Record<SharedCount, number>> = { slgOppsCreated: 130, slgDealsWon: 18, slgCustomers: 100 };
+
+/**
+ * A fresh copy each call: callers may change it (the example's own slide
+ * choices live in memory only). `motions` shows the example in the motions
+ * ticked at setup (§18.9): self-serve alone is exactly §6.0, untouched.
+ */
+export function exampleEngine(words: ExampleWords, motions: Record<Motion, boolean> = { plg: true, slg: false }): EngineState {
+  const hybrid = motions.plg && motions.slg;
+  const metrics = {
+    ...(motions.plg ? exampleMetrics(words) : {}),
+    ...(motions.slg ? exampleSlgMetrics(words) : {}),
+    ...(hybrid ? exampleLinkMetrics(words) : {}),
+  };
+  const targets = { ...(motions.plg ? EXAMPLE_TARGETS : {}), ...(motions.slg ? EXAMPLE_SLG_TARGETS : {}) };
   return structuredClone({
-    schemaVersion: 1,
+    schemaVersion: ENGINE_SCHEMA_VERSION,
     id: "00000000-0000-4000-8000-000000000060",
     createdAt: "2026-09-24T08:00:00.000Z",
     updatedAt: "2026-09-24T09:00:00.000Z",
     setup: {
-      profile: "selfserve",
+      type: "b2b-saas",
+      motions: { ...motions },
       currency: "EUR",
       activationWindowDays: 7,
       paidWindowDays: 30,
+      qualificationWindowDays: 30,
+      goLiveWindowDays: 90,
       ...(words.company ? { companyLabel: words.company } : {}),
     },
     snapshots: [
@@ -88,8 +144,9 @@ export function exampleEngine(words: ExampleWords): EngineState {
         referenceMonth: "2026-08",
         cohortMonth: "2026-07",
         createdAt: "2026-09-24T08:00:00.000Z",
-        metrics: exampleMetrics(words),
-        targets: EXAMPLE_TARGETS,
+        metrics,
+        targets,
+        ...(motions.slg ? { base: { ...EXAMPLE_SLG_BASE } } : {}),
       },
     ],
     tourLink: null,

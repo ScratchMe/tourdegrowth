@@ -1,7 +1,7 @@
 import type { Page } from "@playwright/test";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { getSubmissionById } from "@/lib/submissions/repository";
-import { expect, seedOwnedResult, test } from "./helpers";
+import { expect, seedOwnedResult, test, trackedEvents } from "./helpers";
 import { EMULATOR_HOST, REAL_DEEP_DIVE, REAL_RESULTS, SENTINEL, SKIP_EMULATOR_REASON } from "./real-results";
 
 /**
@@ -16,7 +16,7 @@ import { EMULATOR_HOST, REAL_DEEP_DIVE, REAL_RESULTS, SENTINEL, SKIP_EMULATOR_RE
 test.skip(!EMULATOR_HOST, SKIP_EMULATOR_REASON);
 
 const GAME_OPEN = process.env.GAME_ENABLED === "true";
-const { clear, shared, level, deep } = REAL_RESULTS;
+const { clear, shared, level, deep, twoLevels } = REAL_RESULTS;
 
 /** Every key of a stored document, nested ones included — the answers map's question ids among them. */
 function keysOf(value: unknown, into = new Set<string>()): Set<string> {
@@ -139,6 +139,31 @@ test.describe("a visitor's view of a clear bottleneck", () => {
     await expect(entry).toBeVisible();
     await expect(page.getByTestId("game-entry-cta")).toHaveAttribute("href", /^\/en\/game\/retention(\?|$)/);
   });
+
+  test("offers level 2 on an acquisition bottleneck, as the Deep dive door (A12.f)", async ({ page }) => {
+    test.skip(!GAME_OPEN, "GAME_ENABLED is not \"true\" for this build: the card only exists with the game open.");
+    await page.goto(`/r/${deep.id}?lang=en`);
+    await expect(page.getByTestId("game-entry")).toBeVisible();
+    await expect(page.getByTestId("game-entry-cta")).toHaveAttribute("href", "/en/game/acquisition?from=deep_dive");
+    // Level 2's number in level 2's format: new customers, never a percentage.
+    await expect(page.getByTestId("game-entry-band")).toContainText("New customers 2,000");
+  });
+
+  test("offers BOTH levels on one card when acquisition and retention tie at the bottom (C30 Q5)", async ({ page }) => {
+    test.skip(!GAME_OPEN, "GAME_ENABLED is not \"true\" for this build: the card only exists with the game open.");
+    await page.goto(`/r/${twoLevels.id}?lang=en`);
+    // One card, never two.
+    await expect(page.getByTestId("game-entry")).toHaveCount(1);
+    await expect(page.getByTestId("game-entry")).toHaveAttribute("data-levels", "2");
+    await expect(page.getByTestId("game-entry").getByRole("heading", { level: 2 })).toHaveText("The dark side of your stages");
+    // Stage by stage, lowest first: the reader chooses, AARRR order does not.
+    const ctas = page.getByTestId("game-entry-cta");
+    await expect(ctas).toHaveCount(2);
+    await expect(ctas.nth(0)).toHaveAttribute("href", "/en/game/acquisition?from=result");
+    await expect(ctas.nth(1)).toHaveAttribute("href", "/en/game/retention?from=result");
+    await expect(page.getByTestId("game-entry-band")).toContainText("New customers 2,000");
+    await expect(page.getByTestId("game-entry-band")).toContainText("Churn 6.0%");
+  });
 });
 
 test.describe("the owner's view", () => {
@@ -149,6 +174,34 @@ test.describe("the owner's view", () => {
     await page.reload();
     await expect(page.getByTestId("score-breakdown")).toBeVisible();
     await expect(page.getByTestId("deep-dive-cta")).toBeVisible();
+  });
+
+  /*
+   * Engine spec §19.10 (C32 Q16, A14 T6): under the action, for its owner
+   * only, a way into the engine — and only on a build that opened it. The CI
+   * builds it closed: the line must then be absent; `ENGINE_ENABLED=true` at
+   * build and test time checks the open side.
+   */
+  test("offers its owner the engine under the action — only on a build that opened it, never to a visitor", async ({ page }) => {
+    const entry = page.getByTestId("result-engine-entry");
+    await page.goto(`/r/${clear.id}?lang=en`);
+    await expect(page.getByTestId("priority-move")).toBeVisible();
+    await expect(entry).toHaveCount(0);
+    await seedOwnedResult(page, clear.id, clear.total, clear.answers);
+    await page.reload();
+    await expect(page.getByTestId("score-breakdown")).toBeVisible();
+    if (process.env.ENGINE_ENABLED === "true") {
+      await expect(entry).toHaveText(tc(UI_STRINGS.result.engineEntry, "en"));
+      await expect(entry).toHaveAttribute("href", "/en/aarrr-funnel-template");
+      // Followed, it counts as a door (§19.12): the owner's result, never its stage nor its score.
+      // The engine lives under the other root layout: the click is a full load. Hold it once to read the event where it fired.
+      await page.evaluate(() => document.addEventListener("click", (e) => e.preventDefault(), { capture: true, once: true }));
+      await entry.click();
+      await expect.poll(() => trackedEvents(page)).toContain("engine_entry_clicked/result_owner");
+      expect((await trackedEvents(page)).filter((e) => e.startsWith("engine"))).toEqual(["engine_entry_clicked/result_owner"]);
+    } else {
+      await expect(entry).toHaveCount(0);
+    }
   });
 });
 
@@ -169,6 +222,39 @@ test.describe("the other two states of the bottleneck block", () => {
       await expect(block).not.toContainText(stage);
     }
     await expect(page.getByTestId("game-entry")).toHaveCount(0);
+  });
+});
+
+/**
+ * C34 (Antoine, 2026-10-02, the score sheet of design system extension 05):
+ * the sheet's red follows the bottleneck as the route profile does — every
+ * tied stage on a shared bottleneck, none on a level board. Until A16 the
+ * chips reddened ONE stage (the tie-break's pick) while the profile above
+ * flagged both: one screen naming two different things.
+ *
+ * On `twoLevels`, a shared bottleneck in the neutral tone (acquisition and
+ * retention tied at 0/20), so no roast emphasis can stand in for the rule.
+ * Non-vacuity (2026-10-02): with the row's tone keyed on the tie-break's one
+ * stage again, the first test fails with one red row instead of two.
+ */
+test.describe("the score sheet's red follows the bottleneck (C34)", () => {
+  async function redRows(page: Page) {
+    const sheet = page.getByTestId("stage-scores");
+    await sheet.waitFor();
+    return sheet.evaluate((ol) =>
+      [...ol.querySelectorAll(':scope > li[class*="alert"] [class*="name"]')].map((n) => (n.firstChild?.textContent ?? "").trim()),
+    );
+  }
+
+  test("a shared bottleneck reds every tied stage, as the profile flags them", async ({ page }) => {
+    await page.goto(`/r/${twoLevels.id}?lang=en`);
+    expect(await redRows(page)).toEqual(["Acquisition", "Retention"]);
+    await expect(page.getByTestId("stage-profile").locator('[data-hot="true"]')).toHaveCount(2);
+  });
+
+  test("a level board reds no stage", async ({ page }) => {
+    await page.goto(`/r/${level.id}?lang=fr`);
+    expect(await redRows(page)).toEqual([]);
   });
 });
 

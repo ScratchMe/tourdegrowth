@@ -55,6 +55,10 @@ export interface SheetDraft {
   choice: string;
   source: SourceChoice;
   sourceRole: RoleId;
+  /** « Le dénominateur vient d'un autre outil » (§19.5.3, A14 T4): a rate in counts, its denominator's own source. */
+  splitSource: boolean;
+  denominatorSource: SourceChoice;
+  denominatorSourceRole: RoleId;
   variant: string;
   label: string;
   evidence: "" | "data" | "interviews" | "hunch";
@@ -80,14 +84,18 @@ export type DraftProblem =
   | "denominator"
   | "denominator-zero"
   | "num-gt-den"
+  | "count-negative"
   | "percent"
   | "percent-range"
   | "amount"
+  | "amount-negative"
   | "duration"
+  | "duration-negative"
   | "text"
   | "text-too-long"
   | "choice"
   | "source"
+  | "denominator-source"
   | "variant"
   | "label-too-long"
   | "evidence"
@@ -183,6 +191,9 @@ export function draftFromEntry(entry: MetricEntry | undefined, shape: MetricShap
     choice: "",
     source: "",
     sourceRole: shape.defaultRole,
+    splitSource: false,
+    denominatorSource: "",
+    denominatorSourceRole: shape.defaultRole,
     variant: "",
     label: "",
     evidence: "",
@@ -206,10 +217,14 @@ export function draftFromEntry(entry: MetricEntry | undefined, shape: MetricShap
     case "measured": {
       const v = entry.value;
       const { source, role } = sourceChoiceOf(entry.source);
+      const den = sourceChoiceOf(entry.denominatorSource);
       Object.assign(draft, {
         mode: "have",
         source,
         sourceRole: role ?? draft.sourceRole,
+        splitSource: entry.denominatorSource !== undefined,
+        denominatorSource: den.source,
+        denominatorSourceRole: den.role ?? draft.denominatorSourceRole,
         variant: entry.variant ?? "",
         label: entry.label ?? "",
         evidence: entry.evidence ?? "",
@@ -251,6 +266,32 @@ export function draftFromEntry(entry: MetricEntry | undefined, shape: MetricShap
   }
 }
 
+/**
+ * A new month's sheet (A14 T2, engine spec §19.2.2): the month before's
+ * definition is offered — its variant, its label, its definition note, its
+ * source — never its value. Only on a number nobody has looked at this month
+ * (`mode` null): one this month already has keeps its own. Every field stays
+ * the person's to change; nothing is saved until they save.
+ */
+export function withProposals(
+  draft: SheetDraft,
+  proposed: Pick<MetricEntry, "variant" | "label" | "definitionNote" | "source" | "denominatorSource"> | null,
+): SheetDraft {
+  if (!proposed || draft.mode !== null) return draft;
+  const { source, role } = sourceChoiceOf(proposed.source);
+  const den = sourceChoiceOf(proposed.denominatorSource);
+  return {
+    ...draft,
+    variant: proposed.variant ?? draft.variant,
+    label: proposed.label ?? draft.label,
+    definitionNote: draft.definitionNote || (proposed.definitionNote ?? ""),
+    source: proposed.source ? source : draft.source,
+    sourceRole: role ?? draft.sourceRole,
+    // The denominator's own source travels with the definition (§19.5.3).
+    ...(proposed.denominatorSource ? { splitSource: true, denominatorSource: den.source, denominatorSourceRole: den.role ?? draft.denominatorSourceRole } : {}),
+  };
+}
+
 function sourceRefOf(choice: SourceChoice, role: RoleId): SourceRef | null {
   if (choice === "") return null;
   if (choice === "person") return { kind: "person", role };
@@ -259,18 +300,27 @@ function sourceRefOf(choice: SourceChoice, role: RoleId): SourceRef | null {
 }
 
 /** A count-based value: both counts, a non-zero denominator, and — for a share — no more of the part than of the whole. */
-function ratioProblems(num: number | null, den: number | null, bounded: boolean): DraftProblem[] {
+function ratioProblems(num: number | null, den: number | null, shape: MetricShape): DraftProblem[] {
   const problems: DraftProblem[] = [];
+  const amounts = shape.amounts === true;
   if (num === null) problems.push("numerator");
   if (den === null) problems.push("denominator");
   else if (den === 0) problems.push("denominator-zero");
-  if (bounded && num !== null && den !== null && den > 0 && num > den) problems.push("num-gt-den");
+  // A count of people, or the whole a share is taken of, is never below
+  // zero; a margin over revenue can be (A15.10). The import already said so
+  // (validate.ts), the sheet saved it. The message names what the box holds,
+  // the way ValueEditor draws it: an amount in euros is not « a count ».
+  const negativeNum = !amounts && num !== null && num < 0;
+  const negativeDen = den !== null && den < 0;
+  if ((negativeNum && shape.unit === "money") || (negativeDen && amounts)) problems.push("amount-negative");
+  if ((negativeNum && shape.unit !== "money") || (negativeDen && !amounts)) problems.push("count-negative");
+  if (shape.bounded && num !== null && den !== null && den > 0 && num > den) problems.push("num-gt-den");
   return problems;
 }
 
 function readingValue(r: ReadingDraft, shape: MetricShape): MetricValue | null {
   if (r.kind === "ratio") {
-    if (ratioProblems(r.numerator, r.denominator, shape.bounded).length) return null;
+    if (ratioProblems(r.numerator, r.denominator, shape).length) return null;
     return { kind: "ratio", numerator: r.numerator!, denominator: r.denominator! };
   }
   if (r.kind === "rate") return r.percent === null || r.percent < 0 || r.percent > 100 ? null : { kind: "rate", percent: r.percent };
@@ -314,7 +364,7 @@ export function entryFromDraft(
       let value: MetricValue | null = null;
       switch (draft.kind) {
         case "ratio":
-          problems.push(...ratioProblems(draft.numerator, draft.denominator, shape.bounded));
+          problems.push(...ratioProblems(draft.numerator, draft.denominator, shape));
           if (draft.numerator !== null && draft.denominator !== null && draft.denominator !== 0)
             value = { kind: "ratio", numerator: draft.numerator, denominator: draft.denominator };
           break;
@@ -323,12 +373,15 @@ export function entryFromDraft(
           else if (draft.percent < 0 || draft.percent > 100) problems.push("percent-range");
           else value = { kind: "rate", percent: draft.percent };
           break;
+        // A negative number was typed, not left out: it gets its own rule (A15.3).
         case "amount":
-          if (draft.amount === null || draft.amount < 0) problems.push("amount");
+          if (draft.amount === null) problems.push("amount");
+          else if (draft.amount < 0) problems.push("amount-negative");
           else value = { kind: "amount", amount: draft.amount };
           break;
         case "duration":
-          if (draft.durationValue === null || draft.durationValue < 0) problems.push("duration");
+          if (draft.durationValue === null) problems.push("duration");
+          else if (draft.durationValue < 0) problems.push("duration-negative");
           else value = { kind: "duration", value: draft.durationValue, unit: draft.durationUnit, statistic: draft.statistic };
           break;
         case "text":
@@ -347,6 +400,10 @@ export function entryFromDraft(
       const needsSource = draft.kind !== "text" && draft.kind !== "choice";
       const source = sourceRefOf(draft.source, draft.sourceRole);
       if (needsSource && !source) problems.push("source");
+      // The denominator's own source, when the box says it comes from elsewhere — only for counts (§19.5.3).
+      const split = draft.kind === "ratio" && draft.splitSource;
+      const denominatorSource = split ? sourceRefOf(draft.denominatorSource, draft.denominatorSourceRole) : null;
+      if (split && !denominatorSource) problems.push("denominator-source");
       if (options.hasVariants && draft.kind !== "duration" && !draft.variant) problems.push("variant");
       if (draft.label.length > TEXT_LIMITS.label) problems.push("label-too-long");
       if (options.hasChoices && draft.kind === "text" && !draft.evidence) problems.push("evidence");
@@ -356,6 +413,7 @@ export function entryFromDraft(
           status: "measured",
           value,
           ...(source ? { source } : {}),
+          ...(denominatorSource ? { denominatorSource } : {}),
           ...(options.hasVariants && draft.kind !== "duration" && draft.variant ? { variant: draft.variant } : {}),
           ...(draft.label.trim() ? { label: draft.label.trim() } : {}),
           ...(options.hasChoices && draft.kind === "text" && draft.evidence ? { evidence: draft.evidence } : {}),
@@ -368,6 +426,8 @@ export function entryFromDraft(
       if (draft.low === null) problems.push("low");
       if (draft.high === null) problems.push("high");
       if (draft.low !== null && draft.high !== null && draft.low > draft.high) problems.push("low-above-high");
+      // A rate's bounds are rates (A15.3): the same 0–100 the value itself is held to.
+      if (shape.unit === "percent" && [draft.low, draft.high].some((v) => v !== null && (v < 0 || v > 100))) problems.push("percent-range");
       if (!draft.basis) problems.push("basis");
       if (problems.length === 0)
         entry = { ...common, status: "estimated", estimate: { low: draft.low!, high: draft.high!, basis: draft.basis as EstimateBasis }, updatedAt: nowIso };

@@ -1,36 +1,53 @@
 "use client";
 
-import { useId } from "react";
+import { Fragment, useId } from "react";
 import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
+import { MetaLabel } from "@/components/brand/MetaLabel";
 import { SPACE_PICTO } from "@/components/brand/SpaceBand";
 import { trackEvent } from "@/lib/analytics/goatcounter";
 import { NightSurface } from "./NightSurface";
 import styles from "./GameEntry.module.css";
 
 /**
- * Everything the card shows, already resolved on the server in the reader's
+ * One level the card offers, already resolved on the server in the reader's
  * language (`r/[id]/game-entry.ts`). The event travels as two strings rather
  * than as the game's vocabulary: `components/game` may import `lib/game` only
  * as types (game-bundles.test.ts, rule 2), and the result page's client bundle
  * has no business carrying the engine to fire one click.
  */
-export interface GameEntryView {
-  /** `/{locale}/game/retention?from=result` — another root layout, hence a bare link. */
+export interface GameEntryLevel {
+  /** The stage the level plays, « Acquisition », « Retention »: named only when the card offers several. */
+  stage: string;
+  /** `/{locale}/game/<level>?from=result` — another root layout, hence a bare link. */
   href: string;
+  cta: string;
+  /** « Résiliations 6,0 % », « Nouveaux clients 2 000 »: the level's number, formatted from its model. */
+  metric: string;
+  event: { name: string; detail: string };
+}
+
+/** Everything the card shows. */
+export interface GameEntryView {
+  /**
+   * Above the card, outside its band: « Dans le jeu ». The band's numbers are
+   * the game's, read under the reader's own; this says so before they are
+   * read (C33, 2026-10-01). Not a heading: the card's title is.
+   */
+  eyebrow: string;
   title: string;
   /** The opening sentence (plain or Deep dive variant) and the rest, joined. */
   body: string;
-  cta: string;
   /** The mono mention beside the button: « vingt minutes, gratuit ». */
   meta: string;
-  band: {
-    /** « Résiliations 6,0 % », the number formatted from the level model. */
-    churn: string;
-    trust: string;
-    notOnDashboard: string;
-  };
-  event: { name: string; detail: string };
+  /** What the band says after the levels' numbers: the trust that is not on the CEO's dashboard. */
+  band: { trust: string; notOnDashboard: string };
+  /**
+   * The levels offered, in the bottleneck's order (lowest stage first). One
+   * is the brief's card; several — stages tied at the bottom that each have a
+   * level (C30 Q5, 2026-10-01) — one card offering them all, stage by stage.
+   */
+  levels: readonly [GameEntryLevel, ...GameEntryLevel[]];
 }
 
 export interface GameEntryProps extends GameEntryView {
@@ -45,7 +62,7 @@ export interface GameEntryProps extends GameEntryView {
  * the button is secondary (13.3 — never solid red), and the card is flat
  * paper, because the one raised card on this screen is the score. Across its
  * top, a 44px band of the night world shows the object of the game in one
- * glance — the churn the CEO watches, and the trust that is not on his
+ * glance — the number the CEO watches, and the trust that is not on his
  * dashboard. The empty cell stands in for that missing number; it is drawn,
  * not a glyph, so no font can turn it into a tofu box, and it is hidden from
  * assistive technology because the words beside it already say it.
@@ -54,28 +71,62 @@ export interface GameEntryProps extends GameEntryView {
  * pages' root layout and this page under the app's, so a `next/link` would
  * prefetch a route it can only reach by reloading the document anyway
  * (cross-root-links.test.ts, CLAUDE.md 2026-09-14).
+ *
+ * Several levels (C30 Q5, A12.f.2): the band lists each level's number
+ * before the missing trust, and the card ends on one row per stage — its
+ * name, its button — then the mention, once.
+ *
+ * Above the card, the eyebrow (C33): the band's numbers are the game's, and
+ * the band has no room left to say it. `className` places the whole — eyebrow
+ * and card — in the page.
  */
-export function GameEntry({ href, title, body, cta, meta, band, event, className }: GameEntryProps) {
+export function GameEntry({ eyebrow, title, body, meta, band, levels, className }: GameEntryProps) {
   const titleId = useId();
+  const several = levels.length > 1;
+  return (
+    <div className={[styles.entry, className ?? ""].filter(Boolean).join(" ")}>
+      <MetaLabel wide data-testid="game-entry-eyebrow">
+        {eyebrow}
+      </MetaLabel>
+      <GameEntryCard titleId={titleId} several={several} title={title} body={body} meta={meta} band={band} levels={levels} />
+    </div>
+  );
+}
+
+/** The card itself: the night band across its top, then the offer. */
+function GameEntryCard({
+  titleId,
+  several,
+  title,
+  body,
+  meta,
+  band,
+  levels,
+}: Omit<GameEntryView, "eyebrow"> & { titleId: string; several: boolean }) {
   return (
     <Card
       elevation="flat"
       padding="0"
-      className={[styles.card, className ?? ""].filter(Boolean).join(" ")}
+      className={styles.card}
       role="region"
       aria-labelledby={titleId}
       data-testid="game-entry"
+      data-levels={levels.length}
     >
       <NightSurface as="div" className={styles.band} data-testid="game-entry-band">
         {/* The game's sign, as on the band of its pages: a link to the game wears it (design I + B). */}
         <span className={styles.bandPicto} data-testid="game-entry-band-picto">
           {SPACE_PICTO.game}
         </span>
-        <span className={styles.bandItems}>
-          <span className={styles.bandItem}>{band.churn}</span>
-          <span className={styles.bandSep} aria-hidden="true" data-testid="game-entry-band-sep">
-            ·
-          </span>
+        <span className={[styles.bandItems, several ? styles.bandStacked : ""].filter(Boolean).join(" ")}>
+          {levels.map((level) => (
+            <Fragment key={level.href}>
+              <span className={styles.bandItem}>{level.metric}</span>
+              <span className={styles.bandSep} aria-hidden="true" data-testid="game-entry-band-sep">
+                ·
+              </span>
+            </Fragment>
+          ))}
           <span className={styles.bandItem}>
             {band.trust}
             <span className={styles.missing} aria-hidden="true" />
@@ -88,19 +139,43 @@ export function GameEntry({ href, title, body, cta, meta, band, event, className
           {title}
         </h2>
         <p className={styles.text}>{body}</p>
-        <div className={styles.actions}>
-          <Button
-            variant="secondary"
-            href={href}
-            hard
-            onClick={() => trackEvent(event.name, event.detail)}
-            data-testid="game-entry-cta"
-          >
-            {cta}
-          </Button>
-          <span className={styles.meta}>{meta}</span>
-        </div>
+        {several ? (
+          <>
+            {/* One row per stage, lowest first: the reader chooses, AARRR order does not (C30 Q5). */}
+            <ul className={styles.levels}>
+              {levels.map((level) => (
+                <li key={level.href} className={styles.level}>
+                  <span className={styles.stage}>{level.stage}</span>
+                  <LevelButton level={level} />
+                </li>
+              ))}
+            </ul>
+            <span className={styles.meta}>{meta}</span>
+          </>
+        ) : (
+          <div className={styles.actions}>
+            <LevelButton level={levels[0]} />
+            <span className={styles.meta}>{meta}</span>
+          </div>
+        )}
       </div>
     </Card>
+  );
+}
+
+/** A level's button: secondary (13.3 — never solid red), a bare link to another root layout, its own door counted. */
+function LevelButton({ level }: { level: GameEntryLevel }) {
+  const { href, cta, event } = level;
+  return (
+    <Button
+      variant="secondary"
+      href={href}
+      hard
+      onClick={() => trackEvent(event.name, event.detail)}
+      data-testid="game-entry-cta"
+      data-detail={event.detail}
+    >
+      {cta}
+    </Button>
   );
 }

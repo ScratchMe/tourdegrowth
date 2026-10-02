@@ -1,8 +1,10 @@
-import { LEVER_IDS, METRIC_SHAPES, TEXT_LIMITS, shapeOf, type MetricShape } from "./catalog-shape";
-import { SHARED_COUNT_IDS } from "./shared-counts";
+import { ALL_LEVER_IDS, ALL_METRIC_SHAPES, TEXT_LIMITS, shapeOf, type MetricShape } from "./catalog-shape";
+import { SHARED_COUNT_IDS, WHOLE_SHARED_COUNTS } from "./shared-counts";
 import { BASIS_KEY, CAUSE_KEY, REPAIR_KEY, ROLE_KEY, STATUS_KEY } from "./strings";
 import {
+  DECK_THEMES,
   ENGINE_SCHEMA_VERSION,
+  MAX_MONTHS,
   SLIDE_ORDER,
   YEAR_MONTH_PATTERN,
   type Currency,
@@ -11,6 +13,7 @@ import {
   type EngineState,
   type MetricEntry,
   type MetricId,
+  type SlideId,
   type ToolId,
   type YearMonth,
 } from "./types";
@@ -85,14 +88,27 @@ const TOOL_SET = {
   "play-console": true,
   "product-db": true,
   spreadsheet: true,
+  pipedrive: true,
+  "cs-platform": true,
 } as const satisfies Record<ToolId, true>;
 const TOOLS = Object.keys(TOOL_SET);
 
 const CURRENCY_SET = { EUR: true, USD: true, GBP: true, CHF: true } as const satisfies Record<Currency, true>;
+
+/** The slides outside `SLIDE_ORDER` and the what-ifs: the self-serve « scenario », the hybrid's « total », the sales-assisted ones. */
+const EXTRA_SLIDES = ["scenario", "total", "slg:peloton", "slg:leak", "slg:scenario", "evolution", "slg:evolution"] as const satisfies readonly SlideId[];
 const CURRENCIES = Object.keys(CURRENCY_SET);
 
-const METRIC_IDS: readonly string[] = METRIC_SHAPES.map((s) => s.id);
-const SHAPE_BY_ID = new Map<string, MetricShape>(METRIC_SHAPES.map((s) => [s.id, s]));
+/*
+ * Every number of every catalogue, whichever motions are ticked (§18.3.3):
+ * unticking a motion keeps its numbers on the device and in the file
+ * (§18.1.2), so a file may carry them with the motion off.
+ */
+const METRIC_IDS: readonly string[] = ALL_METRIC_SHAPES.map((s) => s.id);
+const SHAPE_BY_ID = new Map<string, MetricShape>(ALL_METRIC_SHAPES.map((s) => [s.id, s]));
+
+/** The only numbers the company-wide margin may stand in for (C25 Q4). */
+const MARGINS: readonly string[] = ["rev.gross-margin", "slg.rev.gross-margin"];
 
 function tooLong(path: string, value: unknown, limit: number, errors: string[]): void {
   if (value === undefined) return;
@@ -126,7 +142,9 @@ function checkValue(path: string, value: unknown, shape: MetricShape, errors: st
       break;
     }
     case "rate":
-      if (!isNum(value.percent) || value.percent < 0 || value.percent > 100) errors.push(`${path}.percent: not within 0-100`);
+      // Above 100 is refused for a BOUNDED number only (§18.3.3): a 106 % NRR or an expansion wave is real.
+      if (!isNum(value.percent) || value.percent < 0) errors.push(`${path}.percent: not a number ≥ 0`);
+      else if (shape.bounded && value.percent > 100) errors.push(`${path}.percent: not within 0-100`);
       break;
     case "amount":
       if (!isNum(value.amount) || value.amount < 0) errors.push(`${path}.amount: not a number ≥ 0`);
@@ -161,6 +179,8 @@ function entryErrors(path: string, entry: unknown, shape: MetricShape): string[]
     case "measured":
       checkValue(`${path}.value`, entry.value, shape, errors);
       checkSource(`${path}.source`, entry.source, errors);
+      // §19.5.3: a rate in counts whose denominator comes from another tool. Absent = the same source.
+      if (entry.denominatorSource !== undefined) checkSource(`${path}.denominatorSource`, entry.denominatorSource, errors);
       break;
     case "estimated": {
       const e = entry.estimate;
@@ -171,9 +191,11 @@ function entryErrors(path: string, entry: unknown, shape: MetricShape): string[]
       if (!isNum(e.low) || !isNum(e.high)) errors.push(`${path}.estimate: bounds not numbers`);
       else if (e.low > e.high) errors.push(`${path}.estimate: low > high`);
       else if (e.low < 0) errors.push(`${path}.estimate: below 0`);
-      else if (shape.unit === "percent" && e.high > 100) errors.push(`${path}.estimate: above 100`);
+      else if (shape.unit === "percent" && shape.bounded && e.high > 100) errors.push(`${path}.estimate: above 100`);
       // A range without its basis is an opinion that reads as a measure: the basis is what the slide prints next to it.
       if (!oneOf(BASES, e.basis)) errors.push(`${path}.estimate.basis: missing or unknown`);
+      // The company-wide margin stands in for a MOTION's margin, and for nothing else (C25 Q4).
+      else if (e.basis === "company-wide" && !MARGINS.includes(shape.id)) errors.push(`${path}.estimate.basis: company-wide is for a gross margin only`);
       break;
     }
     case "conflicting": {
@@ -236,11 +258,36 @@ function entryErrors(path: string, entry: unknown, shape: MetricShape): string[]
 function setupErrors(setup: unknown): string[] {
   if (!isObj(setup)) return ["setup: missing"];
   const errors: string[] = [];
-  if (setup.profile !== "selfserve") errors.push("setup.profile: unknown profile");
+  // Decision 3 (§18.1): the type, then how it sells — at least one motion, the hybrid being both.
+  if (setup.type !== "b2b-saas") errors.push("setup.type: unknown type");
+  const motions = setup.motions;
+  if (!isObj(motions) || !isBool(motions.plg) || !isBool(motions.slg)) errors.push("setup.motions: not two booleans (plg, slg)");
+  else if (!motions.plg && !motions.slg) errors.push("setup.motions: none ticked");
   if (!oneOf(CURRENCIES, setup.currency)) errors.push("setup.currency: unknown currency");
   if (![7, 14, 30].includes(setup.activationWindowDays as number)) errors.push("setup.activationWindowDays: not 7, 14 or 30");
   if (![30, 60, 90].includes(setup.paidWindowDays as number)) errors.push("setup.paidWindowDays: not 30, 60 or 90");
+  if (![30, 60, 90].includes(setup.qualificationWindowDays as number)) errors.push("setup.qualificationWindowDays: not 30, 60 or 90");
+  if (![30, 60, 90].includes(setup.goLiveWindowDays as number)) errors.push("setup.goLiveWindowDays: not 30, 60 or 90");
   tooLong("setup.companyLabel", setup.companyLabel, TEXT_LIMITS.companyLabel, errors);
+  // §19.5, C32 Q9: optional, and empty means « not said ».
+  if (setup.tools !== undefined) {
+    if (!Array.isArray(setup.tools)) errors.push("setup.tools: not a list");
+    else {
+      setup.tools.forEach((t, i) => {
+        if (!oneOf(TOOLS, t)) errors.push(`setup.tools[${i}]: unknown tool`);
+      });
+      if (new Set(setup.tools).size !== setup.tools.length) errors.push("setup.tools: a tool listed twice");
+    }
+  }
+  // §19.4, C32 Q8: optional, both numbers optional, and both positive when present.
+  if (setup.pipeline !== undefined) {
+    const p = setup.pipeline;
+    if (!isObj(p)) errors.push("setup.pipeline: not an object");
+    else {
+      if (p.quarterTarget !== undefined && (!isNum(p.quarterTarget) || p.quarterTarget <= 0)) errors.push("setup.pipeline.quarterTarget: not a number > 0");
+      if (p.threshold !== undefined && (!isNum(p.threshold) || p.threshold <= 0)) errors.push("setup.pipeline.threshold: not a number > 0");
+    }
+  }
   return errors;
 }
 
@@ -251,6 +298,20 @@ function snapshotErrors(path: string, snapshot: unknown): string[] {
   if (!isYearMonth(snapshot.referenceMonth)) errors.push(`${path}.referenceMonth: not YYYY-MM`);
   if (!isYearMonth(snapshot.cohortMonth)) errors.push(`${path}.cohortMonth: not YYYY-MM`);
   if (!isIso(snapshot.createdAt)) errors.push(`${path}.createdAt: not a date`);
+  // §19.2.3: set on a month when the next one starts.
+  if (snapshot.closedAt !== undefined && !isIso(snapshot.closedAt)) errors.push(`${path}.closedAt: not a date`);
+  if (snapshot.windows !== undefined) {
+    const w = snapshot.windows;
+    if (
+      !isObj(w) ||
+      ![7, 14, 30].includes(w.activationWindowDays as number) ||
+      ![30, 60, 90].includes(w.paidWindowDays as number) ||
+      ![30, 60, 90].includes(w.qualificationWindowDays as number) ||
+      ![30, 60, 90].includes(w.goLiveWindowDays as number)
+    )
+      errors.push(`${path}.windows: not the four windows of a setup`);
+  }
+  if (snapshot.pipelineOpen !== undefined && (!isNum(snapshot.pipelineOpen) || snapshot.pipelineOpen < 0)) errors.push(`${path}.pipelineOpen: not a number >= 0`);
 
   if (!isObj(snapshot.metrics)) errors.push(`${path}.metrics: missing`);
   else
@@ -273,9 +334,9 @@ function snapshotErrors(path: string, snapshot: unknown): string[] {
     else
       for (const [key, n] of Object.entries(snapshot.base)) {
         if (!(SHARED_COUNT_IDS as readonly string[]).includes(key)) errors.push(`${path}.base.${key}: unknown count`);
-        // People are whole; an MRR (2026-09-26) is an amount and may carry cents.
+        // People, deals and opportunities are whole; an MRR (2026-09-26) is an amount and may carry cents.
         else if (!isNum(n) || n <= 0) errors.push(`${path}.base.${key}: not a number > 0`);
-        else if (key.endsWith("Signups") && !Number.isInteger(n)) errors.push(`${path}.base.${key}: not a whole number > 0`);
+        else if ((WHOLE_SHARED_COUNTS as readonly string[]).includes(key) && !Number.isInteger(n)) errors.push(`${path}.base.${key}: not a whole number > 0`);
       }
   }
   return errors;
@@ -287,16 +348,19 @@ function deckErrors(deck: unknown): string[] {
   if (!isObj(deck.include)) errors.push("deck.include: missing");
   else
     for (const [id, on] of Object.entries(deck.include)) {
-      // The fixed slides, plus the what-if ones (2026-09-26): « scenario » and one « whatif:<lever> » per lever.
+      // The fixed slides, the what-if ones (2026-09-26: « scenario » and one « whatif:<lever> » per lever),
+      // the hybrid's « total » and the sales-assisted slides (§18.8.1).
       const known =
         (SLIDE_ORDER as readonly string[]).includes(id) ||
-        id === "scenario" ||
-        (id.startsWith("whatif:") && (LEVER_IDS as readonly string[]).includes(id.slice("whatif:".length)));
+        (EXTRA_SLIDES as readonly string[]).includes(id) ||
+        (id.startsWith("whatif:") && (ALL_LEVER_IDS as readonly string[]).includes(id.slice("whatif:".length)));
       if (!known) errors.push(`deck.include.${id}: unknown slide`);
       else if (!isBool(on)) errors.push(`deck.include.${id}: not a boolean`);
     }
   if (!isBool(deck.showCompany)) errors.push("deck.showCompany: not a boolean");
   if (!isBool(deck.showSiteCredit)) errors.push("deck.showSiteCredit: not a boolean");
+  // §19.8, C32 Q14: optional, "paper" when absent.
+  if (deck.theme !== undefined && !oneOf(DECK_THEMES, deck.theme)) errors.push("deck.theme: not paper or white");
 
   const ask = deck.ask;
   if (!isObj(ask)) return [...errors, "deck.ask: missing"];
@@ -339,17 +403,29 @@ export function validateEngine(state: EngineState): string[] {
   const s: unknown = state;
   if (!isObj(s)) return ["state: not an object"];
   const errors: string[] = [];
-  if (s.schemaVersion !== ENGINE_SCHEMA_VERSION) errors.push("schemaVersion: not 1");
+  if (s.schemaVersion !== ENGINE_SCHEMA_VERSION) errors.push(`schemaVersion: not ${ENGINE_SCHEMA_VERSION}`);
   if (!isStr(s.id) || s.id === "") errors.push("id: missing");
   if (!isIso(s.createdAt)) errors.push("createdAt: not a date");
   if (!isIso(s.updatedAt)) errors.push("updatedAt: not a date");
   if (s.lastExportedAt !== undefined && !isIso(s.lastExportedAt)) errors.push("lastExportedAt: not a date");
   errors.push(...setupErrors(s.setup));
 
-  // v1 keeps exactly one snapshot, but the list exists from day one (D14) so the monthly series migrates nothing;
-  // only an EMPTY list is wrong — there would be nothing to read.
+  // One month per snapshot, oldest first (§19.2, §19.1.6): an EMPTY list is wrong — there would be nothing to read —
+  // and so are two snapshots of the same month, months out of order, more than MAX_MONTHS, or a month before
+  // the last that was never closed.
   if (!Array.isArray(s.snapshots) || s.snapshots.length === 0) errors.push("snapshots: empty");
-  else s.snapshots.forEach((snap, i) => errors.push(...snapshotErrors(`snapshots[${i}]`, snap)));
+  else {
+    s.snapshots.forEach((snap, i) => errors.push(...snapshotErrors(`snapshots[${i}]`, snap)));
+    if (s.snapshots.length > MAX_MONTHS) errors.push(`snapshots: more than ${MAX_MONTHS} months`);
+    const months: unknown[] = s.snapshots;
+    months.forEach((snap, i) => {
+      if (i === 0 || !isObj(snap)) return;
+      const before = months[i - 1];
+      if (isObj(before) && isYearMonth(before.referenceMonth) && isYearMonth(snap.referenceMonth) && snap.referenceMonth <= before.referenceMonth)
+        errors.push(`snapshots[${i}].referenceMonth: not after the month before`);
+      if (isObj(before) && before.closedAt === undefined) errors.push(`snapshots[${i - 1}].closedAt: missing on a month that is not the last`);
+    });
+  }
 
   if (s.tourLink !== null) {
     const t = s.tourLink;
@@ -362,9 +438,11 @@ export function validateEngine(state: EngineState): string[] {
     if (!isObj(s.whatIf)) errors.push("whatIf: not an object");
     else
       for (const [id, target] of Object.entries(s.whatIf)) {
-        if (!(LEVER_IDS as readonly string[]).includes(id)) errors.push(`whatIf.${id}: unknown lever`);
+        if (!(ALL_LEVER_IDS as readonly string[]).includes(id)) errors.push(`whatIf.${id}: unknown lever`);
         else if (!isNum(target) || target < 0) errors.push(`whatIf.${id}: not a number >= 0`);
-        else if (shapeOf(id as MetricId).unit === "percent" && target > 100 && shapeOf(id as MetricId).bounded)
+        // The link's lever is a count of opportunities per quarter, never a percent (C25 Q7).
+        else if (id === "link.pql-handoff" && !Number.isInteger(target)) errors.push(`whatIf.${id}: not a whole number`);
+        else if (id !== "link.pql-handoff" && shapeOf(id as MetricId).unit === "percent" && target > 100 && shapeOf(id as MetricId).bounded)
           errors.push(`whatIf.${id}: above 100`);
       }
   }

@@ -15,20 +15,22 @@ import { GlossaryTerm } from "@/components/glossary/GlossaryTerm";
 import { Bottleneck } from "@/components/result/Bottleneck";
 import { Disclaimer } from "@/components/result/Disclaimer";
 import { InsightCard } from "@/components/result/InsightCard";
-import { PillarChip } from "@/components/result/PillarChip";
 import { PriorityMove } from "@/components/result/PriorityMove";
 import { ScoreDisplay } from "@/components/result/ScoreDisplay";
 import { ShareCard } from "@/components/result/ShareCard";
+import { StageScore } from "@/components/result/StageScore";
+import { StageScores } from "@/components/result/StageScores";
 import { StampedPillar } from "@/components/result/StampedPillar";
 import { StageProfile } from "@/components/viz/StageProfile";
 import { ANTOINE_LINKS, cvUrl, DEEP_DIVE_CREDIT, QUICK_CREDIT } from "@/content/antoine-credit";
 import { HOW_IT_WORKS } from "@/content/how-it-works";
-import { PROFILE_CLICK_DETAILS, trackEvent } from "@/lib/analytics/goatcounter";
+import { PROFILE_CLICK_DETAILS, trackEngineEntry, trackEvent } from "@/lib/analytics/goatcounter";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import type { Locale } from "@/lib/i18n/locale";
 import { useLocale } from "@/lib/i18n/locale-context";
 import { NAV_STRINGS } from "@/lib/i18n/nav-strings";
 import { localePath } from "@/lib/i18n/routes";
+import { SPACE_OPEN_AT_BUILD } from "@/components/brand/SpaceBand";
 import { progressionFor, type Progression } from "@/lib/quiz/progression";
 import { progressionSentence } from "@/lib/quiz/progression-copy";
 import { clearStoredAnswers, findStoredResult, loadStoredResults } from "@/lib/quiz/storage";
@@ -43,9 +45,11 @@ import type { DeepDiveView } from "@/lib/submissions/types";
 import { SEGMENT_MODELS, SEGMENT_STAGES } from "@/content/segments";
 import type { Benchmark } from "@/lib/submissions/benchmark";
 import type { SegmentAnswers } from "@/lib/submissions/segment";
+import { Disclosure } from "@/components/core/Disclosure";
 import { BadgeSnippet } from "./BadgeSnippet";
 import { ScoreBreakdown, type BreakdownData } from "./ScoreBreakdown";
 import styles from "./ResultView.module.css";
+import { scoreBand } from "@/lib/scoring/bands";
 
 // Named for readability at the trackEvent() call sites below — the array
 // itself (and the order) is shared with lib/analytics/goatcounter-api.ts's
@@ -65,7 +69,6 @@ interface ResultViewProps {
   badge?: { src: string; alt: string; markdown: string } | null;
   total: number;
   pillars: { pillar: Pillar; score: number }[];
-  weakestPillar: Pillar;
   verdicts: { neutral: QuickVerdict; roast: QuickVerdict };
   /** Which stage is holding this product back, and how honestly we can say so — resolved on the server (`lib/scoring/bottleneck.ts`), because deciding is not the same job as wording. */
   bottleneck: BottleneckView<{ pillar: Pillar; score: number }>;
@@ -130,7 +133,6 @@ export function ResultView({
   badge = null,
   total,
   pillars,
-  weakestPillar,
   verdicts,
   bottleneck,
   nextMove,
@@ -225,6 +227,28 @@ export function ResultView({
 
   /** The one stage the action belongs to. Null when nothing is behind. */
   const bottleneckPrimary = bottleneck.pillars[0] ?? null;
+  /*
+   * Engine spec §19.10 (C32 Q16, A14 T6): the owner, whose result just named
+   * the stage that holds them back, may already measure it — the engine takes
+   * their real numbers. Owner only (a visitor's numbers are not theirs to
+   * enter), only with a named stage, and only when the build opened the
+   * engine: the line points at a page a closed build would answer with a 404.
+   * Its click counts where the engine's openings come from (§19.12, A14 T7):
+   * the door, never the stage nor the score.
+   */
+  const engineEntry =
+    SPACE_OPEN_AT_BUILD.engine && isOwner && !isSample && bottleneckPrimary ? (
+      <p className={styles.engineEntry}>
+        {/* A bare anchor: the engine lives under another root layout, the navigation is a full load anyway (R-24). */}
+        <a
+          href={localePath(locale, "/aarrr-funnel-template")}
+          onClick={() => trackEngineEntry("result_owner")}
+          data-testid="result-engine-entry"
+        >
+          {tc(t.engineEntry, locale)}
+        </a>
+      </p>
+    ) : null;
 
   /**
    * No stage is behind — so nothing on this page may present one as a
@@ -236,6 +260,15 @@ export function ResultView({
    * more places on the same screen.
    */
   const level = bottleneck.sharpness === "level";
+
+  /**
+   * « Strengths » lists the two highest stages, and on a low board one of
+   * them can be weak: a weak-band sentence under a title that says strong
+   * (A15.14) — `level`'s defect the other way round. The title turns
+   * relative then; the cards and their sentences stay.
+   */
+  const strengthsShown = roast ? strongestTwo.slice(0, 1) : strongestTwo;
+  const strengthsAreWeak = strengthsShown.some((p) => scoreBand(p.score) === "weak");
 
   /**
    * The sharpness line. The server decided WHICH claim the scores support;
@@ -339,6 +372,26 @@ export function ResultView({
   const disclaimerLinkText = tc(NAV_STRINGS.howItWorks, locale);
   const disclaimerSplit = disclaimerShort.split(disclaimerLinkText);
 
+  /*
+   * The result's two states, a Deep dive and a roast, rendered twice: in the
+   * header from 761px, at the top of the page below it — CSS picks one, the
+   * other is `display: none` and out of the accessibility tree. On a phone
+   * the header row holds the wordmark and the language switch, and nothing
+   * more fits: with a state beside them it scrolled sideways, by 9px at 390
+   * with both, 14px at 320 with the roast alone, and the roast badge broke
+   * over two lines from 390 down (430 with the Deep dive tag beside it).
+   * Hiding them, as R-21 hid the landing's nav links, is not an option here:
+   * nothing else on the page says "roast", and that word is what tells a
+   * reader of a shared link that the harsh tone was chosen.
+   */
+  const stateTags =
+    deepDive || roast ? (
+      <>
+        {deepDive && <ModeTag mode="deep">{tc(dd.badge, locale)}</ModeTag>}
+        {roast && <span className={styles.roastBadge}>{tc(t.roastBadge, locale)}</span>}
+      </>
+    ) : null;
+
   return (
     <>
       <SiteHeader locale={locale} width="wide" space="tour">
@@ -352,13 +405,17 @@ export function ResultView({
               the switch goes through `?lang=`, which the proxy folds into
               the cookie — the choice then carries on to `/quiz`. */}
           <LocaleSwitcher locale={locale} />
-          {deepDive && <ModeTag mode="deep">{tc(dd.badge, locale)}</ModeTag>}
           {/* Design system extension 01 drops the "Stage 5/5 — Finished ·
               15/15 answered" meta line from this header: the score below is
               the proof it is finished. The roast badge and the Deep dive tag
               stay — those are state, not a progress read-out, and each has
-              its own component in the system. */}
-          {roast && <span className={styles.roastBadge}>{tc(t.roastBadge, locale)}</span>}
+              its own component in the system. On a phone they move to the
+              top of the page (`stateTags` below). */}
+          {stateTags && (
+            <span className={styles.headerTags} data-testid="result-header-tags">
+              {stateTags}
+            </span>
+          )}
         </div>
       </SiteHeader>
 
@@ -375,6 +432,11 @@ export function ResultView({
           <MetaLabel size="xs" wide tone="alert" className={styles.sampleBadge}>
             {tc(t.sampleBadge, locale)}
           </MetaLabel>
+        )}
+        {stateTags && (
+          <div className={styles.stateTags} data-testid="result-state-tags">
+            {stateTags}
+          </div>
         )}
 
         {/* `data-owner` reorders the share block above the CTA row on a
@@ -448,14 +510,13 @@ export function ResultView({
               </p>
             </Card>
 
-            <div className={`${styles.pillarGrid} ${styles.slotPillars}`}>
+            <div className={`${styles.pillars} ${styles.slotPillars}`}>
               {/* Design I + B (2026-09-28): the shape of the five scores over
-                  the chips that give them. Flagged: exactly the stages the
+                  the sheet that gives them. Flagged: exactly the stages the
                   Bottleneck block names — none on a level board, every tied
                   one on a shared bottleneck — never the roast's second red
-                  chip, which is emphasis and not a diagnosis. */}
+                  row, which is emphasis and not a diagnosis. */}
               <StageProfile
-                className={styles.spanFull}
                 data-testid="stage-profile"
                 stages={PILLARS.flatMap((pillar) => {
                   const entry = pillars.find((p) => p.pillar === pillar);
@@ -473,42 +534,41 @@ export function ResultView({
                 legend={tc(UI_STRINGS.profile.legend, locale)}
                 flag={tc(UI_STRINGS.profile.flag, locale)}
               />
-              {PILLARS.map((pillar) => {
-                const entry = pillars.find((p) => p.pillar === pillar);
-                if (!entry) return null;
-                // Only the roast's stamp takes the whole row. Revenue used to
-                // as well, to close the phone's two-up grid; with a meter on
-                // every chip it would have drawn its bar on a track twice as
-                // long as the other four (design I + B, 2026-09-28).
-                const spanFull = roast && !level && pillar === weakestName;
-                const label = tc(UI_STRINGS.pillars[pillar], locale);
+              {/* Design system extension 05 (A16): the profile's table, one
+                  row per stage, one column at every width — a value, not five
+                  boxes that looked like buttons (A15.19). Its red follows the
+                  bottleneck as the profile does (C34): one row on `clear`,
+                  the tied group on `shared`, none on `level`. */}
+              <StageScores label={tc(t.stageScoresLabel, locale)} data-testid="stage-scores">
+                {PILLARS.map((pillar) => {
+                  const entry = pillars.find((p) => p.pillar === pillar);
+                  if (!entry) return null;
+                  const label = tc(UI_STRINGS.pillars[pillar], locale);
 
-                if (roast && !level && pillar === weakestName) {
+                  // The roast's stamp takes the weakest stage's row.
+                  if (roast && !level && pillar === weakestName) {
+                    return <StampedPillar key={pillar} pillar={label} score={entry.score} suffix={tc(t.stampedSuffix, locale)} />;
+                  }
+
+                  const isAlert =
+                    !level &&
+                    (bottleneck.pillars.some((p) => p.pillar === pillar) || (roast && pillar === secondWeakestName));
                   return (
-                    <div key={pillar} className={spanFull ? styles.spanFull : ""}>
-                      <StampedPillar pillar={label} score={entry.score} suffix={tc(t.stampedSuffix, locale)} />
-                    </div>
-                  );
-                }
-
-                const isWeak = !level && (pillar === weakestPillar || (roast && pillar === secondWeakestName));
-                return (
-                  <div key={pillar} className={spanFull ? styles.spanFull : ""}>
-                    <PillarChip pillar={label} score={entry.score} weak={isWeak} stretch>
+                    <StageScore key={pillar} stage={label} score={entry.score} tone={isAlert ? "alert" : "neutral"}>
                       <GlossaryTerm
                         id={pillar}
                         locale={locale}
                         openId={openGlossaryId}
                         onOpenChange={setOpenGlossaryId}
-                        tone={isWeak ? "alert" : "muted"}
+                        tone={isAlert ? "alert" : "muted"}
                         closeLabel={tc(UI_STRINGS.glossary.closeLabel, locale)}
                         labelTemplate={tc(UI_STRINGS.glossary.definitionLabelTemplate, locale)}
                         moreLabel={tc(UI_STRINGS.glossary.moreLabel, locale)}
                       />
-                    </PillarChip>
-                  </div>
-                );
-              })}
+                    </StageScore>
+                  );
+                })}
+              </StageScores>
             </div>
 
           </div>
@@ -537,12 +597,17 @@ export function ResultView({
                    SHARER's result with the clicker's own context —
                    irreversibly. It also disappears once the Deep dive has
                    been done, because there is nothing left to offer. */
-                !deepVerdict && !isSample && id && isOwner ? (
+                (!deepVerdict && !isSample && id && isOwner) || engineEntry ? (
                   <>
-                    <p className={styles.upgradeText}>{tc(dd.upgradeText, locale)}</p>
-                    <Button variant="secondary" href={`/deep-dive/${id}`} data-testid="deep-dive-cta">
-                      {tc(dd.upgradeCta, locale)}
-                    </Button>
+                    {!deepVerdict && !isSample && id && isOwner ? (
+                      <>
+                        <p className={styles.upgradeText}>{tc(dd.upgradeText, locale)}</p>
+                        <Button variant="secondary" href={`/deep-dive/${id}`} data-testid="deep-dive-cta">
+                          {tc(dd.upgradeCta, locale)}
+                        </Button>
+                      </>
+                    ) : null}
+                    {engineEntry}
                   </>
                 ) : undefined
               }
@@ -551,9 +616,11 @@ export function ResultView({
             </PriorityMove>
 
             <section className={`${styles.section} ${styles.slotStrengths}`}>
-              <MetaLabel wide>{tc(roast ? t.strengthsTitleRoast : t.strengthsTitle, locale)}</MetaLabel>
+              <MetaLabel as="h2" wide>
+                {tc(strengthsAreWeak ? t.strengthsTitleRelative : roast ? t.strengthsTitleRoast : t.strengthsTitle, locale)}
+              </MetaLabel>
               <div className={styles.cardGrid}>
-                {(roast ? strongestTwo.slice(0, 1) : strongestTwo).map((p) => (
+                {strengthsShown.map((p) => (
                   <InsightCard key={p.pillar} pillar={tc(UI_STRINGS.pillars[p.pillar], locale)} score={p.score} kind="strength">
                     {sentenceFor(p.pillar)}
                   </InsightCard>
@@ -562,7 +629,7 @@ export function ResultView({
             </section>
 
             <section className={`${styles.section} ${styles.slotWeaknesses}`}>
-              <MetaLabel wide>{tc(level ? t.roomTitle : t.weaknessesTitle, locale)}</MetaLabel>
+              <MetaLabel as="h2" wide>{tc(level ? t.roomTitle : t.weaknessesTitle, locale)}</MetaLabel>
               <div className={styles.cardGrid}>
                 {weakestTwo.map((p) => (
                   <InsightCard
@@ -714,6 +781,22 @@ export function ResultView({
               already spent on the score. It absorbs "Share this result",
               which leaves the CTA row below. */}
           <div className={styles.slotShare} ref={shareSlotRef}>
+            {/* A15.17 (2026-10-01, decided by Antoine): the owner's page ended
+                on this README block — a <pre> of Markdown for developers, the
+                last and lowest thing on a desktop. Folded, and before the
+                share card: the block ends on sharing. */}
+            {isOwner && badge ? (
+              <Disclosure summary={tc(t.badgeCaption, locale)} size="sm" data-testid="badge-fold">
+                <BadgeSnippet
+                  src={badge.src}
+                  alt={badge.alt}
+                  markdown={badge.markdown}
+                  lead={tc(t.badgeLead, locale)}
+                  copyLabel={tc(t.badgeCopy, locale)}
+                  copiedLabel={tc(t.badgeCopied, locale)}
+                />
+              </Disclosure>
+            ) : null}
             <ShareCard
               data-testid="share-card"
               src={shareImageSrc}
@@ -730,17 +813,6 @@ export function ResultView({
               saveHref={shareImageSrc}
               saveFileName={`tour-de-growth-${total}.png`}
             />
-            {isOwner && badge ? (
-              <BadgeSnippet
-                src={badge.src}
-                alt={badge.alt}
-                markdown={badge.markdown}
-                caption={tc(t.badgeCaption, locale)}
-                lead={tc(t.badgeLead, locale)}
-                copyLabel={tc(t.badgeCopy, locale)}
-                copiedLabel={tc(t.badgeCopied, locale)}
-              />
-            ) : null}
           </div>
         </div>
       </main>

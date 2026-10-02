@@ -19,11 +19,16 @@ import {
   type EngineEntryDetail,
   ENGINE_EXPORT_FORMATS,
   ENGINE_EXPORTED_EVENT,
+  ENGINE_MONTH_STARTED_EVENT,
   ENGINE_OPENED_EVENT,
   ENGINE_REQUEST_COPIED_EVENT,
+  ENGINE_SALES_STAGES,
+  ENGINE_SETUP_DETAILS,
+  ENGINE_SETUP_EVENT,
   ENGINE_STAGE_SAVED_EVENT,
   ENGINE_STAGES,
   ENGINE_TOUR_LINKED_EVENT,
+  type EngineSetupDetail,
   engineEventPaths,
 } from "./goatcounter";
 import {
@@ -47,6 +52,7 @@ import {
   GAME_STARTED_EVENT,
   GAME_TOUR_LOOP_EVENT,
   GAME_VOICE_EVENT,
+  gameEndingDetail,
   gameEventPaths,
   gameStartedDetail,
   type GameEntryDetail,
@@ -54,7 +60,7 @@ import {
   type GameResumeDetail,
   type GameStartFrom,
 } from "@/lib/game/events";
-import type { EndingId, Mood } from "@/lib/game/types";
+import type { EndingId, LevelSlug, Mood } from "@/lib/game/types";
 
 // Server-only — never import this from a "use client" component.
 // GOATCOUNTER_API_TOKEN is a GoatCounter API key with the "read stats"
@@ -123,11 +129,14 @@ export interface GameFunnelStats {
   entries: Record<GameEntryDetail, number>;
   /** `game_started/<level>/<from>`, summed over levels: fresh years only, never a resume. */
   started: Record<GameStartFrom, number>;
+  /** The same starts, per level and summed over doors. */
+  startedByLevel: Record<LevelSlug, number>;
   /** Quarters 1-4 run (`game_quarter/<q>`), in order — where players stop. */
   quartersRun: number[];
   /** CEO calls hung up per quarter (`game_hangup/<q>`). */
   hangups: number[];
-  endings: Record<EndingId, number>;
+  /** `game_ending/<level>/<id>`: each level's endings apart — a fine at Flixo is not a settlement at Pédalix. */
+  endings: Record<LevelSlug, Record<EndingId, number>>;
   orders: Record<GameOrderOutcome, number>;
   voices: Record<Mood, number>;
   resume: Record<GameResumeDetail, number>;
@@ -147,14 +156,20 @@ export interface GameFunnelStats {
 export interface EngineFunnelStats {
   /** `engine_opened` — the island's first view in a session. */
   opened: number;
+  /** `engine_setup/<motions>` — the motions an engine was set up with, or changed to (C25 Q14). */
+  setup: Record<EngineSetupDetail, number>;
   /** `engine_stage_saved/<stage>` — first number saved in that stage, once a session. */
   stagesSaved: Record<(typeof ENGINE_STAGES)[number], number>;
+  /** `engine_stage_saved/slg-<stage>` — the same, in sales-assisted (Q14). */
+  stagesSavedSlg: Record<(typeof ENGINE_STAGES)[number], number>;
+  /** `engine_month_started` — the next month was started: the series in use (§19.12). */
+  monthStarted: number;
   requestsCopied: number;
   deckOpened: number;
-  /** `engine_exported/<format>` — files downloaded, or the deck's text copied. */
+  /** `engine_exported/<format>` — files downloaded (a reminder and the table's template included), or the deck's text copied. */
   exported: Record<(typeof ENGINE_EXPORT_FORMATS)[number], number>;
   tourLinked: number;
-  /** `engine_entry_clicked/<where>` — where the openings come from (A7.9, A7.4). */
+  /** `engine_entry_clicked/<where>` — where the openings come from (A7.9, A7.4, §19.10). */
   entries: Record<EngineEntryDetail, number>;
 }
 
@@ -334,8 +349,8 @@ export async function fetchFunnelWindow(startISO: string, label: string): Promis
   };
 }
 
-function tally<K extends string>(keys: readonly K[], countOf: (key: K) => number): Record<K, number> {
-  return Object.fromEntries(keys.map((k) => [k, countOf(k)])) as Record<K, number>;
+function tally<K extends string, V = number>(keys: readonly K[], valueOf: (key: K) => V): Record<K, V> {
+  return Object.fromEntries(keys.map((k) => [k, valueOf(k)])) as Record<K, V>;
 }
 
 function gameStats(count: (path: string) => number): GameFunnelStats {
@@ -344,9 +359,14 @@ function gameStats(count: (path: string) => number): GameFunnelStats {
     started: tally(GAME_START_FROM, (from) =>
       GAME_LEVEL_SLUGS.reduce((n, slug) => n + count(`${GAME_STARTED_EVENT}/${gameStartedDetail(slug, from)}`), 0),
     ),
+    startedByLevel: tally(GAME_LEVEL_SLUGS, (slug) =>
+      GAME_START_FROM.reduce((n, from) => n + count(`${GAME_STARTED_EVENT}/${gameStartedDetail(slug, from)}`), 0),
+    ),
     quartersRun: GAME_QUARTERS.map((q) => count(`${GAME_QUARTER_EVENT}/${q}`)),
     hangups: GAME_QUARTERS.map((q) => count(`${GAME_HANGUP_EVENT}/${q}`)),
-    endings: tally(GAME_ENDINGS, (e) => count(`${GAME_ENDING_EVENT}/${e}`)),
+    endings: tally(GAME_LEVEL_SLUGS, (slug) =>
+      tally(GAME_ENDINGS, (e) => count(`${GAME_ENDING_EVENT}/${gameEndingDetail(slug, e)}`)),
+    ),
     orders: tally(GAME_ORDER_OUTCOMES, (o) => count(`${GAME_ORDER_EVENT}/${o}`)),
     voices: tally(GAME_MOODS, (m) => count(`${GAME_VOICE_EVENT}/${m}`)),
     resume: tally(GAME_RESUME_DETAILS, (d) => count(`${GAME_RESUME_EVENT}/${d}`)),
@@ -360,7 +380,10 @@ function gameStats(count: (path: string) => number): GameFunnelStats {
 function engineStats(count: (path: string) => number): EngineFunnelStats {
   return {
     opened: count(ENGINE_OPENED_EVENT),
+    setup: tally(ENGINE_SETUP_DETAILS, (motions) => count(`${ENGINE_SETUP_EVENT}/${motions}`)),
     stagesSaved: tally(ENGINE_STAGES, (stage) => count(`${ENGINE_STAGE_SAVED_EVENT}/${stage}`)),
+    stagesSavedSlg: tally(ENGINE_STAGES, (stage) => count(`${ENGINE_STAGE_SAVED_EVENT}/${ENGINE_SALES_STAGES[ENGINE_STAGES.indexOf(stage)]}`)),
+    monthStarted: count(ENGINE_MONTH_STARTED_EVENT),
     requestsCopied: count(ENGINE_REQUEST_COPIED_EVENT),
     deckOpened: count(ENGINE_DECK_OPENED_EVENT),
     exported: tally(ENGINE_EXPORT_FORMATS, (format) => count(`${ENGINE_EXPORTED_EVENT}/${format}`)),

@@ -13,6 +13,36 @@
   border-radius: var(--radius-tag);
   padding: 6px 10px;
   rotate: -1.5deg;
+  /* A badge, never two lines: « 🔥 ROAST » over « MODE » is what a squeezed
+     header made of it. */
+  white-space: nowrap;
+}
+
+/*
+ * The result's states (the Deep dive tag, the roast badge): in the header
+ * from 761px, on their own line at the top of the page below — see
+ * `stateTags` in ResultView.tsx. In the header they stay plain items of
+ * `.headerRight`, spaced by its gap.
+ */
+.headerTags {
+  display: contents;
+}
+
+.stateTags {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .headerTags {
+    display: none;
+  }
+
+  .stateTags {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+  }
 }
 
 .main {
@@ -186,22 +216,22 @@
 .layout[data-owner] .slotShare { order: 7; }
 .layout[data-owner] .slotCta { order: 8; }
 
-/* The share card, and under it the owner's README badge (CHANTIERS.md A3.1),
-   at the left column's own 22px rhythm. */
+/* The share card, and above it the owner's README badge (CHANTIERS.md A3.1),
+   folded since A15.17 so the block ends on sharing, at the left column's own
+   22px rhythm. */
 .slotShare {
   display: flex;
   flex-direction: column;
   gap: 22px;
 }
 
-.pillarGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-
-.spanFull {
-  grid-column: 1 / -1;
+/* The route profile and, right under it, its table: the score sheet
+   (design system extension 05, A16). One column at every width — the
+   phone's two-up grid of chips left Revenue alone on a third row. */
+.pillars {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
 }
 
 
@@ -250,6 +280,16 @@
   font: var(--body-sm);
   color: var(--text-muted);
   margin: 0;
+}
+
+/* Engine spec §19.10: the owner's way into the engine, under the action. */
+.engineEntry {
+  font: var(--body-sm);
+  margin: 0;
+}
+
+.engineEntry a {
+  color: var(--text-link);
 }
 
 .disclaimer {
@@ -327,16 +367,18 @@
     gap: 32px;
   }
 
-  .pillarGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .spanFull {
-    grid-column: auto;
-  }
-
+  /*
+   * Two cards side by side only when each gets 240px: the grid lays out on
+   * its own width, not the window's. It was `1fr 1fr` from 761px, and at
+   * 761 the right column is 249px (713 − 420 − 44), so two cards of 120px
+   * held 76px of text a line, and a word longer than that — the sample's —
+   * pushed the page 8px sideways (1px at 768, an iPad held upright).
+   * `auto-fill`, not `auto-fit`: a roast's lone strength keeps its half
+   * width at full size, as with `1fr 1fr`. At full width (a 528px column)
+   * this is still two columns of 260.
+   */
   .cardGrid {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
   }
 
   .ctaRow {

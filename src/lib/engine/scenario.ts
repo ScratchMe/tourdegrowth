@@ -27,7 +27,12 @@ import { countsOf, currentSnapshot, entryOf, knownIn } from "./values";
  * - Activation: the active at day 30 and the paying are among the
  *   activated, so both grow in the same proportion — never above the
  *   activated.
- * - Paid conversion: the new rate, then scaled by activation like above.
+ * - Day-30 retention (§19.3.1, A14 T3): its target is the share of sign-ups
+ *   still active at day 30, never above the activated; the paying are
+ *   assumed among them, so they follow it — the leak slide's own rule
+ *   (`impact.ts`). When it moves, it carries the paying, activation only
+ *   capping it.
+ * - Paid conversion: the new rate, then scaled by activation (or day 30) like above.
  * - ARPA: what NEW customers pay; the MRR already there keeps its price.
  * - Churn, contraction, expansion: the monthly revenue retention of the
  *   base. Churn is logo churn standing in for revenue churn (as in
@@ -43,12 +48,13 @@ import { countsOf, currentSnapshot, entryOf, knownIn } from "./values";
 
 export interface LeverView {
   id: LeverId;
-  /** Today's value in the display unit (percent, or the engine's currency for ARPA). null = not known: the lever can't move. */
+  /** Today's value in the display unit (percent, the engine's currency for ARPA and ACV, opportunities for the link). null = not known: the lever can't move. */
   today: Interval | null;
   /** The target under test, or null when the lever hasn't been moved. */
   target: number | null;
   direction: "higher" | "lower";
-  unit: "percent" | "money";
+  /** `count`: the link, a whole number of opportunities per quarter (C25 Q7). */
+  unit: "percent" | "money" | "count";
   /** Where the slider may go — a range around today, never below 0, never past 100 for a share. */
   min: number;
   max: number;
@@ -93,6 +99,7 @@ export type ScenarioAssumption =
   | "signup-same-visitors"
   | "referral-on-top"
   | "activation-drives-downstream"
+  | "d30-drives-paying"
   | "arpa-new-customers"
   | "churn-as-revenue"
   | "expansion-unknown"
@@ -110,7 +117,8 @@ export interface Scenario {
   assumptions: ScenarioAssumption[];
 }
 
-const PERCENT_LEVERS: readonly LeverId[] = LEVER_IDS.filter((id) => id !== "rev.arpa");
+/** The levers priced in the engine's currency: what new customers pay, what a new contract is worth. */
+const MONEY_LEVERS: readonly LeverId[] = ["rev.arpa", "slg.rev.acv"];
 const LOWER_IS_BETTER: readonly LeverId[] = ["ret.logo-churn", "rev.contraction"];
 
 function known(state: EngineState, id: MetricId, ctx: EngineCalcContext): Interval | null {
@@ -125,9 +133,9 @@ const clampHi = (i: Interval, cap: Interval | number): Interval => {
 const nonNegative = (i: Interval): Interval => mapBounds(i, (v) => Math.max(0, v));
 const round = (v: number, step: number) => Math.round(v / step) * step;
 
-/** The slider's step: a tenth of a point under 10 %, a point above; 1 € under 100 € of ARPA, 5 € above. */
+/** The slider's step: a tenth of a point under 10 %, a point above; 1 € under 100 € of ARPA (or ACV), 5 € above. */
 function stepOf(id: LeverId, mid: number): number {
-  if (id === "rev.arpa") return mid >= 100 ? 5 : 1;
+  if (MONEY_LEVERS.includes(id)) return mid >= 100 ? 5 : 1;
   return mid >= 10 ? 1 : 0.1;
 }
 
@@ -140,7 +148,7 @@ function snap(v: number, step: number): number {
 function domain(id: LeverId, today: Interval): { min: number; max: number; step: number } {
   const mid = (today.lo + today.hi) / 2;
   const step = stepOf(id, mid);
-  if (id === "rev.arpa") return { min: Math.max(step, snap(mid / 2, step)), max: Math.max(step * 2, snap(mid * 2, step)), step };
+  if (MONEY_LEVERS.includes(id)) return { min: Math.max(step, snap(mid / 2, step)), max: Math.max(step * 2, snap(mid * 2, step)), step };
   const bounded = shapeOf(id).bounded;
   const ceiling = bounded ? 100 : 400;
   if (LOWER_IS_BETTER.includes(id)) return { min: 0, max: Math.min(ceiling, Math.max(1, snap(mid * 2, step))), step };
@@ -148,11 +156,21 @@ function domain(id: LeverId, today: Interval): { min: number; max: number; step:
   return { min: Math.max(0, snap(mid / 2, step)), max: Math.min(ceiling, Math.max(step * 10, snap(mid * 3, step))), step };
 }
 
-/** Every lever with its value today and the target under test. A target on an unknown lever is ignored — there is nothing to move from. */
-export function leverViews(state: EngineState, targets: Partial<Record<LeverId, number>>, ctx: EngineCalcContext): LeverView[] {
-  return LEVER_IDS.map((id) => {
+/**
+ * Every lever with its value today and the target under test. A target on an
+ * unknown lever is ignored — there is nothing to move from. `ids` defaults to
+ * self-serve's; sales-assisted passes its own rate and money levers
+ * (`slg-scenario.ts`), and builds the link's itself.
+ */
+export function leverViews(
+  state: EngineState,
+  targets: Partial<Record<LeverId, number>>,
+  ctx: EngineCalcContext,
+  ids: readonly Exclude<LeverId, "link.pql-handoff">[] = LEVER_IDS,
+): LeverView[] {
+  return ids.map((id) => {
     const today = known(state, id, ctx);
-    const unit = PERCENT_LEVERS.includes(id) ? "percent" : "money";
+    const unit = MONEY_LEVERS.includes(id) ? "money" : "percent";
     const direction = LOWER_IS_BETTER.includes(id) ? "lower" : "higher";
     if (!today) return { id, today: null, target: null, direction, unit, min: 0, max: 0, step: 1 };
     const { min, max, step } = domain(id, today);
@@ -163,14 +181,14 @@ export function leverViews(state: EngineState, targets: Partial<Record<LeverId, 
 }
 
 /** The value a lever takes in the projection: its target, else today's. */
-function valueOf(levers: readonly LeverView[], id: LeverId, projected: boolean): Interval | null {
+export function valueOf(levers: readonly LeverView[], id: LeverId, projected: boolean): Interval | null {
   const lever = levers.find((l) => l.id === id);
   if (!lever?.today) return null;
   return projected && lever.target !== null ? point(lever.target) : lever.today;
 }
 
 /** MRR at the end of the month: typed (ARPA's numerator, or the shared base), else ARPA × the paying customers. */
-function mrrToday(state: EngineState, ctx: EngineCalcContext): Interval | null {
+export function mrrToday(state: EngineState, ctx: EngineCalcContext): Interval | null {
   const snapshot = currentSnapshot(state);
   const typed = knownSharedCount(snapshot, "mrrEnd");
   if (typed) return point(typed.value);
@@ -208,7 +226,7 @@ function projectMrr(mrr: Interval | null, newMrr: Interval | null, nrr: Interval
  * intervals instead would ignore that they move together, and turn an exact
  * « × 4/3 » into « × 0.9 to 2 ».
  */
-function correlatedRatio(today: Interval, after: (v: number) => number): Interval {
+export function correlatedRatio(today: Interval, after: (v: number) => number): Interval {
   const ratio = (v: number) => (v > 0 ? after(v) / v : 1);
   const a = ratio(today.lo);
   const b = ratio(today.hi);
@@ -258,16 +276,25 @@ export function buildScenario(state: EngineState, targets: Partial<Record<LeverI
   if (act && tAct !== null) assumptions.add("activation-drives-downstream");
   const actAfter = act && tAct !== null ? point(tAct) : act;
 
-  // The paid rate after: its target (or today's), carried by activation, never above the activated.
+  // Day 30 after, when its lever moved: its target, never above the activated (§19.3.1).
+  const tD30 = target("ret.d30");
+  const d30Target = d30Today && tD30 !== null ? (actAfter ? Math.min(tD30, actAfter.hi) : tD30) : null;
+  const d30Mid = d30Today ? (d30Today.lo + d30Today.hi) / 2 : 0;
+  if (d30Target !== null) assumptions.add("d30-drives-paying");
+
+  // The paid rate after: its target (or today's), carried by day 30 when it moved, else by activation — never above either.
   const paid = today("rev.paid-conversion");
   const tPaid = target("rev.paid-conversion");
   const paidAfter = (v: number) => {
     const base = tPaid ?? v;
-    const scaled = act && tAct !== null ? base * (tAct / ((act.lo + act.hi) / 2)) : base;
-    return actAfter ? Math.min(scaled, actAfter.hi) : scaled;
+    const scaled =
+      d30Target !== null && d30Mid > 0 ? base * (d30Target / d30Mid) : act && tAct !== null ? base * (tAct / ((act.lo + act.hi) / 2)) : base;
+    const cap = d30Target ?? actAfter?.hi;
+    return cap !== undefined ? Math.min(scaled, cap) : scaled;
   };
-  // Without a paid rate, the payers still follow activation (they are among the activated).
-  const fPaid = paid ? correlatedRatio(paid, paidAfter) : fAct;
+  // Without a paid rate, the payers still follow day 30 when it moved, else activation (they are among both).
+  const fD30 = d30Today && d30Target !== null ? correlatedRatio(d30Today, () => d30Target) : null;
+  const fPaid = paid ? correlatedRatio(paid, paidAfter) : (fD30 ?? fAct);
   const fPayers = mul(mul(fSignup, fRefSignups), fPaid);
 
   // --- The funnel, in people per month --------------------------------------------
@@ -276,7 +303,14 @@ export function buildScenario(state: EngineState, targets: Partial<Record<LeverI
     const visitors = signupsToday && signupRate ? mul(div(scale(signupsToday, 100), signupRate)!, projected ? fRefSignups : one) : null;
     const shareNow = projected && tRef !== null ? point(tRef) : referredShare;
     const actNow = projected ? actAfter : act;
-    const d30Rate = d30Today && projected && act && tAct !== null ? clampHi(mul(d30Today, fAct), point(tAct)) : d30Today;
+    const d30Rate =
+      !projected || !d30Today
+        ? d30Today
+        : d30Target !== null
+          ? point(d30Target)
+          : act && tAct !== null
+            ? clampHi(mul(d30Today, fAct), point(tAct))
+            : d30Today;
     const paidRate = paid ? (projected ? mapBounds(paid, paidAfter) : paid) : null;
     const of = (rate: Interval | null) => (signups && rate ? mul(signups, scale(rate, 1 / 100)) : null);
     return { perHundred: monthSignups === null, visitors, signups, referred: of(shareNow), activated: of(actNow), d30: of(d30Rate), paying: of(paidRate) };
@@ -327,6 +361,7 @@ export function buildScenario(state: EngineState, targets: Partial<Record<LeverI
     "signup-same-visitors",
     "referral-on-top",
     "activation-drives-downstream",
+    "d30-drives-paying",
     "arpa-new-customers",
     "same-spend",
     "churn-as-revenue",

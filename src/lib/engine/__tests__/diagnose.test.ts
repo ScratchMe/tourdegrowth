@@ -4,7 +4,7 @@ import { comparatorOf, diagnose, positionOf } from "../diagnose";
 import { rankingImpact } from "../impact";
 import type { EngineState } from "../types";
 import { CTX_FR } from "./props";
-import { EXAMPLE_EXPECTED, estimated, exampleState, measured, ratio, withEntry, withTarget, withoutTargets } from "./fixtures";
+import { EXAMPLE_EXPECTED, estimated, exampleState, measured, missing, ratio, withEntry, withTarget, withoutTargets } from "./fixtures";
 
 // Engine spec §13.1 "diagnose". Non-vacuity, each measured on its own:
 // - letting a reference name a value INSIDE it (positionOf's `v.hi < c.lo`
@@ -117,23 +117,42 @@ describe("diagnose — the rules", () => {
     expect(diagnose(s, CTX_FR).blind).toEqual(["ret.d30", "ret.logo-churn"]);
   });
 
-  it("day 30 and the referred share are never priced in money", () => {
+  it("day 30 and the referred share are priced on the flows' N and ARPA (§19.3): the same identity, the same ranking", () => {
     let s = withEntry(exampleState(), "ret.d30", measured(ratio(40, 800)));
     s = withTarget(s, "ret.d30", 20);
     s = withEntry(s, "ref.referred-share", measured(ratio(8, 800)));
     s = withTarget(s, "ref.referred-share", 10);
+    // N = 42 (the CAC's count), ARPA = 120 €. Day 30: 42 × (20/5 − 1) × 120. Referred: 42 × (10 − 1)/(100 − 10) × 120.
+    const d30 = rankingImpact(s, "ret.d30", 20, CTX_FR);
+    expect(d30.gap!.lo).toBeCloseTo(3);
+    expect(d30.mrr!.lo).toBeCloseTo(15_120);
+    const referred = rankingImpact(s, "ref.referred-share", 10, CTX_FR);
+    expect(referred.gap!.lo).toBeCloseTo(0.1);
+    expect(referred.mrr!.lo).toBeCloseTo(504);
     const d = diagnose(s, CTX_FR);
     for (const id of ["ret.d30", "ref.referred-share"] as const) {
       expect(d.positions[id].position).toBe("below");
-      expect(d.positions[id].impact).toBeUndefined();
-      expect(rankingImpact(s, id, 20, CTX_FR)).toEqual({});
+      expect(d.positions[id].impact?.kind, id).toBe("new-mrr");
     }
-    expect(d.named).toEqual(["act.rate"]);
-    expect(d.belowUnpriced).toEqual(["ret.d30", "ref.referred-share"]);
+    expect(d).toMatchObject({ state: "clear", named: ["ret.d30"], basis: "mrr", belowUnpriced: [] });
+    // Without ARPA, the relative gap ranks them with the flows: 3 against activation's 0,11 and the referred 0,1.
+    const noArpa = diagnose(withEntry(s, "rev.arpa", missing("no-access", "meeting")), CTX_FR);
+    expect(noArpa).toMatchObject({ state: "clear", named: ["ret.d30"], basis: "relative-gap" });
+  });
+
+  it("a referred share past a 50 % target stands apart, named but unpriced, and the money ranking stays (§19.3.2)", () => {
+    let s = withEntry(exampleState(), "ref.referred-share", measured(ratio(8, 800)));
+    s = withTarget(s, "ref.referred-share", 60);
+    expect(rankingImpact(s, "ref.referred-share", 60, CTX_FR)).toEqual({});
+    const d = diagnose(s, CTX_FR);
+    expect(d.positions["ref.referred-share"].impact).toBeUndefined();
+    // Activation's ~560 € and churn's 240 € still rank in money: the share past its ceiling doesn't drag the basis.
+    expect(d).toMatchObject({ named: ["act.rate"], basis: "mrr", belowUnpriced: ["ref.referred-share"] });
+    // At 50 % exactly, it is priced: (50 − 1)/(100 − 50) = 0,98.
+    expect(rankingImpact(withTarget(s, "ref.referred-share", 50), "ref.referred-share", 50, CTX_FR).gap!.lo).toBeCloseTo(0.98);
     // Only unpriceable stages below: one is named, without a basis.
     const only = withEntry(withEntry(s, "act.rate", measured(ratio(200, 800))), "ret.logo-churn", measured(ratio(6, 400), tool));
-    const onlyUnpriced = diagnose(withEntry(only, "ref.referred-share", measured(ratio(120, 800))), CTX_FR);
-    expect(onlyUnpriced).toMatchObject({ state: "clear", named: ["ret.d30"], basis: "none" });
+    expect(diagnose(only, CTX_FR)).toMatchObject({ state: "clear", named: ["ref.referred-share"], basis: "none" });
   });
 
   it("no reference ever names, not even the two that used to (C1); a team target always does", () => {

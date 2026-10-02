@@ -2,6 +2,7 @@ import type { Page } from "@playwright/test";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import { METRIC_SHAPES } from "@/lib/engine/catalog-shape";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
+import { storedEngineEntry } from "./engine-helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
 // owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
@@ -16,7 +17,6 @@ test.beforeEach(async ({ context }) => {
  * now be changed after the fact. Behaviour, read from the device's storage
  * and from what the next screen shows — never from the component's state.
  */
-const STORAGE_KEY = "tdg.engine.v1";
 
 type Stored = {
   state: {
@@ -26,10 +26,7 @@ type Stored = {
 };
 
 async function stored(page: Page): Promise<Stored | null> {
-  return page.evaluate((key) => {
-    const raw = window.localStorage.getItem(key);
-    return raw ? JSON.parse(raw) : null;
-  }, STORAGE_KEY);
+  return storedEngineEntry<Stored>(page);
 }
 
 async function open(page: Page, locale: "en" | "fr" = "en"): Promise<void> {
@@ -251,3 +248,98 @@ async function boardSheet(page: Page, stage: string, metricDomId: string) {
   await expect(sheet).toBeVisible();
   return sheet;
 }
+
+/*
+ * A15.2 (2026-10-01): a target is written when its box is left, and a box
+ * holding text it cannot read used to write `null` — erasing the stored
+ * target while the box still showed the typo and its message. Both target
+ * fields: the step screen's and the board sheet's. Emptying the box is still
+ * how a target is removed.
+ *
+ * Non-vacuity (2026-10-01), one guard at a time: without the step screen's,
+ * the test falls on the step's `toBe(25)` (`undefined`); without the sheet's,
+ * on the sheet's, the step part passing. Each field is held on its own.
+ */
+test("a typo in a target keeps the stored target, on the step screen and in a sheet; an empty box removes it", async ({ page }) => {
+  const target = async () => (await stored(page))?.state.snapshots[0]?.targets["act.rate"];
+  await open(page);
+  await page.getByTestId("engine-setup-start").click();
+
+  const step = page.locator("#engine-step-target-act-rate");
+  await step.fill("25");
+  await step.blur();
+  await expect.poll(target).toBe(25);
+  // Not « 25 %% » any more: since A15.10 a unit sign is read, and that reads as 25.
+  await step.fill("25 kg");
+  await step.blur();
+  await expect(page.getByText(ENGINE_COPY.workbench.notANumber.en)).toBeVisible();
+  expect(await target()).toBe(25);
+
+  // The same field in a sheet, after a reload: the target came back from the device.
+  await page.reload();
+  await expect(page.getByTestId("engine-board")).toBeVisible();
+  const tab = page.getByTestId("engine-tab-activation");
+  if ((await tab.getAttribute("aria-selected")) !== "true") await tab.click();
+  const toggle = page.getByTestId("engine-metric-act-rate");
+  if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.click();
+  const box = page.locator("#engine-act-rate-target");
+  await expect(box).toHaveValue("25");
+  await box.fill("abc");
+  await box.blur();
+  await expect(page.getByTestId("engine-sheet-act-rate").getByText(ENGINE_COPY.workbench.notANumber.en)).toBeVisible();
+  expect(await target()).toBe(25);
+
+  await box.fill("");
+  await box.blur();
+  await expect.poll(target).toBeUndefined();
+});
+
+/*
+ * A15.9 and A15.10 (2026-10-01). The base step skipped a count that was not
+ * a whole number above zero and went on, so the person never saw it was not
+ * kept: it now stays, says why, and puts the focus on the count. And a box
+ * that shows « % » accepts « 25 % » (Postel): a spreadsheet's cell, pasted.
+ *
+ * Non-vacuity: see A15's sabotage build, recorded in the journal.
+ */
+for (const locale of ["en", "fr"] as const) {
+  test(`the base step keeps nothing in silence: zero or a decimal stops it, on the count (${locale})`, async ({ page }) => {
+    await open(page, locale);
+    await page.getByTestId("engine-setup-start").click();
+    const steps = page.getByTestId("engine-steps");
+    await page.getByTestId("engine-steps-next").click();
+    await expect(steps).toHaveAttribute("data-phase", "base");
+
+    const cohort = page.locator("#engine-base-cohort");
+    await cohort.fill("0");
+    await page.getByTestId("engine-steps-next").click();
+    await expect(steps).toHaveAttribute("data-phase", "base");
+    await expect(page.getByText(ENGINE_COPY.steps.countPositive[locale])).toBeVisible();
+    await expect(cohort).toBeFocused();
+
+    await cohort.fill("800");
+    const month = page.locator("#engine-base-month");
+    await month.fill(locale === "fr" ? "12,5" : "12.5");
+    // Left first: its message appears as the box loses focus and moves the
+    // button down — a click begun before that lands on nothing.
+    await month.blur();
+    await page.getByTestId("engine-steps-next").click();
+    await expect(steps).toHaveAttribute("data-phase", "base");
+    await expect(month).toBeFocused();
+
+    await month.fill("1000");
+    await page.getByTestId("engine-steps-next").click();
+    await expect(steps).toHaveAttribute("data-phase", "number");
+    expect((await stored(page))?.state.snapshots[0]?.base).toEqual({ cohortSignups: 800, monthSignups: 1000 });
+  });
+}
+
+test("a target typed with its percent sign is read, the sign dropped from the box", async ({ page }) => {
+  await open(page);
+  await page.getByTestId("engine-setup-start").click();
+  const target = page.locator("#engine-step-target-act-rate");
+  await target.fill("25 %");
+  await target.blur();
+  await expect.poll(async () => (await stored(page))?.state.snapshots[0]?.targets["act.rate"]).toBe(25);
+  await expect(target).toHaveValue("25");
+});

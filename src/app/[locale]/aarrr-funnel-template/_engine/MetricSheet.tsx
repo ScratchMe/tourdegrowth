@@ -1,30 +1,35 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/core/Button";
 import { Choices } from "@/components/core/Choices";
 import { Field } from "@/components/core/Field";
 import { FieldRow } from "@/components/core/FieldRow";
 import { NumberField } from "@/components/core/NumberField";
+import { isUnreadableNumber } from "@/lib/forms/number";
 import { Select } from "@/components/core/Select";
 import { Tag } from "@/components/core/Tag";
 import { TextArea } from "@/components/core/TextArea";
-import { CANDIDATE_IDS, TEXT_LIMITS, shapeOf, type MetricShape } from "@/lib/engine/catalog-shape";
-import { BASIS_KEY, EFFORT_KEY, ROLE_KEY, STATUS_KEY, type ResolvedMetric } from "@/lib/engine/strings";
-import type { CandidateId, EstimateBasis, MetricId, RoleId } from "@/lib/engine/types";
-import { isImmature, nextMonth, windowDaysOf } from "@/lib/engine/cohort";
+import { TEXT_LIMITS, motionOfMetric, shapeOf, shapesOf, type MetricShape } from "@/lib/engine/catalog-shape";
+import { BASIS_KEY, EFFORT_KEY, ROLE_KEY, SHEET_BASES, STATUS_KEY, type ResolvedMetric } from "@/lib/engine/strings";
+import type { CandidateId, MetricEntry, MetricId, RoleId } from "@/lib/engine/types";
+import { isImmature, nextMonth, periodRangeOf, windowDaysOf } from "@/lib/engine/cohort";
 import { comparatorOf } from "@/lib/engine/diagnose";
-import { formatInterval } from "@/lib/engine/format";
+import { formatInterval, formatMonthRange, formatNumber, roundDisplay } from "@/lib/engine/format";
 import { isRequestStale } from "@/lib/engine/request";
 import { blockingCheck } from "@/lib/engine/sanity";
-import { positionLabel, statusQuestionOf } from "@/lib/engine/phrases";
+import { hybridTrapOf, isCandidate as isCandidateId, numbered, positionIn, positionLabel, statusQuestionOf } from "@/lib/engine/phrases";
+import { smallSampleOf } from "@/lib/engine/relays";
+import { proposedFromBefore } from "@/lib/engine/series";
+import { slgBaseNoun } from "@/lib/engine/sentences";
 import { knownIn } from "@/lib/engine/values";
 import { SHARED_COUNTS, knownSharedCount, sharedCountAt } from "@/lib/engine/shared-counts";
 import { ComparisonStrip } from "./ComparisonStrip";
 import { MissingTriage } from "./MissingTriage";
 import { RequestCopy } from "./RequestCopy";
-import { draftFromEntry, entryFromDraft, isWideRange, type DraftProblem, type SheetDraft, type SheetMode } from "./sheet-draft";
+import { draftFromEntry, entryFromDraft, isWideRange, withProposals, type DraftProblem, type SheetDraft, type SheetMode } from "./sheet-draft";
 import { isRule, missingLabel, ruleMessage } from "./sheet-problems";
+import { draftKey, dropDraft, keepDraft, keptDraft } from "./sheet-drafts";
 import { moneyUnit, percentUnit, wordUnit, type NumberUnit } from "./sources";
 import { catalogFill, daysBetween, domId, fill, formatMonth, joinList, metricById, midSentence, sourceLabel } from "./text";
 import { ValueEditor } from "./ValueEditor";
@@ -32,7 +37,9 @@ import type { EngineActions, EngineView } from "./view";
 import styles from "./Sheet.module.css";
 
 const ROLES = Object.keys(ROLE_KEY) as RoleId[];
-const BASES = Object.keys(BASIS_KEY) as EstimateBasis[];
+
+/** The boxes where Enter submits a form, in a browser (HTML's implicit submission): not a checkbox, a button or a textarea. */
+const TEXT_INPUTS = new Set(["text", "search", "url", "email", "tel", "number"]);
 
 /** The unit inside a bound's or a target's box, placed by the page's language — a duration's word in the number's grammatical number (A11.1). */
 function unitOf(shape: MetricShape, view: EngineView, value: number | null): NumberUnit {
@@ -91,8 +98,13 @@ export function MetricSheet({
   // A count several numbers share is typed once (shared-counts.ts): an empty side of this
   // number's counts starts from it, and the field says so.
   const shared = sharedSides(id, snapshot);
+  // An unsaved draft comes back when the sheet is remounted (A15.12), in its own month (A14 T2).
+  const key = draftKey(id, entry, snapshot.referenceMonth);
   const [draft, setDraft] = useState<SheetDraft>(() => {
-    const d = draftFromEntry(entry, shape);
+    const kept = keptDraft(key);
+    if (kept) return kept;
+    // A new month offers the month before's definition and source, never its value (§19.2.2).
+    const d = withProposals(draftFromEntry(entry, shape), proposedFromBefore(view.state, id));
     if (d.kind !== "ratio") return d;
     return {
       ...d,
@@ -101,6 +113,18 @@ export function MetricSheet({
     };
   });
   const [attempted, setAttempted] = useState(false);
+  // A refused save moves the focus to the first field it names (A15.3): its
+  // label and its message are read out with it, where a line under the
+  // button, outside any live region, said nothing to a screen reader. Counted,
+  // so a second refusal moves it again.
+  const [refusals, setRefusals] = useState(0);
+  const sheetRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (refusals === 0) return;
+    const root = sheetRef.current;
+    const first = root?.querySelector<HTMLElement>('[aria-invalid="true"]') ?? root?.querySelector<HTMLElement>("[data-save-problems]");
+    first?.focus();
+  }, [refusals]);
   // Every refusal reads the same to the person — the device kept nothing, save a file — whether
   // it was the quota, storage switched off, or a store another tab left unreadable.
   const [outcome, setOutcome] = useState<"saved" | "failed" | null>(null);
@@ -108,7 +132,11 @@ export function MetricSheet({
   // read when needed, not scrolled past every time (Antoine, 2026-09-25).
   const [whereOpen, setWhereOpen] = useState(false);
   const update = (patch: Partial<SheetDraft>) => {
-    setDraft((current) => ({ ...current, ...patch }));
+    setDraft((current) => {
+      const next = { ...current, ...patch };
+      keepDraft(key, next);
+      return next;
+    });
     setOutcome(null);
   };
 
@@ -123,8 +151,12 @@ export function MetricSheet({
     const built = entryFromDraft(draft, shape, nowIso, options);
     // The engine's own guard, on top of the form's: the same impossibility
     // (more of the part than of the whole) must block here and in an import.
-    if (!built.entry || blockingCheck(built.entry, shape, locale)) return;
+    if (!built.entry || blockingCheck(built.entry, shape, locale)) {
+      setRefusals((n) => n + 1);
+      return;
+    }
     const result = actions.saveEntry(id, built.entry);
+    if (result.ok) dropDraft(key);
     setOutcome(result.ok ? "saved" : "failed");
     if (result.ok) onSaved?.();
   }
@@ -132,7 +164,8 @@ export function MetricSheet({
   // null, not 0, when the definition has no window: the sheet then prints no cohort line at all.
   const windowDays = shape.window ? windowDaysOf(shape, state.setup) : null;
   const variantLabel = metric.variants?.find((v) => v.id === (entry?.variant ?? draft.variant))?.label;
-  const fillCatalog = (text: string) => catalogFill(text, { state, locale, strings, metrics: view.metrics, windowDays, variantLabel });
+  const fillCatalog = (text: string) =>
+    catalogFill(text, { state, locale, strings, metrics: view.metrics, windowDays, variantLabel, period: { id, today: ctx.today } });
   // The count labels carry the same placeholders as the formula ({n},
   // {cohort}, {event}): resolved once here, so the value editor and the two
   // conflicting readings never print a raw "{n}" as a field label.
@@ -153,12 +186,24 @@ export function MetricSheet({
   ];
 
   const eventMeasured = snapshot.metrics["act.event"]?.status === "measured";
-  const isCandidate = (CANDIDATE_IDS as readonly MetricId[]).includes(id);
+  const isCandidate = isCandidateId(id);
   // knownIn grades a cohort number entered on an immature month as approximate (§6.3),
   // exactly as the board row and the peloton read it — one number, one reading.
   const known = knownIn(state, id, ctx);
   const comparator = isCandidate ? comparatorOf(state, id as CandidateId) : undefined;
-  const position = isCandidate ? view.derived.diagnosis.positions[id as CandidateId]?.position : undefined;
+  // Its own motion's diagnosis: a sales-assisted rate sits against sales-assisted's targets (§18.5.2).
+  const motionDiagnosis = view.derived.motions.find((m) => m.motion === motionOfMetric(id))?.diagnosis ?? view.derived.diagnosis;
+  const position = isCandidate ? positionIn(motionDiagnosis, id as CandidateId)?.position : undefined;
+  const hybrid = state.setup.motions.plg && state.setup.motions.slg;
+  // Three months for everything sales-assisted (C25 Q2), « de juin à août 2026 » — and the link, read on the same opportunities.
+  const range = shape.span > 1 ? periodRangeOf(shape, entry, snapshot, state.setup, ctx.today) : null;
+  // « Sur 25 opportunités conclues, un de plus ou de moins bouge le taux de 4 points » (§18.5.1).
+  const sample = shape.scope === "slg" ? smallSampleOf(snapshot, id) : null;
+  const trap = hybridTrapOf(id, state.setup.motions);
+  // The company-wide margin, in the hybrid only, on the two margin sheets (C25 Q4).
+  const marginSheet = hybrid && (id === "rev.gross-margin" || id === "slg.rev.gross-margin");
+  const otherMargin = id === "rev.gross-margin" ? snapshot.metrics["slg.rev.gross-margin"] : snapshot.metrics["rev.gross-margin"];
+  const companyWideElsewhere = companyWide(otherMargin);
   const target = snapshot.targets[id];
   const bench = shape.benchmark;
   // The strip is decorative; this sentence is what it says, in words — said
@@ -173,19 +218,39 @@ export function MetricSheet({
   const requestedAt = entry?.request?.remindedAt ?? entry?.request?.requestedAt;
   const stale = isRequestStale(entry, ctx.today);
 
-  // "Also in Stripe: ARPA, churn" — the other numbers that sit in the same tool.
+  // "Also in Stripe: ARPA, churn" — the other numbers that sit in the same
+  // tool, among the ones this setup asks for (§18.2.1).
+  const shown = new Set<MetricId>(shapesOf(state.setup.motions).map((s) => s.id));
   const alsoIn = metric.where
     .filter((w) => w.source.kind === "tool")
     .map((w) => {
       const tool = w.source.kind === "tool" ? w.source.tool : null;
-      const others = view.metrics.filter((m) => m.id !== id && m.where.some((o) => o.source.kind === "tool" && o.source.tool === tool));
+      const others = view.metrics.filter((m) => m.id !== id && shown.has(m.id) && m.where.some((o) => o.source.kind === "tool" && o.source.tool === tool));
       return { tool, others };
     })
     .filter((x): x is { tool: NonNullable<typeof x.tool>; others: ResolvedMetric[] } => x.tool !== null && x.others.length > 0);
   const [alsoBefore = ""] = strings.sheet.alsoIn.split("{metrics}");
 
   return (
-    <div className={styles.sheet} data-testid={`engine-sheet-${domId(id)}`}>
+    // Enter in a box saves, as on any form (A15.20, Jakob's law, decided by
+    // Antoine on 2026-10-01). Not a <form>: one is a carrier, and if its
+    // submit ever ran without this code (before hydration, or a handler that
+    // throws), the browser would put what was typed in a URL. Nothing typed
+    // in the engine leaves the device (ENGINE.md §11.4, rule 3 in
+    // `engine-boundary.test.ts`). So the key itself, from a text box only,
+    // and only when the Save button would take the click.
+    <div
+      ref={sheetRef}
+      className={styles.sheet}
+      data-testid={`engine-sheet-${domId(id)}`}
+      onKeyDown={(event) => {
+        if (event.key !== "Enter" || event.nativeEvent.isComposing) return;
+        if (!(event.target instanceof HTMLInputElement) || !TEXT_INPUTS.has(event.target.type)) return;
+        if (draft.mode === null || draft.mode === "ask") return;
+        event.preventDefault();
+        save();
+      }}
+    >
       <div className={styles.meta}>
         <Tag tone="outline">{strings.effort[EFFORT_KEY[shape.effort]]}</Tag>
         <a className={styles.definitionLink} href={metric.glossaryHref} target="_blank" rel="noopener">
@@ -199,7 +264,13 @@ export function MetricSheet({
         <p className={styles.formula}>{fillCatalog(metric.formula)}</p>
       </div>
 
-      {shape.flow === "cohort" && windowDays !== null ? (
+      {range ? (
+        <p className={styles.cohort} data-testid="engine-sheet-period">
+          {shape.flow === "cohort" && windowDays !== null
+            ? fill(strings.sheet.periodSlgCohort, { period: formatMonthRange(range, locale, strings.units, "from"), n: windowDays })
+            : fill(strings.sheet.periodSlg, { period: formatMonthRange(range, locale, strings.units, "from") })}
+        </p>
+      ) : shape.flow === "cohort" && windowDays !== null ? (
         <p className={styles.cohort}>
           {fill(strings.sheet.cohortToUse, {
             cohort: formatMonth(snapshot.cohortMonth, locale),
@@ -212,6 +283,37 @@ export function MetricSheet({
 
       {shape.dependsOn === "act.event" && !eventMeasured ? <p className={styles.caveat}>{strings.sheet.dependsOnEvent}</p> : null}
 
+      {sample ? (
+        <p className={styles.caveat} data-testid="engine-small-sample-sheet">
+          {/* The finding's own sentence and number: « 4 points », « 0,8 point ». */}
+          {fill(strings.findings[numbered("smallSample", { lo: roundDisplay(sample.points), hi: roundDisplay(sample.points) }, locale)], {
+            d: formatNumber(sample.denominator, locale),
+            base: slgBaseNoun(id, state, strings),
+            p: formatInterval({ lo: sample.points, hi: sample.points }, "ratio", ctx, strings.units),
+          })}
+        </p>
+      ) : null}
+
+      {marginSheet && draft.basis !== "company-wide" ? (
+        <div className={styles.saveRow}>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() =>
+              // Saved as an estimate on the company's margin: approximate, never found (C25 Q4).
+              update({
+                mode: "estimate",
+                basis: "company-wide",
+                low: draft.low ?? companyWideElsewhere?.low ?? null,
+                high: draft.high ?? companyWideElsewhere?.high ?? null,
+              })
+            }
+            data-testid={`engine-company-wide-${domId(id)}`}
+          >
+            {strings.sheet.companyWide}
+          </Button>
+        </div>
+      ) : null}
       <Choices
         size="sm"
         id={`${prefix}-mode`}
@@ -245,7 +347,15 @@ export function MetricSheet({
         <div className={styles.editor} data-testid="engine-estimate">
           {/* « At least » / « At most » name themselves: a pair with no joiner,
               and the rule about the two belongs to the row. */}
-          <FieldRow error={draft.low !== null && draft.high !== null && draft.low > draft.high ? strings.sheet.lowAboveHigh : undefined}>
+          <FieldRow
+            error={
+              draft.low !== null && draft.high !== null && draft.low > draft.high
+                ? strings.sheet.lowAboveHigh
+                : problems.includes("percent-range")
+                  ? strings.workbench.percentRange
+                  : undefined
+            }
+          >
             <NumberField
               size="sm"
               id={`${prefix}-low`}
@@ -274,16 +384,29 @@ export function MetricSheet({
               {strings.sheet.wideRange}
             </p>
           ) : null}
-          <Choices
-            size="sm"
-            id={`${prefix}-basis`}
-            legend={strings.sheet.basis}
-            error={need("basis")}
-            value={draft.basis || null}
-            options={BASES.map((b) => ({ value: b, label: strings.basis[BASIS_KEY[b]] }))}
-            onChange={(basis) => update({ basis })}
-            columns={2}
-          />
+          {draft.basis === "company-wide" ? (
+            // The company's margin stands in for this motion's: said, with what it costs, never offered as a basis to pick.
+            <div data-testid="engine-company-wide">
+              <p className={styles.metaLabel}>{strings.basis.companyWide}</p>
+              <p className={styles.caveat}>{strings.sheet.companyWideHint}</p>
+              {companyWideElsewhere ? (
+                <p className={styles.caveat}>
+                  {fill(strings.sheet.companyWidePrefilled, { motion: strings.hybrid.motionAdjective[id === "rev.gross-margin" ? "slg" : "plg"] })}
+                </p>
+              ) : null}
+            </div>
+          ) : (
+            <Choices
+              size="sm"
+              id={`${prefix}-basis`}
+              legend={strings.sheet.basis}
+              error={need("basis")}
+              value={draft.basis || null}
+              options={SHEET_BASES.map((b) => ({ value: b, label: strings.basis[BASIS_KEY[b]] }))}
+              onChange={(basis) => update({ basis })}
+              columns={2}
+            />
+          )}
         </div>
       ) : null}
 
@@ -362,6 +485,12 @@ export function MetricSheet({
             <p className={styles.trap}>
               <span className={styles.metaLabel}>{strings.sheet.trapTitle}</span> {fillCatalog(metric.trap)}
             </p>
+            {/* Five self-serve sheets have a second trap in the hybrid, and only there (C25 Q3, §18.4.6). */}
+            {trap ? (
+              <p className={styles.trap} data-testid="engine-hybrid-trap">
+                <span className={styles.metaLabel}>{strings.sheet.hybridTrapTitle}</span> {strings.sheet.hybridTrap[trap]}
+              </p>
+            ) : null}
             {alsoIn.map(({ tool, others }) => (
               <p key={tool} className={styles.alsoIn}>
                 {fill(alsoBefore, { tool: strings.tools[tool] })}
@@ -453,8 +582,8 @@ export function MetricSheet({
         <div className={styles.saveRow}>
           <Button
             variant={variant === "step" ? "primary" : "secondary"}
-            onClick={save}
             disabled={draft.mode === null}
+            onClick={save}
             data-testid={`engine-save-${domId(id)}`}
           >
             {variant === "step" ? strings.sheet.saveNext : strings.sheet.save}
@@ -465,14 +594,14 @@ export function MetricSheet({
         </div>
       ) : null}
       {missing.length ? (
-        <p className={styles.error} data-testid="engine-save-needs">
+        <p className={styles.error} data-testid="engine-save-needs" data-save-problems tabIndex={-1}>
           {fill(strings.workbench.saveNeeds, { fields: joinList(missing, strings.grammar) })}
         </p>
       ) : null}
       {rules
         .filter((p) => p !== "num-gt-den" && p !== "denominator-zero")
         .map((p) => (
-          <p key={p} className={styles.error}>
+          <p key={p} className={styles.error} data-save-problems tabIndex={-1}>
             {ruleMessage(p, filledMetric, strings, locale)}
           </p>
         ))}
@@ -554,7 +683,10 @@ function TargetField({
       hint={view.strings.sheet.targetHint}
       value={value}
       onChange={setValue}
-      onBlur={() => {
+      onBlur={(event) => {
+        // An unreadable box stays on screen with its message and writes
+        // nothing: the stored target is not erased by a typo (A15.2).
+        if (isUnreadableNumber(event.target.value, view.ctx.locale)) return;
         if ((value ?? undefined) !== target) actions.setTarget(id, value);
       }}
       locale={view.ctx.locale}
@@ -600,4 +732,9 @@ function sharedSides(
 function sharedHint(others: MetricId[], view: EngineView): string {
   const names = others.map((m) => midSentence(metricById(view.metrics, m).name, view.ctx.locale));
   return fill(view.strings.sheet.sharedHint, { metrics: joinList(names, view.strings.grammar) });
+}
+
+/** A margin entered as the company's (C25 Q4): its bounds, to prefill the other motion's sheet with. */
+function companyWide(entry: MetricEntry | undefined): { low: number; high: number } | null {
+  return entry?.status === "estimated" && entry.estimate?.basis === "company-wide" ? { low: entry.estimate.low, high: entry.estimate.high } : null;
 }

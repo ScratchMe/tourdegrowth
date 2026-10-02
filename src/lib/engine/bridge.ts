@@ -1,5 +1,5 @@
 import type { StoredResult } from "@/lib/quiz/storage";
-import { DERIVED_SHAPES } from "./catalog-shape";
+import { ALL_DERIVED_SHAPES, motionOfMetric } from "./catalog-shape";
 import type { ResolvedBridge } from "./strings";
 import type { BridgeRow, DerivedId, EngineState, MetricId, MetricStatus, Mirror, MirrorVerdict, TrackingLevel } from "./types";
 import { currentSnapshot, statusOf } from "./values";
@@ -49,7 +49,7 @@ function foundFromStatus(status: MetricStatus): TrackingLevel | null {
  * and it can't be pulled; one still to do and there is no verdict yet.
  */
 function foundDerived(state: EngineState, id: DerivedId): TrackingLevel | null {
-  const inputs = DERIVED_SHAPES.find((s) => s.id === id)?.inputs ?? [];
+  const inputs = ALL_DERIVED_SHAPES.find((s) => s.id === id)?.inputs ?? [];
   const levels = inputs.map((input) => foundFromStatus(statusOf(currentSnapshot(state).metrics[input])));
   if (levels.includes("unknown")) return "unknown";
   if (levels.includes(null)) return null;
@@ -68,13 +68,22 @@ export function verdictOf(declared: TrackingLevel, found: TrackingLevel | null):
 }
 
 function isDerived(id: MetricId | DerivedId): id is DerivedId {
-  return DERIVED_SHAPES.some((s) => s.id === id);
+  return ALL_DERIVED_SHAPES.some((s) => s.id === id);
 }
 
+/**
+ * One row per (question, motion) of the ticked motions (§18.4.9): in the
+ * hybrid, a question bridged in both motions gives two rows, and the counts
+ * count rows. A motion unticked is not mirrored — its numbers stay in the
+ * file but nobody reads them (§18.1.2). Rows keep the bridges' order, which
+ * lists self-serve's before sales-assisted's.
+ */
 export function buildMirror(state: EngineState, result: StoredResult, bridges: ResolvedBridge[]): Mirror {
   const counts: Record<MirrorVerdict, number> = { coherent: 0, "blind-spot": 0, "blind-spot-light": 0, better: 0, "known-gap": 0 };
   const rows: BridgeRow[] = [];
   for (const bridge of bridges) {
+    const motion = motionOfMetric(bridge.metric);
+    if (!state.setup.motions[motion]) continue;
     const index = result.answers?.[bridge.questionId];
     const option = index === undefined ? undefined : bridge.options[index];
     if (!option) continue; // an unanswered question declares nothing
@@ -84,7 +93,7 @@ export function buildMirror(state: EngineState, result: StoredResult, bridges: R
       : foundFromStatus(statusOf(currentSnapshot(state).metrics[bridge.metric]));
     const verdict = verdictOf(declared, found);
     if (verdict) counts[verdict] += 1;
-    rows.push({ questionId: bridge.questionId, metric: bridge.metric, declaredPoints: option.points, declared, found, verdict });
+    rows.push({ questionId: bridge.questionId, motion, metric: bridge.metric, declaredPoints: option.points, declared, found, verdict });
   }
   return { resultId: result.id, takenAt: result.createdAt, total: result.total ?? null, rows, counts };
 }

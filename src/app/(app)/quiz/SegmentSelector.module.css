@@ -90,3 +90,9 @@
   color: var(--text-muted);
   text-wrap: pretty;
 }
+
+/* « ← Back » under the screen's own action, on the left like the questions'
+   (A15.7): nothing is final until the score is asked for. */
+.back {
+  align-self: flex-start;
+}

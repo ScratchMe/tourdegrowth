@@ -96,6 +96,7 @@ const PAIRS: Pair[] = [
   { fg: "text-alert", bg: "surface-alert", stated: 5.56, role: "text", why: "red text on the red wash" },
   { fg: "text-muted", bg: "surface-alert", stated: 6.91, role: "text", why: "a label on the red wash" },
   { fg: "border-alert", bg: "surface-alert", stated: 3.37, role: "mark", why: "an alert card's own edge" },
+  { fg: "viz-highlight-text", bg: "surface-alert", stated: 5.56, role: "mark", why: "the score sheet's stalling meter, on its wash (extension 05)" },
   ...on3("border-alert", [4.04, 3.76, 3.3], "mark", "red border"),
   ...on3("focus-ring-invert", [4.04, 3.76, 3.3], "mark", "red ring of option buttons"),
   { fg: "field-border-alert", bg: N1, stated: 3.76, role: "mark", why: "a field past its limit" },
@@ -106,6 +107,8 @@ const PAIRS: Pair[] = [
   { fg: "state-warn-text", bg: N1, stated: 9.41, role: "text", why: "status warn" },
   { fg: "text-muted", bg: "surface-desk", stated: 8.28, role: "text", why: "the desk is the page at night" },
   { fg: "texture-ink", bg: N0, stated: 1.11, role: "decorative", why: "stencil spray" },
+  // Never read at night: a slide declares data-world="paper" and binds it to pure white again (A14 T6). Pinned for completeness.
+  { fg: "text-on-inverse", bg: "surface-white", stated: 16.38, role: "decorative", why: "the slides' white, rebound by the slide itself" },
   { fg: "viz-grid", bg: N0, stated: 1.43, role: "decorative", why: "gridlines, subtle on purpose" },
   ...on3("viz-axis", [8.28, 7.7, 6.76], "text", "axis labels"),
   { fg: "viz-unknown", bg: N0, stated: 8.28, role: "text", why: "'not measured' dash" },

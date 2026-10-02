@@ -4,7 +4,8 @@ import { expect, test } from "./helpers";
 /**
  * Design I + B, the result's half (retained by Antoine on 2026-09-28): the
  * score as a kilometre marker beside the stage that stalls, the stage
- * profile over the pillar chips, and a meter on every chip.
+ * profile over its table, and a meter on every stage — since design system
+ * extension 05 (A16) a row of the score sheet, where it was a chip.
  *
  * Measured on the rendered page, because each of these is a claim about
  * geometry that the markup cannot make: a marker "beside" the name, a name
@@ -19,11 +20,11 @@ const WIDTHS = [
 /** Every meter's track and fill, in page pixels. */
 async function meters(page: Page, scope: string) {
   return page.evaluate((scope) => {
-    return [...document.querySelectorAll(`${scope} [data-testid="pillar-meter"]`)].map((track) => {
+    return [...document.querySelectorAll(`${scope} [data-testid="stage-meter"]`)].map((track) => {
       const t = track.getBoundingClientRect();
       const f = track.firstElementChild!.getBoundingClientRect();
-      const chip = track.parentElement!;
-      const score = Number(chip.querySelector("b")!.textContent);
+      const row = track.closest("li")!;
+      const score = Number(row.querySelector('[class*="figure"]')!.textContent);
       return { score, track: t.width, fill: f.width, hidden: track.getAttribute("aria-hidden") };
     });
   }, scope);
@@ -71,10 +72,10 @@ for (const { width, locale } of WIDTHS) {
       expect(geo.verdictWidth).toBeGreaterThan(geo.blockWidth * 0.9);
     });
 
-    test("draws the profile over the chips, hidden from assistive technology, the named stage flagged", async ({ page }) => {
+    test("draws the profile over the score sheet, hidden from assistive technology, the named stage flagged", async ({ page }) => {
       const profile = page.getByTestId("stage-profile");
       await expect(profile).toBeVisible();
-      // The chips are its table: a screen reader gets them, not the picture.
+      // The sheet is its table: a screen reader gets it, not the picture.
       await expect(profile).toHaveAttribute("aria-hidden", "true");
 
       // The sample is 18 · 12 · 8 · 16 · 20 and names retention alone.
@@ -96,15 +97,15 @@ for (const { width, locale } of WIDTHS) {
       expect(geo.column).toBe(2);
       expect(geo.labels).toEqual(["Acq.", "Act.", "Ret.", "Ref.", "Rev."]);
 
-      // Over the chips: it comes first in the pillar column.
+      // Over the sheet: it comes first in the column.
       const top = (await profile.boundingBox())!.y;
-      const firstChip = (await page.locator('[class*="pillarGrid"] [data-testid="pillar-meter"]').first().boundingBox())!.y;
-      expect(top).toBeLessThan(firstChip);
+      const firstRow = (await page.locator('[data-testid="stage-scores"] [data-testid="stage-meter"]').first().boundingBox())!.y;
+      expect(top).toBeLessThan(firstRow);
     });
 
-    test("gives every chip a meter on a track of the same length, so the bars compare", async ({ page }) => {
-      const rows = await meters(page, '[class*="pillarGrid"]');
-      expect(rows.length, "the pillar grid moved — this measures nothing now").toBe(5);
+    test("gives every stage a meter on a track of the same length, so the bars compare", async ({ page }) => {
+      const rows = await meters(page, '[data-testid="stage-scores"]');
+      expect(rows.length, "the score sheet moved — this measures nothing now").toBe(5);
       const tracks = rows.map((r) => Math.round(r.track));
       expect(new Set(tracks).size, `tracks of different lengths: ${tracks.join(", ")}`).toBe(1);
       for (const r of rows) {

@@ -1,0 +1,165 @@
+/*
+ * The score sheet (design system extension 05, design/ds-extension-05-return/):
+ * the five stage scores as one ruled list — a solid rule on top, one row per
+ * stage, a dashed hairline between rows, DataTable's own ruling. No box, no
+ * button radius, no edge all round: a row is a line you read, not a thing
+ * you press (the law of similarity, A15.19). It replaces PillarChip, whose
+ * closed box, button radius and solid edge read as a secondary button.
+ *
+ * The list is the grid; each row is a subgrid of it, so the score, meter and
+ * name columns line up across the five rows and every meter's track is the
+ * same length — the meter's job is five bars that compare.
+ *
+ * The row's height is the list's: `--score-row` is set here per size and read
+ * by StageScore's row and by StampedPillar's, which lives in its own module.
+ */
+.list {
+  --score-row: var(--score-row-height-md);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: max-content minmax(64px, 1fr) max-content;
+  column-gap: var(--space-6);
+  border-top: var(--border-solid);
+  font: var(--meta-md);
+  color: var(--text-muted);
+}
+
+.sm {
+  --score-row: var(--score-row-height-sm);
+  font: var(--meta-sm);
+}
+
+/* `md` shrinks on a phone by itself, as the chips did — CSS only, so a
+   server-rendered sheet is right before any script runs. */
+@media (max-width: 760px) {
+  .md {
+    --score-row: var(--score-row-height-sm);
+    font: var(--meta-sm);
+  }
+}
+
+.row {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: subgrid;
+  align-items: center;
+  min-height: var(--score-row);
+  /* Every row keeps the alert rule's room, so the stalling row's text sits
+     on the same line as the others when its rule is drawn. */
+  padding-inline: calc(var(--space-4) - var(--border-width-stamp)) var(--space-4);
+  border-inline-start: var(--border-width-stamp) solid transparent;
+  border-bottom: var(--border-width-hairline) dashed var(--border-divider);
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+/* The score first: the figure in body ink at 600, "/20" in the row's ink.
+   Set right, in tabular figures, so 8/20 sits under 18/20. */
+.score {
+  justify-self: end;
+  white-space: nowrap;
+  font-variant-numeric: var(--tabular);
+}
+
+.figure {
+  font-weight: 600;
+  color: var(--text-body);
+}
+
+/* The meter repeats the number: decoration, hidden from assistive
+   technology. --viz-grid on the paper card is 1.33:1, on purpose. */
+.meter {
+  position: relative;
+  height: 6px;
+  overflow: hidden;
+  background: var(--viz-grid);
+  border-radius: var(--radius-tag);
+}
+
+.fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--score-share);
+  background: var(--viz-ink);
+  border-radius: inherit;
+}
+
+/* The stage's name, and right after it the « ? » — or, on the landing, the
+   name is the link. */
+.name {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  column-gap: var(--space-1);
+  white-space: nowrap;
+}
+
+/*
+ * The stage that stalls: a red wash across the row and a solid inked rule
+ * down its start edge — the system's diagnosis (« Red means one of three
+ * things »). Never dashed: dashed red is advice, and PriorityMove is on the
+ * same screen. Which rows take it follows the bottleneck's sharpness (C34):
+ * one on `clear`, the tied group on `shared`, none on `level`.
+ *
+ * The meter takes the TEXT red, not --viz-highlight: the brand red measured
+ * 2.65:1 against its own track on the wash (extension 05, answer 2).
+ */
+.alert {
+  background: var(--surface-alert);
+  border-inline-start-color: var(--border-alert);
+  color: var(--text-alert);
+}
+
+.alert .figure {
+  color: var(--text-alert);
+}
+
+.alert .name {
+  font-weight: 600;
+}
+
+.alert .fill {
+  background: var(--viz-highlight-text);
+}
+
+/*
+ * The landing: the stage name is the link to its glossary page, set in its
+ * row's type — underlined, in the row's ink, never the red --text-link: on
+ * this sheet red belongs to the diagnosis. Its taps land on a 44px strip
+ * centred on it (styles/hit.module.css's shape), and the rows' 44px pitch
+ * keeps two strips from overlapping.
+ */
+.link {
+  position: relative;
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: var(--border-width-hairline);
+  text-underline-offset: 3px;
+  border-radius: 2px;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.link::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: min(0px, calc((100% - var(--hit-min)) / 2));
+  right: min(0px, calc((100% - var(--hit-min)) / 2));
+  height: max(100%, var(--hit-min));
+  translate: 0 -50%;
+}
+
+@media (hover: hover) {
+  .link:hover {
+    color: var(--text-body);
+    text-decoration-thickness: var(--border-width);
+  }
+}
+
+.link:focus-visible {
+  outline-offset: var(--focus-offset-tight);
+}

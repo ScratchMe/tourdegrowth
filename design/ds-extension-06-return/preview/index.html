@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Engine share image · preview</title>
+<!-- Source only. The project's fonts (this folder lives at
+     design/ds-extension-06-return/); the browser draws the same tree Satori
+     will. The images Satori itself drew are in ../render/. Serve over http:
+     ES modules do not load from file://. -->
+<link rel="stylesheet" href="../../../fonts/fonts.css">
+<style>
+  body { margin: 0; padding: 32px; background: #cfc7b4; color: #211c15; font: 500 14px/1.5 "IBM Plex Mono", ui-monospace, monospace; }
+  h1 { font-size: 16px; margin: 0 0 24px; }
+  .P_section { margin-bottom: 56px; }
+  .P_title { font-size: 15px; margin: 0 0 12px; }
+  .P_caption { margin: 18px 0 8px; }
+  .P_full { width: 1200px; height: 630px; overflow: hidden; }
+  .P_feed { overflow: hidden; }
+  .P_full div, .P_feed div { box-sizing: border-box; }
+  .P_strings { display: grid; grid-template-columns: 260px 1fr; gap: 6px 16px; max-width: 1200px; margin-top: 20px; }
+  .P_strings dt { color: #5b5346; }
+  .P_strings dd { margin: 0; font-family: Inter, system-ui, sans-serif; }
+</style>
+</head>
+<body>
+<h1>Brief 06 — the growth engine's share image · source preview</h1>
+<div id="root"></div>
+<script type="module" src="preview.mjs"></script>
+</body>
+</html>

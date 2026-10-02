@@ -73,7 +73,7 @@ test("the result card says the quarter's churn in large, as the report does", as
   await page.keyboard.press("Escape");
   await expect(page.getByTestId("game-news")).toHaveCount(0);
   // The same figure, on the dashboard the report sits under.
-  await expect(page.getByTestId("game-dash-churn")).toContainText(value.trim());
+  await expect(page.getByTestId("game-dash-metric")).toContainText(value.trim());
 });
 
 test("the inspection says why, names every trick it took down, and is stamped with its fine", async ({ page }) => {

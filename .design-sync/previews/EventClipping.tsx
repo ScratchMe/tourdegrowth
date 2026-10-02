@@ -9,9 +9,10 @@ import { EventClipping, NightSurface } from "tour-de-growth";
  * public platform the event names. The tilt is static, so it stays under
  * reduced motion.
  *
- * Each cell is the clippings of one real quarter, exactly as the island
- * builds them (`reportContent().clippings`) from a reference year, stacked
- * in the report's main column (600px). An inspection and the complaints that
+ * Each cell is ALL the clippings of one real quarter, exactly as the island
+ * builds them (`reportContent(ctx, state, q).clippings`, island-view.ts) from
+ * a reference year of lib/game/__tests__/paths.ts (`PATH_C`, `PATH_A`)
+ * played to its end, stacked in the report's main column (600px). An inspection and the complaints that
  * announce one always carry their `why`; the rubber stamp only lands on the
  * end-of-quarter news screen and is left off here. Copy:
  * content/game/retention.ts (`events`, `clippings`).
@@ -82,7 +83,11 @@ export const Press = () => (
   </NightSurface>
 );
 
-/** The inspection in French (same quarter as Inspection): digit groups and the fine carry U+00A0. */
+/**
+ * The same quarter in French (`PATH_C`, third quarter, as Inspection): digit
+ * groups and the fine carry U+00A0, and the viral thread its French handle
+ * and « » quotes.
+ */
 export const French = () => (
   <NightSurface as="div" style={col}>
     <EventClipping
@@ -91,6 +96,11 @@ export const French = () => (
       headline="Flixo épinglé par la répression des fraudes"
       text="Contrôle de la DGCCRF, article dans la presse, amende de 75 000 €. Le DG te demande de tout retirer avant vendredi. 1 400 abonnés partent dans la foulée, en le racontant."
       why={{"heading": "Pourquoi ce contrôle", "lines": ["Chaque astuce mise en production a fait monter le radar DGCCRF, la tuile masquée de ton tableau de bord. Ce trimestre, il a franchi le seuil du contrôle.", "En production au moment du contrôle : « Pause mise en avant », « Alléger la page abonnement », « Résiliation accompagnée », « Offres de rétention », « Preuve sociale en sortie » et « Préavis contractuel ». Tout est retiré d'office, et leur effet s'arrête."]}}
+    />
+    <EventClipping
+      kind="viral"
+      handle="@soiree_sans_fin"
+      text={"Un fil viral : « J'ai essayé de résilier Flixo, voici mes trois heures. » Les départs s'accélèrent."}
     />
   </NightSurface>
 );

@@ -8,7 +8,7 @@ import { Dashboard, NightSurface } from "tour-de-growth";
  * text, until December reveals them.
  *
  * Every prop below is what the level's island builds (`dashboardProps` in
- * game/retention/island-view.ts) from a state PLAYED on a reference year
+ * game/_island/island-view.ts) from a state PLAYED on a reference year
  * (lib/game/__tests__/paths.ts), never typed by hand. After a quarter the
  * churn tile already shows the NEXT quarter's target, and each change carries
  * a sign AND a word.
@@ -25,9 +25,9 @@ export const YearStart = () => (
   <NightSurface as="div" style={box}>
     <Dashboard
       label="Your dashboard"
-      churn={{"label": "Churn · per month", "value": "6.0%", "sub": "quarter target: 5.6%", "bullet": {"value": 0.06, "target": 0.056, "domain": [0.02, 0.09], "ariaLabel": "Churn 6.0%, quarter target: 5.6%"}}}
-      subs={{"label": "Subscribers", "value": "100,000", "sub": "January"}}
-      mrr={{"label": "Monthly revenue", "value": "€1.30M"}}
+      metric={{"label": "Churn · per month", "value": "6.0%", "sub": "quarter target: 5.6%", "bullet": {"value": 0.06, "target": 0.056, "domain": [0.02, 0.09], "ariaLabel": "Churn 6.0%, quarter target: 5.6%"}}}
+      customers={{"label": "Subscribers", "value": "100,000", "sub": "January"}}
+      revenue={{"label": "Monthly revenue", "value": "€1.30M"}}
       patience={{"label": "CEO's patience", "value": "55", "bar": 55, "low": false}}
       trust={{"hidden": true, "label": "Subscriber trust", "hiddenLabel": "not on your dashboard", "hiddenNote": "Hidden until December"}}
       radar={{"hidden": true, "label": "Regulator radar", "hiddenLabel": "not on your dashboard", "hiddenNote": "Hidden until December"}}
@@ -45,9 +45,9 @@ export const AfterAQuarter = () => (
   <NightSurface as="div" style={box}>
     <Dashboard
       label="Your dashboard"
-      churn={{"label": "Churn · per month", "value": "5.5%", "sub": "quarter target: 4.6%", "delta": {"text": "−0.2 pts this quarter", "direction": "down", "sentiment": "good"}, "bullet": {"value": 0.05545, "target": 0.046, "domain": [0.02, 0.09], "ariaLabel": "Churn 5.5%, quarter target: 4.6%"}}}
-      subs={{"label": "Subscribers", "value": "98,253", "sub": "June, end of month", "delta": {"text": "−162 this quarter", "direction": "down", "sentiment": "bad"}}}
-      mrr={{"label": "Monthly revenue", "value": "€1.24M", "sub": "−€0.06M vs January", "delta": {"text": "−€0.04M this quarter", "direction": "down", "sentiment": "bad"}}}
+      metric={{"label": "Churn · per month", "value": "5.5%", "sub": "quarter target: 4.6%", "delta": {"text": "−0.2 pts this quarter", "direction": "down", "sentiment": "good"}, "bullet": {"value": 0.05545, "target": 0.046, "domain": [0.02, 0.09], "ariaLabel": "Churn 5.5%, quarter target: 4.6%"}}}
+      customers={{"label": "Subscribers", "value": "98,253", "sub": "June, end of month", "delta": {"text": "−162 this quarter", "direction": "down", "sentiment": "bad"}}}
+      revenue={{"label": "Monthly revenue", "value": "€1.24M", "sub": "−€0.06M vs January", "delta": {"text": "−€0.04M this quarter", "direction": "down", "sentiment": "bad"}}}
       patience={{"label": "CEO's patience", "value": "31", "sub": "at breaking point", "delta": {"text": "−20 this quarter", "direction": "down", "sentiment": "bad"}, "bar": 31, "low": true}}
       trust={{"hidden": true, "label": "Subscriber trust", "hiddenLabel": "not on your dashboard", "hiddenNote": "Hidden until December"}}
       radar={{"hidden": true, "label": "Regulator radar", "hiddenLabel": "not on your dashboard", "hiddenNote": "Hidden until December"}}
@@ -66,9 +66,9 @@ export const DecemberRevealed = () => (
   <NightSurface as="div" style={box}>
     <Dashboard
       label="Your dashboard"
-      churn={{"label": "Churn · per month", "value": "9.1%", "sub": "board target: 4.0%", "delta": {"text": "+4.0 pts this quarter", "direction": "up", "sentiment": "bad"}, "bullet": {"value": 0.09066, "target": 0.04, "domain": [0.02, 0.09], "ariaLabel": "Churn 9.1%, board target: 4.0%"}}}
-      subs={{"label": "Subscribers", "value": "79,659", "sub": "December, end of month", "delta": {"text": "−13,645 this quarter", "direction": "down", "sentiment": "bad"}}}
-      mrr={{"label": "Monthly revenue", "value": "€1.03M", "sub": "−€0.26M vs January", "delta": {"text": "−€0.24M this quarter", "direction": "down", "sentiment": "bad"}}}
+      metric={{"label": "Churn · per month", "value": "9.1%", "sub": "board target: 4.0%", "delta": {"text": "+4.0 pts this quarter", "direction": "up", "sentiment": "bad"}, "bullet": {"value": 0.09066, "target": 0.04, "domain": [0.02, 0.09], "ariaLabel": "Churn 9.1%, board target: 4.0%"}}}
+      customers={{"label": "Subscribers", "value": "79,659", "sub": "December, end of month", "delta": {"text": "−13,645 this quarter", "direction": "down", "sentiment": "bad"}}}
+      revenue={{"label": "Monthly revenue", "value": "€1.03M", "sub": "−€0.26M vs January", "delta": {"text": "−€0.24M this quarter", "direction": "down", "sentiment": "bad"}}}
       patience={{"label": "CEO's patience", "value": "12", "sub": "at breaking point", "delta": {"text": "−45 this quarter", "direction": "down", "sentiment": "bad"}, "bar": 12, "low": true}}
       trust={{"hidden": false, "label": "Subscriber trust", "value": "27", "sub": "revealed in December", "bar": 27, "revealing": false}}
       radar={{"hidden": false, "label": "Regulator radar", "value": "1", "sub": "revealed in December", "bar": 1, "revealing": false}}

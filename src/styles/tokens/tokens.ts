@@ -19,7 +19,8 @@
  *
  * The paper world is colors.css; the night world is world-night.css, and
  * has its own two maps below (NIGHT_PRIMITIVES, NIGHT_WORLD), held equal to
- * that file by night-token-sources.test.ts.
+ * that file by night-token-sources.test.ts. The three spaces' two colours
+ * (spaces.css) are SPACE_PRIMITIVES, held equal by token-sources.test.ts.
  */
 
 type Hex = `#${string}`;
@@ -32,6 +33,7 @@ export const PRIMITIVES = {
   "paper-1": "#e7e1d2",
   "paper-2": "#ded6c2",
   "paper-3": "#cfc7b4",
+  "paper-white": "#ffffff",
   "ink-0": "#211c15",
   "ink-1": "#5b5346",
   "paint-red": "#d2402c",
@@ -45,6 +47,7 @@ export const SEMANTIC = {
   "surface-page": "var(--paper-1)",
   "surface-card": "var(--paper-0)",
   "surface-sunken": "var(--paper-2)",
+  "surface-white": "var(--paper-white)",
   "surface-desk": "var(--paper-3)",
   "surface-alert": "var(--paint-red-wash)",
   "surface-inverse": "var(--ink-0)",
@@ -115,6 +118,18 @@ export const DERIVED = {
 } as const satisfies Record<string, Ref>;
 
 export const COLOR_TOKENS = { ...PRIMITIVES, ...SEMANTIC, ...DERIVED };
+
+/**
+ * The two colours spaces.css adds for the three spaces of the Tour: the
+ * engine's ultramarine and the game's ochre. Only the two literals: the
+ * band's own tokens (`--space-engine-bg`…) are references to them or to the
+ * paper palette, and stay in the CSS. Here for the engine's share image
+ * (`lib/og/engine-frame.tsx`), which Satori draws without custom properties.
+ */
+export const SPACE_PRIMITIVES = {
+  "space-ultramarine": "#1d3f8f",
+  "space-ochre": "#d99a2b",
+} as const satisfies Record<string, Hex>;
 export type ColorToken = keyof typeof COLOR_TOKENS;
 
 /**
@@ -143,6 +158,7 @@ export const NIGHT_WORLD = {
   "surface-page": "var(--night-0)",
   "surface-card": "var(--night-1)",
   "surface-sunken": "var(--night-2)",
+  "surface-white": "var(--night-text)",
   "surface-desk": "var(--night-0)",
   "surface-alert": "var(--night-red-wash)",
   "surface-inverse": "var(--night-amber)",

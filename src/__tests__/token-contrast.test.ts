@@ -120,7 +120,11 @@ const PAIRS: Pair[] = [
 
   // --- §5.1 / §5.4: inverse and states ---
   { fg: "text-on-inverse", bg: "surface-inverse", stated: 16.06, role: "text", why: "ink chip, active segment" },
-  { fg: "text-inverse", bg: "surface-accent", stated: 4.65, role: "text", why: "small label on a red fill: Tag red, stamped pillar, roast badge" },
+  { fg: "text-inverse", bg: "surface-accent", stated: 4.65, role: "text", why: "small label on a red fill: Tag red, roast badge" },
+  // --- Design system extension 05: the score sheet's stalling row and the roast's stamp, on the red wash ---
+  { fg: "text-alert", bg: "surface-alert", stated: 5.28, role: "text", why: "the stalling row's figure and name, the stamp's ink" },
+  { fg: "viz-highlight-text", bg: "surface-alert", stated: 5.28, role: "mark", why: "the stalling row's meter: the text red, not the brand red" },
+  { fg: "border-alert", bg: "surface-alert", stated: 3.47, role: "mark", why: "the stalling row's rule and the stamp's edge, on their own wash" },
   { fg: "state-selected-text", bg: "state-selected-bg", stated: 16.06, role: "text", why: "one selection language (H-5)" },
   { fg: "state-good-text", bg: P0, stated: 6.34, role: "text", why: "status good" },
   { fg: "state-good-text", bg: P1, stated: 5.12, role: "text", why: "status good" },
@@ -162,6 +166,15 @@ const PAIRS: Pair[] = [
   { fg: "field-border-alert", bg: P0, stated: 4.42, role: "mark", why: "an invalid field's 3px edge" },
   { fg: "field-border-alert", bg: P1, stated: 3.57, role: "mark", why: "an invalid field's 3px edge" },
   { fg: "field-focus-ring", bg: P1, stated: 12.97, role: "mark", why: "the one focus ring on every control" },
+
+  // --- The slides' white theme (engine spec §19.8, A14 T6): what a slide prints, on pure white ---
+  { fg: "text-body", bg: "surface-white", stated: 16.91, role: "text", why: "a slide's title and body" },
+  { fg: "text-muted", bg: "surface-white", stated: 7.58, role: "text", why: "a slide's kicker, pill and sources" },
+  { fg: "text-faint", bg: "surface-white", stated: 5.63, role: "text", why: "the site credit in a slide's footer" },
+  { fg: "text-alert", bg: "surface-white", stated: 7.08, role: "text", why: "the leak's red words" },
+  { fg: "viz-highlight", bg: "surface-white", stated: 4.66, role: "mark", why: "the leak's mark: on pure white it would even pass as text, the system still never uses it so" },
+  { fg: "viz-highlight-text", bg: "surface-white", stated: 7.08, role: "text", why: "its label" },
+  { fg: "viz-axis", bg: "surface-white", stated: 7.58, role: "text", why: "axis labels" },
 ];
 
 describe("every stated paper-world contrast ratio holds", () => {

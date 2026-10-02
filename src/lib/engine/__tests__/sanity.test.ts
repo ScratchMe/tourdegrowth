@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { shapeOf } from "../catalog-shape";
 import { blockingCheck, reconcile, sanityChecks } from "../sanity";
-import type { EngineState, SanityId } from "../types";
+import { sanityText } from "../sentences";
+import type { EngineState, MetricEntry, SanityId } from "../types";
 import { CTX_FR, FR } from "./props";
-import { estimated, exampleState, measured, ratio, withEntry } from "./fixtures";
+import { estimated, exampleState, hybridState, measured, ratio, salesAssistedState, withEntry } from "./fixtures";
 
 // Engine spec §13.1 "sanity" — one case that triggers and one that doesn't,
 // per check. Non-vacuity, measured: firing on ANY overlap instead of the
@@ -76,5 +77,89 @@ describe("sanity checks", () => {
     const off = withEntry(exampleState(), "acq.cac", measured(ratio(21_000, 20), { kind: "person", role: "finance" }));
     const check = sanityChecks(off, CTX_FR, FR.strings.units).find((c) => c.id === "reconcile-gap")!;
     expect(check).toMatchObject({ blocking: false, values: { p: "49 à 74", n: "20", month: "août 2026" } });
+  });
+});
+
+// --- Sales-assisted (§18.5.7; A7.3.c S1) — one case that triggers, one that doesn't.
+// Non-vacuity, measured on 2026-10-01: firing `slg-cycle-long` on any overlap
+// (`cycle.hi > 90`) fails its 60-120 day estimate case only; raising
+// `cac-variants-differ` without both motions ticked fails « hybrid only ».
+
+describe("sales-assisted checks", () => {
+  const hubspot = { kind: "tool", tool: "hubspot" } as const;
+  const slgIds = (state: EngineState) => sanityChecks(state, CTX_FR, FR.strings.units).filter((c) => c.motion === "slg").map((c) => c.id);
+  const cycle = (value: number, statistic: "median" | "mean" = "median"): MetricEntry => measured({ kind: "duration", value, unit: "days", statistic }, hubspot);
+
+  it("the §18.9 hybrid raises one check only, across the motions: the two CACs count different spend", () => {
+    expect(sanityChecks(hybridState(), CTX_FR, FR.strings.units)).toEqual([
+      { id: "cac-variants-differ", blocking: false, metrics: ["acq.cac", "slg.acq.cac"], values: { plg: "media-only", slg: "fully-loaded" } },
+    ]);
+  });
+
+  it("cac-variants-differ: hybrid only, both CACs known, two different variants", () => {
+    expect(ids(salesAssistedState())).not.toContain("cac-variants-differ");
+    const same = withEntry(hybridState(), "slg.acq.cac", measured(ratio(342_000, 18), { kind: "person", role: "finance" }, { variant: "media-only" }));
+    expect(ids(same)).not.toContain("cac-variants-differ");
+    expect(ids(withEntry(hybridState(), "slg.acq.cac", undefined))).not.toContain("cac-variants-differ");
+  });
+
+  it("slg-cycle-long: past the three-month window, the WHOLE interval", () => {
+    expect(slgIds(withEntry(hybridState(), "slg.acq.cycle", cycle(120)))).toContain("slg-cycle-long");
+    expect(slgIds(withEntry(hybridState(), "slg.acq.cycle", cycle(90)))).not.toContain("slg-cycle-long");
+    expect(slgIds(withEntry(hybridState(), "slg.acq.cycle", estimated(60, 120)))).not.toContain("slg-cycle-long");
+  });
+
+  it("slg-cycle-mean and slg-ttl-mean: a mean, on the value or as the estimate's variant", () => {
+    expect(slgIds(withEntry(hybridState(), "slg.acq.cycle", cycle(64, "mean")))).toEqual(["slg-cycle-mean"]);
+    expect(slgIds(withEntry(hybridState(), "slg.act.time-to-live", estimated(20, 40, { variant: "mean" })))).toEqual(["slg-ttl-mean"]);
+    expect(slgIds(withEntry(hybridState(), "slg.act.time-to-live", estimated(20, 40, { variant: "median" })))).toEqual([]);
+  });
+
+  it("slg-acv-vs-arpa: a new contract worth less than half or more than twice the book's average, entirely", () => {
+    const acv = (amount: number) => withEntry(hybridState(), "slg.rev.acv", measured({ kind: "amount", amount }, hubspot));
+    const check = sanityChecks(acv(60_000), CTX_FR, FR.strings.units).find((c) => c.id === "slg-acv-vs-arpa")!;
+    // 60 000 ÷ 12 = 5 000 € a month against an ARPA of 1 800 €: ~2.8 times.
+    expect(check).toMatchObject({ motion: "slg", metrics: ["slg.rev.acv", "slg.rev.arpa"], values: { x: "2,8" } });
+    expect(slgIds(acv(8_000))).toContain("slg-acv-vs-arpa");
+    expect(slgIds(acv(24_000))).not.toContain("slg-acv-vs-arpa");
+    expect(slgIds(acv(43_000))).not.toContain("slg-acv-vs-arpa");
+  });
+
+  it("num-gt-den reaches the sales-assisted shares and the link, tagged with their motion", () => {
+    const broken = withEntry(hybridState(), "slg.rev.win-rate", measured(ratio(90, 75), hubspot));
+    expect(sanityChecks(broken, CTX_FR, FR.strings.units).find((c) => c.id === "num-gt-den")).toMatchObject({ motion: "slg", metrics: ["slg.rev.win-rate"] });
+    // The NRR is not bounded: 106 % is a value, not an error.
+    expect(ids(withEntry(hybridState(), "slg.ret.nrr", measured(ratio(212_000, 200_000), hubspot)))).not.toContain("num-gt-den");
+  });
+
+  it("a motion unticked raises nothing: its numbers stay in the file, the checks ignore them", () => {
+    const off = withEntry(exampleState(), "slg.acq.cycle", cycle(200, "mean"));
+    expect(ids(off)).toEqual([]);
+    const plgOff = { ...hybridState(), setup: { ...hybridState().setup, motions: { plg: false, slg: true } } };
+    expect(sanityChecks(withEntry(plgOff, "ret.logo-churn", measured(ratio(140, 400), tool)), CTX_FR, FR.strings.units).map((c) => c.id)).toEqual([]);
+  });
+});
+
+describe("« deux outils » (§19.5.3, A14 T4)", () => {
+  const twoTools = (state: EngineState) => sanityChecks(state, CTX_FR, FR.strings.units).filter((c) => c.id === "two-tools");
+
+  it("a rate whose counts come from two tools is to check, never blocking, and says which", () => {
+    const state = withEntry(exampleState(), "act.rate", measured(ratio(144, 800), { kind: "tool", tool: "amplitude" }, { denominatorSource: { kind: "tool", tool: "ga4" } }));
+    const [check] = twoTools(state);
+    expect(check).toMatchObject({ id: "two-tools", motion: "plg", blocking: false, metrics: ["act.rate"], values: { a: "amplitude", b: "ga4" } });
+    expect(sanityText(check!, FR.strings, "fr")).toBe("Numérateur (Amplitude) et dénominateur (GA4) viennent de deux outils\u00a0: vérifie qu'ils comptent la même chose sur la même période.");
+  });
+
+  it("a tool's name loses its own parenthesis inside the sentence's", () => {
+    const state = withEntry(exampleState(), "act.rate", measured(ratio(144, 800), { kind: "tool", tool: "cs-platform" }, { denominatorSource: { kind: "tool", tool: "hubspot" } }));
+    const text = sanityText(twoTools(state)[0]!, FR.strings, "fr");
+    expect(text).not.toMatch(/\([^)]*\(/);
+    expect(text.startsWith("Numérateur (")).toBe(true);
+  });
+
+  it("nothing for one tool twice, a person, or no second source", () => {
+    const same = withEntry(exampleState(), "act.rate", measured(ratio(144, 800), { kind: "tool", tool: "amplitude" }, { denominatorSource: { kind: "tool", tool: "amplitude" } }));
+    const person = withEntry(exampleState(), "act.rate", measured(ratio(144, 800), { kind: "tool", tool: "amplitude" }, { denominatorSource: { kind: "person", role: "data" } }));
+    for (const state of [exampleState(), same, person]) expect(twoTools(state)).toEqual([]);
   });
 });

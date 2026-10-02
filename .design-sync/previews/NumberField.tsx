@@ -44,7 +44,7 @@ export const AmountEnglish = () => (
     locale="en"
     prefix="€"
     unitName="euros"
-    parseError="That isn't a readable number."
+    parseError="Type a number, such as 1,250 or 18.5."
   />
 );
 
@@ -58,7 +58,7 @@ export const AmountFrench = () => (
     locale="fr"
     suffix={" €"}
     unitName="euros"
-    parseError="Ce n'est pas un nombre lisible."
+    parseError="Écris un nombre, par exemple 1 250 ou 18,5."
   />
 );
 
@@ -69,7 +69,7 @@ export const AmountFrench = () => (
  * value `e2e/engine-forms.spec.ts` types there, grouped as the field groups it.
  */
 export const CurrencyInTheLabel = () => (
-  <Live initial={26000} size="sm" label="Amount (€)" locale="en" parseError="That isn't a readable number." />
+  <Live initial={26000} size="sm" label="Amount (€)" locale="en" parseError="Type a number, such as 1,250 or 18.5." />
 );
 
 /**
@@ -89,7 +89,7 @@ export const PercentTarget = () => (
     digits={5}
     suffix={" %"}
     unitName="pour cent"
-    parseError="Ce n'est pas un nombre lisible."
+    parseError="Écris un nombre, par exemple 1 250 ou 18,5."
   />
 );
 
@@ -105,7 +105,7 @@ export const Empty = () => (
     label="Valeur"
     hint={"Laisser vide tant que le chiffre n'est pas reçu : une observation sans valeur est une demande en cours, pas une absence."}
     locale="fr"
-    parseError="Ce n'est pas un nombre lisible."
+    parseError="Écris un nombre, par exemple 1 250 ou 18,5."
   />
 );
 
@@ -127,6 +127,6 @@ export const Invalid = () => (
     digits={5}
     suffix="%"
     unitName="per cent"
-    parseError="That isn't a readable number."
+    parseError="Type a number, such as 1,250 or 18.5."
   />
 );

@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
-import type { LevelCopy } from "@/lib/game/copy";
+import type { ReactNode } from "react";
+import type { RetentionPhoneCopy } from "@/lib/game/copy";
 import type { PhoneItem } from "@/lib/game/view";
+import { changedKeys, usePhoneFlash } from "./phone-flash";
+import frame from "./PhoneFrame.module.css";
 import styles from "./PhoneMock.module.css";
 
 /**
@@ -28,8 +30,7 @@ export function phoneItemKey(item: PhoneItem): string {
 
 /** The keys of `next` that `prev` did not show — the elements a tick just changed. */
 export function changedPhoneKeys(prev: readonly PhoneItem[], next: readonly PhoneItem[]): Set<string> {
-  const before = new Set(prev.map(phoneItemKey));
-  return new Set(next.map(phoneItemKey).filter((key) => !before.has(key)));
+  return changedKeys(prev, next, phoneItemKey);
 }
 
 /** A template with one `{name}` slot, the value set in `render`. No match: the template as is. */
@@ -48,7 +49,7 @@ function withSlot(template: string, name: string, render: ReactNode): ReactNode 
 export interface PhoneMockProps {
   /** lib/game/view.ts `phoneView(level, phoneIds(state))` — the active cards AND the ticked ones. */
   items: readonly PhoneItem[];
-  labels: LevelCopy["phone"];
+  labels: RetentionPhoneCopy;
   className?: string;
 }
 
@@ -66,30 +67,19 @@ export interface PhoneMockProps {
  *
  * When a ticked card changes something on the screen, that element is
  * outlined for a moment in the night's selection amber — the colour of the
- * ticked card itself: this is what it did. CSS only, so reduced motion
- * turns it off with every other animation; the first render never flashes.
+ * ticked card itself: this is what it did (`usePhoneFlash`, shared with
+ * Pédalix's phone). CSS only, so reduced motion turns it off with every
+ * other animation; the first render never flashes.
  */
 export function PhoneMock({ items, labels, className }: PhoneMockProps) {
-  // The previous screen kept in state and compared during render — React's
-  // pattern for state derived from a prop change, with no effect and no ref
-  // read. Compared by content, not by reference: the island rebuilds the
-  // array on every render, and an unrelated re-render must not cut a flash
-  // short by clearing its class mid-animation.
-  const signature = items.map(phoneItemKey).join("|");
-  const [previous, setPrevious] = useState({ signature, items });
-  const [changed, setChanged] = useState<ReadonlySet<string>>(() => new Set());
-  if (previous.signature !== signature) {
-    setChanged(changedPhoneKeys(previous.items, items));
-    setPrevious({ signature, items });
-  }
-
-  const flash = (item: PhoneItem) => (changed.has(phoneItemKey(item)) ? (styles.flash ?? "") : "");
+  const changed = usePhoneFlash(items, phoneItemKey);
+  const flash = (item: PhoneItem) => (changed(item) ? (frame.flash ?? "") : "");
 
   return (
-    <figure className={[styles.phone, className ?? ""].filter(Boolean).join(" ")} data-testid="game-phone">
-      <figcaption className={styles.caption}>{labels.caption}</figcaption>
-      <div className={styles.bezel}>
-        <div className={styles.screen}>
+    <figure className={[frame.phone, styles.flixo, className ?? ""].filter(Boolean).join(" ")} data-testid="game-phone">
+      <figcaption className={frame.caption}>{labels.caption}</figcaption>
+      <div className={frame.bezel}>
+        <div className={frame.screen}>
           {items.map((item) => (
             <PhoneElement key={phoneItemKey(item)} item={item} labels={labels} className={flash(item)} />
           ))}
@@ -99,17 +89,17 @@ export function PhoneMock({ items, labels, className }: PhoneMockProps) {
   );
 }
 
-function PhoneElement({ item, labels, className }: { item: PhoneItem; labels: LevelCopy["phone"]; className: string }) {
+function PhoneElement({ item, labels, className }: { item: PhoneItem; labels: RetentionPhoneCopy; className: string }) {
   const cx = (...names: (string | undefined)[]) => [...names, className].filter(Boolean).join(" ");
   switch (item.kind) {
     case "appBar":
       return (
-        <div className={cx(styles.appBar)}>
-          <span className={styles.brand}>
-            <span className={styles.dot} aria-hidden="true" />
+        <div className={cx(frame.appBar)}>
+          <span className={frame.brand}>
+            <span className={frame.dot} aria-hidden="true" />
             {labels.appName}
           </span>
-          <span className={styles.time}>{labels.time}</span>
+          <span className={frame.time}>{labels.time}</span>
         </div>
       );
     case "streakPush":
@@ -194,7 +184,7 @@ function CancelElement({
   className,
 }: {
   item: Extract<PhoneItem, { kind: "cancel" }>;
-  labels: LevelCopy["phone"];
+  labels: RetentionPhoneCopy;
   className: string;
 }) {
   const cx = (...names: (string | undefined)[]) => [...names, className].filter(Boolean).join(" ");

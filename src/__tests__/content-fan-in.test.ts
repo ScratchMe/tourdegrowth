@@ -87,6 +87,11 @@ const BUDGETS: { module: string; max: number; why: string }[] = [
     why: "Toute la copie d'interface du moteur : sa page la résout, et /llms.txt lit son titre et sa description quand le moteur est ouvert au build (C27).",
   },
   {
+    module: "content/engine-share.ts",
+    max: 3,
+    why: "Le titre du moteur et les mots de son image de partage (T6.2) : la page et /llms.txt par engine-copy.ts, et l'image elle-même — qui n'atteint QUE ce module-là de la copie du moteur, et pas engine-copy.ts.",
+  },
+  {
     module: "content/copy-library.ts",
     max: 13,
     why:
@@ -102,18 +107,23 @@ const BUDGETS: { module: string; max: number; why: string }[] = [
   },
   {
     module: "content/game/meta.ts",
-    max: 5,
-    why: "Titres, descriptions, intro du niveau : le hub, la page du niveau, leurs deux images OG (chantier G4b), et /llms.txt quand le jeu est ouvert (C27). Pas le sitemap, qui ne lit que des chemins et des dates.",
+    max: 7,
+    why: "Titres, descriptions, intro des niveaux : le hub, les deux pages de niveau, leurs trois images OG (chantier G4b), et /llms.txt quand le jeu est ouvert (C27). Pas le sitemap, qui ne lit que des chemins et des dates. 5 avant le niveau 2 (A12.f, 2026-10-01).",
   },
   {
     module: "content/game/hub.ts",
-    max: 3,
-    why: "Le hub, la page du niveau dont la navigation des zones reprend les cinq questions, et l'image de partage du hub qui dessine les cinq zones (chantier G4b). Écart au plan (qui disait 1) : une seconde copie des zones dériverait. L'image du NIVEAU ne l'atteint pas, et ne doit pas.",
+    max: 4,
+    why: "Le hub, les deux pages de niveau dont la navigation des zones reprend les cinq questions, et l'image de partage du hub qui dessine les cinq zones (chantier G4b). Écart au plan (qui disait 1) : une seconde copie des zones dériverait. Les images des NIVEAUX ne l'atteignent pas, et ne doivent pas.",
   },
   {
     module: "content/game/retention.ts",
+    max: 4,
+    why: "Les 49 Ko de texte du niveau 1 : sa page (îlot, G8a) et son image de partage, qui reprend les libellés du dashboard (G4b) ; et, depuis A12.f (2026-10-01), la page et l'image du niveau 2, dont la copie reprend par référence ce que le niveau 1 dit de toute année (A12.c). Jamais l'image du hub.",
+  },
+  {
+    module: "content/game/acquisition.ts",
     max: 2,
-    why: "Les 49 Ko de texte du niveau : la page du niveau (îlot, G8a) et son image de partage, qui reprend les libellés du dashboard (G4b). Jamais l'image du hub.",
+    why: "Le texte du niveau 2 (A12.c) : sa page et son image de partage, rien d'autre. Jamais la page ni l'image du niveau 1 : leurs entrées ne lui demandent rien (game-level-share-text.ts reçoit le niveau en paramètre).",
   },
 ];
 

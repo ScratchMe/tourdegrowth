@@ -2,7 +2,15 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import * as og from "@/lib/og/tokens";
-import { COLOR_TOKENS, DERIVED, NIGHT_PRIMITIVES, PRIMITIVES, SEMANTIC, resolveColor } from "@/styles/tokens/tokens";
+import {
+  COLOR_TOKENS,
+  DERIVED,
+  NIGHT_PRIMITIVES,
+  PRIMITIVES,
+  SEMANTIC,
+  SPACE_PRIMITIVES,
+  resolveColor,
+} from "@/styles/tokens/tokens";
 
 /**
  * DS v3 (M-8) — one source of truth for colors, enforced rather than hoped
@@ -129,12 +137,34 @@ describe("each layer only references the layer beneath it", () => {
   });
 });
 
+describe("spaces.css and SPACE_PRIMITIVES hold the same two colours", () => {
+  // spaces.css has one `:root` block; its literal hex values are the two new
+  // colours plus the band's own muted tones, which stay in the CSS. The two
+  // that are primitives are the ones the other tokens reference.
+  const spaces = parseBlocks("spaces.css");
+  const root = spaces.find((b) => b.selector === ":root")?.decls ?? new Map<string, string>();
+
+  it("declares each SPACE_PRIMITIVES colour with the same value", () => {
+    for (const [name, value] of Object.entries(SPACE_PRIMITIVES)) expect(root.get(name), `--${name}`).toBe(value);
+  });
+
+  it("references exactly those two among its literals — no third space colour hides in the CSS", () => {
+    const referenced = new Set([...root.values()].flatMap(refsOf).filter((ref) => root.has(ref)));
+    expect([...referenced].sort()).toEqual(Object.keys(SPACE_PRIMITIVES).sort());
+  });
+
+  it("the engine's accent on paper is the ultramarine", () => {
+    expect(root.get("space-engine-accent")).toBe("var(--space-ultramarine)");
+  });
+});
+
 describe("lib/og/tokens.ts reads the typed source", () => {
   const expected: Record<string, keyof typeof PRIMITIVES> = {
     OG_INK: "ink-0",
     OG_INK_SOFT: "ink-1",
     OG_STONE: "paper-1",
     OG_STONE_2: "paper-2",
+    OG_STONE_3: "paper-3",
     OG_RED: "paint-red",
     OG_RED_ACTION: "paint-red-action",
     OG_RED_INK: "paint-red-deep",
@@ -155,12 +185,25 @@ describe("lib/og/tokens.ts reads the typed source", () => {
     OG_NIGHT_BAD: "night-bad",
   };
 
+  // The engine's share image paints its space's colour (design brief 06).
+  const expectedSpace: Record<string, keyof typeof SPACE_PRIMITIVES> = {
+    OG_ULTRAMARINE: "space-ultramarine",
+  };
+
   it("every OG color equals its primitive", () => {
     const colors = Object.entries(og).filter(([k]) => k !== "OG_SIZE");
-    expect(colors.map(([k]) => k).sort()).toEqual([...Object.keys(expected), ...Object.keys(expectedNight)].sort());
+    expect(colors.map(([k]) => k).sort()).toEqual(
+      [...Object.keys(expected), ...Object.keys(expectedNight), ...Object.keys(expectedSpace)].sort(),
+    );
     for (const [k, v] of colors) {
       const night = expectedNight[k];
-      expect(v, k).toBe(night ? NIGHT_PRIMITIVES[night] : PRIMITIVES[expected[k] as keyof typeof PRIMITIVES]);
+      const space = expectedSpace[k];
+      const want = night
+        ? NIGHT_PRIMITIVES[night]
+        : space
+          ? SPACE_PRIMITIVES[space]
+          : PRIMITIVES[expected[k] as keyof typeof PRIMITIVES];
+      expect(v, k).toBe(want);
     }
   });
 

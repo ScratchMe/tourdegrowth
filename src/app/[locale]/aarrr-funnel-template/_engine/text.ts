@@ -1,4 +1,6 @@
-import { fillTemplate, formatDay, formatMonth } from "@/lib/engine/format";
+import { shapeOf } from "@/lib/engine/catalog-shape";
+import { periodRangeOf } from "@/lib/engine/cohort";
+import { fillTemplate, formatDay, formatMonth, formatMonthRange } from "@/lib/engine/format";
 import type { EngineStrings, ResolvedMetric } from "@/lib/engine/strings";
 import type { EngineState, MetricId } from "@/lib/engine/types";
 import type { Pillar } from "@/lib/scoring/pillars";
@@ -80,9 +82,14 @@ export function catalogFill(
     metrics: ResolvedMetric[];
     windowDays: number | null;
     variantLabel?: string;
+    /** The sheet's number and today: `{period}`, the months it covers (« de mai à juillet 2026 »). */
+    period?: { id: MetricId; today: Date };
   },
 ): string {
   const snap = context.state.snapshots[context.state.snapshots.length - 1]!;
+  const range = context.period
+    ? periodRangeOf(shapeOf(context.period.id), snap.metrics[context.period.id], snap, context.state.setup, context.period.today)
+    : null;
   const event = snap.metrics["act.event"];
   const eventName = event?.value?.kind === "text" ? event.value.text : null;
   const eventMetric = context.metrics.find((m) => m.id === "act.event");
@@ -96,6 +103,7 @@ export function catalogFill(
         : `"${eventName}"`
       : midSentence(eventMetric?.name ?? "", context.locale),
     ...(context.variantLabel ? { variant: context.variantLabel } : {}),
+    ...(range ? { period: formatMonthRange(range, context.locale, context.strings.units, "from") } : {}),
   });
 }
 

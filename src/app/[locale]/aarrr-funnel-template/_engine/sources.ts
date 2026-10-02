@@ -4,37 +4,53 @@ import type { Currency, ToolId } from "@/lib/engine/types";
 import type { SourceChoice } from "./sheet-draft";
 import type { SelectOption, SelectOptionGroup } from "@/components/core/Select";
 
-const ALL_TOOLS = [
-  "ga4",
-  "mixpanel",
-  "amplitude",
-  "posthog",
-  "stripe",
-  "chargebee",
-  "chartmogul",
-  "hubspot",
-  "salesforce",
-  "google-ads",
-  "meta-ads",
-  "linkedin-ads",
-  "app-store-connect",
-  "play-console",
-  "product-db",
-  "spreadsheet",
-] as const satisfies readonly ToolId[];
+/**
+ * Every tool, in the order the « Autres outils » list shows them. A `Record`
+ * that `satisfies` every `ToolId`, read by its keys: a tool added to the type
+ * is a compile error here, not a tool this list forgets — the gap Pipedrive
+ * and the customer-success platform fell into, never offered under « Autres
+ * outils » until A14 T0 (engine spec §19.0).
+ */
+const TOOL_ORDER = {
+  ga4: true,
+  mixpanel: true,
+  amplitude: true,
+  posthog: true,
+  stripe: true,
+  chargebee: true,
+  chartmogul: true,
+  hubspot: true,
+  salesforce: true,
+  pipedrive: true,
+  "google-ads": true,
+  "meta-ads": true,
+  "linkedin-ads": true,
+  "app-store-connect": true,
+  "play-console": true,
+  "product-db": true,
+  spreadsheet: true,
+  "cs-platform": true,
+} as const satisfies Record<ToolId, true>;
+export const ALL_TOOLS = Object.keys(TOOL_ORDER) as ToolId[];
 
 /**
  * The "where does it come from?" list (§7 E3): the tools this number is
  * usually found in first, then "someone gave it to me" and "other", then
  * every other tool under its own heading — offered, not hidden, because a
  * team that reads its sign-up rate in Amplitude is not wrong, only unusual.
+ *
+ * With the team's tools ticked (§19.5.2, A14 T4), THEY come first — the
+ * usual ones for this number among them first — and every other tool goes
+ * under « Autres outils ». Nothing ticked, the list is the one above.
  */
 export function sourceOptions(
   shape: MetricShape,
   strings: EngineStrings,
+  team: readonly ToolId[] = [],
 ): (SelectOption<Exclude<SourceChoice, "">> | SelectOptionGroup<Exclude<SourceChoice, "">>)[] {
-  const usual = shape.sources.map((tool) => ({ value: `tool:${tool}` as const, label: strings.tools[tool] }));
-  const rest = ALL_TOOLS.filter((tool) => !shape.sources.includes(tool)).map((tool) => ({
+  const first = team.length > 0 ? [...shape.sources.filter((t) => team.includes(t)), ...team.filter((t) => !shape.sources.includes(t))] : shape.sources;
+  const usual = first.map((tool) => ({ value: `tool:${tool}` as const, label: strings.tools[tool] }));
+  const rest = ALL_TOOLS.filter((tool) => !first.includes(tool)).map((tool) => ({
     value: `tool:${tool}` as const,
     label: strings.tools[tool],
   }));

@@ -1,9 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/core/Button";
+import { Callout } from "@/components/core/Callout";
+import { Checkbox } from "@/components/core/Checkbox";
 import { TEXT_LIMITS, type MetricShape } from "@/lib/engine/catalog-shape";
 import { ROLE_KEY, type ResolvedMetric } from "@/lib/engine/strings";
-import type { RoleId } from "@/lib/engine/types";
+import type { RoleId, ToolId } from "@/lib/engine/types";
 import { formatMoney, formatNumber, formatPercent } from "@/lib/engine/format";
 import type { DraftProblem, SheetDraft, SourceChoice } from "./sheet-draft";
 import { Choices } from "@/components/core/Choices";
@@ -18,6 +21,9 @@ import { moneyUnit, percentUnit, sourceOptions } from "./sources";
 import { fill, midSentence } from "./text";
 import type { EngineView } from "./view";
 import styles from "./Sheet.module.css";
+import { teamTools } from "@/lib/engine/tools";
+import { twoToolsOf } from "@/lib/engine/sanity";
+import { sanityText } from "@/lib/engine/sentences";
 
 const ROLES = Object.keys(ROLE_KEY) as RoleId[];
 
@@ -64,6 +70,23 @@ export function ValueEditor({
   const currency = state.setup.currency;
 
   const numberInvalid = w.notANumber;
+  // A cost per customer counts money over people; a margin or an MRR
+  // movement, money over money (A15.8). Only people are whole numbers.
+  const moneyNumerator = shape.unit === "money" || shape.amounts === true;
+  const moneyDenominator = shape.amounts === true;
+
+  // A rule a single value breaks — a rate outside 0–100, a negative amount
+  // or duration — is said when the box is left, not only at the save
+  // (A15.3): the person is still looking at it. A piece still missing waits
+  // for the save, as before.
+  const [left, setLeft] = useState<Partial<Record<"rate" | "amount" | "duration", true>>>({});
+  const leave = (field: "rate" | "amount" | "duration") => () => setLeft((was) => (was[field] ? was : { ...was, [field]: true }));
+  const outOfRange = draft.percent !== null && (draft.percent < 0 || draft.percent > 100);
+  const early = {
+    rate: left.rate && outOfRange ? w.percentRange : null,
+    amount: left.amount && draft.amount !== null && draft.amount < 0 ? w.amountNegative : null,
+    duration: left.duration && draft.durationValue !== null && draft.durationValue < 0 ? w.durationNegative : null,
+  };
 
   const kindToggle = (() => {
     if (shape.unit === "percent" && shape.valueKinds.includes("rate")) {
@@ -94,7 +117,14 @@ export function ValueEditor({
     return formatNumber(Math.round(q * 100) / 100, locale);
   })();
 
-  const src = sourceOptions(shape, strings);
+  const src = sourceOptions(shape, strings, teamTools(view.state.setup.tools));
+  // The check « deux outils » (§19.5.3), live as the two sources are chosen: the same sentence the deck's list says.
+  const toolOf = (choice: SourceChoice) => (choice.startsWith("tool:") ? { kind: "tool" as const, tool: choice.slice("tool:".length) as ToolId } : undefined);
+  const pair =
+    draft.kind === "ratio" && draft.splitSource
+      ? twoToolsOf({ status: "measured", value: { kind: "ratio", numerator: 0, denominator: 1 }, source: toolOf(draft.source), denominatorSource: toolOf(draft.denominatorSource) })
+      : null;
+  const twoTools = pair ? sanityText({ id: "two-tools", blocking: false, metrics: [shape.id], values: pair }, strings, locale) : null;
   const needsSource = draft.kind !== "text" && draft.kind !== "choice";
   const numGtDen = rule("num-gt-den");
 
@@ -106,7 +136,7 @@ export function ValueEditor({
         // a rule about the pair is the row's, not one box's.
         <FieldRow
           joiner={strings.sheet.over}
-          error={numGtDen ? <span data-testid="engine-live">{numGtDen}</span> : undefined}
+          error={numGtDen ? <span data-testid="engine-live">{numGtDen}</span> : (rule("count-negative") ?? rule("amount-negative") ?? undefined)}
         >
           <NumberField
             size="sm"
@@ -117,9 +147,9 @@ export function ValueEditor({
             value={draft.numerator}
             onChange={(numerator) => update({ numerator })}
             locale={locale}
-            integer={shape.unit !== "money"}
-            {...(shape.unit === "money" ? moneyUnit(currency, locale) : {})}
-            parseError={shape.unit === "money" ? numberInvalid : w.notAWholeNumber}
+            integer={!moneyNumerator}
+            {...(moneyNumerator ? moneyUnit(currency, locale) : {})}
+            parseError={moneyNumerator ? numberInvalid : w.notAWholeNumber}
           />
           <NumberField
             size="sm"
@@ -130,8 +160,9 @@ export function ValueEditor({
             value={draft.denominator}
             onChange={(denominator) => update({ denominator })}
             locale={locale}
-            integer
-            parseError={w.notAWholeNumber}
+            integer={!moneyDenominator}
+            {...(moneyDenominator ? moneyUnit(currency, locale) : {})}
+            parseError={moneyDenominator ? numberInvalid : w.notAWholeNumber}
           />
         </FieldRow>
       ) : null}
@@ -147,9 +178,10 @@ export function ValueEditor({
           id={`${idPrefix}-rate`}
           label={metric.name}
           hint={strings.sheet.rateOnlyHint}
-          error={rule("percent-range") ?? need("percent")}
+          error={rule("percent-range") ?? early.rate ?? need("percent")}
           value={draft.percent}
           onChange={(percent) => update({ percent })}
+          onBlur={leave("rate")}
           locale={locale}
           digits={5}
           {...percentUnit(locale)}
@@ -163,9 +195,10 @@ export function ValueEditor({
           id={`${idPrefix}-amount`}
           label={metric.name}
           hint={strings.sheet.rateOnlyHint}
-          error={need("amount")}
+          error={rule("amount-negative") ?? early.amount ?? need("amount")}
           value={draft.amount}
           onChange={(amount) => update({ amount })}
+          onBlur={leave("amount")}
           locale={locale}
           {...moneyUnit(currency, locale)}
           parseError={numberInvalid}
@@ -178,9 +211,10 @@ export function ValueEditor({
             size="sm"
             id={`${idPrefix}-duration`}
             label={metric.name}
-            error={need("duration")}
+            error={rule("duration-negative") ?? early.duration ?? need("duration")}
             value={draft.durationValue}
             onChange={(durationValue) => update({ durationValue })}
+            onBlur={leave("duration")}
             locale={locale}
             digits={5}
             parseError={numberInvalid}
@@ -275,6 +309,44 @@ export function ValueEditor({
           options={ROLES.map((role) => ({ value: role, label: strings.role[ROLE_KEY[role]] }))}
           onChange={(role) => role && update({ sourceRole: role })}
         />
+      ) : null}
+
+      {/* A rate in counts whose two counts come from two places (§19.5.3, A14 T4): its own box, then its own source. */}
+      {needsSource && draft.kind === "ratio" ? (
+        <Checkbox
+          id={`${idPrefix}-split-source`}
+          label={strings.sheet.splitSource}
+          checked={draft.splitSource}
+          onChange={(splitSource) => update({ splitSource })}
+          data-testid={`${idPrefix}-split-source`}
+        />
+      ) : null}
+      {needsSource && draft.kind === "ratio" && draft.splitSource ? (
+        <Select<Exclude<SourceChoice, "">>
+          size="sm"
+          id={`${idPrefix}-denominator-source`}
+          label={strings.sheet.denominatorSource}
+          error={need("denominator-source")}
+          value={draft.denominatorSource}
+          placeholder={w.choose}
+          options={src}
+          onChange={(denominatorSource) => update({ denominatorSource })}
+        />
+      ) : null}
+      {needsSource && draft.kind === "ratio" && draft.splitSource && draft.denominatorSource === "person" ? (
+        <Select<RoleId>
+          size="sm"
+          id={`${idPrefix}-denominator-source-role`}
+          label={w.sourceRole}
+          value={draft.denominatorSourceRole}
+          options={ROLES.map((role) => ({ value: role, label: strings.role[ROLE_KEY[role]] }))}
+          onChange={(role) => role && update({ denominatorSourceRole: role })}
+        />
+      ) : null}
+      {twoTools ? (
+        <Callout tone="caveat" data-testid={`${idPrefix}-two-tools`}>
+          <p>{twoTools}</p>
+        </Callout>
       ) : null}
 
       {metric.variants?.length && draft.kind !== "duration" ? (

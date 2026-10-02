@@ -1,0 +1,1639 @@
+{
+  "plg-example": {
+    "state": {
+      "schemaVersion": 2,
+      "id": "00000000-0000-4000-8000-000000000060",
+      "createdAt": "2026-09-24T08:00:00.000Z",
+      "updatedAt": "2026-09-24T09:00:00.000Z",
+      "setup": {
+        "type": "b2b-saas",
+        "motions": {
+          "plg": true,
+          "slg": false
+        },
+        "currency": "EUR",
+        "activationWindowDays": 7,
+        "paidWindowDays": 30,
+        "qualificationWindowDays": 30,
+        "goLiveWindowDays": 90
+      },
+      "snapshots": [
+        {
+          "id": "00000000-0000-4000-8000-000000000061",
+          "referenceMonth": "2026-08",
+          "cohortMonth": "2026-07",
+          "createdAt": "2026-09-24T08:00:00.000Z",
+          "metrics": {
+            "acq.signup-rate": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 820,
+                "denominator": 26000
+              },
+              "source": {
+                "kind": "tool",
+                "tool": "ga4"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "acq.top-channel-share": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 410,
+                "denominator": 820
+              },
+              "source": {
+                "kind": "tool",
+                "tool": "ga4"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z",
+              "label": "Recherche naturelle"
+            },
+            "acq.cac": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 21000,
+                "denominator": 42
+              },
+              "source": {
+                "kind": "person",
+                "role": "finance"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z",
+              "variant": "media-only"
+            },
+            "act.event": {
+              "status": "measured",
+              "value": {
+                "kind": "text",
+                "text": "a créé un premier projet"
+              },
+              "source": {
+                "kind": "other"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "act.rate": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 144,
+                "denominator": 800
+              },
+              "source": {
+                "kind": "tool",
+                "tool": "amplitude"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "act.ttv": {
+              "status": "estimated",
+              "estimate": {
+                "low": 1,
+                "high": 3,
+                "basis": "team-hunch"
+              },
+              "variant": "median",
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "ret.d30": {
+              "status": "missing",
+              "missing": {
+                "cause": "not-tracked",
+                "repair": "sprint",
+                "ownerRole": "data"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "ret.logo-churn": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 10,
+                "denominator": 400
+              },
+              "source": {
+                "kind": "tool",
+                "tool": "stripe"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "ret.churn-cause": {
+              "status": "missing",
+              "missing": {
+                "cause": "no-definition",
+                "repair": "meeting"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "ref.mechanism": {
+              "status": "measured",
+              "value": {
+                "kind": "choice",
+                "choice": "product"
+              },
+              "source": {
+                "kind": "other"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "ref.referred-share": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 48,
+                "denominator": 800
+              },
+              "source": {
+                "kind": "tool",
+                "tool": "product-db"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "ref.k-factor": {
+              "status": "requested",
+              "request": {
+                "role": "data",
+                "requestedAt": "2026-09-20T09:00:00.000Z"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "rev.paid-conversion": {
+              "status": "estimated",
+              "estimate": {
+                "low": 6,
+                "high": 9,
+                "basis": "old-number"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "rev.arpa": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 48000,
+                "denominator": 400
+              },
+              "source": {
+                "kind": "tool",
+                "tool": "stripe"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "rev.gross-margin": {
+              "status": "missing",
+              "missing": {
+                "cause": "no-access",
+                "repair": "meeting",
+                "ownerRole": "finance"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "rev.expansion": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 1440,
+                "denominator": 46800
+              },
+              "source": {
+                "kind": "tool",
+                "tool": "stripe"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "rev.contraction": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 480,
+                "denominator": 46800
+              },
+              "source": {
+                "kind": "tool",
+                "tool": "stripe"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            }
+          },
+          "targets": {
+            "act.rate": 20,
+            "ret.logo-churn": 2
+          }
+        }
+      ],
+      "tourLink": null,
+      "deck": {
+        "include": {},
+        "showCompany": false,
+        "showSiteCredit": true,
+        "ask": {
+          "what": "",
+          "bullets": [],
+          "measureFirst": []
+        }
+      }
+    },
+    "tour": null
+  },
+  "hybrid": {
+    "state": {
+      "schemaVersion": 2,
+      "id": "00000000-0000-4000-8000-000000000060",
+      "createdAt": "2026-09-24T08:00:00.000Z",
+      "updatedAt": "2026-09-24T09:00:00.000Z",
+      "setup": {
+        "type": "b2b-saas",
+        "motions": {
+          "plg": true,
+          "slg": true
+        },
+        "currency": "EUR",
+        "activationWindowDays": 7,
+        "paidWindowDays": 30,
+        "qualificationWindowDays": 30,
+        "goLiveWindowDays": 90
+      },
+      "snapshots": [
+        {
+          "id": "00000000-0000-4000-8000-000000000061",
+          "referenceMonth": "2026-08",
+          "cohortMonth": "2026-07",
+          "createdAt": "2026-09-24T08:00:00.000Z",
+          "metrics": {
+            "acq.signup-rate": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 820,
+                "denominator": 26000
+              },
+              "source": {
+                "kind": "tool",
+                "tool": "ga4"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "acq.top-channel-share": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 410,
+                "denominator": 820
+              },
+              "source": {
+                "kind": "tool",
+                "tool": "ga4"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z",
+              "label": "Recherche naturelle"
+            },
+            "acq.cac": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 21000,
+                "denominator": 42
+              },
+              "source": {
+                "kind": "person",
+                "role": "finance"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z",
+              "variant": "media-only"
+            },
+            "act.event": {
+              "status": "measured",
+              "value": {
+                "kind": "text",
+                "text": "a créé un premier projet"
+              },
+              "source": {
+                "kind": "other"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "act.rate": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 144,
+                "denominator": 800
+              },
+              "source": {
+                "kind": "tool",
+                "tool": "amplitude"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "act.ttv": {
+              "status": "estimated",
+              "estimate": {
+                "low": 1,
+                "high": 3,
+                "basis": "team-hunch"
+              },
+              "variant": "median",
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "ret.d30": {
+              "status": "missing",
+              "missing": {
+                "cause": "not-tracked",
+                "repair": "sprint",
+                "ownerRole": "data"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "ret.logo-churn": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 10,
+                "denominator": 400
+              },
+              "source": {
+                "kind": "tool",
+                "tool": "stripe"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "ret.churn-cause": {
+              "status": "missing",
+              "missing": {
+                "cause": "no-definition",
+                "repair": "meeting"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "ref.mechanism": {
+              "status": "measured",
+              "value": {
+                "kind": "choice",
+                "choice": "product"
+              },
+              "source": {
+                "kind": "other"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "ref.referred-share": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 48,
+                "denominator": 800
+              },
+              "source": {
+                "kind": "tool",
+                "tool": "product-db"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "ref.k-factor": {
+              "status": "requested",
+              "request": {
+                "role": "data",
+                "requestedAt": "2026-09-20T09:00:00.000Z"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "rev.paid-conversion": {
+              "status": "estimated",
+              "estimate": {
+                "low": 6,
+                "high": 9,
+                "basis": "old-number"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "rev.arpa": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 48000,
+                "denominator": 400
+              },
+              "source": {
+                "kind": "tool",
+                "tool": "stripe"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "rev.gross-margin": {
+              "status": "missing",
+              "missing": {
+                "cause": "no-access",
+                "repair": "meeting",
+                "ownerRole": "finance"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "rev.expansion": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 1440,
+                "denominator": 46800
+              },
+              "source": {
+                "kind": "tool",
+                "tool": "stripe"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "rev.contraction": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 480,
+                "denominator": 46800
+              },
+              "source": {
+                "kind": "tool",
+                "tool": "stripe"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "slg.acq.lead-to-opp": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 72,
+                "denominator": 480
+              },
+              "source": {
+                "kind": "tool",
+                "tool": "hubspot"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z",
+              "variant": "mql",
+              "cohortMonth": "2026-07"
+            },
+            "slg.acq.cac": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 342000,
+                "denominator": 18
+              },
+              "source": {
+                "kind": "person",
+                "role": "finance"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z",
+              "variant": "fully-loaded"
+            },
+            "slg.acq.cycle": {
+              "status": "measured",
+              "value": {
+                "kind": "duration",
+                "value": 64,
+                "unit": "days",
+                "statistic": "median"
+              },
+              "source": {
+                "kind": "tool",
+                "tool": "hubspot"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "slg.act.live-event": {
+              "status": "measured",
+              "value": {
+                "kind": "text",
+                "text": "premier rapport partagé avec l'équipe du client"
+              },
+              "source": {
+                "kind": "other"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "slg.act.go-live": {
+              "status": "missing",
+              "missing": {
+                "cause": "not-tracked",
+                "repair": "sprint",
+                "ownerRole": "customer-success"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "slg.ret.renewal": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 22,
+                "denominator": 25
+              },
+              "source": {
+                "kind": "tool",
+                "tool": "hubspot"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z",
+              "variant": "annual"
+            },
+            "slg.ret.nrr": {
+              "status": "estimated",
+              "estimate": {
+                "low": 104,
+                "high": 108,
+                "basis": "old-number"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "slg.ret.loss-cause": {
+              "status": "measured",
+              "value": {
+                "kind": "text",
+                "text": "départ du sponsor chez le client"
+              },
+              "source": {
+                "kind": "other"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z",
+              "evidence": "hunch"
+            },
+            "slg.ref.referred-share": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 26,
+                "denominator": 130
+              },
+              "source": {
+                "kind": "tool",
+                "tool": "hubspot"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z",
+              "variant": "customers-and-partners"
+            },
+            "slg.ref.referenceable": {
+              "status": "requested",
+              "request": {
+                "role": "marketing",
+                "requestedAt": "2026-09-21T09:00:00.000Z"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "slg.rev.win-rate": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 18,
+                "denominator": 75
+              },
+              "source": {
+                "kind": "tool",
+                "tool": "hubspot"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "slg.rev.acv": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 432000,
+                "denominator": 18
+              },
+              "source": {
+                "kind": "tool",
+                "tool": "hubspot"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "slg.rev.arpa": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 180000,
+                "denominator": 100
+              },
+              "source": {
+                "kind": "tool",
+                "tool": "stripe"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "slg.rev.gross-margin": {
+              "status": "missing",
+              "missing": {
+                "cause": "no-access",
+                "repair": "meeting",
+                "ownerRole": "finance"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "link.pql-handoff": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 31,
+                "denominator": 130
+              },
+              "source": {
+                "kind": "tool",
+                "tool": "hubspot"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z",
+              "definitionNote": "espace avec 3 membres actifs"
+            }
+          },
+          "targets": {
+            "act.rate": 20,
+            "ret.logo-churn": 2,
+            "slg.acq.lead-to-opp": 18,
+            "slg.rev.win-rate": 32,
+            "slg.ret.renewal": 92
+          },
+          "base": {
+            "slgOppsCreated": 130,
+            "slgDealsWon": 18,
+            "slgCustomers": 100
+          }
+        }
+      ],
+      "tourLink": null,
+      "deck": {
+        "include": {},
+        "showCompany": false,
+        "showSiteCredit": true,
+        "ask": {
+          "what": "",
+          "bullets": [],
+          "measureFirst": []
+        }
+      }
+    },
+    "tour": null
+  },
+  "hybrid-whatif-tour": {
+    "state": {
+      "schemaVersion": 2,
+      "id": "00000000-0000-4000-8000-000000000060",
+      "createdAt": "2026-09-24T08:00:00.000Z",
+      "updatedAt": "2026-09-24T09:00:00.000Z",
+      "setup": {
+        "type": "b2b-saas",
+        "motions": {
+          "plg": true,
+          "slg": true
+        },
+        "currency": "EUR",
+        "activationWindowDays": 7,
+        "paidWindowDays": 30,
+        "qualificationWindowDays": 30,
+        "goLiveWindowDays": 90
+      },
+      "snapshots": [
+        {
+          "id": "00000000-0000-4000-8000-000000000061",
+          "referenceMonth": "2026-08",
+          "cohortMonth": "2026-07",
+          "createdAt": "2026-09-24T08:00:00.000Z",
+          "metrics": {
+            "acq.signup-rate": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 820,
+                "denominator": 26000
+              },
+              "source": {
+                "kind": "tool",
+                "tool": "ga4"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "acq.top-channel-share": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 410,
+                "denominator": 820
+              },
+              "source": {
+                "kind": "tool",
+                "tool": "ga4"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z",
+              "label": "Recherche naturelle"
+            },
+            "acq.cac": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 21000,
+                "denominator": 42
+              },
+              "source": {
+                "kind": "person",
+                "role": "finance"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z",
+              "variant": "media-only"
+            },
+            "act.event": {
+              "status": "measured",
+              "value": {
+                "kind": "text",
+                "text": "a créé un premier projet"
+              },
+              "source": {
+                "kind": "other"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "act.rate": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 144,
+                "denominator": 800
+              },
+              "source": {
+                "kind": "tool",
+                "tool": "amplitude"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "act.ttv": {
+              "status": "estimated",
+              "estimate": {
+                "low": 1,
+                "high": 3,
+                "basis": "team-hunch"
+              },
+              "variant": "median",
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "ret.d30": {
+              "status": "missing",
+              "missing": {
+                "cause": "not-tracked",
+                "repair": "sprint",
+                "ownerRole": "data"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "ret.logo-churn": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 10,
+                "denominator": 400
+              },
+              "source": {
+                "kind": "tool",
+                "tool": "stripe"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "ret.churn-cause": {
+              "status": "missing",
+              "missing": {
+                "cause": "no-definition",
+                "repair": "meeting"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "ref.mechanism": {
+              "status": "measured",
+              "value": {
+                "kind": "choice",
+                "choice": "product"
+              },
+              "source": {
+                "kind": "other"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "ref.referred-share": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 48,
+                "denominator": 800
+              },
+              "source": {
+                "kind": "tool",
+                "tool": "product-db"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "ref.k-factor": {
+              "status": "requested",
+              "request": {
+                "role": "data",
+                "requestedAt": "2026-09-20T09:00:00.000Z"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "rev.paid-conversion": {
+              "status": "estimated",
+              "estimate": {
+                "low": 6,
+                "high": 9,
+                "basis": "old-number"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "rev.arpa": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 48000,
+                "denominator": 400
+              },
+              "source": {
+                "kind": "tool",
+                "tool": "stripe"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "rev.gross-margin": {
+              "status": "missing",
+              "missing": {
+                "cause": "no-access",
+                "repair": "meeting",
+                "ownerRole": "finance"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "rev.expansion": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 1440,
+                "denominator": 46800
+              },
+              "source": {
+                "kind": "tool",
+                "tool": "stripe"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "rev.contraction": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 480,
+                "denominator": 46800
+              },
+              "source": {
+                "kind": "tool",
+                "tool": "stripe"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "slg.acq.lead-to-opp": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 72,
+                "denominator": 480
+              },
+              "source": {
+                "kind": "tool",
+                "tool": "hubspot"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z",
+              "variant": "mql",
+              "cohortMonth": "2026-07"
+            },
+            "slg.acq.cac": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 342000,
+                "denominator": 18
+              },
+              "source": {
+                "kind": "person",
+                "role": "finance"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z",
+              "variant": "fully-loaded"
+            },
+            "slg.acq.cycle": {
+              "status": "measured",
+              "value": {
+                "kind": "duration",
+                "value": 64,
+                "unit": "days",
+                "statistic": "median"
+              },
+              "source": {
+                "kind": "tool",
+                "tool": "hubspot"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "slg.act.live-event": {
+              "status": "measured",
+              "value": {
+                "kind": "text",
+                "text": "premier rapport partagé avec l'équipe du client"
+              },
+              "source": {
+                "kind": "other"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "slg.act.go-live": {
+              "status": "missing",
+              "missing": {
+                "cause": "not-tracked",
+                "repair": "sprint",
+                "ownerRole": "customer-success"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "slg.ret.renewal": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 22,
+                "denominator": 25
+              },
+              "source": {
+                "kind": "tool",
+                "tool": "hubspot"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z",
+              "variant": "annual"
+            },
+            "slg.ret.nrr": {
+              "status": "estimated",
+              "estimate": {
+                "low": 104,
+                "high": 108,
+                "basis": "old-number"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "slg.ret.loss-cause": {
+              "status": "measured",
+              "value": {
+                "kind": "text",
+                "text": "départ du sponsor chez le client"
+              },
+              "source": {
+                "kind": "other"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z",
+              "evidence": "hunch"
+            },
+            "slg.ref.referred-share": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 26,
+                "denominator": 130
+              },
+              "source": {
+                "kind": "tool",
+                "tool": "hubspot"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z",
+              "variant": "customers-and-partners"
+            },
+            "slg.ref.referenceable": {
+              "status": "requested",
+              "request": {
+                "role": "marketing",
+                "requestedAt": "2026-09-21T09:00:00.000Z"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "slg.rev.win-rate": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 18,
+                "denominator": 75
+              },
+              "source": {
+                "kind": "tool",
+                "tool": "hubspot"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "slg.rev.acv": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 432000,
+                "denominator": 18
+              },
+              "source": {
+                "kind": "tool",
+                "tool": "hubspot"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "slg.rev.arpa": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 180000,
+                "denominator": 100
+              },
+              "source": {
+                "kind": "tool",
+                "tool": "stripe"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "slg.rev.gross-margin": {
+              "status": "missing",
+              "missing": {
+                "cause": "no-access",
+                "repair": "meeting",
+                "ownerRole": "finance"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "link.pql-handoff": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 31,
+                "denominator": 130
+              },
+              "source": {
+                "kind": "tool",
+                "tool": "hubspot"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z",
+              "definitionNote": "espace avec 3 membres actifs"
+            }
+          },
+          "targets": {
+            "act.rate": 20,
+            "ret.logo-churn": 2,
+            "slg.acq.lead-to-opp": 18,
+            "slg.rev.win-rate": 32,
+            "slg.ret.renewal": 92
+          },
+          "base": {
+            "slgOppsCreated": 130,
+            "slgDealsWon": 18,
+            "slgCustomers": 100
+          }
+        }
+      ],
+      "tourLink": {
+        "resultId": "11111111-1111-4111-8111-111111111111",
+        "linkedAt": "2026-09-24T09:00:00.000Z"
+      },
+      "deck": {
+        "include": {
+          "mirror": true
+        },
+        "showCompany": false,
+        "showSiteCredit": true,
+        "ask": {
+          "what": "",
+          "bullets": [],
+          "measureFirst": []
+        }
+      },
+      "whatIf": {
+        "act.rate": 24,
+        "slg.rev.win-rate": 30,
+        "link.pql-handoff": 40
+      }
+    },
+    "tour": {
+      "id": "11111111-1111-4111-8111-111111111111",
+      "ownerToken": "t",
+      "createdAt": "2026-09-01T10:00:00.000Z",
+      "total": 58,
+      "answers": {
+        "acq-1": 0,
+        "acq-2": 1,
+        "acq-3": 2,
+        "act-1": 0,
+        "act-2": 1,
+        "act-3": 2,
+        "ret-1": 0,
+        "ret-2": 1,
+        "ret-3": 2,
+        "ref-1": 0,
+        "ref-2": 1,
+        "ref-3": 2,
+        "rev-1": 0,
+        "rev-2": 1,
+        "rev-3": 2
+      }
+    }
+  },
+  "hybrid-slg-empty": {
+    "state": {
+      "schemaVersion": 2,
+      "id": "00000000-0000-4000-8000-000000000060",
+      "createdAt": "2026-09-24T08:00:00.000Z",
+      "updatedAt": "2026-09-24T09:00:00.000Z",
+      "setup": {
+        "type": "b2b-saas",
+        "motions": {
+          "plg": true,
+          "slg": true
+        },
+        "currency": "EUR",
+        "activationWindowDays": 7,
+        "paidWindowDays": 30,
+        "qualificationWindowDays": 30,
+        "goLiveWindowDays": 90
+      },
+      "snapshots": [
+        {
+          "id": "00000000-0000-4000-8000-000000000061",
+          "referenceMonth": "2026-08",
+          "cohortMonth": "2026-07",
+          "createdAt": "2026-09-24T08:00:00.000Z",
+          "metrics": {
+            "acq.signup-rate": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 820,
+                "denominator": 26000
+              },
+              "source": {
+                "kind": "tool",
+                "tool": "ga4"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "acq.top-channel-share": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 410,
+                "denominator": 820
+              },
+              "source": {
+                "kind": "tool",
+                "tool": "ga4"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z",
+              "label": "Recherche naturelle"
+            },
+            "acq.cac": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 21000,
+                "denominator": 42
+              },
+              "source": {
+                "kind": "person",
+                "role": "finance"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z",
+              "variant": "media-only"
+            },
+            "act.event": {
+              "status": "measured",
+              "value": {
+                "kind": "text",
+                "text": "a créé un premier projet"
+              },
+              "source": {
+                "kind": "other"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "act.rate": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 144,
+                "denominator": 800
+              },
+              "source": {
+                "kind": "tool",
+                "tool": "amplitude"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "act.ttv": {
+              "status": "estimated",
+              "estimate": {
+                "low": 1,
+                "high": 3,
+                "basis": "team-hunch"
+              },
+              "variant": "median",
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "ret.d30": {
+              "status": "missing",
+              "missing": {
+                "cause": "not-tracked",
+                "repair": "sprint",
+                "ownerRole": "data"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "ret.logo-churn": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 10,
+                "denominator": 400
+              },
+              "source": {
+                "kind": "tool",
+                "tool": "stripe"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "ret.churn-cause": {
+              "status": "missing",
+              "missing": {
+                "cause": "no-definition",
+                "repair": "meeting"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "ref.mechanism": {
+              "status": "measured",
+              "value": {
+                "kind": "choice",
+                "choice": "product"
+              },
+              "source": {
+                "kind": "other"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "ref.referred-share": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 48,
+                "denominator": 800
+              },
+              "source": {
+                "kind": "tool",
+                "tool": "product-db"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "ref.k-factor": {
+              "status": "requested",
+              "request": {
+                "role": "data",
+                "requestedAt": "2026-09-20T09:00:00.000Z"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "rev.paid-conversion": {
+              "status": "estimated",
+              "estimate": {
+                "low": 6,
+                "high": 9,
+                "basis": "old-number"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "rev.arpa": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 48000,
+                "denominator": 400
+              },
+              "source": {
+                "kind": "tool",
+                "tool": "stripe"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "rev.gross-margin": {
+              "status": "missing",
+              "missing": {
+                "cause": "no-access",
+                "repair": "meeting",
+                "ownerRole": "finance"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "rev.expansion": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 1440,
+                "denominator": 46800
+              },
+              "source": {
+                "kind": "tool",
+                "tool": "stripe"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "rev.contraction": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 480,
+                "denominator": 46800
+              },
+              "source": {
+                "kind": "tool",
+                "tool": "stripe"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            }
+          },
+          "targets": {
+            "act.rate": 20,
+            "ret.logo-churn": 2,
+            "slg.acq.lead-to-opp": 18,
+            "slg.rev.win-rate": 32,
+            "slg.ret.renewal": 92
+          }
+        }
+      ],
+      "tourLink": null,
+      "deck": {
+        "include": {},
+        "showCompany": false,
+        "showSiteCredit": true,
+        "ask": {
+          "what": "",
+          "bullets": [],
+          "measureFirst": []
+        }
+      }
+    },
+    "tour": null
+  },
+  "slg": {
+    "state": {
+      "schemaVersion": 2,
+      "id": "00000000-0000-4000-8000-000000000060",
+      "createdAt": "2026-09-24T08:00:00.000Z",
+      "updatedAt": "2026-09-24T09:00:00.000Z",
+      "setup": {
+        "type": "b2b-saas",
+        "motions": {
+          "plg": false,
+          "slg": true
+        },
+        "currency": "EUR",
+        "activationWindowDays": 7,
+        "paidWindowDays": 30,
+        "qualificationWindowDays": 30,
+        "goLiveWindowDays": 90
+      },
+      "snapshots": [
+        {
+          "id": "00000000-0000-4000-8000-000000000061",
+          "referenceMonth": "2026-08",
+          "cohortMonth": "2026-07",
+          "createdAt": "2026-09-24T08:00:00.000Z",
+          "metrics": {
+            "slg.acq.lead-to-opp": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 72,
+                "denominator": 480
+              },
+              "source": {
+                "kind": "tool",
+                "tool": "hubspot"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z",
+              "variant": "mql",
+              "cohortMonth": "2026-07"
+            },
+            "slg.acq.cac": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 342000,
+                "denominator": 18
+              },
+              "source": {
+                "kind": "person",
+                "role": "finance"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z",
+              "variant": "fully-loaded"
+            },
+            "slg.acq.cycle": {
+              "status": "measured",
+              "value": {
+                "kind": "duration",
+                "value": 64,
+                "unit": "days",
+                "statistic": "median"
+              },
+              "source": {
+                "kind": "tool",
+                "tool": "hubspot"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "slg.act.live-event": {
+              "status": "measured",
+              "value": {
+                "kind": "text",
+                "text": "premier rapport partagé avec l'équipe du client"
+              },
+              "source": {
+                "kind": "other"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "slg.act.go-live": {
+              "status": "missing",
+              "missing": {
+                "cause": "not-tracked",
+                "repair": "sprint",
+                "ownerRole": "customer-success"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "slg.ret.renewal": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 22,
+                "denominator": 25
+              },
+              "source": {
+                "kind": "tool",
+                "tool": "hubspot"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z",
+              "variant": "annual"
+            },
+            "slg.ret.nrr": {
+              "status": "estimated",
+              "estimate": {
+                "low": 104,
+                "high": 108,
+                "basis": "old-number"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "slg.ret.loss-cause": {
+              "status": "measured",
+              "value": {
+                "kind": "text",
+                "text": "départ du sponsor chez le client"
+              },
+              "source": {
+                "kind": "other"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z",
+              "evidence": "hunch"
+            },
+            "slg.ref.referred-share": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 26,
+                "denominator": 130
+              },
+              "source": {
+                "kind": "tool",
+                "tool": "hubspot"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z",
+              "variant": "customers-and-partners"
+            },
+            "slg.ref.referenceable": {
+              "status": "requested",
+              "request": {
+                "role": "marketing",
+                "requestedAt": "2026-09-21T09:00:00.000Z"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "slg.rev.win-rate": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 18,
+                "denominator": 75
+              },
+              "source": {
+                "kind": "tool",
+                "tool": "hubspot"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "slg.rev.acv": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 432000,
+                "denominator": 18
+              },
+              "source": {
+                "kind": "tool",
+                "tool": "hubspot"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "slg.rev.arpa": {
+              "status": "measured",
+              "value": {
+                "kind": "ratio",
+                "numerator": 180000,
+                "denominator": 100
+              },
+              "source": {
+                "kind": "tool",
+                "tool": "stripe"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            },
+            "slg.rev.gross-margin": {
+              "status": "missing",
+              "missing": {
+                "cause": "no-access",
+                "repair": "meeting",
+                "ownerRole": "finance"
+              },
+              "updatedAt": "2026-09-20T10:00:00.000Z"
+            }
+          },
+          "targets": {
+            "slg.acq.lead-to-opp": 18,
+            "slg.rev.win-rate": 32,
+            "slg.ret.renewal": 92
+          },
+          "base": {
+            "slgOppsCreated": 130,
+            "slgDealsWon": 18,
+            "slgCustomers": 100
+          }
+        }
+      ],
+      "tourLink": null,
+      "deck": {
+        "include": {},
+        "showCompany": false,
+        "showSiteCredit": true,
+        "ask": {
+          "what": "",
+          "bullets": [],
+          "measureFirst": []
+        }
+      }
+    },
+    "tour": null
+  },
+  "slg-empty": {
+    "state": {
+      "schemaVersion": 2,
+      "id": "00000000-0000-4000-8000-000000000060",
+      "createdAt": "2026-09-24T08:00:00.000Z",
+      "updatedAt": "2026-09-24T09:00:00.000Z",
+      "setup": {
+        "type": "b2b-saas",
+        "motions": {
+          "plg": false,
+          "slg": true
+        },
+        "currency": "EUR",
+        "activationWindowDays": 7,
+        "paidWindowDays": 30,
+        "qualificationWindowDays": 30,
+        "goLiveWindowDays": 90
+      },
+      "snapshots": [
+        {
+          "id": "00000000-0000-4000-8000-000000000061",
+          "referenceMonth": "2026-08",
+          "cohortMonth": "2026-07",
+          "createdAt": "2026-09-24T08:00:00.000Z",
+          "metrics": {},
+          "targets": {}
+        }
+      ],
+      "tourLink": null,
+      "deck": {
+        "include": {},
+        "showCompany": false,
+        "showSiteCredit": true,
+        "ask": {
+          "what": "",
+          "bullets": [],
+          "measureFirst": []
+        }
+      }
+    },
+    "tour": null
+  }
+}

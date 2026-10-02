@@ -81,7 +81,8 @@ export function SlideWhatIf({ slide, context }: SlideProps) {
           testId={`slide-kpis-${slide.id}`}
         />
         <ChangeTable
-          title={s.whatIfFunnel}
+          // Sales-assisted reads a quarter where self-serve reads the month's funnel (§18.5.5).
+          title={slide.motion === "slg" ? s.whatIfQuarter : s.whatIfFunnel}
           todayLabel={s.whatIfToday}
           withLabel={s.whatIfWithOne}
           changeLabel={s.whatIfChange}

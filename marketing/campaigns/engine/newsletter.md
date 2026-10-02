@@ -41,7 +41,7 @@ une adresse personnelle trouvée ailleurs.
 >
 > [One line that shows you actually read their last issue — written by hand, never templated.]
 >
-> We built a free AARRR funnel template that runs entirely in the browser: a growth lead enters seventeen numbers from their own tools, sees where they lose the most people, and exports a 4 to 7 slide deck for their leadership meeting. No account, no server, no AI — there's a test in the public repo that fails if anything they type is sent.
+> We built a free AARRR funnel template that runs entirely in the browser: a growth lead enters the numbers from their own tools (self-serve, sales-assisted, or both), sees where they lose the most people, and exports a deck for their leadership meeting. No account, no server, no AI — there's a test in the public repo that fails if anything they type is sent.
 >
 > What might interest your readers is less the tool than two rules it holds: it only calls a stage "the leak" against a target the team sets (published ranges are shown for context, never to name one), and every number it can't find becomes a finding with a repair cost, on its own slide.
 >
@@ -63,7 +63,7 @@ une adresse personnelle trouvée ailleurs.
 >
 > [Une ligne qui montre qu'on a lu le dernier numéro — écrite à la main, jamais un gabarit.]
 >
-> On a construit un modèle de funnel AARRR gratuit qui tourne entièrement dans le navigateur : un responsable growth y saisit dix-sept chiffres tirés de ses outils, voit où il perd le plus de monde, et repart avec 4 à 7 slides pour son CODIR. Sans compte, sans serveur, sans IA — un test du dépôt public échoue si quoi que ce soit de saisi est envoyé.
+> On a construit un modèle de funnel AARRR gratuit qui tourne entièrement dans le navigateur : un responsable growth y saisit les chiffres tirés de ses outils (libre-service, vente assistée, ou les deux), voit où il perd le plus de monde, et repart avec les slides de son CODIR. Sans compte, sans serveur, sans IA — un test du dépôt public échoue si quoi que ce soit de saisi est envoyé.
 >
 > Ce qui pourrait intéresser tes lecteurs, c'est moins l'outil que deux règles qu'il tient : il ne désigne une étape comme « la fuite » que contre une cible fixée par l'équipe (les fourchettes publiées sont affichées pour situer, jamais pour désigner), et chaque chiffre introuvable devient un constat, chiffré en coût de réparation, sur sa propre slide.
 >

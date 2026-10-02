@@ -14,6 +14,10 @@ interface SegmentSelectorProps {
   segment: SegmentAnswers;
   onChange: (segment: SegmentAnswers) => void;
   onSubmit: () => void;
+  /** Back to the 15th question (A15.7): an answer stays correctable until the score is asked for. */
+  onBack: () => void;
+  /** The quiz's own « ← Back », from the page. */
+  backLabel: string;
 }
 
 /**
@@ -26,7 +30,7 @@ interface SegmentSelectorProps {
  * so pressing Continue immediately is a complete answer — the score is never
  * gated on profiling, and the reader falls back to the global average.
  */
-export function SegmentSelector({ locale, segment, onChange, onSubmit }: SegmentSelectorProps) {
+export function SegmentSelector({ locale, segment, onChange, onSubmit, onBack, backLabel }: SegmentSelectorProps) {
   const t = SEGMENT_SCREEN;
   // Mounts only once the 15th question is answered — the same transition the
   // tone selector focuses on, for the same reason (REVIEW.md R-19).
@@ -86,6 +90,10 @@ export function SegmentSelector({ locale, segment, onChange, onSubmit }: Segment
       <MetaLabel size="xs" uppercase={false} className={styles.hint}>
         {tc(t.optional, locale)}
       </MetaLabel>
+
+      <Button variant="quiet" className={styles.back} data-testid="segment-back" onClick={onBack}>
+        {backLabel}
+      </Button>
     </div>
   );
 }

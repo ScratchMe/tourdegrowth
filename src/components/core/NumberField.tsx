@@ -1,7 +1,7 @@
 "use client";
 
 import { useLayoutEffect, useRef, useState, type CSSProperties, type FocusEventHandler, type ReactNode } from "react";
-import { displayNumber, parseTypedNumber, regroupTypedNumber } from "@/lib/forms/number";
+import { displayNumber, isUnreadableNumber, parseTypedNumber, regroupTypedNumber } from "@/lib/forms/number";
 import { Field } from "./Field";
 import { boxStatusClasses, fieldBox } from "./field-parts";
 import styles from "./NumberField.module.css";
@@ -117,7 +117,7 @@ export function NumberField({
   });
 
   const raw = draft.value === value ? draft.raw : displayNumber(value, locale);
-  const unreadable = isUnreadable(raw, locale, integer);
+  const unreadable = isUnreadableNumber(raw, locale, integer);
   const shownError = parseShown && unreadable ? parseError : error;
 
   return (
@@ -173,12 +173,12 @@ export function NumberField({
                   const usable = next !== null && (!integer || Number.isInteger(next)) ? next : null;
                   // Once the text reads again, the message goes; it only comes
                   // back when the person leaves a box that still cannot be read.
-                  if (!isUnreadable(text, locale, integer)) setParseShown(false);
+                  if (!isUnreadableNumber(text, locale, integer)) setParseShown(false);
                   setDraft({ raw: text, value: usable });
                   onChange(usable);
                 }}
                 onBlur={(event) => {
-                  setParseShown(isUnreadable(event.target.value, locale, integer));
+                  setParseShown(isUnreadableNumber(event.target.value, locale, integer));
                   onBlur?.(event);
                 }}
               />
@@ -201,11 +201,4 @@ export function NumberField({
       }}
     </Field>
   );
-}
-
-/** Something was typed, and it is not a usable number: unreadable, or not whole where it must be. */
-function isUnreadable(raw: string, locale: "en" | "fr", integer: boolean): boolean {
-  if (raw.trim() === "") return false;
-  const parsed = parseTypedNumber(raw, locale);
-  return parsed === null || (integer && !Number.isInteger(parsed));
 }

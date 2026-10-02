@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { shapeOf, TEXT_LIMITS } from "@/lib/engine/catalog-shape";
 import type { MetricEntry, MetricId } from "@/lib/engine/types";
-import { draftFromEntry, entryFromDraft, isWideRange, proposedRepair, triageAnswersFor, type SheetDraft } from "../sheet-draft";
+import { draftFromEntry, entryFromDraft, isWideRange, proposedRepair, triageAnswersFor, withProposals, type SheetDraft } from "../sheet-draft";
 
 /**
  * The sheet's save rules (spec §7 E3, §6.9, D11), pinned where they live:
@@ -105,6 +105,44 @@ describe("entryFromDraft — what refuses a save", () => {
     expect(save("act.rate", { mode: "ask", note: "z".repeat(TEXT_LIMITS.note + 1) }).problems).toEqual(["note-too-long"]);
   });
 
+  // A15.3 (2026-10-01): a negative number was typed, not left out — it was
+  // said « still missing », which sent the person looking for an empty box.
+  it("calls a negative amount or duration what it is, not missing", () => {
+    expect(save("act.ttv", { mode: "have", kind: "duration", durationValue: -3, source: "other" }).problems).toEqual(["duration-negative"]);
+    expect(save("act.ttv", { mode: "have", kind: "duration", durationValue: null, source: "other" }).problems).toEqual(["duration"]);
+    const cac = (amount: number | null) =>
+      save("acq.cac", { mode: "have", kind: "amount", amount, source: "other", variant: "media-only" }, { hasVariants: true }).problems;
+    expect(cac(-5)).toEqual(["amount-negative"]);
+    expect(cac(null)).toEqual(["amount"]);
+    expect(cac(0)).toEqual([]);
+  });
+
+  // A15.10 (2026-10-01): a count of people, or the whole a share is taken
+  // of, is never below zero — the import said so, the sheet saved it. A
+  // margin over revenue can be: a loss-making business has one.
+  it("refuses a negative count, never a negative margin", () => {
+    expect(save("act.rate", { mode: "have", numerator: -3, denominator: 800, source: "other" }).problems).toEqual(["count-negative"]);
+    expect(save("act.rate", { mode: "have", numerator: 3, denominator: -800, source: "other" }).problems).toEqual(["count-negative"]);
+    expect(save("rev.gross-margin", { mode: "have", numerator: -1200.5, denominator: 40000, source: "other" }).problems).toEqual([]);
+  });
+
+  // The message names what the box holds, as ValueEditor draws it: a revenue
+  // in euros, or an MRR, is an amount, not « a count » (the copy review of
+  // A15, 2026-10-01).
+  it("says « amount » for a negative term in euros, « count » for a count", () => {
+    expect(save("rev.gross-margin", { mode: "have", numerator: 1200, denominator: -40000, source: "other" }).problems).toEqual(["amount-negative"]);
+    expect(save("rev.arpa", { mode: "have", numerator: -9000, denominator: 30, source: "other" }).problems).toEqual(["amount-negative"]);
+    expect(save("rev.arpa", { mode: "have", numerator: 9000, denominator: -30, source: "other" }).problems).toEqual(["count-negative"]);
+  });
+
+  // A15.3: a rate's bounds are rates, held to the 0–100 its value is held to.
+  it("holds an estimated rate's bounds to 0–100, and only a rate's", () => {
+    expect(save("act.rate", { mode: "estimate", low: 10, high: 140, basis: "sample" }).problems).toEqual(["percent-range"]);
+    expect(save("act.rate", { mode: "estimate", low: -2, high: 20, basis: "sample" }).problems).toEqual(["percent-range"]);
+    expect(save("act.rate", { mode: "estimate", low: 0, high: 100, basis: "sample" }).problems).toEqual([]);
+    expect(save("acq.cac", { mode: "estimate", low: 200, high: 900, basis: "sample" }).problems).toEqual([]);
+  });
+
   it("an estimate needs both bounds the right way round and a basis", () => {
     expect(save("act.rate", { mode: "estimate", low: 30, high: 20, basis: "sample" }).problems).toEqual(["low-above-high"]);
     expect(save("act.rate", { mode: "estimate", low: 10 }).problems).toEqual(["high", "basis"]);
@@ -171,6 +209,8 @@ describe("entryFromDraft — what refuses a save", () => {
 describe("the round trip — a saved entry reopens as the same form", () => {
   const entries: [MetricId, MetricEntry, Partial<Parameters<typeof entryFromDraft>[3]>][] = [
     ["act.rate", { status: "measured", value: { kind: "ratio", numerator: 144, denominator: 800 }, source: { kind: "tool", tool: "amplitude" }, updatedAt: NOW }, {}],
+    // A14 T4 (§19.5.3): the denominator's own source survives the round trip.
+    ["rev.arpa", { status: "measured", value: { kind: "ratio", numerator: 48_000, denominator: 400 }, source: { kind: "tool", tool: "stripe" }, denominatorSource: { kind: "tool", tool: "hubspot" }, updatedAt: NOW }, {}],
     ["acq.cac", { status: "measured", value: { kind: "amount", amount: 420 }, source: { kind: "person", role: "finance" }, variant: "fully-loaded", updatedAt: NOW }, { hasVariants: true }],
     ["act.ttv", { status: "measured", value: { kind: "duration", value: 3, unit: "days", statistic: "median" }, source: { kind: "other" }, updatedAt: NOW }, {}],
     ["ret.d30", { status: "estimated", estimate: { low: 20, high: 30, basis: "old-number" }, updatedAt: NOW }, {}],
@@ -236,5 +276,60 @@ describe("triageAnswersFor — no « deux chiffres » for an answer", () => {
     });
     expect(entry).toBeNull();
     expect(problems).toEqual(["triage"]);
+  });
+});
+
+describe("withProposals — a new month offers the month before's definition, never its value (A14 T2, §19.2.2)", () => {
+  const cac = shapeOf("acq.cac");
+  const before: Pick<MetricEntry, "variant" | "label" | "definitionNote" | "source"> = {
+    variant: "fully-loaded",
+    label: "Recherche naturelle",
+    definitionNote: "salaires de l'équipe compris",
+    source: { kind: "person", role: "finance" },
+  };
+
+  it("a number nobody has looked at this month starts from the month before's variant, label, note and source — and no value", () => {
+    const draft = withProposals(draftFromEntry(undefined, cac), before);
+    expect(draft).toMatchObject({ mode: null, variant: "fully-loaded", label: "Recherche naturelle", definitionNote: "salaires de l'équipe compris", source: "person", sourceRole: "finance" });
+    expect(draft).toMatchObject({ numerator: null, denominator: null, amount: null, percent: null });
+  });
+
+  it("a tool source becomes that tool", () => {
+    expect(withProposals(draftFromEntry(undefined, shapeOf("act.rate")), { source: { kind: "tool", tool: "amplitude" } }).source).toBe("tool:amplitude");
+  });
+
+  it("a number this month already has keeps its own; nothing to offer changes nothing", () => {
+    const entry: MetricEntry = { status: "estimated", estimate: { low: 400, high: 600, basis: "team-hunch" }, updatedAt: "2026-10-02T08:00:00.000Z" };
+    const draft = draftFromEntry(entry, cac);
+    expect(withProposals(draft, before)).toBe(draft);
+    const empty = draftFromEntry(undefined, cac);
+    expect(withProposals(empty, null)).toBe(empty);
+  });
+});
+
+describe("the denominator from another tool (§19.5.3, A14 T4)", () => {
+  const counts = { mode: "have" as const, kind: "ratio" as const, numerator: 144, denominator: 800, source: "tool:amplitude" as const };
+
+  it("unticked, nothing changes: one source, no `denominatorSource`", () => {
+    expect(save("act.rate", counts).entry).not.toHaveProperty("denominatorSource");
+  });
+
+  it("ticked, its source is required, and saved", () => {
+    expect(save("act.rate", { ...counts, splitSource: true }).problems).toContain("denominator-source");
+    expect(save("act.rate", { ...counts, splitSource: true, denominatorSource: "tool:ga4" }).entry).toMatchObject({
+      source: { kind: "tool", tool: "amplitude" },
+      denominatorSource: { kind: "tool", tool: "ga4" },
+    });
+  });
+
+  it("only for counts: a rate typed as a percent has one source", () => {
+    const rate = save("act.rate", { mode: "have", kind: "rate", percent: 18, source: "tool:amplitude", splitSource: true });
+    expect(rate.problems).toEqual([]);
+    expect(rate.entry).not.toHaveProperty("denominatorSource");
+  });
+
+  it("a new month offers the month before's denominator source too", () => {
+    const proposed = withProposals(draftFromEntry(undefined, shapeOf("act.rate")), { source: { kind: "tool", tool: "amplitude" }, denominatorSource: { kind: "tool", tool: "ga4" } });
+    expect(proposed).toMatchObject({ source: "tool:amplitude", splitSource: true, denominatorSource: "tool:ga4" });
   });
 });

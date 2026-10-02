@@ -97,6 +97,7 @@
 }
 
 .pill {
+  composes: strip from "../../styles/hit.module.css";
   display: inline-flex;
   align-items: center;
   gap: 6px;

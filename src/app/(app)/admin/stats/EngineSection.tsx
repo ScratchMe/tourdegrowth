@@ -14,8 +14,9 @@ function share(n: number, of: number): string {
  * game's precedent (`GameSection`). English like the rest of this page.
  *
  * What it can say is deliberately narrow: how many sessions opened the
- * engine, how far into the five stages they saved something, and what left
- * as a file. Never what anyone found — the page promises that nothing typed
+ * engine, with which motions (Q14), how far into the five stages they saved
+ * something — self-serve's and sales-assisted's apart — how many started a
+ * next month (the series in use, §19.12), and what left as a file. Never what anyone found — the page promises that nothing typed
  * leaves the browser, and these counts are the proof that the analytics keep
  * that promise too. Everything reads zero until the engine is opened.
  */
@@ -36,16 +37,23 @@ function EngineCard({ window }: { window: FunnelWindow }) {
       <ul className={styles.list} data-testid="admin-engine-stages">
         <li>Opened — {engine.opened}</li>
         <li data-testid="admin-engine-entries">
-          Entries — landing strip {engine.entries.home_strip}, space band {engine.entries.space_band}
+          Entries — landing strip {engine.entries.home_strip}, space band {engine.entries.space_band}, result (owner){" "}
+          {engine.entries.result_owner}, landing line {engine.entries.landing_resume}
+        </li>
+        <li data-testid="admin-engine-setup">
+          Set up — self-serve {engine.setup.plg}, sales-assisted {engine.setup.slg}, both {engine.setup.hybrid}
         </li>
         {ENGINE_STAGES.map((stage) => (
           <li key={stage}>
             First number saved in {stage} — {engine.stagesSaved[stage]} ({share(engine.stagesSaved[stage], engine.opened)} of
-            openings)
+            openings); sales-assisted {engine.stagesSavedSlg[stage]}
           </li>
         ))}
       </ul>
       <ul className={styles.list}>
+        <li data-testid="admin-engine-months">
+          Next month started — {engine.monthStarted} ({share(engine.monthStarted, engine.opened)} of openings)
+        </li>
         <li>Requests copied — {engine.requestsCopied}</li>
         <li>Linked to a Tour — {engine.tourLinked}</li>
         <li>

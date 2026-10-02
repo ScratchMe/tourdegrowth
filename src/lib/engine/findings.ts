@@ -1,8 +1,24 @@
-import { METRIC_SHAPES, shapeOf } from "./catalog-shape";
-import { formatInterval, type UnitWords } from "./format";
+import { METRIC_SHAPES, SLG_METRIC_SHAPES, shapeOf } from "./catalog-shape";
+import type { MetricShape } from "./catalog-shape";
+import { formatInterval, formatNumber, roundDisplay, type UnitWords } from "./format";
 import { point } from "./interval";
 import type { PelotonMetric } from "./peloton";
-import type { Comparator, EngineCalcContext, EngineDerived, EngineState, Finding, Interval, MetricId, MetricValue } from "./types";
+import { slgNoDecimals, smallestSample } from "./relays";
+import type {
+  CandidateId,
+  Comparator,
+  DerivedValue,
+  EngineCalcContext,
+  EngineDerived,
+  EngineState,
+  Finding,
+  Interval,
+  MetricId,
+  MetricValue,
+  Motion,
+  MotionDerived,
+  Position,
+} from "./types";
 import { currentSnapshot, entryOf, knownIn, readingValue, statusOf } from "./values";
 
 /**
@@ -41,6 +57,7 @@ const RANK: Record<Finding["kind"], Finding["rank"]> = {
   "unit-econ-uncomputable": 3,
   "reconcile-gap": 3,
   "small-cohort": 4,
+  "small-sample": 4,
   "hidden-knowledge": 4,
 };
 
@@ -59,17 +76,100 @@ export function formatComparator(comparator: Comparator, id: MetricId, state: En
   return formatInterval(range, shapeOf(id).unit, ctx, words, { currency: state.setup.currency });
 }
 
+/**
+ * The findings of the ticked motions, each tagged with its motion (§18.5.8),
+ * then sorted: by rank, by kind, and within a kind in canonical order —
+ * self-serve's before sales-assisted's, never by a value. The link makes no
+ * finding: it is optional, and its absence says nothing about the company.
+ */
 export function findings(state: EngineState, derived: Omit<EngineDerived, "findings">, ctx: EngineCalcContext, words: UnitWords): Finding[] {
   const snapshot = currentSnapshot(state);
   const out: Finding[] = [];
-  const add = (kind: Finding["kind"], metrics: Finding["metrics"], values: Record<string, string> = {}) =>
-    out.push({ kind, rank: RANK[kind], metrics, values });
+  const addFor =
+    (motion: Motion) =>
+    (kind: Finding["kind"], metrics: Finding["metrics"], values: Record<string, string> = {}, count?: Interval) =>
+      out.push({ kind, motion, rank: RANK[kind], metrics, values, ...(count ? { count } : {}) });
   const missing = (id: MetricId) => statusOf(entryOf(snapshot, id)) === "missing";
+
+  for (const m of derived.motions) {
+    const add = addFor(m.motion);
+    if (m.motion === "plg") selfServeFindings(state, m, derived, ctx, words, add, missing);
+    else salesAssistedFindings(state, m, ctx, words, add, missing);
+  }
+
+  // 2 — declared tracked at the Tour (20 points), and nobody could pull it.
+  for (const row of derived.mirror?.rows ?? []) {
+    if (row.declared === "tracked" && row.found === "unknown") addFor(row.motion)("blind-spot", [row.metric]);
+  }
+  // 4 — the positive one: declared unknown at the Tour, and measured here.
+  for (const row of derived.mirror?.rows ?? []) {
+    if (row.declared === "unknown" && row.found === "tracked") addFor(row.motion)("hidden-knowledge", [row.metric]);
+  }
+
+  // Stable: by rank, then by kind; within a kind, the order above (motions in canonical order, then metrics).
+  return out
+    .map((f, i) => ({ f, i }))
+    .sort((a, b) => a.f.rank - b.f.rank || KIND_ORDER.indexOf(a.f.kind) - KIND_ORDER.indexOf(b.f.kind) || a.i - b.i)
+    .map(({ f }) => f);
+}
+
+type Add = (kind: Finding["kind"], metrics: Finding["metrics"], values?: Record<string, string>, count?: Interval) => void;
+
+/** What a diagnosis named, with its value and the comparator that named it — the same in both motions. */
+function namedFindings(
+  state: EngineState,
+  diagnosis: MotionDerived["diagnosis"],
+  ctx: EngineCalcContext,
+  words: UnitWords,
+  add: Add,
+  noDecimals: (id: MetricId) => boolean,
+): void {
+  if (diagnosis.state !== "clear" && diagnosis.state !== "shared") return;
+  const positions = diagnosis.positions as Partial<Record<CandidateId, { position: Position; comparator?: Comparator }>>;
+  for (const id of diagnosis.named as CandidateId[]) {
+    const comparator = positions[id]?.comparator;
+    const known = knownIn(state, id, ctx);
+    if (!comparator || known.kind !== "known") continue;
+    add("below-comparator", [id], {
+      value: formatInterval(known.value, shapeOf(id).unit, ctx, words, { noDecimals: noDecimals(id) }),
+      comparator: formatComparator(comparator, id, state, ctx, words),
+    });
+  }
+}
+
+/** Two numbers that disagree, each with its own figure. */
+function conflictFindings(state: EngineState, shapes: readonly MetricShape[], ctx: EngineCalcContext, words: UnitWords, add: Add): void {
+  const snapshot = currentSnapshot(state);
+  for (const shape of shapes) {
+    const entry = entryOf(snapshot, shape.id);
+    if (entry?.status !== "conflicting" || !entry.conflict) continue;
+    add("conflict", [shape.id], {
+      a: formatReading(entry.conflict.a.value, shape.id, state, ctx, words),
+      b: formatReading(entry.conflict.b.value, shape.id, state, ctx, words),
+    });
+  }
+}
+
+/** The payback can't be computed, and at least one of its inputs was looked for and not found. */
+function paybackFinding(payback: DerivedValue, id: "rev.cac-payback" | "slg.rev.cac-payback", add: Add, missing: (id: MetricId) => boolean): void {
+  if (payback.kind === "uncomputable" && payback.missing.some(missing)) add("unit-econ-uncomputable", [id, ...payback.missing]);
+}
+
+function selfServeFindings(
+  state: EngineState,
+  m: Extract<MotionDerived, { motion: "plg" }>,
+  derived: Omit<EngineDerived, "findings">,
+  ctx: EngineCalcContext,
+  words: UnitWords,
+  add: Add,
+  missing: (id: MetricId) => boolean,
+): void {
+  const snapshot = currentSnapshot(state);
   const eventMissing = missing("act.event");
 
   // 1 — a ★ of the peloton that nobody could pull. The activation column breaks too when its EVENT is
   // missing: nobody can count activations of an action nobody has named, and it is said once (§5.3).
-  for (const column of derived.peloton.columns) {
+  for (const column of m.peloton.columns) {
     if (column.perHundred !== null) continue;
     if (column.metric === "act.rate" && eventMissing) add("chain-break", ["act.event", "act.rate"]);
     else if (missing(column.metric)) add("chain-break", [column.metric]);
@@ -81,53 +181,54 @@ export function findings(state: EngineState, derived: Omit<EngineDerived, "findi
     if (entryOf(snapshot, shape.id)?.missing?.cause === "no-definition" && missing(shape.id)) add("no-definition", [shape.id]);
   }
 
-  // 2 — declared tracked at the Tour (20 points), and nobody could pull it.
-  for (const row of derived.mirror?.rows ?? []) {
-    if (row.declared === "tracked" && row.found === "unknown") add("blind-spot", [row.metric]);
-  }
+  // 2 — the stages the diagnosis named.
+  namedFindings(state, m.diagnosis, ctx, words, add, () => false);
 
-  // 2 — the stages the diagnosis named, with their value and the comparator that named them.
-  if (derived.diagnosis.state === "clear" || derived.diagnosis.state === "shared") {
-    for (const id of derived.diagnosis.named) {
-      const comparator = derived.diagnosis.positions[id].comparator;
-      const known = knownIn(state, id, ctx);
-      if (!comparator || known.kind !== "known") continue;
-      add("below-comparator", [id], {
-        value: formatInterval(known.value, shapeOf(id).unit, ctx, words),
-        comparator: formatComparator(comparator, id, state, ctx, words),
-      });
-    }
-  }
-
-  // 3 — two numbers that disagree, each with its own figure.
-  for (const shape of METRIC_SHAPES) {
-    const entry = entryOf(snapshot, shape.id);
-    if (entry?.status !== "conflicting" || !entry.conflict) continue;
-    add("conflict", [shape.id], {
-      a: formatReading(entry.conflict.a.value, shape.id, state, ctx, words),
-      b: formatReading(entry.conflict.b.value, shape.id, state, ctx, words),
-    });
-  }
-
-  // 3 — the payback can't be computed, and at least one of its inputs was looked for and not found.
-  const payback = derived.unit.payback;
-  if (payback.kind === "uncomputable" && payback.missing.some(missing)) add("unit-econ-uncomputable", ["rev.cac-payback", ...payback.missing]);
+  // 3
+  conflictFindings(state, METRIC_SHAPES, ctx, words, add);
+  paybackFinding(m.unit.payback, "rev.cac-payback", add, missing);
 
   // 3 — the chain and the billing don't describe the same population.
   const gap = derived.sanity.find((c) => c.id === "reconcile-gap");
-  if (gap) out.push({ kind: "reconcile-gap", rank: RANK["reconcile-gap"], metrics: gap.metrics, values: gap.values, ...(gap.count ? { count: gap.count } : {}) });
+  if (gap) add("reconcile-gap", gap.metrics, gap.values, gap.count);
 
   // 4 — each sign-up weighs more than a point.
-  if (derived.peloton.smallCohort) add("small-cohort", []);
+  if (m.peloton.smallCohort) add("small-cohort", []);
+}
 
-  // 4 — the positive one: declared unknown at the Tour, and measured here.
-  for (const row of derived.mirror?.rows ?? []) {
-    if (row.declared === "unknown" && row.found === "tracked") add("hidden-knowledge", [row.metric]);
+/** §18.5.8: the same kinds and ranks, on the relays and the sales-assisted catalogue. */
+function salesAssistedFindings(
+  state: EngineState,
+  m: Extract<MotionDerived, { motion: "slg" }>,
+  ctx: EngineCalcContext,
+  words: UnitWords,
+  add: Add,
+  missing: (id: MetricId) => boolean,
+): void {
+  const snapshot = currentSnapshot(state);
+  const liveEventMissing = missing("slg.act.live-event");
+
+  // 1 — a relay nobody could pull. Go-live with no definition of « live » is one finding, on the definition.
+  for (const column of m.relays.columns) {
+    if (column.perHundred !== null) continue;
+    if (column.metric === "slg.act.go-live" && liveEventMissing) add("chain-break", ["slg.act.live-event", "slg.act.go-live"]);
+    else if (missing(column.metric)) add("chain-break", [column.metric]);
   }
 
-  // Stable: by rank, then by kind; within a kind, the order above (canonical metric order).
-  return out
-    .map((f, i) => ({ f, i }))
-    .sort((a, b) => a.f.rank - b.f.rank || KIND_ORDER.indexOf(a.f.kind) - KIND_ORDER.indexOf(b.f.kind) || a.i - b.i)
-    .map(({ f }) => f);
+  // 2 — no shared definition. Not raised on go-live when its definition is already the finding.
+  for (const shape of SLG_METRIC_SHAPES) {
+    if (shape.id === "slg.act.go-live" && liveEventMissing) continue;
+    if (entryOf(snapshot, shape.id)?.missing?.cause === "no-definition" && missing(shape.id)) add("no-definition", [shape.id]);
+  }
+
+  namedFindings(state, m.diagnosis, ctx, words, add, (id) => slgNoDecimals(snapshot, id));
+  conflictFindings(state, SLG_METRIC_SHAPES, ctx, words, add);
+  paybackFinding(m.unit.payback, "slg.rev.cac-payback", add, missing);
+
+  // 4 — the counted ★ on the smallest base: one more or less moves it by p points (§18.5.1).
+  const sample = smallestSample(snapshot);
+  if (sample) {
+    const p = roundDisplay(sample.points);
+    add("small-sample", [sample.metric], { d: formatNumber(sample.denominator, ctx.locale), p: formatInterval(point(sample.points), "ratio", ctx, words) }, point(p));
+  }
 }

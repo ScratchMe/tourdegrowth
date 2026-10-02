@@ -38,13 +38,15 @@ export function resolveEngineAccess({
 }
 
 /**
- * Whether a locale-less path (`rest` from `splitLocalePath`) is the engine's
- * page. Exactly one address: the engine is a single route with a client
- * state machine (§7), so `/aarrr-funnel-template/x` is not the engine — and
- * with `dynamicParams` off under `[locale]` it is a 404 anyway.
+ * Whether a locale-less path (`rest` from `splitLocalePath`) is the engine's:
+ * its page, and everything under it — today its share image
+ * (`/aarrr-funnel-template/opengraph-image/<locale>`, design brief 06), which
+ * must 404 with the page while the engine is closed, as the game's images do
+ * (`isGamePath`). Any other address under it is a 404 anyway (`dynamicParams`
+ * is off under `[locale]`).
  */
 export function isEnginePath(rest: string): boolean {
-  return rest === ENGINE_PATH;
+  return rest === ENGINE_PATH || rest.startsWith(`${ENGINE_PATH}/`);
 }
 
 /** The raw env value, read at call time (the proxy calls it per request). */

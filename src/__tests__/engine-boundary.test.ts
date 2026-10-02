@@ -1,12 +1,16 @@
 import { describe, expect, it } from "vitest";
 import {
   ENGINE_DECK_OPENED_EVENT,
+  ENGINE_ENTRY_DETAILS,
   ENGINE_EXPORT_FORMATS,
   ENGINE_EXPORTED_EVENT,
+  ENGINE_MONTH_STARTED_EVENT,
   ENGINE_OPENED_EVENT,
   ENGINE_REQUEST_COPIED_EVENT,
+  ENGINE_SETUP_DETAILS,
+  ENGINE_SETUP_EVENT,
+  ENGINE_STAGE_DETAILS,
   ENGINE_STAGE_SAVED_EVENT,
-  ENGINE_STAGES,
   ENGINE_TOUR_LINKED_EVENT,
 } from "@/lib/analytics/goatcounter";
 import { BY_PATH, FILES, reachable, stripComments, valueImports } from "./helpers/import-graph";
@@ -40,6 +44,12 @@ import { BY_PATH, FILES, reachable, stripComments, valueImports } from "./helper
  *    `lib/analytics/goatcounter.ts` — never a number, never a label typed by
  *    someone (§11.6). An event path is a way out like any other.
  * 6. The rules are not vacuous: the island exists and the walk walks.
+ * 7. What a person pastes is read in the island, never in `lib/engine` (A14 T5).
+ * 8. Outside the route, only the landing's `EngineResume` reads the engine's
+ *    storage, and it sends nothing — not directly, not through any import
+ *    (A14 T6, T7).
+ * 9. Outside the route, a door into the engine is counted by
+ *    `trackEngineEntry` and a literal from the list (A14 T7).
  *
  * The import graph is `helpers/import-graph.ts`, shared with the other walks:
  * value imports only (`import type` is erased by the compiler), and since the
@@ -56,6 +66,14 @@ const ISLAND = "app/[locale]/aarrr-funnel-template/EngineWorkbench.tsx";
 const DECK = "app/[locale]/aarrr-funnel-template/_engine/deck/DeckView.tsx";
 const PNG_EXPORT = "app/[locale]/aarrr-funnel-template/_engine/deck/export-png.ts";
 const EVENTS_DOOR = "app/[locale]/aarrr-funnel-template/_engine/engine-events.ts";
+/**
+ * The engine's share image (T6.2, design brief 06): a route of its own that
+ * Next compiles apart from the page, and the one file under the engine's
+ * route that must draw with the OG pipeline. Rule 1 lets it, and holds it to
+ * the other side of the bargain: it reaches nothing of the engine but its
+ * headline, and nothing of the engine reaches it.
+ */
+const SHARE_IMAGE = "app/[locale]/aarrr-funnel-template/opengraph-image.tsx";
 
 /** The engine's shipped code: its pure library and its route. Tests are not shipped. */
 const ENGINE = FILES.filter(
@@ -148,10 +166,12 @@ const ISLAND_MUST_REACH = [
  */
 const ENGINE_EVENTS: Record<string, readonly string[] | null> = {
   [ENGINE_OPENED_EVENT]: null,
+  [ENGINE_MONTH_STARTED_EVENT]: null,
   [ENGINE_REQUEST_COPIED_EVENT]: null,
   [ENGINE_DECK_OPENED_EVENT]: null,
   [ENGINE_TOUR_LINKED_EVENT]: null,
-  [ENGINE_STAGE_SAVED_EVENT]: ENGINE_STAGES,
+  [ENGINE_SETUP_EVENT]: ENGINE_SETUP_DETAILS,
+  [ENGINE_STAGE_SAVED_EVENT]: ENGINE_STAGE_DETAILS,
   [ENGINE_EXPORTED_EVENT]: ENGINE_EXPORT_FORMATS,
 };
 
@@ -254,12 +274,38 @@ describe("growth engine boundary (engine spec §11.4)", () => {
   });
 
   it("rule 1 — nothing in the engine imports Firebase, Gemini, submissions, the audit instrument, the OG pipeline or the dictionary", () => {
-    const offenders = ENGINE.flatMap((f) =>
+    const offenders = ENGINE.filter((f) => f.path !== SHARE_IMAGE).flatMap((f) =>
       ALL_IMPORTS(f.source)
         .filter((spec) => FORBIDDEN.some((re) => re.test(spec)))
         .map((spec) => `${f.path} → ${spec}`),
     );
     expect(offenders).toEqual([]);
+  });
+
+  it("rule 1 — the share image is the OG pipeline's only door, and it opens one way", () => {
+    expect(BY_PATH.has(SHARE_IMAGE), SHARE_IMAGE).toBe(true);
+    const walk = [...reachable(SHARE_IMAGE)];
+    // It draws with lib/og — or this exemption is exempting nothing.
+    expect(walk).toContain("lib/og/engine-frame.tsx");
+    // Of the engine, only its headline and the image's words: no engine code,
+    // no interface copy, no catalogue (content fan-in, VERCEL.md §2.2).
+    expect(walk.filter((m) => m.startsWith("lib/engine/") || m.startsWith("app/[locale]/aarrr-funnel-template/"))).toEqual([
+      SHARE_IMAGE,
+    ]);
+    expect(walk.filter((m) => /^content\/engine-/.test(m))).toEqual(["content/engine-share.ts"]);
+    // The rest of the FORBIDDEN list holds for everything it reaches, not
+    // only for what it imports itself: each module read as the specifier
+    // that would name it (convention 11 — count what crosses).
+    const asSpecifier = (m: string) => `@/${m.replace(/\.(tsx?|jsx?)$/, "").replace(/\/index$/, "")}`;
+    const notOg = FORBIDDEN.filter((re) => !re.test("@/lib/og/"));
+    expect(walk.filter((m) => notOg.some((re) => re.test(asSpecifier(m))))).toEqual([]);
+    // And nothing else of the engine reaches the OG pipeline but its size:
+    // the page reaches lib/og/tokens.ts, for OG_SIZE, through lib/i18n/meta.ts,
+    // as every content page does — a constant, not the renderer.
+    for (const f of ENGINE.filter((x) => x.path !== SHARE_IMAGE)) {
+      const og = [...reachable(f.path)].filter((m) => m.startsWith("lib/og/") && m !== "lib/og/tokens.ts");
+      expect(og, f.path).toEqual([]);
+    }
   });
 
   it("rule 1 — lib/engine imports no content value: it is pure, the page resolves copy and passes props", () => {
@@ -302,6 +348,24 @@ describe("growth engine boundary (engine spec §11.4)", () => {
       return NETWORK.filter((re) => re.test(code)).map((re) => `${f.path} → ${re}`);
     });
     expect(offenders).toEqual([]);
+  });
+
+  /**
+   * Engine spec §19.13 (A14 T5): a pasted table is read in the island, by the
+   * page's own text box — never by `lib/engine`, whose modules parse no text
+   * from outside, and never through the clipboard API, which would ask the
+   * browser's permission for what a paste already gives. It holds where the
+   * code lives, not what it does: `csv.test.ts` holds that. Non-vacuity,
+   * measured on 2026-10-01: an empty `export function readTable()` added to
+   * `lib/engine/merge.ts` fails it.
+   */
+  it("rule 7 — what a person pastes is read in the island, by its text box, never in lib/engine", () => {
+    const reader = /\breadTable\b|\btablePreview\b|split\(\s*["']\\t["']\s*\)/;
+    const inLib = ENGINE.filter((f) => f.path.startsWith("lib/engine/") && reader.test(stripComments(f.source))).map((f) => f.path);
+    expect(inLib).toEqual([]);
+    expect(ENGINE.map((f) => f.path)).toContain("app/[locale]/aarrr-funnel-template/_engine/csv.ts");
+    const clipboardRead = ENGINE.filter((f) => /clipboard\.read(?:Text)?\s*\(/.test(stripComments(f.source))).map((f) => f.path);
+    expect(clipboardRead).toEqual([]);
   });
 
   /**
@@ -359,9 +423,63 @@ describe("growth engine boundary (engine spec §11.4)", () => {
 
     // The door binds each detail to its list at the type level.
     const door = BY_PATH.get(EVENTS_DOOR)!;
-    expect(door).toMatch(/detail:\s*\(typeof ENGINE_STAGES\)\[number\]/);
+    expect(door).toMatch(/detail:\s*\(typeof ENGINE_SETUP_DETAILS\)\[number\]/);
+    expect(door).toMatch(/detail:\s*\(typeof ENGINE_STAGE_DETAILS\)\[number\]/);
     expect(door).toMatch(/detail:\s*\(typeof ENGINE_EXPORT_FORMATS\)\[number\]/);
     expect(door).not.toMatch(/detail\??:\s*string\b/);
+  });
+
+  /*
+   * The security review of A14 T6: outside the engine's route, the landing
+   * now reads the engine's storage (§19.10). Rules 3 and 5 only saw the
+   * route and lib/engine, so a count read there could have become an event's
+   * detail through a plain trackEvent. One file may read it — its own
+   * component — and it is held to the engine's rules: no network primitive,
+   * no analytics at all. Non-vacuity, measured on 2026-10-01: a
+   * `trackEvent` import in EngineResume.tsx fails the second assertion; the
+   * read moved back into LastResult.tsx fails the first.
+   */
+  it("rule 8 — outside the route, only the landing's EngineResume reads the engine's storage, and it sends nothing", () => {
+    const READERS = ["@/lib/engine/storage", "@/lib/engine/resume"];
+    const outside = FILES.filter((f) => !ENGINE.includes(f) && !f.path.includes("__tests__/") && !f.path.startsWith("lib/engine/"));
+    const readers = outside.filter((f) => valueImports(f.source).some((i) => READERS.includes(i))).map((f) => f.path);
+    expect(readers).toEqual(["app/[locale]/EngineResume.tsx"]);
+    const reader = BY_PATH.get("app/[locale]/EngineResume.tsx")!;
+    const code = stripComments(reader);
+    expect(NETWORK.filter((re) => re.test(code)).map(String)).toEqual([]);
+    expect(valueImports(reader).filter((i) => i.includes("analytics") || i.includes("engine-events"))).toEqual([]);
+    expect(code).not.toMatch(/\btrack(Event|Engine)\s*\(/);
+    // Not through an import either: a `TrackedLink` would count a click with any detail (security review of A14 T7).
+    expect([...reachable("app/[locale]/EngineResume.tsx")]).not.toContain("lib/analytics/goatcounter.ts");
+    // Its click reaches the landing's analytics through `onFollow` (A14 T7), so what crosses is counted, not named
+    // (convention 11): one call, on the click, with nothing — no loop, no effect, no argument, no alias. Three
+    // mentions: the prop, its destructuring, that call.
+    expect([...code.matchAll(/\bonFollow\b/g)]).toHaveLength(3);
+    expect(code).toMatch(/onClick=\{\(\)\s*=>\s*onFollow\?\.\(\)\}/);
+    // And the side that counts takes nothing: a parameterless arrow, the door by its literal.
+    const landing = stripComments(BY_PATH.get("app/[locale]/LastResult.tsx")!);
+    expect(landing.match(/onFollow=\{[^}]*\}/g)).toEqual(['onFollow={() => trackEngineEntry("landing_resume")}']);
+  });
+
+  it("rule 9 — outside the route, a door into the engine is counted by trackEngineEntry and a literal from the list", () => {
+    const outside = FILES.filter(
+      // The analytics module itself names the event to define and read it: the doors are everywhere else.
+      (f) => !ENGINE.includes(f) && !f.path.includes("__tests__/") && !f.path.startsWith("lib/analytics/"),
+    );
+    const calls = outside.flatMap((f) => {
+      const code = stripComments(f.source);
+      return [...code.matchAll(/\btrackEngineEntry\s*\(/g)].map((m) => ({ file: f.path, arg: argumentsAt(code, m.index! + m[0].length - 1).trim() }));
+    });
+    // The result's owner and the landing's line, at least: the rule looked at something.
+    expect(calls.length).toBeGreaterThanOrEqual(2);
+    for (const call of calls) expect(ENGINE_ENTRY_DETAILS.map((d) => `"${d}"`), `${call.file}: ${call.arg}`).toContain(call.arg);
+    // The event's name with a free detail is nowhere else: only the two older doors name it, through a TrackedLink
+    // and a literal detail (A7.9). A new door named here fails until it goes through `trackEngineEntry`.
+    const naming = outside.filter((f) => /\bENGINE_ENTRY_EVENT\b/.test(stripComments(f.source))).map((f) => f.path);
+    expect(naming.sort()).toEqual(["components/brand/SpaceBand.tsx", "components/brand/SpaceStrip.tsx"]);
+    // Nor spelled out: an engine event typed as a string, in a `trackEvent` or a `TrackedLink`, would be a door no list holds.
+    const spelled = outside.filter((f) => /(?:\btrackEvent\s*\(\s*|\bevent=\{?\s*)["'`]engine_/.test(stripComments(f.source))).map((f) => f.path);
+    expect(spelled).toEqual([]);
   });
 
   it("the flag has one reader: only lib/engine/access.ts reads ENGINE_ENABLED", () => {

@@ -23,7 +23,9 @@ export interface GameLevelEntry {
 
 export type GameLevelTable = Partial<Record<Pillar, GameLevelEntry>>;
 
+/** In AARRR order: the sitemap, /llms.txt and the hub's image list the levels in the order declared here. */
 export const GAME_LEVELS_BY_PILLAR: GameLevelTable = {
+  acquisition: { slug: "acquisition", enabled: true },
   retention: { slug: "retention", enabled: true },
 };
 
@@ -44,19 +46,22 @@ export interface BottleneckLike {
 }
 
 /**
- * The entry card's condition, pure (série G, test G6).
+ * The entry card's condition, pure (série G, test G6): the levels a result
+ * page offers, in the bottleneck's order — none means no card.
  *
  * - A "level" board names no stage, so it offers no level: the card would be
  *   pointing at a weakness the same page says does not exist.
  * - Closed access offers nothing — the flag, or a preview cookie, decides.
- * - Otherwise the first stage OF THE BOTTLENECK GROUP, lowest first, that has
- *   an enabled level. Orchestrator decision 2 (2026-09-24): a "shared"
- *   bottleneck that includes retention shows the card too — retention is in
- *   the lot holding this product back, and `pillars[0]` alone would hide it
- *   whenever a tie put another stage first in AARRR order, which is an
- *   artefact of declaration order, not a diagnosis.
+ * - Otherwise EVERY stage of the bottleneck group, lowest first, that has an
+ *   enabled level. Orchestrator decision 2 (2026-09-24): a "shared"
+ *   bottleneck counts — `pillars[0]` alone would hide a stage whenever a tie
+ *   put another first in AARRR order, which is an artefact of declaration
+ *   order, not a diagnosis. C30 Q5 (Antoine, 2026-10-01) took it one step
+ *   further when level 2 arrived: when several stages of the group have a
+ *   level, one card offers them all, stage by stage, and the reader chooses
+ *   — AARRR order no longer picks for them (GAME-BRIEF §15.4, A12.f.2).
  */
-export function gameEntryFor({
+export function gameEntriesFor({
   bottleneck,
   access,
   levels = GAME_LEVELS_BY_PILLAR,
@@ -64,14 +69,15 @@ export function gameEntryFor({
   bottleneck: BottleneckLike;
   access: GameAccess;
   levels?: GameLevelTable;
-}): GameEntryTarget | null {
-  if (access !== "open") return null;
-  if (bottleneck.sharpness === "level") return null;
+}): GameEntryTarget[] {
+  if (access !== "open") return [];
+  if (bottleneck.sharpness === "level") return [];
+  const targets: GameEntryTarget[] = [];
   for (const { pillar } of bottleneck.pillars) {
     const level = levels[pillar];
-    if (level?.enabled) return { pillar, slug: level.slug };
+    if (level?.enabled && !targets.some((t) => t.slug === level.slug)) targets.push({ pillar, slug: level.slug });
   }
-  return null;
+  return targets;
 }
 
 /** The slugs a player can actually open today, in the table's order. */

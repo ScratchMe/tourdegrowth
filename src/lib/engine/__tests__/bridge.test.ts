@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { QUESTIONS } from "@/content/copy-library";
 import { buildMirror, declaredLevel, latestTourWithAnswers, verdictOf } from "../bridge";
-import { ENGINE_BRIDGES } from "../catalog-shape";
+import { ENGINE_BRIDGES, SLG_ENGINE_BRIDGES } from "../catalog-shape";
 import type { MetricEntry, MirrorVerdict, TrackingLevel } from "../types";
 import { FR } from "./props";
-import { exampleState, tourResult, withEntry } from "./fixtures";
+import { exampleState, hybridState, salesAssistedState, tourResult, withEntry } from "./fixtures";
 
 // Engine spec §13.1 "bridge". Non-vacuity, measured: giving todo/requested/
 // not-applicable a verdict (found "unknown") fails "no verdict for what
@@ -44,13 +44,13 @@ describe("the eight bridges", () => {
     ]);
   });
 
-  it("every question exists in the Tour, with 20 / 7 / 0 points", () => {
-    for (const { questionId } of ENGINE_BRIDGES) {
+  it("every question exists in the Tour, with 20 / 7 / 0 points — self-serve's eight, then sales-assisted's six", () => {
+    for (const { questionId } of [...ENGINE_BRIDGES, ...SLG_ENGINE_BRIDGES]) {
       const q = QUESTIONS.find((x) => x.id === questionId);
       expect(q, questionId).toBeDefined();
       expect(q!.options.map((o) => o.points)).toEqual([20, 7, 0]);
     }
-    expect(FR.bridges.map((b) => b.questionId)).toEqual(ENGINE_BRIDGES.map((b) => b.questionId));
+    expect(FR.bridges.map((b) => b.metric)).toEqual([...ENGINE_BRIDGES, ...SLG_ENGINE_BRIDGES].map((b) => b.metric));
   });
 });
 
@@ -94,5 +94,45 @@ describe("buildMirror on the §6.0 example", () => {
 
   it("an unanswered question declares nothing", () => {
     expect(buildMirror(exampleState(), tourResult({ "acq-1": 0 }), FR.bridges).rows).toHaveLength(1);
+  });
+});
+
+// --- The hybrid (§18.4.9; A7.3.c S1). Non-vacuity, measured on 2026-10-01: a
+// mirror that keeps an unticked motion's rows fails « self-serve alone », four
+// deck tests whose mirror slide counts rows, and the golden v1's linked Tour.
+
+describe("the mirror in the hybrid: one row per (question, motion)", () => {
+  // Every bridged question answered « Oui, et on le mesure » (20 points).
+  const allTracked = tourResult(Object.fromEntries([...ENGINE_BRIDGES, ...SLG_ENGINE_BRIDGES].map((b) => [b.questionId, 0 as const])));
+
+  it("a question bridged in both motions gives two rows, self-serve's first; the counts count rows", () => {
+    const mirror = buildMirror(hybridState(), allTracked, FR.bridges);
+    expect(mirror.rows.map((r) => [r.questionId, r.motion, r.metric])).toEqual([
+      ["acq-1", "plg", "acq.top-channel-share"],
+      ["acq-3", "plg", "acq.cac"],
+      ["act-1", "plg", "act.event"],
+      ["act-2", "plg", "act.rate"],
+      ["ret-1", "plg", "ret.d30"],
+      ["ret-3", "plg", "ret.churn-cause"],
+      ["ref-3", "plg", "ref.k-factor"],
+      ["rev-2", "plg", "rev.ltv"],
+      ["acq-3", "slg", "slg.acq.cac"],
+      ["act-1", "slg", "slg.act.live-event"],
+      ["act-2", "slg", "slg.act.go-live"],
+      ["ret-1", "slg", "slg.ret.renewal"],
+      ["ret-3", "slg", "slg.ret.loss-cause"],
+      ["rev-2", "slg", "slg.rev.ltv"],
+    ]);
+    const slg = mirror.rows.filter((r) => r.motion === "slg");
+    // Measured, measured, missing, measured, measured (a hunch is still found), and the LTV's margin missing.
+    expect(slg.map((r) => r.verdict)).toEqual(["coherent", "coherent", "blind-spot", "coherent", "coherent", "blind-spot"]);
+    expect(Object.values(mirror.counts).reduce((a, b) => a + b, 0)).toBe(mirror.rows.filter((r) => r.verdict !== null).length);
+  });
+
+  it("self-serve alone keeps self-serve's rows only, as before", () => {
+    const mirror = buildMirror(exampleState(), allTracked, FR.bridges);
+    expect(mirror.rows.every((r) => r.motion === "plg")).toBe(true);
+    expect(mirror.rows).toHaveLength(ENGINE_BRIDGES.length);
+    expect(buildMirror(salesAssistedState(), allTracked, FR.bridges).rows.map((r) => r.motion)).toEqual(Array(6).fill("slg"));
   });
 });

@@ -1,5 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import type { Page } from "@playwright/test";
+import { GAME_ENTRY_EYEBROW } from "@/content/game/entry";
 import { ADMIN_PASSWORD, SKIP_ADMIN_REASON, expect, grantOwnerPreview, test, trackedEvents } from "./helpers";
 
 /**
@@ -28,6 +29,7 @@ import { ADMIN_PASSWORD, SKIP_ADMIN_REASON, expect, grantOwnerPreview, test, tra
 const GAME_OPEN = process.env.GAME_ENABLED === "true";
 
 const TITLE = { en: "The dark side of retention", fr: "Le côté obscur de la rétention" } as const;
+const EYEBROW = GAME_ENTRY_EYEBROW;
 
 async function box(page: Page, testId: string) {
   const b = await page.getByTestId(testId).boundingBox();
@@ -124,6 +126,32 @@ test.describe("P23 — the card on the sample's retention bottleneck", () => {
     });
   }
 
+  /**
+   * C33 (2026-10-01, decided by Antoine): « RÉSILIATIONS 6,0 % » is the
+   * game's number, read under the reader's own, and nothing said so. The line
+   * above the card does — outside the band, which keeps its one 44px line
+   * (the desktop test below) and its two lines on a phone.
+   */
+  for (const [locale, width] of [["fr", 1280], ["en", 1280], ["fr", 390]] as const) {
+    test(`says « in the game » right above the band (${locale}, ${width}px)`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto(`/r/sample?lang=${locale}`);
+      const eyebrow = page.getByTestId("game-entry-eyebrow");
+      await expect(eyebrow).toHaveText(EYEBROW[locale]);
+      const above = await box(page, "game-entry-eyebrow");
+      const band = await box(page, "game-entry-band");
+      const card = await box(page, "game-entry");
+      // On the line above the band, at the result's 10px section rhythm…
+      expect(above.y + above.height).toBeLessThanOrEqual(band.y);
+      expect(band.y - (above.y + above.height)).toBeLessThan(16);
+      // …flush with the card's edge, as every section eyebrow is (the band
+      // starts 2px further in, inside the card's border).
+      expect(Math.abs(above.x - card.x)).toBeLessThan(1);
+      // One line, even in French on a phone.
+      expect(above.height).toBeLessThan(24);
+    });
+  }
+
   test("clicking fires game_entry_clicked/result/retention", async ({ page }) => {
     await page.goto(`/r/sample?lang=en`);
     // The level lives under the other root layout, so the click is a full
@@ -172,8 +200,11 @@ test.describe("P23 — the card on the sample's retention bottleneck", () => {
     expect(cta.y).toBeLessThan(share.y);
     expect(cta.y).toBeLessThan(entry.y);
     expect(entry.y).toBeGreaterThan(share.y + share.height);
-    // Directly after it: the layout's 22px rhythm, nothing in between.
-    expect(entry.y - (share.y + share.height)).toBeLessThan(30);
+    // Directly after it: the layout's 22px rhythm, then the card's own
+    // eyebrow (C33) and the card — nothing else in between.
+    const eyebrow = await box(page, "game-entry-eyebrow");
+    expect(eyebrow.y - (share.y + share.height)).toBeLessThan(30);
+    expect(entry.y - (eyebrow.y + eyebrow.height)).toBeLessThan(16);
     // The band stacks on a narrow card instead of wrapping, so the "·"
     // cannot be left dangling at the end of a line (seen in a capture).
     await expect(page.getByTestId("game-entry-band-sep")).toBeHidden();

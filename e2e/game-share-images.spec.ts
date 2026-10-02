@@ -20,6 +20,7 @@ const GAME_OPEN = process.env.GAME_ENABLED === "true";
 
 const IMAGES = [
   { page: "/game", image: (l: string) => `/${l}/game/opengraph-image/${l}` },
+  { page: "/game/acquisition", image: (l: string) => `/${l}/game/acquisition/opengraph-image/${l}` },
   { page: "/game/retention", image: (l: string) => `/${l}/game/retention/opengraph-image/${l}` },
 ] as const;
 

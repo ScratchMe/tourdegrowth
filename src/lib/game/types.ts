@@ -10,16 +10,17 @@
 import type { Pillar } from "@/lib/scoring/pillars";
 
 /** The levels a player can reach: each has a page, a save, an entry card and its analytics. */
-export type LevelSlug = "retention";
+export type LevelSlug = "acquisition" | "retention";
 /**
- * A level whose model is written and tested but not yet wired to a page —
- * level 2 (GAME-BRIEF §17, validated on 2026-10-01) until `CHANTIERS.md` A12
- * wires it. Kept out of `LevelSlug` on purpose: every record keyed by it (the
- * save, the result page's entry card, the analytics) would otherwise demand
- * copy and decisions for a level nobody can play. Wiring the level is moving
- * its slug from here to there, and letting the compiler list what it needs.
+ * A level whose model is written and tested but not yet wired to a page. Kept
+ * out of `LevelSlug` on purpose: every record keyed by it (the save, the
+ * result page's entry card, the analytics) would otherwise demand copy and
+ * decisions for a level nobody can play. Wiring a level is moving its slug
+ * from here to there, and letting the compiler list what it needs — level 2
+ * (« acquisition ») made that move on 2026-10-01 (`CHANTIERS.md` A12.f).
+ * None today.
  */
-export type DraftLevelSlug = "acquisition";
+export type DraftLevelSlug = never;
 /** Any level the engine can run: published or still a draft. */
 export type ModelSlug = LevelSlug | DraftLevelSlug;
 export type CardKind = "h" | "d";

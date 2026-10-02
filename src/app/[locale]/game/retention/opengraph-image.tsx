@@ -1,9 +1,12 @@
-import { GAME_META } from "@/content/game/meta";
+import { GAME_META, RETENTION_INTRO } from "@/content/game/meta";
+import { RETENTION_CONTENT } from "@/content/game/retention";
+import { RETENTION_LEVEL } from "@/lib/game/levels/retention";
 import { tc } from "@/lib/i18n/dictionary";
 import { isLocale, type Locale } from "@/lib/i18n/locale";
 import { loadOgFonts } from "@/lib/og/fonts";
 import { renderGameLevelShareImage } from "@/lib/og/game-frame";
 import { gameLevelShareText } from "@/lib/og/game-level-share-text";
+import { localeShareImage } from "@/lib/og/image-metadata";
 import { OG_SIZE } from "@/lib/og/tokens";
 
 /**
@@ -22,13 +25,13 @@ export const size = OG_SIZE;
 export const contentType = "image/png";
 
 export async function generateImageMetadata({ params }: { params: Promise<{ locale: string }> }) {
-  const { locale } = await params;
-  const resolved: Locale = isLocale(locale) ? locale : "en";
-  return [{ id: resolved, size, contentType, alt: tc(GAME_META.retention.shareImageAlt, resolved) }];
+  // No image for a first segment that is not a language: Next then answers 404 (lib/og/image-metadata.ts).
+  return localeShareImage(params, (l) => tc(GAME_META.retention.shareImageAlt, l));
 }
 
 export default async function GameLevelShareImage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   const resolved: Locale = isLocale(locale) ? locale : "en";
-  return renderGameLevelShareImage(gameLevelShareText(resolved), await loadOgFonts());
+  const text = gameLevelShareText(resolved, { intro: RETENTION_INTRO, dashboard: RETENTION_CONTENT.dashboard, level: RETENTION_LEVEL });
+  return renderGameLevelShareImage(text, await loadOgFonts());
 }

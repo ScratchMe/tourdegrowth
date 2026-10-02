@@ -1,8 +1,9 @@
 import type { Page } from "@playwright/test";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import type { EngineState } from "../src/lib/engine/types";
-import { exampleState } from "../src/lib/engine/__tests__/fixtures";
+import { exampleState, measured, ratio, withEntry } from "../src/lib/engine/__tests__/fixtures";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, openFold, SKIP_ADMIN_REASON, test } from "./helpers";
+import { storedEngineEntry, writeEngineSeed } from "./engine-helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
 // owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
@@ -22,7 +23,6 @@ test.beforeEach(async ({ context }) => {
  * is here — that a slider moves the screen, that the screen keeps what was
  * moved, and that it holds on a phone.
  */
-const STORAGE_KEY = "tdg.engine.v1";
 const EXAMPLE_CLOCK = new Date(2026, 8, 24, 12);
 const W = ENGINE_COPY.scenario;
 
@@ -30,10 +30,7 @@ async function openWith(page: Page, state: EngineState, locale: "en" | "fr" = "e
   await page.clock.setFixedTime(EXAMPLE_CLOCK);
   await page.goto(`/${locale}/aarrr-funnel-template`);
   await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
-  await page.evaluate(({ key, value }) => window.localStorage.setItem(key, JSON.stringify({ schemaVersion: 1, state: value })), {
-    key: STORAGE_KEY,
-    value: state,
-  });
+  await writeEngineSeed(page, state);
   await page.reload();
   await expect(page.getByTestId("engine-board")).toBeVisible();
   await openFold(page.getByTestId("engine-board-whatif"));
@@ -46,7 +43,7 @@ async function nudge(page: Page, lever: string, key: "ArrowRight" | "ArrowLeft",
 }
 
 async function storedWhatIf(page: Page): Promise<Record<string, number> | undefined> {
-  return page.evaluate((key) => JSON.parse(window.localStorage.getItem(key) ?? "{}").state?.whatIf, STORAGE_KEY);
+  return (await storedEngineEntry(page))?.state.whatIf;
 }
 
 test("a better sign-up rate finally shows: same visitors, and the sign-up grid grows past 100", async ({ page }) => {
@@ -105,6 +102,17 @@ test("the targets are kept in the state: a reload finds them where they were lef
   await openFold(page.getByTestId("engine-board-whatif"));
   await expect(page.getByTestId("whatif-value-rev.arpa")).toHaveText(moved!);
   await expect(page.getByTestId("engine-whatif-funnel-title")).toHaveText(W.funnelIf.en);
+});
+
+test("day 30, once entered, is a lever: the paying follow it, and the assumption says so (§19.3.1)", async ({ page }) => {
+  await openWith(page, withEntry(exampleState(), "ret.d30", measured(ratio(120, 800))));
+  const panel = page.getByTestId("engine-whatif-panel");
+  await expect(panel.getByTestId("whatif-value-ret.d30")).toHaveText(/^15\s?%$/);
+  await nudge(page, "ret.d30", "ArrowRight", 3);
+  await expect(panel.getByTestId("whatif-value-ret.d30")).toHaveText(/^18\s?%$/);
+  await expect(panel.getByTestId("whatif-step-paying")).toContainText("+");
+  await expect(panel.getByTestId("whatif-assumptions")).toContainText(W.assumption["d30-drives-paying"].en);
+  expect(await storedWhatIf(page)).toEqual({ "ret.d30": 18 });
 });
 
 test("a lever not entered gets no slider, and says which ones; with nothing entered there is nothing to move", async ({ page }) => {

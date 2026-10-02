@@ -2,6 +2,7 @@ import type { Locator, Page } from "@playwright/test";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import { exampleState } from "../src/lib/engine/__tests__/fixtures";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
+import { activeEngineKey, writeEngineSeed } from "./engine-helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
 // owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
@@ -21,7 +22,6 @@ test.beforeEach(async ({ context }) => {
  * "Fill in" and "Continue" land on, and that the strip never pushes the page
  * sideways on a phone.
  */
-const STORAGE_KEY = "tdg.engine.v1";
 const EXAMPLE_CLOCK = new Date(2026, 8, 24, 12);
 const STAGES = ["acquisition", "activation", "retention", "referral", "revenue"] as const;
 
@@ -34,10 +34,7 @@ async function openEngine(page: Page, locale: "en" | "fr" = "en"): Promise<void>
 async function openExample(page: Page, locale: "en" | "fr" = "en"): Promise<void> {
   await page.clock.setFixedTime(EXAMPLE_CLOCK);
   await openEngine(page, locale);
-  await page.evaluate(
-    ({ key, state }) => window.localStorage.setItem(key, JSON.stringify({ schemaVersion: 1, state })),
-    { key: STORAGE_KEY, state: exampleState() },
-  );
+  await writeEngineSeed(page, exampleState());
   await page.reload();
   await expect(page.getByTestId("engine-board")).toBeVisible();
 }
@@ -175,7 +172,7 @@ test.describe("the stage menu", () => {
       const store = JSON.parse(window.localStorage.getItem(key)!);
       store.state.updatedAt = new Date(Date.now() - 3 * 86_400_000).toISOString();
       window.localStorage.setItem(key, JSON.stringify(store));
-    }, STORAGE_KEY);
+    }, await activeEngineKey(page));
     await page.reload();
     await expect(page.getByTestId("engine-resume")).toBeVisible();
     await page.getByTestId("engine-tab-referral").click();

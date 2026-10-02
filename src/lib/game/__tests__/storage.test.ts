@@ -211,3 +211,11 @@ describe("collection (X14)", () => {
     expect(loadCollection()).toEqual({ patterns: {}, endings: { retention: { id: "fine", at: "t" } } });
   });
 });
+
+describe("one save per level (A12.f, 2026-10-01)", () => {
+  it("gives level 2 its own key, apart from level 1's and from the collection", () => {
+    expect(GAME_SAVE_KEYS.acquisition).toBe("tdg.game.acquisition.v1");
+    const keys = [...Object.values(GAME_SAVE_KEYS), GAME_COLLECTION_KEY];
+    expect(new Set(keys).size).toBe(keys.length);
+  });
+});

@@ -4,6 +4,7 @@ import { exampleState } from "../src/lib/engine/__tests__/fixtures";
 import { PATH_A } from "../src/lib/game/__tests__/paths";
 import { hangUp, LEVEL_PATH } from "./game-helpers";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
+import { writeEngineSeed } from "./engine-helpers";
 
 /**
  * What the platform now does in our place (audit du kit §6, CHANTIERS.md A4,
@@ -26,12 +27,12 @@ import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } fr
  * `command` taken off the skip button; `Segmented`'s anchor block removed;
  * `color-scheme` removed from the night world. Two tests hold what stays and
  * pass on the old code too: a Disclosure under reduced motion, and a folded
- * row dropping an unsaved edit. So does the PNG half of the deck's: a lift of
+ * row dropping an unsaved edit (keeping it since A15.12, 2026-10-01: see the
+ * test). So does the PNG half of the deck's: a lift of
  * the skip during the export was written, measured useless (the off-screen
  * slide came out byte for byte the same without it) and taken out.
  */
 
-const STORAGE_KEY = "tdg.engine.v1";
 const EXAMPLE_CLOCK = new Date(2026, 8, 24, 12);
 const GAME_OPEN = process.env.GAME_ENABLED === "true";
 
@@ -264,10 +265,7 @@ test.describe("the engine", () => {
     await page.clock.setFixedTime(EXAMPLE_CLOCK);
     await page.goto("/en/aarrr-funnel-template");
     await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
-    await page.evaluate(({ key, state }) => window.localStorage.setItem(key, JSON.stringify({ schemaVersion: 1, state })), {
-      key: STORAGE_KEY,
-      state: exampleState(),
-    });
+    await writeEngineSeed(page, exampleState());
     await page.reload();
     await expect(page.getByTestId("engine-board")).toBeVisible();
   }
@@ -332,7 +330,12 @@ test.describe("the engine", () => {
     await expect(body).not.toHaveAttribute("hidden");
   });
 
-  test("folding a row drops what was typed and not saved, as closing it always did", async ({ page }) => {
+  // Until A15.12 (2026-10-01) this test held the opposite: folding dropped
+  // the typing, « as closing it always did » — kept when the folded row
+  // stayed in the page, not decided. The laws of UX review found it (a fold
+  // or a tab change lost a sheet's typing without a word) and Antoine took
+  // the fix: what was typed comes back, on screen only (`sheet-drafts.ts`).
+  test("folding a row keeps what was typed and not saved, and writes none of it to the device", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await openExample(page);
     const toggle = page.getByTestId("engine-metric-act-event");
@@ -344,7 +347,15 @@ test.describe("the engine", () => {
     await toggle.click();
     await expect(page.getByTestId("engine-sheet-act-event")).toBeHidden();
     await toggle.click();
-    await expect(page.getByTestId("engine-sheet-act-event").getByRole("textbox").first()).toHaveValue(saved);
+    await expect(page.getByTestId("engine-sheet-act-event").getByRole("textbox").first()).toHaveValue("typed, never saved");
+    // Every key on the device: since A14.c T0 an engine lives under its own.
+    const stored = await page.evaluate(() =>
+      Object.keys(window.localStorage)
+        .map((key) => window.localStorage.getItem(key) ?? "")
+        .join("\n"),
+    );
+    expect(stored).toContain(JSON.stringify(saved).slice(1, -1));
+    expect(stored).not.toContain("typed, never saved");
   });
 
   test("on a phone the strip says which way more tabs are, and scrolls exactly as far as before", async ({ page }) => {

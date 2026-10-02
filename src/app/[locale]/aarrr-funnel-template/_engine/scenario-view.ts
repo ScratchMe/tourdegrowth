@@ -13,6 +13,7 @@ import {
 } from "@/lib/engine/format";
 import { unitInputsPhrase } from "@/lib/engine/phrases";
 import { buildScenario, leverAlone, type LeverView, type Scenario, type ScenarioFunnel, type ScenarioKpis } from "@/lib/engine/scenario";
+import { buildSlgScenario, oppsCreated, oppsFromSelfServe, type SlgScenario, type SlgScenarioKpis } from "@/lib/engine/slg-scenario";
 import type { EngineStrings, ResolvedMetric } from "@/lib/engine/strings";
 import type { Currency, EngineCalcContext, EngineState, Interval, LeverId, MetricId } from "@/lib/engine/types";
 import { knownIn } from "@/lib/engine/values";
@@ -123,7 +124,7 @@ export function funnelSteps(scenario: Scenario, ctx: EngineCalcContext, strings:
   ];
 }
 
-export type KpiId = "mrr12" | "newMrr" | "nrr" | "grr" | "cac" | "ltv" | "payback";
+export type KpiId = "mrr12" | "newMrr" | "nrr" | "grr" | "cac" | "ltv" | "payback" | "won";
 
 export interface KpiView {
   id: KpiId;
@@ -144,7 +145,7 @@ export interface KpiView {
  * are named, through `unitInputsPhrase` (« la marge brute et l'ARPA ») —
  * never the whole list, which would ask for what is already there.
  */
-const KPI_INPUTS: Record<KpiId, readonly MetricId[]> = {
+const KPI_INPUTS: Record<Exclude<KpiId, "won">, readonly MetricId[]> = {
   mrr12: ["rev.arpa", "rev.paid-conversion", "ret.logo-churn"],
   newMrr: ["rev.arpa", "rev.paid-conversion"],
   nrr: ["ret.logo-churn", "rev.contraction", "rev.expansion"],
@@ -152,6 +153,17 @@ const KPI_INPUTS: Record<KpiId, readonly MetricId[]> = {
   cac: ["acq.cac"],
   ltv: ["rev.arpa", "rev.gross-margin", "ret.logo-churn"],
   payback: ["acq.cac", "rev.arpa", "rev.gross-margin"],
+};
+
+/** Sales-assisted's (§18.5.5): the quarter's new contracts at their ACV, the base at the 12-month NRR. No GRR: nobody types one. */
+const SLG_KPI_INPUTS: Record<Exclude<KpiId, "grr">, readonly MetricId[]> = {
+  mrr12: ["slg.rev.arpa", "slg.rev.acv", "slg.ret.renewal"],
+  newMrr: ["slg.rev.win-rate", "slg.rev.acv"],
+  nrr: ["slg.ret.nrr"],
+  cac: ["slg.acq.cac"],
+  ltv: ["slg.rev.acv", "slg.rev.gross-margin", "slg.ret.renewal"],
+  payback: ["slg.acq.cac", "slg.rev.acv", "slg.rev.gross-margin"],
+  won: ["slg.rev.win-rate"],
 };
 
 const LOWER_IS_BETTER: readonly KpiId[] = ["cac", "payback"];
@@ -166,7 +178,7 @@ export function kpiRows(
 ): KpiView[] {
   const w = strings.scenario;
   const unknownText = (id: KpiId) => {
-    const absent = KPI_INPUTS[id].filter((m) => knownIn(missing.state, m, ctx).kind !== "known");
+    const absent = KPI_INPUTS[id as Exclude<KpiId, "won">].filter((m) => knownIn(missing.state, m, ctx).kind !== "known");
     // Every input entered and still no figure (the month's sign-ups missing, say): the plain « inconnu ».
     return absent.length > 0 ? fillTemplate(w.kpiUnknown, { input: unitInputsPhrase(absent, strings, missing.metrics) }) : w.unknownStep;
   };
@@ -370,3 +382,144 @@ export function roundedMoney(amount: number, currency: Currency, ctx: EngineCalc
   return formatMoney(roundSignificant(Math.abs(amount), 2), currency, ctx.locale);
 }
 
+
+// --- Sales-assisted (A7.3.c S3, engine spec §18.5.5) ----------------------------
+
+/** The sales-assisted panel's scenario: the same targets map, its own levers (`slg-scenario.ts`). */
+export function slgScenarioFor(state: EngineState, targets: Partial<Record<LeverId, number>>, ctx: EngineCalcContext): SlgScenario {
+  return buildSlgScenario(state, targets, ctx);
+}
+
+/** A sales-assisted lever's value: a percent, money (the ACV), or whole opportunities (the link, C25 Q7). */
+function slgLeverText(lever: LeverView, v: Interval, ctx: EngineCalcContext, strings: EngineStrings, currency: Currency): string {
+  if (lever.unit === "count") return formatCountInterval(v, ctx, strings.units);
+  return leverText(lever, v, ctx, strings, currency);
+}
+
+/**
+ * Sales-assisted's sliders, in lever order: the three rates, the ACV, then
+ * the link in the hybrid. The link's slider is named for what it moves —
+ * « Opportunités venues du libre-service, par trimestre » — not its sheet's
+ * name: the slider counts opportunities, the sheet a share.
+ */
+export function slgLeverRows(scenario: SlgScenario, ctx: EngineCalcContext, strings: EngineStrings, currency: Currency, metrics: ResolvedMetric[]): LeverRowView[] {
+  return scenario.levers.map((lever) => {
+    const name = lever.id === "link.pql-handoff" ? strings.scenario.linkSlider : (metrics.find((m) => m.id === lever.id)?.name ?? lever.id);
+    if (!lever.today) return { id: lever.id, name, today: null, todayValue: null, min: 0, max: 0, step: 1, position: 0, valueText: "", moved: false };
+    const todayText = slgLeverText(lever, lever.today, ctx, strings, currency);
+    const moved = lever.target !== null;
+    return {
+      id: lever.id,
+      name,
+      today: fillTemplate(strings.scenario.leverToday, { value: todayText }),
+      todayValue: todayText,
+      min: lever.min,
+      max: lever.max,
+      step: lever.step,
+      position: moved ? lever.target! : onStep(middle(lever.today), lever.step),
+      valueText: moved ? slgLeverText(lever, { lo: lever.target!, hi: lever.target! }, ctx, strings, currency) : todayText,
+      moved,
+    };
+  });
+}
+
+/**
+ * Sales-assisted's growth figures, today → with the what-ifs: the MRR in
+ * twelve months, the new MRR a month, the 12-month NRR, the CAC, the LTV, the
+ * payback, and the new customers a quarter. The same tile rules as
+ * self-serve's (`kpiRows`): a change too small to print is no change, and a
+ * figure unknown says which of ITS inputs is missing.
+ */
+export function slgKpiRows(
+  scenario: SlgScenario,
+  ctx: EngineCalcContext,
+  strings: EngineStrings,
+  currency: Currency,
+  missing: { state: EngineState; metrics: ResolvedMetric[] },
+): KpiView[] {
+  const w = strings.scenario;
+  const unknownText = (id: Exclude<KpiId, "grr">) => {
+    const absent = SLG_KPI_INPUTS[id].filter((m) => knownIn(missing.state, m, ctx).kind !== "known");
+    return absent.length > 0 ? fillTemplate(w.kpiUnknown, { input: unitInputsPhrase(absent, strings, missing.metrics) }) : w.unknownStep;
+  };
+  const money = (i: Interval | null, extra = 0) => (i ? formatApproxMoneyInterval(i, currency, ctx, strings.units, extra) : null);
+  const percent = (i: Interval | null, extra = 0) => (i ? formatInterval(i, "percent", ctx, strings.units, { extra }) : null);
+  const months = (i: Interval | null) => (i ? formatDurationInterval(i, "months", ctx, strings.units) : null);
+  const customers = (i: Interval | null) => (i ? formatCountInterval(i, ctx, strings.units) : null);
+  type Row = {
+    id: Exclude<KpiId, "grr">;
+    label: string;
+    pick: (k: SlgScenarioKpis) => Interval | null;
+    show: (i: Interval | null, extra?: number) => string | null;
+    round?: (v: number, extra: number) => number;
+    delta: (d: number) => string;
+  };
+  const moneyRow = { show: money, round: approxRounding, delta: (d: number) => signed(roundedMoney(d, currency, ctx), d) };
+  const rows: Row[] = [
+    { id: "mrr12", label: w.kpiMrr12, pick: (k) => k.mrr12, ...moneyRow },
+    { id: "newMrr", label: w.kpiNewMrr, pick: (k) => k.newMrr, ...moneyRow },
+    { id: "nrr", label: w.kpiNrr12, pick: (k) => k.nrr, show: percent, round: rateRounding, delta: (d) => signed(points(Math.abs(d), strings, ctx), d) },
+    { id: "cac", label: w.kpiCac, pick: (k) => k.cac, ...moneyRow },
+    { id: "ltv", label: w.kpiLtv, pick: (k) => k.ltv, ...moneyRow },
+    { id: "payback", label: w.kpiPayback, pick: (k) => k.payback, show: months, delta: (d) => signed(months({ lo: Math.abs(d), hi: Math.abs(d) }) ?? "", d) },
+    { id: "won", label: w.kpiWon, pick: (k) => k.won, show: customers, delta: (d) => signed(customers({ lo: Math.abs(d), hi: Math.abs(d) }) ?? "", d) },
+  ];
+  const mid = (i: Interval) => (i.lo + i.hi) / 2;
+  return rows.map((row) => {
+    const today = row.pick(scenario.today);
+    const projected = row.pick(scenario.projected);
+    const d = today && projected ? mid(projected) - mid(today) : 0;
+    const extra = today && projected && row.round ? pairPrecision(mid(today), mid(projected), row.round) : 0;
+    const printedToday = row.show(today, extra);
+    const printedProjected = row.show(projected, extra);
+    const moved = printedToday !== null && printedProjected !== null && printedToday !== printedProjected && d !== 0;
+    const better = LOWER_IS_BETTER.includes(row.id) ? d < 0 : d > 0;
+    return {
+      id: row.id,
+      label: row.label,
+      today: printedToday,
+      projected: printedProjected,
+      delta: moved ? row.delta(d) : null,
+      tone: moved ? (better ? "better" : "worse") : null,
+      direction: moved ? (d > 0 ? "up" : "down") : null,
+      unknown: unknownText(row.id),
+    };
+  });
+}
+
+/** One line of the quarter: today → with the what-ifs, both formatted, the second null when nothing moved it. */
+export interface QuarterRowView {
+  id: "opps" | "fromSelfServe" | "won";
+  label: string;
+  today: string;
+  projected: string | null;
+}
+
+/**
+ * Sales-assisted's quarter, where self-serve draws its month's funnel: the
+ * opportunities created (and, in the hybrid, how many came from self-serve),
+ * then the new customers. The link and the referred share move the
+ * opportunities (§18.5.5, §19.3.2), read off the scenario itself; the new
+ * customers follow every lever.
+ */
+export function quarterRows(state: EngineState, scenario: SlgScenario, ctx: EngineCalcContext, strings: EngineStrings): QuarterRowView[] {
+  const w = strings.scenario;
+  const people = (i: Interval | null) => (i ? formatCountInterval(i, ctx, strings.units) : w.unknownStep);
+  const o = oppsCreated(state);
+  const l = oppsFromSelfServe(state, ctx);
+  const link = scenario.levers.find((x) => x.id === "link.pql-handoff");
+  const rows: QuarterRowView[] = [];
+  if (o !== null) {
+    const opps = scenario.today.opps ?? { lo: o, hi: o };
+    const printedO = scenario.projected.opps ? people(scenario.projected.opps) : null;
+    rows.push({ id: "opps", label: w.opps, today: people(opps), projected: printedO !== null && printedO !== people(opps) ? printedO : null });
+    if (link && l) {
+      rows.push({ id: "fromSelfServe", label: w.oppsFromSelfServe, today: people(l), projected: link.target !== null ? people({ lo: link.target, hi: link.target }) : null });
+    }
+  }
+  const won = scenario.today.won;
+  const projectedWon = scenario.projected.won;
+  const printed = people(projectedWon);
+  rows.push({ id: "won", label: w.won, today: people(won), projected: won && projectedWon && printed !== people(won) ? printed : null });
+  return rows;
+}
