@@ -11,10 +11,10 @@ teste avec l'aperçu propriétaire de `/admin/preview`), route `/{locale}/aarrr-
 `src/app/[locale]/aarrr-funnel-template/` (l'îlot, le tableau de bord, les
 slides). Les écarts que l'implémentation a tranchés par rapport à ce document
 sont consignés dans le journal (`JOURNAL.md`), pas réécrits ici. **Le moteur
-complet (§19, A14) est codé depuis le 2026-10-01** (T0 à T7, neuf PR de #255 à #266),
-drapeau fermé, sauf l'image de partage (T6.2), qui attend la passe de Claude
-Design (B5) ; sa copie neuve attend le bon à tirer A14.d, et l'ouverture
-attend les deux, en plus du reste de `CHANTIERS.md` D2.
+complet (§19, A14) est codé depuis le 2026-10-01** (T0 à T7, neuf PR de #255 à #266,
+puis son image de partage, T6.2, [#272](https://github.com/ScratchMe/tourdegrowth/pull/272), dessinée par Claude Design), drapeau
+fermé ; sa copie neuve attend le bon à tirer A14.d, et l'ouverture l'attend, en
+plus du reste de `CHANTIERS.md` D2.
 
 **Décisions prises par défaut le 2026-09-24 pour que le travail avance** —
 chacune se renverse en une phrase :

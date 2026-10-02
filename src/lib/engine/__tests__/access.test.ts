@@ -23,7 +23,9 @@ describe("resolveEngineAccess", () => {
 describe("isEnginePath", () => {
   it("matches the engine's page and nothing that merely starts like it", () => {
     expect(isEnginePath("/aarrr-funnel-template")).toBe(true);
-    expect(isEnginePath("/aarrr-funnel-template/x")).toBe(false);
+    // Everything under the page is the engine's — its share image first.
+    expect(isEnginePath("/aarrr-funnel-template/opengraph-image/fr")).toBe(true);
+    expect(isEnginePath("/aarrr-funnel-template/x")).toBe(true);
     expect(isEnginePath("/aarrr-funnel-templates")).toBe(false);
     expect(isEnginePath("/aarrr-vs-okr")).toBe(false);
     expect(isEnginePath("/")).toBe(false);

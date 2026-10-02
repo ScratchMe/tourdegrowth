@@ -9,6 +9,7 @@ import { ACQUISITION_INTRO, RETENTION_INTRO } from "@/content/game/meta";
 import { RETENTION_CONTENT } from "@/content/game/retention";
 import { ACQUISITION_LEVEL } from "@/lib/game/levels/acquisition";
 import { RETENTION_LEVEL } from "@/lib/game/levels/retention";
+import { engineShareText } from "@/lib/og/engine-share-text";
 import { gameLevelShareText } from "@/lib/og/game-level-share-text";
 import { LOCALES, type Locale } from "@/lib/i18n/locale";
 import { sampleShareImageModel, shareImageStrings } from "@/lib/og/share-image";
@@ -28,6 +29,9 @@ import { SITE_DOMAIN_LABEL } from "@/lib/site";
  * `src/lib/og/result-frame.tsx` (the result image, served by
  * `/r/[id]/share/[token]`) actually render, family by family. Adding text to
  * an image means adding it here too.
+ *
+ * The engine's image (`lib/og/engine-frame.tsx`) is read through
+ * `engineShareText`, the function the image calls, like the game's.
  *
  * The game's two images (`lib/og/game-frame.tsx`) are read through the very
  * functions the images call (`gameHubShareText`, `gameLevelShareText`), so
@@ -54,6 +58,10 @@ function textsByFamily(locale: Locale) {
   // handed them by: the space's pill, the profile's labels and flag, and the
   // stage beside the action label, in capitals as drawn.
   const result = shareImageStrings(sampleShareImageModel(locale));
+  // The engine's image (design brief 06, T6.2), read through the function the
+  // frame is handed it by: the pill and the eyebrow and the promise in
+  // capitals, the H1 on its two lines, and the line under it.
+  const engine = engineShareText(locale);
   return {
     stardos: [
       WORDMARK,
@@ -66,6 +74,7 @@ function textsByFamily(locale: Locale) {
       // « Le côté obscur » — the two titles and the churn figure.
       hub.title,
       ...levels.flatMap((level) => [level.title, ...level.tiles.flatMap((tile) => (tile.value ? [tile.value] : []))]),
+      ...engine.title.flat().map((segment) => segment.text),
     ],
     inter: [
       tc(landing.subtitle, locale),
@@ -85,6 +94,7 @@ function textsByFamily(locale: Locale) {
       // « Le côté obscur » — the zone questions and the line under the tiles.
       ...hub.zones.map((zone) => zone.question),
       ...levels.map((level) => level.sentence),
+      engine.line,
     ],
     mono: [
       tc(landing.bibTag, locale),
@@ -111,6 +121,10 @@ function textsByFamily(locale: Locale) {
         ...level.tiles.flatMap((tile) => [tile.label, ...(tile.unit ? [tile.unit] : [])]),
         level.hidden,
       ]),
+      engine.space,
+      engine.eyebrow,
+      engine.promise,
+      engine.domain,
     ],
   };
 }

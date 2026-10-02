@@ -456,6 +456,17 @@ describe("proxy (engine flag and owner preview)", () => {
     );
   });
 
+  it("closes the engine's share image with the page, and opens it with the same signed cookie (T6.2)", async () => {
+    const cookie = `${ENGINE_PREVIEW_COOKIE}=${await ownerPreviewToken("engine", PASSWORD)}`;
+    for (const locale of ["en", "fr"]) {
+      const path = `/${locale}/aarrr-funnel-template/opengraph-image/${locale}`;
+      expect(rewriteOf(await proxy(request(path))), path).toBe(`https://tourdegrowth.com/${locale}/engine-unavailable`);
+      expect(rewriteOf(await proxy(request(path, { cookie }))), path).toBeNull();
+    }
+    process.env.ENGINE_ENABLED = "true";
+    expect(rewriteOf(await proxy(request("/fr/aarrr-funnel-template/opengraph-image/fr")))).toBeNull();
+  });
+
   it("?engine=preview is inert now: no cookie set, the engine stays closed", async () => {
     const res = await proxy(request("/fr/aarrr-funnel-template?engine=preview"));
     expect(rewriteOf(res)).toBe("https://tourdegrowth.com/fr/engine-unavailable");

@@ -12,12 +12,14 @@
  * names are the ones the images were written against (stone = paper,
  * red ink = the deep red text color); only their source changed.
  */
-import { NIGHT_PRIMITIVES, PRIMITIVES } from "@/styles/tokens/tokens";
+import { NIGHT_PRIMITIVES, PRIMITIVES, SPACE_PRIMITIVES } from "@/styles/tokens/tokens";
 
 export const OG_INK = PRIMITIVES["ink-0"];
 export const OG_INK_SOFT = PRIMITIVES["ink-1"];
 export const OG_STONE = PRIMITIVES["paper-1"];
 export const OG_STONE_2 = PRIMITIVES["paper-2"];
+/** The darkest paper: the dashed road line of the engine's image, a mark under no text. */
+export const OG_STONE_3 = PRIMITIVES["paper-3"];
 export const OG_RED = PRIMITIVES["paint-red"];
 /** The red FILL under a small white label (colors.css, R-22): 4.65 with it, where the road-paint red gives 4.42. */
 export const OG_RED_ACTION = PRIMITIVES["paint-red-action"];
@@ -43,6 +45,13 @@ export const OG_NIGHT_LINE = NIGHT_PRIMITIVES["night-line"];
 export const OG_NIGHT_RULE = NIGHT_PRIMITIVES["night-rule"];
 export const OG_NIGHT_AMBER = NIGHT_PRIMITIVES["night-amber"];
 export const OG_NIGHT_BAD = NIGHT_PRIMITIVES["night-bad"];
+
+/**
+ * The engine's space (spaces.css): its band, and its accent on paper
+ * (`--space-engine-accent`) — the pill, the title's word, the eyebrow and the
+ * stopwatch of its share image (`engine-frame.tsx`, design brief 06).
+ */
+export const OG_ULTRAMARINE = SPACE_PRIMITIVES["space-ultramarine"];
 
 /** DESIGN-BRIEF.md §03 — the exact share frame, shared by every OG image. */
 export const OG_SIZE = { width: 1200, height: 630 };

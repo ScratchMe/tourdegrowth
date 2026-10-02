@@ -66,6 +66,14 @@ const ISLAND = "app/[locale]/aarrr-funnel-template/EngineWorkbench.tsx";
 const DECK = "app/[locale]/aarrr-funnel-template/_engine/deck/DeckView.tsx";
 const PNG_EXPORT = "app/[locale]/aarrr-funnel-template/_engine/deck/export-png.ts";
 const EVENTS_DOOR = "app/[locale]/aarrr-funnel-template/_engine/engine-events.ts";
+/**
+ * The engine's share image (T6.2, design brief 06): a route of its own that
+ * Next compiles apart from the page, and the one file under the engine's
+ * route that must draw with the OG pipeline. Rule 1 lets it, and holds it to
+ * the other side of the bargain: it reaches nothing of the engine but its
+ * headline, and nothing of the engine reaches it.
+ */
+const SHARE_IMAGE = "app/[locale]/aarrr-funnel-template/opengraph-image.tsx";
 
 /** The engine's shipped code: its pure library and its route. Tests are not shipped. */
 const ENGINE = FILES.filter(
@@ -266,12 +274,38 @@ describe("growth engine boundary (engine spec §11.4)", () => {
   });
 
   it("rule 1 — nothing in the engine imports Firebase, Gemini, submissions, the audit instrument, the OG pipeline or the dictionary", () => {
-    const offenders = ENGINE.flatMap((f) =>
+    const offenders = ENGINE.filter((f) => f.path !== SHARE_IMAGE).flatMap((f) =>
       ALL_IMPORTS(f.source)
         .filter((spec) => FORBIDDEN.some((re) => re.test(spec)))
         .map((spec) => `${f.path} → ${spec}`),
     );
     expect(offenders).toEqual([]);
+  });
+
+  it("rule 1 — the share image is the OG pipeline's only door, and it opens one way", () => {
+    expect(BY_PATH.has(SHARE_IMAGE), SHARE_IMAGE).toBe(true);
+    const walk = [...reachable(SHARE_IMAGE)];
+    // It draws with lib/og — or this exemption is exempting nothing.
+    expect(walk).toContain("lib/og/engine-frame.tsx");
+    // Of the engine, only its headline and the image's words: no engine code,
+    // no interface copy, no catalogue (content fan-in, VERCEL.md §2.2).
+    expect(walk.filter((m) => m.startsWith("lib/engine/") || m.startsWith("app/[locale]/aarrr-funnel-template/"))).toEqual([
+      SHARE_IMAGE,
+    ]);
+    expect(walk.filter((m) => /^content\/engine-/.test(m))).toEqual(["content/engine-share.ts"]);
+    // The rest of the FORBIDDEN list holds for everything it reaches, not
+    // only for what it imports itself: each module read as the specifier
+    // that would name it (convention 11 — count what crosses).
+    const asSpecifier = (m: string) => `@/${m.replace(/\.(tsx?|jsx?)$/, "").replace(/\/index$/, "")}`;
+    const notOg = FORBIDDEN.filter((re) => !re.test("@/lib/og/"));
+    expect(walk.filter((m) => notOg.some((re) => re.test(asSpecifier(m))))).toEqual([]);
+    // And nothing else of the engine reaches the OG pipeline but its size:
+    // the page reaches lib/og/tokens.ts, for OG_SIZE, through lib/i18n/meta.ts,
+    // as every content page does — a constant, not the renderer.
+    for (const f of ENGINE.filter((x) => x.path !== SHARE_IMAGE)) {
+      const og = [...reachable(f.path)].filter((m) => m.startsWith("lib/og/") && m !== "lib/og/tokens.ts");
+      expect(og, f.path).toEqual([]);
+    }
   });
 
   it("rule 1 — lib/engine imports no content value: it is pure, the page resolves copy and passes props", () => {

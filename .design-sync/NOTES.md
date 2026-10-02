@@ -379,10 +379,19 @@ them on 2026-10-02, `design/ds-extension-05-return/` (22 files, all source,
 copied to the repo the same day; nothing outside that folder changed). Brief 06 (the growth engine's share image,
 B5) followed the same evening: `design/DS-EXTENSION-BRIEF-06.md` and the ten
 PNGs under `design/ds-extension-06/` (eleven files, their own plan, no delete,
-anchor untouched); its return is expected under
-`design/ds-extension-06-return/`. A re-sync must leave them: before applying
+anchor untouched); Claude Design returned it the same evening, under
+`design/ds-extension-06-return/`, copied into this repo and ported (T6.2). A
+re-sync must leave them: before applying
 `upload.deletePaths`, check it names nothing under `design/`. Remove them on
 purpose once the return is ported, not as a side effect of a sync.
+
+**T6.2 (2026-10-01) moved two drawings into data, with the same markup.**
+`brand/Stopwatch` reads its shapes from `stopwatch-geometry.ts` and
+`brand/SpaceBand`'s three pictograms come from `space-pictos.ts`, because the
+engine's share image draws them too. The rendered SVG is the same, attribute
+for attribute (an explicit `fill="none"` on three open lines of the
+pictograms aside), so no re-sync is owed for it; the next one uploads the two
+components with nothing to see.
 
 **Sessions do upload now.** The `DesignSync` tool answered from a cloud session
 with the claude.ai login — no `/design-login`, no local machine. The

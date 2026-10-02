@@ -5,6 +5,7 @@ import type { Locale } from "@/lib/i18n/locale";
 import { localePath } from "@/lib/i18n/routes";
 import { SPACE_STRINGS } from "@/lib/i18n/space-strings";
 import { tc } from "@/lib/i18n/translatable";
+import { PICTO_VIEWBOX, SPACE_PICTO_PARTS } from "./space-pictos";
 import { TrackedLink } from "./TrackedLink";
 import styles from "./SpaceBand.module.css";
 
@@ -40,30 +41,36 @@ export const SPACE_OPEN_AT_BUILD: Record<Space, boolean> = {
   game: process.env.TDG_GAME_OPEN_AT_BUILD === "1",
 };
 
+/** One pictogram of the road book, drawn in `currentColor` (`space-pictos.ts`). */
+function picto(space: Space): ReactNode {
+  return (
+    <svg viewBox={PICTO_VIEWBOX} aria-hidden="true" focusable="false">
+      {SPACE_PICTO_PARTS[space].map((part, index) =>
+        part.kind === "ring" ? (
+          <circle
+            key={index}
+            cx={part.cx}
+            cy={part.cy}
+            r={part.r}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={part.width}
+          />
+        ) : part.kind === "stroke" ? (
+          <path key={index} d={part.d} stroke="currentColor" strokeWidth={part.width} fill="none" />
+        ) : (
+          <path key={index} d={part.d} fill="currentColor" />
+        ),
+      )}
+    </svg>
+  );
+}
+
 /** The road book's three pictograms: a flat stage, a stopwatch, a mountain. Drawn in `currentColor`. */
 export const SPACE_PICTO: Record<Space, ReactNode> = {
-  tour: (
-    <svg viewBox="0 0 34 22" aria-hidden="true" focusable="false">
-      <path d="M1 20.5H33" stroke="currentColor" strokeWidth="2.2" fill="none" />
-      <path d="M1 19V15.2C5 14.2 8 15.6 12 14.8S20 13.9 24 14.6 30 14.2 33 14.4V19Z" fill="currentColor" />
-      <path d="M28.6 14V4.2" stroke="currentColor" strokeWidth="1.8" />
-      <path d="M28.6 4.4H33V8.6H28.6Z" fill="currentColor" />
-    </svg>
-  ),
-  engine: (
-    <svg viewBox="0 0 34 22" aria-hidden="true" focusable="false">
-      <circle cx="17" cy="12.6" r="7.6" fill="none" stroke="currentColor" strokeWidth="2.2" />
-      <path d="M17 12.6V7.8M14.2 2.2H19.8M17 2.2V5" stroke="currentColor" strokeWidth="2.2" fill="none" />
-      <path d="M23.2 6.4L25 4.6" stroke="currentColor" strokeWidth="2.2" />
-      <path d="M1 9.5H7M3 13H7.5M1 16.5H7" stroke="currentColor" strokeWidth="1.8" />
-    </svg>
-  ),
-  game: (
-    <svg viewBox="0 0 34 22" aria-hidden="true" focusable="false">
-      <path d="M1 20.5H33" stroke="currentColor" strokeWidth="2.2" fill="none" />
-      <path d="M1 19.4L10.4 9.2L14 12.6L20.6 3.2L33 19.4Z" fill="currentColor" />
-    </svg>
-  ),
+  tour: picto("tour"),
+  engine: picto("engine"),
+  game: picto("game"),
 };
 
 export interface SpaceBandProps {

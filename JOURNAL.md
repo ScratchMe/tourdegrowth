@@ -1277,3 +1277,64 @@ Le texte du skill `/design-sync` (trouvé en ligne) dit que l'application « cle
 **Le design system** : `.design-sync/config.json` retire `PillarChip` et ajoute `StageScore` et `StageScores` (91 composants, `check-inventory` vert) ; les aperçus de `StampedPillar`, `GlossaryTerm` et `DefinitionTrigger` sont réécrits sur la feuille, ceux de `Tag` et `StageProfile` corrigés dans leurs commentaires, ceux de `StageScore` et `StageScores` neufs ; `conventions.md` suit. **La re-synchro vers Claude Design est B9**, pas faite ici.
 
 **Consigné** : `CHANTIERS.md` (A15 clos, A16 retiré, B7, B9 ouvert), `docs/decisions.md` (C34 et C35 codées), `design/README.md`, `design/LOIS-UX.md` (la loi de similarité : tenue).
+
+## A14.c, T6.2 : l'image de partage du moteur, portée du retour de B5 (2026-10-02, #272)
+
+Antoine a lancé le brief 06 dans Claude Design le soir même du dépôt (D12), puis a dit « Claude Design a terminé ». Cette PR recopie le retour dans le dépôt et le porte : c'était la dernière pièce d'A14.c.
+
+**Le retour, recopié** (`design/ds-extension-06-return/`) : les huit fichiers texte, lus un par un par `DesignSync` (`get_file`) et traités comme des données. Ce sont le README des quatre réponses, les quatre sources de `og/` (le cadre, le chronomètre, les jetons, les chaînes) et l'aperçu navigateur. Les quatre PNG de `render/` restent dans le projet : l'outil ne rapatrie pas une image. Ils ne manquent pas, parce que les sources ont été rendues telles quelles par le Satori du dépôt (`next/og`, les cinq polices de `src/lib/og/fonts/`). `COPIE.md` le dit, avec l'insécable de `NB` remise à U+00A0. Les réponses de Claude Design :
+- **le fond** : du papier ;
+- **l'image** : le chronomètre seul, sans peloton, parce qu'en fil les chiffres de l'exemple se liraient comme ceux de qui partage ;
+- **les mots** : l'eyebrow, le titre de la page sur deux lignes avec « moteur » en outremer, une ligne neuve et une promesse neuve en capitales mono ;
+- **la pastille** : « 2/3 · CONTRE-LA-MONTRE », oui, à la place où le résultat porte « 1/3 · PLAINE ».
+
+**Le portage** : `lib/og/engine-frame.tsx`, servi par `aarrr-funnel-template/opengraph-image.tsx`, une image par langue, prérendue (●), sur le modèle du jeu. La page déclare son image par la convention de fichier (`ownShareImage`). Les mesures sont celles du retour, sans exception. **Rendu par le même Satori, le portage est identique au pixel aux sources du retour partout, sauf deux zones voulues**, mesurées au seuil de 16 sur 255 par canal : 0 pixel d'écart hors du chronomètre et du pictogramme, aux deux langues.
+
+**Les deux dessins repris du produit plutôt que du retour.** Claude Design a redessiné à la main le chronomètre et le pictogramme de la pastille, en disant reprendre ceux de la page et du bandeau. Ses versions s'en écartent : la lunette est hors du cadran au lieu d'être dedans, le temps couru fait 38 % au lieu de 70 %, les boutons sont autres, et les traits de vitesse du pictogramme sont placés ailleurs. Un second dessin aurait fait un second emblème le jour où l'un des deux bouge. Leurs formes sont donc devenues des données :
+- `components/brand/stopwatch-geometry.ts`, que `Stopwatch.tsx` peint en CSS et l'image en littéraux ;
+- `components/brand/space-pictos.ts`, d'où `SpaceBand` tire ses trois pictogrammes. L'image du résultat y prend celui du Tour, dont elle gardait une copie.
+
+Le balisage du composant `Stopwatch` est identique avant et après, au caractère près. Celui des pictogrammes l'est attribut par attribut, à un `fill="none"` explicite près sur trois lignes ouvertes. L'image du résultat rend les mêmes octets avant et après : sa version d'adresse (`SHARE_IMAGE_VERSION`) ne bouge pas. Pas de re-synchro due à Claude Design (`.design-sync/NOTES.md`).
+
+**Les autres écarts** (`docs/engine/moteur-complet.md` §19.11) :
+- La route ne lit pas le drapeau elle-même. `isEnginePath` couvre désormais tout ce qui est sous la page, comme `isGamePath`, et le proxy rend l'image en 404 avec la page ; l'aperçu propriétaire l'ouvre avec elle. La spec disait « comme le jeu, elle le vérifie elle-même », mais le jeu ne le fait pas.
+- Les capitales sont posées dans `lib/og/engine-share-text.ts`, comme pour les images du jeu, pas par `textTransform` : `fonts.test.ts` vérifie ainsi ce qui est dessiné.
+- Le titre et l'eyebrow de la page vivent maintenant dans `content/engine-share.ts`, que lit `engine-copy.ts`. Le titre dessiné et le H1 sont une seule chaîne. L'image n'atteint que ce module de la copie du moteur (budget de fan-in : 3 routes), pas `engine-copy.ts`.
+- L'outremer entre dans les jetons typés (`SPACE_PRIMITIVES`, tenu égal à `spaces.css`), d'où `OG_ULTRAMARINE`.
+- Le texte alternatif est un gabarit rempli avec ce qui est dessiné (la pastille, le H1, la ligne, la promesse, l'adresse), et il ne peut pas en dériver. Vérifié une fois contre le retour : identique au caractère près dans les deux langues, insécables comprises. En production, l'adresse est celle de `NEXT_PUBLIC_SITE_URL` (`www.`), comme le badge dessiné.
+
+**Les gardes** :
+- `engine-share-text.test.ts` : le titre est le H1, un seul mot est en outremer, la pastille porte les mots du bandeau, l'alt est sans trou, et les règles françaises sont tenues. Un H1 renommé sous l'image, ou un mot accentué perdu, fait échouer le build plutôt que de dessiner un demi-titre.
+- `brand-marks.test.ts` : les épaisseurs de trait de `Stopwatch.module.css` et le mélange du temps couru sont ceux que l'image dessine. Aucun fichier source n'écrit le tracé d'un pictogramme hors de `space-pictos.ts`.
+- `token-sources.test.ts` : l'outremer typé est celui de `spaces.css`.
+- `engine-boundary.test.ts`, règle 1 : la route d'image est la seule porte de l'OG sous la route du moteur. Elle n'atteint rien du moteur que son titre, et rien du moteur ne l'atteint.
+- `fonts.test.ts` lit les chaînes par `engineShareText`.
+- `proxy.test.ts` ferme et ouvre l'image avec la page.
+- `e2e/engine-share-image.spec.ts` couvre trois choses :
+  - moteur fermé, un 404 sans aperçu et avec un cookie deviné ;
+  - le PNG en 1 200 × 630, différent d'une langue à l'autre ;
+  - l'unique `og:image` de la page, qui pointe sur elle, avec son alt.
+
+**Relectures** :
+- sécurité : un constat réel, et un durcissement.
+  - **Le constat** : moteur fermé, `/xx/aarrr-funnel-template/opengraph-image/en` répondait 200 avec l'image anglaise, et de même pour tout premier segment autre que `en` ou `fr`, `/EN/` compris. **Les images du jeu, fermé en production, avaient le même défaut depuis G4b**, et celle de l'accueil coûtait un rendu Satori par segment inventé. La cause : le proxy ne ferme que ce que `splitLocalePath` reconnaît, et `dynamicParams = false` ne s'applique pas à une route de métadonnées. Next la rend à la demande, et le loader retire même ce réglage des réexports (`NEXTJS.md` §1.11). Reproduit sur un build de production : 200 et un PNG pour `/xx/game/opengraph-image/en` comme pour `/xx/opengraph-image/en`. **Corrigé pour toutes les routes d'image** par `lib/og/image-metadata.ts` : aucune image pour une langue inconnue, et le `GET` généré par Next répond 404 avant tout rendu. `share-image-routes.test.ts` parcourt chaque fichier `opengraph-image` de l'arbre (huit). La spec de `share-previews` vérifie les huit adresses sous `xx`, `EN` et `en-US`, avec un témoin qui répond 200 ; elle a été vue rouge sur l'ancien build avant le correctif.
+  - **Le durcissement** : la garde de la règle 1 nommait quatre modules. Elle compte maintenant tout ce que l'image atteint contre la liste interdite, et exige que le reste du moteur n'atteigne de `lib/og` que `tokens.ts` (pour `OG_SIZE`, par `meta.ts`). Deux sabotages la font tomber : un fichier de l'îlot qui importe `lib/og/picto`, et le texte de l'image qui atteint le dictionnaire. ;
+- copie : un défaut, traité. L'eyebrow déplacé avait perdu la couverture du marqueur de tête d'`engine-copy.ts` : il a maintenant le sien. Toute la copie neuve (la ligne, la promesse, le gabarit de l'alt) va au bon à tirer A14.d. La carte doit montrer l'alt de production, qui finit en `www.tourdegrowth.com`.
+
+**Vérifié** :
+- **Le rendu** : le portage comparé au pixel au rendu des sources du retour par le même Satori (0 écart hors des deux zones voulues). Lu à l'œil en français et en anglais à 1 200 px, puis à 320 px : le titre, le mot bleu, le logo et le chronomètre se lisent.
+- **Les octets** : l'image du résultat est identique avant et après la sortie de son pictogramme ; le balisage du composant `Stopwatch` aussi.
+- **Les mots** : l'alt, la ligne, la promesse, l'eyebrow, la pastille et la coupe du titre sont identiques à `og/strings.og.mjs`, aux deux langues.
+- **Les tests unitaires** : `vitest --coverage`, 2 942 tests dans 230 fichiers, au-dessus des seuils, sur l'arbre rebasé après A16 (#271).
+- **Les contrôles statiques** : `tsc` et `eslint` propres ; `next build` propre moteur fermé et moteur ouvert, l'image prérendue (●) les deux fois.
+- **Playwright complet, build fermé comme la CI**, avec l'émulateur Firestore et `CI=1` : 861 specs, 855 passées, 6 ignorées par construction, aucune au second essai. Rejoué après le rebase sur A16 (#271), qui touchait le résultat et les jetons : 865 specs, 859 passées, 6 ignorées.
+- **Build `ENGINE_ENABLED=true`**, avec l'émulateur : les specs `engine-*`, `share-previews`, `game-share-images`, `result-real` et `locale-routing`, soit 310. 299 passées et 5 ignorées par construction. Les six de `engine-flag.spec.ts` sont rouges, comme il se doit : elles sont écrites pour un serveur fermé (leur en-tête le dit), et le motif `engine-*` les a prises. L'image y répond à tous, et la page la déclare avec son alt.
+- **Les sabotages** : seize sur les gardes neuves, tous tombés.
+  - Un glyphe absent du sous-ensemble dans la ligne (« ≈ » : la flèche, elle, est dans le sous-ensemble d'Inter et passe à juste titre).
+  - L'outremer typé décalé de `spaces.css`, et `OG_STONE_3` sur le mauvais papier.
+  - La lunette à 7 px en CSS, le temps couru à 20 %, une seconde copie d'un pictogramme.
+  - Un H1 renommé et un mot accentué perdu (le module ne se charge plus), un trou dans l'alt.
+  - L'îlot qui importe `lib/og`, l'image qui atteint `engine-copy.ts` (la règle et le fan-in tombent) ou `lib/engine`, et les deux sabotages de la garde durcie.
+  - `isEnginePath` remis au chemin exact (le proxy et l'accès tombent), et le repli `"en"` remis à l'image du jeu.
+
+**Consigné** : `CHANTIERS.md` (A14.c, A14.d, B5 clos, D12 retirée, D2, et A17 pour le halo grisé des images de contenu, trouvé en route : `transparent` dans un dégradé Satori se mélange à travers le noir), `ENGINE.md`, `docs/engine/moteur-complet.md` §19.11, `NEXTJS.md` §1.10 et §1.11, `design/README.md`, `.design-sync/NOTES.md`, `CLAUDE.md` (l'état et les chiffres).

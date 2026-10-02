@@ -213,6 +213,37 @@ test("pages with their own share-image file keep the file's hashed address", asy
   }
 });
 
+/**
+ * An image route answers under a language and nowhere else (the security
+ * review of T6.2, `lib/og/image-metadata.ts`). The proxy closes only the
+ * first segments it reads as a language, and `dynamicParams = false` does not
+ * reach a metadata route: until this was pinned, `/xx/game/opengraph-image/en`
+ * answered 200 with the closed game's picture, and so did the engine's, while
+ * their pages were 404. The language-prefixed control first, so a 404 below
+ * is the route refusing and not the route missing — under each flag, the
+ * landing's image is the one that always answers.
+ */
+test("a share image answers under a language, and a 404 under anything else", async ({ request }) => {
+  expect((await request.get("/fr/opengraph-image/fr")).status()).toBe(200);
+  for (const image of [
+    "opengraph-image/en",
+    "glossary/opengraph-image/en",
+    "glossary/cac/opengraph-image/en",
+    "how-it-works/opengraph-image/en",
+    "game/opengraph-image/en",
+    "game/acquisition/opengraph-image/en",
+    "game/retention/opengraph-image/en",
+    "aarrr-funnel-template/opengraph-image/en",
+  ]) {
+    for (const first of ["xx", "EN", "en-US"]) {
+      const path = `/${first}/${image}`;
+      const res = await request.get(path, { maxRedirects: 0 });
+      expect(res.status(), path).toBe(404);
+      expect(res.headers()["content-type"] ?? "", path).not.toContain("image/png");
+    }
+  }
+});
+
 test.describe("/quiz share preview (SEO audit v1 §1.1, §1.4)", () => {
   for (const [lang, heading] of [
     ["en", "The Tour"],

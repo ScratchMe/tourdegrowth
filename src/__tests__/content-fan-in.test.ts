@@ -87,6 +87,11 @@ const BUDGETS: { module: string; max: number; why: string }[] = [
     why: "Toute la copie d'interface du moteur : sa page la résout, et /llms.txt lit son titre et sa description quand le moteur est ouvert au build (C27).",
   },
   {
+    module: "content/engine-share.ts",
+    max: 3,
+    why: "Le titre du moteur et les mots de son image de partage (T6.2) : la page et /llms.txt par engine-copy.ts, et l'image elle-même — qui n'atteint QUE ce module-là de la copie du moteur, et pas engine-copy.ts.",
+  },
+  {
     module: "content/copy-library.ts",
     max: 13,
     why:
