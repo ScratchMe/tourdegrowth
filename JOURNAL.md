@@ -280,3 +280,35 @@ Les suites passaient pourtant sur `main` + #244 : lint, `tsc`, 2 944 tests unita
 **Le journal, archivé une fois de plus.** Cette entrée portait `JOURNAL.md` à environ 202 000 caractères, pour un plafond de 200 000, et le test rougissait. Les 35 entrées du 2026-10-01 sont parties telles quelles dans `docs/journal/10-niveau-2-assiste-moteur-complet.md`. Il est vérifié que le bloc s'y retrouve à l'identique, et que les entrées du 2026-10-02 n'ont pas bougé. La table des volumes gagne sa ligne, et ce fichier repart à environ 37 000 caractères.
 
 **Ce qui reste pour la suite, et pourquoi ce fichier le dit** : `GITHUB.md` §2 pose maintenant qu'une PR Dependabot ouverte se mesure et se pose en question dans `CHANTIERS.md` C. Sans cette règle, #244 serait restée ouverte, ou aurait été mergée par une session pressée, avec 11 Mo de plus par déploiement.
+
+## B11 : le brief 08 de l'en-tête collant compact, déposé dans Claude Design (2026-10-02)
+
+**La demande** (Antoine) : l'en-tête collant est agréable sur un téléphone tenu droit, mais sur un écran de bureau, en paysage, il prend beaucoup de place. Il veut le réduire au défilement, en gardant de quoi savoir où l'on est dans l'app, avec une transition élégante, et passer par Claude Design pour la qualité du rendu.
+
+**Mesuré sur un build de production du jour** (`next build` avec le jeu et le moteur ouverts, puis `next start`), sur huit pages et huit fenêtres :
+- avec le bandeau d'espace, l'en-tête fait 118 px au bureau (une ligne de 72 px, tenue par les 44 px du sélecteur de langue, et un bandeau de 46 px). C'est 16,4 % d'un écran de 1 280 × 720, 15,4 % à 1 366 × 768 et 10,9 % à 1 920 × 1 080 ;
+- **sur un téléphone en paysage (844 × 390), c'est 30,3 %**, contre 13,5 % en portrait (114 px), le cas qu'Antoine trouve agréable. Le problème est donc la fenêtre en paysage, pas la fenêtre large, ce qu'Antoine disait déjà ;
+- sans bandeau (glossaire, pages de lecture), 74 px ; dans le quiz, 93 px.
+
+**Trouvé en mesurant** : dans le quiz, `--sticky-offset` vaut 118 px pour un en-tête de 93 px au bureau (106 px sur téléphone). La valeur est mesurée une fois par sorte d'en-tête, et la ligne du quiz n'a pas de contrôle de 44 px. Les ancres et le focus s'y arrêtent 25 px trop bas, ce qui ne masque rien. Le portage, qui fera suivre l'état à `--sticky-offset`, le rendra juste (`CHANTIERS.md` B11).
+
+**Le brief** (`design/DS-EXTENSION-BRIEF-08.md`, en anglais, sur la forme du 05) :
+- le constat chiffré, puis l'en-tête tel que le code le dessine : un composant pour toutes les pages, le verre à 92 %, une borne de contraste et non un goût, la ligne, le bandeau et ses trois largeurs, le filet tiré au défilement, ce que chaque page met à droite, et ce qui dépend de la hauteur (`scroll-padding-top`, les chiffres « Et si » du moteur, la colonne d'un niveau du jeu) ;
+- ce qui doit rester : l'espace où l'on est, le portrait inchangé, **le bouton principal de l'accueil** (A15.15 a masqué le bloc de fin de page au-dessus de 760 px parce que l'en-tête garde le sien), le sélecteur de langue, que rien d'autre ne porte, la course à trois étapes, les 44 px, le contraste ;
+- sept règles de mécanique : rien ne bouge sous l'en-tête et le changement ne se nourrit pas du défilement (sans quoi l'en-tête clignote à son seuil), l'en-tête d'aujourd'hui sans JavaScript, le mouvement réduit (la garde unique coupe toute transition), l'échelle de `motion.css`, ce qui colle dessous le suit, le clavier, un composant pour les deux langues ;
+- huit questions, avec notre penchant : toute fenêtre en paysage, téléphone compris ; un déclenchement par la position, pas par le sens du défilement ; un changement d'état plutôt qu'une animation asservie au défilement ; une ligne d'environ 56 px ;
+- le retour demandé : un README des réponses, **la spécification du mouvement** (propriété, valeurs, durée et courbe par jeton, dans les deux sens, et la version en mouvement réduit), `SiteHeader` et son `.prompt.md`, et une planche **qui défile vraiment**, ouvrable depuis ses sources.
+
+Seize captures dans `design/ds-extension-08/`, toutes relues à l'œil et toutes distinctes. Celle du moteur a demandé un état d'exemple écrit dans le stockage, comme le font les specs : depuis A14, l'exemple public n'a plus de panneau « Et si ». Les chiffres collent à 134 px, 118 + 16.
+
+**Une course de numéros, évitée avant l'envoi.** Le brief est parti sous le numéro 07. `list_files` a montré, avant le plan d'envoi, un `design/DS-EXTENSION-BRIEF-07.md` déjà dans le projet : le moteur plus simple (B10), déposé le même jour par une autre session, dont la PR n'était pas mergée. Le brief de l'en-tête devient le 08, et B11 et D15 suivent les B10 et D14 de cette branche. Il signale le 07 et dit que les deux ne se recouvrent pas. Avant de numéroter un brief, il faut lire `design/` dans le projet, pas seulement dans le dépôt (`.design-sync/NOTES.md`, « Synced »).
+
+**Le dépôt** : dix-sept fichiers écrits par `DesignSync` dans le projet `23b9671c-…`, aux mêmes chemins que dans le dépôt, sous un plan qui ne nommait qu'eux, sans suppression. Le bundle, la sentinelle et `_ds_sync.json` ne sont pas touchés. Vérifié :
+- `get_project` avant l'envoi : un design system, modifiable ;
+- `list_files` avant : rien sous un numéro 08 ; après : les dix-sept chemins y sont, et les briefs 04 à 07 comme les retours 04 à 06 n'ont pas bougé ;
+- le brief relu côté projet par `get_file`, en entier : le même texte que dans le dépôt ;
+- les fichiers envoyés sont ceux du commit (`git diff` vide sur `design/`).
+
+**Consigné** : `CHANTIERS.md` (vue d'ensemble, B11, D15), `design/README.md`, `.design-sync/NOTES.md` (« Synced »). Il n'y a que de la doc et des images sous `design/`, donc `vercel-ignore.sh` ne déploie pas.
+
+**Ce qui reste** : D15 (le lancer). Le retour va dans `design/ds-extension-08-return/`, une session le recopie dans le dépôt et ouvre son portage en A.
