@@ -9,11 +9,12 @@ import { EMULATOR_HOST, REAL_RESULTS, SKIP_EMULATOR_REASON } from "./real-result
  *
  * The header carries the result's two states beside the language switch: the
  * Deep dive tag and the roast badge. Only the sample, which has neither, was
- * ever measured on a phone (landing-mobile.spec.ts), and the states broke it:
- * a roast with a Deep dive scrolled sideways by 9px at 390 — inside the
- * contract — and by 79px at 320; a roast alone by 14px at 320; and the roast
- * badge broke over two lines from 390 down. Since then the states leave the
- * header for a line at the top of the page up to 760px (ResultView.tsx,
+ * ever measured on a phone (landing-mobile.spec.ts and result-composition.spec.ts
+ * among others), and the states broke it: a roast with a Deep dive scrolled
+ * sideways by 9px at 390 — inside the contract — and by 79px at 320; a roast
+ * alone by 14px at 320; and the roast badge broke over two lines from 390
+ * down (430 with the Deep dive tag beside it). Since then the states leave
+ * the header for a line at the top of the page up to 760px (ResultView.tsx,
  * `stateTags`).
  *
  * Every state is measured, not only the one a bug was seen in: a bound holds
@@ -40,8 +41,11 @@ function expectedTags(variant: (typeof VARIANTS)[number], locale: Locale): strin
 
 /**
  * The visible states inside `testId`, each with whether its text sits on one
- * line: its content box (border and padding taken off) is under two font
- * sizes high — one line of `--meta-*` is ~1.4 of it, two are ~2.8. Read off
+ * line: its content box (border and padding taken off) is under one and a
+ * half line-heights — one line is one line-height, two are two. Counted in
+ * line-heights, not font sizes: the Deep dive tag is set solid (`--meta-2xs`,
+ * line-height 1), so over two lines it is exactly two font sizes high, and a
+ * bound of two font sizes caught it with no margin at all. Read off
  * `offsetHeight`, which the roast badge's tilt does not inflate.
  */
 async function tagsIn(page: Page, testId: string) {
@@ -55,7 +59,7 @@ async function tagsIn(page: Page, testId: string) {
         const chrome = ["paddingTop", "paddingBottom", "borderTopWidth", "borderBottomWidth"]
           .map((key) => parseFloat(cs[key as "paddingTop"]))
           .reduce((a, b) => a + b, 0);
-        return { text: (el.textContent ?? "").trim(), oneLine: el.offsetHeight - chrome < 2 * parseFloat(cs.fontSize) };
+        return { text: (el.textContent ?? "").trim(), oneLine: el.offsetHeight - chrome < 1.5 * parseFloat(cs.lineHeight) };
       });
   }, testId);
 }
@@ -95,7 +99,7 @@ for (const variant of VARIANTS) {
         for (const width of WIDE_WIDTHS) {
           await page.setViewportSize({ width, height: 800 });
           // The header's own row, not the document: /r/sample's two-column
-          // grid is 8px too wide from 761 to 769px whatever the header holds
+          // grid is up to 8px too wide from 761 to 768px, whatever the header holds
           // (CHANTIERS.md E, « Un contrat de largeur »).
           const row = await page.locator("header").first().evaluate((header) => {
             const el = header.firstElementChild as HTMLElement;

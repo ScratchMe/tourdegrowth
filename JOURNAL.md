@@ -1340,35 +1340,36 @@ Le balisage du composant `Stopwatch` est identique avant et après, au caractèr
 **Consigné** : `CHANTIERS.md` (A14.c, A14.d, B5 clos, D12 retirée, D2, et A17 pour le halo grisé des images de contenu, trouvé en route : `transparent` dans un dégradé Satori se mélange à travers le noir), `ENGINE.md`, `docs/engine/moteur-complet.md` §19.11, `NEXTJS.md` §1.10 et §1.11, `design/README.md`, `.design-sync/NOTES.md`, `CLAUDE.md` (l'état et les chiffres).
 
 
-## L'en-tête du résultat sur téléphone : les états descendent en tête de page (2026-10-02, #273)
+## L'en-tête du résultat sur téléphone : les états descendent en tête de page (2026-10-02, #273)
 
-**La demande** (Antoine) : à 320 px, un résultat en roast débordait de 14 px, par le badge roast de l'en-tête (`CHANTIERS.md` E, noté par A16).
+**La demande** (Antoine) : à 320 px, un résultat en roast débordait de 14 px, par le badge roast de l'en-tête (`CHANTIERS.md` E, noté par A16).
 
-**Mesuré sur un vrai build, avec l'émulateur, dans tous les états de l'en-tête** (le logo, puis à droite la langue, le tag Deep dive, le badge roast) et non dans le seul où le défaut avait été vu :
+**Mesuré sur un vrai build, avec l'émulateur, dans tous les états de l'en-tête** (le logo, puis à droite la langue, le tag Deep dive, le badge roast) et non dans le seul où le défaut avait été vu :
 
-| État | 320 px | 360 px | 375 px | 390 px (contrat) |
+| État | 320 px | 360 px | 375 px | 390 px (contrat) |
 |---|---|---|---|---|
 | l'exemple, sans état | tient | tient | tient | tient |
-| roast | +14 px | tient | tient | tient |
-| Deep dive | +13 px | tient | tient | tient |
-| roast + Deep dive | +79 px | +39 px | +24 px | **+9 px** |
+| roast | +14 px | tient | tient | tient |
+| Deep dive | +13 px | tient | tient | tient |
+| roast + Deep dive | +79 px | +39 px | +24 px | **+9 px** |
 
-Le dernier état débordait **dans le contrat**, et aucun test ne le voyait : seul `/r/sample`, sans état, était mesuré au téléphone (`landing-mobile.spec.ts`). Les captures ont montré un second défaut, sans débordement : le badge roast se coupait en « 🔥 ROAST / MODE » dès 390 px, et le tag Deep dive en « DEEP / DIVE » à côté de lui.
+Le dernier état débordait **dans le contrat**, et aucun test ne le voyait : seul `/r/sample`, sans état, était mesuré au téléphone (`landing-mobile.spec.ts` et `result-composition.spec.ts`, entre autres). Les captures ont montré un second défaut, sans débordement : le badge roast se coupait en « 🔥 ROAST / MODE » dès 390 px, et dès 430 px quand le tag Deep dive était à côté, lui-même coupé en « DEEP / DIVE ».
 
-**Pourquoi pas comme R-21** : l'accueil a réglé le même problème en masquant au téléphone ce que le pied de page porte déjà, et en refusant un en-tête sur deux lignes (132 à 171 px). Ici, rien d'autre sur la page ne dit « roast », et ce mot est ce qui prévient le lecteur d'un lien partagé que le ton dur a été choisi. Masquer était exclu.
+**Pourquoi pas comme R-21** : l'accueil a réglé le même problème en masquant au téléphone ce que le pied de page porte déjà, et en refusant un en-tête sur deux lignes (132 à 171 px). Ici, rien d'autre sur la page ne dit « roast », et ce mot est ce qui prévient le lecteur d'un lien partagé que le ton dur a été choisi. Masquer était exclu.
 
-**Ce qui change**, en CSS seul, au point de rupture de l'app :
-- jusqu'à 760 px, l'en-tête garde le logo et la langue, et les deux états descendent sur leur propre ligne en tête de page, là où l'exemple porte son badge « exemple » ;
-- à partir de 761 px, rien ne bouge ;
-- les états sont rendus deux fois (`stateTags`), et celui qui ne s'affiche pas est en `display: none`, donc hors de l'arbre d'accessibilité ;
+**Ce qui change**, au point de rupture de l'app (la bascule est en CSS seul, sans JavaScript) :
+- jusqu'à 760 px, l'en-tête garde le logo et la langue, et les deux états descendent sur leur propre ligne en tête de page, là où l'exemple porte son badge d'exemple ;
+- à partir de 761 px, rien ne bouge ;
+- les états sont rendus deux fois (`stateTags`), et celui qui ne s'affiche pas est en `display: none`, donc hors de l'arbre d'accessibilité ;
 - le badge roast ne se coupe plus jamais (`white-space: nowrap`).
 
-**Tests** :
-- un vrai résultat de plus dans l'émulateur, `roastDeep` (roast, avec un Deep dive, 54/100), l'état le plus large de l'en-tête ;
-- `e2e/result-header.spec.ts` couvre les quatre états, aux deux langues. Au téléphone (320, 360, 375, 390, 430 et 760 px), la page ne défile pas de côté, les états sont en tête de page et pas dans l'en-tête, et chacun tient sur une ligne. À 761 et 1 280 px, la ligne de l'en-tête tient et les états y sont ;
-- **non-vacuité, sur un build sans le correctif** : les six cas branchés sur l'émulateur échouent dès 320 px (de 13 à 79 px de trop), et l'exemple passe, comme attendu ;
-- le contrôle « une ligne » est éprouvé à part, sur le même build : le badge coupé fait 36 px de contenu pour 24 permis, et il ressort faux ; sur une ligne, il fait 18 px.
+**Tests** :
+- un vrai résultat de plus dans l'émulateur, `roastDeep` (roast, avec un Deep dive, 54/100), l'état le plus large de l'en-tête ;
+- `e2e/result-header.spec.ts` couvre les quatre états, aux deux langues. Au téléphone (320, 360, 375, 390, 430 et 760 px), la page ne défile pas de côté, les états sont en tête de page et pas dans l'en-tête, et chacun tient sur une ligne. À 761 et 1 280 px, la ligne de l'en-tête tient et les états y sont ;
+- **non-vacuité, sur un build sans le correctif** : les six cas branchés sur l'émulateur échouent dès 320 px (de 13 à 79 px de trop), et l'exemple passe, comme attendu ;
+- le contrôle « une ligne » est éprouvé à part, sur le même build, avec le badge roast : coupé, il fait 36 px de contenu, et il ressort faux ; sur une ligne, il fait 18 px ;
+- **la relecture de copie a trouvé une borne sans marge** : le premier jet comptait en tailles de police (moins de deux). Or le tag Deep dive est composé plein (`--meta-2xs`, hauteur de ligne 1) : coupé, il fait exactement deux tailles de police, et seul le `<` strict l'attrapait. La borne compte maintenant en hauteurs de ligne (moins d'une et demie), et elle est éprouvée sur le tag Deep dive coupé aussi.
 
-**Trouvé en mesurant, laissé et noté en E** : `/r/sample` déborde de 8 px à 761 px et de 1 px à 768, à cause de la grille à deux colonnes. La colonne de droite n'y a que 249 px, et l'exemple en demande 257. C'est hors contrat, et la vraie question est le seuil des deux colonnes : une décision de dessin, pas une marge à rogner dans cette PR.
+**Trouvé en mesurant, laissé et noté en E** : `/r/sample` déborde de 8 px à 761 px et de 1 px à 768, à cause de la grille à deux colonnes. La colonne de droite n'y a que 249 px, et l'exemple en demande 257. Les vrais résultats, mesurés à la main de 761 à 1 024 px, n'y débordent pas. C'est hors contrat, et la vraie question est le seuil des deux colonnes : une décision de dessin, pas une marge à rogner dans cette PR.
 
-**Captures** du vrai build, à 320, 390 et 1 280 px, avant et après, pour le roast, le Deep dive et les deux ensemble. Au téléphone, l'en-tête est fin et les deux tags sont lisibles sur une ligne au-dessus de la carte du score. Au bureau, l'en-tête est inchangé.
+**Captures** du vrai build, à 320, 390 et 1 280 px, avant et après, pour le roast, le Deep dive et les deux ensemble. Au téléphone, l'en-tête est fin et les deux tags sont lisibles sur une ligne au-dessus de la carte du score. Au bureau, l'en-tête est inchangé.

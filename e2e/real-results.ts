@@ -46,8 +46,9 @@ export interface RealResult {
 }
 
 /**
- * One board per state of the bottleneck block (`resolveBottleneck`), and two
- * for the game's card (a Deep dive, two levels on one card).
+ * One board per state of the bottleneck block (`resolveBottleneck`), two for
+ * the game's card (a Deep dive, two levels on one card), one with every stage
+ * at its weakest (`low`), and the result header at its widest (`roastDeep`).
  * The totals are what `computeScore` gives for these answers; the spec checks
  * the page shows them, so a scoring change announces itself here.
  */
@@ -110,8 +111,9 @@ export const REAL_RESULTS = {
   },
   /**
    * A roast WITH a Deep dive (2026-10-02): the result header at its widest —
-   * the language switch, the Deep dive tag and the roast badge on one row
-   * beside the wordmark. Measured from 320px by e2e/result-header.spec.ts.
+   * from 761px, the language switch, the Deep dive tag and the roast badge on
+   * one row beside the wordmark; below, the two tags on their own line at the
+   * top of the page. Measured from 320px by e2e/result-header.spec.ts.
    */
   roastDeep: {
     id: "7d3c9e2a-0b1f-4c5d-8e6f-1a2b3c4d5e07",
@@ -144,12 +146,12 @@ function verdict(tone: "neutral" | "roast"): DeepDiveVerdict {
 }
 
 /**
- * The Deep dive of `REAL_RESULTS.deep`, with the fields a document can hold
- * and the page must never carry: `modelUsed` on each verdict, and the two
- * legacy fields documents written before R2-20 still have — the context
- * answers and the founder's free text. The security review of A7.11 found
- * the payload guard blind to all three while every fixture had
- * `deepDive: null`.
+ * The Deep dive of `REAL_RESULTS.deep` and of `REAL_RESULTS.roastDeep`, with
+ * the fields a document can hold and the page must never carry: `modelUsed`
+ * on each verdict, and the two legacy fields documents written before R2-20
+ * still have — the context answers and the founder's free text. The
+ * security review of A7.11 found the payload guard blind to all three while
+ * every fixture had `deepDive: null`.
  */
 export const REAL_DEEP_DIVE: DeepDiveResult = {
   completed: true,
