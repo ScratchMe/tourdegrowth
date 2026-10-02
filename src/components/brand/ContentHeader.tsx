@@ -14,7 +14,9 @@ export interface ContentHeaderProps {
    * The width the header's inner row aligns to — the page's own content
    * column, like `SiteFooter`'s. `reading` (760px) for the prose pages;
    * `wide` (the app shell's 1040px) for a page whose body is a tool, where a
-   * header narrower than the content under it reads as misaligned.
+   * header narrower than the content under it reads as misaligned, and for
+   * every page of a space: its band is the same width in the three spaces,
+   * and names the race's legs only over 900px (`ProsePage` passes it).
    */
   width?: "reading" | "wide";
   /**

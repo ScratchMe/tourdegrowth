@@ -1,4 +1,7 @@
 import type { Page } from "@playwright/test";
+import type { Locale } from "@/lib/i18n/locale";
+import { SPACE_STRINGS } from "@/lib/i18n/space-strings";
+import { tc } from "@/lib/i18n/translatable";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
 
 /**
@@ -107,6 +110,50 @@ test.describe("the space band", () => {
     await expect(band(page)).toHaveAttribute("data-space", "game");
     await expect(band(page)).toContainText("3/3 · Montagne");
   });
+});
+
+test.describe("the space band on a desktop", () => {
+  test.use({ viewport: { width: 1280, height: 800 } });
+
+  /** The left edge and width of a box, rounded: where a column sits. */
+  const column = async (page: Page, selector: string) =>
+    page.locator(selector).first().evaluate((el) => {
+      const r = el.getBoundingClientRect();
+      return { left: Math.round(r.left), width: Math.round(r.width) };
+    });
+
+  // Until 2026-10-02 the game's pages sat on the reading column: a band of
+  // 760px, under the 900px its race needs to name the legs, so the game
+  // never showed « Diagnostic » or « Moteur », at any window width, and its
+  // header ran narrower than a level's desk and footer (Antoine).
+  //
+  // Sabotage (ProsePage as it was, rebuilt): the three tests fall, each on
+  // its header row (760px from 260, against the Tour's 1040 from 120); with
+  // the column assertions commented out, each on the first leg's name (1px).
+  for (const [path, locale] of [
+    ["/fr/game", "fr"],
+    ["/fr/game/retention", "fr"],
+    ["/en/game", "en"],
+  ] as const satisfies readonly (readonly [string, Locale])[]) {
+    test(`${path} wears the same header as the Tour, and its race names the three legs`, async ({ page }) => {
+      test.skip(!GAME_OPEN, "the game is closed in this build: its pages are 404s");
+      await page.goto(locale === "fr" ? "/fr" : "/en");
+      const tour = await column(page, "[data-header-row]");
+
+      await page.goto(path);
+      await expect(band(page)).toHaveAttribute("data-space", "game");
+      expect(await column(page, "[data-header-row]"), "the header row").toEqual(tour);
+      expect(await column(page, '[data-testid="space-band"] > div'), "the band").toEqual(tour);
+      // The footer closes the page on the header's column, not a narrower one.
+      expect((await column(page, "footer > div")).left, "the footer").toBe(tour.left);
+
+      for (const s of ["tour", "engine", "game"] as const) {
+        const name = stop(page, s).getByText(tc(SPACE_STRINGS.short[s], locale), { exact: true });
+        // Under 900px the name is clipped to 1px for screen readers: on screen means wider.
+        expect((await name.boundingBox())?.width ?? 0, `${s}'s name`).toBeGreaterThan(20);
+      }
+    });
+  }
 });
 
 test.describe("the sticky header", () => {

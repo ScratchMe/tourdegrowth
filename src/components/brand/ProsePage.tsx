@@ -36,7 +36,13 @@ export interface ProsePageProps {
    * §2.1). The footer widens to the desk's width with it.
    */
   band?: ReactNode;
-  /** The space this page belongs to — the game's hub and levels. Hangs the space band under the header (`SpaceBand`). */
+  /**
+   * The space this page belongs to — the game's hub and levels. Hangs the
+   * space band under the header (`SpaceBand`), and sets the header and the
+   * footer on the app shell's column (1040px) rather than the reading one:
+   * the band is the same width in the three spaces, and wide enough to name
+   * the race's legs, which it drops under 900px.
+   */
   space?: Space;
   /**
    * `night` sets the intro (kicker, title, lead, note) in the night world, as
@@ -57,9 +63,10 @@ export interface ProsePageProps {
  * page with `h1.title` overrides. This is that family as a component.
  *
  * The frame is the reading column (`--width-reading`) with its header and
- * footer; inside it, `ProseSection`, `ProseText` and `ProseList` set running
- * text in the reading type (`--body-read`, 400 weight, `--text-body`,
- * capped at `--measure-read`). Grey is kept for the lead and for captions:
+ * footer — the app shell's on a page of a space, see `space`; inside it,
+ * `ProseSection`, `ProseText` and `ProseList` set running text in the
+ * reading type (`--body-read`, 400 weight, `--text-body`, capped at
+ * `--measure-read`). Grey is kept for the lead and for captions:
  * body copy in grey at 500 was the thing that made 60 pages tiring to read.
  *
  * Server Component: nothing here is interactive.
@@ -88,6 +95,10 @@ export function ProsePage({
     </div>
   );
   const night = introWorld === "night";
+  // A page of a space (the game) wears the frame of the other two, the
+  // engine's and the Tour's: on the reading column its band could never name
+  // the race's legs (Antoine, 2026-10-02). A level's night desk is as wide.
+  const frame = band || space ? "wide" : "reading";
   const column = (
     <>
       {night ? null : intro}
@@ -97,7 +108,7 @@ export function ProsePage({
 
   return (
     <>
-      <ContentHeader locale={locale} path={path} switchQuery={switchQuery} space={space} />
+      <ContentHeader locale={locale} path={path} switchQuery={switchQuery} width={frame} space={space} />
 
       {band || night ? (
         // The column keeps its own box, so a page with a band reads exactly
@@ -118,7 +129,7 @@ export function ProsePage({
         </main>
       )}
 
-      <SiteFooter locale={locale} width={band ? "wide" : "reading"} />
+      <SiteFooter locale={locale} width={frame} />
     </>
   );
 }
