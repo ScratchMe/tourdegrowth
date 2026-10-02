@@ -539,4 +539,14 @@ Troisième étape du portage du retour 07, drapeau fermé. **T2 est coupé en tr
 
 **Relevé en route** : la première coupe de la copie a cherché le commentaire de `board.eyebrow` par son texte, qui ouvre aussi celui du fil d'Ariane plus haut, et a emporté 240 lignes. Le diff l'a montré avant tout test : fichier restauré, coupe refaite bornée au groupe. Et dans la carte, « Relancer » montait au-dessus de sa ligne : la confirmation de `RequestCopy`, vide mais gardée pour être annoncée, prenait une ligne sous le bouton. Elle se met à côté (`inline`).
 
-**Vérifié** : `tsc` et `eslint` propres ; 3 008 tests unitaires ; `next build` avec les variables de la CI ; les 284 specs du moteur, des cibles et de l'accessibilité (une ignorée par construction) ; les specs du bandeau, du kit et des aperçus de partage, avec `GAME_ENABLED=true` aussi côté serveur (sans lui, les pages du jeu manquent et trois specs tombent, ce qui n'est pas ce changement) ; des captures en français et en anglais, à 1 280 et 390 px : le retour, le menu ouvert, le mois à démarrer, un mois passé, sans défilement horizontal.
+**La relecture de copie** (le relecteur, sur la PR ouverte) a trouvé de quoi changer, appliqué :
+- le nom d'un chiffre passait en sujet de phrase (« Opportunités recommandées vient de quelqu'un d'autre ») : il est une étiquette après les deux-points, comme la règle du fichier le veut ;
+- « Demander à Produit » : le rôle est une étiquette sans article, d'où « à l'équipe {rôle} ». **Le même défaut est déjà dans `reminders.requestTitle` et `requestDescription`** (« Relancer {rôle} ») : laissé pour A18.d ;
+- « Copier tes 3 demandes » comptait des chiffres, pas des demandes (une par rôle) : « Demande tes {n} chiffres », et « {n} chiffres demandés » au rang 7 ;
+- « remplis le reste en attendant » quand plus rien n'est à faire seul : deux variantes qui s'arrêtent à « envoie la demande maintenant » ;
+- les boutons fléchés passent à l'impératif avec « ton », la règle de l'en-tête du fichier (« Passe au chiffre suivant », « Reviens à », « Démarre », « Sauvegarde ton moteur ») ; l'infinitif venait du retour ;
+- la phrase de Safari dit la règle entière (« sept jours d'utilisation sans passage ici »), comme celle du menu ; « il y a {n} jours » prend son espace insécable ; « read-only » comme ailleurs.
+
+**Reste pour A18.d** : « Moteur, mois et fichier » annonce un mois que le menu n'a pas quand le moteur n'a qu'un mois et que le suivant est à démarrer (le groupe est vide, donc absent).
+
+**Vérifié** : `tsc` et `eslint` propres ; 3 008 tests unitaires ; `next build` avec les variables de la CI ; les 284 specs (et les 77 que touche la relecture, rejouées après elle) du moteur, des cibles et de l'accessibilité (une ignorée par construction) ; les specs du bandeau, du kit et des aperçus de partage, avec `GAME_ENABLED=true` aussi côté serveur (sans lui, les pages du jeu manquent et trois specs tombent, ce qui n'est pas ce changement) ; des captures en français et en anglais, à 1 280 et 390 px : le retour, le menu ouvert, le mois à démarrer, un mois passé, sans défilement horizontal.

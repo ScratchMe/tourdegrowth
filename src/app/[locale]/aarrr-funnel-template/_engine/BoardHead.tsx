@@ -334,7 +334,8 @@ export function BoardNextStep({
       break;
     case "ask-one":
       step = {
-        lead: fill(n.leadAskOne, { number: nameOf(choice.id) }),
+        // The catalogue's name is a label, after the colon (engine-copy.ts): French never agrees with it.
+        lead: fill(nextSelfNumber(plan, shapes) ? n.leadAskOne : n.leadAskOneOnly, { number: midSentence(nameOf(choice.id), ctx.locale) }),
         primary: {
           label: fill(n.goAsk, { role: strings.role[ROLE_KEY[choice.role]], number: midSentence(nameOf(choice.id), ctx.locale) }),
           onClick: () => openNumber(choice.id, true),
@@ -345,7 +346,7 @@ export function BoardNextStep({
     case "ask-all": {
       const self = nextSelfNumber(plan, shapes);
       step = {
-        lead: fill(n.leadAskAll, { n: choice.ids.length }),
+        lead: fill(self ? n.leadAskAll : n.leadAskAllOnly, { n: choice.ids.length }),
         primary: { label: fill(n.goRequests, { n: choice.ids.length }), onClick: onRequests, "data-testid": "engine-next-requests" },
         secondary: self ? resumeButton(n.skipRequests, "engine-next-skip", { kind: "number", ...self }) : undefined,
       };

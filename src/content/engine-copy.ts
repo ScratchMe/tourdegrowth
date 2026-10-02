@@ -286,7 +286,7 @@ export const ENGINE_COPY = {
    */
   bar: {
     line: { fr: "{name} · {model} · {month}", en: "{name} · {model} · {month}" },
-    lineReadOnly: { fr: "{name} · {model} · {month} · lecture seule", en: "{name} · {model} · {month} · read only" },
+    lineReadOnly: { fr: "{name} · {model} · {month} · lecture seule", en: "{name} · {model} · {month} · read-only" },
     lineCorrecting: { fr: "{name} · {model} · {month} · en correction", en: "{name} · {model} · {month} · being corrected" },
     unnamed: { fr: "Moteur sans nom", en: "Unnamed engine" },
     menu: { fr: "Moteur, mois et fichier", en: "Engine, month and file" },
@@ -307,39 +307,43 @@ export const ENGINE_COPY = {
     since: { fr: "Dernière visite · {ago}", en: "Last visit · {ago}" },
     today: { fr: "aujourd'hui", en: "today" },
     yesterday: { fr: "hier", en: "yesterday" },
-    daysAgo: { fr: "il y a {n} jours", en: "{n} days ago" },
+    daysAgo: { fr: "il y a {n} jours", en: "{n} days ago" },
     /** Ranks 4 and 6 (`next-step.ts`): why this number, by its effort. */
-    leadQuick: { fr: "Les plus rapides d'abord : celui-ci se trouve seul, en cinq minutes environ.", en: "The quickest first: this one you can find on your own, in about five minutes." },
-    leadLong: { fr: "Plus de chiffre rapide : celui-ci se trouve seul, en une heure environ.", en: "No quick number left: this one you can find on your own, in about an hour." },
+    leadQuick: { fr: "Les plus rapides d'abord : tu le trouves seul, en cinq minutes environ.", en: "The quickest first: this one you can find on your own, in about five minutes." },
+    leadLong: { fr: "Plus de chiffre rapide : tu le trouves seul, en une heure environ.", en: "No quick number left: this one you can find on your own, in about an hour." },
     leadBuild: { fr: "Plus de chiffre rapide : celui-ci est à construire, compte plus d'une heure.", en: "No quick number left: this one needs building, count on more than an hour." },
-    goNumber: { fr: "Chiffre suivant : {number} →", en: "Next number: {number} →" },
+    goNumber: { fr: "Passe au chiffre suivant : {number} →", en: "Go to the next number: {number} →" },
     /** Rank 5, one number to ask for: its screen, « Je le demande » open. */
-    leadAskOne: { fr: "{number} vient de quelqu'un d'autre : envoie la demande maintenant, remplis le reste en attendant.", en: "{number} comes from someone else: send the request now, fill in the rest while you wait." },
-    goAsk: { fr: "Demander à {role} : {number} →", en: "Ask {role}: {number} →" },
+    leadAskOne: { fr: "À demander à quelqu'un d'autre : {number}. Envoie la demande maintenant, remplis le reste en attendant.", en: "To ask someone else: {number}. Send the request now, fill in the rest while you wait." },
+    /** The same when nothing is left to find alone: no « rest » to fill while waiting. */
+    leadAskOneOnly: { fr: "À demander à quelqu'un d'autre : {number}. Envoie la demande maintenant.", en: "To ask someone else: {number}. Send the request now." },
+    goAsk: { fr: "Demande à l'équipe {role} : {number} →", en: "Ask {role}: {number} →" },
     /** Rank 5, two or more: the requests, by role. `{n}` ≥ 2. */
     leadAskAll: { fr: "{n} chiffres viennent de quelqu'un d'autre : envoie les demandes maintenant, remplis le reste en attendant.", en: "{n} numbers come from someone else: send the requests now, fill in the rest while you wait." },
-    goRequests: { fr: "Copier tes {n} demandes →", en: "Copy your {n} requests →" },
+    /** The same when nothing is left to find alone: no « rest » to fill while waiting. */
+    leadAskAllOnly: { fr: "{n} chiffres viennent de quelqu'un d'autre : envoie les demandes maintenant.", en: "{n} numbers come from someone else: send the requests now." },
+    goRequests: { fr: "Demande tes {n} chiffres →", en: "Ask for your {n} numbers →" },
     skipRequests: { fr: "Taper d'abord le chiffre suivant", en: "Type the next number first" },
     /** Ranks 7 and 8: the slides. */
-    leadWaiting: { fr: "Plus rien à taper : {n} demandes attendent leur réponse.", en: "Nothing left to type: {n} requests are waiting for an answer." },
-    leadWaitingOne: { fr: "Plus rien à taper : une demande attend sa réponse.", en: "Nothing left to type: one request is waiting for an answer." },
+    leadWaiting: { fr: "Plus rien à taper : {n} chiffres demandés attendent leur réponse.", en: "Nothing left to type: {n} numbers you asked for are waiting for an answer." },
+    leadWaitingOne: { fr: "Plus rien à taper : un chiffre demandé attend sa réponse.", en: "Nothing left to type: one number you asked for is waiting for an answer." },
     leadAnswered: { fr: "Chaque chiffre a une réponse.", en: "Every number has an answer." },
     verdictIsSlide: { fr: "Ton verdict, ci-dessus, est le titre de ta première slide.", en: "Your verdict above is the title of your first slide." },
     /** Rank 1: the device refused the last write (the lead is `storage.writeFailed`). */
-    goSaveFile: { fr: "Sauvegarder dans un fichier (.json) →", en: "Save to a file (.json) →" },
+    goSaveFile: { fr: "Sauvegarde ton moteur dans un fichier (.json) →", en: "Save your engine to a file (.json) →" },
     /** Rank 2: a past month on screen (the lead is `series.viewing` or `series.correcting`). */
-    goBack: { fr: "Revenir à {month} →", en: "Back to {month} →" },
+    goBack: { fr: "Reviens à {month} →", en: "Go back to {month} →" },
     /** Rank 3: the next month can start (the lead is `series.ready`). */
-    goMonth: { fr: "Démarrer {month} →", en: "Start {month} →" },
-    keepFilling: { fr: "Continuer {month}", en: "Keep filling {month}" },
+    goMonth: { fr: "Démarre {month} →", en: "Start {month} →" },
+    keepFilling: { fr: "Continuer à remplir {month}", en: "Keep filling {month}" },
     /** A request unanswered long enough to follow up, one line per role. */
-    asked: { fr: "Demandé à {role} {ago} : {list}, pas encore de réponse.", en: "Asked {role} {ago}: {list}, no answer typed yet." },
+    asked: { fr: "Demandé à l'équipe {role} {ago} : {list}, réponse pas encore saisie.", en: "Asked {role} {ago}: {list}, no answer typed yet." },
     followUp: { fr: "Relancer", en: "Follow up" },
     /** While the engine needs a backup: never saved, or changed since. */
-    backup: { fr: "Jamais sauvegardé dans un fichier : Safari peut l'effacer après sept jours sans visite.", en: "Never saved to a file: Safari may erase it after seven days without a visit." },
-    backupChanged: { fr: "Modifié depuis ta sauvegarde du {date} : Safari peut l'effacer après sept jours sans visite.", en: "Changed since you saved it on {date}: Safari may erase it after seven days without a visit." },
+    backup: { fr: "Jamais sauvegardé dans un fichier : Safari peut l'effacer après sept jours d'utilisation sans passage ici.", en: "Never saved to a file: Safari may erase it after seven days of use without a visit here." },
+    backupChanged: { fr: "Modifié depuis ta sauvegarde du {date} : Safari peut l'effacer après sept jours d'utilisation sans passage ici.", en: "Changed since you saved it on {date}: Safari may erase it after seven days of use without a visit here." },
     /** At the board's end while the slides are not the next step. */
-    slidesQuiet: { fr: "Préparer tes slides avec ce que tu as →", en: "Prepare your slides with what you have →" },
+    slidesQuiet: { fr: "Prépare tes slides avec ce que tu as →", en: "Prepare your slides with what you have →" },
   },
 
   coverage: {
@@ -831,7 +835,7 @@ export const ENGINE_COPY = {
     },
     importOpen: { fr: "Ouvrir ce fichier", en: "Open this file" },
     noCompany: { fr: "Sans nom", en: "Unnamed" },
-    /** The model as the board's eyebrow says it — the setup's labels are sentences, too long for a mono line. */
+    /** The model as the engine bar's line says it (A18 T2.a) — the setup's labels are sentences, too long for a mono line. */
     modelShort: {
       selfserve: { fr: "libre-service", en: "self-serve" },
       // TODO: à relire (convention 6) — neuf le 2026-10-01 (A7.3.c S2, §18.7).

@@ -73,7 +73,7 @@ export async function openEngineMenu(page: Page): Promise<void> {
   if (!(await menu.evaluate((d) => (d as HTMLDetailsElement).open))) await menu.locator(":scope > summary").click();
 }
 
-/** The board's next step (A18 T2.a) when it is that step (`nextStepFor`'s kind): « Démarrer {mois} », a past month, the slides… */
+/** The board's next step (A18 T2.a) when it is that step (`nextStepFor`'s kind): « Démarre {mois} », a past month, the slides… */
 export function nextStep(page: Page, kind: string): Locator {
   return page.locator(`[data-testid="engine-next"][data-step="${kind}"]`);
 }
