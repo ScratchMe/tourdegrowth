@@ -17,6 +17,18 @@ export interface DisclosureProps {
   rule?: boolean;
   className?: string;
   "data-testid"?: string;
+  /** Open on first render, then the reader's (uncontrolled). Design system extension 07. */
+  defaultOpen?: boolean;
+  /** Controlled: the row is open while this is true. Pass `onOpenChange` with it. */
+  open?: boolean;
+  /**
+   * Called from the native `toggle` event with the row's new state — on the
+   * reader's click, and also when `open` itself opens or closes it, so the
+   * value may be the one already held.
+   */
+  onOpenChange?: (open: boolean) => void;
+  /** So another control can point at it (`aria-controls`) and scroll to it. */
+  id?: string;
 }
 
 /**
@@ -29,6 +41,13 @@ export interface DisclosureProps {
  *
  * Closed by default, always. Never put a primary Button inside one: what is
  * hidden by default cannot be the screen's one action.
+ *
+ * Opened from elsewhere (design system extension 07: `defaultOpen`, `open`
+ * and `onOpenChange`) only when the other control names what it opens — the
+ * trap's « Écris ta définition » opens « Ta définition et une note ». Never
+ * open one on first paint because it "might help": folded is the default.
+ * It stays a native `<details>` either way: keyboard, find-in-page and what
+ * a search engine reads of a closed row are unchanged.
  */
 export function Disclosure({
   summary,
@@ -36,6 +55,10 @@ export function Disclosure({
   size = "md",
   rule = true,
   className,
+  defaultOpen,
+  open,
+  onOpenChange,
+  id,
   ...rest
 }: DisclosureProps) {
   return (
@@ -43,6 +66,10 @@ export function Disclosure({
       className={[styles.wrap, styles[size], rule ? styles.ruled : "", className ?? ""]
         .filter(Boolean)
         .join(" ")}
+      // React writes `open` only when the prop changes: an uncontrolled row the reader closed stays closed on the next render.
+      open={open ?? defaultOpen ?? false}
+      onToggle={onOpenChange ? (e) => onOpenChange(e.currentTarget.open) : undefined}
+      id={id}
       {...rest}
     >
       <summary className={styles.summary}>

@@ -7,7 +7,13 @@ import { clamp, fractionOf, overflowOf, type Domain, type Overflow } from "./sca
  */
 
 export interface BulletGeometry {
-  /** Width of the value bar, 0–100 (% of the track). */
+  /**
+   * Whether there is a value bar to draw at all. False for no figure yet
+   * (`null`, design system extension 07: a number's screen before the value
+   * is typed) and for one that is not a number: no bar, never a sliver.
+   */
+  valueKnown: boolean;
+  /** Width of the value bar, 0–100 (% of the track); 0 when there is no value. */
   valuePct: number;
   /**
    * Centre of the target marker, 0–100 — or `null` when there is no marker to
@@ -35,16 +41,42 @@ const pct = (value: number, domain: Domain) => Math.round(clamp(fractionOf(value
  * same rule as `meterPct`. The chart's aria-label, written by the caller from
  * the same data, is where "no reading" gets said in words.
  */
-export function bulletGeometry(value: number, target: number, domain: Domain): BulletGeometry {
-  const valueKnown = Number.isFinite(value);
-  const targetKnown = Number.isFinite(target);
-  const targetOverflow = targetKnown ? overflowOf(target, domain) : null;
+export function bulletGeometry(value: number | null, target: number | null, domain: Domain): BulletGeometry {
+  const valueKnown = isNumber(value);
+  const targetOverflow = isNumber(target) ? overflowOf(target, domain) : null;
   return {
+    valueKnown,
     valuePct: valueKnown ? pct(value, domain) : 0,
-    targetPct: targetKnown && targetOverflow === null ? pct(target, domain) : null,
+    targetPct: isNumber(target) && targetOverflow === null ? pct(target, domain) : null,
     valueOverflow: valueKnown ? overflowOf(value, domain) : null,
     targetOverflow,
   };
+}
+
+const isNumber = (n: number | null): n is number => n !== null && Number.isFinite(n);
+
+/** Where the published range sits under the track: its left edge and its width, both 0–100 (% of the track). */
+export interface BandGeometry {
+  leftPct: number;
+  widthPct: number;
+}
+
+/**
+ * The bracket of BulletChart's `band` (design system extension 07): a
+ * published range, clamped to the domain as the bar and the tick are. `null`
+ * when there is nothing to draw: a bound that is not a number, or a range
+ * that lies wholly outside the domain — clamped, it would collapse into a
+ * bracket on the edge that no published range says.
+ */
+export function bandGeometry(band: readonly [number, number] | undefined, domain: Domain): BandGeometry | null {
+  if (!band || !band.every(Number.isFinite)) return null;
+  const lo = Math.min(band[0], band[1]);
+  const hi = Math.max(band[0], band[1]);
+  if (hi < Math.min(domain[0], domain[1]) || lo > Math.max(domain[0], domain[1])) return null;
+  // A descending domain puts `lo` on the right: the bracket runs between the two edges, whichever way.
+  const [a, b] = [pct(lo, domain), pct(hi, domain)];
+  const left = Math.min(a, b);
+  return { leftPct: left, widthPct: Math.round((Math.max(a, b) - left) * 100) / 100 };
 }
 
 /**

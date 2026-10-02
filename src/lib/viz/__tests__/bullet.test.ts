@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { bulletGeometry, meterPct } from "../bullet";
+import { bandGeometry, bulletGeometry, meterPct } from "../bullet";
 
 describe("bulletGeometry", () => {
   it("measures value and target as a percentage of the track", () => {
     expect(bulletGeometry(6, 4, [0, 10])).toEqual({
+      valueKnown: true,
       valuePct: 60,
       targetPct: 40,
       valueOverflow: null,
@@ -64,9 +65,54 @@ describe("bulletGeometry", () => {
     },
   );
 
+  it("draws no value at all for a figure not typed yet (null), and keeps its target", () => {
+    // Design system extension 07: a number's screen before the value, with its target already set.
+    const g = bulletGeometry(null, 4, [0, 10]);
+    expect(g.valueKnown).toBe(false);
+    expect(g.valueOverflow).toBeNull();
+    expect(g.targetPct).toBe(40);
+    expect(bulletGeometry(null, null, [0, 10]).targetPct).toBeNull();
+  });
+
+  it("says a non-number value is unknown too, so no bar is drawn for it", () => {
+    expect(bulletGeometry(Number.NaN, 4, [0, 10]).valueKnown).toBe(false);
+    expect(bulletGeometry(0, 4, [0, 10]).valueKnown).toBe(true);
+  });
+
   it("works on a domain that does not start at zero", () => {
     expect(bulletGeometry(5, 4.5, [4, 6]).valuePct).toBe(50);
     expect(bulletGeometry(5, 4.5, [4, 6]).targetPct).toBe(25);
+  });
+});
+
+describe("bandGeometry (design system extension 07)", () => {
+  it("places the published range as a left edge and a width, in % of the track", () => {
+    expect(bandGeometry([2, 5], [0, 10])).toEqual({ leftPct: 20, widthPct: 30 });
+  });
+
+  it("clamps a range that leaves the domain to the edge it crosses", () => {
+    expect(bandGeometry([8, 14], [0, 10])).toEqual({ leftPct: 80, widthPct: 20 });
+    expect(bandGeometry([-3, 4], [0, 10])).toEqual({ leftPct: 0, widthPct: 40 });
+  });
+
+  it("draws nothing for a range wholly outside the domain, never a bracket squashed on the edge", () => {
+    expect(bandGeometry([12, 14], [0, 10])).toBeNull();
+    expect(bandGeometry([-4, -1], [0, 10])).toBeNull();
+  });
+
+  it("draws nothing without a range, or with a bound that is not a number", () => {
+    expect(bandGeometry(undefined, [0, 10])).toBeNull();
+    expect(bandGeometry([Number.NaN, 4], [0, 10])).toBeNull();
+    expect(bandGeometry([2, Number.POSITIVE_INFINITY], [0, 10])).toBeNull();
+  });
+
+  it("reads the bounds in either order, and on a domain that runs downwards", () => {
+    expect(bandGeometry([5, 2], [0, 10])).toEqual({ leftPct: 20, widthPct: 30 });
+    expect(bandGeometry([2, 5], [10, 0])).toEqual({ leftPct: 50, widthPct: 30 });
+  });
+
+  it("works on a domain that does not start at zero", () => {
+    expect(bandGeometry([4.5, 5.5], [4, 6])).toEqual({ leftPct: 25, widthPct: 50 });
   });
 });
 
