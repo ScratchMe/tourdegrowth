@@ -122,8 +122,8 @@ for (const { locale, size, viewport } of SCREENS) {
     await page.getByTestId("engine-steps-next").click();
     await expect(steps).toHaveAttribute("data-phase", "number");
     await shootEl(steps, `05-steps-number-untouched-${tag}`);
-    await steps.locator('input[type="radio"][value="have"]').first().check();
-    await steps.getByRole("button", { name: /Où le trouver|Where to find/ }).click();
+    // Since A18 T1 the boxes are the question (no « I have it » to pick) and « Where to find it » is a fold.
+    await steps.locator("summary", { hasText: /Où le trouver|Where to find/ }).click();
     await shootEl(steps, `06-steps-number-have-open-${tag}`);
   });
 

@@ -63,6 +63,11 @@
   max-width: 720px;
 }
 
+/* A number's screen: the sheet is its own card (design system extension 07). */
+.number {
+  min-width: 0;
+}
+
 .title {
   font: var(--display-section);
   letter-spacing: var(--display-letter-spacing);

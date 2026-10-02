@@ -64,7 +64,6 @@ async function openSheet(page: Page, stage: string, dom: string): Promise<Locato
 /** « I have it », two counts, a source, the first variant when the number has one — then saved. */
 async function typeCounts(page: Page, locale: "fr" | "en", stage: string, dom: string, num: string, den: string) {
   const sheet = await openSheet(page, stage, dom);
-  await sheet.getByRole("radio", { name: ENGINE_COPY.sheet.haveIt[locale] }).check();
   await sheet.locator(`#engine-${dom}-num`).fill(num);
   await sheet.locator(`#engine-${dom}-den`).fill(den);
   await sheet.locator(`#engine-${dom}-source`).selectOption({ index: 1 });

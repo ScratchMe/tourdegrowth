@@ -73,7 +73,6 @@ test("« Start step by step » walks targets → base → one number per screen,
   const toggle = page.getByTestId("engine-metric-act-rate");
   if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.click();
   const sheet = page.getByTestId("engine-sheet-act-rate");
-  await sheet.getByRole("radio", { name: "I have it" }).check();
   await expect(sheet.locator("#engine-act-rate-den")).toHaveValue("800");
 
   // And the peloton says what its 100 are.
@@ -105,7 +104,6 @@ test("settings can be changed later; a new activation window sends that number b
   const toggle = page.getByTestId("engine-metric-act-rate");
   if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.click();
   const sheet = page.getByTestId("engine-sheet-act-rate");
-  await sheet.getByRole("radio", { name: "I have it" }).check();
   await sheet.locator("#engine-act-rate-num").fill("144");
   await sheet.locator("#engine-act-rate-den").fill("800");
   await sheet.locator("#engine-act-rate-source").selectOption({ label: "Amplitude" });
@@ -135,12 +133,15 @@ test("the company field says it is the product's or the company's name", async (
 /**
  * Antoine, 2026-09-26: « Où en es-tu avec ce chiffre ? » was asked of the
  * activation event, which is a name. The three answers — activation event,
- * churn cause, referral mechanism — get their own question, their own eyebrow
+ * churn cause, referral mechanism — get their own wording, their own eyebrow
  * in the step-by-step, and no « J'ai deux chiffres qui ne collent pas » in the
- * triage (its two readings were percent boxes). The numbers keep theirs: the
- * companion assertions below would pass on a sheet that asked no question at all.
+ * triage (its two readings were percent boxes). Since A18 T1 the question is
+ * the boxes, and the other answers sit under « Pas de chiffre sous la main ? »
+ * — « Pas de réponse » over a name, with no estimate: a name is not somewhere
+ * between. The numbers keep theirs: the companion assertions below would pass
+ * on a sheet that offered no other answer at all.
  */
-test("an answer is asked where you are « sur ce point », never « avec ce chiffre »", async ({ page }) => {
+test("an answer is offered « Pas de réponse sous la main ? », never « Pas de chiffre »", async ({ page }) => {
   await open(page, "fr");
   const q = ENGINE_COPY.sheet;
   await page.getByTestId("engine-setup-board").click();
@@ -151,20 +152,21 @@ test("an answer is asked where you are « sur ce point », never « avec ce chif
     ["referral", "ref-mechanism"],
   ] as const) {
     const sheet = await boardSheet(page, stage, metric);
-    await expect(sheet.getByRole("group", { name: q.statusQuestionAnswer.fr, exact: true })).toBeVisible();
-    await expect(sheet.getByRole("group", { name: q.statusQuestion.fr, exact: true })).toHaveCount(0);
-    await expect(sheet.locator("legend").first()).not.toContainText("chiffre");
+    await expect(sheet.getByRole("group", { name: q.answerLegendAnswer.fr, exact: true })).toBeVisible();
+    await expect(sheet.getByRole("group", { name: q.answerLegend.fr, exact: true })).toHaveCount(0);
+    await expect(sheet.getByRole("button", { name: q.canEstimate.fr })).toHaveCount(0);
     // « Je ne le trouve pas »: four causes, never two numbers that don't match.
-    await sheet.getByRole("radio", { name: q.cantFind.fr }).check();
+    await sheet.getByRole("button", { name: q.cantFind.fr }).click();
     const triage = sheet.getByTestId("engine-triage");
     await expect(triage.getByRole("radio")).toHaveCount(4);
     await expect(triage.getByRole("radio", { name: ENGINE_COPY.cause.conflicting.fr })).toHaveCount(0);
   }
 
-  // A number keeps « ce chiffre », and its « deux chiffres » triage answer.
+  // A number keeps « chiffre », its estimate, and its « deux chiffres » triage answer.
   const rate = await boardSheet(page, "activation", "act-rate");
-  await expect(rate.getByRole("group", { name: q.statusQuestion.fr, exact: true })).toBeVisible();
-  await rate.getByRole("radio", { name: q.cantFind.fr }).check();
+  await expect(rate.getByRole("group", { name: q.answerLegend.fr, exact: true })).toBeVisible();
+  await expect(rate.getByRole("button", { name: q.canEstimate.fr })).toHaveCount(1);
+  await rate.getByRole("button", { name: q.cantFind.fr }).click();
   await expect(rate.getByTestId("engine-triage").getByRole("radio", { name: ENGINE_COPY.cause.conflicting.fr })).toHaveCount(1);
 });
 
@@ -187,7 +189,7 @@ test("the step-by-step calls the activation event « Point 4 sur N », not « Ch
     ENGINE_COPY.steps.answerOf.fr.replace("{i}", "4").replace("{n}", N).replace("{stage}", ENGINE_COPY.stages.activation.fr),
   );
   await expect(number).not.toContainText("Chiffre 4");
-  await expect(number.getByRole("group", { name: ENGINE_COPY.sheet.statusQuestionAnswer.fr, exact: true })).toBeVisible();
+  await expect(number.getByRole("group", { name: ENGINE_COPY.sheet.answerLegendAnswer.fr, exact: true })).toBeVisible();
 });
 
 /**

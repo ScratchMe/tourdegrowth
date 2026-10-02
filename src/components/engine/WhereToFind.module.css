@@ -1,0 +1,87 @@
+/* WhereToFind — design system extension 07 (design/ds-extension-07-return/components/engine/WhereToFind). */
+
+.summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--space-5);
+}
+
+/* The tools read as names, not as the summary's eyebrow. */
+.tools {
+  color: var(--text-muted);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  margin: 0 0 var(--space-7);
+}
+
+.entry {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.tool {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+  font: var(--field-label);
+  color: var(--text-body);
+}
+
+.path {
+  font: var(--meta-sm);
+  color: var(--text-muted);
+  max-width: var(--measure-read);
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.also {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 var(--space-5);
+  font: var(--body-sm);
+  color: var(--text-body);
+}
+
+.alsoList {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--space-7);
+  margin: 0;
+  padding: 0;
+}
+
+/* Another number, on a 44px row (constraint 4): ink underline, not the red of
+ * --text-link, so the screen's only reds stay the trap's advice and a diagnosis. */
+.link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--hit-min);
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  color: var(--text-body);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.link:hover {
+  text-decoration-thickness: var(--border-width);
+}
+
+.link:focus-visible {
+  outline: var(--focus-width) solid var(--focus-ring);
+  outline-offset: var(--focus-offset-tight);
+}

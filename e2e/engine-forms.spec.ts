@@ -81,7 +81,6 @@ test("« 26 000 » typed in French is 26 000: the sheet reads it, and the live r
   await page.getByTestId("engine-tab-activation").click();
   await page.getByTestId("engine-metric-act-rate").click();
   const sheet = page.getByTestId("engine-sheet-act-rate");
-  await sheet.getByRole("radio", { name: "Je l'ai" }).check();
   // Typed as a French reader writes them, with an ordinary space.
   await sheet.locator("#engine-act-rate-num").pressSequentially("4 680");
   await sheet.locator("#engine-act-rate-den").pressSequentially("26 000");
@@ -125,8 +124,9 @@ test("one focus ring, the system's, on every kind of control the engine draws", 
   await page.getByTestId("engine-tab-activation").click();
   await page.getByTestId("engine-metric-act-rate").click();
   const sheet = page.getByTestId("engine-sheet-act-rate");
-  await sheet.getByRole("radio", { name: "I have it" }).check();
   await expectOneSystemRing(page, sheet.locator("#engine-act-rate-num"), "a count");
+  // The source describes a value: it is asked once one is typed (A18 T1).
+  await sheet.locator("#engine-act-rate-num").fill("144");
   await expectOneSystemRing(page, sheet.locator("#engine-act-rate-source"), "the source");
 
   // The slide builder: a checkbox, and its own text box.
@@ -152,7 +152,6 @@ test("the joiner of a pair sits against the first box, however long its label", 
   await page.getByTestId("engine-tab-acquisition").click();
   await page.getByTestId("engine-metric-acq-cac").click();
   const sheet = page.getByTestId("engine-sheet-acq-cac");
-  await sheet.getByRole("radio", { name: "Je l'ai" }).check();
   const measure = await sheet.locator("#engine-acq-cac-num").evaluate((input) => {
     const box = input.parentElement!;
     const row = box.closest('[class*="rowGrid"]')!;
@@ -194,7 +193,6 @@ for (const locale of ["en", "fr"] as const) {
     const toggle = page.getByTestId("engine-metric-act-rate");
     if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.click();
     const sheet = page.getByTestId("engine-sheet-act-rate");
-    await sheet.getByRole("radio", { name: ENGINE_COPY.sheet.haveIt[locale] }).check();
 
     // The rate alone, over 100, BEFORE any save: once a save was tried the
     // sheet re-reads its rules at every keystroke, which would say it anyway.
@@ -237,7 +235,6 @@ async function openSheet(page: Page, locale: "en" | "fr", stage: string, metric:
 for (const locale of ["en", "fr"] as const) {
   test(`a margin's two amounts take their cents (${locale})`, async ({ page }) => {
     const sheet = await openSheet(page, locale, "revenue", "rev-gross-margin");
-    await sheet.getByRole("radio", { name: ENGINE_COPY.sheet.haveIt[locale] }).check();
     const num = page.locator("#engine-rev-gross-margin-num");
     const den = page.locator("#engine-rev-gross-margin-den");
     await num.fill(locale === "fr" ? "12 450,80" : "12,450.80");
@@ -250,8 +247,7 @@ for (const locale of ["en", "fr"] as const) {
 }
 
 test("what was typed in a sheet comes back after another tab, unsaved", async ({ page }) => {
-  const sheet = await openSheet(page, "en", "activation", "act-rate");
-  await sheet.getByRole("radio", { name: ENGINE_COPY.sheet.haveIt.en }).check();
+  await openSheet(page, "en", "activation", "act-rate");
   await page.locator("#engine-act-rate-num").fill("144");
   await page.getByTestId("engine-tab-acquisition").click();
   await page.getByTestId("engine-tab-activation").click();
@@ -268,11 +264,11 @@ test("what was typed in a sheet comes back after another tab, unsaved", async ({
  * metric the new engine had not filled keys its draft `id@new` too — so the
  * other company's typing came back in its sheet, one Enter from its file.
  * Non-vacuity: with `dropAllDrafts()` under `replace` only, as before, this
- * test fails on the radio, checked again (recorded in the journal).
+ * test failed on the « I have it » radio, checked again (recorded in the
+ * journal); since A18 T1 the boxes are the question, and it fails on the box.
  */
 test("an engine imported from the board opens with no half-typed sheet of the one before", async ({ page }) => {
-  const sheet = await openSheet(page, "en", "activation", "act-rate");
-  await sheet.getByRole("radio", { name: ENGINE_COPY.sheet.haveIt.en }).check();
+  await openSheet(page, "en", "activation", "act-rate");
   await page.locator("#engine-act-rate-num").fill("144");
   // Another engine, with nothing saved for this metric either.
   const other = await storedState(page);
@@ -287,14 +283,12 @@ test("an engine imported from the board opens with no half-typed sheet of the on
   const toggle = page.getByTestId("engine-metric-act-rate");
   if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.click();
   const reopened = page.getByTestId("engine-sheet-act-rate");
-  await expect(reopened.getByRole("radio", { name: ENGINE_COPY.sheet.haveIt.en })).not.toBeChecked();
-  await reopened.getByRole("radio", { name: ENGINE_COPY.sheet.haveIt.en }).check();
+  await expect(reopened.getByTestId("engine-answer-act-rate")).toHaveAttribute("data-answer", "value");
   await expect(page.locator("#engine-act-rate-num")).toHaveValue("");
 });
 
 test("Enter in a box saves the sheet, like any form", async ({ page }) => {
-  const sheet = await openSheet(page, "en", "activation", "act-rate");
-  await sheet.getByRole("radio", { name: ENGINE_COPY.sheet.haveIt.en }).check();
+  await openSheet(page, "en", "activation", "act-rate");
   await page.locator("#engine-act-rate-num").fill("144");
   await page.locator("#engine-act-rate-source").selectOption({ label: "Amplitude" });
   const den = page.locator("#engine-act-rate-den");

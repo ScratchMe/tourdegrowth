@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Button } from "@/components/core/Button";
 import { Callout } from "@/components/core/Callout";
 import { Checkbox } from "@/components/core/Checkbox";
@@ -46,7 +46,8 @@ export function ValueEditor({
   metric,
   view,
   problems,
-  sharedHints,
+  shared,
+  periodHint,
 }: {
   idPrefix: string;
   draft: SheetDraft;
@@ -56,8 +57,14 @@ export function ValueEditor({
   view: EngineView;
   /** Only after a save was attempted — nothing turns red before the person has had a chance. */
   problems: readonly DraftProblem[];
-  /** « Même nombre que pour … » under a count several numbers share (shared-counts.ts). */
-  sharedHints?: { numerator?: string; denominator?: string };
+  /**
+   * « Même nombre que pour … : le modifier ici le modifie partout » (shared-counts.ts): one
+   * full-width line under the row of boxes (design system extension 07) — no number shares
+   * both of its counts, so one line says it, where a box's hint wrapped it into 160px.
+   */
+  shared?: string;
+  /** Which month or cohort to count (the cohort sentence, the three sales-assisted months): the denominator's hint. */
+  periodHint?: ReactNode;
 }) {
   const { strings, ctx, state } = view;
   const locale = ctx.locale;
@@ -125,7 +132,18 @@ export function ValueEditor({
       ? twoToolsOf({ status: "measured", value: { kind: "ratio", numerator: 0, denominator: 1 }, source: toolOf(draft.source), denominatorSource: toolOf(draft.denominatorSource) })
       : null;
   const twoTools = pair ? sanityText({ id: "two-tools", blocking: false, metrics: [shape.id], values: pair }, strings, locale) : null;
-  const needsSource = draft.kind !== "text" && draft.kind !== "choice";
+  // Where a value comes from describes the value: asked once one is typed (design system extension 07).
+  const typed =
+    draft.kind === "ratio"
+      ? draft.numerator !== null || draft.denominator !== null
+      : draft.kind === "rate"
+        ? draft.percent !== null
+        : draft.kind === "amount"
+          ? draft.amount !== null
+          : draft.kind === "duration"
+            ? draft.durationValue !== null
+            : false;
+  const needsSource = draft.kind !== "text" && draft.kind !== "choice" && (typed || draft.source !== "" || problems.includes("source"));
   const numGtDen = rule("num-gt-den");
 
   return (
@@ -142,7 +160,6 @@ export function ValueEditor({
             size="sm"
             id={`${idPrefix}-num`}
             label={metric.inputs?.numerator ?? metric.name}
-            hint={sharedHints?.numerator}
             error={need("numerator")}
             value={draft.numerator}
             onChange={(numerator) => update({ numerator })}
@@ -155,7 +172,7 @@ export function ValueEditor({
             size="sm"
             id={`${idPrefix}-den`}
             label={metric.inputs?.denominator ?? metric.name}
-            hint={sharedHints?.denominator}
+            hint={periodHint}
             error={rule("denominator-zero") ?? need("denominator")}
             value={draft.denominator}
             onChange={(denominator) => update({ denominator })}
@@ -166,6 +183,12 @@ export function ValueEditor({
           />
         </FieldRow>
       ) : null}
+      {draft.kind === "ratio" && shared ? (
+        <p className={styles.sharedLine} data-testid="engine-shared-hint">
+          {shared}
+        </p>
+      ) : null}
+      {draft.kind !== "ratio" && periodHint ? <p className={styles.caveat}>{periodHint}</p> : null}
       {draft.kind === "ratio" && live && !numGtDen ? (
         <p className={styles.live} data-testid="engine-live" aria-live="polite">
           {live}
