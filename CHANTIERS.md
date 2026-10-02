@@ -404,7 +404,7 @@ trois jetons de plus (`--score-row-height-md`, `--score-row-height-sm`, `--radiu
 (`--pad-chip*`). Attendu : 91 composants. Le retour 05, sous `design/` dans le
 projet, peut en partir exprès maintenant qu'il est porté (`.design-sync/NOTES.md`,
 « Synced ») : à décider avec Antoine au moment de la synchro.
-**Faite le 2026-10-02 avec B12, en une seule synchro** : 91 composants,
+**Faite le 2026-10-02 avec B12, en une seule synchro** ([#289](https://github.com/ScratchMe/tourdegrowth/pull/289)) : 91 composants,
 308 cellules, toutes notées bonnes ; `PillarChip` sorti du projet. Deux
 aperçus corrigés en route : la feuille en roast et `StampedPillar` dessinaient
 les voisins du tampon sans leur « ? », que `ResultView` leur donne.

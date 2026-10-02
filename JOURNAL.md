@@ -516,7 +516,7 @@ Deuxième étape du portage du retour 07, drapeau fermé. L'écran d'un chiffre,
 
 **Vérifié** : `tsc` et `eslint` propres, les tests unitaires, `next build` avec les variables de la CI, les 285 specs du moteur, des cibles et de l'accessibilité (onze échecs à la première passe, tous dans les specs qui visaient l'ancien écran, puis les cinq fichiers repassés : 84 sur 84), et des captures de l'écran en français et en anglais, à 1 280 et 390 px, dans le pas à pas et au tableau, sans défilement horizontal. Le `toggle` du `Disclosure` livré en T0 est exercé en vrai : « Écrire ta définition » déplie la note et y met le focus, vérifié par Playwright.
 
-## B9 et B12 : la re-synchro d'A16 et d'A19 (2026-10-02)
+## B9 et B12 : la re-synchro d'A16 et d'A19 (2026-10-02, #289)
 
 **Ce qu'elle emporte**, en une seule synchro vers le projet Claude Design, faite sur `main` à `44f2a2a` :
 - B9, la feuille de scores : `StageScore` et `StageScores` (nouveaux), `PillarChip` sorti du projet, `StampedPillar` et `DefinitionTrigger` redessinés, les rangs rouges de C34 ;
