@@ -112,3 +112,21 @@ for (const locale of ["fr", "en"] as const) {
     expect(JSON.parse(stored!)).toEqual([TOUR]);
   });
 }
+
+/**
+ * A Tour already on the device when the engine starts (A18 T3.a): the start
+ * screen asks one question and no longer shows the box, which the old setup
+ * ticked by default (C8). « Commence » links it, as the ticked box did; the
+ * Settings and the mirror unlink it. Counted once, as a link.
+ */
+test("a Tour on the device at the start is linked by « Start », as the setup's box was ticked by default", async ({ page }) => {
+  await page.goto("/en/aarrr-funnel-template");
+  await page.evaluate((tour) => localStorage.setItem("tdg.results.v1", JSON.stringify([tour])), TOUR);
+  await page.reload();
+  await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
+  await page.getByTestId("engine-start-go").click();
+  await page.getByTestId("engine-targets-next").click();
+  await page.getByTestId("engine-number-back").click();
+  await expect(page.getByTestId("engine-mirror")).toHaveAttribute("data-state", "linked");
+  await expect.poll(() => trackedEvents(page)).toContain("engine_tour_linked");
+});

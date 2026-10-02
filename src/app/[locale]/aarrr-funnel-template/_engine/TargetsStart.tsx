@@ -15,7 +15,7 @@ import styles from "./Steps.module.css";
  * box is optional and the screen is passed in one press, with one label
  * whether a target was typed or not (a label that changed when a box was
  * left changed under the pointer: the copy review of A18 T3.a). The same
- * boxes are on these numbers' own screens and, from A18 T3.c, in the
+ * boxes are on these numbers' own screens and, from A18 T3.d, in the
  * Settings. A box holding text it cannot read stops the move, its message
  * shown and the focus on it: it writes nothing (A15.2), and leaving the
  * screen would drop it unseen.

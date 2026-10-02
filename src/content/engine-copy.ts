@@ -209,7 +209,7 @@ export const ENGINE_COPY = {
    */
   targetsStart: {
     title: { fr: "Ton équipe a-t-elle déjà des cibles ?", en: "Does your team already have targets?" },
-    /** Only these numbers take a target (C1): the other screens have no box. The Settings receive them with A18 T3.c. */
+    /** Only these numbers take a target (C1): the other screens have no box. The Settings receive them with A18 T3.d. */
     lead: {
       fr: "Si oui, tape-les : ce sont elles qui nomment l'étape qui freine. Sinon, passe : tu pourras en fixer plus tard, sur l'écran de chacun de ces chiffres.",
       en: "If so, type them in: they are what names the stage that holds you back. If not, skip: you can set them later, on each of these numbers' screens.",
