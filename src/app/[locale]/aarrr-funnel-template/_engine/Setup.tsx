@@ -23,6 +23,7 @@ import { Select } from "@/components/core/Select";
 import { TextField } from "@/components/core/TextField";
 import { monthsEndingAt } from "@/lib/forms/date";
 import { moneyUnit } from "./sources";
+import { DEFAULT_CURRENCY, DEFAULT_WINDOWS } from "./start";
 import styles from "./Screens.module.css";
 
 const CURRENCIES: readonly Currency[] = ["EUR", "USD", "GBP", "CHF"];
@@ -36,12 +37,15 @@ export interface SetupChoice {
   cohortMonth: YearMonth;
   /** The Tour result to compare with, when the person kept the box ticked. */
   tourResultId: string | null;
-  /** How to fill it in (Antoine, 2026-09-25): one number at a time, or the whole board. */
-  start: "steps" | "board";
 }
 
 /**
- * The setup card (spec §7 E1), one card ≤ 560 px at every width: the
+ * Every setting of an engine, on one card: the Settings of an engine that
+ * exists, and — before one exists — what « Modifier » opens from the start
+ * screen (A18 T3.a), which asks only how the company sells. Since A18 T3.a
+ * the start screen is the way in; this card was the setup (spec §7 E1).
+ *
+ * One card ≤ 560 px at every width: the
  * model, the two months the numbers belong to, the currency and the two
  * windows that are part of the definitions, an optional name for the
  * slides, and — when a Tour with answers is on this device — whether to
@@ -62,8 +66,7 @@ export function Setup({
   today,
   tour,
   onStart,
-  onImport,
-  onExample,
+  startMotions,
   initial,
   existing,
   linked,
@@ -76,9 +79,8 @@ export function Setup({
   today: Date;
   tour: StoredResult | null;
   onStart: (choice: SetupChoice) => void;
-  onImport?: () => void;
-  /** « Voir un exemple rempli » — only offered before an engine exists, in the motions ticked (§18.7). */
-  onExample?: (motions: Record<Motion, boolean>) => void;
+  /** Before an engine exists: the answer the start screen had chosen, which the card opens on. */
+  startMotions?: Record<Motion, boolean>;
   /**
    * Editing the settings of an engine that exists (Antoine, 2026-09-25: they
    * could not be changed without erasing everything). The card opens on them,
@@ -106,11 +108,12 @@ export function Setup({
     if (focusCompany) document.getElementById(`${id}-company`)?.focus();
   }, [focusCompany, id]);
   const lastClosed = defaultReferenceMonth(today);
-  const [currency, setCurrency] = useState<Currency>(initial?.setup.currency ?? "EUR");
-  const [activation, setActivation] = useState<EngineSetup["activationWindowDays"]>(initial?.setup.activationWindowDays ?? 7);
-  const [paid, setPaid] = useState<EngineSetup["paidWindowDays"]>(initial?.setup.paidWindowDays ?? 30);
-  // Self-serve ticked, sales-assisted not, at a first visit (C25 Q16): the v1 behaviour.
-  const [motions, setMotions] = useState<Record<Motion, boolean>>(() => ({ ...(initial?.setup.motions ?? SETUP_V2_DEFAULTS.motions) }));
+  // The defaults the start screen says in its sentence (`start.ts`): one source for both.
+  const [currency, setCurrency] = useState<Currency>(initial?.setup.currency ?? DEFAULT_CURRENCY);
+  const [activation, setActivation] = useState<EngineSetup["activationWindowDays"]>(initial?.setup.activationWindowDays ?? DEFAULT_WINDOWS.activationWindowDays);
+  const [paid, setPaid] = useState<EngineSetup["paidWindowDays"]>(initial?.setup.paidWindowDays ?? DEFAULT_WINDOWS.paidWindowDays);
+  // Before an engine exists, the start screen's answer (self-serve by default, C25 Q16: the v1 behaviour).
+  const [motions, setMotions] = useState<Record<Motion, boolean>>(() => ({ ...(initial?.setup.motions ?? startMotions ?? SETUP_V2_DEFAULTS.motions) }));
   const [qualification, setQualification] = useState<Window>(initial?.setup.qualificationWindowDays ?? SETUP_V2_DEFAULTS.qualificationWindowDays);
   const [goLive, setGoLive] = useState<Window>(initial?.setup.goLiveWindowDays ?? SETUP_V2_DEFAULTS.goLiveWindowDays);
   const [referenceMonth, setReferenceMonth] = useState<YearMonth>(initial?.referenceMonth ?? lastClosed);
@@ -136,7 +139,7 @@ export function Setup({
     setMotions((was) => ({ ...was, [motion]: on }));
   }
 
-  function start(how: SetupChoice["start"]) {
+  function start() {
     setTried(true);
     // The group's message, focused at the send (R-19): the first box, so the error is read with its group.
     if (noMotion) {
@@ -149,7 +152,6 @@ export function Setup({
       ...(threshold !== null && threshold > 0 ? { threshold } : {}),
     };
     onStart({
-      start: how,
       setup: {
         type: SETUP_V2_DEFAULTS.type,
         // A copy: the state's object is never the card's.
@@ -438,45 +440,14 @@ export function Setup({
         </div>
       ) : null}
 
-      {editing ? (
-        <div className={styles.panelActions}>
-          <Button onClick={() => start("board")} data-testid="engine-settings-save">
-            {strings.settings.save}
-          </Button>
-          <Button variant="quiet" onClick={onCancel} data-testid="engine-settings-cancel">
-            {strings.settings.cancel}
-          </Button>
-        </div>
-      ) : (
-        <>
-          <div className={styles.panelActions}>
-            <Button onClick={() => start("steps")} data-testid="engine-setup-start">
-              {s.startSteps}
-            </Button>
-            <Button variant="secondary" onClick={() => start("board")} data-testid="engine-setup-board">
-              {s.startBoard}
-            </Button>
-          </div>
-          <div className={styles.panelActions}>
-            {onExample ? (
-              <Button variant="quiet" onClick={() => onExample(noMotion ? SETUP_V2_DEFAULTS.motions : motions)} data-testid="engine-setup-example">
-                {s.exampleLink}
-              </Button>
-            ) : null}
-            {onImport ? (
-              <Button variant="quiet" onClick={onImport} data-testid="engine-setup-import">
-                {strings.actions.import}
-              </Button>
-            ) : null}
-            {/* « Nouveau moteur » (§19.1.5, A14 T5): the engine on screen is still there to go back to. */}
-            {onCancel ? (
-              <Button variant="quiet" onClick={onCancel} data-testid="engine-setup-cancel">
-                {strings.settings.cancel}
-              </Button>
-            ) : null}
-          </div>
-        </>
-      )}
+      <div className={styles.panelActions}>
+        <Button onClick={start} data-testid={editing ? "engine-settings-save" : "engine-setup-start"}>
+          {editing ? strings.settings.save : strings.start.go}
+        </Button>
+        <Button variant="quiet" onClick={onCancel} data-testid={editing ? "engine-settings-cancel" : "engine-setup-cancel"}>
+          {strings.settings.cancel}
+        </Button>
+      </div>
     </Card>
   );
 }

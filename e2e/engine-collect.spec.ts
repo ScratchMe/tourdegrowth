@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 import AxeBuilder from "@axe-core/playwright";
 import type { Locator, Page } from "@playwright/test";
 import { ENGINE_COPY } from "@/content/engine-copy";
+import { fillTemplate } from "@/lib/engine/format";
 import { EXAMPLE_EXPECTED, exampleState } from "../src/lib/engine/__tests__/fixtures";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, openFold, SKIP_ADMIN_REASON, test, trackedEvents } from "./helpers";
 import { activeEngineKey, openWords, storedEngineEntry, writeEngineSeed, openEngineMenu, openNumber, backToBoard, expectFound } from "./engine-helpers";
@@ -71,10 +72,12 @@ async function openEngine(page: Page, locale: "en" | "fr" = "en"): Promise<Locat
   return island;
 }
 
-/** Setup with its defaults (self-serve, last closed month, EUR), straight to the board. */
+/** The start screen with its defaults (self-serve, last closed month, EUR), the targets passed, the first number left: the board. */
 async function startEngine(page: Page, locale: "en" | "fr" = "en"): Promise<void> {
   await openEngine(page, locale);
-  await page.getByTestId("engine-setup-board").click();
+  await page.getByTestId("engine-start-go").click();
+  await page.getByTestId("engine-targets-next").click();
+  await page.getByTestId("engine-number-back").click();
   await expect(page.getByTestId("engine-board")).toBeVisible();
 }
 
@@ -113,17 +116,39 @@ async function expectNoSeriousA11y(page: Page, label: string): Promise<void> {
 const ENGINE_EVENT = /^engine_(opened|request_copied|deck_opened|tour_linked|setup\/(plg|slg|hybrid)|stage_saved\/(slg-)?(acquisition|activation|retention|referral|revenue)|exported\/json)$/;
 
 test.describe("setup and first save", () => {
-  test("first visit shows the setup; « See it all at once » opens the board with nothing found yet", async ({ page }) => {
+  test("first visit: one question, self-serve by default; « Start » → the targets, passed → the first number, each heading focused", async ({ page }) => {
     await openEngine(page);
-    await expect(page.getByTestId("engine-setup")).toBeVisible();
-    // B2B SaaS, sold self-serve: the v1 engine unless someone ticks sales-assisted (A7.3.c).
-    await expect(page.getByRole("radio", { name: /B2B SaaS/ })).toBeChecked();
-    await expect(page.getByTestId("engine-motion-plg")).toBeChecked();
-    await expect(page.getByTestId("engine-motion-slg")).not.toBeChecked();
-    await page.getByTestId("engine-setup-board").click();
+    await expect(page.getByTestId("engine-start")).toBeVisible();
+    // Self-serve unless someone answers otherwise (A7.3.c); every other default said in one sentence (A18 T3.a).
+    await expect(page.locator("#engine-start-motion-ss")).toBeChecked();
+    await expect(page.getByTestId("engine-start-plan")).toHaveText(fillTemplate(ENGINE_COPY.start.plan.en, { n: 17, quick: 5, hour: 7, ask: 5 }));
+    await expect(page.getByTestId("engine-start-defaults")).toContainText("B2B SaaS, in euros");
+    // The plan follows the answer, before anything is created.
+    await page.locator("#engine-start-motion-both").check();
+    await expect(page.getByTestId("engine-start-plan")).toHaveText(fillTemplate(ENGINE_COPY.start.plan.en, { n: 33, quick: 9, hour: 13, ask: 11 }));
+    await page.locator("#engine-start-motion-ss").check();
+    expect(await storedEngine(page)).toBeNull();
+
+    // « Start »: the « Targets » screen (C40), every box optional, one way on.
+    await page.getByTestId("engine-start-go").click();
+    await expect(page.locator("#engine-targets-title")).toBeFocused();
+    await expect(page.getByTestId("engine-targets-next")).toHaveText(ENGINE_COPY.targetsStart.go.en);
+    // A box it cannot read stops the move, its message shown and the focus on it: leaving would drop it unseen.
+    const target = page.locator("#engine-step-target-act-rate");
+    await target.fill("25 kg");
+    await page.getByTestId("engine-targets-next").click();
+    await expect(page.getByText(ENGINE_COPY.workbench.notANumber.en)).toBeVisible();
+    await expect(target).toBeFocused();
+    await expect(page.getByTestId("engine-targets-start")).toBeVisible();
+    await target.fill("");
+    await page.getByTestId("engine-targets-next").click();
+    // The first number a person can find alone, the quickest in the funnel's order: the sign-up rate.
+    await expect(page.getByTestId("engine-number")).toHaveAttribute("data-metric", "acq.signup-rate");
+    await expect(page.locator("#engine-number-title")).toBeFocused();
+    await page.getByTestId("engine-number-back").click();
     await expectFound(page, 0);
-    // Focus follows the screen change to the verdict, never left on <body>.
-    await expect(page.locator("#engine-verdict")).toBeFocused();
+    // Focus follows the way back to the number's row, never left on <body>.
+    await expect(page.getByTestId("engine-metric-acq-signup-rate")).toBeFocused();
     await expect.poll(() => trackedEvents(page)).toContain("engine_opened");
   });
 
@@ -213,8 +238,12 @@ test.describe("asking and collecting", () => {
   test("\"I'll ask for it\" copies the request, records who was asked, and the event carries no text", async ({ page }) => {
     await openEngine(page);
     // A company name and a number typed first: neither may travel in the copied message.
+    // The name, in the full card the start screen's « Change » opens (A18 T3.a).
+    await page.getByTestId("engine-start-change").click();
     await page.getByLabel(ENGINE_COPY.setup.companyLabel.en).fill("Canary Corp 4242");
-    await page.getByTestId("engine-setup-board").click();
+    await page.getByTestId("engine-setup-start").click();
+    await page.getByTestId("engine-targets-next").click();
+    await page.getByTestId("engine-number-back").click();
     const found = await openSheet(page, "activation", "act-rate");
     await found.locator("#engine-act-rate-num").fill("144");
     await found.locator("#engine-act-rate-den").fill("800");
@@ -464,8 +493,8 @@ test.describe("leaving the device and coming back", () => {
     // Really clear it: without this the test proves React state survived a click, not that the file carries the work.
     await page.evaluate(() => window.localStorage.clear());
     await page.reload();
-    await expect(page.getByTestId("engine-setup")).toBeVisible();
-    await page.getByTestId("engine-setup-import").click();
+    await expect(page.getByTestId("engine-start")).toBeVisible();
+    await page.getByTestId("engine-start-import").click();
     await page.getByTestId("engine-import-file").setInputFiles(path);
     await expect(page.getByTestId("engine-import-preview")).toContainText("1 of 17");
     await page.getByTestId("engine-import-open").click();
@@ -475,7 +504,7 @@ test.describe("leaving the device and coming back", () => {
 
   test("a file that isn't an engine is refused, and nothing changes", async ({ page }) => {
     await openEngine(page);
-    await page.getByTestId("engine-setup-import").click();
+    await page.getByTestId("engine-start-import").click();
     await page.getByTestId("engine-import-file").setInputFiles({ name: "x.json", mimeType: "application/json", buffer: Buffer.from('{"hello":1}') });
     await expect(page.getByTestId("engine-import-refused")).toBeVisible();
     await expect(page.getByTestId("engine-import-open")).toHaveCount(0);
@@ -493,15 +522,25 @@ test.describe("leaving the device and coming back", () => {
     await page.getByLabel("Confirmation").fill("erase");
     await expect(confirm).toBeEnabled();
     await confirm.click();
-    await expect(page.getByTestId("engine-setup")).toBeVisible();
+    await expect(page.getByTestId("engine-start")).toBeVisible();
     expect(await storedEngine(page)).toBeNull();
   });
 });
 
 test.describe("keyboard, languages, widths", () => {
-  test("keyboard only: setup, a number's row, its screen, saved", async ({ page }) => {
+  test("keyboard only: the start, the targets, a number's row, its screen, saved", async ({ page }) => {
     await openEngine(page);
-    await tabTo(page, page.getByTestId("engine-setup-board"));
+    // The question's radios move with the arrows, as a real radio group does.
+    await page.locator("#engine-start-motion-ss").focus();
+    await page.keyboard.press("ArrowDown");
+    await expect(page.locator("#engine-start-motion-sa")).toBeChecked();
+    await page.keyboard.press("ArrowUp");
+    await expect(page.locator("#engine-start-motion-ss")).toBeChecked();
+    await tabTo(page, page.getByTestId("engine-start-go"));
+    await page.keyboard.press("Enter");
+    await tabTo(page, page.getByTestId("engine-targets-next"));
+    await page.keyboard.press("Enter");
+    await tabTo(page, page.getByTestId("engine-number-back"));
     await page.keyboard.press("Enter");
     await expect(page.getByTestId("engine-board")).toBeVisible();
 
@@ -575,7 +614,9 @@ test.describe("accessibility of each screen", () => {
   test("setup, board with a sheet, triage, collect, import, erase — no serious or critical issue", async ({ page }) => {
     await openEngine(page);
     await expectNoSeriousA11y(page, "setup");
-    await page.getByTestId("engine-setup-board").click();
+    await page.getByTestId("engine-start-go").click();
+    await page.getByTestId("engine-targets-next").click();
+    await page.getByTestId("engine-number-back").click();
     const sheet = await openSheet(page, "activation", "act-rate");
     await expectNoSeriousA11y(page, "sheet");
     await sheet.getByRole("button", { name: "I can't find it" }).click();

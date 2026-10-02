@@ -123,3 +123,18 @@ export async function expectFound(page: Page, n: number): Promise<void> {
   if (n === 0) await expect(found).toHaveCount(0);
   else await expect(page.getByTestId("engine-progress-counts")).toHaveText(new RegExp(`(^|· )${n} (found|trouvés?)( ·|$)`));
 }
+
+/**
+ * A new engine from the start screen (A18 T3.a, design system extension 07):
+ * the one question answered (`ss`, the default, is left as it is), « Commencer »,
+ * the « Cibles » screen passed, the first number's screen left by « ← Tes
+ * chiffres » — on the board, as the old setup's « Tout voir d'un coup » landed.
+ */
+export async function startEngine(page: Page, motion: "ss" | "sa" | "both" = "ss"): Promise<void> {
+  await page.getByTestId("engine-start").waitFor();
+  if (motion !== "ss") await page.locator(`#engine-start-motion-${motion}`).check();
+  await page.getByTestId("engine-start-go").click();
+  await page.getByTestId("engine-targets-next").click();
+  await page.getByTestId("engine-number").waitFor();
+  await backToBoard(page);
+}

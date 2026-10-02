@@ -124,8 +124,8 @@ for (const locale of ["fr", "en"] as const) {
         window.sessionStorage.setItem("e2e-engine-seeded", "1");
       });
       await page.reload();
-      await expect(page.getByTestId("engine-setup")).toBeVisible();
-      await page.getByTestId("engine-setup-import").click();
+      await expect(page.getByTestId("engine-start")).toBeVisible();
+      await page.getByTestId("engine-start-import").click();
       await page.getByTestId("engine-import-file").setInputFiles(path);
       await page.getByTestId("engine-import-open").click();
       await expect(page.getByTestId("engine-board")).toHaveAttribute("data-motions", "hybrid");

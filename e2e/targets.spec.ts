@@ -382,7 +382,9 @@ test.describe("the quiet text button", () => {
     await grantOwnerPreview(context.request, "engine");
     await page.goto("/en/aarrr-funnel-template");
     await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
-    await page.getByTestId("engine-setup-board").click();
+    await page.getByTestId("engine-start-go").click();
+    await page.getByTestId("engine-targets-next").click();
+    await page.getByTestId("engine-number-back").click();
     await openNumber(page, "act-rate");
     const sheet = page.getByTestId("engine-sheet-act-rate");
     const rateOnly = sheet.getByRole("button", { name: "I only have the rate" });

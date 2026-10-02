@@ -77,7 +77,9 @@ async function expectOneSystemRing(page: Page, target: Locator, name: string): P
 
 test("« 26 000 » typed in French is 26 000: the sheet reads it, and the live rate follows", async ({ page }) => {
   await openEngine(page, "fr");
-  await page.getByTestId("engine-setup-board").click();
+  await page.getByTestId("engine-start-go").click();
+  await page.getByTestId("engine-targets-next").click();
+  await page.getByTestId("engine-number-back").click();
   await openNumber(page, "act-rate");
   const sheet = page.getByTestId("engine-sheet-act-rate");
   // Typed as a French reader writes them, with an ordinary space.
@@ -110,7 +112,10 @@ test("one focus ring, the system's, on every kind of control the engine draws", 
   await page.clock.setFixedTime(new Date(2026, 8, 24, 12));
   await openEngine(page, "en");
 
-  // The setup: a radio row, a motion's box, a month list, a short select, a text box.
+  // The start screen (A18 T3.a): the question's radio row, then « Change », the full card.
+  await expectOneSystemRing(page, page.locator("#engine-start-motion-ss"), "the start's choice row");
+  await page.getByTestId("engine-start-change").click();
+  // The full card: a radio row, a motion's box, a month list, a short select, a text box.
   const setup = page.getByTestId("engine-setup");
   await expectOneSystemRing(page, setup.getByRole("radio", { name: /B2B SaaS/ }), "a choice row");
   await expectOneSystemRing(page, setup.getByTestId("engine-motion-slg"), "a motion's box");
@@ -118,8 +123,13 @@ test("one focus ring, the system's, on every kind of control the engine draws", 
   await expectOneSystemRing(page, setup.getByLabel("Currency"), "Currency");
   await expectOneSystemRing(page, setup.getByRole("textbox").first(), "the company name");
 
+  // The « Targets » screen: a target's box.
+  await page.getByTestId("engine-setup-start").click();
+  await expectOneSystemRing(page, page.locator("#engine-step-target-act-rate"), "a target");
+  await page.getByTestId("engine-targets-next").click();
+
   // A sheet: a number in its box, the source list.
-  await page.getByTestId("engine-setup-board").click();
+  await page.getByTestId("engine-number-back").click();
   await openNumber(page, "act-rate");
   const sheet = page.getByTestId("engine-sheet-act-rate");
   await expectOneSystemRing(page, sheet.locator("#engine-act-rate-num"), "a count");
@@ -146,7 +156,9 @@ test("one focus ring, the system's, on every kind of control the engine draws", 
  */
 test("the joiner of a pair sits against the first box, however long its label", async ({ page }) => {
   await openEngine(page, "fr");
-  await page.getByTestId("engine-setup-board").click();
+  await page.getByTestId("engine-start-go").click();
+  await page.getByTestId("engine-targets-next").click();
+  await page.getByTestId("engine-number-back").click();
   await openNumber(page, "acq-cac");
   const sheet = page.getByTestId("engine-sheet-acq-cac");
   const measure = await sheet.locator("#engine-acq-cac-num").evaluate((input) => {
@@ -184,7 +196,9 @@ test("the joiner of a pair sits against the first box, however long its label", 
 for (const locale of ["en", "fr"] as const) {
   test(`a refused save puts the focus on the field it names; a rate over 100 is said on leaving it (${locale})`, async ({ page }) => {
     await openEngine(page, locale);
-    await page.getByTestId("engine-setup-board").click();
+    await page.getByTestId("engine-start-go").click();
+    await page.getByTestId("engine-targets-next").click();
+    await page.getByTestId("engine-number-back").click();
     await openNumber(page, "act-rate");
     const sheet = page.getByTestId("engine-sheet-act-rate");
 
@@ -209,8 +223,13 @@ for (const locale of ["en", "fr"] as const) {
 /** The board, then one number's own screen (A18 T2.b): the stage stays for the callers' reading. */
 async function openSheet(page: Page, locale: "en" | "fr", _stage: string, metric: string): Promise<Locator> {
   await openEngine(page, locale);
-  const board = page.getByTestId("engine-setup-board");
-  if (await board.count()) await board.click();
+  // A first visit (A18 T3.a): the start, the targets passed, the first number left for the board.
+  const start = page.getByTestId("engine-start-go");
+  if (await start.count()) {
+    await start.click();
+    await page.getByTestId("engine-targets-next").click();
+    await page.getByTestId("engine-number-back").click();
+  }
   return openNumber(page, metric);
 }
 

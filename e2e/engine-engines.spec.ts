@@ -56,9 +56,17 @@ test("a second engine: created from the switcher, switched to and back, deleted 
 
   await openSwitcher(page);
   await page.getByTestId("engine-new").click();
-  await expect(page.getByTestId("engine-setup")).toBeVisible();
+  await expect(page.getByTestId("engine-start")).toBeVisible();
+  await expect(page.locator("#engine-start-title")).toBeFocused();
+  // Another engine's start (A18 T3.a): no example, no import, « Cancel » back to the engine on screen.
+  await expect(page.getByTestId("engine-start-example")).toHaveCount(0);
+  await expect(page.getByTestId("engine-start-cancel")).toBeVisible();
+  // Its name, in the full card « Change » opens.
+  await page.getByTestId("engine-start-change").click();
   await page.getByLabel(ENGINE_COPY.setup.companyLabel.en).fill("Second Co");
-  await page.getByTestId("engine-setup-board").click();
+  await page.getByTestId("engine-setup-start").click();
+  await page.getByTestId("engine-targets-next").click();
+  await page.getByTestId("engine-number-back").click();
   await expect(page.getByTestId("engine-bar-line")).toContainText("Second Co");
   const index = (await storedIndex(page))!;
   expect(index.order).toHaveLength(2);
@@ -95,7 +103,7 @@ test("a second engine: created from the switcher, switched to and back, deleted 
   await openEngineMenu(page);
   await page.getByTestId("engine-delete-open").click();
   await page.getByTestId("engine-delete-confirm").click();
-  await expect(page.getByTestId("engine-setup")).toBeVisible();
+  await expect(page.getByTestId("engine-start")).toBeVisible();
   expect(await storedIndex(page)).toBeNull();
 });
 

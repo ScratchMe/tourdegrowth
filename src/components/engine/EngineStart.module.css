@@ -1,0 +1,55 @@
+/* EngineStart — design system extension 07 (design/ds-extension-07-return/components/engine/EngineStart). */
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--form-gap-md);
+  max-width: var(--engine-measure);
+}
+
+.title {
+  font: var(--display-section);
+  letter-spacing: var(--display-letter-spacing);
+  color: var(--text-body);
+  margin: 0;
+}
+
+/* Focused by script when a person comes here from another screen (R-19), never reachable by Tab. */
+.title:focus {
+  outline: none;
+}
+
+.plan {
+  font: var(--body-md);
+  color: var(--text-body);
+  margin: 0;
+}
+
+.defaults {
+  font: var(--body-sm);
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-7) var(--space-10);
+}
+
+.ways {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-6) var(--space-8);
+}
+
+@media (max-width: 760px) {
+  .root {
+    gap: var(--form-gap-sm);
+  }
+
+  .go {
+    width: 100%;
+  }
+}

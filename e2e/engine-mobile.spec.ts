@@ -52,11 +52,16 @@ async function seedHybrid(page: Page, locale: "fr" | "en") {
 /** Every screen the two motions add, each measured: how many pixels the page runs past the viewport. */
 async function measureScreens(page: Page, locale: "fr" | "en"): Promise<Record<string, number>> {
   const out: Record<string, number> = {};
-  // E1 — the setup, both motions unfolded.
+  // E1 — the start screen, « Both », then its full card with both motions unfolded, then the « Targets » screen (A18 T3.a).
   await page.goto(`/${locale}/aarrr-funnel-template`);
   await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
-  await page.getByTestId("engine-motion-slg").check();
+  await page.locator("#engine-start-motion-both").check();
+  out.start = await overflow(page);
+  await page.getByTestId("engine-start-change").click();
   out.setup = await overflow(page);
+  await page.getByTestId("engine-setup-start").click();
+  await expect(page.getByTestId("engine-targets-start")).toBeVisible();
+  out.targets = await overflow(page);
 
   // E2 — the hybrid board, then sales-assisted's stages and a sheet.
   await seedHybrid(page, locale);
@@ -82,7 +87,7 @@ for (const locale of ["fr", "en"] as const) {
   for (const width of [360, 390, 430] as const) {
     test(`${locale} at ${width}: nothing the two motions add pushes the page sideways`, async ({ page }) => {
       await page.setViewportSize({ width, height: 800 });
-      expect(await measureScreens(page, locale)).toEqual({ setup: 0, board: 0, sheet: 0, collect: 0, deck: 0 });
+      expect(await measureScreens(page, locale)).toEqual({ start: 0, setup: 0, targets: 0, board: 0, sheet: 0, collect: 0, deck: 0 });
     });
   }
 
@@ -90,7 +95,8 @@ for (const locale of ["fr", "en"] as const) {
     await page.setViewportSize({ width: 320, height: 640 });
     const measured = await measureScreens(page, locale);
     test.info().annotations.push({ type: "overflow at 320", description: JSON.stringify(measured) });
-    expect(Object.keys(measured)).toHaveLength(5);
+    // The start, its full card and the « Targets » screen joined the screens measured (A18 T3.a).
+    expect(Object.keys(measured)).toHaveLength(7);
   });
 
   test(`${locale}: each relay's words stay inside its card, at 390 and 1280`, async ({ page }) => {
@@ -136,15 +142,21 @@ async function tabTo(page: Page, target: Locator, max = 200): Promise<void> {
   throw new Error(`Never reached ${target} with ${max} Tab presses`);
 }
 
-test("the keyboard alone: tick sales-assisted, open the board, fill its win rate", async ({ page }) => {
+test("the keyboard alone: answer « Both », pass the targets, open the board, fill its win rate", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.clock.setFixedTime(new Date(2026, 8, 24, 12));
   await page.goto("/en/aarrr-funnel-template");
   await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
-  await tabTo(page, page.getByTestId("engine-motion-slg"));
-  await page.keyboard.press("Space");
-  await expect(page.getByTestId("engine-motion-slg")).toBeChecked();
-  await tabTo(page, page.getByTestId("engine-setup-board"));
+  // The start's question is one radio group: Tab reaches it, the arrows choose « Both » (A18 T3.a).
+  await tabTo(page, page.locator("#engine-start-motion-ss"));
+  await page.keyboard.press("ArrowDown");
+  await page.keyboard.press("ArrowDown");
+  await expect(page.locator("#engine-start-motion-both")).toBeChecked();
+  await tabTo(page, page.getByTestId("engine-start-go"));
+  await page.keyboard.press("Enter");
+  await tabTo(page, page.getByTestId("engine-targets-next"));
+  await page.keyboard.press("Enter");
+  await tabTo(page, page.getByTestId("engine-number-back"));
   await page.keyboard.press("Enter");
   await expect(page.getByTestId("engine-board")).toHaveAttribute("data-motions", "hybrid");
 
@@ -229,7 +241,7 @@ async function measureA14(page: Page, locale: "fr" | "en"): Promise<Record<(type
   await openSwitcher(page);
   out.switcher = await overflow(page);
   await page.getByTestId("engine-new").click();
-  await expect(page.getByTestId("engine-setup")).toBeVisible();
+  await expect(page.getByTestId("engine-start")).toBeVisible();
   out.newEngine = await overflow(page);
 
   await reopen(page, locale);

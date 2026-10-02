@@ -11,6 +11,7 @@ import { isAnswerMetric } from "@/lib/engine/phrases";
 import { knownSharedCount } from "@/lib/engine/shared-counts";
 import type { MetricId, SharedCount } from "@/lib/engine/types";
 import { MetricSheet } from "./MetricSheet";
+import { TargetInput } from "./TargetInput";
 import { SlgWhatIfPanel } from "./SlgWhatIfPanel";
 import {
   STEP_PHASES,
@@ -23,7 +24,6 @@ import {
   type StepPhase,
   type StepPosition,
 } from "./steps-model";
-import { percentUnit } from "./sources";
 import { catalogFill, fill, metricById } from "./text";
 import type { EngineActions, EngineView } from "./view";
 import { WhatIfPanel } from "./WhatIfPanel";
@@ -187,33 +187,6 @@ export function Steps({
         </Card>
       ) : null}
     </section>
-  );
-}
-
-/** A team target for one of the numbers that can name the stage holding you back — written on blur, like the sheet's. */
-function TargetInput({ id, view, actions }: { id: MetricId; view: EngineView; actions: EngineActions }) {
-  const snapshot = view.state.snapshots[view.state.snapshots.length - 1]!;
-  const target = snapshot.targets[id];
-  const [value, setValue] = useState<number | null>(target ?? null);
-  const metric = metricById(view.metrics, id);
-  return (
-    <NumberField
-      id={`engine-step-target-${id.replace(/\./g, "-")}`}
-      label={fill(view.strings.steps.targetFor, { metric: metric.name })}
-      hint={metric.oneLiner}
-      value={value}
-      onChange={setValue}
-      onBlur={(event) => {
-        // An unreadable box stays on screen with its message and writes
-        // nothing: the stored target is not erased by a typo (A15.2).
-        if (isUnreadableNumber(event.target.value, view.ctx.locale)) return;
-        if ((value ?? undefined) !== target) actions.setTarget(id, value);
-      }}
-      locale={view.ctx.locale}
-      digits={5}
-      {...percentUnit(view.ctx.locale)}
-      parseError={view.strings.workbench.notANumber}
-    />
   );
 }
 

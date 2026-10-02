@@ -170,6 +170,54 @@ export const ENGINE_COPY = {
     catalogueLinkTitle: { fr: "La liaison, si tu vends des deux façons", en: "The link, if you sell both ways" },
   },
 
+  /**
+   * TODO: à relire (convention 6) — neuf le 2026-10-02 (A18 T3.a, le retour 07 de Claude Design,
+   * design/ds-extension-07-return/COPY.md) : le premier écran, une seule question (`EngineStart`) ; le
+   * titre reste `setup.title`. `{n}`, `{quick}`, `{hour}`, `{ask}` valent au moins 2 pour chacune des
+   * trois façons de vendre (testé), d'où le pluriel sans variante. `{month}`, `{cohort}` : un mois
+   * formaté, après deux-points en français (jamais « de {month} », voir l'en-tête). « En euros » : la
+   * devise par défaut (`DEFAULT_CURRENCY`), seule possible ici ; « Modifier » ouvre tous les réglages.
+   */
+  start: {
+    legend: { fr: "Comment vends-tu ?", en: "How do you sell?" },
+    ss: { fr: "Libre-service", en: "Self-serve" },
+    ssNote: { fr: "On s'inscrit et on paie seul (PLG).", en: "People sign up and pay on their own (PLG)." },
+    sa: { fr: "Assisté", en: "Sales-assisted" },
+    saNote: { fr: "Un commercial signe les contrats (SLG).", en: "A salesperson signs the deals (SLG)." },
+    both: { fr: "Les deux", en: "Both" },
+    bothNote: { fr: "Deux moteurs, un total.", en: "Two engines, one total." },
+    plan: {
+      fr: "{n} chiffres : {quick} se lisent en cinq minutes, {hour} demandent environ une heure chacun, {ask} sont à demander à quelqu'un.",
+      en: "{n} numbers: {quick} take five minutes, {hour} about an hour each, {ask} come from someone else.",
+    },
+    defaults: {
+      fr: "Réglé pour un SaaS B2B, en euros. Mois des chiffres : {month} ; inscrits suivis : {cohort}.",
+      en: "Set for a B2B SaaS, in euros, on {month}'s figures and {cohort}'s sign-ups.",
+    },
+    /** Sales-assisted alone follows no self-serve cohort: it reads three months, as the engine bar says (« juillet à septembre 2026 »). */
+    defaultsSlg: { fr: "Réglé pour un SaaS B2B, en euros, sur trois mois de chiffres jusqu'à {month}.", en: "Set for a B2B SaaS, in euros, on three months of figures up to {month}." },
+    change: { fr: "Modifier", en: "Change" },
+    /** Not « Commence par ton premier chiffre » (the return): the « Cibles » screen comes first (C40). */
+    go: { fr: "Commence →", en: "Start →" },
+    example: { fr: "Voir un exemple rempli", en: "See a filled-in example" },
+    import: { fr: "Importer un fichier (.json)", en: "Import a file (.json)" },
+  },
+  /**
+   * TODO: à relire (convention 6) — neuf le 2026-10-02 (A18 T3.a) : l'écran « Cibles », gardé au début
+   * et sautable par Antoine (C40, contre la reco du retour 07, qui ne les mettait que sur l'écran de
+   * chaque chiffre et dans les Réglages). Les cases sont celles du pas à pas (`steps.targetFor`).
+   */
+  targetsStart: {
+    title: { fr: "Ton équipe a-t-elle déjà des cibles ?", en: "Does your team already have targets?" },
+    /** Only these numbers take a target (C1): the other screens have no box. The Settings receive them with A18 T3.c. */
+    lead: {
+      fr: "Si oui, tape-les : ce sont elles qui nomment l'étape qui freine. Sinon, passe : tu pourras en fixer plus tard, sur l'écran de chacun de ces chiffres.",
+      en: "If so, type them in: they are what names the stage that holds you back. If not, skip: you can set them later, on each of these numbers' screens.",
+    },
+    /** One label, true whether a target was typed or not: a label that changed on the box's blur changed under the pointer. */
+    go: { fr: "Passe à ton premier chiffre →", en: "On to your first number →" },
+  },
+
   setup: {
     title: { fr: "Avant de commencer", en: "Before you start" },
     referenceMonth: { fr: "Mois des flux", en: "Month for flows" },
@@ -204,10 +252,6 @@ export const ENGINE_COPY = {
       fr: "Délier garde ton Tour sur cet appareil : tu pourras le relier de nouveau.",
       en: "Unlinking keeps your Tour on this device: you can link it again.",
     },
-    // TODO: à relire — nouveau (2026-09-25, retours d'Antoine sur le moteur).
-    exampleLink: { fr: "Voir un exemple rempli, funnel et slides →", en: "See a filled-in example, funnel and slides →" },
-    startSteps: { fr: "Commencer pas à pas →", en: "Start step by step →" },
-    startBoard: { fr: "Tout voir d'un coup", en: "See it all at once" },
     /**
      * TODO: à relire (convention 6) — neuf le 2026-10-01 (A7.3.c S2, ENGINE.md §18.1, C25 Q16) : the
      * type and the motions. The type is a closed list with one option open,

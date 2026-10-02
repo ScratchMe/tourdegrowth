@@ -35,7 +35,9 @@ const TOUR_DAY = { fr: "1er septembre 2026", en: "September 1, 2026" } as const;
 async function startWithoutTour(page: Page, locale: "fr" | "en") {
   await page.goto(`/${locale}/aarrr-funnel-template`);
   await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
-  await page.getByTestId("engine-setup-board").click();
+  await page.getByTestId("engine-start-go").click();
+  await page.getByTestId("engine-targets-next").click();
+  await page.getByTestId("engine-number-back").click();
   await expect(page.getByTestId("engine-board")).toBeVisible();
 }
 

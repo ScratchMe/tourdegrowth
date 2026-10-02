@@ -3,7 +3,7 @@ import type { Locator, Page, Request } from "@playwright/test";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import { engineEventPaths } from "@/lib/analytics/goatcounter";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test, trackedEvents } from "./helpers";
-import { openWords, openEngineMenu, openNumber, backToBoard } from "./engine-helpers";
+import { openWords, openEngineMenu, openNumber, backToBoard, startEngine } from "./engine-helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
 // owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
@@ -62,8 +62,12 @@ test.describe("the growth engine keeps everything in the browser (D16)", () => {
     // --- Setup ---------------------------------------------------------------
     await page.goto("/en/aarrr-funnel-template");
     await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
+    // The name lives in the full card the start screen's « Change » opens (A18 T3.a).
+    await page.getByTestId("engine-start-change").click();
     await page.getByLabel(ENGINE_COPY.setup.companyLabel.en).fill(COMPANY);
-    await page.getByTestId("engine-setup-board").click();
+    await page.getByTestId("engine-setup-start").click();
+    await page.getByTestId("engine-targets-next").click();
+    await page.getByTestId("engine-number-back").click();
     await expect(page.getByTestId("engine-board")).toBeVisible();
 
     // --- The activation event: the one number that IS a text ---------------
@@ -235,8 +239,7 @@ test.describe("sales-assisted keeps everything in the browser too (D16, §18.10.
 
     await page.goto("/en/aarrr-funnel-template");
     await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
-    await page.getByTestId("engine-motion-slg").check();
-    await page.getByTestId("engine-setup-board").click();
+    await startEngine(page, "both");
     await expect(page.getByTestId("engine-board")).toHaveAttribute("data-motions", "hybrid");
     await page.getByTestId("engine-motion-selector").getByRole("button", { name: ENGINE_COPY.hybrid.motionName.slg.en }).click();
 
