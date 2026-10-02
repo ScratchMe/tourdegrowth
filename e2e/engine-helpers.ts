@@ -101,6 +101,13 @@ export async function openNumber(page: Page, metricDomId: string): Promise<Locat
   const sheet = page.getByTestId(`engine-sheet-${metricDomId}`);
   if (await sheet.count()) return sheet;
   await backToBoard(page);
+  // The hybrid shows one engine's list at a time (§18.7), and continuing from a number's screen (A18 T3.b)
+  // shows the engine of the number opened last: the number's own engine first — sales-assisted for `slg-…` and the link.
+  const selector = page.getByTestId("engine-motion-selector");
+  if (await selector.count()) {
+    const slg = metricDomId.startsWith("slg-") || metricDomId.startsWith("link-");
+    await selector.getByRole("button").nth(slg ? 1 : 0).click();
+  }
   const row = page.getByTestId(`engine-metric-${metricDomId}`);
   // A row in a closed group (the hybrid's link, at the end of sales-assisted's list): the group opens first.
   const group = row.locator("xpath=ancestor::details[1]");
