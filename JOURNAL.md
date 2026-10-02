@@ -582,7 +582,7 @@ Troisième étape du portage du retour 07, drapeau fermé. **T2 est coupé en tr
 
 **Vérifié** : `tsc` et `eslint` propres ; 3 008 tests unitaires ; `next build` avec les variables de la CI ; les 284 specs (et les 77 que touche la relecture, rejouées après elle) du moteur, des cibles et de l'accessibilité (une ignorée par construction) ; les specs du bandeau, du kit et des aperçus de partage, avec `GAME_ENABLED=true` aussi côté serveur (sans lui, les pages du jeu manquent et trois specs tombent, ce qui n'est pas ce changement) ; des captures en français et en anglais, à 1 280 et 390 px : le retour, le menu ouvert, le mois à démarrer, un mois passé, sans défilement horizontal.
 
-## A18 T2.b : « Tes chiffres », une liste à la place des onglets, et l'écran d'un chiffre (2026-10-02)
+## A18 T2.b : « Tes chiffres », une liste à la place des onglets, et l'écran d'un chiffre (2026-10-02, #291)
 
 Quatrième étape du portage du retour 07, drapeau fermé, et la décision C41 d'Antoine : **les cinq onglets d'étape du 2026-09-26 sont remplacés par une liste**. Toutes les étapes sont visibles, chaque chiffre est une ligne (nom, valeur ou statut), et une ligne ouvre l'écran du chiffre, au lieu de déplier sa fiche sur place (1 667 px pour un chiffre, sur un téléphone).
 
