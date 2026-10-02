@@ -80,7 +80,6 @@ export function Board({
   onImport,
   onErase,
   onSettings,
-  onSteps,
   onRename,
   series,
   engines,
@@ -101,7 +100,6 @@ export function Board({
   onImport: () => void;
   onErase: () => void;
   onSettings: () => void;
-  onSteps: () => void;
   /** « Renommer », in the menu: the settings, at the company's name. */
   onRename: () => void;
   /** The monthly series (§19.2, A14 T2): the month selector, a past month read only or corrected, the next month. */
@@ -193,7 +191,6 @@ export function Board({
           correcting={Boolean(series?.correcting)}
           onSettings={onSettings}
           onRename={onRename}
-          onSteps={onSteps}
           onSave={onSave}
           onImport={onImport}
           onErase={onErase}

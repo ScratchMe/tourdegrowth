@@ -16,8 +16,7 @@ import type { CollectPlan } from "./collect";
 import { EngineSwitcher } from "./EngineSwitcher";
 import { nextSelfNumber, nextStepFor, type NextStepChoice } from "./next-step";
 import { RequestCopy } from "./RequestCopy";
-import { draftFromEntry } from "./sheet-draft";
-import { draftKey, keepDraft, keptDraft } from "./sheet-drafts";
+import { seedAskDraft } from "./sheet-drafts";
 import { daysBetween, fill, formatDate, formatMonth, metricById, midSentence } from "./text";
 import type { EngineActions, EngineView } from "./view";
 
@@ -77,7 +76,6 @@ export function BoardBar({
   correcting,
   onSettings,
   onRename,
-  onSteps,
   onSave,
   onImport,
   onErase,
@@ -91,7 +89,6 @@ export function BoardBar({
   correcting: boolean;
   onSettings: () => void;
   onRename: () => void;
-  onSteps: () => void;
   onSave: () => void;
   onImport: () => void;
   onErase: () => void;
@@ -131,9 +128,6 @@ export function BoardBar({
   engineItems.push(
     <Button variant="quiet" size="sm" onClick={onRename} key="engine-rename" data-testid="engine-rename">
       {b.rename}
-    </Button>,
-    <Button variant="quiet" size="sm" onClick={onSteps} key="engine-open-steps" data-testid="engine-open-steps">
-      {strings.board.steps}
     </Button>,
   );
   groups.push({ title: b.groupEngine, items: engineItems });
@@ -265,11 +259,7 @@ export function BoardNextStep({
 
   /** A number's screen, on the board. « Je le demande » open when the person is sent there to ask for it. */
   const openNumber = (id: MetricId, ask = false) => {
-    if (ask) {
-      const entry = snapshot.metrics[id];
-      const key = draftKey(id, entry, snapshot.referenceMonth);
-      if (!keptDraft(key)) keepDraft(key, { ...draftFromEntry(entry, shapeOf(id)), mode: "ask" });
-    }
+    if (ask) seedAskDraft(snapshot, id);
     actions.openMetric(id);
   };
   /** What « Continuer {mois} » and « Taper d'abord le chiffre suivant » open: the step the month would not have taken over. */

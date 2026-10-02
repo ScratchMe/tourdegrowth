@@ -7,7 +7,7 @@ import { isUnreadableNumber } from "@/lib/forms/number";
 import { TargetInput } from "./TargetInput";
 import { domId } from "./text";
 import type { EngineActions, EngineView } from "./view";
-import styles from "./Steps.module.css";
+import styles from "./TargetsStart.module.css";
 
 /**
  * « Cibles », right after the start (C40: kept by Antoine, against the

@@ -330,9 +330,10 @@ describe("isAnswerMetric / statusQuestionOf — an answer is not « ce chiffre �
     expect(EN.strings.sheet.answerLegendAnswer).not.toBe(EN.strings.sheet.answerLegend);
   });
 
-  it("the step-by-step eyebrow for an answer does not call it a number either", () => {
-    expect(FR.strings.steps.answerOf).not.toMatch(/chiffre/i);
-    expect(EN.strings.steps.answerOf).not.toMatch(/number/i);
+  it("where an answer sits, on its screen, does not call it a number either", () => {
+    // The step-by-step's « Point 4 sur 17 » went with it (A18 T3.b): every screen says « Activation · 2 sur 3 ».
+    expect(FR.strings.list.position).not.toMatch(/chiffre/i);
+    expect(EN.strings.list.position).not.toMatch(/number/i);
   });
 });
 

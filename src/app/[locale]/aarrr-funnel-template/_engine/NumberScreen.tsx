@@ -16,10 +16,29 @@ import styles from "./Screens.module.css";
  * It replaced a row that unfolded the whole sheet in place, 1,667 px for one
  * number on a phone.
  *
- * A closed month being corrected opens its numbers here too, written back
- * into that month: `view` and `actions` are the board's.
+ * Since A18 T3.b it is also the step-by-step, folded into the board: saving
+ * leads to the next step (« Enregistre et continue → »), « Passe pour
+ * l'instant » leaves the number « à faire » and goes on. A closed month being
+ * corrected opens its numbers here too, written back into that month, and
+ * only saves: `view` and `actions` are the board's.
  */
-export function NumberScreen({ id, view, actions, onBack }: { id: MetricId; view: EngineView; actions: EngineActions; onBack: () => void }) {
+export function NumberScreen({
+  id,
+  view,
+  actions,
+  onBack,
+  next,
+  onSkip,
+}: {
+  id: MetricId;
+  view: EngineView;
+  actions: EngineActions;
+  onBack: () => void;
+  /** « Enregistre et continue → » (A18 T3.b): saving leads to the next step. Absent on a past month corrected. */
+  next?: { label: string; onSaved: () => void };
+  /** « Passe pour l'instant »: the number stays « à faire », and the journey goes on without it. */
+  onSkip?: () => void;
+}) {
   return (
     <div className={styles.numberScreen} data-testid="engine-number" data-metric={id}>
       <div>
@@ -37,6 +56,14 @@ export function NumberScreen({ id, view, actions, onBack }: { id: MetricId; view
           headingId: "engine-number-title",
           progress: <EngineProgress size="sm" remaining={numberRemaining(id, view)} data-testid="engine-number-progress" />,
         }}
+        next={next}
+        extraActions={
+          onSkip ? (
+            <Button variant="quiet" onClick={onSkip} data-testid="engine-number-skip">
+              {view.strings.sheet.skip}
+            </Button>
+          ) : null
+        }
       />
     </div>
   );

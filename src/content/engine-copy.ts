@@ -122,9 +122,10 @@ export const ENGINE_COPY = {
       en: "Of the fifteen sales-assisted ones, {quick} take five minutes to read, {hour} take about an hour each and {ask} have to be asked of someone.",
     },
     durationReadyLabel: { fr: "Tout est sous la main", en: "Everything is at hand" },
+    // TODO: à relire (convention 6) — le 2026-10-02 (A18 T3.b) : le pas à pas, fondu dans le tableau, ne « garde » plus rien ; le moteur, si.
     durationReady: {
-      fr: "Tu as accès à l'analytics, à la facturation et à la base produit : compte une demi-journée, en plusieurs fois si besoin. Le pas à pas garde ta place.",
-      en: "You have access to analytics, billing and the product database: allow half a day, in several sittings if needed. The step-by-step keeps your place.",
+      fr: "Tu as accès à l'analytics, à la facturation et à la base produit : compte une demi-journée, en plusieurs fois si besoin. Ton moteur garde ce que tu as tapé.",
+      en: "You have access to analytics, billing and the product database: allow half a day, in several sittings if needed. Your engine keeps what you've typed.",
     },
     durationAskLabel: { fr: "Il faut demander", en: "You have to ask" },
     durationAsk: {
@@ -205,7 +206,7 @@ export const ENGINE_COPY = {
   /**
    * TODO: à relire (convention 6) — neuf le 2026-10-02 (A18 T3.a) : l'écran « Cibles », gardé au début
    * et sautable par Antoine (C40, contre la reco du retour 07, qui ne les mettait que sur l'écran de
-   * chaque chiffre et dans les Réglages). Les cases sont celles du pas à pas (`steps.targetFor`).
+   * chaque chiffre et dans les Réglages). Les cases sont celles du pas à pas (`targetsStart.targetFor`).
    */
   targetsStart: {
     title: { fr: "Ton équipe a-t-elle déjà des cibles ?", en: "Does your team already have targets?" },
@@ -216,6 +217,8 @@ export const ENGINE_COPY = {
     },
     /** One label, true whether a target was typed or not: a label that changed on the box's blur changed under the pointer. */
     go: { fr: "Passe à ton premier chiffre →", en: "On to your first number →" },
+    /** Each box's label: the step-by-step's, approved with it (2026-09-25), moved here when it was folded away (A18 T3.b). */
+    targetFor: { fr: "Cible pour {metric}", en: "Target for {metric}" },
   },
 
   setup: {
@@ -311,7 +314,6 @@ export const ENGINE_COPY = {
     toFill: { fr: "à renseigner", en: "to fill in" },
     // TODO: à relire — nouveau (2026-09-25, retours d'Antoine sur le moteur).
     settings: { fr: "Réglages", en: "Settings" },
-    steps: { fr: "Reprendre le pas à pas", en: "Back to step by step" },
     collectTitle: { fr: "À aller chercher ({n})", en: "To go and get ({n})" },
     whatIfTitle: { fr: "Et si ?", en: "What if?" },
   },
@@ -777,7 +779,16 @@ export const ENGINE_COPY = {
       en: "Same number as for {metrics}: changing it here changes it everywhere.",
     },
     offBase: { fr: "Compté sur {n}, pas sur ta base de {base}.", en: "Counted on {n}, not on your base of {base}." },
-    saveNext: { fr: "Enregistrer et continuer →", en: "Save and continue →" },
+    /**
+     * TODO: à relire (convention 6) — le 2026-10-02 (A18 T3.b, le retour 07, design/ds-extension-07-return/COPY.md) :
+     * le pas à pas fondu dans le tableau, l'écran d'un chiffre mène au suivant. `saveNext` passe à l'impératif,
+     * comme les autres flèches (en-tête du fichier) ; `saveLast` quand plus rien ne reste à trouver seul ni à
+     * demander ; `skip` laisse le chiffre « à faire » ; `continue` après une demande copiée, qui est l'enregistrement.
+     */
+    saveNext: { fr: "Enregistre et continue →", en: "Save and continue →" },
+    saveLast: { fr: "Enregistre et vois ton moteur →", en: "Save and see your engine →" },
+    skip: { fr: "Passe pour l'instant", en: "Skip for now" },
+    continue: { fr: "Continue →", en: "Continue →" },
     /**
      * TODO: à relire (convention 6) — neuf le 2026-10-02 (A18 T1, le retour 07 de Claude Design,
      * design/ds-extension-07-return/COPY.md) : l'écran d'un chiffre, le piège avant la valeur, les trois
@@ -2414,82 +2425,6 @@ export const ENGINE_COPY = {
       en: "The go-live window is part of the go-live rate's definition: the number you already entered will go back to \"to do\", so you can measure it again over {n} days.",
     },
     saved: { fr: "Réglages enregistrés.", en: "Settings saved." },
-  },
-
-  // TODO: à relire — nouveau (2026-09-25, retours d'Antoine) : le pas à pas, en trois grandes étapes.
-  steps: {
-    label: { fr: "Pas à pas", en: "Step by step" },
-    phaseTargets: { fr: "Tes cibles", en: "Your targets" },
-    phaseNumbers: { fr: "Tes chiffres", en: "Your numbers" },
-    phaseWhatIf: { fr: "Et si", en: "What if" },
-    phaseDeck: { fr: "Tes slides", en: "Your slides" },
-    continue: { fr: "Continuer →", en: "Continue →" },
-    back: { fr: "← Retour", en: "← Back" },
-    toBoard: { fr: "Voir le tableau complet", en: "See the full board" },
-    targetsTitle: { fr: "Tes cibles actuelles", en: "Your current targets" },
-    // TODO: à relire (convention 6) — réécrit le 2026-09-30 (A7.1, C1 : aucun repère ne désigne).
-    targetsIntro: {
-      fr: "Si ton équipe s'est fixé une cible sur ces chiffres, entre-la. Seule une cible permet de dire, chiffres à l'appui, quelle étape freine. Pas de cible ? Continue : tu verras tes chiffres, et le repère publié quand il en existe un, mais pas quelle étape freine.",
-      en: "If your team has set a target on these numbers, enter it. Only a target lets the engine say, with numbers, which stage is holding you back. No target? Continue: you'll see your numbers, and the published reference where there is one, but not which stage holds you back.",
-    },
-    targetFor: { fr: "Cible pour {metric}", en: "Target for {metric}" },
-    baseTitle: { fr: "Ta base : les inscrits", en: "Your base: sign-ups" },
-    baseIntro: {
-      fr: "Deux nombres servent à plusieurs chiffres. Saisis-les une fois ici : on les réutilise partout, et tu peux toujours les modifier.",
-      en: "Two numbers feed several of the others. Enter them once here: they are reused everywhere, and you can always change them.",
-    },
-    // TODO: à relire (convention 6) — A15.9 (2026-10-01) : un compte de la base à zéro ou moins était jeté sans un mot.
-    countPositive: { fr: "Un nombre plus grand que zéro : on compte des personnes.", en: "A number above zero: these are people." },
-    // TODO: à relire (convention 6) — A15.9 : la base assistée compte des opportunités, des affaires et des clients, pas des personnes.
-    countPositiveSlg: {
-      fr: "Un nombre plus grand que zéro : on compte des opportunités, des affaires ou des clients.",
-      en: "A number above zero: these are opportunities, deals or customers.",
-    },
-    baseCohortHint: {
-      fr: "Tous les comptes créés en {cohort}. Ils servent à l'activation, à la rétention à J30, au parrainage et à la conversion en payant.",
-      en: "Every account created in {cohort}. They feed activation, day-30 retention, referral and paid conversion.",
-    },
-    baseMonthHint: {
-      fr: "Tous les comptes créés en {month}. Ils servent au taux d'inscription et à la part du premier canal.",
-      en: "Every account created in {month}. They feed the sign-up rate and the top channel's share.",
-    },
-    numberOf: { fr: "Chiffre {i} sur {n} · {stage}", en: "Number {i} of {n} · {stage}" },
-    // TODO: à relire — nouveau (2026-09-26, retour d'Antoine) : l'en-tête des trois points qui ne sont pas
-    // des chiffres (événement d'activation, cause de churn, mécanisme de recommandation).
-    answerOf: { fr: "Point {i} sur {n} · {stage}", en: "Item {i} of {n} · {stage}" },
-    skip: { fr: "Passer, j'y reviendrai", en: "Skip, I'll come back to it" },
-    /**
-     * TODO: à relire (convention 6) — neuf le 2026-10-01 (A7.3.c S2, ENGINE.md §18.7) : the step by
-     * step per motion. Numbered within a motion (« Assisté · chiffre 4 sur
-     * 15 »), never across both. `{motion}`: `hybrid.motionName`.
-     */
-    numberOfMotion: { fr: "{motion} · chiffre {i} sur {n} · {stage}", en: "{motion} · number {i} of {n} · {stage}" },
-    answerOfMotion: { fr: "{motion} · point {i} sur {n} · {stage}", en: "{motion} · item {i} of {n} · {stage}" },
-    skipToSlg: { fr: "Passer à l'assisté →", en: "Skip to sales-assisted →" },
-    skipToWhatIf: { fr: "Passer aux « Et si » →", en: "Skip to the what-ifs →" },
-    baseTitleSlg: { fr: "Ta base assistée : opportunités, affaires, clients", en: "Your sales-assisted base: opportunities, deals, customers" },
-    baseIntroSlg: {
-      fr: "Trois nombres servent à plusieurs chiffres de l'assisté. Saisis-les une fois ici : on les réutilise partout, et tu peux toujours les modifier.",
-      en: "Three numbers feed several sales-assisted figures. Enter them once here: they are reused everywhere, and you can always change them.",
-    },
-    baseOppsHint: {
-      fr: "Toutes les opportunités créées {period}. Elles servent à la part des opportunités recommandées et, si tu vends aussi en libre-service, à la liaison.",
-      en: "Every opportunity created {period}. They feed the referred share of opportunities and, if you also sell self-serve, the link.",
-    },
-    baseDealsHint: {
-      fr: "Les affaires « nouveau client » gagnées {period}. Elles servent au taux de closing, à l'ACV et au CAC assisté.",
-      en: "The new-customer deals won {period}. They feed the win rate, the ACV and the sales-assisted CAC.",
-    },
-    baseCustomersHint: {
-      fr: "Les clients assistés à fin {month}. Ils servent à l'ARPA assisté et aux clients références.",
-      en: "The sales-assisted customers at the end of {month}. They feed the sales-assisted ARPA and the reference customers.",
-    },
-    whatIfTitle: { fr: "Et si ?", en: "What if?" },
-    doneTitle: { fr: "Ton moteur est prêt", en: "Your engine is ready" },
-    doneBody: {
-      fr: "Prépare tes slides maintenant, ou complète plus tard : tout reste sur cet appareil. Pense à sauvegarder un fichier.",
-      en: "Prepare your slides now, or fill in the rest later: everything stays on this device. Remember to save a file.",
-    },
   },
 
   // TODO: à relire — nouveau (2026-09-25, retours d'Antoine) : l'exemple rempli.

@@ -109,3 +109,44 @@ function funnelOrder(shapes: readonly MetricShape[]): (ids: readonly MetricId[])
   const at = (id: MetricId) => rank.get(id) ?? Number.MAX_SAFE_INTEGER;
   return (ids) => [...ids].sort((a, b) => at(a) - at(b));
 }
+
+/**
+ * Where « Enregistre et continue » leads from a number's screen (design
+ * system extension 07, A18 T3.b): the board's next step as it will be once
+ * this number is saved — the step-by-step folded into the board, one order
+ * for both. `leaving` is the number just saved or asked for, read from the
+ * plan as it was BEFORE the save (so the click needs no second render), plus
+ * the numbers passed this session (« Passe pour l'instant »), which stay
+ * « à faire » and would otherwise come straight back.
+ *
+ * Only the steps a number's screen can lead to: another number, a request
+ * (one, or the requests' screen), else the board — whose own next step then
+ * says the rest (the slides, a month to start).
+ */
+export type Continuation =
+  | { kind: "number"; id: MetricId }
+  | { kind: "ask-one"; id: MetricId; role: RoleId }
+  | { kind: "ask-all"; ids: readonly MetricId[] }
+  | { kind: "board" };
+
+export function continueFrom(plan: CollectPlan, shapes: readonly MetricShape[], leaving: readonly MetricId[]): Continuation {
+  const out = new Set(leaving);
+  const keep = (ids: readonly MetricId[]) => ids.filter((id) => !out.has(id));
+  const left: CollectPlan = {
+    ...plan,
+    self: plan.self.map((g) => ({ ...g, ids: keep(g.ids) })),
+    ...(plan.byTool ? { byTool: plan.byTool.map((g) => ({ ...g, ids: keep(g.ids) })) } : {}),
+    ask: plan.ask.map((g) => ({ ...g, toAsk: keep(g.toAsk) })),
+  };
+  const step = nextStepFor({ plan: left, shapes, writeFailed: false, viewingPast: false, nextMonth: { kind: "not-yet" } });
+  switch (step.kind) {
+    case "number":
+      return { kind: "number", id: step.id };
+    case "ask-one":
+      return { kind: "ask-one", id: step.id, role: step.role };
+    case "ask-all":
+      return { kind: "ask-all", ids: step.ids };
+    default:
+      return { kind: "board" };
+  }
+}

@@ -1,0 +1,59 @@
+/* « Cibles », right after the start (C40, A18 T3.a) — semantic tokens only (no-primitives.test.ts). */
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+  min-width: 0;
+  max-width: 720px;
+}
+
+.title {
+  font: var(--display-section);
+  letter-spacing: var(--display-letter-spacing);
+  text-transform: uppercase;
+  color: var(--text-body);
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Focused by script when a person moves (R-19), never reachable by Tab. */
+.title:focus {
+  outline: none;
+}
+
+.lead {
+  font: var(--body-md);
+  color: var(--text-body);
+  margin: 0;
+}
+
+.targets {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--form-gap-md);
+}
+
+@media (min-width: 761px) {
+  .targets {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+/* The hybrid's targets (§18.7): one group per motion on the one screen, self-serve first. */
+.groupTitle {
+  grid-column: 1 / -1;
+  font: var(--label-button);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-body);
+  margin: var(--space-4) 0 0;
+  padding-bottom: var(--space-2);
+  border-bottom: var(--border-rule);
+}

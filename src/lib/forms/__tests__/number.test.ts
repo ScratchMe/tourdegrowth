@@ -49,7 +49,7 @@ describe("parseTypedNumber", () => {
 /**
  * Grouping as the person types (Antoine, 2026-09-26: "2000000" stayed a row of
  * zeros). What the text becomes and where the caret goes are pure, so they are
- * tested here keystroke by keystroke; e2e/engine-steps.spec.ts checks that the
+ * tested here keystroke by keystroke; e2e/engine-journey.spec.ts checks that the
  * browser really shows it and really puts the caret there.
  */
 describe("groupTypedNumber", () => {

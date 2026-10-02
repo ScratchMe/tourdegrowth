@@ -53,3 +53,18 @@ export function asTabs(stages: readonly ListStage[]) {
     named: s.holdsBack,
   }));
 }
+
+/**
+ * Where the step-by-step resumed (`resumePosition`), which the goldens froze
+ * with the rest. A18 T3.b folded the step-by-step into the board, and the
+ * function went with it. It was never something a v1 or v2 engine printed —
+ * no board, no slide, no text says it, only where a screen landed — so the
+ * expected side drops it: the one field retired, not changed. Its successor,
+ * the board's next step (`nextStepFor`, `continueFrom`), is pinned by its
+ * own tests. On a JSON copy: the golden file is never touched.
+ */
+export function withoutResume(expected: unknown): unknown {
+  const copy = JSON.parse(JSON.stringify(expected)) as Record<string, Record<string, unknown>>;
+  for (const reading of Object.values(copy)) delete reading.resume;
+  return copy;
+}

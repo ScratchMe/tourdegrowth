@@ -1,8 +1,9 @@
 import type { Page } from "@playwright/test";
 import { ENGINE_COPY } from "@/content/engine-copy";
-import { METRIC_SHAPES } from "@/lib/engine/catalog-shape";
+import type { MetricId } from "@/lib/engine/types";
+import { exampleState, withMonthBefore } from "../src/lib/engine/__tests__/fixtures";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
-import { storedEngineEntry, openEngineMenu, openNumber, expectFound, backToBoard } from "./engine-helpers";
+import { storedEngineEntry, openEngineMenu, openNumber, expectFound, writeEngineSeed } from "./engine-helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
 // owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
@@ -12,10 +13,15 @@ test.beforeEach(async ({ context }) => {
 });
 
 /**
- * The engine's second way in (Antoine, 2026-09-25): the step-by-step, the
- * shared base typed once, the filled-in example, and the settings that can
- * now be changed after the fact. Behaviour, read from the device's storage
- * and from what the next screen shows — never from the component's state.
+ * The journey (A18 T3.b, design system extension 07): the step-by-step,
+ * folded into the board. From the start, each number's screen leads to the
+ * next step — « Enregistre et continue » — in the board's own order: the
+ * five-minute numbers, then the requests, then the hour-long ones, then the
+ * board. « Passe pour l'instant » leaves a number « à faire ». A count
+ * several numbers share is typed once, in the first number that carries it.
+ * And the filled-in example, the settings changed after the fact, the
+ * answers that are not numbers. Behaviour, read from the device's storage and
+ * from what the next screen shows — never from the component's state.
  */
 
 type Stored = {
@@ -34,67 +40,91 @@ async function open(page: Page, locale: "en" | "fr" = "en"): Promise<void> {
   await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
 }
 
-/**
- * The step-by-step, until A18 T3.b folds it into the board: the start, its
- * « Targets » screen passed, then the menu's « Resume step by step » — at the
- * targets, for an engine nobody has touched (`resumePosition`).
- */
-async function openSteps(page: Page): Promise<void> {
-  await page.getByTestId("engine-start-go").click();
-  await page.getByTestId("engine-targets-next").click();
-  await openEngineMenu(page);
-  await expect(page.getByTestId("engine-open-steps")).toBeVisible();
-  await page.getByTestId("engine-open-steps").click();
-  await expect(page.getByTestId("engine-steps")).toHaveAttribute("data-phase", "targets");
+/** The example engine, every number answered but the ones named: back to « à faire ». */
+async function seedWithout(page: Page, ids: MetricId[]): Promise<void> {
+  const state = exampleState();
+  const snapshot = state.snapshots[state.snapshots.length - 1]!;
+  for (const id of ids) delete snapshot.metrics[id];
+  await page.clock.setFixedTime(new Date(2026, 8, 24, 12));
+  await open(page);
+  await writeEngineSeed(page, state);
+  await page.reload();
+  await expect(page.getByTestId("engine-board")).toBeVisible();
 }
 
-test("the step-by-step walks targets → base → one number per screen, and the base is typed once", async ({ page }) => {
+test("from the start, « Save and continue » walks the quick numbers; « Skip for now » leaves one to do; a shared count is typed once", async ({ page }) => {
   await open(page);
-  await openSteps(page);
-  const steps = page.getByTestId("engine-steps");
-  await expect(steps).toHaveAttribute("data-phase", "targets");
-  await expect(page.locator("#engine-steps-title")).toHaveText(ENGINE_COPY.steps.targetsTitle.en);
-
-  // A target, written on its way out of the field.
+  await page.getByTestId("engine-start-go").click();
+  // A target on the « Targets » screen, written on its way out of the box.
   await page.locator("#engine-step-target-act-rate").fill("25");
-  await page.getByTestId("engine-steps-next").click();
-  await expect(steps).toHaveAttribute("data-phase", "base");
+  await page.locator("#engine-step-target-act-rate").blur();
+  await page.getByTestId("engine-targets-next").click();
   expect((await stored(page))?.state.snapshots[0]?.targets["act.rate"]).toBe(25);
-  // A person moved: the focus follows the heading, never left on <body>.
-  await expect(page.locator("#engine-steps-title")).toBeFocused();
 
-  await page.locator("#engine-base-cohort").fill("800");
-  await page.locator("#engine-base-month").fill("1000");
-  await page.getByTestId("engine-steps-next").click();
-  await expect(steps).toHaveAttribute("data-phase", "number");
-  // Both counts, in the base — the two used to be two writes, and the second dropped the first.
-  expect((await stored(page))?.state.snapshots[0]?.base).toEqual({ cohortSignups: 800, monthSignups: 1000 });
+  // The first number: the quickest, in the funnel's order. Its sign-ups are the month's, shared.
+  const number = page.getByTestId("engine-number");
+  await expect(number).toHaveAttribute("data-metric", "acq.signup-rate");
+  const sheet = page.getByTestId("engine-sheet-acq-signup-rate");
+  await sheet.locator("#engine-acq-signup-rate-num").fill("1000");
+  await sheet.locator("#engine-acq-signup-rate-den").fill("20000");
+  await sheet.locator("#engine-acq-signup-rate-source").selectOption({ index: 1 });
+  const save = page.getByTestId("engine-save-acq-signup-rate");
+  await expect(save).toHaveText(ENGINE_COPY.sheet.saveNext.en);
+  await save.click();
 
-  // Skip, then back: a skipped number stays "to fill in".
-  const number = page.getByTestId("engine-steps-number");
-  const first = await number.getAttribute("data-metric");
-  await page.getByTestId("engine-steps-skip").click();
-  await expect(number).not.toHaveAttribute("data-metric", first!);
-  await page.getByTestId("engine-steps-back").click();
-  await expect(number).toHaveAttribute("data-metric", first!);
-  expect((await stored(page))?.state.snapshots[0]?.metrics[first!]).toBeUndefined();
+  // The next quick number, its heading focused: a person moved (R-19).
+  await expect(number).toHaveAttribute("data-metric", "act.event");
+  await expect(page.locator("#engine-number-title")).toBeFocused();
+  expect((await stored(page))?.state.snapshots[0]?.metrics["acq.signup-rate"]?.status).toBe("measured");
 
-  // The board's activation sheet already carries the 800: typed once, reused.
-  await page.getByTestId("engine-steps-board").click();
+  // Passed for now: still « à faire », and the next quick one comes.
+  await page.getByTestId("engine-number-skip").click();
+  await expect(number).toHaveAttribute("data-metric", "ret.logo-churn");
+  expect((await stored(page))?.state.snapshots[0]?.metrics["act.event"]).toBeUndefined();
+
+  // The month's sign-ups, typed once: the top channel's share already carries them.
+  await openNumber(page, "acq-top-channel-share");
+  await expect(page.locator("#engine-acq-top-channel-share-den")).toHaveValue("1,000");
+});
+
+test("the last number to find alone says « Save and see your engine », and leads to the board", async ({ page }) => {
+  await seedWithout(page, ["act.ttv"]);
+  await openNumber(page, "act-ttv");
+  await expect(page.getByTestId("engine-save-act-ttv")).toHaveText(ENGINE_COPY.sheet.saveLast.en);
+  await page.getByTestId("engine-number-skip").click();
   await expect(page.getByTestId("engine-board")).toBeVisible();
-  await openNumber(page, "act-rate");
-  const sheet = page.getByTestId("engine-sheet-act-rate");
-  await expect(sheet.locator("#engine-act-rate-den")).toHaveValue("800");
+  await expect(page.locator("#engine-verdict")).toBeFocused();
+});
 
-  // And the peloton says what its 100 are, on the board.
-  await backToBoard(page);
-  await expect(page.getByTestId("peloton-same-hundred").first()).toContainText("800");
+test.describe("one request left", () => {
+  test.use({ permissions: ["clipboard-read", "clipboard-write"] });
 
-  // Back to the steps: it resumes on the first number nobody has touched, not at the targets.
+  test("leads to its number, « I'll ask for it » open; copied, « Continue » goes on", async ({ page }) => {
+    await seedWithout(page, ["act.ttv", "rev.gross-margin"]);
+    await openNumber(page, "act-ttv");
+    // Something is still to ask for: not the last screen.
+    await expect(page.getByTestId("engine-save-act-ttv")).toHaveText(ENGINE_COPY.sheet.saveNext.en);
+    await page.getByTestId("engine-number-skip").click();
+    await expect(page.getByTestId("engine-number")).toHaveAttribute("data-metric", "rev.gross-margin");
+    const sheet = page.getByTestId("engine-sheet-rev-gross-margin");
+    await sheet.getByRole("button", { name: ENGINE_COPY.request.copy.en }).click();
+    await expect.poll(async () => (await stored(page))?.state.snapshots[0]?.metrics["rev.gross-margin"]?.status).toBe("requested");
+    await page.getByTestId("engine-continue-rev-gross-margin").click();
+    await expect(page.getByTestId("engine-board")).toBeVisible();
+  });
+});
+
+test("a past month corrected only saves: no « continue », no « skip »", async ({ page }) => {
+  await page.clock.setFixedTime(new Date(2026, 8, 24, 12));
+  await open(page);
+  await writeEngineSeed(page, withMonthBefore(exampleState(), () => undefined));
+  await page.reload();
   await openEngineMenu(page);
-  await expect(page.getByTestId("engine-open-steps")).toBeVisible();
-  await page.getByTestId("engine-open-steps").click();
-  await expect(steps).toHaveAttribute("data-phase", "number");
+  await page.getByTestId("engine-month-select").selectOption({ index: 1 });
+  await page.getByTestId("engine-month-correct").click();
+  await openNumber(page, "act-rate");
+  await expect(page.getByTestId("engine-save-act-rate")).toHaveText(ENGINE_COPY.sheet.save.en);
+  await expect(page.getByTestId("engine-number-skip")).toHaveCount(0);
 });
 
 test("the example shows a filled-in funnel and its slides, and writes nothing on the device", async ({ page }) => {
@@ -187,25 +217,16 @@ test("an answer is offered « Pas de réponse sous la main ? », never « Pas de
   await expect(rate.getByTestId("engine-triage").getByRole("radio", { name: ENGINE_COPY.cause.conflicting.fr })).toHaveCount(1);
 });
 
-// The count is the catalogue's (17 since expansion and contraction, 2026-09-26), never retyped.
-const N = String(METRIC_SHAPES.length);
-
-test("the step-by-step calls the activation event « Point 4 sur N », not « Chiffre 4 sur N »", async ({ page }) => {
+test("an answer's screen says where it sits, never « Chiffre »", async ({ page }) => {
   await open(page, "fr");
-  await openSteps(page);
-  await page.getByTestId("engine-steps-next").click();
-  await page.getByTestId("engine-steps-next").click();
-  const number = page.getByTestId("engine-steps-number");
-  const eyebrow = (i: number, key: "numberOf" | "answerOf") =>
-    ENGINE_COPY.steps[key].fr.replace("{i}", String(i)).replace("{n}", N).replace("{stage}", ENGINE_COPY.stages.acquisition.fr);
-  await expect(number).toHaveAttribute("data-metric", "acq.signup-rate");
-  await expect(number).toContainText(eyebrow(1, "numberOf"));
-  for (let i = 0; i < 3; i += 1) await page.getByTestId("engine-steps-skip").click();
+  await page.getByTestId("engine-start-go").click();
+  await page.getByTestId("engine-targets-next").click();
+  // The step-by-step's « Point 4 sur 17 » went with it (A18 T3.b): every screen says its stage and its place there.
+  await page.getByTestId("engine-number-skip").click();
+  const number = page.getByTestId("engine-number");
   await expect(number).toHaveAttribute("data-metric", "act.event");
-  await expect(number).toContainText(
-    ENGINE_COPY.steps.answerOf.fr.replace("{i}", "4").replace("{n}", N).replace("{stage}", ENGINE_COPY.stages.activation.fr),
-  );
-  await expect(number).not.toContainText("Chiffre 4");
+  await expect(number).toContainText(ENGINE_COPY.list.position.fr.replace("{stage}", ENGINE_COPY.stages.activation.fr).replace("{i}", "1").replace("{n}", "3"));
+  await expect(number).not.toContainText("Chiffre");
   await expect(number.getByRole("group", { name: ENGINE_COPY.sheet.answerLegendAnswer.fr, exact: true })).toBeVisible();
 });
 
@@ -217,12 +238,12 @@ test("the step-by-step calls the activation event « Point 4 sur N », not « Ch
  * `inputValue()`, never `toHaveValue`: a NBSP must be proved, not normalised.
  */
 for (const [locale, big, middle, decimal] of [
-  ["fr", "2 000 000", "129 834", ["12,", "12,5"]],
+  ["fr", "2\u00a0000\u00a0000", "129\u00a0834", ["12,", "12,5"]],
   ["en", "2,000,000", "129,834", ["12.", "12.5"]],
 ] as const) {
   test(`${locale}: big numbers group as they are typed, the caret stays put, and 2000000 is saved`, async ({ page }) => {
     await open(page, locale);
-    await openSteps(page);
+    await page.getByTestId("engine-start-go").click();
 
     // A rate field: a trailing decimal separator is half a number, not something to clean up.
     const target = page.locator("#engine-step-target-act-rate");
@@ -230,28 +251,29 @@ for (const [locale, big, middle, decimal] of [
     expect(await target.inputValue()).toBe(decimal[0]);
     await target.pressSequentially("5");
     expect(await target.inputValue()).toBe(decimal[1]);
-    await page.getByTestId("engine-steps-next").click();
-    await expect(page.getByTestId("engine-steps")).toHaveAttribute("data-phase", "base");
+    await target.blur();
+    await page.getByTestId("engine-targets-next").click();
 
-    // A count, typed digit by digit.
-    const cohort = page.locator("#engine-base-cohort");
-    await cohort.pressSequentially("2000000");
-    expect(await cohort.inputValue()).toBe(big);
+    // A count, typed digit by digit, in a number's own boxes.
+    await openNumber(page, "act-rate");
+    const den = page.locator("#engine-act-rate-den");
+    await den.pressSequentially("2000000");
+    expect(await den.inputValue()).toBe(big);
 
     // Typing in the middle: the caret follows the digit just typed, not the end of the box.
-    const month = page.locator("#engine-base-month");
-    await month.pressSequentially("1234");
-    await month.press("ArrowLeft");
-    await month.press("ArrowLeft");
-    await month.pressSequentially("9");
-    expect(await month.evaluate((el: HTMLInputElement) => el.selectionStart)).toBe(4);
-    await month.pressSequentially("8");
-    expect(await month.inputValue()).toBe(middle);
+    const num = page.locator("#engine-act-rate-num");
+    await num.pressSequentially("1234");
+    await num.press("ArrowLeft");
+    await num.press("ArrowLeft");
+    await num.pressSequentially("9");
+    expect(await num.evaluate((el: HTMLInputElement) => el.selectionStart)).toBe(4);
+    await num.pressSequentially("8");
+    expect(await num.inputValue()).toBe(middle);
 
-    await page.getByTestId("engine-steps-next").click();
-    await expect(page.getByTestId("engine-steps")).toHaveAttribute("data-phase", "number");
+    await page.locator("#engine-act-rate-source").selectOption({ index: 1 });
+    await page.getByTestId("engine-save-act-rate").click();
     const saved = (await stored(page))?.state.snapshots[0];
-    expect(saved?.base).toEqual({ cohortSignups: 2000000, monthSignups: 129834 });
+    expect(saved?.metrics["act.rate"]?.value).toEqual({ kind: "ratio", numerator: 129834, denominator: 2000000 });
     expect(saved?.targets["act.rate"]).toBe(12.5);
   });
 }
@@ -305,46 +327,6 @@ test("a typo in a target keeps the stored target, on the step screen and in a sh
   await box.blur();
   await expect.poll(target).toBeUndefined();
 });
-
-/*
- * A15.9 and A15.10 (2026-10-01). The base step skipped a count that was not
- * a whole number above zero and went on, so the person never saw it was not
- * kept: it now stays, says why, and puts the focus on the count. And a box
- * that shows « % » accepts « 25 % » (Postel): a spreadsheet's cell, pasted.
- *
- * Non-vacuity: see A15's sabotage build, recorded in the journal.
- */
-for (const locale of ["en", "fr"] as const) {
-  test(`the base step keeps nothing in silence: zero or a decimal stops it, on the count (${locale})`, async ({ page }) => {
-    await open(page, locale);
-    await openSteps(page);
-    const steps = page.getByTestId("engine-steps");
-    await page.getByTestId("engine-steps-next").click();
-    await expect(steps).toHaveAttribute("data-phase", "base");
-
-    const cohort = page.locator("#engine-base-cohort");
-    await cohort.fill("0");
-    await page.getByTestId("engine-steps-next").click();
-    await expect(steps).toHaveAttribute("data-phase", "base");
-    await expect(page.getByText(ENGINE_COPY.steps.countPositive[locale])).toBeVisible();
-    await expect(cohort).toBeFocused();
-
-    await cohort.fill("800");
-    const month = page.locator("#engine-base-month");
-    await month.fill(locale === "fr" ? "12,5" : "12.5");
-    // Left first: its message appears as the box loses focus and moves the
-    // button down — a click begun before that lands on nothing.
-    await month.blur();
-    await page.getByTestId("engine-steps-next").click();
-    await expect(steps).toHaveAttribute("data-phase", "base");
-    await expect(month).toBeFocused();
-
-    await month.fill("1000");
-    await page.getByTestId("engine-steps-next").click();
-    await expect(steps).toHaveAttribute("data-phase", "number");
-    expect((await stored(page))?.state.snapshots[0]?.base).toEqual({ cohortSignups: 800, monthSignups: 1000 });
-  });
-}
 
 test("a target typed with its percent sign is read, the sign dropped from the box", async ({ page }) => {
   await open(page);
