@@ -47,8 +47,9 @@ import { SITE_DOMAIN_LABEL } from "@/lib/site";
 // The night ground's lamp, same geometry as its CSS counterpart (world-night.css,
 // --ground-lift): a faint lamp of the night text top left, a deeper shade bottom
 // right. Literal rgba because Satori has no custom properties; the base colour
-// comes from the typed tokens.
-const NIGHT_GROUND = `radial-gradient(circle at 16% 12%, rgba(243,239,228,0.06), transparent 42%), radial-gradient(circle at 88% 74%, rgba(0,0,0,0.35), transparent 46%), ${OG_NIGHT_0}`;
+// comes from the typed tokens. Each stop fades to its own colour at alpha 0,
+// never `transparent`, which Satori blends through black (NEXTJS.md §1.10).
+const NIGHT_GROUND = `radial-gradient(circle at 16% 12%, rgba(243,239,228,0.06), rgba(243,239,228,0) 42%), radial-gradient(circle at 88% 74%, rgba(0,0,0,0.35), rgba(0,0,0,0) 46%), ${OG_NIGHT_0}`;
 // The road line of the paper images, redrawn in the night text at low alpha:
 // decorative, the same place on every share image of the site.
 const ROAD_LINE = "rgba(243,239,228,0.07)";
