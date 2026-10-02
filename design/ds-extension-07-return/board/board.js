@@ -33,7 +33,7 @@ const h = React.createElement;
 
 // ── URL ────────────────────────────────────────────────────────────────────
 const q = new URLSearchParams(location.search);
-const screenId = SCREENS.some((s) => s.id === q.get("screen")) ? q.get("screen") : "return";
+const screenId = SCREENS.find((s) => s.id === q.get("screen"))?.id ?? "return";
 const lang = q.get("lang") === "fr" ? "fr" : "en";
 // No `w` (the design system pane, a plain link): draw at the window's width.
 const width = q.has("w") ? (q.get("w") === "390" ? 390 : 1280) : window.innerWidth <= 760 ? 390 : 1280;
@@ -824,7 +824,6 @@ if (!framing) {
   const root = document.getElementById("root");
   document.body.dataset.screen = screenId;
   document.body.dataset.w = String(width);
-  const draw = Object.prototype.hasOwnProperty.call(RENDER, screenId) ? RENDER[screenId] : RENDER.return;
-  if (typeof draw === "function") render(draw(), root);
+  render(RENDER[screenId](), root);
   document.title = `${screenId} · ${lang} · ${width} — engine 07`;
 }

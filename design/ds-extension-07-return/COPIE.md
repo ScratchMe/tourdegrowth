@@ -30,9 +30,9 @@ reprendra :
   échappe `<`, `>`, `/`, U+2028 et U+2029 dans la clé avant de l'écrire dans le
   `<script>` en ligne (*bad code sanitization*). La clé est une constante du
   moteur, mais c'est la règle que le portage doit garder ;
-- `board/board.js` : l'écran demandé dans l'adresse n'appelle une fonction de
-  `RENDER` que si `RENDER` la possède (*unvalidated dynamic method call*) ;
-  sinon, l'écran du retour ;
+- `board/board.js` : l'identifiant d'écran est pris dans la liste des écrans
+  connus (`SCREENS`), plus la chaîne lue dans l'adresse (*unvalidated dynamic
+  method call*) ; un écran inconnu donne toujours l'écran du retour ;
 - `board/make-copy.mjs` : une cellule échappe les barres obliques inverses
   avant les `|` (*incomplete string escaping*), et le remplacement de U+202F
   par lui-même, qui ne faisait rien, est retiré (*replacement of a substring
