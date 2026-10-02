@@ -516,7 +516,7 @@ Deuxième étape du portage du retour 07, drapeau fermé. L'écran d'un chiffre,
 
 **Vérifié** : `tsc` et `eslint` propres, les tests unitaires, `next build` avec les variables de la CI, les 285 specs du moteur, des cibles et de l'accessibilité (onze échecs à la première passe, tous dans les specs qui visaient l'ancien écran, puis les cinq fichiers repassés : 84 sur 84), et des captures de l'écran en français et en anglais, à 1 280 et 390 px, dans le pas à pas et au tableau, sans défilement horizontal. Le `toggle` du `Disclosure` livré en T0 est exercé en vrai : « Écrire ta définition » déplie la note et y met le focus, vérifié par Playwright.
 
-## A18 T2.a : la barre du moteur et la prochaine étape, une seule action (2026-10-02)
+## A18 T2.a : la barre du moteur et la prochaine étape, une seule action (2026-10-02, #290)
 
 Troisième étape du portage du retour 07, drapeau fermé. **T2 est coupé en trois PR** : T2.a (la tête du tableau, celle-ci), T2.b (`EngineProgress` et `NumberList` à la place des onglets), T2.c (`LeverCard`). Les onglets touchent plus de la moitié des specs du moteur : les changer dans la même PR que la tête aurait mêlé deux réécritures de specs.
 
