@@ -36,6 +36,16 @@ updates:
       # when the runtime moves, never ahead of it.
       - dependency-name: "@types/node"
         update-types: ["version-update:semver-major"]
+      # `firebase-admin` 14.4 and up (2026-10-02, Dependabot #244, CHANTIERS
+      # C36): it pulls `@google-cloud/firestore` 9, which runs on `google-gax`
+      # 6 but pins `@google-cloud/firestore-api` ^0.2.0, still on `google-gax`
+      # 5. Both copies land in each of the three server bundles that read
+      # Firestore, +3.8 MB each: 47.8 -> 59.2 MB per deployment (VERCEL.md
+      # §1.2). Every 9.x up to 9.3.1 does it. Re-check when a
+      # `@google-cloud/firestore` 9.x asks for `@google-cloud/firestore-api`
+      # >= 0.4, the first on `google-gax` 6, and measure again before taking it.
+      - dependency-name: "firebase-admin"
+        versions: [">=14.4.0"]
   - package-ecosystem: github-actions
     directory: /
     schedule:

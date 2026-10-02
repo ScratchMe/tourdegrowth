@@ -144,6 +144,14 @@ le chargement de Firestore. Aucun sous-ensemble n'est excluable.
   `index.edge.js` est ~734 Ko morts par fonction concernée. **Poser un test
   qui affirme qu'aucune route ne déclare `runtime = "edge"`** : c'est ce qui
   rend l'exclusion légitime plutôt que chanceuse.
+- **Une mineure de SDK peut doubler une dépendance transitive.** Quand une
+  bibliothèque passe une dépendance en majeure, sans que tous ses
+  sous-paquets aient suivi, l'arbre garde deux copies, et le tracé emporte les
+  deux. Le diff de `package.json` n'en montre rien. Avant toute montée de
+  dépendance serveur, mesurer (§1.2), puis comparer bundle par bundle, paquet
+  par paquet, les tailles des `filePathMap` avant et après. Pour lire l'arbre,
+  `npm ls <paquet>`. Chez nous, une mineure de `firebase-admin` doublait
+  `google-gax` (§2.2).
 
 ### 1.6 `ignoreCommand` — sémantique exacte, vérifiée à la source
 
@@ -367,6 +375,14 @@ Répartition du poids : runtime Next.js 19,5 Mo (41 %), notre code 10,0 Mo
   applicatives (`Page`), donc de revenir aux deux layouts racine — ce qui
   coûterait le prérendu CDN des pages de contenu (82 le 2026-10-01). Mauvais
   échange.
+- **`firebase-admin` reste en 14.3** (C36, Antoine, 2026-10-02). Dès 14.4,
+  il tire `@google-cloud/firestore` 9. Celui-ci tourne sur `google-gax` 6,
+  mais garde `@google-cloud/firestore-api` 0.2, resté sur `google-gax` 5. Les
+  deux copies vont dans les trois bundles qui lisent Firestore : +3,8 Mo
+  chacun, **47,83 → 59,21 Mo par déploiement**, mesuré hors ligne sur `main`
+  plus la PR Dependabot #244. Dans la même PR, React 19.3 pesait +0,01 Mo et
+  a été pris seul. `.github/dependabot.yml` ignore `firebase-admin` ≥ 14.4
+  avec sa raison. Le déclencheur pour y revenir est dans `CHANTIERS.md` E.
 
 ### 2.3 Convention de cadence
 
