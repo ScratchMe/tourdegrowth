@@ -454,6 +454,10 @@ Captures relues : l'accueil compact en français, le moteur compact avec ses chi
 - `docs/decisions.md`, `design/README.md`, `.design-sync/NOTES.md` ;
 - `design/ds-extension-08-return/COPIE.md`, `CLAUDE.md` (les chiffres de référence).
 
+## D10 : l'indexation française demandée (2026-10-02)
+
+Antoine a demandé l'indexation des sept pages françaises que la session lui avait listées : les deux pages « porte ouverte » et les cinq « AARRR vs X ». `/fr` était déjà sur Google. Le rappel de la session avait vérifié avant que les huit adresses répondaient en 200. Il reste dans D10 les huit adresses des quatre termes de la vente assistée ajoutés par A7.3.e (`win-rate`, `sales-cycle`, `acv`, `lead-to-opportunity`, en anglais puis en français), vérifiées en 200 et présentes dans le sitemap le 2026-10-02. Les annuaires peuvent repartir depuis A7.12.a.
+
 ## A18 T1 : l'écran d'un chiffre, une question et son savoir à côté (2026-10-02, #285)
 
 Deuxième étape du portage du retour 07, drapeau fermé. L'écran d'un chiffre, au tableau comme dans le pas à pas, suit maintenant l'ordre du `NumberSheet` : ce que le chiffre est et sa formule sur une ligne, le Tour en une ligne, **le piège ouvert avant la valeur**, « Où le trouver » replié avec les outils dans son résumé, **les cases d'abord**, « Comment il se situe » (repère, cible, verdict en un objet), puis « Ta définition et une note » repliées.
