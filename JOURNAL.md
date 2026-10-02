@@ -376,7 +376,7 @@ Quatorze composants neufs, deux deltas (`Disclosure`, `BulletChart`), aucun chan
 
 **Consigné** : `design/ds-extension-07-return/COPIE.md`, `docs/decisions.md` (C38, C40 à C42), `CHANTIERS.md` (A18 ouvert, A7.3.d et A14.d absorbés, B10 clos, C sans question ouverte, D14 retiré, D2), `ENGINE.md`, `CLAUDE.md` (l'état), `design/README.md`, `.design-sync/NOTES.md`.
 
-## A18 T0 : le socle du moteur simplifié, les jetons, deux deltas et la prochaine étape (2026-10-02)
+## A18 T0 : le socle du moteur simplifié, les jetons, deux deltas et la prochaine étape (2026-10-02, #283)
 
 Première étape du portage du retour 07 (A18), drapeau fermé : rien ne change à l'écran, tout ce qui suit sert T1 à T5.
 
