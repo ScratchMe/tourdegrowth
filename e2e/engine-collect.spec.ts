@@ -5,7 +5,7 @@ import { ENGINE_COPY } from "@/content/engine-copy";
 import { fillTemplate } from "@/lib/engine/format";
 import { EXAMPLE_EXPECTED, exampleState } from "../src/lib/engine/__tests__/fixtures";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, openFold, SKIP_ADMIN_REASON, test, trackedEvents } from "./helpers";
-import { activeEngineKey, openWords, storedEngineEntry, writeEngineSeed, openEngineMenu, openNumber, backToBoard, expectFound } from "./engine-helpers";
+import { activeEngineKey, openWords, storedEngineEntry, writeEngineSeed, openEngineMenu, openNumber, backToBoard, expectFound, expectLeft } from "./engine-helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
 // owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
@@ -163,7 +163,7 @@ test.describe("setup and first save", () => {
     await expect(sheet.getByTestId("engine-live")).toContainText("18%");
     await sheet.locator("#engine-act-rate-source").selectOption({ label: "Amplitude" });
     await sheet.getByTestId("engine-save-act-rate").click();
-    await expect(sheet.getByTestId("engine-saved-act-rate")).toBeVisible();
+    await expectLeft(page, "act-rate");
     await expectFound(page, 1);
 
     const stored = await storedEngine(page);
@@ -211,7 +211,7 @@ test.describe("setup and first save", () => {
     await expect(sheet.getByTestId("engine-wide-range")).toBeVisible();
     await sheet.getByRole("radio", { name: "Team hunch" }).check();
     await sheet.getByTestId("engine-save-act-rate").click();
-    await expect(sheet.getByTestId("engine-saved-act-rate")).toBeVisible();
+    await expectLeft(page, "act-rate");
     expect((await storedEngine(page))?.state.snapshots[0]?.metrics["act.rate"]?.status).toBe("estimated");
   });
 
@@ -223,7 +223,7 @@ test.describe("setup and first save", () => {
     await triage.getByRole("radio", { name: "We don't measure it" }).check();
     await triage.getByRole("radio", { name: "a sprint" }).check();
     await sheet.getByTestId("engine-save-ret-d30").click();
-    await expect(sheet.getByTestId("engine-saved-ret-d30")).toBeVisible();
+    await expectLeft(page, "ret-d30");
     const entry = (await storedEngine(page))?.state.snapshots[0]?.metrics["ret.d30"] as { status: string; missing?: { cause: string; repair: string } };
     expect(entry.status).toBe("missing");
     expect(entry.missing).toMatchObject({ cause: "not-tracked", repair: "sprint" });
@@ -561,7 +561,9 @@ test.describe("keyboard, languages, widths", () => {
     await source.selectOption({ label: "Amplitude" }); // a native select's options are the browser's, not ours
     await tabTo(page, sheet.getByTestId("engine-save-act-rate"));
     await page.keyboard.press("Enter");
-    await expect(sheet.getByTestId("engine-saved-act-rate")).toBeVisible();
+    // Saved, and on to the next step (A18 T3.b): its heading takes the focus.
+    await expectLeft(page, "act-rate");
+    await expect(page.locator("#engine-number-title")).toBeFocused();
   });
 
   for (const locale of ["en", "fr"] as const) {

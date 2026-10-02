@@ -138,3 +138,13 @@ export async function startEngine(page: Page, motion: "ss" | "sa" | "both" = "ss
   await page.getByTestId("engine-number").waitFor();
   await backToBoard(page);
 }
+
+/**
+ * A number's screen saved and left (A18 T3.b): « Enregistre et continue »
+ * leads to the next step, so the sheet goes — that is how a spec knows the
+ * save went through. A refused save keeps the sheet, its message under the
+ * boxes; a past month corrected only saves, and says « Enregistré ».
+ */
+export async function expectLeft(page: Page, metricDomId: string): Promise<void> {
+  await expect(page.getByTestId(`engine-sheet-${metricDomId}`)).toHaveCount(0);
+}

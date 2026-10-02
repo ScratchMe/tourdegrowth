@@ -3,7 +3,7 @@ import type { Locator, Page, Request } from "@playwright/test";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import { engineEventPaths } from "@/lib/analytics/goatcounter";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test, trackedEvents } from "./helpers";
-import { openWords, openEngineMenu, openNumber, backToBoard, startEngine } from "./engine-helpers";
+import { openWords, openEngineMenu, openNumber, backToBoard, startEngine, expectLeft } from "./engine-helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
 // owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
@@ -318,10 +318,10 @@ async function openSheet(page: Page, _stage: string, metricDomId: string): Promi
   return openNumber(page, metricDomId);
 }
 
-/** Saves a sheet and waits for its "saved" line: a save that silently failed would leave a canary untyped. */
+/** Saves a sheet and waits for its screen to be left (A18 T3.b): a save that silently failed would leave a canary untyped. */
 async function saveSheet(sheet: Locator, metricDomId: string): Promise<void> {
   await sheet.getByTestId(`engine-save-${metricDomId}`).click();
-  await expect(sheet.getByTestId(`engine-saved-${metricDomId}`)).not.toBeEmpty();
+  await expectLeft(sheet.page(), metricDomId);
 }
 
 async function clipboard(page: Page): Promise<string> {

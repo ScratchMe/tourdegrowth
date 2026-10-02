@@ -3,7 +3,7 @@ import type { Locator, Page } from "@playwright/test";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import { exampleState, hybridState } from "../src/lib/engine/__tests__/fixtures";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
-import { engineSeed, nextStep, openEngineMenu, storedEngineEntry, openNumber, backToBoard } from "./engine-helpers";
+import { engineSeed, nextStep, openEngineMenu, storedEngineEntry, openNumber, backToBoard, expectLeft } from "./engine-helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
 // owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
@@ -176,7 +176,7 @@ test("the keyboard alone: answer « Both », pass the targets, open the board, f
   await page.keyboard.press("ArrowDown");
   await tabTo(page, sheet.getByTestId("engine-save-slg-rev-win-rate"));
   await page.keyboard.press("Enter");
-  await expect(sheet.getByTestId("engine-saved-slg-rev-win-rate")).not.toBeEmpty();
+  await expectLeft(page, "slg-rev-win-rate");
   const stored = (await storedEngineEntry(page))?.state.snapshots[0]!.metrics["slg.rev.win-rate"];
   expect(stored?.value).toEqual({ kind: "ratio", numerator: 18, denominator: 75 });
 });
