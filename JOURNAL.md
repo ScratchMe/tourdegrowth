@@ -376,7 +376,7 @@ Quatorze composants neufs, deux deltas (`Disclosure`, `BulletChart`), aucun chan
 
 **Consigné** : `design/ds-extension-07-return/COPIE.md`, `docs/decisions.md` (C38, C40 à C42), `CHANTIERS.md` (A18 ouvert, A7.3.d et A14.d absorbés, B10 clos, C sans question ouverte, D14 retiré, D2), `ENGINE.md`, `CLAUDE.md` (l'état), `design/README.md`, `.design-sync/NOTES.md`.
 
-## A19 : l'en-tête compact, le retour 08 recopié et porté (2026-10-02)
+## A19 : l'en-tête compact, le retour 08 recopié et porté (2026-10-02, #284)
 
 **Ce qui est revenu** : Claude Design a répondu au brief 08 le jour même, sous `design/ds-extension-08-return/` (28 fichiers, tout en source). Il suit trois de nos quatre penchants : toute fenêtre en paysage, déclenché par la position, un changement d'état et non un défilement asservi. La hauteur diffère : une ligne de 48 px, pas 56, sur un liseré de 6 px, soit 7,5 % d'un écran de portable au lieu de 16,4 %. Dans cette ligne, la marque, la course (l'étape où l'on est, remplie de la couleur de son espace) et les contrôles de la page, sur la couleur du bandeau réduite à un liseré. `MOTION.md` donne chaque valeur du mouvement, dans les deux sens. Recopié fichier par fichier par `DesignSync`, la planche rejouée par son propre `check.cjs` : 252 états, aucun problème (`COPIE.md`).
 
