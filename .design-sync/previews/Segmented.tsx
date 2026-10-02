@@ -35,7 +35,9 @@ export const Buttons = () => {
 /**
  * `sm` is the header scale: a 32px track, and each segment's touch
  * target reaches 44px on the segment itself, into the 6px of room the group
- * keeps above and below — never strip that room to tighten a header. This is
+ * keeps above and below — never strip that room to tighten a header. A
+ * segment is at least 42px wide, so even a two-letter one (the language
+ * switch, 88px in all) is a 44 × 44 target with its border. This is
  * ToneToggle as the landing's preview card sets it, with "Roast me" chosen:
  * `accent` makes the roast tone the one option whose selected fill is red.
  */

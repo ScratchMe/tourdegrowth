@@ -180,7 +180,9 @@ So `componentSrcMap` now pins all 90 exported components to their file
 last in `cfg.buildCmd`, fails the build if a component exported from
 `src/components/**` is missing from the map, pinned to the wrong file, or
 pinned but no longer exported. Its success line is
-`[inventory] 90 components pinned, 1 excluded on purpose, none missing`.
+`[inventory] 91 components pinned, 3 excluded on purpose, none missing`
+(since A19, 2026-10-02: `SpaceRace` and `SiteHeaderCompactor` joined
+`LegalPage`, see "Synced").
 `QuarterNews` (the game's news screen, 2026-09-26) shipped without its entry
 and broke this build for two days — caught by the design audit of
 2026-09-27, not by anything that runs on a PR, since CI does not build the
@@ -332,9 +334,22 @@ doc comment says why the layout uses an auto margin rather than
 ## Synced
 
 Project `23b9671c-a55b-452e-aa41-39906ee71ba8` ("Tour de Growth"), pinned as
-`projectId` in `config.json`. **Last upload: 2026-10-01, B6 (A15 and
-C33)**, from a claude.ai/code cloud session — **90 components, 303 story
-cells**, all graded good. The driver keyed 13 components as changed
+`projectId` in `config.json`. **Last upload: 2026-10-02, B9 and B12** (the
+stage score sheet of A15.19, which replaced `PillarChip`, C34's red rows,
+A18 T0's `Disclosure` and the compact header of A19), from a claude.ai/code
+cloud session — **91 components, 308 story cells**, all graded good. The
+driver keyed 5 components as changed (`DefinitionTrigger`, `GlossaryTerm`,
+`StageProfile`, `StampedPillar`, `Tag`), 2 as new (`StageScore`,
+`StageScores`) and 1 as removed (`PillarChip`); the
+spot check re-read 18 more whose code changed without their preview (see
+"Found in the 2026-10-02 re-sync"). 14 components uploaded, 77 carried
+forward: 466 files; `PillarChip`'s six paths deleted (the tool counted 5:
+one was not in the project); and, decided by
+Antoine, the four ported briefs and returns under `design/` (04, 05, 06 and
+08: 171 files, see below). Two driver runs; `report_validate`: 91 total, 0
+bad, 0 thin, 0 identical; manifest 91 cards, read back identical; anchor
+`bundleSha12` `59b524b3669b`. The upload before it: 2026-10-01, B6 (A15 and
+C33) — 90 components, 303 story cells, all graded good. The driver keyed 13 components as changed
 (`ErrorScreen`, `LoadingScreen`, `MetaLabel`, `GameEntry`, `NumberField`,
 `FieldRow`, and the seven game previews regenerated from the model, see
 "Found in the 2026-10-01 re-sync (B6)"), all regraded. `NightSurface` went up
@@ -402,6 +417,18 @@ and ported the same day (`CHANTIERS.md` A19); the re-sync that carries the
 port is B12. A re-sync must leave these folders: before applying
 `upload.deletePaths`, check it names nothing under `design/`. Remove them on
 purpose once the return is ported, not as a side effect of a sync.
+
+**That is what B12 did, on 2026-10-02**: Antoine chose to remove the four
+ported ones, 04, 05, 06 and 08 (each brief, its PNGs and its return), so the
+design agent stops reading three generations of superseded mockups next to
+the live system. The list was built from `list_files` under `design/`, not
+from the repo: the project's returns are not file-for-file the repo's copies
+(brief 04's return holds 56 files there), and a list built from the repo
+would have left some and named others that do not exist. 171 paths, applied
+after the content and before the second sentinel. Only brief 07 and its
+return stay (`design/DS-EXTENSION-BRIEF-07.md`, `design/ds-extension-07/`,
+`design/ds-extension-07-return/`): its port, A18, is under way. Everything
+removed is in this repo, under the same paths.
 
 **A19 (2026-10-02) added two exports that are not cards.** `SpaceRace` (the
 race, out of `SpaceBand`, that the band renders and the compact header
@@ -538,22 +565,24 @@ these was a card that rendered perfectly and said something false:
 - **`DefinitionTrigger open`** only shifts a border on a 16px glyph — invisible
   unless the closed and open states sit side by side, which the story now does.
 
-Two components have no way to show their most useful state without help:
-`Disclosure` (no `open` prop — `<details>` owns it) and any leaf that needs a
-parent. For `Disclosure` the preview passes the **native** `open` attribute,
-which reaches the element through the component's `...rest`. That is not in
-`DisclosureProps`, and it type-checks only because TypeScript's `include` globs
-skip dot-directories, so `.design-sync/previews/**` is outside the repo's
-`tsc`. If that ever changes, this line errors.
+Any leaf that needs a parent has no way to show its most useful state
+without help. `Disclosure` was the other case until A18 T0 (2026-10-02): it
+had no `open` prop, so the preview passed the native attribute through
+`...rest`. It now declares `defaultOpen` (uncontrolled) and `open` with
+`onOpenChange` (controlled), and the preview uses `defaultOpen`: a bare
+`open` is now the controlled prop, which tells the design agent a caller owns
+the state when nobody does.
 
 Because the repo's `tsc` never sees the previews, type-check them by hand
 after writing one: a scratch `tsconfig.json` that extends the repo's, maps
-`tour-de-growth` to an index re-exporting every file in `componentSrcMap`,
-and includes `.design-sync/previews/*.tsx`. Keep only lines starting with
-`.design-sync` (component files error on CSS-module types without
-`next-env.d.ts`, which is noise here). Expected residue: the two `Disclosure`
-`open` lines above and `ShareCard`'s `.png` import. Anything else is a real
-contract mismatch — this is what caught an undefined month in `ChartFrame`.
+`tour-de-growth` to an index that does `export *` from every file in
+`componentSrcMap` (named re-exports of the components alone miss the types
+some previews import, `DotGrid`'s `DotMark`), and includes
+`.design-sync/previews/*.tsx`. Keep only lines starting with `.design-sync`
+(component files error on CSS-module types without `next-env.d.ts`, which is
+noise here). Expected residue since 2026-10-02: `ShareCard`'s `.png` import,
+nothing else. Anything else is a real contract mismatch — this is what caught
+an undefined month in `ChartFrame`.
 
 ### Found in the DS v3 pass, all by reading the screenshots
 
@@ -734,6 +763,43 @@ What the three methods found beyond that:
   known; and « 83 / 100 » keeps plain spaces around the slash in French
   (`december.cells.outOf`), outside the NBSP list above.
 
+### Found in the 2026-10-02 re-sync (B9, B12), by grading and by the spot check
+
+B9 carried the score sheet (A15.19: `StageScore` and `StageScores` replaced
+`PillarChip`; C34: the red rows follow the bottleneck's sharpness), B12 the
+compact header (A19, A19.1, C44). The seven queued components graded good;
+the spot check of the 18 whose code changed without their preview
+(`SiteHeader`, `SpaceBand`, `Segmented`, `LocaleSwitcher`, `ToneToggle`,
+`ContentHeader`, `ProsePage`, `SpaceStrip`, `GameEntry`, `Stopwatch`,
+`Disclosure`, `BulletChart`, `Dashboard`, `ChartFrame`, `VideoCall`,
+`GameJournal`, `PatternCatalogue`, `ShareCard`) rendered as graded. Five
+previews were still wrong, every one a card that rendered well:
+
+- **`StageScores` Roast and `StampedPillar` Stamped drew the neighbours of
+  the stamp without their « ? ».** `ResultView` gives every row but the stamp
+  its `GlossaryTerm`, in a roast as on the calm result. The Roast cell now
+  goes through the same `Sheet` as the others, with a `stamped` row.
+- **`Disclosure` Open and Nested passed the native `open`**, which A18 T0 made
+  the controlled prop (see "Traps" above): now `defaultOpen`, and the doc
+  says which form is for what.
+- **`SiteHeader`'s docs** still said the plain header always draws its dashed
+  rule (since A19 it comes in once the page scrolls) and said nothing of the
+  compact state. A still card cannot show that state: it is set by a script
+  on scroll, so the doc says so instead.
+- **`Segmented` Small** did not say the 42px minimum width C44 gave a
+  segment, the reason the 88px language switch is two 44 × 44 targets.
+
+Also seen: the driver's two `[GRID_OVERFLOW]` lines (`QuarterNews`,
+`GlossaryTerm` Open) are standing warnings already listed above, not new
+ones; `config.json` did not change.
+
+**Seen after the upload**: A18 T1 (#285) reached `main` while this ran. It
+adds five components under `src/components/engine/` with no
+`componentSrcMap` entry, so the next bundle build stops on
+`check-inventory` (by design), and it retires copy that `Choices`,
+`NumberField` and `FieldRow` still quote. That is `CHANTIERS.md` B13, the
+re-sync at the end of A18.
+
 ## `_ds_manifest.json` — Claude Design never rebuilt it, and writing it was not enough
 
 **What Antoine saw on 2026-10-01**: no kilometre marker anywhere in the
@@ -811,6 +877,11 @@ file the sync can write restarts it. It is a Claude Design defect to report
 - **`list_files` and the anchor do not prove what the pane shows**, and neither
   does `_ds_manifest.json` (section above). Six uploads passed every check while
   the pane stayed on 2026-09-11. Only someone looking at the pane can say.
+- **A state with a contract and no cell is invisible to grading.** Grades
+  read stills: `BulletChart` with `band` or `value` at `null`, `Disclosure`'s
+  controlled form, `SiteHeader`'s compact state (set by its script on
+  scroll) are described in docs, drawn nowhere. When one of them changes,
+  reread the doc against the code; no sheet will show it.
 - **Merging `main` in the middle of a re-sync.** A5 renamed variant props and
   stories (`mobile`/`desktop`/`compact` → `sm`/`md`, `Frame` → `Call`,
   `tone="red"` → `alert`, `DotGrid size` → `medium`, `DgFace size` →
@@ -856,7 +927,7 @@ file the sync can write restarts it. It is a Claude Design defect to report
   Executable doesn't exist`); re-run `npx playwright install chromium`.
 - **The grades in `.design-sync/.cache/` are not committed.** What makes
   verification durable is the uploaded `_ds_sync.json`. If that anchor is ever
-  lost or the project is recreated, every component (90 on 2026-10-01) re-verifies from scratch —
+  lost or the project is recreated, every component (91 on 2026-10-02) re-verifies from scratch —
   which is a few hours of reading sheets, not minutes.
 - **The `--entry ./dist/index.js` trick breaks the day the repo gains a real
   `dist/`.** If a build is ever added, drop the flag and set `cfg.buildCmd`.

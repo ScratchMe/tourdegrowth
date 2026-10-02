@@ -24,7 +24,7 @@ en fin de document). `CLAUDE.md` garde l'état courant, `JOURNAL.md` l'histoire.
 | Groupe | Qui | Où | Quand |
 |---|---|---|---|
 | **A. Le travail autonome**, en quatre lots | Une session seule, une PR par lot (A7 : une PR par item) | Session cloud | A1 à A6 livrés le 2026-09-29, A7 et A8 le 2026-09-30. **Reste d'A7** : A7.3.d (le bon à tirer de la copie neuve), A7.4 après A7.3, et A7.12.c à l'ouverture. **A7.3.c est livré le 2026-10-01**, les textes de lancement de la ligne « Hors code » d'A7.3 le même jour (S0 à S5, PR d'intégration [#233](https://github.com/ScratchMe/tourdegrowth/pull/233), drapeau fermé). A10 (S-15), A11 et A7.3.e (les quatre termes du glossaire) livrés le 2026-09-30. **A12, le niveau 2 du jeu** : spécifié et chiffré le 2026-09-30, **validé le 2026-10-01 (C30)**, sa copie, l'îlot partagé, le téléphone de Pédalix et le branchement faits le même jour (A12.c à A12.f.2)  et ses specs (A12.g) : reste A12.h (le bon à tirer, puis la recette) et A12.i (le `?ref=` de la boucle inverse, trouvé par B6). **A14, le moteur complet** : spécifié et validé le 2026-10-01 (C32) ; **A14.c est livré le même jour**, T0 à T7 (neuf PR de #255 à #266, drapeau fermé), puis T6.2, l'image de partage, au retour de B5 le même soir ([#272](https://github.com/ScratchMe/tourdegrowth/pull/272)) ; reste A14.d, son bon à tirer. **A13** (trois alertes de dépendances, dont une critique sur `next`) livré le 2026-10-01. **A15**, la finition UI et UX d'après les reels et les lois de l'UX, ouvert le 2026-10-01 : tout livré le même jour : deux PR, puis A15.18 une fois C33 tranchée ; A15.19 est porté le 2026-10-02 par **A16** (la feuille de score) : A15 est clos. **A17** (le halo grisé des images de partage de contenu, trouvé par T6.2) est livré le 2026-10-02 ([#274](https://github.com/ScratchMe/tourdegrowth/pull/274)). **A18, le moteur simplifié** (le portage du retour 07, C38 et C40 à C42) : ouvert le 2026-10-02, T0 à T7 puis un bon à tirer unique, A18.d, qui absorbe A7.3.d et A14.d ; **T0 et T1 livrés le même jour** ([#283](https://github.com/ScratchMe/tourdegrowth/pull/283), [#285](https://github.com/ScratchMe/tourdegrowth/pull/285)). **A19, l'en-tête compact** (le portage du retour 08, B11) est livré le 2026-10-02 ([#284](https://github.com/ScratchMe/tourdegrowth/pull/284)) |
-| **B. Design sync** | Une session, cloud ou locale | N'importe où : une session cloud pousse vers Claude Design depuis le 2026-09-29 | **À jour le 2026-09-30, après A7.10, A10 et A11** (B3, puis la re-synchro d'A11 le soir même : 88 composants, 292 cellules, 88 aperçus sur 88 rendus). Ouverts le 2026-10-01 : **B4** (la re-synchro du niveau 2 du jeu, faite le même jour), **B5** (l'image de partage du moteur, C32 Q17 : brief 06 écrit et déposé le même jour, retour reçu et porté en T6.2 le même soir), **B6** (la re-synchro d'A15 et de C33, faite le même jour : 90 composants, 303 cellules, les douze aperçus du jeu laissés par B4 régénérés) et **B7** (les puces d'étape, A15.19 : le retour 05 est recopié et porté le 2026-10-02, A16 ; la re-synchro qui l'emporte est **B9**, ouverte le même jour). **B8** (ouvert le 2026-10-01 au soir) : le volet Design System montre une copie compilée le 2026-09-11, 34 cartes, alors que les fichiers et l'agent sont à jour ; Claude Design ne rafraîchit plus ce projet à l'ouverture ; laissé en l'état par Antoine le même soir (signalement prêt en D13). **B10** (le 2026-10-02) : le brief 07, le moteur plus simple sans perdre son expertise, déposé, lancé et revenu le même jour ; le retour est recopié et son portage est A18. **B11** (le 2026-10-02) : l'en-tête collant, compact une fois la page défilée en paysage ; brief 08 déposé, lancé et revenu le même jour, recopié et porté (A19) : clos ; la re-synchro qui l'emporte est **B12**, ouverte le même jour. Hors d'eux, rien à lancer tant qu'un composant, ou une copie qu'un aperçu reprend, ne change pas |
+| **B. Design sync** | Une session, cloud ou locale | N'importe où : une session cloud pousse vers Claude Design depuis le 2026-09-29 | **À jour le 2026-10-02, après A16 et A19** (B9 et B12, une seule synchro : 91 composants, 308 cellules, 91 aperçus sur 91 rendus ; les briefs 04, 05, 06 et 08 et leurs retours retirés du projet, décision d'Antoine). Avant : B3 et la re-synchro d'A11, le 2026-09-30. Ouverts le 2026-10-01 : **B4** (la re-synchro du niveau 2 du jeu, faite le même jour), **B5** (l'image de partage du moteur, C32 Q17 : brief 06 écrit et déposé le même jour, retour reçu et porté en T6.2 le même soir), **B6** (la re-synchro d'A15 et de C33, faite le même jour : 90 composants, 303 cellules, les douze aperçus du jeu laissés par B4 régénérés) et **B7** (les puces d'étape, A15.19 : le retour 05 est recopié et porté le 2026-10-02, A16 ; la re-synchro qui l'emporte est **B9**, ouverte et close le même jour). **B8** (ouvert le 2026-10-01 au soir) : le volet Design System montre une copie compilée le 2026-09-11, 34 cartes, alors que les fichiers et l'agent sont à jour ; Claude Design ne rafraîchit plus ce projet à l'ouverture ; laissé en l'état par Antoine le même soir (signalement prêt en D13). **B10** (le 2026-10-02) : le brief 07, le moteur plus simple sans perdre son expertise, déposé, lancé et revenu le même jour ; le retour est recopié et son portage est A18. **B11** (le 2026-10-02) : l'en-tête collant, compact une fois la page défilée en paysage ; brief 08 déposé, lancé et revenu le même jour, recopié et porté (A19) : clos ; la re-synchro qui l'emporte est **B12**, ouverte et close le même jour. **B13** (le 2026-10-02) : la re-synchro d'A18, à la fin de son portage (cinq composants neufs, trois aperçus à reprendre). Hors d'eux, rien à lancer tant qu'un composant, ou une copie qu'un aperçu reprend, ne change pas |
 | **C. Tes décisions**, une par une | Toi, guidé, avec une recommandation par question | N'importe quelle session | **Tranchées le 2026-09-29** (C18 close à part, par la session D). C23 à C29 tranchées le 2026-09-30, C26 à C29 livrées le même jour, **C25** (la spécification de A7.3, `ENGINE.md` §18) dans sa propre session. **C30** (le niveau 2 du jeu, `GAME-BRIEF.md` §17) le 2026-10-01. **C31** (le bloc « Niveau suivant » du jeu) et **C32** (le moteur complet, `docs/engine/moteur-complet.md` §19.15) le 2026-10-01. **C33** (la carte du jeu sous les chiffres du lecteur, A15.18) ouverte et tranchée le 2026-10-01. **C34** et **C35** (le rouge des ex aequo, le nouveau « ? », nées du retour 05) tranchées le 2026-10-02, puis **C36** (la PR Dependabot #244 : React 19.3 seul, `firebase-admin` ≥ 14.4 mis en attente pour son poids) puis **C37** et **C39** (`next` 16.3.7, les types React 19.3 et `eslint-config-next` 16.3.7, mergés par #277 et #278) le même jour. **C38** (les bons à tirer du moteur attendent le portage du retour 07) et **C40 à C42** (le pas à pas fondu dans le tableau avec un écran Cibles gardé, la liste à la place des onglets, les renommages), nées du brief 07, tranchées le 2026-10-02, puis **C43** et **C44** (la course compacte comptée à part, la langue à 88 px partout), nées du retour 08, le même jour. **Rien n'est ouvert** |
 | **D. Tes actions**, pas à pas | Toi, accompagné | Session cloud | Selon ce qui est prêt. D10 (l'indexation) est prêt tout de suite. D2 attend les bons à tirer nº7 et nº8, la recette (D9) et, pour le moteur, le lot A18 (le moteur simplifié) et son bon à tirer unique A18.d, qui absorbe ceux d'A7.3 et d'A14 (C38) |
 | **E. La veille** | Personne | — | Rien à lancer avant un déclencheur |
@@ -318,7 +318,7 @@ retour laissait (C43 : les clics sur la course compacte comptés à part,
 par cible). **A19.1**, le même jour, sur une question d'Antoine :
 `--sticky-offset` est mesuré aussi dans l'état plein, sur toutes les pages et
 à toutes les largeurs ([#287](https://github.com/ScratchMe/tourdegrowth/pull/287), le journal à « A19.1 »). **A19 est clos** ; la
-re-synchro qui l'emporte vers Claude Design est B12.
+re-synchro qui l'emporte vers Claude Design est B12, faite le même jour.
 
 ---
 
@@ -369,7 +369,7 @@ recopié le 2026-10-02** ([#270](https://github.com/ScratchMe/tourdegrowth/pull/
 22 fichiers, la planche toute en source, rejouée dans Chromium aux huit
 cadres (`COPIE.md`). Claude Design n'a rien touché hors de son dossier. **Le
 portage (A16) est livré le 2026-10-02**, [#271](https://github.com/ScratchMe/tourdegrowth/pull/271) ; la re-synchro qui l'emporte vers le
-projet est B9.
+projet est B9, faite le même jour.
 
 **B8 : l'index du projet Claude Design, réécrit le 2026-10-01 au soir.** Antoine
 ne voyait pas la borne kilométrique dans le projet ; ses captures montraient un
@@ -404,6 +404,13 @@ trois jetons de plus (`--score-row-height-md`, `--score-row-height-sm`, `--radiu
 (`--pad-chip*`). Attendu : 91 composants. Le retour 05, sous `design/` dans le
 projet, peut en partir exprès maintenant qu'il est porté (`.design-sync/NOTES.md`,
 « Synced ») : à décider avec Antoine au moment de la synchro.
+**Faite le 2026-10-02 avec B12, en une seule synchro** ([#289](https://github.com/ScratchMe/tourdegrowth/pull/289)) : 91 composants,
+308 cellules, toutes notées bonnes ; `PillarChip` sorti du projet. Deux
+aperçus corrigés en route : la feuille en roast et `StampedPillar` dessinaient
+les voisins du tampon sans leur « ? », que `ResultView` leur donne.
+Antoine a choisi de retirer du projet les briefs 04, 05, 06 et 08 et leurs
+retours (171 fichiers, tous dans ce dépôt) ; seul le 07, en cours de portage
+(A18), y reste. **B9 est clos.**
 
 **B10, ouvert le 2026-10-02 : le moteur plus simple, sans perdre son
 expertise.** Antoine : la saisie du moteur reste « extrêmement dense », au
@@ -476,8 +483,28 @@ le premier n'a de sens que dans un en-tête, le second ne rend rien. Un aperçu
 de l'état compact demande de poser `data-compact="true"` et les mesures à la
 main : à décider au moment de la synchro. Le retour 08, sous `design/` dans le
 projet, peut en partir exprès maintenant qu'il est porté.
+**Faite le 2026-10-02 avec B9** (le détail est au paragraphe de B9 et dans
+`.design-sync/NOTES.md`, « Found in the 2026-10-02 re-sync »). L'état compact
+n'a pas de cellule : il est posé par un script au défilement et mesuré, une
+carte immobile ne le montre pas ; la documentation de `SiteHeader` le décrit,
+avec le filet du cas sans espace qui n'apparaît qu'au défilement depuis A19.
+Deux autres aperçus corrigés : `Segmented` (les 42 px de C44), `Disclosure`
+(`defaultOpen`, depuis A18 T0, au lieu de l'attribut natif). **B12 est clos.**
 
-**Hors de B9 et B12, rien d'ouvert.** La prochaine synchro se lance quand un composant change, ou
+**B13, ouvert le 2026-10-02 : la re-synchro d'A18, à la fin de son
+portage.** A18 T1 ([#285](https://github.com/ScratchMe/tourdegrowth/pull/285)) est arrivé sur `main` pendant B9 et B12. Il
+ajoute cinq composants sous `src/components/engine/` (`NumberSheet`,
+`AnswerSwitch`, `TrapNote`, `WhereToFind`, `HowItCompares`) que
+`componentSrcMap` ne connaît pas : la construction du paquet échoue sur
+`check-inventory` tant qu'ils n'y sont pas, et c'est voulu (un composant
+entre dans Claude Design par décision). Il retire aussi de la copie que
+trois aperçus citent encore : `Choices` (« Where are you with this
+number? », « I have it »), `NumberField` (« Seule une cible d'équipe permet
+de dire quelle étape freine. ») et `FieldRow` (sa documentation). À faire
+quand A18 est livré, pas avant : chaque tranche change encore le moteur.
+Le brief 07 et son retour pourront alors quitter `design/` dans le projet.
+
+**Hors de B13, rien d'ouvert.** La prochaine synchro se lance quand un composant change, ou
 quand change une copie, un chiffre du modèle ou un comportement qu'un aperçu
 reprend : c'est ainsi que B3 a trouvé l'amende du jeu et les cartes de
 `SpaceStrip` restées d'avant A7.8 et A7.9, dans des notes reportées. Ce qu'elle
