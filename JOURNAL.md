@@ -581,3 +581,23 @@ Troisième étape du portage du retour 07, drapeau fermé. **T2 est coupé en tr
 **Reste pour A18.d** : « Moteur, mois et fichier » annonce un mois que le menu n'a pas quand le moteur n'a qu'un mois et que le suivant est à démarrer (le groupe est vide, donc absent).
 
 **Vérifié** : `tsc` et `eslint` propres ; 3 008 tests unitaires ; `next build` avec les variables de la CI ; les 284 specs (et les 77 que touche la relecture, rejouées après elle) du moteur, des cibles et de l'accessibilité (une ignorée par construction) ; les specs du bandeau, du kit et des aperçus de partage, avec `GAME_ENABLED=true` aussi côté serveur (sans lui, les pages du jeu manquent et trois specs tombent, ce qui n'est pas ce changement) ; des captures en français et en anglais, à 1 280 et 390 px : le retour, le menu ouvert, le mois à démarrer, un mois passé, sans défilement horizontal.
+
+## L'en-tête du jeu à la largeur des deux autres espaces (2026-10-02, #292)
+
+**Le constat d'Antoine**, captures à l'appui : la barre du haut est plus étroite dans le jeu, et sa course n'y nomme jamais « Diagnostic » ni « Moteur ». Seuls les numéros s'affichent, quelle que soit la largeur de la fenêtre.
+
+**La cause** : les pages du jeu (le hub et les niveaux) sont des `ProsePage`, dont l'en-tête suivait la colonne de lecture, 760 px. La bande s'aligne sur la ligne de l'en-tête, et sa course retire les noms des étapes sous 900 px de large (requête de conteneur, extension 08). À 760 px, elle ne pouvait donc jamais les montrer. La maquette I + B faisait déjà de même (`ib.js` recopiait la largeur de l'en-tête dans la bande) : le portage l'a reproduit, mais personne ne l'avait décidé. Sur un niveau, c'était aussi un défaut d'alignement : le plateau de nuit et le pied de page faisaient 1 040 px, l'en-tête 760, ce que la doc de `ContentHeader` appelait déjà « misaligned ».
+
+**La correction** : une `ProsePage` qui appartient à un espace prend le cadre des deux autres. L'en-tête et le pied de page passent à 1 040 px (`frame = band || space ? "wide" : "reading"`), et la colonne de lecture reste à 760 px. Au-dessus d'environ 950 px de fenêtre, la course du jeu nomme ses trois étapes, comme celle du moteur et de l'accueil. Les pages de lecture sans espace (glossaire, Comment ça marche…) ne bougent pas. Le quiz et le Deep dive gardent leur colonne de 720 px et leur course en numéros. **Antoine, le 2026-10-02** : l'en-tête n'a pas à bouger au beau milieu d'un quiz.
+
+**Ce qui change à l'œil** : sur le hub et en tête d'un niveau, le logo n'est plus aligné sur le titre (144 px contre 284 à 1 280 px de large). C'est le prix d'une barre identique dans les trois espaces. Sur un niveau, l'en-tête tombe maintenant sur le plateau de jeu.
+
+**Non changé** : l'en-tête compact (une fois la page défilée) montre toujours les autres étapes en numéros, dans les trois espaces. C'est le dessin de l'extension 08, pas cette cause, et **Antoine le garde ainsi** (2026-10-02).
+
+**Vérifié** :
+- mesures à 1 440, 1 280, 1 000, 950, 900, 768 et 390 px sur l'accueil, le moteur, le hub du jeu, un niveau et le hub anglais. Les cinq ont la même ligne d'en-tête à chaque largeur, les noms s'affichent à partir de 950 px, aucun défilement horizontal, rien ne déborde de la bande ;
+- captures du hub et d'un niveau à 1 280 px, en haut et en bas de page, aux deux langues ;
+- `e2e/site-header.spec.ts` gagne trois specs (le hub, un niveau, le hub anglais) : même ligne d'en-tête et même bande que l'accueil, pied de page sur la même colonne, les trois noms à l'écran. Non-vacuité : `ProsePage` remis tel qu'il était puis reconstruit, les trois tombent sur la ligne d'en-tête (760 px depuis 260, contre 1 040 depuis 120). Sans les assertions de colonne, les trois tombent sur le nom de la première étape (1 px) ;
+- `tsc`, `eslint`, les tests unitaires de `brand/`, et la suite Playwright complète sur un build comme la CI.
+
+**Consigné** : `CHANTIERS.md` (B13 emportera les JSDoc de `ProsePage` et `ContentHeader`, et deux aperçus retouchés : la doc de `ContentHeader`, `SiteHeader` « Phone » en `wide`).
