@@ -453,3 +453,7 @@ Captures relues : l'accueil compact en français, le moteur compact avec ses chi
 - `CHANTIERS.md` : A19 clos, B11 clos, B12 ouvert, C43 et C44, D15 retiré, une ligne en E ;
 - `docs/decisions.md`, `design/README.md`, `.design-sync/NOTES.md` ;
 - `design/ds-extension-08-return/COPIE.md`, `CLAUDE.md` (les chiffres de référence).
+
+## D10 : l'indexation française demandée (2026-10-02)
+
+Antoine a demandé l'indexation des sept pages françaises que la session lui avait listées : les deux pages « porte ouverte » et les cinq « AARRR vs X ». `/fr` était déjà sur Google. Le rappel de la session avait vérifié avant que les huit adresses répondaient en 200. Il reste dans D10 les huit adresses des quatre termes de la vente assistée ajoutés par A7.3.e (`win-rate`, `sales-cycle`, `acv`, `lead-to-opportunity`, en anglais puis en français), vérifiées en 200 et présentes dans le sitemap le 2026-10-02. Les annuaires peuvent repartir depuis A7.12.a.
