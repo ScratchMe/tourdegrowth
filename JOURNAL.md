@@ -706,7 +706,7 @@ Aucune autre spec n'a bougé : le panneau est toujours là, plié, sous la carte
 
 Le tout reste « à relire » pour A18.d. Après la relecture : 3 029 tests unitaires (6 de plus), et les specs du moteur repassées sur le nouveau build.
 
-## A18 T3.a : une question pour commencer, puis l'écran « Cibles » (2026-10-02, #PR)
+## A18 T3.a : une question pour commencer, puis l'écran « Cibles » (2026-10-02, #293)
 
 Sixième étape du portage du retour 07, drapeau fermé, et la première de T3 (le parcours), coupé en quatre PR : T3.a (le départ, celle-ci), T3.b (« Enregistre et continue », le pas à pas fondu dans le tableau), T3.c (`AskList` à la place de « À aller chercher »), T3.d (les cibles et les nombres partagés dans les Réglages).
 
