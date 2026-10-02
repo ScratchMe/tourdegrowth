@@ -39,7 +39,22 @@ const REASON_KEY: Record<TableRefusal, keyof EngineStrings["table"]["reasons"]> 
  * and the numbers a shared count would move; nothing is written until
  * « Appliquer », which reads the box again against the month as it is then.
  */
-export function TableEntry({ view, onTemplate, onApply }: { view: EngineView; onTemplate: () => void; onApply: (preview: TablePreview) => boolean }) {
+export function TableEntry({
+  view,
+  onTemplate,
+  onApply,
+  open,
+  onOpenChange,
+  id,
+}: {
+  view: EngineView;
+  onTemplate: () => void;
+  onApply: (preview: TablePreview) => boolean;
+  /** Controlled from the board: the menu's « Saisie en tableau » opens it (A18 T2.a). */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  id?: string;
+}) {
   const { strings, state, ctx } = view;
   const t = strings.table;
   const [text, setText] = useState("");
@@ -63,7 +78,7 @@ export function TableEntry({ view, onTemplate, onApply }: { view: EngineView; on
   };
 
   return (
-    <Disclosure summary={t.title} data-testid="engine-table">
+    <Disclosure summary={t.title} open={open} onOpenChange={onOpenChange} id={id} data-testid="engine-table">
       <div className={styles.table}>
         <p className={styles.lead}>{t.intro}</p>
         <div>

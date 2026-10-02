@@ -42,18 +42,12 @@
   gap: var(--space-6);
 }
 
-.eyebrow {
-  font: var(--meta-sm);
-  letter-spacing: var(--meta-tracking-wide);
-  text-transform: uppercase;
-  color: var(--text-muted);
-  margin: 0;
-}
-
-/* --display-hero-mobile at every width: the full hero size is the landing's
-   (§7 E2.2). Its accent is large text, where --accent-mark passes 3:1. */
+/* The verdict at a size a sentence can be read at (design system extension
+   07, --engine-verdict): it was the landing's hero size, four lines of
+   capitals at 1280 and seven at 390. Still the first slide's title, word for
+   word. Its accent is large text, where --accent-mark passes 3:1. */
 .verdict {
-  font: var(--display-hero-mobile);
+  font: var(--engine-verdict);
   letter-spacing: var(--display-letter-spacing);
   text-transform: uppercase;
   color: var(--text-body);
@@ -61,7 +55,12 @@
   overflow-wrap: anywhere;
 }
 
-/* Focused by script on arrival (R-19), never reachable by Tab: no ring. */
+@media (max-width: 760px) {
+  .verdict {
+    font: var(--engine-verdict-mobile);
+  }
+}
+
 .verdict:focus {
   outline: none;
 }
@@ -102,12 +101,6 @@
 .chipMissing {
   border: var(--border-width) solid var(--border-alert);
   color: var(--text-alert);
-}
-
-.writeFailed {
-  font: var(--body-md);
-  color: var(--text-alert);
-  margin: 0;
 }
 
 /* --- The stage menu and its panel (StageTabs.tsx, 2026-09-26) ----------- */
@@ -578,33 +571,9 @@
   padding: 0;
 }
 
-/* --- Actions ----------------------------------------------------------- */
-.actions {
+/* --- The slides, quietly, while they are not the next step (A18 T2.a) --- */
+.slidesQuiet {
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-4);
-  align-items: center;
-}
-
-@media (max-width: 760px) {
-  .actions > :first-child {
-    width: 100%;
-  }
-}
-
-/* --- The eyebrow row: settings and the way back to the step-by-step (2026-09-25) --- */
-.eyebrowRow {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-4);
-}
-
-.headActions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-3);
 }
 
 /* --- « Et si » on the whole funnel ------------------------------------ */

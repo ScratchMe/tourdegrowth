@@ -4,7 +4,7 @@ import type { Locator, Page } from "@playwright/test";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import { EXAMPLE_EXPECTED, exampleState } from "../src/lib/engine/__tests__/fixtures";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, openFold, SKIP_ADMIN_REASON, test, trackedEvents } from "./helpers";
-import { activeEngineKey, openWords, storedEngineEntry, writeEngineSeed } from "./engine-helpers";
+import { activeEngineKey, openWords, storedEngineEntry, writeEngineSeed, openEngineMenu } from "./engine-helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
 // owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
@@ -268,7 +268,7 @@ test.describe("asking and collecting", () => {
     await expect(page.getByTestId("engine-sheet-acq-signup-rate")).toBeVisible();
   });
 
-  test("a returning visit shows how far you got and what is waiting on someone", async ({ page }) => {
+  test("a returning visit says the last visit, the one next step, and what is waiting on someone", async ({ page }) => {
     await startEngine(page);
     const day = 86_400_000;
     await page.evaluate(
@@ -287,12 +287,13 @@ test.describe("asking and collecting", () => {
       { key: await activeEngineKey(page), day },
     );
     await page.reload();
-    const band = page.getByTestId("engine-resume");
-    await expect(band).toBeVisible();
-    await expect(band).toContainText("last visit 3 days ago");
-    await expect(band).toContainText("to follow up");
-    await band.getByTestId("engine-resume-continue").click();
-    // "Continue" opens the cheapest number still to fill: a five-minute one.
+    // One card (A18 T2.a): the last visit, the primary, then the request to follow up with its own action.
+    await expect(page.locator("#engine-next")).toHaveText("Last visit · 3 days ago");
+    const asked = page.getByTestId("engine-next-asked-support");
+    await expect(asked).toHaveText(/^Asked Support 10 days ago: viral coefficient \(K\), no answer typed yet\./);
+    await expect(asked.getByTestId("engine-request-copy")).toHaveText("Follow up");
+    await page.getByTestId("engine-next-number").click();
+    // « Next number » opens the first five-minute number still to fill.
     await expect(page.locator('[data-testid^="engine-sheet-"]:visible')).toHaveCount(1);
   });
 });
@@ -304,8 +305,8 @@ test.describe("the §6.0 example on the board", () => {
       await openExample(page, locale);
       const copy = ENGINE_COPY.coverage.found[locale].replace("{n}", "11").replace("{N}", "17");
       await expect(page.getByTestId("engine-coverage")).toContainText(copy);
-      // Same day, nothing waiting, nothing left to fill: no resume band repeating the coverage.
-      await expect(page.getByTestId("engine-resume")).toHaveCount(0);
+      // The next step is always there (A18 T2.a): one card under the verdict, one primary.
+      await expect(page.getByTestId("engine-next")).toBeVisible();
 
       // The board's own funnel — the folded « what if » below draws a second one.
       const peloton = page.getByTestId("engine-board-peloton");
@@ -438,13 +439,11 @@ test.describe("the §6.0 example on the board", () => {
     await noHorizontalScroll(page);
   });
 
-  test("a returning visit says the band's own sentence when something is waiting", async ({ page }) => {
+  test("a returning visit says when, and the request waiting on someone, a week old", async ({ page }) => {
     // Three days after the example's last save; the k-factor request (20 Sept.) is then a week old.
     await openExample(page, "en", new Date(2026, 8, 27, 12));
-    const band = page.getByTestId("engine-resume");
-    await expect(band).toBeVisible();
-    await expect(band).toContainText("You've found 11 of 17 numbers. Since your last visit, 3 days ago:");
-    await expect(band).toContainText("to follow up");
+    await expect(page.locator("#engine-next")).toHaveText("Last visit · 3 days ago");
+    await expect(page.locator('[data-testid^="engine-next-asked-"]')).toHaveText(/7 days ago: viral coefficient \(K\), no answer typed yet\./);
   });
 });
 
@@ -459,6 +458,7 @@ test.describe("leaving the device and coming back", () => {
     await expect(page.getByTestId("engine-coverage")).toContainText("1 of 17 numbers found");
 
     const downloadP = page.waitForEvent("download");
+    await openEngineMenu(page);
     await page.getByTestId("engine-save-json").click();
     const download = await downloadP;
     const path = await download.path();
@@ -491,6 +491,7 @@ test.describe("leaving the device and coming back", () => {
 
   test("erasing asks for the word first, then leaves nothing on the device", async ({ page }) => {
     await startEngine(page);
+    await openEngineMenu(page);
     await page.getByTestId("engine-erase-open").click();
     const confirm = page.getByTestId("engine-erase-confirm");
     await expect(confirm).toBeDisabled();
@@ -609,9 +610,11 @@ test.describe("accessibility of each screen", () => {
     await expectNoSeriousA11y(page, "triage");
     await page.getByTestId("engine-collect-disclosure").locator("summary").click();
     await expectNoSeriousA11y(page, "collect");
+    await openEngineMenu(page);
     await page.getByTestId("engine-import-open-screen").click();
     await expectNoSeriousA11y(page, "import");
     await page.getByTestId("engine-import-cancel").click();
+    await openEngineMenu(page);
     await page.getByTestId("engine-erase-open").click();
     await expectNoSeriousA11y(page, "erase");
   });

@@ -3,7 +3,7 @@ import type { Locator, Page } from "@playwright/test";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import { exampleState, hybridState } from "../src/lib/engine/__tests__/fixtures";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
-import { engineSeed, storedEngineEntry } from "./engine-helpers";
+import { engineSeed, nextStep, openEngineMenu, storedEngineEntry } from "./engine-helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
 // owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
@@ -205,7 +205,9 @@ async function reopen(page: Page, locale: "fr" | "en") {
   await expect(page.getByTestId("engine-board")).toBeVisible();
 }
 
+/** « Changer ou ajouter un moteur », in the engine bar's menu (A18 T2.a). */
 async function openSwitcher(page: Page) {
+  await openEngineMenu(page);
   const details = page.getByTestId("engine-switcher");
   if ((await details.getAttribute("open")) === null) await details.locator("summary").click();
 }
@@ -214,14 +216,15 @@ async function openSwitcher(page: Page) {
 async function measureA14(page: Page, locale: "fr" | "en"): Promise<Record<(typeof A14_SCREENS)[number], number>> {
   const out = {} as Record<(typeof A14_SCREENS)[number], number>;
   await seedExample(page, locale);
-  await expect(page.getByTestId("engine-month-next")).toBeVisible();
+  await expect(nextStep(page, "start-month")).toBeVisible();
   out.month = await overflow(page);
   await page.getByTestId("engine-month-start").click();
-  await expect(page.getByTestId("engine-month-next")).toHaveCount(0);
+  await expect(nextStep(page, "start-month")).toHaveCount(0);
   out.started = await overflow(page);
   // Newest first: the month before is the second.
+  await openEngineMenu(page);
   await page.getByTestId("engine-month-select").selectOption({ index: 1 });
-  await expect(page.getByTestId("engine-month-past")).toBeVisible();
+  await expect(nextStep(page, "back-to-current")).toBeVisible();
   out.past = await overflow(page);
 
   await reopen(page, locale);
@@ -233,6 +236,7 @@ async function measureA14(page: Page, locale: "fr" | "en"): Promise<Record<(type
 
   await reopen(page, locale);
   await openSwitcher(page);
+  await openEngineMenu(page);
   await page.getByTestId("engine-delete-open").click();
   await expect(page.getByTestId("engine-delete")).toBeVisible();
   out.delete = await overflow(page);
@@ -247,6 +251,7 @@ async function measureA14(page: Page, locale: "fr" | "en"): Promise<Record<(type
   await reopen(page, locale);
   const file = exampleState();
   file.snapshots[0]!.targets["rev.paid-conversion"] = 12;
+  await openEngineMenu(page);
   await page.getByTestId("engine-import-open-screen").click();
   await page.getByTestId("engine-import-file").setInputFiles({ name: "laptop.json", mimeType: "application/json", buffer: Buffer.from(JSON.stringify(file)) });
   await page.getByTestId("engine-import-choices").getByRole("radio").nth(2).check();
@@ -308,6 +313,7 @@ test.describe("the complete engine's screens (§19.13, A14 T7)", () => {
     await expect(page.getByTestId("engine-table-preview")).toBeVisible();
     expect(await serious()).toEqual([]);
 
+    await openEngineMenu(page);
     await page.getByTestId("engine-import-open-screen").click();
     await page.getByTestId("engine-import-file").setInputFiles({ name: "laptop.json", mimeType: "application/json", buffer: Buffer.from(JSON.stringify(exampleState())) });
     await expect(page.getByTestId("engine-import-choices")).toBeVisible();
@@ -315,6 +321,7 @@ test.describe("the complete engine's screens (§19.13, A14 T7)", () => {
 
     await reopen(page, "fr");
     await openSwitcher(page);
+    await openEngineMenu(page);
     await page.getByTestId("engine-delete-open").click();
     await expect(page.getByTestId("engine-delete")).toBeVisible();
     expect(await serious()).toEqual([]);

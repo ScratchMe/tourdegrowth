@@ -3,7 +3,7 @@ import { METRIC_SHAPES, motionShapes, type MetricShape } from "@/lib/engine/cata
 import type { NextMonth } from "@/lib/engine/series";
 import type { MetricEntry, MetricId, Snapshot } from "@/lib/engine/types";
 import { collectPlan, type CollectTools } from "../collect";
-import { nextStepFor, type NextStepChoice, type NextStepFacts } from "../next-step";
+import { nextSelfNumber, nextStepFor, type NextStepChoice, type NextStepFacts } from "../next-step";
 
 /**
  * The board's one next step (A18 T0, `NextStep.prompt.md`): a fixed order,
@@ -159,5 +159,28 @@ describe("nextStepFor reads the collect plan, so the next step and the lists agr
     // No number of the catalogue is « build » today; the rank is fixed for the day one is.
     const shapes: MetricShape[] = METRIC_SHAPES.map((s) => (s.id === "acq.top-channel-share" ? { ...s, effort: "build" } : s));
     expect(step({ ...all(QUICK, found), ...all(ASK, found) }, { shapes })).toEqual({ kind: "number", id: "acq.top-channel-share", effort: "build" });
+  });
+});
+
+describe("nextSelfNumber: « Taper d'abord le chiffre suivant » (A18 T2.a)", () => {
+  const self = (metrics: Partial<Record<MetricId, MetricEntry>> = {}) => nextSelfNumber(collectPlan(snapshot(metrics), NOW, SELF_SERVE), SELF_SERVE);
+
+  it("is the number rank 4 opens while a five-minute one is left", () => {
+    const choice = step();
+    expect(choice.kind).toBe("number");
+    expect(self()).toEqual({ id: (choice as Extract<NextStepChoice, { kind: "number" }>).id, effort: "self-5min" });
+  });
+
+  it("beside the requests (rank 5), is the hour-long number rank 6 would open once they are sent", () => {
+    const quickDone = all(QUICK, found);
+    expect(step(quickDone).kind).toBe("ask-all");
+    const after = step({ ...quickDone, ...all(ASK, asked("finance", 1)) });
+    expect(after.kind).toBe("number");
+    expect(self(quickDone)).toEqual({ id: (after as Extract<NextStepChoice, { kind: "number" }>).id, effort: "self-1h" });
+    expect(LONG).toContain(self(quickDone)!.id);
+  });
+
+  it("is null once nothing is left to find alone", () => {
+    expect(self({ ...all(QUICK, found), ...all(LONG, found), ...all(SELF_SERVE.filter((s) => s.effort === "build").map((s) => s.id), found) })).toBeNull();
   });
 });

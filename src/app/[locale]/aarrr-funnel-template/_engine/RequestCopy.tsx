@@ -37,6 +37,7 @@ export function RequestCopy({
   view,
   onCopied,
   variant = "secondary",
+  inline = false,
 }: {
   role: RoleId;
   ids: MetricId[];
@@ -44,6 +45,8 @@ export function RequestCopy({
   view: EngineView;
   onCopied: () => void;
   variant?: "primary" | "secondary" | "quiet";
+  /** On one row, the confirmation beside the button: a line's action in the board's next step (A18 T2.a). */
+  inline?: boolean;
 }) {
   const [outcome, setOutcome] = useState<{ ok: boolean; text: string } | null>(null);
   // The numbers asked, kept from the copy: copying marks them requested, which empties `ids`.
@@ -91,7 +94,7 @@ export function RequestCopy({
   // fallback at all.
   if (ids.length === 0 && !outcome) return null;
   return (
-    <div className={styles.request}>
+    <div className={[styles.request, inline ? styles.requestInline : ""].filter(Boolean).join(" ")}>
       {ids.length ? (
         <Button variant={variant} onClick={() => void copy()} data-testid="engine-request-copy">
           {label}

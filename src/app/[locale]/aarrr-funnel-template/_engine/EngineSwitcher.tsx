@@ -14,11 +14,12 @@ export function engineName(listing: Pick<EngineListing, "companyLabel" | "create
 }
 
 /**
- * « Moteur : {nom} » at the head of the board (engine spec §19.1.5, C32 Q12,
- * A14 T5): every engine of the device, the one on screen said so, then
- * « Nouveau moteur » — greyed, with its reason, at `MAX_ENGINES` — and
- * « Supprimer ce moteur ». Folded: one engine is the common case, and the
- * board is about its numbers, not about the device.
+ * « Changer ou ajouter un moteur », in the engine bar's menu (engine spec
+ * §19.1.5, C32 Q12, A14 T5; the menu since A18 T2.a): every engine of the
+ * device, the one on screen said so, then « Nouveau moteur » — greyed, with
+ * its reason, at `MAX_ENGINES`. Folded: one engine is the common case, and
+ * the board is about its numbers, not about the device. Deleting one is in
+ * the menu's « Fichier ».
  *
  * Names and months only (`EngineListing`): switching reads the other engine
  * from the device, the list never carries its numbers.
@@ -30,7 +31,6 @@ export function EngineSwitcher({
   locale,
   onSwitch,
   onNew,
-  onDelete,
 }: {
   engines: readonly EngineListing[];
   currentId: string;
@@ -38,19 +38,11 @@ export function EngineSwitcher({
   locale: "en" | "fr";
   onSwitch: (id: string) => void;
   onNew: () => void;
-  onDelete: () => void;
 }) {
   const e = strings.engines;
-  const current = engines.find((x) => x.id === currentId);
   const full = engines.length >= MAX_ENGINES;
   return (
-    <Disclosure
-      size="sm"
-      rule={false}
-      className={styles.switcher}
-      summary={fill(e.current, { name: current ? engineName(current, strings, locale) : strings.workbench.noCompany })}
-      data-testid="engine-switcher"
-    >
+    <Disclosure size="sm" rule={false} className={styles.switcher} summary={strings.bar.switch} data-testid="engine-switcher">
       <ul className={styles.switcherList} data-testid="engine-switcher-list">
         {engines.map((listing) => {
           const name = engineName(listing, strings, locale);
@@ -71,9 +63,6 @@ export function EngineSwitcher({
       <div className={styles.panelActions}>
         <Button variant="secondary" size="sm" onClick={onNew} disabled={full} aria-describedby={full ? "engine-switcher-full" : undefined} data-testid="engine-new">
           {e.new}
-        </Button>
-        <Button variant="quiet" size="sm" onClick={onDelete} data-testid="engine-delete-open">
-          {e.delete}
         </Button>
       </div>
       {full ? (

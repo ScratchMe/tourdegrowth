@@ -260,20 +260,6 @@ export const ENGINE_COPY = {
   },
 
   board: {
-    // TODO: à relire (convention 6) — renommé le 2026-09-30 (A7.2, C2 : « Moteur de growth »).
-    eyebrow: {
-      fr: "Ton moteur de growth · {model} · cohorte : {cohort} · flux : {month}",
-      en: "Your growth engine · {model} · {cohort} cohort · {month} flows",
-    },
-    /**
-     * TODO: à relire (convention 6) — neuf le 2026-10-01 (A7.3.c S2, §18.7) : no cohort line. Sales-assisted
-     * alone (`{month}` its three months, « juin à août 2026 ») and the
-     * hybrid (`{month}` the flows' month).
-     */
-    eyebrowNoCohort: {
-      fr: "Ton moteur de growth · {model} · flux : {month}",
-      en: "Your growth engine · {model} · {month} flows",
-    },
     smallCohort: {
       fr: "Petits effectifs : moins de 100 inscrits dans cette cohorte. Lis la direction, pas les décimales.",
       en: "Small numbers: fewer than 100 sign-ups in this cohort. Read the direction, not the decimals.",
@@ -291,6 +277,73 @@ export const ENGINE_COPY = {
     steps: { fr: "Reprendre le pas à pas", en: "Back to step by step" },
     collectTitle: { fr: "À aller chercher ({n})", en: "To go and get ({n})" },
     whatIfTitle: { fr: "Et si ?", en: "What if?" },
+  },
+  /**
+   * TODO: à relire (convention 6) — neuf le 2026-10-02 (A18 T2.a, le retour 07 de Claude Design,
+   * design/ds-extension-07-return/COPY.md) : la barre du moteur, sa ligne et son menu. `{name}` : le nom de
+   * l'entreprise, sinon `unnamed` ; `{model}` : `workbench.modelShort` ; `{month}` : le mois affiché (pour
+   * l'assisté seul, ses trois mois de flux).
+   */
+  bar: {
+    line: { fr: "{name} · {model} · {month}", en: "{name} · {model} · {month}" },
+    lineReadOnly: { fr: "{name} · {model} · {month} · lecture seule", en: "{name} · {model} · {month} · read-only" },
+    lineCorrecting: { fr: "{name} · {model} · {month} · en correction", en: "{name} · {model} · {month} · being corrected" },
+    unnamed: { fr: "Moteur sans nom", en: "Unnamed engine" },
+    menu: { fr: "Moteur, mois et fichier", en: "Engine, month and file" },
+    groupEngine: { fr: "Ce moteur", en: "This engine" },
+    switch: { fr: "Changer ou ajouter un moteur", en: "Switch or add an engine" },
+    rename: { fr: "Renommer", en: "Rename" },
+    monthField: { fr: "Mois affiché", en: "Month shown" },
+    groupFile: { fr: "Fichier", en: "File" },
+  },
+  /**
+   * TODO: à relire (convention 6) — neuf le 2026-10-02 (A18 T2.a, le retour 07 de Claude Design) : la
+   * prochaine étape, une seule action principale, choisie par `nextStepFor` (`_engine/next-step.ts`).
+   * `{number}` : le nom d'un chiffre, en milieu de phrase ; `{role}` : `role.*` ; `{list}` : des noms de
+   * chiffres joints ; `{ago}` : `today`, `yesterday` ou `daysAgo`.
+   */
+  next: {
+    where: { fr: "Où tu en es", en: "Where you are" },
+    since: { fr: "Dernière visite · {ago}", en: "Last visit · {ago}" },
+    today: { fr: "aujourd'hui", en: "today" },
+    yesterday: { fr: "hier", en: "yesterday" },
+    daysAgo: { fr: "il y a {n} jours", en: "{n} days ago" },
+    /** Ranks 4 and 6 (`next-step.ts`): why this number, by its effort. */
+    leadQuick: { fr: "Les plus rapides d'abord : tu le trouves seul, en cinq minutes environ.", en: "The quickest first: this one you can find on your own, in about five minutes." },
+    leadLong: { fr: "Plus de chiffre rapide : tu le trouves seul, en une heure environ.", en: "No quick number left: this one you can find on your own, in about an hour." },
+    leadBuild: { fr: "Plus de chiffre rapide : celui-ci est à construire, compte plus d'une heure.", en: "No quick number left: this one needs building, count on more than an hour." },
+    goNumber: { fr: "Passe au chiffre suivant : {number} →", en: "Go to the next number: {number} →" },
+    /** Rank 5, one number to ask for: its screen, « Je le demande » open. */
+    leadAskOne: { fr: "À demander à quelqu'un d'autre : {number}. Envoie la demande maintenant, remplis le reste en attendant.", en: "To ask someone else: {number}. Send the request now, fill in the rest while you wait." },
+    /** The same when nothing is left to find alone: no « rest » to fill while waiting. */
+    leadAskOneOnly: { fr: "À demander à quelqu'un d'autre : {number}. Envoie la demande maintenant.", en: "To ask someone else: {number}. Send the request now." },
+    goAsk: { fr: "Demande à l'équipe {role} : {number} →", en: "Ask {role}: {number} →" },
+    /** Rank 5, two or more: the requests, by role. `{n}` ≥ 2. */
+    leadAskAll: { fr: "{n} chiffres viennent de quelqu'un d'autre : envoie les demandes maintenant, remplis le reste en attendant.", en: "{n} numbers come from someone else: send the requests now, fill in the rest while you wait." },
+    /** The same when nothing is left to find alone: no « rest » to fill while waiting. */
+    leadAskAllOnly: { fr: "{n} chiffres viennent de quelqu'un d'autre : envoie les demandes maintenant.", en: "{n} numbers come from someone else: send the requests now." },
+    goRequests: { fr: "Demande tes {n} chiffres →", en: "Ask for your {n} numbers →" },
+    skipRequests: { fr: "Taper d'abord le chiffre suivant", en: "Type the next number first" },
+    /** Ranks 7 and 8: the slides. */
+    leadWaiting: { fr: "Plus rien à taper : {n} chiffres demandés attendent leur réponse.", en: "Nothing left to type: {n} numbers you asked for are waiting for an answer." },
+    leadWaitingOne: { fr: "Plus rien à taper : un chiffre demandé attend sa réponse.", en: "Nothing left to type: one number you asked for is waiting for an answer." },
+    leadAnswered: { fr: "Chaque chiffre a une réponse.", en: "Every number has an answer." },
+    verdictIsSlide: { fr: "Ton verdict, ci-dessus, est le titre de ta première slide.", en: "Your verdict above is the title of your first slide." },
+    /** Rank 1: the device refused the last write (the lead is `storage.writeFailed`). */
+    goSaveFile: { fr: "Sauvegarde ton moteur dans un fichier (.json) →", en: "Save your engine to a file (.json) →" },
+    /** Rank 2: a past month on screen (the lead is `series.viewing` or `series.correcting`). */
+    goBack: { fr: "Reviens à {month} →", en: "Go back to {month} →" },
+    /** Rank 3: the next month can start (the lead is `series.ready`). */
+    goMonth: { fr: "Démarre {month} →", en: "Start {month} →" },
+    keepFilling: { fr: "Continuer à remplir {month}", en: "Keep filling {month}" },
+    /** A request unanswered long enough to follow up, one line per role. */
+    asked: { fr: "Demandé à l'équipe {role} {ago} : {list}, réponse pas encore saisie.", en: "Asked {role} {ago}: {list}, no answer typed yet." },
+    followUp: { fr: "Relancer", en: "Follow up" },
+    /** While the engine needs a backup: never saved, or changed since. */
+    backup: { fr: "Jamais sauvegardé dans un fichier : Safari peut l'effacer après sept jours d'utilisation sans passage ici.", en: "Never saved to a file: Safari may erase it after seven days of use without a visit here." },
+    backupChanged: { fr: "Modifié depuis ta sauvegarde du {date} : Safari peut l'effacer après sept jours d'utilisation sans passage ici.", en: "Changed since you saved it on {date}: Safari may erase it after seven days of use without a visit here." },
+    /** At the board's end while the slides are not the next step. */
+    slidesQuiet: { fr: "Prépare tes slides avec ce que tu as →", en: "Prepare your slides with what you have →" },
   },
 
   coverage: {
@@ -780,11 +833,9 @@ export const ENGINE_COPY = {
       fr: "La copie n'a pas marché dans ce navigateur : sélectionne le texte ci-dessous.",
       en: "Copying didn't work in this browser: select the text below.",
     },
-    lastVisit: { fr: "dernière visite il y a {n} jours", en: "last visit {n} days ago" },
-    lastVisitOne: { fr: "dernière visite hier", en: "last visit yesterday" },
     importOpen: { fr: "Ouvrir ce fichier", en: "Open this file" },
     noCompany: { fr: "Sans nom", en: "Unnamed" },
-    /** The model as the board's eyebrow says it — the setup's labels are sentences, too long for a mono line. */
+    /** The model as the engine bar's line says it (A18 T2.a) — the setup's labels are sentences, too long for a mono line. */
     modelShort: {
       selfserve: { fr: "libre-service", en: "self-serve" },
       // TODO: à relire (convention 6) — neuf le 2026-10-01 (A7.3.c S2, §18.7).
@@ -2382,7 +2433,6 @@ export const ENGINE_COPY = {
   },
   // TODO: à relire (convention 6) — neuf le 2026-10-01 (A14 T5, §19.1.5) : plusieurs moteurs sur un appareil. `{name}` : le nom de l'entreprise, sinon `unnamed`.
   engines: {
-    current: { fr: "Moteur : {name}", en: "Engine: {name}" },
     unnamed: { fr: "Moteur sans nom, créé le {date}", en: "Unnamed engine, created {date}" },
     upTo: { fr: "jusqu'à {month}", en: "up to {month}" },
     onScreen: { fr: "à l'écran", en: "on screen" },
@@ -2517,49 +2567,6 @@ export const ENGINE_COPY = {
       slgCustomers: { fr: "clients assistés en fin de mois", en: "sales-assisted customers at the month's end" },
     },
   },
-  resume: {
-    band: {
-      fr: "Tu as trouvé {n} chiffres sur {N}. Depuis ta dernière visite, il y a {days} jours : {pending}.",
-      en: "You've found {n} of {N} numbers. Since your last visit, {days} days ago: {pending}.",
-    },
-    /** `days === 1`. */
-    bandOne: {
-      fr: "Tu as trouvé {n} chiffres sur {N}. Depuis ta visite d'hier : {pending}.",
-      en: "You've found {n} of {N} numbers. Since your visit yesterday: {pending}.",
-    },
-    /** `days === 0`. */
-    bandToday: {
-      fr: "Tu as trouvé {n} chiffres sur {N}. Depuis ta visite de tout à l'heure : {pending}.",
-      en: "You've found {n} of {N} numbers. Since your visit earlier today: {pending}.",
-    },
-    pendingRequests: {
-      fr: "{n} demandes à relancer ({role}, {metric})",
-      en: "{n} requests to follow up ({role}, {metric})",
-    },
-    pendingRequestsOne: {
-      fr: "1 demande à relancer ({role}, {metric})",
-      en: "1 request to follow up ({role}, {metric})",
-    },
-    continue: { fr: "Reprendre", en: "Continue" },
-    remind: { fr: "Relancer : {role}", en: "Follow up: {role}" },
-    /**
-     * TODO: à relire (convention 6) — neuf le 2026-10-01 (A7.3.c S2, ENGINE.md §18.7 E6) : the band
-     * counts per motion. `{counts}`: `hybrid.motionCount` per ticked motion,
-     * joined with « · » (« libre-service 11 sur 17 · assisté 10 sur 15 »).
-     */
-    bandMotions: {
-      fr: "Chiffres trouvés : {counts}. Depuis ta dernière visite, il y a {days} jours : {pending}.",
-      en: "Numbers found: {counts}. Since your last visit, {days} days ago: {pending}.",
-    },
-    bandMotionsOne: {
-      fr: "Chiffres trouvés : {counts}. Depuis ta visite d'hier : {pending}.",
-      en: "Numbers found: {counts}. Since your visit yesterday: {pending}.",
-    },
-    bandMotionsToday: {
-      fr: "Chiffres trouvés : {counts}. Depuis ta visite de tout à l'heure : {pending}.",
-      en: "Numbers found: {counts}. Since your visit earlier today: {pending}.",
-    },
-  },
   /**
    * TODO: à relire (convention 6) — neuf le 2026-10-01 (A14 T2, moteur-complet.md §19.2.1-§19.2.5) :
    * the screens of the monthly series — every key of this group. `{month}`: a month, formatted
@@ -2571,13 +2578,11 @@ export const ENGINE_COPY = {
     monthLabel: { fr: "Mois", en: "Month" },
     /** A past month, read only: the band above the board. */
     viewing: { fr: "Tu regardes {month}, en lecture seule.", en: "You're looking at {month}, read-only." },
-    backTo: { fr: "Revenir à {month}", en: "Back to {month}" },
     correct: { fr: "Corriger ce mois", en: "Correct this month" },
     correcting: { fr: "Tu corriges {month} : les écarts du mois suivant se recalculent.", en: "You're correcting {month}: the next month's changes recompute." },
     doneCorrecting: { fr: "Terminer la correction", en: "Done correcting" },
     /** The flows' month is over (§19.2.1): the next month can start. */
     ready: { fr: "Mois clos : {month}. Ses chiffres peuvent commencer ; les cibles et les définitions suivent, les valeurs jamais.", en: "Month over: {month}. Its numbers can start; targets and definitions carry over, values never do." },
-    start: { fr: "Démarrer {month}", en: "Start {month}" },
     /** `MAX_MONTHS` reached (§19.1.6). */
     full: { fr: "Ce moteur suit déjà {max} mois, son plafond : sauvegarde le fichier, puis démarre un nouveau moteur pour la suite.", en: "This engine already tracks {max} months, its limit: save the file, then start a new engine for what comes next." },
     /** On a number's row: how far it moved since the month before (§19.2.5). Signs and words, never a colour. */

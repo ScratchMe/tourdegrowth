@@ -60,3 +60,20 @@ export async function openWords(sheet: Locator): Promise<void> {
   const words = sheet.locator('details[data-testid^="engine-words-"]');
   if (!(await words.evaluate((d) => (d as HTMLDetailsElement).open))) await words.locator("summary").click();
 }
+
+/**
+ * The engine bar's menu, « Moteur, mois et fichier » (A18 T2.a, design system
+ * extension 07): the switcher, the month shown and its reminder, the file
+ * actions. Closed on the board; opened here when it is not, so a spec can
+ * reach what it holds. Nothing when it is open already — a second click would
+ * fold it again.
+ */
+export async function openEngineMenu(page: Page): Promise<void> {
+  const menu = page.getByTestId("engine-bar-menu");
+  if (!(await menu.evaluate((d) => (d as HTMLDetailsElement).open))) await menu.locator(":scope > summary").click();
+}
+
+/** The board's next step (A18 T2.a) when it is that step (`nextStepFor`'s kind): « Démarre {mois} », a past month, the slides… */
+export function nextStep(page: Page, kind: string): Locator {
+  return page.locator(`[data-testid="engine-next"][data-step="${kind}"]`);
+}

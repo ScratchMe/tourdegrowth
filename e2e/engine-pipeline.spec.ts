@@ -3,7 +3,7 @@ import { ENGINE_COPY } from "@/content/engine-copy";
 import { hybridState, salesAssistedState, withMonthBefore } from "../src/lib/engine/__tests__/fixtures";
 import type { EngineState } from "../src/lib/engine/types";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
-import { storedEngineEntry, writeEngineSeed } from "./engine-helpers";
+import { storedEngineEntry, writeEngineSeed, openEngineMenu } from "./engine-helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
 // owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
@@ -43,7 +43,7 @@ test("no target yet: the band says where to add it; set in the settings, the ope
   await expect(page.getByTestId("engine-pipeline-no-target")).toHaveText(P.noTarget.en);
   await expect(page.getByTestId("engine-pipeline-coverage")).toHaveCount(0);
 
-  await page.getByTestId("engine-open-settings").click();
+  await page.getByTestId("engine-bar-settings").click();
   await page.getByTestId("engine-setup-pipeline-target").fill("200000");
   await page.getByTestId("engine-setup-pipeline-threshold").fill("3");
   await page.getByTestId("engine-settings-save").click();
@@ -67,6 +67,7 @@ test("the month before's coverage, and a past month read on its own shows its ow
   await expect(band.getByTestId("engine-pipeline-coverage")).toHaveText("Couverture : 2,6× l'objectif du trimestre");
   await expect(band.getByTestId("engine-pipeline-previous")).toHaveText("En juillet 2026 : 2,1×");
 
+  await openEngineMenu(page);
   await page.getByTestId("engine-month-select").selectOption({ index: 1 });
   const past = page.getByTestId("engine-column-slg").getByTestId("engine-pipeline");
   await expect(past.getByTestId("engine-pipeline-coverage")).toHaveText("Couverture : 2,1× l'objectif du trimestre");

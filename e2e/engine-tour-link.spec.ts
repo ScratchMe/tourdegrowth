@@ -91,7 +91,7 @@ for (const locale of ["fr", "en"] as const) {
     await expect(await mirrorState(page)).toBe("unlinked");
 
     // Link from the settings.
-    await page.getByTestId("engine-open-settings").click();
+    await page.getByTestId("engine-bar-settings").click();
     const box = page.getByTestId("engine-setup-tour").getByRole("checkbox");
     await expect(page.getByTestId("engine-setup-tour")).toContainText(TOUR_DAY[locale]);
     await expect(box).not.toBeChecked();
@@ -100,7 +100,7 @@ for (const locale of ["fr", "en"] as const) {
     await expect(page.getByTestId("engine-mirror")).toHaveAttribute("data-state", "linked");
 
     // Unlink from the settings: the hint says the Tour stays, and it does.
-    await page.getByTestId("engine-open-settings").click();
+    await page.getByTestId("engine-bar-settings").click();
     await expect(box).toBeChecked();
     await box.uncheck();
     await expect(page.getByTestId("engine-settings-unlink-hint")).toHaveText(ENGINE_COPY.setup.tourUnlinkHint[locale]);

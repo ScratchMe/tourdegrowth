@@ -4,7 +4,7 @@ import { ENGINE_COPY } from "@/content/engine-copy";
 import { hybridState } from "../src/lib/engine/__tests__/fixtures";
 import type { EngineState, MetricId } from "../src/lib/engine/types";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
-import { engineSeed } from "./engine-helpers";
+import { engineSeed, openEngineMenu } from "./engine-helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
 // owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
@@ -105,19 +105,20 @@ for (const locale of ["fr", "en"] as const) {
       await expect(page.getByTestId("engine-column-slg").getByTestId("engine-coverage")).toContainText(found(locale, 5, 15));
 
       // 7 — unticked: said before saving, the board is self-serve's; ticked again, its five numbers are back.
-      await page.getByTestId("engine-open-settings").click();
+      await page.getByTestId("engine-bar-settings").click();
       await page.getByTestId("engine-settings").getByTestId("engine-motion-slg").uncheck();
       await expect(page.getByTestId("engine-settings-resets")).not.toBeEmpty();
       await page.getByTestId("engine-settings-save").click();
       await expect(page.getByTestId("engine-board")).toHaveAttribute("data-motions", "plg");
       await expect(page.getByTestId("engine-coverage")).toContainText(found(locale, 11, 17));
-      await page.getByTestId("engine-open-settings").click();
+      await page.getByTestId("engine-bar-settings").click();
       await page.getByTestId("engine-settings").getByTestId("engine-motion-slg").check();
       await page.getByTestId("engine-settings-save").click();
       await expect(page.getByTestId("engine-column-slg").getByTestId("engine-coverage")).toContainText(found(locale, 5, 15));
 
       // 8 — exported, the device cleared, imported: the same counts.
       const download = page.waitForEvent("download");
+      await openEngineMenu(page);
       await page.getByTestId("engine-save-json").click();
       const path = (await (await download).path())!;
       expect(JSON.parse(await readFile(path, "utf8")).setup.motions).toEqual({ plg: true, slg: true });
