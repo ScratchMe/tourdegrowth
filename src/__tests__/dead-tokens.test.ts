@@ -34,6 +34,58 @@ const WAITING: Record<string, string> = {
 };
 // The fifteen --viz-cat-* and --viz-seq-* waited here until A2.2 (2026-09-29), which removed them: nothing read them.
 
+/**
+ * The simpler engine (A18, 2026-10-02) ports tokens/engine.css whole in T0,
+ * and its screens a step at a time: each token waits for the step whose
+ * component reads it first (the return's own CSS says which). A step that
+ * ports its component and forgets to take its tokens off this list fails the
+ * third test; a step that is dropped leaves its tokens here, in plain sight.
+ */
+const A18_STEP = {
+  T1: "A18 T1, the number's screen (NumberSheet, TrapNote, HowItCompares)",
+  T2: "A18 T2, the board (EngineBar, NextStep, EngineProgress, NumberList, LeverCard, the verdict)",
+  T4: "A18 T4, the page (EngineLanding)",
+  T5: "A18 T5, the hybrid (TotalBand)",
+} as const;
+const WAITING_FOR_A18: Record<string, string> = {
+  "--engine-measure": A18_STEP.T1,
+  "--engine-number-title": A18_STEP.T1,
+  "--engine-number-title-mobile": A18_STEP.T1,
+  "--engine-formula": A18_STEP.T1,
+  "--engine-advice-edge": A18_STEP.T1,
+  "--engine-key-width": A18_STEP.T1,
+  "--engine-key-bar": A18_STEP.T1,
+  "--engine-key-tick-width": A18_STEP.T1,
+  "--engine-key-tick-height": A18_STEP.T1,
+  "--engine-key-tick-radius": A18_STEP.T1,
+  "--engine-row-height": A18_STEP.T2,
+  "--engine-mark-size": A18_STEP.T2,
+  "--engine-mark-gap": A18_STEP.T2,
+  "--engine-mark-group-gap": A18_STEP.T2,
+  "--engine-mark-ink": A18_STEP.T2,
+  "--engine-mark-ring": A18_STEP.T2,
+  "--engine-mark-hatch": A18_STEP.T2,
+  "--engine-slider-thumb": A18_STEP.T2,
+  "--engine-slider-track": A18_STEP.T2,
+  "--engine-slider-track-bg": A18_STEP.T2,
+  "--engine-slider-fill": A18_STEP.T2,
+  "--engine-slider-thumb-bg": A18_STEP.T2,
+  "--engine-slider-thumb-edge": A18_STEP.T2,
+  "--engine-verdict": A18_STEP.T2,
+  "--engine-verdict-mobile": A18_STEP.T2,
+  "--engine-stage-title": A18_STEP.T2,
+  "--engine-figure-lg": A18_STEP.T2,
+  "--engine-diagnosis-edge": A18_STEP.T2,
+  "--engine-pending-edge": A18_STEP.T2,
+  "--engine-accent": A18_STEP.T2,
+  "--engine-reserve": A18_STEP.T4,
+  "--engine-reserve-mobile": A18_STEP.T4,
+  "--engine-landing-title": A18_STEP.T4,
+  "--engine-landing-title-mobile": A18_STEP.T4,
+  "--engine-figure": A18_STEP.T5,
+};
+Object.assign(WAITING, WAITING_FOR_A18);
+
 const sheets = readdirSync(TOKENS).filter((f) => f.endsWith(".css"));
 const declared = new Map<string, string>();
 for (const sheet of sheets) {

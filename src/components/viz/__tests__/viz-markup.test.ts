@@ -56,6 +56,30 @@ describe("BulletChart markup", () => {
   });
 });
 
+describe("BulletChart's band and empty value (design system extension 07)", () => {
+  it("draws the published range as a bracket AFTER the track, never inside it", () => {
+    const html = bullet({ value: 3, target: 5, domain: [0, 10], band: [2, 5] });
+    expect(html.match(/data-band/g)).toHaveLength(1);
+    expect(html).toContain('style="left:20%;width:30%"');
+    // Under the track, not on it: the track closes before the bracket opens.
+    const track = html.indexOf('aria-hidden="true"');
+    const trackEnd = html.indexOf("</div>", track);
+    expect(html.indexOf("data-band")).toBeGreaterThan(trackEnd);
+  });
+
+  it("draws no bracket without a band — a chart from before is unchanged", () => {
+    expect(bullet({ value: 3, target: 5, domain: [0, 10] })).not.toContain("data-band");
+  });
+
+  it("draws no bar for a figure not typed yet, and keeps the target and the range", () => {
+    const html = bullet({ value: null, target: 5, domain: [0, 10], band: [2, 5] });
+    expect(html).not.toMatch(/style="width:/);
+    expect(html).not.toContain("data-overflow");
+    expect(html).toContain('style="left:50%"');
+    expect(html).toContain("data-band");
+  });
+});
+
 describe("ChartFrame markup", () => {
   it("captions the figure with its head, as the FIRST child, even with a source and a data table", () => {
     const html = frame({ source: "Flixo, monthly, 2026", data: DATA });

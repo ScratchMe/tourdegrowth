@@ -1,0 +1,122 @@
+/*
+ * Tokens of the growth engine, simpler — design system extension 07
+ * (design/ds-extension-07-return/tokens/engine.css), ported by A18 T0.
+ *
+ * Every value the engine's new screens need that the system does not already
+ * name. Built on the existing layers (colors, typography, spacing, shape,
+ * spaces): no new primitive; everything below is a semantic or derived name
+ * over existing tokens, except the measures, which are new.
+ *
+ * The engine only ever renders in the paper world, so nothing is redefined
+ * for the night. The colour block is still declared on `[data-world]`, as
+ * the derived layer of colors.css is: a var() resolves where it is declared,
+ * and one built on a semantic token must follow a world's rebinding, or it
+ * freezes at paper (token-sources.test.ts holds the rule).
+ *
+ * Ported a step at a time: the tokens a step of A18 does not read yet wait in
+ * dead-tokens.test.ts, under the step that will, and leave the list when it
+ * does.
+ */
+
+:root {
+  /* ── Measures ─────────────────────────────────────────────────────────── */
+
+  /* One column for the whole tool (board, number screen, settings), at every
+   * width. The board was 1,040px wide with two- and five-column grids; one
+   * reading column is what makes 390 and 1280 the same engine (brief: "the
+   * same engine at 390px as at 1280px"). */
+  --engine-measure: 720px;
+
+  /* A row of the numbers list and of the engine menu: a whole row is the tap
+   * target, so it is never under --hit-min. */
+  --engine-row-height: var(--space-13); /* 48px */
+
+  /* Status marks (EngineProgress, NumberList): one dot per number. */
+  --engine-mark-size: 12px;
+  --engine-mark-gap: var(--space-2);
+  --engine-mark-group-gap: var(--space-5);
+
+  /* The first instant on return (EngineLanding): the tool's place is held at
+   * this height until the engine is read, so nothing jumps under the reader. */
+  --engine-reserve: 560px;
+  --engine-reserve-mobile: 640px;
+
+  /* HowItCompares' legend draws each mark as BulletChart does: the bar
+   * (BulletChart sm track), the target tick (3px, as BulletChart's target). */
+  --engine-key-width: 16px;
+  --engine-key-bar: 8px;
+  --engine-key-tick-width: 3px;
+  --engine-key-tick-height: 14px;
+  --engine-key-tick-radius: 1px;
+
+  /* The slider of LeverCard: its thumb, and the height of its tap area. */
+  --engine-slider-thumb: 28px;
+  --engine-slider-track: 8px;
+
+  /* ── Type ─────────────────────────────────────────────────────────────── */
+
+  /* The verdict, on the board. It was set at --display-hero (62px), four
+   * lines of capitals at 1280 and seven at 390. It is the first slide's
+   * title and stays that sentence; it gets a size a sentence can be read at. */
+  --engine-verdict: 700 40px/1.06 var(--font-display);
+  --engine-verdict-mobile: 700 25px/1.08 var(--font-display);
+
+  /* The H1 for a returning reader (EngineLanding): the same words, at the
+   * size of a section title, since it is no longer the page's first read. */
+  --engine-landing-title: var(--display-title);
+  --engine-landing-title-mobile: 700 28px/1.05 var(--font-display);
+
+  /* A number's name on its screen. */
+  --engine-number-title: var(--display-title);
+  --engine-number-title-mobile: 700 28px/1.05 var(--font-display);
+
+  /* A stage's name in the numbers list: the stage tabs' stencil, at the size
+   * of a heading inside a column. */
+  --engine-stage-title: 700 21px/1.1 var(--font-display);
+
+  /* The figure a lever moves, and a total in TotalBand. */
+  --engine-figure: var(--chart-value);
+  --engine-figure-lg: 700 30px/1 var(--font-display);
+
+  /* The formula, inline after its label. */
+  --engine-formula: var(--meta-sm);
+}
+
+:root,
+[data-world] {
+  /* ── Colour, by meaning ──────────────────────────────────────────────── */
+
+  /* Advice: the trap, the "refused to save" line, the window warning in
+   * Settings. Dashed red is the system's "advice" (constraint 5). */
+  --engine-advice-edge: var(--border-width-stamp) dashed var(--border-alert);
+
+  /* Diagnosis: the stage that holds the engine back, in the numbers list.
+   * Solid red edge is the system's "diagnosis" (constraint 5). */
+  --engine-diagnosis-edge: var(--border-width-stamp) solid var(--border-alert);
+
+  /* Pending: a request asked, the engine's first instant. Dashed is "not
+   * yet" (constraint 7). */
+  --engine-pending-edge: var(--border-dashed);
+
+  /* Status marks. found = ink; estimated = the peloton's hatch for a range;
+   * asked = dashed ring (pending); to do = thin ring; can't find = struck
+   * ring. Every mark is ink or --viz-axis on paper: 5.8:1 at the least. */
+  --engine-mark-ink: var(--viz-ink);
+  --engine-mark-ring: var(--viz-axis);
+  --engine-mark-hatch: var(--viz-unknown-fill);
+
+  /* The engine's own blue, for the eyebrow of the engine bar only: the page
+   * already wears it in the band. */
+  --engine-accent: var(--space-engine-accent);
+
+  /* The slider. */
+  --engine-slider-track-bg: var(--surface-sunken);
+  --engine-slider-fill: var(--viz-ink);
+  --engine-slider-thumb-bg: var(--surface-card);
+  --engine-slider-thumb-edge: var(--border-solid);
+
+  /* BulletChart's `band`: the published range, drawn as a bracket under the
+   * track (never on it, so the value bar never hides it). */
+  --viz-band-edge: var(--border-width) solid var(--viz-axis);
+  --viz-band-height: 6px;
+}

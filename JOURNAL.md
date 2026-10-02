@@ -376,6 +376,24 @@ Quatorze composants neufs, deux deltas (`Disclosure`, `BulletChart`), aucun chan
 
 **Consigné** : `design/ds-extension-07-return/COPIE.md`, `docs/decisions.md` (C38, C40 à C42), `CHANTIERS.md` (A18 ouvert, A7.3.d et A14.d absorbés, B10 clos, C sans question ouverte, D14 retiré, D2), `ENGINE.md`, `CLAUDE.md` (l'état), `design/README.md`, `.design-sync/NOTES.md`.
 
+## A18 T0 : le socle du moteur simplifié, les jetons, deux deltas et la prochaine étape (2026-10-02, #283)
+
+Première étape du portage du retour 07 (A18), drapeau fermé : rien ne change à l'écran, tout ce qui suit sert T1 à T5.
+
+**Les jetons** : `src/styles/tokens/engine.css`, importé par `globals.css`, tels que le retour les donne, à un sélecteur près. Le bloc des couleurs est déclaré sur `:root, [data-world]` et non `[data-world=paper]` : la règle des mondes du dépôt (`token-sources.test.ts`, dont le balayage couvre maintenant `engine.css`) veut qu'un jeton bâti sur un jeton sémantique suive un monde qui le redéfinit. Le moteur ne sort jamais du papier, la valeur ne change donc pas. Non-vacuité : le sélecteur du retour remis fait tomber le test sur `--engine-advice-edge`. **Trente-cinq jetons ne sont lus par rien en T0**, et `dead-tokens.test.ts` refuse un jeton sans lecteur : ils attendent dans sa liste, chacun sous l'étape dont le composant le lit le premier (T1, T2, T4, T5, d'après le CSS du retour), et le test oblige chaque étape à les retirer en les lisant. `--engine-verdict` n'est lu par aucun composant du retour, seulement par la planche : c'est T2. Le plancher de 11 px (`type-scale.test.ts`) lit aussi `engine.css`.
+
+**`BulletChart`** reçoit le delta : `value: null` (aucune barre), `target: null`, et `band`, la fourchette publiée en crochet **sous** la piste. Sa géométrie est pure (`bandGeometry`, `lib/viz/bullet.ts`) : bornée au domaine comme la barre et le trait, et **rien** quand la fourchette tombe entièrement hors du domaine, là où la planche l'aurait écrasée en un crochet sur le bord ; elle accepte un domaine descendant. Une valeur qui n'est pas un nombre ne dessine plus une barre de largeur nulle mais rien, ce qui revient au même à l'écran.
+
+**`Disclosure`** reçoit `defaultOpen`, `open` avec `onOpenChange`, et `id`, toujours un `<details>` natif. Le balisage est épinglé sans DOM. **L'événement `toggle` n'est exercé en navigateur qu'en T1**, par son premier appelant (le piège qui ouvre « Ta définition et une note »).
+
+**La prochaine étape** : `nextStepFor` (`_engine/next-step.ts`), les huit rangs de `NextStep.prompt.md`, le premier qui s'applique gagne, l'ordre du tunnel dans un rang. Elle part du plan de collecte, pour que la carte et les listes ne se contredisent jamais : un chiffre qu'aucun outil de l'équipe ne couvre y est « à demander » comme dans la liste. Les sept états de la planche sont épinglés avec le moteur qu'ils montrent (« Demander le CAC à la finance » au retour), ainsi que l'hybride (étape par étape, les deux moteurs ensemble, pas l'un puis l'autre) et les outils cochés. Non-vacuité : les rangs 4 et 5 inversés font tomber cinq tests, l'ordre du catalogue seul fait tomber les deux de l'hybride.
+
+**Deux lectures du retour, faites ici et à confirmer au bon à tirer (A18.d)** :
+- le prompt donne l'écran des demandes à « deux ou plus **à une première visite** » et ne dit rien d'un retour. Un retour avec deux demandes ou plus non envoyées reçoit le même écran : une demande par écran les étalerait sur plusieurs visites, ce que le rang 5 évite ;
+- le prompt relance une demande « après sept jours », le moteur après **cinq** (`REMIND_AFTER_DAYS`, §6.13, la même durée que le rappel d'agenda). T2 gardera cinq et lira `isRequestStale`.
+
+**Vérifié** : `tsc` et `eslint` propres, 2 977 tests unitaires, `next build` avec les variables de la CI, et les 315 specs e2e du moteur, des niveaux du jeu (le `BulletChart` du tableau de bord), de la composition du résultat (des `Disclosure`) et de l'accessibilité, toutes passées. Un premier passage de la CI a rougi sur le lint (`react/no-children-prop`, dans le test du `Disclosure` réécrit pour `tsc` après le passage d'`eslint`) : le lint se relance après toute retouche, même d'un test.
+
 ## A19 : l'en-tête compact, le retour 08 recopié et porté (2026-10-02, #284)
 
 **Ce qui est revenu** : Claude Design a répondu au brief 08 le jour même, sous `design/ds-extension-08-return/` (28 fichiers, tout en source). Il suit trois de nos quatre penchants : toute fenêtre en paysage, déclenché par la position, un changement d'état et non un défilement asservi. La hauteur diffère : une ligne de 48 px, pas 56, sur un liseré de 6 px, soit 7,5 % d'un écran de portable au lieu de 16,4 %. Dans cette ligne, la marque, la course (l'étape où l'on est, remplie de la couleur de son espace) et les contrôles de la page, sur la couleur du bandeau réduite à un liseré. `MOTION.md` donne chaque valeur du mouvement, dans les deux sens. Recopié fichier par fichier par `DesignSync`, la planche rejouée par son propre `check.cjs` : 252 états, aucun problème (`COPIE.md`).
@@ -427,9 +445,9 @@ Captures relues : l'accueil compact en français, le moteur compact avec ses chi
 **Relu par les deux sous-agents** : rien à corriger côté copie (aucune chaîne neuve pour un visiteur ; seul un libellé de `/admin/stats` est aligné entre le jeu et le moteur). Côté sécurité, rien de bloquant : l'île client ne prend aucune prop, et le script ne lit que de la géométrie et n'écrit que des attributs fixes. Le seul constat, F-1, est corrigé.
 
 **Vérifié** :
-- `vitest`, 2 944 tests ;
+- `vitest`, 2 977 tests après la fusion de `main` (A18 T0 en apporte 33) ;
 - `tsc` et `eslint` propres ;
-- Playwright complet sur un build comme la CI (le jeu ouvert, le moteur fermé), avec l'émulateur et `CI=1` : 904 specs, 898 passées, 6 ignorées par construction.
+- Playwright complet sur un build comme la CI (le jeu ouvert, le moteur fermé), avec l'émulateur et `CI=1`, avant la fusion d'A18 T0 : 904 specs, 898 passées, 6 ignorées par construction. A18 T0 n'ajoute aucune spec, et la CI rejoue la suite sur la tête fusionnée.
 
 **Consigné** :
 - `CHANTIERS.md` : A19 clos, B11 clos, B12 ouvert, C43 et C44, D15 retiré, une ligne en E ;
