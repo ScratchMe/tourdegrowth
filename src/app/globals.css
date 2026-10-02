@@ -33,22 +33,26 @@ html {
 }
 
 /*
- * The sticky header's height, for what must stay clear of it: anchors and
- * focus (above), and the two things that stick under it (the game's side
- * column, the engine's « Et si » figures). Measured on the build at each
- * width, with and without the space band: the band is the header's bottom
- * two-fifths, and on a phone it runs on two lines.
+ * The sticky header's painted height, for what must stay clear of it:
+ * anchors and focus (above), and the two things that stick under it (the
+ * game's side column, the engine's « Et si » figures). The header's script
+ * measures it (`--sticky-offset-full`, compact-header.ts), so it is exact at
+ * every width and on every page: 118px with the band on a laptop, 114 on a
+ * phone, 93 in the quiz on a laptop and 88 to 106 on a phone, 74 and 70
+ * without a band. Until the script runs, and without JavaScript, the
+ * tallest header of each kind stands in (118, 74): never under the header,
+ * at worst a little lower than it needs to be.
  */
 :root {
   --sticky-offset: 0px;
 }
 
 html:has(header[data-site-header="plain"]) {
-  --sticky-offset: 74px;
+  --sticky-offset: var(--sticky-offset-full, 74px);
 }
 
 html:has(header[data-site-header="band"]) {
-  --sticky-offset: 118px;
+  --sticky-offset: var(--sticky-offset-full, 118px);
 }
 
 /*

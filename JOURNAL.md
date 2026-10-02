@@ -458,6 +458,41 @@ Captures relues : l'accueil compact en français, le moteur compact avec ses chi
 
 Antoine a demandé l'indexation des sept pages françaises que la session lui avait listées : les deux pages « porte ouverte » et les cinq « AARRR vs X ». `/fr` était déjà sur Google. Le rappel de la session avait vérifié avant que les huit adresses répondaient en 200. Il reste dans D10 les huit adresses des quatre termes de la vente assistée ajoutés par A7.3.e (`win-rate`, `sales-cycle`, `acv`, `lead-to-opportunity`, en anglais puis en français), vérifiées en 200 et présentes dans le sitemap le 2026-10-02. Les annuaires peuvent repartir depuis A7.12.a.
 
+## A19.1 : le `--sticky-offset` plein, mesuré lui aussi (2026-10-02, #287)
+
+**La question** (Antoine, après A19) : « tu as quelque chose à corriger vis-à-vis de ça ? », à propos du quiz, où les ancres et le focus s'arrêtaient « 25 px trop bas ».
+
+**Mesuré sur le build de production de `main`** (le jeu ouvert), en haut de page, la hauteur de l'en-tête contre `--sticky-offset` :
+
+| Fenêtre | Bandeau | Quiz | Sans bandeau |
+|---|---|---|---|
+| 1 280 × 720, 1 024 × 768, 768 × 1 024 | 118 pour 118 | 93 pour 118 (+25) | 74 pour 74 |
+| 390 × 844 | 114 pour 118 (+4) | 88 pour 118 (+30) | 70 pour 74 (+4) |
+| 320 × 568 | 114 pour 118 (+4) | 106 pour 118 (+12) | 70 pour 74 (+4) |
+
+**Deux choses écrites étaient fausses** :
+- l'entrée B11 donnait au quiz « 106 px sur téléphone » : ce n'est vrai qu'à 320 px ; à 390, il fait 88 px ;
+- A19 parlait de 25 px, dans le quiz seulement. C'est 25 px au bureau, 30 et 12 sur téléphone, et **4 px sur chaque page d'un téléphone tenu droit**, que personne n'avait relevés.
+
+L'offset n'était jamais sous la hauteur de l'en-tête : rien n'était masqué, les ancres et le focus s'arrêtaient seulement plus bas que prévu.
+
+**Le correctif** : `compact-header.ts` mesurait déjà l'en-tête pour l'état compact. Il pose aussi `--sticky-offset-full`, la hauteur de la boîte, filet compris, arrondie au pixel supérieur. Elle ne change pas avec l'état, seulement avec la largeur, et le `ResizeObserver` existant la suit. `globals.css` la lit à la place de 118 et 74, qui restent le repli tant que le script n'a pas tourné et sans JavaScript.
+
+**Les specs** :
+- `site-header.spec.ts` : l'offset égale la hauteur de l'en-tête, au pixel près, sur l'accueil, un résultat, le quiz et une page de glossaire, à 1 280, 390 et 320 px. Ces specs remplacent les deux qui ne demandaient que « au moins ». Sans JavaScript, trois specs vérifient que le repli couvre toujours l'en-tête, aux trois largeurs ;
+- `site-header-compact.spec.ts`, le portrait : la spec lisait l'offset juste après le chargement, donc le repli. Elle attend maintenant la mesure, et compare à la boîte de l'en-tête : son aide `painted` s'arrête au liseré et laisse de côté le filet de 2 px d'un en-tête sans bandeau.
+
+**Non-vacuité** : sans la ligne qui pose `--sticky-offset-full`, 7 specs rougissent (les trois d'égalité et les quatre du portrait) ; les trois sans JavaScript restent vertes, comme elles le doivent.
+
+**Ce qui ne bouge pas** : au bureau, hors du quiz, les valeurs sont celles d'avant (118, 74), donc la colonne d'un niveau du jeu et les chiffres « Et si » du moteur collent au même endroit.
+
+**Vérifié** :
+- `vitest`, 2 977 tests ;
+- `tsc` et `eslint` propres ;
+- Playwright complet sur un build comme la CI, `CI=1` : 908 specs, 860 passées et 48 ignorées sans l'émulateur. Les 42 specs des vrais résultats, rejouées avec l'émulateur, passent : 902 passées, 6 ignorées par construction.
+
+**Consigné** : `CHANTIERS.md` (B11 corrigé, A19.1, la ligne de veille du quiz retirée de la section E), `CLAUDE.md` (les chiffres de référence).
+
 ## D10 : Uneed soumis, Smol Launch écarté (2026-10-02)
 
 **Uneed** : soumis par Antoine le 2026-10-02 dans la file gratuite, avec le lien `directory_uneed` en campagne `relaunch_tour`, le compte créé avec `contact@` et la fiche sous « Tour de Growth ». La session lui avait transmis le logo et les trois captures refaites par A7.12.a (accueil, résultat, sélecteur de ton). Uneed a fixé le lancement au **21 février 2027**, ce que la section E de `CHANTIERS.md` note. Relevé sur leur page de tarifs le même jour : la fiche doit atteindre 10 votes pour rester publiée, et 20 pour le lien en dofollow. On n'en demande jamais (`GROWTH-PLAN.md`).

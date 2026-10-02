@@ -292,11 +292,15 @@ test.describe("a phone held upright keeps today's header (390 × 844)", () => {
     test(`${path}: scrolled, the header is as it was`, async ({ page }) => {
       await page.goto(path);
       const full = await painted(page);
-      const offset = await stickyOffset(page);
+      // The header's script measures the offset once hydrated: from the
+      // stand-in (118 or 74) to the header's box (114 or 70 here, a plain
+      // header's 2px rule included, which `painted` leaves out).
+      const box = await header(page).evaluate((el) => Math.ceil(el.getBoundingClientRect().height));
+      await expect.poll(() => stickyOffset(page)).toBe(box);
       await scrollTo(page, 700);
       await settle(page);
       expect(await painted(page)).toBe(full);
-      expect(await stickyOffset(page)).toBe(offset);
+      expect(await stickyOffset(page)).toBe(box);
       await expect(header(page).locator('[data-race="compact"]')).toHaveCount(path.includes("glossary") ? 0 : 1);
       await expect(header(page).locator('[data-race="compact"]')).toBeHidden();
       expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
