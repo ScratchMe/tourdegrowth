@@ -3,16 +3,25 @@ import { renameSync } from "node:fs";
 import sharp from "sharp";
 import { exampleState, hybridState, withEntry, withMonthBefore } from "../src/lib/engine/__tests__/fixtures";
 import type { EngineState } from "../src/lib/engine/types";
-import { engineSeed } from "../e2e/engine-helpers";
+import { engineSeed, openNumber, skipToAsks } from "../e2e/engine-helpers";
 
 /**
  * The engine's density, captured and measured — design brief 07 (CHANTIERS.md
  * B10, 2026-10-02): the screens in `design/ds-extension-07/`, its
  * `CATALOGUE.md`, and the « measurements » test, whose MEASURE lines are the
- * brief's table (where the tool starts, the setup's and the board's heights
- * and controls, one sheet). Kept so the port of the return measures the same
- * things the same way: run it again with OUT pointing elsewhere and compare.
+ * brief's table. Kept so the port of the return measures the same things the
+ * same way: run it again with OUT pointing elsewhere and compare.
  * Not a test suite: its own config, outside `e2e/`, so CI never runs it.
+ *
+ * Since A18 T7 (2026-10-03) it walks the ported flows — the start card, the
+ * « Cibles » screen, a number's own screen, the requests' screen, the board
+ * with its list of numbers — and its MEASURE lines carry the keys of the
+ * return's own measures (`design/ds-extension-07-return/board/measures.js`,
+ * read the same way: CSS pixels, a control is visible when no closed
+ * `<details>` holds it), so the three columns line up: before (B10, in
+ * `JOURNAL.md`), the return's proposal, and the port. The before's
+ * screens are in `design/ds-extension-07/`, the port's in
+ * `design/ds-extension-07-after/`, numbered alike where a screen survived.
  *
  * Against a LOCAL production build with the engine open, at runtime too:
  *
@@ -24,7 +33,7 @@ import { engineSeed } from "../e2e/engine-helpers";
  * example with four numbers back to « to do », last touched twelve days
  * before the clock (24 September 2026).
  */
-const OUT = process.env.OUT ?? "design/ds-extension-07";
+const OUT = process.env.OUT ?? "design/ds-extension-07-after";
 const DESKTOP = { width: 1280, height: 900 } as const;
 const MOBILE = { width: 390, height: 844 } as const;
 const CLOCK = new Date(2026, 8, 24, 12);
@@ -43,10 +52,14 @@ async function shootViewport(page: Page, name: string): Promise<void> {
 
 async function unstick(page: Page): Promise<void> {
   // A tall element is captured beyond the viewport: a sticky header would be drawn across it.
+  // A sticky element turns `relative`, not `static`: it stays where it stands and stays the box
+  // its absolute layers sit in — static, the header's edge (A19) fell to the bottom of the first
+  // screen and drew a rule across the board, 900px down the page.
   await page.evaluate(() => {
     for (const node of Array.from(document.querySelectorAll<HTMLElement>("body *"))) {
       const position = getComputedStyle(node).position;
-      if (position === "sticky" || position === "fixed") node.style.setProperty("position", "static", "important");
+      if (position === "sticky") node.style.setProperty("position", "relative", "important");
+      else if (position === "fixed") node.style.setProperty("position", "static", "important");
     }
   });
 }
@@ -102,41 +115,49 @@ for (const { locale, size, viewport } of SCREENS) {
     await page.goto(`/${locale}/aarrr-funnel-template`);
     await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
     await shootViewport(page, `01-first-visit-arrival-${tag}`);
-    await shootEl(page.getByTestId("engine-setup"), `02-setup-${tag}`);
+    // The start card (A18 T3.a): one question, the defaults said, « Commencer ».
+    await shootEl(page.getByTestId("engine-start"), `02-start-${tag}`);
+    // « Changer » opens the whole setup card, the one every visit met before.
+    await page.getByTestId("engine-start-change").click();
+    await shootEl(page.getByTestId("engine-setup"), `02b-setup-${tag}`);
   });
 
-  test(`step by step (${tag})`, async ({ page }) => {
+  test(`the first numbers (${tag})`, async ({ page }) => {
     await page.setViewportSize(viewport);
     await page.clock.setFixedTime(CLOCK);
     await page.goto(`/${locale}/aarrr-funnel-template`);
     await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
-    await page.getByTestId("engine-setup-start").click();
-    const steps = page.getByTestId("engine-steps");
-    await expect(steps).toHaveAttribute("data-phase", "targets");
-    await shootEl(steps, `03-steps-targets-${tag}`);
-    await page.getByTestId("engine-steps-next").click();
-    await expect(steps).toHaveAttribute("data-phase", "base");
-    await shootEl(steps, `04-steps-base-${tag}`);
-    await page.locator("#engine-base-cohort").fill("1200");
-    await page.locator("#engine-base-month").fill("1400");
-    await page.getByTestId("engine-steps-next").click();
-    await expect(steps).toHaveAttribute("data-phase", "number");
-    await shootEl(steps, `05-steps-number-untouched-${tag}`);
-    // Since A18 T1 the boxes are the question (no « I have it » to pick) and « Where to find it » is a fold.
-    await steps.locator("summary", { hasText: /Où le trouver|Where to find/ }).click();
-    await shootEl(steps, `06-steps-number-have-open-${tag}`);
+    await page.getByTestId("engine-start-go").click();
+    const targets = page.getByTestId("engine-targets-start");
+    await expect(targets).toBeVisible();
+    await shootEl(targets, `03-targets-${tag}`);
+    // The cohort and the month are no longer a screen of their own (04 before): each number asks its own counts.
+    await page.getByTestId("engine-targets-next").click();
+    const number = page.getByTestId("engine-number");
+    await expect(number).toBeVisible();
+    await shootEl(number, `05-number-untouched-${tag}`);
+    await number.locator("summary", { hasText: /Où le trouver|Where to find/ }).click();
+    await shootEl(number, `06-number-where-open-${tag}`);
   });
 
-  test(`what-if and done in the steps (${tag})`, async ({ page }) => {
+  test(`the requests (${tag})`, async ({ page }) => {
+    await page.setViewportSize(viewport);
+    await page.clock.setFixedTime(CLOCK);
+    await page.goto(`/${locale}/aarrr-funnel-template`);
+    await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
+    await page.getByTestId("engine-start-go").click();
+    await page.getByTestId("engine-targets-next").click();
+    // The five-minute numbers passed, every request on one screen (A18 T3.c), where « done » was before.
+    await skipToAsks(page);
+    await shootEl(page.getByTestId("engine-asks-screen"), `07-asks-${tag}`);
+  });
+
+  test(`the lever (${tag})`, async ({ page }) => {
+    // The what-if, a lever on the board (A18 T2.c), where the steps had a screen of their own.
     await page.setViewportSize(viewport);
     await seed(page, locale, exampleState());
-    await page.getByTestId("engine-open-steps").click();
-    const steps = page.getByTestId("engine-steps");
-    await expect(steps).toHaveAttribute("data-phase", "whatif");
-    await shootEl(steps, `07-steps-whatif-${tag}`);
-    await page.getByTestId("engine-steps-next").click();
-    await expect(steps).toHaveAttribute("data-phase", "done");
-    await shootEl(steps, `08-steps-done-${tag}`);
+    await expect(page.getByTestId("engine-board")).toBeVisible();
+    await shootEl(page.getByTestId("engine-lever"), `08-lever-${tag}`);
   });
 
   test(`returning (${tag})`, async ({ page }) => {
@@ -150,16 +171,17 @@ for (const { locale, size, viewport } of SCREENS) {
   test(`a number on the board (${tag})`, async ({ page }) => {
     await page.setViewportSize(viewport);
     await seed(page, locale, returning());
-    await page.getByTestId("engine-metric-act-rate").click();
-    const sheet = page.getByTestId("engine-sheet-act-rate");
-    await expect(sheet).toBeVisible();
-    await shootEl(page.getByTestId("engine-stages"), `10-return-stage-sheet-${tag}`);
+    await expect(page.getByTestId("engine-board")).toBeVisible();
+    // Its row in « Tes chiffres » opens its own screen (A18 T2.b), where the stage tabs opened it under the board.
+    await openNumber(page, "act-rate");
+    await shootEl(page.getByTestId("engine-number"), `10-return-number-${tag}`);
   });
 }
 
 test("hybrid board (fr-desktop)", async ({ page }) => {
   await page.setViewportSize(DESKTOP);
   await seed(page, "fr", returning(hybridState()));
+  await expect(page.getByTestId("engine-board")).toBeVisible();
   await shootEl(page.getByTestId("engine-board"), "12-return-hybrid-board-full-fr-desktop");
 });
 
@@ -204,13 +226,48 @@ test("the deck (fr-desktop)", async ({ page }) => {
   await shootEl(page.locator('[data-testid^="slide-"]:not([data-testid^="slide-page-"])').first(), "16-deck-first-slide-fr-desktop");
 });
 
-test("to go and get, open (fr-desktop)", async ({ page }) => {
+test("the next step, returning (fr-desktop)", async ({ page }) => {
   await page.setViewportSize(DESKTOP);
   await seed(page, "fr", returning());
-  const collect = page.getByTestId("engine-collect-disclosure");
-  await collect.locator("summary").first().click();
-  await shootEl(collect, "11-return-to-go-and-get-fr-desktop");
+  // « À aller chercher » folded under the board (11 before) became the next step at its top and the requests' screen.
+  await expect(page.getByTestId("engine-board")).toBeVisible();
+  await shootEl(page.getByTestId("engine-next"), "11-return-next-step-fr-desktop");
 });
+
+/**
+ * What the return measured, read the same way on the product (`measure.cjs`'s
+ * `probe`): the tool is `#engine`; a control is a button, a link, a box, a
+ * select or a summary, visible, and not inside a closed `<details>` (its own
+ * summary aside).
+ */
+function probe(selector: string) {
+  const CONTROL = "button, a[href], input:not([type=hidden]), select, textarea, summary";
+  const visible = (el: Element) => {
+    if (el.closest("details:not([open])") && el.tagName !== "SUMMARY") return false;
+    if (el.closest("details:not([open]) details")) return false;
+    const r = el.getBoundingClientRect();
+    const cs = getComputedStyle(el);
+    if (cs.visibility === "hidden" || cs.display === "none") return false;
+    return (r.width > 0 && r.height > 0) || el.matches("input[type=radio], input[type=checkbox]");
+  };
+  const root = document.querySelector(selector);
+  const tool = document.querySelector("#engine");
+  const inRoot = root ? Array.from(root.querySelectorAll(CONTROL)).filter(visible) : [];
+  const inTool = tool ? Array.from(tool.querySelectorAll(CONTROL)).filter(visible) : [];
+  const firstScreen = inTool.filter((el) => {
+    const r = el.getBoundingClientRect();
+    return r.top < innerHeight && r.bottom > 0;
+  });
+  const primary = Array.from(document.querySelectorAll<HTMLElement>("#engine [class*='primary']")).filter((el) => el.matches("button, a[href]") && visible(el))[0];
+  return {
+    toolTop: tool ? Math.round(tool.getBoundingClientRect().top + scrollY) : null,
+    height: root ? Math.round(root.getBoundingClientRect().height) : null,
+    controls: inRoot.length,
+    controlsFirstScreen: firstScreen.length,
+    primaryBottom: primary ? Math.round(primary.getBoundingClientRect().bottom + scrollY) : null,
+    pageHeight: document.documentElement.scrollHeight,
+  };
+}
 
 test("measurements", async ({ browser }) => {
   for (const [label, viewport] of [["1280", DESKTOP], ["390", MOBILE]] as const) {
@@ -220,27 +277,66 @@ test("measurements", async ({ browser }) => {
       await page.clock.setFixedTime(CLOCK);
       await page.goto(`/${locale}/aarrr-funnel-template`);
       await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
-      const top = (sel: string) => page.locator(sel).first().evaluate((el) => Math.round(el.getBoundingClientRect().top + window.scrollY));
-      const height = (sel: string) => page.locator(sel).first().evaluate((el) => Math.round(el.getBoundingClientRect().height));
-      const controls = (sel: string) =>
-        page.locator(sel).first().evaluate((el) => Array.from(el.querySelectorAll("button, a[href], input, select, textarea, summary")).filter((n) => (n as HTMLElement).offsetParent !== null).length);
-      const out: Record<string, number> = {};
-      out.setupTop = await top('[data-testid="engine-setup"]');
-      out.setupHeight = await height('[data-testid="engine-setup"]');
-      out.setupControls = await controls('[data-testid="engine-setup"]');
-      out.pageFirst = await page.evaluate(() => document.documentElement.scrollHeight);
-      await page.evaluate((items) => { for (const [k, v] of items) localStorage.setItem(k, v); }, engineSeed(returning()));
+      const out: Record<string, number | null> = {};
+      // The first visit: where the tool starts, the start card (« the setup card » before, B10).
+      const start = await page.evaluate(probe, '[data-testid="engine-start"]');
+      out.firstToolAt = start.toolTop;
+      out.startHeight = start.height;
+      out.startControls = start.controls;
+      out.pageFirst = start.pageHeight;
+      // The first number reached, untouched, then its « Où le trouver » open.
+      await page.getByTestId("engine-start-go").click();
+      await page.getByTestId("engine-targets-next").click();
+      await expect(page.getByTestId("engine-number")).toBeVisible();
+      const untouched = await page.evaluate(probe, '[data-testid^="engine-sheet-"]');
+      out.sheetUntouched = untouched.height;
+      out.sheetControls = untouched.controls;
+      // How many screens from « Commencer » to the requests: the start, the targets, each number skipped, the requests.
+      let screens = 3;
+      const asks = page.getByTestId("engine-asks");
+      while (!(await asks.count()) && screens < 60) {
+        await page.getByTestId("engine-number-skip").click();
+        await expect(page.getByTestId("engine-number").or(asks)).toBeVisible();
+        screens += 1;
+      }
+      out.screensToAsks = screens;
+
+      // Returning: the short page, the board, its first screen and its primary.
+      await page.evaluate((items) => {
+        localStorage.clear();
+        for (const [k, v] of items) localStorage.setItem(k, v);
+      }, engineSeed(returning()));
       await page.reload();
       await expect(page.getByTestId("engine-board")).toBeVisible();
-      out.boardTop = await top('[data-testid="engine-board"]');
-      out.verdictTop = await top("#engine-verdict");
-      out.boardHeight = await height('[data-testid="engine-board"]');
-      out.boardControls = await controls('[data-testid="engine-board"]');
-      out.pageReturn = await page.evaluate(() => document.documentElement.scrollHeight);
-      out.boardChildren = await page.getByTestId("engine-board").evaluate((el) => el.children.length);
-      await page.getByTestId("engine-metric-act-rate").click();
-      out.sheetHeight = await height('[data-testid="engine-sheet-act-rate"]');
-      out.sheetControls = await controls('[data-testid="engine-sheet-act-rate"]');
+      await page.evaluate(() => window.scrollTo(0, 0));
+      const board = await page.evaluate(probe, '[data-testid="engine-board"]');
+      out.returnToolAt = board.toolTop;
+      out.returnFirstControls = board.controlsFirstScreen;
+      out.returnPrimaryBottom = board.primaryBottom;
+      out.boardHeight = board.height;
+      out.boardControls = board.controls;
+      out.pageReturn = board.pageHeight;
+      out.verdictTop = await page.locator("#engine-verdict").evaluate((el) => Math.round(el.getBoundingClientRect().top + window.scrollY));
+      // A number open from the board, « Où le trouver » open (« number-open » in the return: where, trap,
+      // reference), then every fold open — « Ta définition et une note » too, which the return kept shut.
+      const settle = async () => {
+        // A fold opens with a transition: measured once every one has ended, or the height is the animation's.
+        await page.evaluate(() => Promise.all(document.getAnimations().map((a) => a.finished.catch(() => undefined))));
+        await page.waitForTimeout(300);
+      };
+      await openNumber(page, "act-rate");
+      const number = page.getByTestId("engine-number");
+      await number.locator("summary", { hasText: /Où le trouver|Where to find/ }).click();
+      await settle();
+      const open = await page.evaluate(probe, '[data-testid="engine-sheet-act-rate"]');
+      out.sheetOpen = open.height;
+      await number.evaluate((root) => {
+        for (const d of Array.from(root.querySelectorAll("details"))) (d as HTMLDetailsElement).open = true;
+      });
+      await settle();
+      const all = await page.evaluate(probe, '[data-testid="engine-sheet-act-rate"]');
+      out.sheetAllOpen = all.height;
+      out.sheetAllOpenControls = all.controls;
       console.log(`MEASURE ${locale} ${label} ${JSON.stringify(out)}`);
       await context.close();
     }

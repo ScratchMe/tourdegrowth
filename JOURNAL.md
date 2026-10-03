@@ -1118,3 +1118,67 @@ Pour le bon à tirer A18.d :
 - **3 059 tests unitaires** verts ;
 - `next build` avec les variables de la CI ;
 - les **359 specs** du moteur, du kit des espaces, des cibles, de l'accessibilité, de la plateforme, du clavier, du glossaire et du quiz (les autres « ? » du site, que le correctif de la bulle touche) sur le build final : 358 passées, une ignorée par construction ; 927 specs au total (`--list`, hors captures temporaires).
+
+## A18 T7 : l'intégration, l'avant et l'après mesurés, et les champs qui prenaient 42 px (2026-10-03)
+
+Treizième et dernière étape du portage du retour 07, drapeau fermé : **l'intégration**. Le code du moteur simplifié est entier ; reste son bon à tirer unique, A18.d.
+
+**Le script de densité, remis d'accord avec le portage** (`scripts/engine-density.capture.ts`). Il visait encore les identifiants du pas à pas, de l'écran de la base, des onglets et de « À aller chercher ». Il parcourt maintenant :
+- la carte de départ, puis le réglage complet derrière « Changer » ;
+- l'écran « Cibles » et le premier chiffre, intact, puis « Où le trouver » ouvert ;
+- les demandes, toutes sur un écran ;
+- le levier, sur le tableau ;
+- le tableau du retour, l'écran d'un chiffre ouvert depuis sa ligne, et la prochaine étape ;
+- l'hybride, le mois suivant, les deux pages entières et la slide, comme avant.
+
+Ses lignes MEASURE portent maintenant les clés du retour (`board/measures.js`), lues de la même façon : l'outil est `#engine`, un contrôle est visible et hors d'un `<details>` fermé. Les trois colonnes se lisent donc côte à côte : l'avant (B10), la proposition du retour, et le portage.
+
+**Mesuré sur un build de production** (`ENGINE_ENABLED=true`, la même horloge et les mêmes données que B10 ; en anglais, à 1 280 puis 390 px) :
+- **l'outil commence à 811 / 955 px** à la première visite (1 267 / 1 849 avant, 735 / 956 au retour 07), **et à 356 / 298 px au retour** (1 267 / 1 849 avant, 287 / 288 proposés). L'écart avec le retour 07 vient de la page courte, qui garde le H1, la promesse et la durée au-dessus de l'outil (T4) ;
+- **la première carte fait 618 / 781 px et 7 contrôles**, exactement la proposition, contre 1 431 px et 36 contrôles pour l'ancienne carte de réglage ;
+- **le tableau du retour a 27 contrôles**, comme proposé, contre 75 avant. Il mesure 3 463 / 4 132 px, contre 3 136 / 3 627 proposés : trois choses que la planche ne dessinait pas l'allongent d'environ 330 px. Ce sont la phrase de sauvegarde dans la prochaine étape, les deux plis du pied (« Tous les leviers ensemble » et « Saisie en tableau ») et la carte du Tour ;
+- **un chiffre intact : 1 169 / 1 488 px et 15 contrôles** (1 113 / 1 422 proposés) ; avec « Où le trouver » ouvert, 1 807 / 2 361 (1 689 / 2 206 proposés) ;
+- **8 écrans de « Commencer » jusqu'aux demandes** (le départ, les cibles, cinq chiffres, les demandes), là où le pas à pas en comptait 21 en tout. Le premier chiffre arrive au troisième écran, contre deux proposés, à cause de l'écran « Cibles » gardé (C40).
+
+Le tableau complet et les 26 captures sont dans `design/ds-extension-07-after/`, numérotées comme celles de B10 là où l'écran a survécu. **Le catalogue n'a pas bougé** : le texte des 41 fiches par langue, réextrait de la page portée, est identique à celui de B10 au caractère près. C'est l'expertise que le brief demandait de garder.
+
+**Deux pièges de mesure, corrigés dans le script** :
+- **un trait bleu barrait le tableau à 900 px de son haut.** Pour capturer un élément plus haut que la fenêtre, le script passait les éléments collants en `static`. Depuis A19, le bord de l'en-tête est une couche absolue : l'en-tête redevenu statique, ce bord tombait au bas du premier écran. Un élément collant passe maintenant en `relative`. C'était un artefact de capture, pas un défaut du produit ;
+- **la hauteur d'un chiffre aux plis ouverts variait d'un passage à l'autre** (1 668 puis 1 476 px, en français à 1 280) : on mesurait pendant la transition d'ouverture. Le script attend maintenant la fin des animations, et deux passages donnent les mêmes chiffres.
+
+**La spec d'intégration** (`e2e/engine-screens.spec.ts`, 6 tests). Elle parcourt dix écrans dans les deux langues :
+- le départ et son réglage complet, les cibles ;
+- un chiffre intact, puis tous ses plis ouverts ;
+- les demandes ;
+- le tableau, menu fermé puis ouvert ;
+- les Réglages, et l'hybride.
+
+Sur chacun, à 1 280 et 390 px : aucune violation axe sérieuse ou critique (le contraste compris), une bande de 44 px sous le doigt au travers de chaque contrôle, et rien qui pousse la page de côté. À 320 px, le contraste et les 44 px sont tenus, et la largeur est mesurée sans être tenue (§18.10.3) : elle valait 0 sur chaque écran.
+
+**Ce qu'elle a trouvé au premier passage, dans le design system.** Les champs prenaient 42 px sous le doigt dans une boîte de 48 (38 dans 44, pour un champ de chiffre), sur tout le site :
+- **la cause** : la boîte du champ (`core/Field.module.css`) dessine un bord de 3 px, 2 de bordure et 1 de marge interne. Ce bord appartenait à la boîte, et un appui dessus, en haut comme en bas, n'atteignait pas le champ ;
+- **pourquoi personne ne l'avait vu** : la mesure du retour 07 comptait la boîte comme cible, et `targets.spec.ts` ne mesure que les boutons ;
+- **le correctif** : le champ déborde de 3 px sur ce bord, haut et bas, et rend ces 3 px en marge interne. Son fond s'arrête à son contenu, pour qu'une couleur d'autoremplissage ne couvre jamais le bord. Le bord vaut 3 px dans les deux états, puisqu'un champ invalide a une bordure de 3 px et aucune marge interne ;
+- **vérifié sans rien changer à l'écran** : captures avant et après d'un champ de texte au repos et au focus, d'un champ de chiffre vide, rempli, invalide et avec son unité, et d'un écran de chiffre entier, identiques au pixel. Le seul écart, le champ invalide, était le rouge saisi en pleine transition (120 ms). Une capture faite après la transition donne #d2402c, la couleur du jeton ;
+- **la garde** : un test de `form-controls.test.ts` tient la règle. Le champ déborde de `--field-edge-invalid`, la boîte garde 1 px de marge interne et sa bordure, et 2 px plus 1 font les 3 px du bord invalide. Il échoue sur ses deux sabotages : la marge rendue à 0, puis un bord invalide passé à 4 px.
+
+`TESTING.md` §2.2 gagne la leçon : une cible se mesure là où le doigt tombe, pas sur la boîte dessinée.
+
+**`ENGINE.md`** : un bloc dit maintenant ce qu'est le moteur après A18 (un seul parcours, l'écran d'un chiffre, la prochaine étape, le tableau, la page, l'hybride, les mots, ce qui n'a pas bougé). Dans les blocs plus anciens, ce qui le contredit est de l'histoire.
+
+**B13, la re-synchro d'A18**, est prête à lancer. Ce qu'elle emportera :
+- les quatorze composants neufs de `src/components/engine/` : `NumberSheet`, `AnswerSwitch`, `TrapNote`, `WhereToFind`, `HowItCompares`, `EngineBar`, `NextStep`, `EngineProgress`, `NumberList`, `LeverCard`, `EngineStart`, `AskList`, `EngineLanding` et `TotalBand` ;
+- les deltas de `Disclosure` et de `BulletChart` ;
+- le retour de focus sans défilement de `DefinitionPopover` (T6) ;
+- le champ qui couvre son bord (ici), qui ne change aucun aperçu.
+
+**Restes connus, laissés à A18.d ou à plus tard** :
+- l'avertissement de fenêtre des Réglages se lit sous la fenêtre, pas dans la carte ;
+- `ExampleView` garde ses deux colonnes pour l'exemple de l'hybride ;
+- la page courte du retour commence à 356 px au bureau, au lieu des 287 proposés (T4, choisi).
+
+**Vérifié** :
+- `tsc` et `npm run lint` propres (après le retrait des specs de capture temporaires, jamais versionnées) ;
+- **3 060 tests unitaires** verts ;
+- `next build` avec les variables de la CI ;
+- **422 specs** sur ce build : celles du moteur, du kit des espaces, des cibles, de l'accessibilité (aux deux largeurs), de la plateforme, du clavier, de l'audit (l'autre écran qui dessine des champs) et du glossaire. 421 passent, une est ignorée par construction ; 933 specs au total (`--list`).
