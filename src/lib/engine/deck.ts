@@ -65,7 +65,8 @@ import { linkSentence } from "./deck-motions";
 import { buildScenario, leverAlone } from "./scenario";
 import { renewalTermOf, slgWhatIf } from "./slg-impact";
 import { slgLeverAlone } from "./slg-scenario";
-import type { Scenario, ScenarioFunnel, ScenarioKpis } from "./scenario";
+import type { MoneyKpis } from "./money";
+import type { Scenario, ScenarioFunnel } from "./scenario";
 import { BASIS_KEY, REPAIR_KEY, ROLE_KEY, STATUS_KEY } from "./strings";
 import type { EngineStrings, ResolvedBridge, ResolvedDerived, ResolvedMetric } from "./strings";
 import { includeKeyOf, SLIDE_ORDER } from "./types";
@@ -93,6 +94,8 @@ import type {
   FixedSlideId,
   SlideId,
   SlgCandidateId,
+  SlideCurve,
+  SlideLeverSum,
   SlideTitle,
   SourceRef,
   TrackingLevel,
@@ -842,16 +845,108 @@ function buildAnnex(state: EngineState, strings: Words, metrics: ResolvedMetric[
 /** `extra`: digits finer than the figure's usual rounding, for a today → projected pair (`pairPrecision`); change printers ignore it. */
 export type Print = (i: Interval, extra?: number) => string;
 
-/** The growth figures of the table, in the order a leadership meeting reads them, and their row labels. */
-const KPI_ROWS = [
-  ["mrr12", "kpiMrr12"],
-  ["newMrr", "kpiNewMrr"],
-  ["nrr", "kpiNrr"],
-  ["grr", "kpiGrr"],
-  ["cac", "kpiCac"],
-  ["ltv", "kpiLtv"],
-  ["payback", "kpiPayback"],
-] as const satisfies readonly (readonly [Exclude<keyof ScenarioKpis, "mrr">, keyof Words["scenario"]])[];
+/**
+ * The growth figures of a what-if slide's table, in the order a leadership
+ * meeting reads them (design system extension 09, Q11, A20.d T4.b): the MRR
+ * and the ARR in twelve months, the NRR, then one new customer — the CAC,
+ * the LTV, the LTV:CAC, the payback — and the cash tied up. The new MRR of
+ * the month and the GRR left the slide for them; the panel keeps them.
+ * Self-serve and sales-assisted print the same rows.
+ */
+export type WhatIfKpiId = "mrr12" | "arr12" | "nrr" | "cac" | "ltv" | "ltvCac" | "payback" | "cash";
+export const WHATIF_KPI_IDS: readonly WhatIfKpiId[] = ["mrr12", "arr12", "nrr", "cac", "ltv", "ltvCac", "payback", "cash"];
+
+/** A scenario's figures, either motion's: self-serve's under `kpis`, sales-assisted's at the top. */
+export type WhatIfKpis = MoneyKpis & { mrr12: Interval | null; nrr: Interval | null; cac: Interval | null; ltv: Interval | null; payback: Interval | null };
+
+export function whatIfKpi(k: WhatIfKpis, id: WhatIfKpiId): Interval | null {
+  return id === "cash" ? (k.cash?.tiedUp ?? null) : k[id];
+}
+
+/**
+ * A what-if slide's curve (design system extension 09, Q11, A20.d T4.b): the
+ * MRR month by month, today's pace against the what-if(s), from the same
+ * scenario the slide's table reads. null when the MRR can't be projected:
+ * the slide then prints its table alone.
+ */
+export function slideCurve(
+  today: WhatIfKpis & { mrr: Interval | null },
+  projected: WhatIfKpis,
+  whatifKey: string,
+  state: EngineState,
+  strings: Words,
+  ctx: EngineCalcContext,
+): SlideCurve | null {
+  if (!today.mrrPath || !today.mrr || !today.mrr12) return null;
+  const units = strings.units;
+  const currency = state.setup.currency;
+  const fact = (i: Interval) => (i.lo === i.hi ? formatInterval(i, "money", ctx, units, { currency }) : formatApproxMoneyInterval(i, currency, ctx, units));
+  const approx = (i: Interval) => formatApproxMoneyInterval(i, currency, ctx, units);
+  const tuple = (i: Interval): [number, number] => [i.lo, i.hi];
+  const ref = currentSnapshot(state).referenceMonth;
+  const after = (n: number) => {
+    let m = ref;
+    for (let i = 0; i < n; i += 1) m = nextMonth(m);
+    return formatMonth(m, ctx.locale);
+  };
+  const l = strings.lever;
+  return {
+    today: today.mrrPath.map(tuple),
+    whatif: projected.mrrPath ? projected.mrrPath.map(tuple) : null,
+    start: fillTemplate(l.curveStart, { mrr: fact(today.mrr) }),
+    xLabels: [after(0), after(6), after(12)],
+    keys: { today: l.curveToday, whatif: whatifKey },
+    summary:
+      projected.mrr12 && projected.mrrPath
+        ? fillTemplate(l.curveSummaryWhatif, { start: fact(today.mrr), today: approx(today.mrr12), whatif: approx(projected.mrr12) })
+        : fillTemplate(l.curveSummary, { start: fact(today.mrr), today: approx(today.mrr12) }),
+  };
+}
+
+/**
+ * The « together » slide's compounding, drawn (`LeverSum`): each lever's gain
+ * on the MRR in twelve months alone, the solo gains added up, the gain
+ * together. null when a gain can't be computed: nothing to draw.
+ */
+export function slideLeverSum(
+  levers: readonly { id: string; label: string; from: string; to: string; gain: Interval | null }[],
+  gain: Interval | null,
+  state: EngineState,
+  strings: Words,
+  ctx: EngineCalcContext,
+): SlideLeverSum | null {
+  if (!gain || levers.some((l) => !l.gain)) return null;
+  const { approxMoney, roundMoney } = whatIfPrinters(state, strings, ctx);
+  const mid = (i: Interval) => (i.lo + i.hi) / 2;
+  const sum = levers.reduce((acc, l) => ({ lo: acc.lo + l.gain!.lo, hi: acc.hi + l.gain!.hi }), { lo: 0, hi: 0 });
+  const w = strings.scenario;
+  return {
+    rows: levers.map((l) => ({
+      id: l.id,
+      label: fillTemplate(w.aloneRow, { lever: l.label, from: l.from, to: l.to }),
+      value: formatChange(l.gain!, roundMoney, strings.units),
+      amount: mid(l.gain!),
+    })),
+    sum: { id: "sum", label: w.sumOneByOne, value: approxMoney(sum), amount: mid(sum) },
+    together: { id: "together", label: w.sumTogether, value: formatChange(gain, roundMoney, strings.units), amount: mid(gain) },
+  };
+}
+
+/** A row's label: the panel's words; sales-assisted's NRR is over twelve months. */
+export function whatIfKpiLabel(id: WhatIfKpiId, strings: Words, slg: boolean): string {
+  const w = strings.scenario;
+  const labels: Record<WhatIfKpiId, string> = {
+    mrr12: w.kpiMrr12,
+    arr12: strings.lever.arr12,
+    nrr: slg ? w.kpiNrr12 : w.kpiNrr,
+    cac: w.kpiCac,
+    ltv: w.kpiLtv,
+    ltvCac: w.rowLtvCac,
+    payback: w.kpiPayback,
+    cash: w.rowCash,
+  };
+  return labels[id];
+}
 
 /** The month's funnel, top to bottom. The referred share is left to the panel: on a slide it is one line too many. */
 const STEP_ROWS = [
@@ -929,11 +1024,17 @@ export function whatIfPrinters(state: EngineState, strings: Words, ctx: EngineCa
 
   const money: Printers = { today: approxMoney, projected: approxMoney, change: roundMoney, round: approxRounding };
   const rate: Printers = { today: percent, projected: percent, change: points, round: rateRounding };
-  const kpis: Record<(typeof KPI_ROWS)[number][0], Printers> = {
+  // LTV:CAC, a multiple: « 0,79 fois », its change a plain difference.
+  const times: Print = (i) => fillTemplate(units.times, { n: formatInterval(i, "ratio", ctx, units) });
+  const ratio: Print = (i) => formatInterval(i, "ratio", ctx, units);
+  const kpis: Record<WhatIfKpiId | "newMrr" | "grr", Printers> = {
     mrr12: money,
+    arr12: money,
     newMrr: money,
     nrr: rate,
     grr: rate,
+    ltvCac: { today: times, projected: times, change: ratio },
+    cash: money,
     cac: { today: (i) => formatInterval(i, "money", ctx, units, { currency }), projected: approxMoney, change: roundMoney, round: approxRounding },
     ltv: money,
     payback: same(months),
@@ -987,7 +1088,9 @@ export function changeRow(
 function scenarioLines(s: Scenario, rowTemplate: string, state: EngineState, strings: Words, ctx: EngineCalcContext): Row[] {
   const printers = whatIfPrinters(state, strings, ctx);
   const lines: Row[] = [
-    ...KPI_ROWS.map(([id, label]) => changeRow("kpi", id, strings.scenario[label], s.today.kpis[id], s.projected.kpis[id], printers.kpis[id], rowTemplate, strings)),
+    ...WHATIF_KPI_IDS.map((id) =>
+      changeRow("kpi", id, whatIfKpiLabel(id, strings, false), whatIfKpi(s.today.kpis, id), whatIfKpi(s.projected.kpis, id), printers.kpis[id], rowTemplate, strings),
+    ),
     ...STEP_ROWS.map(([id, label]) =>
       changeRow("funnelStep", id, strings.scenario[label], s.today.funnel[id], s.projected.funnel[id], printers.steps[id], rowTemplate, strings),
     ),
@@ -1052,9 +1155,10 @@ function buildWhatIfSlides(state: EngineState, strings: Words, ctx: EngineCalcCo
     const gain = mrrGain(lever.alone);
     const values = { stage: strings.leverSubject[lever.id], from: lever.from, to: lever.to };
     const title: SlideTitle = isPricedGain(gain) ? { key: "whatIfLever", values: { ...values, gain: approxMoney(gain) } } : { key: "whatIfLeverPlain", values };
+    const curve = slideCurve(lever.alone.today.kpis, lever.alone.projected.kpis, strings.slide.curveWhatifOne, state, strings, ctx);
     return {
       id: `whatif:${lever.id}`,
-      slide: { present: true, title, lines: scenarioLines(lever.alone, strings.slide.whatIfRowOne, state, strings, ctx), notes },
+      slide: { present: true, title, lines: scenarioLines(lever.alone, strings.slide.whatIfRowOne, state, strings, ctx), notes, ...(curve ? { curve } : {}) },
     };
   });
 
@@ -1102,9 +1206,24 @@ function buildWhatIfSlides(state: EngineState, strings: Words, ctx: EngineCalcCo
       title: isPricedGain(gain) ? { key: "scenario", values: { n, gain: approxMoney(gain) } } : { key: "scenarioPlain", values: { n } },
       lines: [...leverRows, ...together, ...scenarioLines(all, strings.slide.whatIfRowAll, state, strings, ctx)],
       notes,
+      ...withDrawings(
+        slideCurve(all.today.kpis, all.projected.kpis, fillTemplate(strings.slide.curveWhatifAll, { n }), state, strings, ctx),
+        slideLeverSum(
+          levers.map((l) => ({ id: l.id, label: capitalise(strings.leverSubject[l.id]), from: l.from, to: l.to, gain: mrrGain(l.alone) })),
+          gain,
+          state,
+          strings,
+          ctx,
+        ),
+      ),
     },
   });
   return slides;
+}
+
+/** The drawings a « together » slide carries, each only when it can be drawn. */
+export function withDrawings(curve: SlideCurve | null, leverSum: SlideLeverSum | null): { curve?: SlideCurve; leverSum?: SlideLeverSum } {
+  return { ...(curve ? { curve } : {}), ...(leverSum ? { leverSum } : {}) };
 }
 
 // --- The model ----------------------------------------------------------------

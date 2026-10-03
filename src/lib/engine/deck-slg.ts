@@ -9,6 +9,12 @@ import {
   type Row,
   sourceLabel,
   whatIfPrinters,
+  slideCurve,
+  slideLeverSum,
+  withDrawings,
+  WHATIF_KPI_IDS,
+  whatIfKpi,
+  whatIfKpiLabel,
 } from "./deck";
 import { linkSentence, relaysTitle, totalBlocks, totalSums, totalTitle } from "./deck-motions";
 import {
@@ -31,7 +37,7 @@ import {
 import { mapBounds, point } from "./interval";
 import { fillSegments, positionLabel, subjectOf, unitInputsPhrase } from "./phrases";
 import { coverageText, pipelineCoverage } from "./pipeline";
-import { buildSlgScenario, oppsCreated, oppsFromSelfServe, slgLeverAlone, type SlgScenario, type SlgScenarioKpis } from "./slg-scenario";
+import { buildSlgScenario, oppsCreated, oppsFromSelfServe, slgLeverAlone, type SlgScenario } from "./slg-scenario";
 import { sanityText } from "./sentences";
 import { STATUS_KEY } from "./strings";
 import type { EngineStrings, ResolvedDerived, ResolvedMetric } from "./strings";
@@ -171,15 +177,6 @@ export function buildRelaysSlide(state: EngineState, slg: SlgDerived, sanity: re
 // --- Sales-assisted « Et si » (§18.5.5) -------------------------------------------
 
 /** The growth figures of sales-assisted's table, in the panel's order. No GRR: nobody types one. */
-const SLG_KPI_ROWS = [
-  ["mrr12", "kpiMrr12"],
-  ["newMrr", "kpiNewMrr"],
-  ["nrr", "kpiNrr12"],
-  ["cac", "kpiCac"],
-  ["ltv", "kpiLtv"],
-  ["payback", "kpiPayback"],
-] as const satisfies readonly (readonly [Exclude<keyof SlgScenarioKpis, "mrr" | "won">, keyof Words["scenario"]])[];
-
 interface MovedSlgLever {
   id: SlgLeverId;
   from: string;
@@ -214,7 +211,10 @@ function slgMrrGain(s: SlgScenario): Interval | null {
 function slgScenarioLines(state: EngineState, s: SlgScenario, rowTemplate: string, strings: Words, ctx: EngineCalcContext): Row[] {
   const printers = whatIfPrinters(state, strings, ctx);
   const w = strings.scenario;
-  const lines: Row[] = SLG_KPI_ROWS.map(([id, label]) => changeRow("kpi", id, w[label], s.today[id], s.projected[id], printers.kpis[id], rowTemplate, strings));
+  // The same rows as self-serve's (extension 09, A20.d T4.b): the MRR and ARR in twelve months, the NRR, one new customer, the cash.
+  const lines: Row[] = WHATIF_KPI_IDS.map((id) =>
+    changeRow("kpi", id, whatIfKpiLabel(id, strings, true), whatIfKpi(s.today, id), whatIfKpi(s.projected, id), printers.kpis[id], rowTemplate, strings),
+  );
   const people = printers.steps.signups;
   const o = oppsCreated(state);
   const l = oppsFromSelfServe(state, ctx);
@@ -239,7 +239,11 @@ export function buildSlgWhatIfSlides(state: EngineState, strings: Words, ctx: En
     const gain = slgMrrGain(lever.alone);
     const values = { stage: strings.leverSubject[lever.id], from: lever.from, to: lever.to };
     const title: SlideTitle = isPricedGain(gain) ? { key: "whatIfLever", values: { ...values, gain: approxMoney(gain) } } : { key: "whatIfLeverPlain", values };
-    return { id: `whatif:${lever.id}`, slide: { present: true, title, lines: slgScenarioLines(state, lever.alone, strings.slide.whatIfRowOne, strings, ctx), notes } };
+    const curve = slideCurve(lever.alone.today, lever.alone.projected, strings.slide.curveWhatifOne, state, strings, ctx);
+    return {
+      id: `whatif:${lever.id}`,
+      slide: { present: true, title, lines: slgScenarioLines(state, lever.alone, strings.slide.whatIfRowOne, strings, ctx), notes, ...(curve ? { curve } : {}) },
+    };
   });
   if (levers.length < 2) return slides;
 
@@ -280,6 +284,16 @@ export function buildSlgWhatIfSlides(state: EngineState, strings: Words, ctx: En
       title: isPricedGain(gain) ? { key: "scenario", values: { n, gain: approxMoney(gain) } } : { key: "scenarioPlain", values: { n } },
       lines: [...leverRows, ...together, ...slgScenarioLines(state, all, strings.slide.whatIfRowAll, strings, ctx)],
       notes,
+      ...withDrawings(
+        slideCurve(all.today, all.projected, fillTemplate(strings.slide.curveWhatifAll, { n }), state, strings, ctx),
+        slideLeverSum(
+          levers.map((l) => ({ id: l.id, label: capitalise(strings.leverSubject[l.id]), from: l.from, to: l.to, gain: slgMrrGain(l.alone) })),
+          gain,
+          state,
+          strings,
+          ctx,
+        ),
+      ),
     },
   });
   return slides;

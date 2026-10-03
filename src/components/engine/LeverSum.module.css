@@ -1,7 +1,8 @@
 /*
  * LeverSum — design system extension 09 (design/ds-extension-09-return/
- * components/engine/LeverSum), ported by A20.d T3.b. Tokens only. The
- * return's slide size is not ported: the deck draws at 1 920 × 1 080 (T4).
+ * components/engine/LeverSum), ported by A20.d T3.b. Tokens only. Its
+ * slide size (`.slide`, A20.d T4.b) reads the deck's own scale (--slide-*,
+ * 18px and up on its 1 920 canvas), not the return's 960 × 540 one.
  */
 .root {
   margin: 0;
@@ -22,8 +23,12 @@
   margin: 0;
 }
 
+/* Each row a subgrid of the list: its three cells line up with every other row's, and the row keeps a box of its own. */
 .row {
-  display: contents;
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  align-items: center;
 }
 
 .label {
@@ -124,5 +129,45 @@
   }
   .rowSum .bar {
     top: 0;
+  }
+}
+
+/* On a slide (A20.d T4.b): the deck's own steps; never stacked, a slide is a fixed canvas. */
+/* The table heads' step and half the tracking, as the what-if tables' heads: the title holds on fewer lines. */
+.slide .title {
+  font: var(--slide-meta);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.slide .label,
+.slide .value {
+  font: var(--slide-figures);
+}
+
+.slide .rowSum .label,
+.slide .rowTogether .label,
+.slide .rowTogether .value {
+  font-weight: 700;
+}
+
+@media (max-width: 760px) {
+  .slide .list {
+    grid-template-columns: minmax(0, max-content) minmax(6em, 1fr) max-content;
+  }
+  .slide .label {
+    grid-column: auto;
+  }
+  .slide .rowSum .track,
+  .slide .rowSum .value {
+    border-top: var(--border-width-hairline) dashed var(--border-divider);
+    padding-top: var(--space-4);
+  }
+  .slide .rowSum .track {
+    height: calc(var(--money-sum-bar) + var(--space-4));
+  }
+  .slide .rowSum .bar {
+    top: var(--space-4);
   }
 }

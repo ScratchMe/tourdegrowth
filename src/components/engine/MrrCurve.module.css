@@ -2,8 +2,9 @@
  * MrrCurve — design system extension 09 (design/ds-extension-09-return/
  * components/engine/MrrCurve), ported by A20.d T3.a. Tokens only.
  *
- * The return's slide variant (`MrrCurve_slide`, --money-slide-note) is not
- * ported: the deck draws its slides at 1 920 × 1 080 with its own scale (T4).
+ * The return's slide variant read --money-slide-note, sized for its 960 × 540
+ * slides: here `.slide` reads the deck's own scale (--slide-*, 18px and up on
+ * its 1 920 × 1 080 canvas, design audit S-8), A20.d T4.b.
  */
 .root {
   margin: 0;
@@ -134,4 +135,16 @@
   stroke: var(--surface-page);
   stroke-width: var(--border-width-stamp);
   stroke-linejoin: round;
+}
+
+/* On a slide (A20.d T4.b): the deck's own steps, never under 18px on its 1 920 canvas. Its SVG text is set in the
+ * mono step: the UI face dropped spaces inside SVG text on the slide (« août2026 », measured 2026-10-03). */
+.slide .tick,
+.slide .startLabel {
+  font: var(--slide-meta);
+}
+
+.slide .legend {
+  font: var(--slide-meta);
+  gap: var(--space-2) var(--space-10);
 }

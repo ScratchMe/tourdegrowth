@@ -11,7 +11,7 @@ import { buildScenario } from "../scenario";
 import type { DeckModel, EngineDerived, EngineState, MetricEntry } from "../types";
 import { currentSnapshot } from "../values";
 import { EXAMPLE_TODAY, emptyState, exampleState, tourResult, withEntry, withoutTargets } from "./fixtures";
-import { asBeforeA20, asBeforeT3, asTabs, withoutResume } from "./golden-projection";
+import { asBeforeA20, asBeforeT3, asTabs, deckBeforeA20, withoutResume, withoutRetiredWhatIfRows } from "./golden-projection";
 import { CTX_EN, CTX_FR, EN, FR } from "./props";
 import { fullState } from "./storage-fixtures";
 
@@ -125,8 +125,9 @@ function outputsOf(state: EngineState, tour: StoredResult | null) {
     const snapshot = currentSnapshot(state);
     out[locale] = {
       derived: projectDerived(derived),
-      deck: projectDeck(deck),
-      markdown: deckMarkdown(deck, p.strings),
+      // The what-if slides' drawings and three rows A20.d T4.b adds, dropped; their markdown written from what remains.
+      deck: projectDeck(deckBeforeA20(deck)),
+      markdown: deckMarkdown(deckBeforeA20(deck), p.strings),
       scenario: buildScenario(state, state.whatIf ?? {}, ctx),
       tabs: asTabs(listStages(snapshot, derived.diagnosis)),
       collect: collectPlan(snapshot, EXAMPLE_TODAY),
@@ -184,7 +185,8 @@ describe("golden v1 — a self-serve engine reads the same after the change", ()
     it(`${name}: same board, same slides, same text, to the character`, () => {
       const { state, tour } = inputs[name]!;
       // The step-by-step's resume position retired with it (A18 T3.b): dropped from the expected side, the file untouched.
-      expect(outputsOf(openV1(state), tour)).toEqual(withoutResume(outputs[name]));
+      // The two rows the what-if slides retired for them (A20.d T4.b): dropped from the expected side, the file untouched.
+      expect(outputsOf(openV1(state), tour)).toEqual(withoutRetiredWhatIfRows(withoutResume(outputs[name])));
     });
   }
 });

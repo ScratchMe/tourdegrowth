@@ -20,6 +20,8 @@ export interface LeverSumProps {
   together: LeverSumRow;
   /** « Ensemble, ils rapportent ~4 400 € de plus que chacun seul, additionnés : … C'est l'effet composé. » */
   extra?: ReactNode;
+  /** « slide »: the deck's type sizes, and never stacked on a phone — a slide is a fixed canvas. */
+  medium?: "screen" | "slide";
   className?: string;
   "data-testid"?: string;
 }
@@ -35,13 +37,13 @@ const pct = (x: number, top: number) => `${Math.max(0, Math.min(100, (Math.max(0
  * The rows are real text (a definition list); the bars are decoration. On a
  * phone each label goes on its own line, the bar and the figure under it.
  */
-export function LeverSum({ title, rows, sum, together, extra, className, "data-testid": testId }: LeverSumProps) {
+export function LeverSum({ title, rows, sum, together, extra, medium = "screen", className, "data-testid": testId }: LeverSumProps) {
   const top = Math.max(together.amount, sum.amount, ...rows.map((r) => r.amount), 0) || 1;
   // Where each solo bar starts on the « added up » row: the ones before it, end to end.
   const lefts = rows.map((_, i) => rows.slice(0, i).reduce((sum, r) => sum + Math.max(0, r.amount), 0));
   const bar = (left: number, width: number): CSSProperties => ({ left: pct(left, top), width: pct(width, top) });
   return (
-    <figure className={[styles.root, className].filter(Boolean).join(" ")} data-testid={testId}>
+    <figure className={[styles.root, medium === "slide" ? styles.slide : "", className].filter(Boolean).join(" ")} data-testid={testId}>
       <figcaption className={styles.title}>{title}</figcaption>
       <dl className={styles.list}>
         {rows.map((r) => (

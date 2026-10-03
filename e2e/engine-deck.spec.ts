@@ -230,7 +230,8 @@ for (const locale of ["fr", "en"] as const) {
           const foot = slide.querySelector("footer")!;
           const footTop = (foot.getBoundingClientRect().top - box.top) / scale;
           const body = foot.previousElementSibling!;
-          const deepest = Math.max(...[...body.querySelectorAll("*")].map(y));
+          // Inside an <svg>, the shapes are measured by the <svg> itself: off screen, a thumbnail leaves them unlaid (A20.d T4.b).
+          const deepest = Math.max(...[...body.querySelectorAll("*")].filter((el) => !el.parentElement?.closest("svg")).map(y));
           return deepest > footTop ? [`${slide.getAttribute("data-slide")}: body ends at ${Math.round(deepest)}, footer starts at ${Math.round(footTop)}`] : [];
         }),
       );

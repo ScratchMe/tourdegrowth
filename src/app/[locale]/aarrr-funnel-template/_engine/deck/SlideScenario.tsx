@@ -1,6 +1,7 @@
+import { LeverSum } from "@/components/engine/LeverSum";
 import { rowOf, rowsOf } from "./deck-rows";
 import { SlideFrame, type SlideProps } from "./SlideFrame";
-import { ChangeTable } from "./SlideWhatIf";
+import { ChangeTable, SlideCurveCard } from "./SlideWhatIf";
 import { Arrow, SlideText } from "./slide-text";
 import styles from "./deck.module.css";
 
@@ -24,6 +25,13 @@ const DENSER_FROM = 9;
  * each lever's slide and in the text export, not here: with eight levers (nine since §19.3),
  * three tables side by side ran under the footer (measured, 2026-09-27).
  * The assumptions that applied are the dense footer.
+ *
+ * Design system extension 09 (Q11, A20.d T4.b): the levers are drawn
+ * (`LeverSum`: each alone, added up, together, the bracket over what the
+ * whole adds), under the MRR's curve with all the what-ifs — both only while
+ * they hold above the footer (under `DENSE_FROM`, measured): with four or
+ * more levers the slide keeps its lever list, denser, as before. The words
+ * stay the model's: the lever list is still what the text export writes.
  */
 export function SlideScenario({ slide, context }: SlideProps) {
   const s = context.strings;
@@ -35,28 +43,44 @@ export function SlideScenario({ slide, context }: SlideProps) {
 
   return (
     <SlideFrame slide={slide} context={context} footer={footer} footerDense>
-      <div className={styles.scenario}>
-        <section
-          className={[styles.leverCard, levers.length >= DENSE_FROM ? styles.leverDense : "", levers.length >= DENSER_FROM ? styles.leverDenser : ""]
-            .filter(Boolean)
-            .join(" ")}
-          data-testid={`${prefix}-levers`}
-        >
-          <h4 className={styles.cardEyebrow}>{s.scenario.aloneTitle}</h4>
-          <ul className={styles.leverList}>
-            {levers.map((lever) => (
-              <li key={lever.id} className={styles.leverRow} data-testid={`slide-lever-${lever.id}`}>
-                <span className={styles.leverName}>{lever.label}</span>
-                <span className={styles.leverMove}>
-                  {lever.from}
-                  <Arrow />
-                  {lever.to}
-                </span>
-                <span className={styles.leverGain}>{lever.gain || "?"}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
+      <div className={[styles.scenario, levers.length >= DENSE_FROM ? styles.scenarioDense : ""].filter(Boolean).join(" ")}>
+        <div className={styles.whatIfSide}>
+          {slide.curve && levers.length < DENSE_FROM ? <SlideCurveCard curve={slide.curve} slideId={slide.id} shared /> : null}
+          <section
+            className={[styles.leverCard, levers.length >= DENSE_FROM ? styles.leverDense : "", levers.length >= DENSER_FROM ? styles.leverDenser : ""]
+              .filter(Boolean)
+              .join(" ")}
+            data-testid={`${prefix}-levers`}
+          >
+            {slide.leverSum && levers.length < DENSE_FROM ? (
+              <LeverSum
+                medium="slide"
+                title={s.scenario.aloneTitle}
+                rows={slide.leverSum.rows.map((r) => ({ ...r, label: <SlideText text={r.label} accent={false} /> }))}
+                sum={slide.leverSum.sum}
+                together={slide.leverSum.together}
+                data-testid={`${prefix}-sum`}
+              />
+            ) : (
+              <>
+                <h4 className={styles.cardEyebrow}>{s.scenario.aloneTitle}</h4>
+                <ul className={styles.leverList}>
+                  {levers.map((lever) => (
+                    <li key={lever.id} className={styles.leverRow} data-testid={`slide-lever-${lever.id}`}>
+                      <span className={styles.leverName}>{lever.label}</span>
+                      <span className={styles.leverMove}>
+                        {lever.from}
+                        <Arrow />
+                        {lever.to}
+                      </span>
+                      <span className={styles.leverGain}>{lever.gain || "?"}</span>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
+          </section>
+        </div>
         <div className={styles.scenarioSide}>
           <ChangeTable
             title={s.slide.whatIfKpis}

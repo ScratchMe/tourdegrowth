@@ -4,7 +4,7 @@ import { deriveEngine } from "../derive";
 import { buildScenario } from "../scenario";
 import type { DeckModel, EngineState, SlideId, SlideTitleKey } from "../types";
 import { CTX_EN, CTX_FR, EN, FR } from "./props";
-import { EXAMPLE_EXPECTED, emptyState, exampleState, measured, missing, ratio, tourResult, withEntry, withTarget } from "./fixtures";
+import { EXAMPLE_EXPECTED, FILM_LEVERS, emptyState, exampleState, filmState, hybridState, measured, missing, ratio, tourResult, withEntry, withTarget } from "./fixtures";
 
 // Engine spec §13.1 "deck" — §9.2 presence and order, `visibility` first
 // under two ★, one case that triggers each title template and one that
@@ -523,8 +523,8 @@ describe("the what-if slides (2026-09-26)", () => {
     expect(row(s, "funnelStep", "signups").tone).toBe("stable");
     expect(row(s, "funnelStep", "activated").tone).toBe("moved");
     expect(row(s, "funnelStep", "paying").tone).toBe("moved");
-    // Churn didn't move: the retention rates say so, in a word.
-    expect(row(s, "kpi", "grr")).toMatchObject({ tone: "stable", change: FR.strings.slide.whatIfStable });
+    // Churn didn't move: the NRR says so, in a word.
+    expect(row(s, "kpi", "nrr")).toMatchObject({ tone: "stable", change: FR.strings.slide.whatIfStable });
   });
 
   /**
@@ -535,8 +535,8 @@ describe("the what-if slides (2026-09-26)", () => {
   it("today → with the what-ifs: a digit more when the change is finer than the rounding, as on the tiles", () => {
     const s = slide(deck(withWhatIf({ "acq.signup-rate": 3.6, "ret.logo-churn": 3.1 })), "scenario");
     expect(row(s, "kpi", "mrr12")).toMatchObject({ tone: "moved", today: "~104\u00a0000\u00a0€", projected: "~107\u00a0000\u00a0€" });
-    expect(row(s, "kpi", "grr")).toMatchObject({ tone: "moved", today: "96,5\u00a0%", projected: "95,9\u00a0%" });
-    expect(row(s, "kpi", "newMrr")).toMatchObject({ today: "~5\u00a0000\u00a0€", projected: "~5\u00a0800\u00a0€" });
+    expect(row(s, "kpi", "nrr")).toMatchObject({ tone: "moved", today: "99,6\u00a0%", projected: "99,0\u00a0%" });
+    expect(row(s, "kpi", "arr12")).toMatchObject({ today: "~1\u00a0250\u00a0000\u00a0€", projected: "~1\u00a0290\u00a0000\u00a0€" });
   });
 
   // Every lever across its slider's range. Non-vacuity, measured: without the visitors' `round`,
@@ -583,5 +583,56 @@ describe("the what-if slides (2026-09-26)", () => {
       }
     }
     expect(bad).toEqual([]);
+  });
+});
+
+/**
+ * The what-if slides of design system extension 09 (Q11, A20.d T4.b): the
+ * table's rows, the curve each slide draws, and the compounding the
+ * « together » slide draws — on the film's SaaS, whose figures the return
+ * printed.
+ */
+describe("the what-if slides, extension 09 (A20.d T4.b)", () => {
+  const film = (targets: EngineState["whatIf"]) => deck({ ...filmState(), whatIf: targets });
+  const row = (s: DeckModel["slides"][number], kind: string, id: string) => s.lines.find((l) => l.row === kind && l.id === id)!;
+  const N = "\u00a0";
+  const nb = (t: string) => t.replace(/\^/g, N);
+
+  it("one table: the MRR and the ARR in twelve months, the NRR, one new customer, the cash — no new MRR, no GRR", () => {
+    const s = slide(film({ "ret.logo-churn": 4 }), "whatif:ret.logo-churn");
+    expect(s.lines.filter((l) => l.row === "kpi").map((l) => l.id)).toEqual(["mrr12", "arr12", "nrr", "cac", "ltv", "ltvCac", "payback", "cash"]);
+    expect(row(s, "kpi", "ltvCac")).toMatchObject({ today: nb("0,79^fois"), projected: nb("1,2^fois"), tone: "moved" });
+    // Churn moves neither the payback nor the cash (§20.9).
+    expect(row(s, "kpi", "cash")).toMatchObject({ tone: "stable", today: nb("~990^000^€") });
+  });
+
+  it("each lever's slide draws the MRR month by month, today's pace against this what-if", () => {
+    const s = slide(film({ "ret.logo-churn": 4 }), "whatif:ret.logo-churn");
+    expect(s.curve!.today).toHaveLength(13);
+    expect(s.curve!.today[0]).toEqual([48_000, 48_000]);
+    expect(s.curve!.whatif![12]![0]).toBeCloseTo(93_556, 0);
+    expect(s.curve!.keys).toEqual({ today: "au rythme d'aujourd'hui", whatif: nb("avec cet «^Et si^»") });
+    expect(s.curve!.start).toBe(nb("48^000^€ aujourd'hui"));
+  });
+
+  it("« together » draws the film's three levers: each alone, added up, together (the return's figures)", () => {
+    const s = slide(film(FILM_LEVERS), "scenario");
+    expect(s.curve!.keys.whatif).toBe(nb("avec les 3 «^Et si^»"));
+    expect(s.leverSum!.rows.map((r) => r.value)).toEqual([nb("+18^000^€"), nb("+13^000^€"), nb("+6^400^€")]);
+    expect(s.leverSum!.sum).toMatchObject({ label: "Chacun seul, additionnés", value: nb("~38^000^€") });
+    expect(s.leverSum!.together).toMatchObject({ label: "Ensemble", value: nb("+42^000^€") });
+    expect(s.leverSum!.together.amount).toBeGreaterThan(s.leverSum!.sum.amount);
+  });
+
+  it("no ARPA: no curve to draw, the table alone", () => {
+    const s = slide(deck({ ...withEntry(filmState(), "rev.arpa", undefined), whatIf: { "act.rate": 24 } }), "whatif:act.rate");
+    expect(s.curve).toBeUndefined();
+  });
+
+  it("sales-assisted: the same rows, its NRR over twelve months, its own curve", () => {
+    const s = slide(deck({ ...hybridState(), whatIf: { "slg.rev.win-rate": 30 } }), "whatif:slg.rev.win-rate");
+    expect(s.lines.filter((l) => l.row === "kpi").map((l) => l.id)).toEqual(["mrr12", "arr12", "nrr", "cac", "ltv", "ltvCac", "payback", "cash"]);
+    expect(row(s, "kpi", "nrr").label).toBe(FR.strings.scenario.kpiNrr12);
+    expect(s.curve!.today).toHaveLength(13);
   });
 });
