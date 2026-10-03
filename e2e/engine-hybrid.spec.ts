@@ -118,8 +118,11 @@ test.describe("the hybrid board (§18.7 E2)", () => {
     expect(slgBox!.x).toBeLessThan(sumBox!.x);
     await expect(page.getByTestId("engine-total-sum")).toContainText(ENGINE_COPY.total.sumMrr.fr);
     await expect(page.getByTestId("engine-total-sum")).toContainText(`228${NB}000${NB}€`);
-    // A sum, never a comparison: no « + » nor « = » between the figures (those are a disclosure's glyphs).
-    await expect(band.locator("dl")).not.toContainText(/[+=]/);
+    // A sum, never a comparison: no « + » nor « = » between the figures (those are a disclosure's glyphs) —
+    // nor in the line of what else adds up (extension 09, A20.d T3.b): the ARR, the MRR in 12 months, the cash.
+    await expect(band.locator("dl")).toHaveCount(2);
+    for (const dl of await band.locator("dl").all()) await expect(dl).not.toContainText(/[+=]/);
+    await expect(page.getByTestId("engine-total-band-totals-arr")).toContainText(`2${NB}736${NB}000${NB}€`);
     const link = page.getByTestId("engine-total-link");
     await expect(link).toContainText(fillTemplate(ENGINE_COPY.total.link.fr, { n: "31", m: "130", period: "juin à août 2026" }));
     await expect(link).toContainText(ENGINE_COPY.total.linkNote.fr);
@@ -181,12 +184,15 @@ test.describe("the hybrid board (§18.7 E2)", () => {
     await block.locator("summary").click();
     await expect(block.getByTestId("engine-metric-link-pql-handoff")).toBeVisible();
 
-    // Its what-if panel, its own levers, the link counted in opportunities; the total line in it (A18 T5).
+    // Its what-if panel, its own levers, the link counted in opportunities. What adds up is the band's line
+    // (extension 09, A20.d T3.b): the ARR, the MRR in 12 months at today's pace, the cash tied up.
     await page.getByTestId("engine-board-whatif").locator("summary").first().click();
     await expect(page.getByTestId("engine-whatif-slg-panel")).toBeVisible();
     await expect(page.getByTestId("whatif-value-link.pql-handoff")).toHaveText("31");
     await expect(page.getByTestId("whatif-slg-quarter")).toContainText("130");
-    await expect(page.getByTestId("engine-total-in12")).toContainText(ENGINE_COPY.scenario.totalIn12.en);
+    await expect(page.getByTestId("engine-total-in12")).toHaveCount(0);
+    await expect(page.getByTestId("engine-total-band-totals-mrr12")).toContainText(ENGINE_COPY.total.sumMrr12.en);
+    await expect(page.getByTestId("engine-total-band-totals-arr")).toContainText(ENGINE_COPY.total.sumArr.en);
   });
 
   test("moving a sales-assisted lever keeps self-serve's what-ifs, and its reset leaves them alone", async ({ page }) => {
@@ -200,7 +206,8 @@ test.describe("the hybrid board (§18.7 E2)", () => {
     await slider.focus();
     for (let i = 0; i < 6; i++) await page.keyboard.press("ArrowRight");
     await expect(page.getByTestId("whatif-value-slg.rev.win-rate")).toHaveText("30%");
-    await expect(page.getByTestId("engine-total-in12")).toContainText(/today|aujourd/);
+    // Both engines' MRR in 12 months with the what-ifs: the card's total line (A20.d T3.a).
+    await expect(page.getByTestId("engine-lever-total")).toContainText(/today|aujourd/);
     await page.getByTestId("whatif-slg-reset-all").click();
     const whatIf = (await storedEngineEntry(page))?.state.whatIf;
     expect(whatIf).toEqual({ "act.rate": 24 });
@@ -221,15 +228,20 @@ test.describe("the hybrid board (§18.7 E2)", () => {
     expect((await storedEngineEntry(page))?.state.whatIf).toEqual({ "slg.ref.referred-share": 30 });
   });
 
-  test("390: the band's three terms stack, the total under its rule, and nothing pushes the page sideways — French too", async ({ page }) => {
+  test("390: the two engines side by side over their total and its rule, the totals two by two, nothing pushes the page sideways — French too", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     for (const locale of ["en", "fr"] as const) {
       await seed(page, hybridState(), locale);
       const plg = await page.getByTestId("engine-total-plg").boundingBox();
       const slg = await page.getByTestId("engine-total-slg").boundingBox();
       const sum = await page.getByTestId("engine-total-sum").boundingBox();
-      expect(slg!.y).toBeGreaterThan(plg!.y + plg!.height - 1);
-      expect(sum!.y).toBeGreaterThan(slg!.y + slg!.height - 1);
+      // Extension 09 (A20.d T3.b): self-serve then sales-assisted on one row, the total under both.
+      expect(Math.abs(slg!.y - plg!.y)).toBeLessThan(2);
+      expect(plg!.x).toBeLessThan(slg!.x);
+      expect(sum!.y).toBeGreaterThan(Math.max(plg!.y + plg!.height, slg!.y + slg!.height) - 1);
+      const arr = await page.getByTestId("engine-total-band-totals-arr").boundingBox();
+      const in12 = await page.getByTestId("engine-total-band-totals-mrr12").boundingBox();
+      expect(Math.abs(in12!.y - arr!.y)).toBeLessThan(2);
       await noHorizontalScroll(page);
       await page.getByTestId("engine-motion-selector").getByRole("button", { name: ENGINE_COPY.hybrid.motionName.slg[locale] }).click();
       await expect(page.getByTestId("engine-relays")).toBeVisible();

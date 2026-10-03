@@ -9,7 +9,7 @@ import { Field } from "@/components/core/Field";
 import { Segmented } from "@/components/core/Segmented";
 import { candidatesOf } from "@/lib/engine/catalog-shape";
 import { pelotonTitle } from "@/lib/engine/deck";
-import { relaysTitle, totalIn12 } from "@/lib/engine/deck-motions";
+import { relaysTitle } from "@/lib/engine/deck-motions";
 import { findingText } from "@/lib/engine/sentences";
 import type { CandidateId, Interval, MetricId, Motion, MotionDerived, SlideTitle } from "@/lib/engine/types";
 import { knownIn } from "@/lib/engine/values";
@@ -27,7 +27,6 @@ import { BoardMoney } from "./BoardMoney";
 import { BoardNumbers } from "./BoardNumbers";
 import type { TablePreview } from "./csv";
 import { TableEntry } from "./TableEntry";
-import { fill } from "./text";
 import { PipelineBand } from "./PipelineBand";
 import { TotalBand } from "./TotalBand";
 import { Verdict } from "./Verdict";
@@ -182,8 +181,6 @@ export function Board({
       <Disclosure summary={strings.lever.panel} open={whatIfOpen} onOpenChange={setWhatIfOpen} id="engine-whatif-full" data-testid="engine-board-whatif">
         <div className={styles.whatIf}>
           {motion === "plg" ? <WhatIfPanel view={view} onChange={actions.setWhatIf} /> : <SlgWhatIfPanel view={view} onChange={actions.setWhatIf} />}
-          {/* The hybrid's MRR in twelve months, with the what-ifs of both engines: in the full panel (A18 T5). */}
-          {hybrid ? <TotalIn12 view={view} /> : null}
         </div>
       </Disclosure>
     </>
@@ -375,23 +372,5 @@ export function Board({
         </div>
       )}
     </div>
-  );
-}
-
-/**
- * The hybrid's one line in the full « et si » panel, whichever engine it shows
- * (§18.5.5): the total MRR in twelve months, today and with the what-ifs of
- * both panels. A sum, not a comparison. Nothing when either motion can't
- * project its MRR — a partial total is no total (S9).
- */
-function TotalIn12({ view }: { view: EngineView }) {
-  const { strings, state, ctx } = view;
-  const line = totalIn12(state, strings, ctx);
-  if (!line) return null;
-  const value = line.projected ? fill(strings.scenario.totalIn12Row, { today: line.today, projected: line.projected }) : line.today;
-  return (
-    <p className={styles.twoSegments} data-testid="engine-total-in12">
-      <strong>{strings.scenario.totalIn12}</strong> · {value}
-    </p>
   );
 }

@@ -1,7 +1,9 @@
 import { TotalBand as Band } from "@/components/engine/TotalBand";
-import { linkSentence, totalBlocks } from "@/lib/engine/deck-motions";
-import { formatSum } from "@/lib/engine/total";
+import { linkSentence, totalBlocks, totalIn12 } from "@/lib/engine/deck-motions";
+import { formatApproxMoneyInterval } from "@/lib/engine/format";
+import { addBoth, formatSum, timesTwelve } from "@/lib/engine/total";
 import type { SlideTitle } from "@/lib/engine/types";
+import { scenarioFor, slgScenarioFor } from "./scenario-view";
 import { titleText } from "./Verdict";
 import type { EngineView } from "./view";
 
@@ -17,9 +19,14 @@ import type { EngineView } from "./view";
  * Its title is the hybrid board's heading and focus target (`engine-verdict`),
  * without the red accent: at 19px semi-bold the red would not read at AA.
  *
+ * Then, since design system extension 09 (A20.d T3.b), one line of what
+ * else adds up, today: the ARR (the total MRR × 12), the MRR in twelve
+ * months at today's pace, the cash tied up. A part missing drops its term: a
+ * partial total is no total (S9). The MRR in twelve months with the
+ * what-ifs is on the card (`BoardLever`'s total line).
+ *
  * The new MRR of the month and the two sums, which a reader can redo on a
- * calculator, are on the `total` slide (`SlideTotal`); the MRR in twelve
- * months with the what-ifs is in the full « Et si » panel.
+ * calculator, are on the `total` slide (`SlideTotal`).
  */
 export function TotalBand({ view, verdict }: { view: EngineView; verdict: SlideTitle }) {
   const { strings, state, ctx, derived } = view;
@@ -29,6 +36,14 @@ export function TotalBand({ view, verdict }: { view: EngineView; verdict: SlideT
   const blocks = totalBlocks(total, state, strings, ctx);
   const sum = formatSum(total.mrr, state.setup.currency, ctx, strings.units);
   const link = linkSentence(total, state, strings, ctx);
+  const arr = formatSum(timesTwelve(total.mrr), state.setup.currency, ctx, strings.units);
+  const in12 = totalIn12(state, strings, ctx);
+  const cash = addBoth(scenarioFor(state, {}, ctx).today.kpis.cash?.tiedUp, slgScenarioFor(state, {}, ctx).today.cash?.tiedUp);
+  const totals = [
+    arr ? { key: "arr", label: t.sumArr, value: arr.total } : null,
+    in12 ? { key: "mrr12", label: t.sumMrr12, value: in12.today } : null,
+    cash ? { key: "cash", label: t.sumCash, value: formatApproxMoneyInterval(cash, state.setup.currency, ctx, strings.units) } : null,
+  ].filter((x): x is { key: string; label: string; value: string } => x !== null);
   return (
     <Band
       eyebrow={t.title}
@@ -41,6 +56,7 @@ export function TotalBand({ view, verdict }: { view: EngineView; verdict: SlideT
         "data-testid": `engine-total-${b.motion}`,
       }))}
       total={{ label: t.sumMrr, value: sum ? sum.total : strings.slide.noNumber, "data-testid": "engine-total-sum" }}
+      totals={totals}
       link={
         link ? (
           <div data-testid="engine-total-link">

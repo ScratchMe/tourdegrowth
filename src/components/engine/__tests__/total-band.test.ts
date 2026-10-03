@@ -61,6 +61,23 @@ describe("TotalBand", () => {
     expect(band()).not.toMatch(/<svg|<progress|<meter/);
   });
 
+  it("extension 09: one line of what else adds up, under the sum, before the link — only when given", () => {
+    expect(band()).not.toContain("ARR total");
+    const markup = band({
+      totals: [
+        { key: "arr", label: "ARR total", value: "2 736 000 €" },
+        { key: "mrr12", label: "MRR dans 12 mois au rythme actuel", value: "~440 000 €" },
+        { key: "cash", label: "Trésorerie immobilisée totale", value: "~1 700 000 €" },
+      ],
+      "data-testid": "band",
+    });
+    expect(markup.indexOf("MRR total")).toBeLessThan(markup.indexOf("ARR total"));
+    expect(markup.indexOf("Trésorerie immobilisée totale")).toBeLessThan(markup.indexOf("opportunités assistées"));
+    expect(markup.match(/data-testid="band-totals-/g)).toHaveLength(3);
+    // Two by two on a phone, so the band grows by a row.
+    expect(css).toMatch(/@media \(max-width: 760px\)[\s\S]*\.totals \{[^}]*grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/);
+  });
+
   it("says the link last, and only when there is one", () => {
     expect(band().indexOf("opportunités assistées")).toBeGreaterThan(band().indexOf("</dl>"));
     expect(band({ link: undefined })).not.toContain("opportunités");

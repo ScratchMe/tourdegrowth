@@ -1,7 +1,7 @@
 import type { Page } from "@playwright/test";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import type { EngineState } from "../src/lib/engine/types";
-import { exampleState, measured, ratio, withEntry } from "../src/lib/engine/__tests__/fixtures";
+import { exampleState, filmState, FILM_LEVERS, measured, ratio, withEntry } from "../src/lib/engine/__tests__/fixtures";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, openFold, SKIP_ADMIN_REASON, test } from "./helpers";
 import { storedEngineEntry, writeEngineSeed } from "./engine-helpers";
 
@@ -73,10 +73,12 @@ test("two levers: what each brings alone, the compounding sentence, and the rese
   await expect(panel.getByTestId("whatif-alone")).toHaveCount(0);
 
   await nudge(page, "ret.logo-churn", "ArrowLeft", 5);
+  // The compounding drawn (extension 09, A20.d T3.b): each lever alone, added up, together, and the bracket.
   const alone = panel.getByTestId("whatif-alone");
-  await expect(alone.locator("tbody tr")).toHaveCount(2);
+  await expect(alone.locator('[data-row="lever"]')).toHaveCount(2);
   // Activation and churn compound: more customers kept longer is worth more than the sum.
-  await expect(panel.getByTestId("whatif-together")).toContainText(W.together.fr.split("{total}")[0]!.trim());
+  await expect(alone.getByTestId("whatif-alone-bracket")).toHaveCount(1);
+  await expect(alone.getByTestId("whatif-alone-extra")).toContainText(W.sumExtra.fr.split("{extra}")[0]!.trim());
   await expect(panel.getByTestId("whatif-assumptions")).toBeVisible();
 
   // Back to today, one lever: its value is today's again, and the table goes.
@@ -143,13 +145,23 @@ for (const locale of ["en", "fr"] as const) {
   });
 }
 
-test("at 1280px, the growth numbers stay in view while the last slider moves", async ({ page }) => {
+/**
+ * The figures' column is sticky: moving the last lever, far below the tables'
+ * top, keeps them beside it. Since design system extension 09 (A20.d T3.b)
+ * the seven tiles are three tables, about 650px: taller than the room the
+ * sticky column has beside the last levers, so its top (« Croissance ») may
+ * leave the screen there, and the column stays pinned to the levers' end —
+ * the table of what one new customer is worth, which the ARPA moves, in view.
+ * Without the sticky, moving it scrolls every table away.
+ */
+test("at 1280px, the figures stay beside the last slider while it moves", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
-  await openWith(page, exampleState());
-  // The last lever sits far below the tiles: without the sticky column, moving it scrolls them away.
+  await openWith(page, filmState());
   await nudge(page, "rev.arpa", "ArrowRight", 2);
   await expect(page.getByTestId("whatif-slider-rev.arpa")).toBeInViewport();
-  await expect(page.getByTestId("whatif-kpi-mrr12")).toBeInViewport();
+  await expect(page.getByTestId("whatif-figures-row-payback")).toBeInViewport();
+  await expect(page.getByTestId("whatif-figures-row-payback")).toContainText(W.better.en);
+  await expect(page.getByTestId("whatif-kpis")).toHaveCSS("position", "sticky");
 });
 
 /**
@@ -195,18 +207,21 @@ test("the growth numbers are read once, from one summary, not from the tiles (au
  * Non-vacuity: both a « better » and a « worse » are on screen when it reads;
  * and checked by sabotage on 2026-09-28, a build with the tiles back on
  * `good`/`bad` fails this test only, on the first delta's green.
+ * Since design system extension 09 (A20.d T3.b) the tiles are three tables:
+ * the change column is read against its row's own name.
  */
-test("the tiles' changes are bold ink, a loss as much as a gain", async ({ page }) => {
+test("the tables' changes are bold ink, a loss as much as a gain", async ({ page }) => {
   await openWith(page, exampleState());
   await nudge(page, "acq.signup-rate", "ArrowRight", 4);
   await nudge(page, "ret.logo-churn", "ArrowRight", 6);
-  const deltas = page.getByTestId("whatif-kpis").locator("[data-direction]");
+  // The change column of the three tables (extension 09, A20.d T3.b): the last cell of each row.
+  const deltas = page.getByTestId("whatif-figures").locator("tbody tr td:last-child");
   await expect(deltas.filter({ hasText: W.worse.en })).not.toHaveCount(0);
   await expect(deltas.filter({ hasText: W.better.en })).not.toHaveCount(0);
   const painted = await deltas.evaluateAll((els) =>
     els.map((el) => {
-      const tile = el.closest('[data-testid^="whatif-kpi-"]')!;
-      return { text: el.textContent, color: getComputedStyle(el).color, ink: getComputedStyle(tile).color, weight: getComputedStyle(el).fontWeight };
+      const row = el.closest("tr")!.querySelector("th")!;
+      return { text: el.textContent, color: getComputedStyle(el).color, ink: getComputedStyle(row).color, weight: getComputedStyle(el).fontWeight };
     }),
   );
   for (const d of painted) {
@@ -239,5 +254,41 @@ for (const width of [1280, 390]) {
     expect(whatIf).toHaveLength(2);
     for (const grid of [...peloton, ...whatIf]) expect(grid).toEqual(peloton[0]);
     expect(peloton[0]![0]).toBe(width === 1280 ? 200 : 118);
+  });
+}
+
+/**
+ * Design system extension 09 (A20.d T3.b): the panel's figures are three
+ * tables, the compounding is drawn, and the money's rules join the
+ * assumptions — on the film's three what-ifs, in both languages, at both
+ * widths. On a phone « today » folds into the what-if cell: three columns,
+ * no sideways scroll.
+ */
+for (const [locale, width] of [
+  ["fr", 1280],
+  ["fr", 390],
+  ["en", 1280],
+  ["en", 390],
+] as const) {
+  test(`${locale} ${width}: the film's three what-ifs — three tables, the compounding drawn, the money's assumptions`, async ({ page }) => {
+    await page.setViewportSize({ width, height: width === 1280 ? 900 : 844 });
+    await openWith(page, { ...filmState(), whatIf: FILM_LEVERS }, locale);
+    const figures = page.getByTestId("whatif-figures");
+    await expect(figures.locator("table")).toHaveCount(3);
+    await expect(figures.locator("caption")).toHaveText([W.figuresGrowth[locale], W.figuresCustomer[locale], W.figuresCash[locale]]);
+    await expect(page.getByTestId("whatif-figures-row-spend")).toContainText(W.stable[locale]);
+    await expect(page.getByTestId("whatif-figures-row-after")).toContainText(W.leavesFirst[locale]);
+    // « Today » is a column on a desktop; on a phone it is the what-if cell's second line.
+    const todayHeader = figures.locator("thead th").nth(1);
+    if (width === 1280) await expect(todayHeader).toBeVisible();
+    else {
+      await expect(todayHeader).toBeHidden();
+      await expect(page.getByTestId("whatif-figures-row-cac").locator("td").nth(1)).toContainText(locale === "fr" ? "aujourd'hui" : "today");
+    }
+    const sum = page.getByTestId("whatif-alone");
+    await expect(sum.locator('[data-row="lever"]')).toHaveCount(3);
+    await expect(sum.getByTestId("whatif-alone-bracket")).toHaveCount(1);
+    await expect(page.getByTestId("whatif-assumptions")).toContainText(W.assumeCash[locale].slice(0, 20));
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
   });
 }

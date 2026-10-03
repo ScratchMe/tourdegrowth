@@ -407,6 +407,7 @@ test.describe("the §6.0 example on the board", () => {
       // Nothing moved: today's funnel, and no figure claims a change.
       await expect(panel.getByTestId("engine-whatif-funnel-title")).toHaveText(w.funnelToday[locale]);
       await expect(panel.getByTestId("whatif-kpis")).not.toContainText(w.better[locale]);
+      await expect(panel.getByTestId("whatif-figures-row-newMrr")).not.toContainText(w.better[locale]);
 
       // Activation 18 → 19 %, one step of the slider.
       await panel.getByTestId("whatif-slider-act.rate").focus();
@@ -419,10 +420,11 @@ test.describe("the §6.0 example on the board", () => {
       // Day 30 is not measured in the example: the unknown shape, never 0 dots.
       await expect(panel.getByTestId("whatif-step-d30").locator("[data-dot]")).toHaveCount(0);
       // More new MRR is better, and at the same spend a lower CAC is better too — said in words.
-      await expect(panel.getByTestId("whatif-kpi-newMrr")).toContainText(w.better[locale]);
-      await expect(panel.getByTestId("whatif-kpi-cac")).toContainText(w.better[locale]);
-      // Churn did not move: retention says nothing.
-      await expect(panel.getByTestId("whatif-kpi-grr")).not.toContainText(w.better[locale]);
+      await expect(panel.getByTestId("whatif-figures-row-newMrr")).toContainText(w.better[locale]);
+      await expect(panel.getByTestId("whatif-figures-row-cac")).toContainText(w.better[locale]);
+      // Churn did not move: retention says nothing but « stable ».
+      await expect(panel.getByTestId("whatif-figures-row-grr")).not.toContainText(w.better[locale]);
+      await expect(panel.getByTestId("whatif-figures-row-grr")).toContainText(w.stable[locale]);
       // The board's own funnel is still today's.
       await expect(page.getByTestId("engine-board-peloton").getByTestId("peloton-numeral-act.rate")).toHaveText(EXAMPLE_EXPECTED.activatedPerHundred);
     });
