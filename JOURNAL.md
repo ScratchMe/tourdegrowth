@@ -1362,7 +1362,7 @@ Les écrans touchés ont été refaits en image et regardés : le quiz dans les 
 
 Rien sous `src/` ne change, donc ni build ni Playwright. `scripts/vercel-ignore.sh` ignore `marketing/` et le Markdown de la racine : ce merge ne déploie rien.
 
-## A20, prompt E : l'argent du moteur, spécifié, modélisé et briefé (2026-10-03)
+## A20, prompt E : l'argent du moteur, spécifié, modélisé et briefé (2026-10-03, #306)
 
 **La demande** (Antoine, prompt E de `CHANTIERS.md`) : mettre le moteur à la hauteur de son film. Le film « Le moteur » montre l'ARR, la courbe du MRR, un client qui coûte plus qu'il ne rapporte et des slides pour un board ; le moteur n'en montrait qu'une partie. Cette session écrit la spécification, code en pur ce qui ne dépend pas du design, pose les questions et dépose le brief 09. Aucun écran ne change.
 

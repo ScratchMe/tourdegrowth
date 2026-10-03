@@ -358,7 +358,7 @@ d'origine datait de `9c81844`, avant #302) :
 
 | # | Quoi | Qui | État |
 |---|---|---|---|
-| A20.a | **Le modèle pur** (`ENGINE.md` §20.1 à §20.7) : par motion, aujourd'hui et avec les « Et si », l'ARR, la courbe du MRR sur 13 points (le MRR dans 12 mois en est le dernier point), le LTV:CAC, la durée de vie et les mois de marge après le remboursement, le constat de perte (détecté, pas encore dans `findings()`), la trésorerie immobilisée, et les sommes de l'hybride | Session | **Livré le 2026-10-03** (`lib/engine/money.ts`, 31 tests, goldens tenus) |
+| A20.a | **Le modèle pur** (`ENGINE.md` §20.1 à §20.7) : par motion, aujourd'hui et avec les « Et si », l'ARR, la courbe du MRR sur 13 points (le MRR dans 12 mois en est le dernier point), le LTV:CAC, la durée de vie et les mois de marge après le remboursement, le constat de perte (détecté, pas encore dans `findings()`), la trésorerie immobilisée, et les sommes de l'hybride | Session | **Livré le 2026-10-03** ([#306](https://github.com/ScratchMe/tourdegrowth/pull/306) : `lib/engine/money.ts`, 31 tests, goldens tenus) |
 | A20.b | **Le brief 09** à Claude Design, avec les captures de l'état actuel et sa densité | Session, puis Antoine qui le lance | Écrit et déposé le 2026-10-03 (B14). **À lancer par Antoine** |
 | A20.c | **Les décisions** : C46 à C52, puis celles que le retour demande | Antoine | C46 à C52 ouvertes le 2026-10-03 |
 | A20.d | **Le portage**, une PR par étape, `ENGINE_ENABLED` fermé, au retour du brief et une fois A20.c tranchée (prompt F). Découpage prévu, à revoir sur le retour : T1, le constat de perte dans `findings()` (type `unit-econ-loss`, son rang et sa phrase, C48) ; T2, l'argent sur le tableau (C47) ; T3, « Et si » (la courbe, l'ARR, le LTV:CAC, le payback et la trésorerie, dans la carte et le panneau, l'assisté et le total, C51) ; T4, les slides (« Et si » avec sa courbe, le payback et la trésorerie sur unit economics) ; T5, l'alerte de payback long, derrière la règle de C49 (et sa saisie, si C49 retient la trésorerie de l'équipe) ; T6, la promesse (C52) et l'exemple (C50) ; T7, la densité avant contre après (`scripts/engine-density.capture.ts`) et les captures. Chaque écran en FR et en EN, à 1 280 et 390 px | Session | Attend A20.b et A20.c |
@@ -586,7 +586,7 @@ chiffre) et un `COPY.md`. **Vingt et une captures** dans
 anglais à 390 px), prises par `scripts/engine-density.capture.ts` (tests
 « brief 09 »), avec la densité mesurée : le tableau du film fait 3 438 px et
 26 contrôles à 1 280, le levier « Et si » y commence à 3 237 px, et le
-panneau ouvert ajoute 1 774 px et 9 contrôles. **Déposé le même jour** dans
+panneau ouvert ajoute 1 774 px et 9 contrôles. **Déposé le même jour** ([#306](https://github.com/ScratchMe/tourdegrowth/pull/306)) dans
 le projet `23b9671c-…`, aux mêmes chemins sous `design/` (22 fichiers, un
 plan à eux, aucune suppression ; ni le bundle ni `_ds_sync.json` touchés),
 relu par `get_file` et `list_files`. **À lancer par Antoine** (D16). Au
