@@ -47,6 +47,17 @@ l'œil et à l'oreille, c'est le même film (deux exports du diagnostic, le
 2026-10-03 : 46 dB de PSNR au pire, sur les mêmes indices de son). Ceux du
 2026-10-03 ont été remis à Antoine dans la session.
 
+**Tout télécharger, depuis la page.** Le bouton « Tout télécharger · zip »
+donne en un seul fichier la dernière version des vingt-quatre vidéos, rangées
+par langue puis par format. Elles sont stockées avec la page (le stockage de
+fichiers de l'artifact), et la page assemble le zip dans le navigateur (un zip
+« stocké », sans compression ni bibliothèque), puis le propose à
+l'enregistrement. La section n'apparaît que sur claude.ai. Le zip pèse
+environ 115 Mo, au-delà des 30 Mo qu'accepte l'envoi de fichiers d'une
+session. **Après un nouvel export**, il faut réenvoyer les MP4 dans la page
+(outil Artifact, `asset: true`) et remplacer la liste `DL_FILES` par les
+nouveaux identifiants.
+
 Pour republier la page à la même adresse, depuis une session Claude Code :
 l'outil Artifact, avec ce fichier et `url` = l'adresse ci-dessus. La page
 publiée est le corps du document : le lecteur ajoute `<!doctype>` et `<head>`
