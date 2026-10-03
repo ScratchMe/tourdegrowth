@@ -1222,3 +1222,27 @@ Sur chacun, à 1 280 et 390 px : aucune violation axe sérieuse ou critique (le 
 - l'écriture d'une décision ne s'exerce que depuis un clic sur la page, pas d'ici.
 
 **Ce qui reste** : les réponses d'Antoine, puis leur application (`/bon-a-tirer appliquer`), qui lèvera les marqueurs. Ensuite B13, la re-synchro, et l'ouverture du moteur (D2), qui attend aussi le nº7.
+
+## Plus d'aperçus Vercel : seul `main` déploie (2026-10-03, #296)
+
+**Le problème** : le quota de déploiements du compte (100 par 24 heures, `VERCEL.md` §1.12) se vidait sans aucun merge. Chaque push de branche crée un déploiement d'aperçu ; `ignoreCommand` en saute le build, mais il tourne **après** la création, donc l'entrée existe (annulée) et compte. Relevé le 2026-10-03 sur GitHub : la tête de #295, poussée le 2026-10-02 à 23 h 58 UTC, porte un statut `Vercel` en `failure`, « Deployment rate limited — retry in 24 hours ». Un relevé fait par Antoine dans une autre session comptait 48 déploiements annulés sur 24 heures ; la session ne peut pas le relire (`list_deployments` répond toujours 403, `VERCEL.md` §1.9).
+
+**La décision** (Antoine, sur la méthode d'une autre session qui l'avait appliquée à Ramille) : `vercel.json` gagne `"git": { "deploymentEnabled": { "**": false, "main": true } }`. Un push de branche ne crée plus aucun déploiement ; un merge sur `main` en crée un, comme avant.
+
+**Vérifié avant d'écrire** :
+- la documentation Vercel (*Git configuration*) : les motifs sont du minimatch, une branche absente vaut `true`, et une branche qui répond à plusieurs motifs déploie dès que l'un d'eux vaut `true` ; `main` déploie donc malgré `"**": false` ;
+- minimatch, exécuté : `*` ne couvre ni `claude/sharp-ptolemy-iyis9j` ni `dependabot/npm_and_yarn/…`, `**` les couvre ;
+- la branche de production est `main` : branche par défaut du dépôt, et domaine `tourdegrowth-git-main-…` du projet Vercel ;
+- le ruleset de `main` (`/rules/branches/main`) n'exige que `Types, tests, build` : le statut `Vercel` qui disparaît des PR ne bloque aucun merge, et aucun workflow ne lit un aperçu.
+
+**Ce qui change** :
+- `vercel.json`, et `src/__tests__/vercel-config.test.ts` : deux tests neufs, l'un exige `"main": true`, l'autre `"**": false` sans clé `"*"`. Non-vacuité : réglage cassé des deux façons, chaque test rougit seul ;
+- `scripts/vercel-ignore.sh` : sa règle 1 (« seule la production construit ») reste, pour une branche d'avant le réglage ou un déploiement fait à la main ; le commentaire le dit ;
+- `VERCEL.md` : §1.10 réécrit (le réglage, pourquoi `ignoreCommand` ne suffit pas, les trois pièges, la vérification), §1.6 corrigé (un build sauté ne produit pas de fonction, mais son entrée existe et compte), §1.12 renvoie au correctif ;
+- le commentaire d'en-tête de `ci.yml`, qui disait « Vercel builds every push ».
+
+**Le piège qui reste** : le réglage suit la branche. Vercel lit le `vercel.json` du commit poussé, donc une branche ouverte avant le merge déploie encore à chaque push tant qu'elle n'a pas récupéré `main`.
+
+**Vérifié** :
+- `eslint` et `tsc` propres ; 3 062 tests unitaires après la fusion de `main`, qui avait reçu #295 et #297 à #301 entre-temps (3 060 + 2), couverture au-dessus des seuils. Build et Playwright sautés : `next build` ne lit pas `vercel.json`, et le reste du diff est de la doc et des commentaires.
+- **Le réglage tient déjà sur la branche, avant le merge** : aucun statut `Vercel` ni commentaire du robot sur les deux commits poussés, quatre minutes après. Sur la tête de #295, le statut était arrivé cinq secondes après le commit, et un déploiement refusé par le quota laisse lui aussi un statut (`failure`). Aucun déploiement n'a donc été créé. C'est la preuve que Vercel lit bien le `vercel.json` du commit poussé.

@@ -21,10 +21,29 @@ const ROOT = process.cwd();
 const SCRIPT = join(ROOT, "scripts", "vercel-ignore.sh");
 
 describe("vercel.json", () => {
+  const config = JSON.parse(readFileSync(join(ROOT, "vercel.json"), "utf8")) as Record<string, unknown>;
+
   it("is valid JSON whose ignoreCommand runs the script and nothing else", () => {
-    const config = JSON.parse(readFileSync(join(ROOT, "vercel.json"), "utf8")) as Record<string, unknown>;
-    expect(Object.keys(config).sort()).toEqual(["$schema", "ignoreCommand"]);
+    expect(Object.keys(config).sort()).toEqual(["$schema", "git", "ignoreCommand"]);
     expect(config.ignoreCommand).toBe("sh scripts/vercel-ignore.sh");
+  });
+
+  // Git deployments: production only (VERCEL.md §1.10). A push to any other
+  // branch creates no deployment at all, so it no longer eats the daily
+  // deployment quota (§1.12), which the ignoreCommand cannot prevent: it runs
+  // after the deployment already exists. Branch patterns are minimatch, and a
+  // branch matching several rules deploys if one of them is true.
+  const rules = (config.git as { deploymentEnabled: Record<string, boolean> }).deploymentEnabled;
+
+  it("names the production branch explicitly, or production stops deploying", () => {
+    expect(rules.main).toBe(true);
+  });
+
+  it('turns off every other branch with "**", never "*"', () => {
+    // In minimatch "*" stops at "/": claude/<name> and dependabot/<path>
+    // would still deploy a preview each.
+    expect(rules["**"]).toBe(false);
+    expect(Object.keys(rules)).not.toContain("*");
   });
 });
 
