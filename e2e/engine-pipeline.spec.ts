@@ -63,13 +63,15 @@ test("the month before's coverage, and a past month read on its own shows its ow
   state.setup.pipeline = { quarterTarget: 200_000 };
   state.snapshots[state.snapshots.length - 1]!.pipelineOpen = 520_000;
   await seed(page, state, "fr");
-  const band = page.getByTestId("engine-column-slg").getByTestId("engine-pipeline");
+  // One engine shown at a time (A18 T5): sales-assisted's.
+  await page.getByTestId("engine-motion-selector").getByRole("button", { name: ENGINE_COPY.hybrid.motionName.slg.fr }).click();
+  const band = page.getByTestId("engine-pipeline");
   await expect(band.getByTestId("engine-pipeline-coverage")).toHaveText("Couverture : 2,6× l'objectif du trimestre");
   await expect(band.getByTestId("engine-pipeline-previous")).toHaveText("En juillet 2026 : 2,1×");
 
   await openEngineMenu(page);
   await page.getByTestId("engine-month-select").selectOption({ index: 1 });
-  const past = page.getByTestId("engine-column-slg").getByTestId("engine-pipeline");
+  const past = page.getByTestId("engine-pipeline");
   await expect(past.getByTestId("engine-pipeline-coverage")).toHaveText("Couverture : 2,1× l'objectif du trimestre");
   await expect(past.getByTestId("engine-pipeline-open")).toHaveCount(0);
 });

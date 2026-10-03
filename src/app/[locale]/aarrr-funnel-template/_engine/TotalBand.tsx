@@ -1,73 +1,55 @@
-import { Card } from "@/components/core/Card";
-import { linkSentence, totalBlocks, totalSums } from "@/lib/engine/deck-motions";
+import { TotalBand as Band } from "@/components/engine/TotalBand";
+import { linkSentence, totalBlocks } from "@/lib/engine/deck-motions";
+import { formatSum } from "@/lib/engine/total";
 import type { SlideTitle } from "@/lib/engine/types";
-import { Verdict } from "./Verdict";
+import { titleText } from "./Verdict";
 import type { EngineView } from "./view";
-import styles from "./Board.module.css";
 
 /**
- * « Deux moteurs, un total » — the hybrid board's band (engine spec §18.7 E2,
- * §18.6.2-§18.6.3). The verdict in stencil is the `total` slide's title
- * (`deck-motions.ts#totalTitle`), then two text blocks, self-serve then
- * sales-assisted — the MRR and the new MRR of the month — with the link
- * between them, its arrow drawn (an SVG, never a glyph) and its sentence
- * saying what it is not: an attribution. Then the sums.
+ * « Deux moteurs, un total » — the hybrid board's band, once, at its top
+ * (engine spec §18.7 E2, §18.6.2-§18.6.3; design system extension 07,
+ * `TotalBand`, A18 T5). Its title is the `total` slide's
+ * (`deck-motions.ts#totalTitle`); then each engine's MRR, self-serve then
+ * sales-assisted, and the total set off by a rule — a sum, never a
+ * comparison, its order never following the values. Its last line is the
+ * link, said as a share of the pipeline, never as an attribution.
  *
- * Text only, on purpose (§18.6.4, rule 3): no bar, no gauge, nothing that
- * puts the two motions on one axis. A sum is a sum; the two blocks are never
- * ranked, and their order never follows their values.
+ * Its title is the hybrid board's heading and focus target (`engine-verdict`),
+ * without the red accent: at 19px semi-bold the red would not read at AA.
+ *
+ * The new MRR of the month and the two sums, which a reader can redo on a
+ * calculator, are on the `total` slide (`SlideTotal`); the MRR in twelve
+ * months with the what-ifs is in the full « Et si » panel.
  */
 export function TotalBand({ view, verdict }: { view: EngineView; verdict: SlideTitle }) {
   const { strings, state, ctx, derived } = view;
   const total = derived.total;
   if (!total) return null;
-  const blocks = totalBlocks(total, state, strings, ctx);
-  const link = linkSentence(total, state, strings, ctx);
-  const sums = totalSums(total, state, strings, ctx);
   const t = strings.total;
-
-  const block = (b: (typeof blocks)[number]) => (
-    <div key={b.motion} className={styles.totalBlock} data-testid={`engine-total-${b.motion}`}>
-      <h3 className={styles.totalMotion}>{strings.hybrid.motionName[b.motion]}</h3>
-      <dl className={styles.totalFigures}>
-        <div>
-          <dt>{t.mrr}</dt>
-          <dd data-testid={`engine-total-mrr-${b.motion}`}>{b.mrr || strings.slide.noNumber}</dd>
-        </div>
-        <div>
-          <dt>{t.newMrr}</dt>
-          <dd>{b.newMrr || strings.slide.noNumber}</dd>
-        </div>
-      </dl>
-    </div>
-  );
-
+  const blocks = totalBlocks(total, state, strings, ctx);
+  const sum = formatSum(total.mrr, state.setup.currency, ctx, strings.units);
+  const link = linkSentence(total, state, strings, ctx);
   return (
-    <Card elevation="raised" className={styles.totalBand} data-testid="engine-total-band">
-      <p className={styles.totalEyebrow}>{t.title}</p>
-      <Verdict title={verdict} strings={strings} />
-      <div className={styles.totalBlocks}>
-        {block(blocks[0]!)}
-        <div className={styles.totalLink} data-testid="engine-total-link">
-          <svg className={styles.totalArrow} viewBox="0 0 28 12" aria-hidden="true" focusable="false">
-            <path d="M0 6 H25 M19 1 L26 6 L19 11" fill="none" stroke="currentColor" strokeWidth="2" />
-          </svg>
-          {link ? (
-            <>
-              <p className={styles.totalLinkText}>{link}</p>
-              <p className={styles.totalLinkNote}>{t.linkNote}</p>
-            </>
-          ) : null}
-        </div>
-        {block(blocks[1]!)}
-      </div>
-      {sums.length ? (
-        <ul className={styles.totalSums} data-testid="engine-total-sums">
-          {sums.map((sum) => (
-            <li key={sum.key}>{sum.text}</li>
-          ))}
-        </ul>
-      ) : null}
-    </Card>
+    <Band
+      eyebrow={t.title}
+      title={titleText(verdict, strings)}
+      headingId="engine-verdict"
+      engines={blocks.map((b) => ({
+        id: b.motion,
+        label: b.motion === "plg" ? t.ssMrr : t.saMrr,
+        value: <span data-testid={`engine-total-mrr-${b.motion}`}>{b.mrr || strings.slide.noNumber}</span>,
+        "data-testid": `engine-total-${b.motion}`,
+      }))}
+      total={{ label: t.sumMrr, value: sum ? sum.total : strings.slide.noNumber, "data-testid": "engine-total-sum" }}
+      link={
+        link ? (
+          <div data-testid="engine-total-link">
+            <p>{link}</p>
+            <p>{t.linkNote}</p>
+          </div>
+        ) : null
+      }
+      data-testid="engine-total-band"
+    />
   );
 }

@@ -33,6 +33,8 @@ export interface PelotonProps {
    * it, with where to change it.
    */
   cohortSignups?: number | null;
+  /** The board's title over the drawing, « Tes 100 inscrits » (A18 T6, the return's `peloton.title`): its caption. */
+  title?: string;
   /** The hybrid's half-width column (§18.7): one row per column, the mini-grid on the left, at every width. */
   compact?: boolean;
   className?: string;
@@ -72,7 +74,7 @@ function twoSignificant(v: number): number {
  * Text equivalent: every grid is a `role="img"` with a full sentence, and a
  * visually hidden table repeats the four columns (number, status, source).
  */
-export function Peloton({ peloton, strings, locale, cohortMonth, paidWindowDays, diagnosis, cohortSignups, compact, className }: PelotonProps) {
+export function Peloton({ peloton, strings, locale, cohortMonth, paidWindowDays, diagnosis, cohortSignups, compact, className, title }: PelotonProps) {
   const w = strings.peloton;
   const v = strings.visual;
   const cohort = monthLabel(cohortMonth, locale);
@@ -131,6 +133,11 @@ export function Peloton({ peloton, strings, locale, cohortMonth, paidWindowDays,
 
   return (
     <figure className={[styles.peloton, compact ? styles.compact : "", className ?? ""].filter(Boolean).join(" ")} data-testid="engine-peloton">
+      {title ? (
+        <figcaption className={styles.title} data-testid="peloton-title">
+          {title}
+        </figcaption>
+      ) : null}
       <p className={styles.upstream} data-testid="peloton-upstream">
         <svg className={styles.arrow} viewBox="0 0 28 12" aria-hidden="true" focusable="false">
           <path d="M0 6 H25 M19 1 L26 6 L19 11" fill="none" stroke="currentColor" strokeWidth="2" />

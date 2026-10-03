@@ -37,6 +37,7 @@ import { isRule, missingLabel, ruleMessage } from "./sheet-problems";
 import { draftKey, dropDraft, keepDraft, keptDraft } from "./sheet-drafts";
 import { moneyUnit, percentUnit, wordUnit, type NumberUnit } from "./sources";
 import { catalogFill, daysBetween, domId, fill, formatDate, formatMonth, joinList, metricById, midSentence, sourceLabel } from "./text";
+import { EngineTerm } from "./EngineTerm";
 import { ValueEditor } from "./ValueEditor";
 import type { EngineActions, EngineView } from "./view";
 import styles from "./Sheet.module.css";
@@ -258,7 +259,14 @@ export function MetricSheet({
           n: windowDays,
         }) + (isImmature(snapshot.cohortMonth, windowDays, ctx.today) ? ` ${strings.sheet.immatureCohort}` : "")
       : null;
-  const periodHint = period ? <span data-testid="engine-sheet-period">{period}</span> : null;
+  // Self-serve's cohort numbers carry « cohorte »'s « ? » on their months (A18 T6): the word they are first read with.
+  const cohortTerm = !range && shape.flow === "cohort" && windowDays !== null;
+  const periodHint = period ? (
+    <span data-testid="engine-sheet-period">
+      {period}
+      {cohortTerm ? <EngineTerm id="cohort" strings={strings} /> : null}
+    </span>
+  ) : null;
   const periodOnDenominator = shape.flow === "cohort";
 
   const bridge = view.bridges.find((b) => b.metric === id);
@@ -489,7 +497,19 @@ export function MetricSheet({
         chartLabel={chartLabel}
         legend={[
           ...(valueText ? [{ kind: "value" as const, label: fill(strings.sheet.compareYours, { value: valueText }) }] : []),
-          ...(benchText ? [{ kind: "band" as const, label: fill(strings.sheet.compareReference, { range: benchText }) }] : []),
+          ...(benchText
+            ? [
+                {
+                  kind: "band" as const,
+                  label: (
+                    <>
+                      {fill(strings.sheet.compareReference, { range: benchText })}
+                      <EngineTerm id="reference" strings={strings} />
+                    </>
+                  ),
+                },
+              ]
+            : []),
           ...(isCandidate && targetText ? [{ kind: "target" as const, label: fill(strings.sheet.compareTargetValue, { value: targetText }) }] : []),
         ]}
         caveat={
@@ -723,7 +743,12 @@ function TargetField({
       id={`${prefix}-target`}
       label={view.strings.sheet.compareTarget}
       optional={view.strings.workbench.optional}
-      hint={view.strings.sheet.compareTargetHint}
+      hint={
+        <>
+          {view.strings.sheet.compareTargetHint}
+          <EngineTerm id="target" strings={view.strings} />
+        </>
+      }
       value={value}
       onChange={setValue}
       onBlur={(event) => {

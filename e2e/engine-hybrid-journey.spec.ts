@@ -70,7 +70,12 @@ async function typeCounts(page: Page, locale: "fr" | "en", stage: string, dom: s
   await backToBoard(page);
 }
 
-const found = (locale: "fr" | "en", n: number, N: number) => (locale === "fr" ? `${n} chiffres sur ${N} trouvés` : `${n} of ${N} numbers found`);
+/** One engine shown at a time (A18 T5): « Engine shown », then its own « Your numbers » counts. */
+async function expectFoundIn(page: Page, locale: "fr" | "en", motion: "plg" | "slg", n: number): Promise<void> {
+  await backToBoard(page);
+  await page.getByTestId("engine-motion-selector").getByRole("button", { name: ENGINE_COPY.hybrid.motionName[motion][locale] }).click();
+  await expectFound(page, n);
+}
 
 for (const locale of ["fr", "en"] as const) {
   for (const width of [1280, 390] as const) {
@@ -89,17 +94,18 @@ for (const locale of ["fr", "en"] as const) {
       // 3 — the total's title, exact.
       const total = locale === "fr" ? `228${NB}000${NB}€` : "€228,000";
       await expect(page.getByTestId("engine-total-band")).toContainText(total);
-      // 4 — two diagnoses: activation in self-serve, the win rate in sales-assisted.
-      await expect(page.getByTestId("engine-column-plg").getByTestId("engine-diagnosis")).toContainText("Activation");
-      await expect(page.getByTestId("engine-column-slg").getByTestId("engine-diagnosis-slg")).toContainText(locale === "fr" ? "Taux de closing" : "Win rate");
-      // 5 — each motion's own coverage.
-      await expect(page.getByTestId("engine-column-plg").getByTestId("engine-coverage")).toContainText(found(locale, 11, 17));
-      await expect(page.getByTestId("engine-column-slg").getByTestId("engine-coverage")).toContainText(found(locale, 5, 15));
+      // 4 — two diagnoses, one engine shown at a time (A18 T5): the win rate in sales-assisted, activation in self-serve.
+      await expect(page.getByTestId("engine-diagnosis-slg")).toContainText(locale === "fr" ? "Taux de closing" : "Win rate");
+      await page.getByTestId("engine-motion-selector").getByRole("button", { name: ENGINE_COPY.hybrid.motionName.plg[locale] }).click();
+      await expect(page.getByTestId("engine-diagnosis")).toContainText("Activation");
+      // 5 — each motion's own count.
+      await expectFoundIn(page, locale, "plg", 11);
+      await expectFoundIn(page, locale, "slg", 5);
 
       // 6 — a reload keeps it all.
       await page.reload();
       await expect(page.getByTestId("engine-total-band")).toContainText(total);
-      await expect(page.getByTestId("engine-column-slg").getByTestId("engine-coverage")).toContainText(found(locale, 5, 15));
+      await expectFoundIn(page, locale, "slg", 5);
 
       // 7 — unticked: said before saving, the board is self-serve's; ticked again, its five numbers are back.
       await page.getByTestId("engine-bar-settings").click();
@@ -111,7 +117,7 @@ for (const locale of ["fr", "en"] as const) {
       await page.getByTestId("engine-bar-settings").click();
       await page.getByTestId("engine-settings").getByTestId("engine-motion-slg").check();
       await page.getByTestId("engine-settings-save").click();
-      await expect(page.getByTestId("engine-column-slg").getByTestId("engine-coverage")).toContainText(found(locale, 5, 15));
+      await expectFoundIn(page, locale, "slg", 5);
 
       // 8 — exported, the device cleared, imported: the same counts.
       const download = page.waitForEvent("download");
@@ -129,8 +135,8 @@ for (const locale of ["fr", "en"] as const) {
       await page.getByTestId("engine-import-file").setInputFiles(path);
       await page.getByTestId("engine-import-open").click();
       await expect(page.getByTestId("engine-board")).toHaveAttribute("data-motions", "hybrid");
-      await expect(page.getByTestId("engine-column-plg").getByTestId("engine-coverage")).toContainText(found(locale, 11, 17));
-      await expect(page.getByTestId("engine-column-slg").getByTestId("engine-coverage")).toContainText(found(locale, 5, 15));
+      await expectFoundIn(page, locale, "plg", 11);
+      await expectFoundIn(page, locale, "slg", 5);
       await expect(page.getByTestId("engine-total-band")).toContainText(total);
     });
   }

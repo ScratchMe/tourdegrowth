@@ -1,5 +1,6 @@
 import type { Page } from "@playwright/test";
 import { ENGINE_COPY } from "@/content/engine-copy";
+import { fillTemplate } from "@/lib/engine/format";
 import { hybridState, salesAssistedState } from "../src/lib/engine/__tests__/fixtures";
 import type { EngineState } from "../src/lib/engine/types";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
@@ -14,8 +15,8 @@ test.beforeEach(async ({ context }) => {
 
 /**
  * The engine with two motions (A7.3.c, engine spec §18.7): the setup's two
- * boxes, the hybrid board — « deux moteurs, un total », the two columns, the
- * selector — sales-assisted alone, a sales-assisted sheet, the settings that
+ * boxes, the hybrid board — « deux moteurs, un total », then one engine at a
+ * time under « Moteur affiché » (A18 T5) — sales-assisted alone, a sales-assisted sheet, the settings that
  * untick a motion without losing it, and the step-by-step per motion.
  *
  * The numbers are §18.9's (`hybridState`): self-serve exactly §6.0, a
@@ -102,44 +103,63 @@ test.describe("how the company sells: the start's question, then the full card's
 });
 
 test.describe("the hybrid board (§18.7 E2)", () => {
-  test("« deux moteurs, un total »: the sum in the title, self-serve first, the link said as a share, then the sums", async ({ page }) => {
+  test("« deux moteurs, un total »: the sum in the title, self-serve first, the total set off by a rule, the link said as a share", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await seed(page, hybridState(), "fr");
     const band = page.getByTestId("engine-total-band");
     await expect(band).toContainText(`228${NB}000${NB}€`);
     await expect(page.getByTestId("engine-total-mrr-plg")).toHaveText(`48${NB}000${NB}€`);
     await expect(page.getByTestId("engine-total-mrr-slg")).toHaveText(`180${NB}000${NB}€`);
-    // Self-serve first, always: the blocks never follow their values.
+    // Self-serve first, always: the blocks never follow their values. Then the total, set off by a rule (A18 T5).
     const plgBox = await page.getByTestId("engine-total-plg").boundingBox();
     const slgBox = await page.getByTestId("engine-total-slg").boundingBox();
+    const sumBox = await page.getByTestId("engine-total-sum").boundingBox();
     expect(plgBox!.x).toBeLessThan(slgBox!.x);
+    expect(slgBox!.x).toBeLessThan(sumBox!.x);
+    await expect(page.getByTestId("engine-total-sum")).toContainText(ENGINE_COPY.total.sumMrr.fr);
+    await expect(page.getByTestId("engine-total-sum")).toContainText(`228${NB}000${NB}€`);
+    // A sum, never a comparison: no « + » nor « = » between the figures (those are a disclosure's glyphs).
+    await expect(band.locator("dl")).not.toContainText(/[+=]/);
     const link = page.getByTestId("engine-total-link");
-    await expect(link).toContainText("31 des 130 opportunités assistées viennent de comptes du libre-service (juin à août 2026).");
+    await expect(link).toContainText(fillTemplate(ENGINE_COPY.total.link.fr, { n: "31", m: "130", period: "juin à août 2026" }));
     await expect(link).toContainText(ENGINE_COPY.total.linkNote.fr);
-    await expect(page.getByTestId("engine-total-sums")).toContainText(`~5${NB}000${NB}€ + ~12${NB}000${NB}€ = ~17${NB}000${NB}€`);
-    // No header verdict or coverage of its own: the band's title is the verdict.
-    await expect(page.locator('[data-testid="engine-board"] > header [data-testid="engine-coverage"]')).toHaveCount(0);
+    // The new MRR and its sum are on the `total` slide, not the board's band.
+    await expect(page.getByTestId("engine-total-sums")).toHaveCount(0);
+    // The band's title is the board's heading: one verdict at the top, not two.
+    await expect(band.locator("#engine-verdict")).toHaveCount(1);
+    await expect(page.locator('[data-testid="engine-board"] > header [data-testid="engine-verdict"]')).toHaveCount(0);
   });
 
-  test("two columns, each with its diagnosis and its own drawing — the peloton and the relays — then the two-segments line", async ({ page }) => {
+  test("one engine at a time under « Engine shown »: its own verdict, diagnosis and drawing — never two columns", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await seed(page, hybridState());
-    const plg = page.getByTestId("engine-column-plg");
-    const slg = page.getByTestId("engine-column-slg");
-    await expect(plg.getByRole("heading", { level: 2 })).toHaveText(ENGINE_COPY.hybrid.motionName.plg.en);
-    await expect(slg.getByRole("heading", { level: 2 })).toHaveText(ENGINE_COPY.hybrid.motionName.slg.en);
-    await expect(plg.getByTestId("engine-diagnosis")).toBeVisible();
-    await expect(slg.getByTestId("engine-diagnosis-slg")).toBeVisible();
-    await expect(plg.getByTestId("engine-board-peloton")).toBeVisible();
-    await expect(slg.getByTestId("engine-relays")).toBeVisible();
+    const selector = page.getByTestId("engine-motion-selector");
+    await expect(selector).toContainText(ENGINE_COPY.hybrid.selectorLabel.en);
+    await expect(page.getByTestId("engine-motion-columns")).toHaveCount(0);
+    // Self-serve shown: its verdict (its slide's title), its diagnosis, its peloton — and nothing of sales-assisted's.
+    await expect(page.getByTestId("engine-motion-verdict")).toBeVisible();
+    await expect(page.getByTestId("engine-diagnosis")).toBeVisible();
+    await expect(page.getByTestId("engine-board-peloton")).toBeVisible();
+    await expect(page.getByTestId("engine-relays")).toHaveCount(0);
+    await expect(page.getByTestId("engine-small-sample")).toHaveCount(0);
+    const plgVerdict = await page.getByTestId("engine-motion-verdict").innerText();
+    await expect(page.getByTestId("engine-two-segments")).toHaveText(ENGINE_COPY.hybrid.twoEngines.en);
+
+    await selector.getByRole("button", { name: ENGINE_COPY.hybrid.motionName.slg.en }).click();
+    await expect(page.getByTestId("engine-board-peloton")).toHaveCount(0);
+    await expect(page.getByTestId("engine-diagnosis-slg")).toBeVisible();
     // The §18.9 diagnosis names the win rate: the stamp is on its relay, and on no other.
-    await expect(slg.getByTestId("relays-stamp")).toHaveCount(1);
-    await expect(slg.getByTestId("relays-numeral-slg.rev.win-rate")).toContainText("24");
-    // Side by side at 1280.
-    const a = await plg.boundingBox();
-    const b = await slg.boundingBox();
-    expect(Math.abs(a!.y - b!.y)).toBeLessThan(2);
-    await expect(page.getByTestId("engine-two-segments")).toHaveText(ENGINE_COPY.hybrid.twoSegments.en);
+    await expect(page.getByTestId("relays-stamp")).toHaveCount(1);
+    await expect(page.getByTestId("relays-numeral-slg.rev.win-rate")).toContainText("24");
+    await expect(page.getByTestId("engine-pipeline")).toBeVisible();
+    // Its own verdict, the relays slide's title, not self-serve's.
+    await expect(page.getByTestId("engine-motion-verdict")).not.toHaveText(plgVerdict);
+    // Its small sample said right under « Engine shown », before its verdict.
+    const caveat = (await page.getByTestId("engine-small-sample").boundingBox())!;
+    const selectorBox = (await selector.boundingBox())!;
+    const verdict = (await page.getByTestId("engine-motion-verdict").boundingBox())!;
+    expect(caveat.y).toBeGreaterThan(selectorBox.y);
+    expect(caveat.y).toBeLessThan(verdict.y);
   });
 
   test("the selector shows one motion's list and what-ifs at a time; the link is its own group at the end of sales-assisted's", async ({ page }) => {
@@ -161,7 +181,7 @@ test.describe("the hybrid board (§18.7 E2)", () => {
     await block.locator("summary").click();
     await expect(block.getByTestId("engine-metric-link-pql-handoff")).toBeVisible();
 
-    // Its what-if panel, its own levers, the link counted in opportunities; the total line under it.
+    // Its what-if panel, its own levers, the link counted in opportunities; the total line in it (A18 T5).
     await page.getByTestId("engine-board-whatif").locator("summary").first().click();
     await expect(page.getByTestId("engine-whatif-slg-panel")).toBeVisible();
     await expect(page.getByTestId("whatif-value-link.pql-handoff")).toHaveText("31");
@@ -201,13 +221,18 @@ test.describe("the hybrid board (§18.7 E2)", () => {
     expect((await storedEngineEntry(page))?.state.whatIf).toEqual({ "slg.ref.referred-share": 30 });
   });
 
-  test("390: the columns stack and nothing pushes the page sideways — French too", async ({ page }) => {
+  test("390: the band's three terms stack, the total under its rule, and nothing pushes the page sideways — French too", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     for (const locale of ["en", "fr"] as const) {
       await seed(page, hybridState(), locale);
-      const a = await page.getByTestId("engine-column-plg").boundingBox();
-      const b = await page.getByTestId("engine-column-slg").boundingBox();
-      expect(b!.y).toBeGreaterThan(a!.y + a!.height - 1);
+      const plg = await page.getByTestId("engine-total-plg").boundingBox();
+      const slg = await page.getByTestId("engine-total-slg").boundingBox();
+      const sum = await page.getByTestId("engine-total-sum").boundingBox();
+      expect(slg!.y).toBeGreaterThan(plg!.y + plg!.height - 1);
+      expect(sum!.y).toBeGreaterThan(slg!.y + slg!.height - 1);
+      await noHorizontalScroll(page);
+      await page.getByTestId("engine-motion-selector").getByRole("button", { name: ENGINE_COPY.hybrid.motionName.slg[locale] }).click();
+      await expect(page.getByTestId("engine-relays")).toBeVisible();
       await noHorizontalScroll(page);
     }
   });

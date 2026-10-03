@@ -148,7 +148,7 @@ export function linkSentence(total: TotalView, state: EngineState, strings: Word
 }
 
 /**
- * The hybrid's one line under both « Et si » panels (§18.5.5): the MRR in
+ * The hybrid's one line in the full « Et si » panel of either engine (§18.5.5, A18 T5): the MRR in
  * twelve months, today and with the what-ifs of BOTH panels — a sum by the
  * rule of every sum here (`formatSum`), never a comparison. null when either
  * motion can't project its MRR (S9: a total exists only when its parts do).

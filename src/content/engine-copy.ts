@@ -236,7 +236,10 @@ export const ENGINE_COPY = {
 
   setup: {
     title: { fr: "Avant de commencer", en: "Before you start" },
-    referenceMonth: { fr: "Mois des flux", en: "Month for flows" },
+    // TODO: à relire (convention 6) — renommé le 2026-10-03 (A18 T6, C42 : le retour 07, `settings.flows`) ; avant « Mois des flux ».
+    // Pas « Chiffres de », qu'il proposait : lu avec la liste, il donnait « Chiffres de août 2026 » (jamais « de {month} »).
+    // « Mois des chiffres », comme la phrase de la carte de départ (`start.defaults`).
+    referenceMonth: { fr: "Mois des chiffres", en: "Month of the figures" },
     referenceMonthHint: {
       fr: "Visiteurs, inscriptions, dépense, churn et ARPA de ce mois-là. Par défaut : le dernier mois terminé.",
       en: "Visitors, sign-ups, spend, churn and ARPA for that month. Default: the last full month.",
@@ -320,6 +323,10 @@ export const ENGINE_COPY = {
   },
 
   board: {
+    // TODO: à relire (convention 6) — neuf le 2026-10-03 (A18 T6, le retour 07 : `peloton.title`) : le titre du peloton, sa légende.
+    // Écart au retour, qui disait « Tes 100 inscrits » : la ligne sous le dessin dit que tes inscrits sont « ramenés à 100 »
+    // (`peloton.sameHundredCount`), et ce 100 a déjà été lu comme un vrai chiffre (Antoine, `Peloton.tsx`).
+    pelotonTitle: { fr: "Pour 100 inscrits", en: "Per 100 sign-ups" },
     smallCohort: {
       fr: "Petits effectifs : moins de 100 inscrits dans cette cohorte. Lis la direction, pas les décimales.",
       en: "Small numbers: fewer than 100 sign-ups in this cohort. Read the direction, not the decimals.",
@@ -857,9 +864,10 @@ export const ENGINE_COPY = {
     },
     /** The two margin sheets, in the hybrid only (C25 Q4): saved as an estimate, counted approximate, never found. */
     companyWide: { fr: "Reprendre la marge globale", en: "Use the company-wide margin" },
+    // TODO: à relire (convention 6) — retouché le 2026-10-03 (A18 T6, C42) : « moteur » plutôt que « motion ».
     companyWideHint: {
-      fr: "Elle sera comptée approximative : une marge globale n'est celle d'aucune des deux motions. Demande la marge par motion à la finance.",
-      en: "It will count as approximate: a company-wide margin belongs to neither motion. Ask finance for the margin by motion.",
+      fr: "Elle sera comptée approximative : une marge globale n'est celle d'aucun des deux moteurs. Demande la marge par moteur à la finance.",
+      en: "It will count as approximate: a company-wide margin belongs to neither engine. Ask finance for the margin by engine.",
     },
     /** `{motion}`: `hybrid.motionAdjective`. */
     companyWidePrefilled: {
@@ -1013,21 +1021,33 @@ export const ENGINE_COPY = {
       plg: { fr: "du libre-service", en: "self-serve" },
       slg: { fr: "de l'assisté", en: "sales-assisted" },
     },
-    /** The motion selector's accessible name: which motion's stages and what-ifs show below it. */
-    selectorLabel: { fr: "Motion affichée : étapes et « Et si »", en: "Motion shown: stages and what-ifs" },
+    /** The motion selector's label: which engine's board shows below it — verdict, diagnosis, drawing, list, lever (A18 T5). */
+    // TODO: à relire (convention 6) — retouché le 2026-10-03 (A18 T5, le retour 07 : `total.shown`) : le sélecteur montre
+    // désormais tout le tableau d'un moteur, pas seulement ses étapes et ses « Et si » ; il disait « Motion affichée : étapes et « Et si » ».
+    selectorLabel: { fr: "Moteur affiché", en: "Engine shown" },
     /** A column's eyebrow over its diagnosis: `{verdict}` a `diagnosis` title, lower-cased by the code. */
     diagnosisEyebrow: { fr: "{motion} — {verdict}", en: "{motion} — {verdict}" },
-    /** The fixed sentence under the two diagnoses and at the foot of the side-by-side slide (§18.6.4). */
+    /** The fixed sentence under « Moteur affiché » (A18 T5) and at the foot of the side-by-side slide (§18.6.4). */
     twoSegments: {
       fr: "Deux motions, deux segments : chacune se lit contre ses cibles, pas contre l'autre.",
       en: "Two motions, two segments: each is read against its own targets, not against the other.",
+    },
+    /**
+     * TODO: à relire (convention 6) — neuf le 2026-10-03 (A18 T6, C42) : la même phrase pour les écrans, au mot « moteur »,
+     * sous « Moteur affiché » et sous les colonnes de l'exemple. `twoSegments` reste au pied de la slide côte à côte,
+     * que golden-v2 fige à la lettre : la renommer est une décision du bon à tirer A18.d.
+     */
+    twoEngines: {
+      fr: "Deux moteurs, deux segments : chacun se lit contre ses cibles, pas contre l'autre.",
+      en: "Two engines, two segments: each is read against its own targets, not against the other.",
     },
     /** One motion's coverage in a line of both: the resume band, the import preview (« libre-service 11 sur 17 · assisté 10 sur 15 »). */
     motionCount: { fr: "{motion} {n} sur {N}", en: "{motion} {n} of {N}" },
     /** A motion unticked whose numbers are kept, in the import preview (§18.1.2). */
     motionCountHidden: { fr: "{motion} {n} sur {N} (masqué)", en: "{motion} {n} of {N} (hidden)" },
     /** The link (§18.6.3): the title of its closed group at the end of sales-assisted's list, and its position on its own screen (A18 T2.b). */
-    linkBlock: { fr: "Liaison avec le libre-service", en: "Link with self-serve" },
+    // TODO: à relire (convention 6) — renommé le 2026-10-03 (A18 T6, C42 : le retour 07, `list.link`) ; avant « Liaison avec le libre-service ».
+    linkBlock: { fr: "La liaison entre les deux", en: "The link between the two" },
   },
   /**
    * TODO: à relire (convention 6) — neuf le 2026-10-01 (A7.3.c S2, ENGINE.md
@@ -1039,6 +1059,13 @@ export const ENGINE_COPY = {
   total: {
     title: { fr: "Deux moteurs, un total", en: "Two engines, one total" },
     mrr: { fr: "MRR", en: "MRR" },
+    /**
+     * TODO: à relire (convention 6) — neuf le 2026-10-03 (A18 T5, le retour 07 : `total.ss`, `total.sa`, `total.sum`) :
+     * les trois termes de la bande du tableau hybride (`TotalBand`), la somme en compte, jamais une comparaison.
+     */
+    ssMrr: { fr: "MRR libre-service", en: "Self-serve MRR" },
+    saMrr: { fr: "MRR assisté", en: "Sales-assisted MRR" },
+    sumMrr: { fr: "MRR total", en: "Total MRR" },
     newMrr: { fr: "Nouveau MRR du mois", en: "New MRR this month" },
     /** `{plg} + {slg} = {total}`: `total.formatSum`'s three strings, each part rounded to the common unit. */
     newMrrSum: { fr: "Nouveau MRR du mois : {plg} + {slg} = {total}", en: "New MRR this month: {plg} + {slg} = {total}" },
@@ -1442,7 +1469,7 @@ export const ENGINE_COPY = {
      */
     /** The link's slider, in WHOLE opportunities: its own label, not `sliderLabel`'s « cible testée ». */
     linkSlider: { fr: "Opportunités venues du libre-service, par trimestre", en: "Opportunities from self-serve, per quarter" },
-    /** The hybrid's one line under both panels: a sum, never a comparison. */
+    /** The hybrid's one line, in the full « Et si » panel of the engine shown (A18 T5): a sum, never a comparison. */
     totalIn12: { fr: "MRR total dans 12 mois", en: "Total MRR in 12 months" },
     totalIn12Row: {
       fr: "{today} aujourd'hui, {projected} avec les « Et si » des deux panneaux",
@@ -1544,11 +1571,54 @@ export const ENGINE_COPY = {
       paid: { fr: "la conversion en payant", en: "paid conversion" },
     },
   },
-  mirror: {
-    title: {
-      fr: "Ce que tu as déclaré au Tour × ce que tu retrouves ici",
-      en: "What you declared in the Tour × what you find here",
+  /**
+   * TODO: à relire (convention 6) — neuf le 2026-10-03 (A18 T6, le retour 07, « Glossary entries: 5 new ») : les cinq
+   * mots du moteur qui ont leur « ? » (`EngineTerm`), là où chacun sert pour la première fois. Aucun n'est dans le
+   * glossaire du site. `label` et `close` reprennent mot pour mot la bulle du glossaire (`dictionary.ts`, validée).
+   */
+  terms: {
+    label: { fr: "Définition : {term}", en: "Definition: {term}" },
+    close: { fr: "Fermer", en: "Close" },
+    cohort: {
+      term: { fr: "cohorte", en: "cohort" },
+      definition: {
+        fr: "Les inscrits d'un même mois, suivis sur les jours qui suivent. L'activation et le paiement se lisent sur une cohorte assez ancienne pour que chacun de ses inscrits ait eu toute la fenêtre : la cohorte suivie, dans les Réglages.",
+        en: "The sign-ups of one month, followed over the days after. Activation and payment are read on a cohort old enough for every sign-up to have had the whole window: the cohort you follow, in Settings.",
+      },
     },
+    target: {
+      term: { fr: "cible", en: "target" },
+      definition: {
+        fr: "Le chiffre que ton équipe s'est fixé pour ce chiffre. Seule une cible peut désigner l'étape qui freine le moteur.",
+        en: "The figure your team set itself for this number. Only a target can name the stage that holds the engine back.",
+      },
+    },
+    reference: {
+      term: { fr: "repère", en: "reference" },
+      definition: {
+        fr: "Une fourchette couramment citée pour un type d'entreprise, avec sa réserve juste dessous. Elle situe ton chiffre ; elle ne désigne jamais d'étape.",
+        en: "A range commonly quoted for a type of company, with its caveat just below. It situates your figure; it never names a stage.",
+      },
+    },
+    window: {
+      term: { fr: "fenêtre", en: "window" },
+      definition: {
+        fr: "Le nombre de jours qu'a un inscrit pour qu'une action compte : s'activer en 7 jours, payer en 30. Elle se règle dans Réglages.",
+        en: "How many days a sign-up has for an action to count: activate within 7 days, pay within 30. Change it in Settings.",
+      },
+    },
+    sharedCount: {
+      term: { fr: "nombre partagé", en: "shared count" },
+      definition: {
+        fr: "Un nombre que plusieurs chiffres utilisent, comme les inscrits du mois. Saisi une fois : le modifier dans un chiffre le modifie dans les autres, sauf celui qu'il rendrait impossible : il garde sa base, et son écran le dit.",
+        en: "A count several numbers use, like the month's sign-ups. Typed once: change it in one number and it changes in the others, except one it would make impossible: that one keeps its own base, and its screen says so.",
+      },
+    },
+  },
+  mirror: {
+    // TODO: à relire (convention 6) — renommé le 2026-10-03 (A18 T6, C42 : le retour 07, `tour.title`) ;
+    // avant « Ce que tu as déclaré au Tour × ce que tu retrouves ici ».
+    title: { fr: "Le Tour et tes chiffres", en: "The Tour and your numbers" },
     /**
      * A verdict next to its count (« 2 angles morts », « 1 angle mort ») and,
      * in the singular, on the one bridge it names. The general form is the
@@ -2460,10 +2530,12 @@ export const ENGINE_COPY = {
     },
     shared: { fr: "Nombres partagés", en: "Shared counts" },
     sharedLead: {
-      fr: "Un nombre que plusieurs chiffres utilisent, saisi une fois : le modifier ici le modifie dans chacun d'eux.",
-      en: "A count several numbers use, typed once: change it here and it changes in each of them.",
+      fr: "Un nombre que plusieurs chiffres utilisent, saisi une fois : le modifier ici le modifie dans chacun d'eux, sauf celui qu'il rendrait impossible.",
+      en: "A count several numbers use, typed once: change it here and it changes in each of them, except one it would make impossible.",
     },
     sharedHint: { fr: "Utilisé par {list}.", en: "Used by {list}." },
+    // TODO: à relire (convention 6) — neuf le 2026-10-03 (A18 T6, le retour 07 : `settings.windowHint`), sous la fenêtre d'activation.
+    windowHint: { fr: "La fenêtre : le nombre de jours qu'a un inscrit pour que ça compte.", en: "The window: how many days a sign-up has for it to count." },
     wholeCount: { fr: "Un nombre entier plus grand que zéro.", en: "A whole number above zero." },
   },
 
@@ -2480,10 +2552,11 @@ export const ENGINE_COPY = {
      * The example in the motions the setup card ticked (A7.3.c S3, §18.7): its targets, read from
      * `lib/engine/example.ts`, the sales-assisted ones fictional too (§18.9).
      */
-    // TODO: à relire (convention 6) — neuf le 2026-10-01 (A7.3.c S3).
+    // TODO: à relire (convention 6) — neuf le 2026-10-01 (A7.3.c S3) ; retouché le 2026-10-03 (A18 T6, le retour 07 :
+    // `rename.relays`) : l'anglais dit « the steps of a deal », le français garde « les relais ».
     bannerBodySlg: {
       fr: "Chiffres et cibles inventés, pour montrer les relais et les slides une fois remplis : l'équipe fictive vise {winRate} de closing et {renewal} de renouvellement des contrats. Rien n'est enregistré, et ça ne touche pas à ton moteur.",
-      en: "Made-up numbers and targets, to show the relays and the slides once filled in: the fictional team aims for a {winRate} win rate and {renewal} contract renewal. Nothing is saved, and it doesn't touch your engine.",
+      en: "Made-up numbers and targets, to show the steps of a deal and the slides once filled in: the fictional team aims for a {winRate} win rate and {renewal} contract renewal. Nothing is saved, and it doesn't touch your engine.",
     },
     // TODO: à relire (convention 6) — neuf le 2026-10-01 (A7.3.c S3).
     bannerBodyHybrid: {
@@ -2738,12 +2811,13 @@ export const ENGINE_COPY = {
         en: "The Tour measures in three minutes whether your team tracks its numbers, without asking for any number. The engine has you go and get them, and compares the two if you took the Tour on this device.",
       },
     },
-    // TODO: à relire (convention 6) — neuf le 2026-10-01 (A7.3.c S2, ENGINE.md §18.7 E0).
+    // TODO: à relire (convention 6) — neuf le 2026-10-01 (A7.3.c S2, ENGINE.md §18.7 E0) ; retouché le 2026-10-03 (A18 T5) :
+    // plus « côte à côte », le tableau hybride montre un moteur à la fois.
     {
       q: { fr: "Et si on vend avec une équipe commerciale ?", en: "What if we sell through a sales team?" },
       a: {
-        fr: "Coche « Assisté » au réglage : le moteur suit tes leads, tes opportunités, tes signatures, la mise en production et le renouvellement, sur trois mois glissants, avec tes propres cibles. Si tu vends aussi en libre-service, coche les deux : deux moteurs côte à côte et leur total, jamais l'un contre l'autre.",
-        en: "Tick \"Sales-assisted\" in the setup: the engine follows your leads, opportunities, signatures, go-live and renewals, over rolling three-month periods, against your own targets. If you also sell self-serve, tick both: two engines side by side and their total, never one against the other.",
+        fr: "Coche « Assisté » au réglage : le moteur suit tes leads, tes opportunités, tes signatures, la mise en production et le renouvellement, sur trois mois glissants, avec tes propres cibles. Si tu vends aussi en libre-service, coche les deux : deux moteurs et leur total, jamais l'un contre l'autre.",
+        en: "Tick \"Sales-assisted\" in the setup: the engine follows your leads, opportunities, signatures, go-live and renewals, over rolling three-month periods, against your own targets. If you also sell self-serve, tick both: two engines and their total, never one against the other.",
       },
     },
   ],
