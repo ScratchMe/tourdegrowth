@@ -1,7 +1,8 @@
 import { METRIC_SHAPES, SLG_METRIC_SHAPES, shapeOf } from "./catalog-shape";
 import type { MetricShape } from "./catalog-shape";
-import { formatInterval, formatNumber, roundDisplay, type UnitWords } from "./format";
-import { point } from "./interval";
+import { formatApproxMoneyInterval, formatInterval, formatNumber, roundDisplay, type UnitWords } from "./format";
+import { point, sub } from "./interval";
+import { lossCheck } from "./money";
 import type { PelotonMetric } from "./peloton";
 import { slgNoDecimals, smallestSample } from "./relays";
 import type {
@@ -50,9 +51,12 @@ export const CHAIN_VERB: Record<PelotonMetric, "activated" | "d30" | "paid"> = {
 
 const RANK: Record<Finding["kind"], Finding["rank"]> = {
   "chain-break": 1,
+  // C48: as grave as a missing link — without it, each new customer digs the hole deeper.
+  "unit-econ-loss": 1,
   "no-definition": 2,
   "blind-spot": 2,
   "below-comparator": 2,
+  "unit-econ-loss-maybe": 2,
   conflict: 3,
   "unit-econ-uncomputable": 3,
   "reconcile-gap": 3,
@@ -150,6 +154,27 @@ function conflictFindings(state: EngineState, shapes: readonly MetricShape[], ct
   }
 }
 
+/**
+ * The loss (§20.4, C48), on today's LTV and CAC of one motion — never summed
+ * across motions. Arithmetic on the team's own numbers: no reference enters
+ * it, so it names no stage. The CAC prints as typed (to the unit, or its
+ * range), the LTV and the gap as the estimates they are (« ~1 500 € »).
+ */
+function lossFinding(state: EngineState, ltv: DerivedValue, cacId: "acq.cac" | "slg.acq.cac", ctx: EngineCalcContext, words: UnitWords, add: Add): void {
+  const cacKnown = knownIn(state, cacId, ctx);
+  if (ltv.kind !== "known" || cacKnown.kind !== "known") return;
+  const loss = lossCheck(ltv.value, cacKnown.value);
+  if (!loss || loss.verdict === "none") return;
+  const currency = state.setup.currency;
+  const cac = cacKnown.value;
+  const shortfall = sub(cac, ltv.value);
+  add(loss.verdict === "loss" ? "unit-econ-loss" : "unit-econ-loss-maybe", [cacId === "acq.cac" ? "rev.ltv" : "slg.rev.ltv", cacId], {
+    cac: cac.lo === cac.hi ? formatInterval(cac, "money", ctx, words, { currency }) : formatApproxMoneyInterval(cac, currency, ctx, words),
+    ltv: formatApproxMoneyInterval(ltv.value, currency, ctx, words),
+    gap: formatApproxMoneyInterval({ lo: Math.max(0, shortfall.lo), hi: Math.max(0, shortfall.hi) }, currency, ctx, words),
+  });
+}
+
 /** The payback can't be computed, and at least one of its inputs was looked for and not found. */
 function paybackFinding(payback: DerivedValue, id: "rev.cac-payback" | "slg.rev.cac-payback", add: Add, missing: (id: MetricId) => boolean): void {
   if (payback.kind === "uncomputable" && payback.missing.some(missing)) add("unit-econ-uncomputable", [id, ...payback.missing]);
@@ -187,6 +212,7 @@ function selfServeFindings(
   // 3
   conflictFindings(state, METRIC_SHAPES, ctx, words, add);
   paybackFinding(m.unit.payback, "rev.cac-payback", add, missing);
+  lossFinding(state, m.unit.ltv, "acq.cac", ctx, words, add);
 
   // 3 — the chain and the billing don't describe the same population.
   const gap = derived.sanity.find((c) => c.id === "reconcile-gap");
@@ -224,6 +250,7 @@ function salesAssistedFindings(
   namedFindings(state, m.diagnosis, ctx, words, add, (id) => slgNoDecimals(snapshot, id));
   conflictFindings(state, SLG_METRIC_SHAPES, ctx, words, add);
   paybackFinding(m.unit.payback, "slg.rev.cac-payback", add, missing);
+  lossFinding(state, m.unit.ltv, "slg.acq.cac", ctx, words, add);
 
   // 4 — the counted ★ on the smallest base: one more or less moves it by p points (§18.5.1).
   const sample = smallestSample(snapshot);

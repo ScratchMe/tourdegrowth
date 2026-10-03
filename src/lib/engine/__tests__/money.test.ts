@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { div, mul, scale } from "../interval";
-import { acquisitionSpend, afterPayback, arrOf, cashTiedUp, lossCheck } from "../money";
+import { PAYBACK_FLOOR_MONTHS, acquisitionSpend, afterPayback, arrOf, cashTiedUp, lossCheck, paybackLimit, paybackWarning } from "../money";
 import { buildScenario, leverAlone, mrrPath } from "../scenario";
 import { buildSlgScenario, slgMrrPath } from "../slg-scenario";
 import { addBoth, buildTotal, sumPaths, timesTwelve } from "../total";
@@ -331,5 +331,76 @@ describe("the hybrid: sums, both parts or nothing (S9)", () => {
     expect(sumPaths(plg, null)).toBeNull();
     expect(addBoth({ lo: 1, hi: 2 }, { lo: 3, hi: 4 })).toEqual({ lo: 4, hi: 6 });
     expect(addBoth({ lo: 1, hi: 2 }, null)).toBeNull();
+  });
+});
+
+describe("the long-payback warning (§20.8, C49: the runway, or the 30-month floor)", () => {
+  // Non-vacuity, measured on 2026-10-03: the floor counted from strictly above 30 fails « 30 months exactly »;
+  // the runway counted from 30 included fails « a payback equal to the runway »; letting the warning speak
+  // over a certain loss fails « never with the loss ».
+  const i = (lo: number, hi = lo) => ({ lo, hi });
+  const floor = paybackLimit(undefined);
+  const runway = (months: number) => paybackLimit(months);
+  const none = lossCheck(i(5_000), i(1_000));
+
+  it("with no runway typed, the floor is 30 months, a product rule and not a published reference (C1)", () => {
+    expect(PAYBACK_FLOOR_MONTHS).toBe(30);
+    expect(floor).toEqual({ kind: "floor", months: 30 });
+    expect(runway(9)).toEqual({ kind: "runway", months: 9 });
+  });
+
+  it("the floor: 30 months exactly warns, 29.9 doesn't, a range across it is « maybe »", () => {
+    expect(paybackWarning(i(30), none, floor)).toEqual({ verdict: "long", limit: floor });
+    expect(paybackWarning(i(29.9), none, floor)).toBeNull();
+    expect(paybackWarning(i(28, 32), none, floor)).toEqual({ verdict: "maybe", limit: floor });
+  });
+
+  it("the runway: longer than it warns, a payback equal to the runway doesn't, a range across it is « maybe »", () => {
+    expect(paybackWarning(i(11), none, runway(9))).toEqual({ verdict: "long", limit: runway(9) });
+    expect(paybackWarning(i(9), none, runway(9))).toBeNull();
+    expect(paybackWarning(i(9, 13), none, runway(12))).toEqual({ verdict: "maybe", limit: runway(12) });
+    // A typed runway replaces the floor, both ways: 31 months against 36 says nothing, 11 against 9 warns.
+    expect(paybackWarning(i(31), none, runway(36))).toBeNull();
+  });
+
+  it("never with the loss: a customer who leaves before paying back is the loss, not a late return", () => {
+    const loss = lossCheck(i(1_500), i(1_900));
+    expect(loss?.verdict).toBe("loss");
+    expect(paybackWarning(i(40), loss, floor)).toBeNull();
+    // A loss only possible leaves the warning its say.
+    const maybe = lossCheck(i(1_500, 2_250), i(1_900));
+    expect(paybackWarning(i(40), maybe, floor)?.verdict).toBe("long");
+    expect(paybackWarning(null, none, floor)).toBeNull();
+  });
+
+  it("the film's SaaS: no warning today (the loss speaks), and with the three levers against a runway of 12 months", () => {
+    const state = filmState();
+    expect(buildScenario(state, {}, CTX_FR).today.kpis.warning).toBeNull(); // a loss, and 21 months < 30
+    const typed: EngineState = { ...state, setup: { ...state.setup, runwayMonths: 12 } };
+    const s = buildScenario(typed, FILM_LEVERS, CTX_FR);
+    expect(s.today.kpis.warning).toBeNull(); // still the loss, whatever the runway
+    expect(s.projected.kpis.warning).toEqual({ verdict: "long", limit: { kind: "runway", months: 12 } }); // ~16 months > 12
+    const roomy: EngineState = { ...state, setup: { ...state.setup, runwayMonths: 18 } };
+    expect(buildScenario(roomy, FILM_LEVERS, CTX_FR).projected.kpis.warning).toBeNull();
+  });
+
+  it("a healthy customer who pays back in 33 months warns with no runway typed: the floor", () => {
+    // CAC 3 000 € over 90 € of monthly margin: 33 months; churn 2 %, so 36 months of life (capped) and no loss.
+    let state = withEntry(filmState(), "acq.cac", measured({ kind: "amount", amount: 3_000 }));
+    state = withEntry(state, "ret.logo-churn", measured(ratio(8, 400)));
+    const kpis = buildScenario(state, {}, CTX_FR).today.kpis;
+    expect(kpis.loss?.verdict).toBe("none");
+    expect(mid(kpis.payback)).toBeCloseTo(3_000 / 90, 9);
+    expect(kpis.warning).toEqual({ verdict: "long", limit: { kind: "floor", months: 30 } });
+  });
+
+  it("sales-assisted reads the same runway: one company, one runway", () => {
+    const hybrid = withEntry(hybridState(), "slg.rev.gross-margin", measured(ratio(135_000, 180_000))); // 75 %, as §20.10
+    const state: EngineState = { ...hybrid, setup: { ...hybrid.setup, runwayMonths: 6 } };
+    const slg = buildSlgScenario(state, {}, CTX_FR);
+    // The §18.9 sales-assisted half pays back in ~13 months (§20.10): past 6 months of runway.
+    expect(slg.today.payback).not.toBeNull();
+    expect(slg.today.warning?.limit).toEqual({ kind: "runway", months: 6 });
+    expect(slg.today.warning?.verdict).toBe("long");
   });
 });

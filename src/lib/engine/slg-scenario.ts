@@ -1,5 +1,5 @@
 import { div, mapBounds, mul, point, scale } from "./interval";
-import { acquisitionSpend, afterPayback, arrOf, cashTiedUp, lossCheck, type MoneyKpis } from "./money";
+import { acquisitionSpend, afterPayback, arrOf, cashTiedUp, lossCheck, paybackLimit, paybackWarning, type MoneyKpis } from "./money";
 import { correlatedRatio, leverViews, type LeverView } from "./scenario";
 import { knownSharedCount } from "./shared-counts";
 import { renewalTermOf, wonPerQuarter } from "./slg-impact";
@@ -282,6 +282,7 @@ export function buildSlgScenario(state: EngineState, targets: Partial<Record<Lev
     const payback = rawPayback && mapBounds(rawPayback, (v) => Math.max(0, v));
     // A month of acquisition: a third of the quarter's new contracts × the CAC, at today's spend whatever the what-ifs (§20.6).
     const spend = w ? acquisitionSpend(scale(w, 1 / 3), cacToday) : null;
+    const loss = lossCheck(ltv, cac);
     return {
       mrr,
       newMrr,
@@ -298,9 +299,11 @@ export function buildSlgScenario(state: EngineState, targets: Partial<Record<Lev
       ltvCac: ltv && cac ? div(ltv, cac) : null,
       lifetime,
       afterPayback: afterPayback(lifetime, payback),
-      loss: lossCheck(ltv, cac),
+      loss,
       // The 12-month NRR above 100 % means expansion may outpace the losses; the renewal alone never does.
       cash: cashTiedUp(spend, payback, Boolean(nrr && nrr.hi > 100)),
+      // C49: against the team's runway, or the 30-month floor when it typed none.
+      warning: paybackWarning(payback, loss, paybackLimit(state.setup.runwayMonths)),
     };
   }
 

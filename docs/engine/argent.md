@@ -14,12 +14,13 @@ dans [`assiste-et-hybride.md`](assiste-et-hybride.md), le moteur complet dans
 
 *Écrite contre le code de `main` (`db7fc72`), pas contre les documents. **Le
 modèle de §20.1 à §20.7 est codé** (A20.a, `lib/engine/money.ts`,
-`scenario.ts`, `slg-scenario.ts`, `total.ts`, sans écran). **L'alerte de §20.8
-n'est pas codée** : son déclencheur attend Antoine (C49). Les écrans attendent
-le retour du brief 09 ([`design/DS-EXTENSION-BRIEF-09.md`](../../design/DS-EXTENSION-BRIEF-09.md))
-et les décisions C46 à C52. Aucune copie n'est écrite ici : les phrases citées
-sont des exemples de sens, la copie neuve naîtra au portage, « à relire »
-(convention 6).*
+`scenario.ts`, `slg-scenario.ts`, `total.ts`, sans écran). **Antoine a tranché
+C45 à C55 le 2026-10-03** (§20.13), sur le retour du brief 09
+([`design/ds-extension-09-return/`](../../design/ds-extension-09-return/README.md)) :
+l'alerte de §20.8 et le constat de perte dans `findings()` sont codés (A20.d
+T1), les écrans se portent étape par étape. Aucune copie n'est écrite ici : les
+phrases citées sont des exemples de sens, la copie neuve naît au portage, « à
+relire » (convention 6).*
 
 *Vérifié pour ce jet : `scenario.ts` (`twelveMonths`, `newPayers`, `kpis`,
 les facteurs des leviers), `slg-scenario.ts` (`baseFactor`,
@@ -57,7 +58,7 @@ leviers) :
 | Le payback face à la durée de vie | durée de vie comptée − payback | 20.5 |
 | La trésorerie immobilisée | dépense d'un mois d'acquisition × payback ÷ 2 | 20.6 |
 | Les sommes de l'hybride | l'ARR et la courbe, additionnés, les deux parts ou rien | 20.7 |
-| L'alerte de payback long | **non codée** : la règle attend C49 | 20.8 |
+| L'alerte de payback long | le payback au-delà du runway saisi, sinon de 30 mois ou plus (C49) | 20.8 |
 
 **Ce qui ne bouge pas, et vaut pour chaque ajout :**
 
@@ -184,10 +185,16 @@ courbes en face-à-face (§18.6.4), même si l'écran les dessine empilées.
 - **Dans « Et si »** : le constat projeté dit si les leviers sortent le client
   de la perte (dans l'exemple du film : `loss` aujourd'hui, `none` avec les
   trois leviers).
-- **Pas encore dans `findings()`** : sa formulation, son rang et sa place
-  (le tableau, la slide d'unit economics, le titre d'une slide) sont C48. Au
-  portage, il devient un `Finding` de type `unit-econ-loss`, de la liste fermée
-  de §6.10, et sa phrase sort d'un gabarit résolu serveur, sans cause affirmée.
+- **Dans `findings()` depuis A20.d T1** (C48) : `unit-econ-loss`, rang 1
+  (aussi grave qu'un maillon introuvable), quand la perte est certaine ;
+  `unit-econ-loss-maybe`, rang 2, au conditionnel. Sur le LTV et le CAC
+  d'aujourd'hui de chaque motion, jamais additionnés. Ses valeurs : le CAC tel
+  que saisi (à l'unité, ou sa fourchette), le LTV et l'écart en estimations
+  (« ~1 500 € »). Sa phrase (`findings.unitEconLoss`, « à relire ») dit
+  l'argent une fois, sans cause : « Chaque nouveau client coûte 1 900 € et
+  rapporte ~1 500 € de marge : tu perds ~400 € sur chacun. » Le tableau la
+  montre dans son bloc d'argent, avec une étiquette à l'encre « Perte », jamais
+  rouge ; certaine, elle titre la slide d'unit economics, qui monte en nº 2.
 
 ### 20.5 Le payback face à la durée de vie d'un client
 
@@ -268,14 +275,14 @@ courbes en face-à-face (§18.6.4), même si l'écran les dessine empilées.
 | La trésorerie immobilisée | somme des deux, si les deux existent | `addBoth` |
 | LTV, LTV:CAC, payback, durée de vie, constat de perte | **aucun total** : chaque motion a les siens. Un payback mixte est une moyenne sur des canaux qui diffèrent d'un facteur cinq (`cac-payback`, « par canal, pas en mixte ») | — |
 
-### 20.8 L'alerte de payback long — non codée
+### 20.8 L'alerte de payback long — tranchée (C49) et codée (A20.d T1)
 
 **Ce qu'elle dirait** : « on gagne de l'argent, mais tard ». C'est un
 **avertissement, pas une alarme** : elle ne prend pas le rouge de la fuite, et
 elle se distingue du constat de perte (on perd de l'argent à chaque client).
 Elle ne désigne aucune étape.
 
-**Son déclencheur est C49**, trois options :
+**Son déclencheur était C49**, trois options, tranchée le 2026-10-03 (plus bas) :
 
 1. **La trésorerie de l'équipe, en mois** (saisie facultative) : l'alerte
    quand le payback la dépasse, « peut-être » quand les fourchettes se
@@ -295,10 +302,28 @@ Elle ne désigne aucune étape.
    economics le fait déjà avec sa graduation de 12 mois), mais une alerte
    déclenchée par eux serait un repère qui juge, ce que C1 a retiré.
 
-**Au portage, une fois C49 tranchée** : une fonction pure de plus dans
-`money.ts`, `paybackWarning(payback, règle) → "long" | "maybe" | null`, par
-motion, aujourd'hui et projetée, avec sa non-vacuité. Sa phrase dit les deux
-faits de §20.5 et §20.6, jamais une cause.
+**La règle tranchée** (Antoine, 2026-10-03) : l'option 1, plus un plancher.
+
+- **Le runway saisi** (`setup.runwayMonths`, facultatif, en mois, de 0 exclu à
+  240) : l'alerte quand le payback le dépasse (strictement : un payback égal au
+  runway n'alerte pas), « peut-être » quand la fourchette du payback le
+  chevauche. Une seule trésorerie par entreprise : les deux motions d'un
+  hybride se comparent au même runway.
+- **Sans runway saisi, un plancher** : un CAC payback de **30 mois ou plus**
+  (deux ans et demi) alerte (30 compris), « peut-être » quand la fourchette
+  chevauche 30. C'est une règle du produit, pas un repère publié : ceux-là
+  sont 12 et 18-24 mois (C1 tient). `money.ts#PAYBACK_FLOOR_MONTHS`.
+- **Jamais avec la perte certaine** : un client qui part avant d'avoir
+  remboursé, c'est la perte, pas un retour tardif. Une perte seulement
+  possible laisse l'alerte parler.
+- **Le mot** : « runway » à l'écran, expliqué par un « ? » qui dit « tes mois
+  de trésorerie » (le terme du moteur, `EngineTerm`).
+
+**Codée en A20.d T1** : `paybackLimit(runwayMonths)` puis
+`paybackWarning(payback, loss, limit) → { verdict: "long" | "maybe", limit } | null`,
+par motion, aujourd'hui et projetée (`MoneyKpis.warning`), avec sa
+non-vacuité (`money.test.ts`). Sa phrase, à l'écran en T5, dit les deux faits
+de §20.5 et §20.6, jamais une cause.
 
 ### 20.9 Ce qui bouge avec quel levier
 
@@ -370,7 +395,7 @@ l'équilibre, l'entrée manquante), l'équivalence perte ⟺ payback au-delà de
 durée de vie sur 2 000 cas, la trésorerie (formule, plancher, leviers), la
 courbe assistée (ligne droite, contrats mensuels), les sommes de l'hybride.
 `golden-v2.test.ts` vérifie que la projection retire exactement les champs
-ajoutés (huit par côté) et que le MRR dans 12 mois gardé est le dernier point
+ajoutés (neuf par côté depuis l'alerte) et que le MRR dans 12 mois gardé est le dernier point
 de la courbe.
 
 Non-vacuité mesurée le 2026-10-03, chaque sabotage prouvé appliqué :
@@ -388,10 +413,30 @@ Non-vacuité mesurée le 2026-10-03, chaque sabotage prouvé appliqué :
 Le détail, avec qui fait quoi, est dans `CHANTIERS.md`, A20 :
 
 - **A20.a**, le modèle pur : **livré** avec cette spécification.
-- **A20.b**, le brief 09 : écrit et déposé dans le projet Claude Design
-  (`CHANTIERS.md` B14). Antoine le lance.
-- **A20.c**, les décisions : C46 à C52, puis celles que le retour demande
-  (prompt F).
-- **A20.d**, le portage, une PR par étape, `ENGINE_ENABLED` fermé.
+- **A20.b**, le brief 09 : écrit, déposé, lancé et revenu le 2026-10-03
+  (`CHANTIERS.md` B14).
+- **A20.c**, les décisions : C46 à C55, **tranchées le 2026-10-03** (§20.13).
+- **A20.d**, le portage, une PR par étape, `ENGINE_ENABLED` fermé : T1 (le
+  constat de perte, l'alerte et le runway dans l'état) est le premier.
 - **A20.e**, le bon à tirer de la copie neuve ; **A20.f**, la re-synchro ;
   **A20.g**, le film remis d'accord.
+
+### 20.13 Les décisions du 2026-10-03 (C45 à C55)
+
+Posées dans `CHANTIERS.md`, section C, le retour du brief 09 sous les yeux,
+et **toutes tranchées sur la reco** par Antoine le 2026-10-03, avec deux
+précisions à C49. L'index est dans [`docs/decisions.md`](../decisions.md).
+
+| # | La question | La réponse |
+|---|---|---|
+| C46 | L'ouverture du moteur attend-elle A20 ? | **Oui** : elle attend le portage (A20.d) et son bon à tirer (A20.e), pas la re-synchro ni le film remis d'accord, qui suivent de quelques jours |
+| C47 | Où l'ARR s'affiche-t-il ? | À côté du MRR, en second (« ARR, le MRR × 12 ») dans le bloc d'argent ; l'ARR dans 12 mois dans la carte « Et si » et les slides ; en hybride, le total seul |
+| C48 | Le constat de perte | Une étiquette à l'encre « Perte » (« Perte possible » en pointillé au conditionnel), jamais rouge ; rang 1 certain, rang 2 au conditionnel ; certain, il titre la slide d'unit economics, qui monte en nº 2 ; la première slide reste le funnel |
+| C49 | Le déclencheur de l'alerte | **Le runway de l'équipe**, champ facultatif des Réglages ; **le mot « runway »**, avec un « ? » qui dit « tes mois de trésorerie » ; **sans runway saisi, un payback de 30 mois ou plus alerte** (§20.8) |
+| C50 | Une marge pour l'exemple intégré | **Estimée, 70 à 80 %** : l'argent en fourchettes, l'exemple sain (payback de 5 à 6 mois, LTV:CAC de 6 à 7, ni perte ni alerte) |
+| C51 | « Et si » déplié par défaut ? | **Non** : le panneau reste plié, la carte porte la courbe du MRR, le MRR et l'ARR dans 12 mois |
+| C52 | Board et investisseurs dans la promesse | **Oui, une fois A20 porté** : « … et ce que te rapporte chaque nouveau client, et repars avec des slides pour ton CODIR, ton board ou tes investisseurs » |
+| C53 | Les chiffres des titres de slides | **À l'encre grasse dans tout le deck** ; le rouge reste au verdict et au diagnostic (d-verdict-red du nº9) |
+| C54 | Le tableau réordonné | **Oui, en bloc** : le diagnostic, le bloc d'argent, la carte « Et si » remontée avant le peloton ; le LTV:CAC hors du tableau ; le panneau en trois tableaux |
+| C55 | Le bon à tirer de la copie d'A20 | **Un nº10 à part** ; la carte de la promesse du nº9 y passe |
+| C45 | Les films | La direction gardée, le calendrier proposé suivi, un bon à tirer à part pour leur copie (`marketing/motion/README.md`) |

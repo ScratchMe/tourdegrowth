@@ -3,8 +3,11 @@
 *Quatre films de motion design, proposés le 2026-10-03 : un pour tout Tour de
 Growth, puis un par espace. Ils sont en musique, en 16:9, 4:5 et 9:16, en
 français et en anglais, avec leur storyboard. Rien ici ne tourne dans l'app ;
-rien ici n'est importé par `src/`. **Statut : proposition.** La direction et
-le calendrier attendent Antoine ([`CHANTIERS.md`](../../CHANTIERS.md), C45).
+rien ici n'est importé par `src/`. **Statut : la direction et le calendrier
+sont validés par Antoine le 2026-10-03** (C45, sur la reco : le road book des
+trois espaces comme fil rouge ; le diagnostic maintenant, sur la page
+d'accueil et dans les annuaires, le moteur à son ouverture, après A20, le jeu
+à la sienne ; un bon à tirer à part pour la copie des films).
 Toute la copie écrite pour les films est « à relire » (convention 6).*
 
 <!-- TODO: à relire (convention 6) : la copie neuve des films (entrées p: 0 de l'objet C, et les libellés écrits en dur listés plus bas). -->
@@ -172,4 +175,4 @@ autour, comme le fait `films.mjs page`.
   « Résultat d'exemple » manque sur la carte de partage du diagnostic. À
   poser avant toute diffusion.
 - **Les MP4 en anglais** ne sont pas exportés : `--lang en`.
-- **La copie neuve** passe au bon à tirer une fois la direction validée (C45).
+- **La copie neuve** passe à un bon à tirer à part (C45, direction validée le 2026-10-03).

@@ -12,10 +12,9 @@ import type { Interval } from "./types";
  * what-ifs. Nothing here is a reference (C1): every figure is computed from
  * the team's own numbers, and none of them names a stage.
  *
- * What is NOT here, on purpose: the long-payback warning. Its trigger (a
- * runway typed by the team, a team target, or the glossary's references) is
- * Antoine's to decide (`CHANTIERS.md`, section C); only the two facts it
- * would read are computed.
+ * The long-payback warning (§20.8) is here too, behind the rule Antoine set
+ * on 2026-10-03 (C49): the team's runway when it is typed, a fixed floor of
+ * 30 months when it is not. Never a published reference.
  */
 
 /** ARR = MRR × 12: a year of recurring revenue at this month's rate — not a turnover (§20.1). */
@@ -101,6 +100,53 @@ export function cashTiedUp(spend: Interval | null, payback: Interval | null, exp
 }
 
 /**
+ * C49 (Antoine, 2026-10-03): with no runway typed, a CAC payback of 30
+ * months or more — two and a half years — still warns. A floor of the
+ * product's own, not a published reference (C1): those are 12 and 18-24.
+ */
+export const PAYBACK_FLOOR_MONTHS = 30;
+
+/** The longest runway the setup accepts: twenty years. Past it the figure says nothing a payback can be held against. */
+export const RUNWAY_MAX_MONTHS = 240;
+
+/**
+ * What the payback is held against (§20.8): the team's runway when it typed
+ * one (`setup.runwayMonths`), otherwise the floor. Per company: the two
+ * motions of a hybrid face the same runway.
+ */
+export type PaybackLimit = { kind: "runway"; months: number } | { kind: "floor"; months: number };
+
+export function paybackLimit(runwayMonths: number | undefined): PaybackLimit {
+  return runwayMonths !== undefined ? { kind: "runway", months: runwayMonths } : { kind: "floor", months: PAYBACK_FLOOR_MONTHS };
+}
+
+/**
+ * The long-payback warning: « you make money, but late — maybe after your
+ * cash runs out ». A warning, not an alarm (never the leak's red), and never
+ * a cause.
+ * - `long`: every reading of the payback is past the limit;
+ * - `maybe`: the payback's range straddles it.
+ */
+export interface PaybackWarning {
+  verdict: "long" | "maybe";
+  limit: PaybackLimit;
+}
+
+/**
+ * Past the runway means longer than it (« plus que ton runway ») ; the floor
+ * counts from 30 months included (« 30 mois ou plus »). null without a
+ * payback, and null when the loss is certain: a customer who leaves before
+ * paying back is the loss, not a late return — the loss alone speaks (§20.5).
+ */
+export function paybackWarning(payback: Interval | null, loss: LossCheck | null, limit: PaybackLimit): PaybackWarning | null {
+  if (!payback || loss?.verdict === "loss") return null;
+  const past = (v: number) => (limit.kind === "runway" ? v > limit.months : v >= limit.months);
+  if (past(payback.lo)) return { verdict: "long", limit };
+  if (past(payback.hi)) return { verdict: "maybe", limit };
+  return null;
+}
+
+/**
  * The money a motion's « Et si » carries beyond the v1 figures (§20): read
  * from the figures the scenario already computed, so the panel, the slides
  * and the board can never disagree with them.
@@ -118,4 +164,6 @@ export interface MoneyKpis {
   afterPayback: Interval | null;
   loss: LossCheck | null;
   cash: CashTiedUp | null;
+  /** The long-payback warning (C49), against the runway or the 30-month floor. */
+  warning: PaybackWarning | null;
 }
