@@ -23,9 +23,9 @@ en fin de document). `CLAUDE.md` garde l'état courant, `JOURNAL.md` l'histoire.
 
 | Groupe | Qui | Où | Quand |
 |---|---|---|---|
-| **A. Le travail autonome**, en quatre lots | Une session seule, une PR par lot (A7 : une PR par item) | Session cloud | A1 à A6 livrés le 2026-09-29, A7 et A8 le 2026-09-30. **Reste d'A7** : A7.3.d (le bon à tirer de la copie neuve), A7.4 après A7.3, et A7.12.c à l'ouverture. **A7.3.c est livré le 2026-10-01**, les textes de lancement de la ligne « Hors code » d'A7.3 le même jour (S0 à S5, PR d'intégration [#233](https://github.com/ScratchMe/tourdegrowth/pull/233), drapeau fermé). A10 (S-15), A11 et A7.3.e (les quatre termes du glossaire) livrés le 2026-09-30. **A12, le niveau 2 du jeu** : spécifié et chiffré le 2026-09-30, **validé le 2026-10-01 (C30)**, sa copie, l'îlot partagé, le téléphone de Pédalix et le branchement faits le même jour (A12.c à A12.f.2)  et ses specs (A12.g) : reste A12.h (le bon à tirer, puis la recette) et A12.i (le `?ref=` de la boucle inverse, trouvé par B6). **A14, le moteur complet** : spécifié et validé le 2026-10-01 (C32) ; **A14.c est livré le même jour**, T0 à T7 (neuf PR de #255 à #266, drapeau fermé), puis T6.2, l'image de partage, au retour de B5 le même soir ([#272](https://github.com/ScratchMe/tourdegrowth/pull/272)) ; reste A14.d, son bon à tirer. **A13** (trois alertes de dépendances, dont une critique sur `next`) livré le 2026-10-01. **A15**, la finition UI et UX d'après les reels et les lois de l'UX, ouvert le 2026-10-01 : tout livré le même jour : deux PR, puis A15.18 une fois C33 tranchée ; A15.19 est porté le 2026-10-02 par **A16** (la feuille de score) : A15 est clos. **A17** (le halo grisé des images de partage de contenu, trouvé par T6.2) est livré le 2026-10-02 ([#274](https://github.com/ScratchMe/tourdegrowth/pull/274)). **A18, le moteur simplifié** (le portage du retour 07, C38 et C40 à C42) : ouvert le 2026-10-02, T0 à T7 puis un bon à tirer unique, A18.d, qui absorbe A7.3.d et A14.d ; **T0, T1, T2, T3.a, T3.b et T3.c livrés le même jour** ([#283](https://github.com/ScratchMe/tourdegrowth/pull/283), [#285](https://github.com/ScratchMe/tourdegrowth/pull/285), [#290](https://github.com/ScratchMe/tourdegrowth/pull/290), [#291](https://github.com/ScratchMe/tourdegrowth/pull/291), [#293](https://github.com/ScratchMe/tourdegrowth/pull/293), [#294](https://github.com/ScratchMe/tourdegrowth/pull/294), [#295](https://github.com/ScratchMe/tourdegrowth/pull/295)), **T3.d, T4, T5, T6 et T7 le 2026-10-03** ([#297](https://github.com/ScratchMe/tourdegrowth/pull/297), [#298](https://github.com/ScratchMe/tourdegrowth/pull/298), [#299](https://github.com/ScratchMe/tourdegrowth/pull/299), [#300](https://github.com/ScratchMe/tourdegrowth/pull/300), [#301](https://github.com/ScratchMe/tourdegrowth/pull/301)) : **le code d'A18 est entier**, reste A18.d. **A19, l'en-tête compact** (le portage du retour 08, B11) est livré le 2026-10-02 ([#284](https://github.com/ScratchMe/tourdegrowth/pull/284)) |
+| **A. Le travail autonome**, en quatre lots | Une session seule, une PR par lot (A7 : une PR par item) | Session cloud | A1 à A6 livrés le 2026-09-29, A7 et A8 le 2026-09-30. **Reste d'A7** : A7.3.d (le bon à tirer de la copie neuve), A7.4 après A7.3, et A7.12.c à l'ouverture. **A7.3.c est livré le 2026-10-01**, les textes de lancement de la ligne « Hors code » d'A7.3 le même jour (S0 à S5, PR d'intégration [#233](https://github.com/ScratchMe/tourdegrowth/pull/233), drapeau fermé). A10 (S-15), A11 et A7.3.e (les quatre termes du glossaire) livrés le 2026-09-30. **A12, le niveau 2 du jeu** : spécifié et chiffré le 2026-09-30, **validé le 2026-10-01 (C30)**, sa copie, l'îlot partagé, le téléphone de Pédalix et le branchement faits le même jour (A12.c à A12.f.2)  et ses specs (A12.g) : reste A12.h (le bon à tirer, puis la recette) et A12.i (le `?ref=` de la boucle inverse, trouvé par B6). **A14, le moteur complet** : spécifié et validé le 2026-10-01 (C32) ; **A14.c est livré le même jour**, T0 à T7 (neuf PR de #255 à #266, drapeau fermé), puis T6.2, l'image de partage, au retour de B5 le même soir ([#272](https://github.com/ScratchMe/tourdegrowth/pull/272)) ; reste A14.d, son bon à tirer. **A13** (trois alertes de dépendances, dont une critique sur `next`) livré le 2026-10-01. **A15**, la finition UI et UX d'après les reels et les lois de l'UX, ouvert le 2026-10-01 : tout livré le même jour : deux PR, puis A15.18 une fois C33 tranchée ; A15.19 est porté le 2026-10-02 par **A16** (la feuille de score) : A15 est clos. **A17** (le halo grisé des images de partage de contenu, trouvé par T6.2) est livré le 2026-10-02 ([#274](https://github.com/ScratchMe/tourdegrowth/pull/274)). **A18, le moteur simplifié** (le portage du retour 07, C38 et C40 à C42) : ouvert le 2026-10-02, T0 à T7 puis un bon à tirer unique, A18.d, qui absorbe A7.3.d et A14.d ; **T0, T1, T2, T3.a, T3.b et T3.c livrés le même jour** ([#283](https://github.com/ScratchMe/tourdegrowth/pull/283), [#285](https://github.com/ScratchMe/tourdegrowth/pull/285), [#290](https://github.com/ScratchMe/tourdegrowth/pull/290), [#291](https://github.com/ScratchMe/tourdegrowth/pull/291), [#293](https://github.com/ScratchMe/tourdegrowth/pull/293), [#294](https://github.com/ScratchMe/tourdegrowth/pull/294), [#295](https://github.com/ScratchMe/tourdegrowth/pull/295)), **T3.d, T4, T5, T6 et T7 le 2026-10-03** ([#297](https://github.com/ScratchMe/tourdegrowth/pull/297), [#298](https://github.com/ScratchMe/tourdegrowth/pull/298), [#299](https://github.com/ScratchMe/tourdegrowth/pull/299), [#300](https://github.com/ScratchMe/tourdegrowth/pull/300), [#301](https://github.com/ScratchMe/tourdegrowth/pull/301)) : **le code d'A18 est entier**, reste A18.d. **A19, l'en-tête compact** (le portage du retour 08, B11) est livré le 2026-10-02 ([#284](https://github.com/ScratchMe/tourdegrowth/pull/284)). **A20** (le moteur à la hauteur de son film) est ouvert le 2026-10-03 : il se lance avec le prompt E. |
 | **B. Design sync** | Une session, cloud ou locale | N'importe où : une session cloud pousse vers Claude Design depuis le 2026-09-29 | **À jour le 2026-10-02, après A16 et A19** (B9 et B12, une seule synchro : 91 composants, 308 cellules, 91 aperçus sur 91 rendus ; les briefs 04, 05, 06 et 08 et leurs retours retirés du projet, décision d'Antoine). Avant : B3 et la re-synchro d'A11, le 2026-09-30. Ouverts le 2026-10-01 : **B4** (la re-synchro du niveau 2 du jeu, faite le même jour), **B5** (l'image de partage du moteur, C32 Q17 : brief 06 écrit et déposé le même jour, retour reçu et porté en T6.2 le même soir), **B6** (la re-synchro d'A15 et de C33, faite le même jour : 90 composants, 303 cellules, les douze aperçus du jeu laissés par B4 régénérés) et **B7** (les puces d'étape, A15.19 : le retour 05 est recopié et porté le 2026-10-02, A16 ; la re-synchro qui l'emporte est **B9**, ouverte et close le même jour). **B8** (ouvert le 2026-10-01 au soir) : le volet Design System montre une copie compilée le 2026-09-11, 34 cartes, alors que les fichiers et l'agent sont à jour ; Claude Design ne rafraîchit plus ce projet à l'ouverture ; laissé en l'état par Antoine le même soir (signalement prêt en D13). **B10** (le 2026-10-02) : le brief 07, le moteur plus simple sans perdre son expertise, déposé, lancé et revenu le même jour ; le retour est recopié et son portage est A18. **B11** (le 2026-10-02) : l'en-tête collant, compact une fois la page défilée en paysage ; brief 08 déposé, lancé et revenu le même jour, recopié et porté (A19) : clos ; la re-synchro qui l'emporte est **B12**, ouverte et close le même jour. **B13** (le 2026-10-02) : la re-synchro d'A18, prête depuis T7 (le 2026-10-03), à lancer après A18.d (quatorze composants neufs, trois aperçus à reprendre). Hors d'eux, rien à lancer tant qu'un composant, ou une copie qu'un aperçu reprend, ne change pas |
-| **C. Tes décisions**, une par une | Toi, guidé, avec une recommandation par question | N'importe quelle session | **Tranchées le 2026-09-29** (C18 close à part, par la session D). C23 à C29 tranchées le 2026-09-30, C26 à C29 livrées le même jour, **C25** (la spécification de A7.3, `ENGINE.md` §18) dans sa propre session. **C30** (le niveau 2 du jeu, `GAME-BRIEF.md` §17) le 2026-10-01. **C31** (le bloc « Niveau suivant » du jeu) et **C32** (le moteur complet, `docs/engine/moteur-complet.md` §19.15) le 2026-10-01. **C33** (la carte du jeu sous les chiffres du lecteur, A15.18) ouverte et tranchée le 2026-10-01. **C34** et **C35** (le rouge des ex aequo, le nouveau « ? », nées du retour 05) tranchées le 2026-10-02, puis **C36** (la PR Dependabot #244 : React 19.3 seul, `firebase-admin` ≥ 14.4 mis en attente pour son poids) puis **C37** et **C39** (`next` 16.3.7, les types React 19.3 et `eslint-config-next` 16.3.7, mergés par #277 et #278) le même jour. **C38** (les bons à tirer du moteur attendent le portage du retour 07) et **C40 à C42** (le pas à pas fondu dans le tableau avec un écran Cibles gardé, la liste à la place des onglets, les renommages), nées du brief 07, tranchées le 2026-10-02, puis **C43** et **C44** (la course compacte comptée à part, la langue à 88 px partout), nées du retour 08, le même jour. **Rien n'est ouvert** |
+| **C. Tes décisions**, une par une | Toi, guidé, avec une recommandation par question | N'importe quelle session | **Tranchées le 2026-09-29** (C18 close à part, par la session D). C23 à C29 tranchées le 2026-09-30, C26 à C29 livrées le même jour, **C25** (la spécification de A7.3, `ENGINE.md` §18) dans sa propre session. **C30** (le niveau 2 du jeu, `GAME-BRIEF.md` §17) le 2026-10-01. **C31** (le bloc « Niveau suivant » du jeu) et **C32** (le moteur complet, `docs/engine/moteur-complet.md` §19.15) le 2026-10-01. **C33** (la carte du jeu sous les chiffres du lecteur, A15.18) ouverte et tranchée le 2026-10-01. **C34** et **C35** (le rouge des ex aequo, le nouveau « ? », nées du retour 05) tranchées le 2026-10-02, puis **C36** (la PR Dependabot #244 : React 19.3 seul, `firebase-admin` ≥ 14.4 mis en attente pour son poids) puis **C37** et **C39** (`next` 16.3.7, les types React 19.3 et `eslint-config-next` 16.3.7, mergés par #277 et #278) le même jour. **C38** (les bons à tirer du moteur attendent le portage du retour 07) et **C40 à C42** (le pas à pas fondu dans le tableau avec un écran Cibles gardé, la liste à la place des onglets, les renommages), nées du brief 07, tranchées le 2026-10-02, puis **C43** et **C44** (la course compacte comptée à part, la langue à 88 px partout), nées du retour 08, le même jour. **C45** (les films de motion design) est ouverte le 2026-10-03 |
 | **D. Tes actions**, pas à pas | Toi, accompagné | Session cloud | Selon ce qui est prêt. D10 (l'indexation) est prêt tout de suite. D2 attend les bons à tirer nº7 et nº9 (A18.d, qui remplace le nº8), la recette (D9) et, pour le moteur, le lot A18 (le moteur simplifié) et son bon à tirer unique A18.d, qui absorbe ceux d'A7.3 et d'A14 (C38) |
 | **E. La veille** | Personne | — | Rien à lancer avant un déclencheur |
 
@@ -37,7 +37,7 @@ tirer unique A18.d (`/bon-a-tirer`), qui absorbe A7.3.d et A14.d (C38), A7.4, pu
 parallèle : il ne touche pas les mêmes fichiers. Le moteur ouvre avant le jeu (C23). A14.c
 (le moteur complet) est livré le 2026-10-01, T6.2 compris ; son bon à tirer
 passe dans A18.d, et le moteur n'ouvre qu'après A18 (C32 Q1, C38).
-Rien n'attend dans la section C : C30 à C33 sont tranchées le 2026-10-01, C34 à C44 le 2026-10-02.
+Dans la section C, seule **C45** (les films de motion design, ouverte le 2026-10-03) attend : C30 à C33 sont tranchées le 2026-10-01, C34 à C44 le 2026-10-02. **A20** (le moteur à la hauteur de son film) se lance avec le prompt E quand Antoine le décide ; c'est lui qui pose la question de l'ouverture du moteur.
 
 **Deux sessions en parallèle** écrivent toutes deux à la fin de `JOURNAL.md`
 et dans ce fichier. La seconde à merger fusionne `main` dans sa branche avant
@@ -320,6 +320,39 @@ par cible). **A19.1**, le même jour, sur une question d'Antoine :
 à toutes les largeurs ([#287](https://github.com/ScratchMe/tourdegrowth/pull/287), le journal à « A19.1 »). **A19 est clos** ; la
 re-synchro qui l'emporte vers Claude Design est B12, faite le même jour.
 
+### A20 — Le moteur à la hauteur de son film (ouvert le 2026-10-03)
+
+**Ouvert le 2026-10-03**, au retour des films de motion design
+([`marketing/motion/`](marketing/motion/README.md)). Le film « Le moteur »
+montre l'argent : un MRR qui monte, un client qui coûte plus qu'il ne
+rapporte, « Et si ? » qui fait bouger le MRR dans 12 mois et l'ARR, des slides
+pour un board ou un investisseur. Antoine pensait que le moteur le montrait
+déjà. L'écart a été relevé dans le code le même jour, sur `9c81844`, avant
+#302 : le prompt E le re-vérifie ligne à ligne.
+
+- **Déjà là.**
+  - Les « Et si » cumulés (`WhatIfPanel`), avec MRR dans 12 mois, nouveau MRR, NRR, GRR, CAC, LTV et payback qui bougent ensemble.
+  - Ce que chaque levier rapporte seul, et l'effet composé.
+  - « Freine ici », par une cible d'équipe.
+  - Les slides : verdict, unit economics (dont le LTV:CAC), « Et si » par levier et cumulée.
+- **Manque.**
+  1. L'ARR, nulle part.
+  2. La trajectoire du MRR mois par mois, aujourd'hui contre « Et si » : le panneau et les slides n'ont que des tableaux et des tuiles.
+  3. Le LTV:CAC dans « Et si » : il n'est que sur la slide d'unit economics.
+  4. Un constat quand le LTV passe sous le CAC : `findings.ts` n'a que `unit-econ-uncomputable`.
+  5. Rien ne signale un CAC payback long, alors que c'est la trésorerie qui le paie. La fiche `cac-payback` du glossaire le dit déjà (`src/content/glossary-deep.ts`), mais le moteur n'a aucune notion de trésorerie. Ajouté par Antoine le 2026-10-03.
+- **Caché.**
+  - L'argent n'est pas sur le tableau, qui ouvre sur le diagnostic du funnel.
+  - « Et si » est plié derrière une carte à un seul levier (`BoardLever`).
+  - La promesse de la page dit « CODIR », jamais board ni investisseurs.
+  - L'exemple intégré (`example.ts`) n'a pas de marge : son LTV et son payback sont incalculables.
+- **Le film a tort sur un point.** Il colore en rouge ce que les « Et si » ajoutent. Le produit garde sa règle (audit S-5 : une projection n'est jamais rouge, le rouge c'est la fuite), et les films se remettent d'accord avec le moteur porté (prompt F).
+
+Il se lance avec le **prompt E** (en fin de document) : la spécification, le
+modèle pur, le brief 09 à Claude Design, et les questions en section C. Au
+retour du brief, le **prompt F** : les décisions, puis le portage, la
+re-synchro et les films.
+
 ---
 
 ## B. Design sync
@@ -547,7 +580,15 @@ question, et leur index (sujet, réponse, où c'est écrit, suite) est dans
 
 ### Encore ouvert
 
-Rien. C25 est tranchée le 2026-09-30, C30 à C33 le 2026-10-01, C34 à C44 le 2026-10-02 (`docs/decisions.md`).
+**C45 — Les quatre films de motion design** (ouverte le 2026-10-03). Ils
+sont dans [`marketing/motion/`](marketing/motion/README.md) et se jouent sur
+la page https://claude.ai/artifact/MDSptVBYtkDuT8vFPJW49Z, avec le storyboard
+de chaque film. Trois points :
+- **La direction.** Le road book des trois espaces comme fil rouge (plaine, contre-la-montre, montagne, la nuit qui tombe en montant), et Retention comme étape qui traverse le film d'ensemble. *Reco : la garder.*
+- **Le calendrier.** Le diagnostic maintenant, mais seulement sur la page d'accueil et dans les annuaires : C19 et C20 gardent les réseaux pour l'ouverture du moteur. Le moteur à son ouverture, après A20 (son film montre ce qu'A20 ajoute) ; le jeu à la sienne ; le film d'ensemble avec le moteur, sa partie jeu marquée « bientôt » si le jeu ouvre plus tard. *Reco : celui-là, sauf si tu rouvres C20.*
+- **La copie neuve des films** (les entrées `p: 0` de l'objet `C` de la page, et quelques libellés écrits en dur, listés dans le README). *Reco : un bon à tirer à part, construit depuis `C` une fois la direction validée, avec les étiquettes « Chiffres d'exemple » qui manquent encore sur certains plans.*
+
+Avant elle, rien : C25 est tranchée le 2026-09-30, C30 à C33 le 2026-10-01, C34 à C44 le 2026-10-02 (`docs/decisions.md`).
 
 ---
 
@@ -666,4 +707,62 @@ Tu m'accompagnes pas à pas dans les actions qui ne peuvent venir que de moi : l
 7. Quand une action est faite : retire-la de CHANTIERS.md, mets à jour CLAUDE.md si l'état change, ajoute l'entrée de JOURNAL.md ; PR de doc seule, mergée quand elle est verte. Si une action révèle du code à écrire, ne l'écris pas ici : ajoute-le en section A.
 
 Réponds-moi en français.
+```
+
+### Prompt E — le moteur à la hauteur de son film (A20)
+
+Écrit le 2026-10-03 avec les films (`marketing/motion/`). À lancer quand
+Antoine le décide ; au retour du brief 09, le prompt F.
+
+```text
+Tu reprends Tour de Growth sur une mission neuve : mettre le moteur de growth à la hauteur de son film, le lot A20 de CHANTIERS.md. Le film « Le moteur » (44 s) est dans l'artifact https://claude.ai/artifact/MDSptVBYtkDuT8vFPJW49Z, onglet « Le moteur », storyboard dessous. Lis-le avec l'outil Artifact, pas avec WebFetch. Sa source et ses chiffres d'exemple sont dans marketing/motion/.
+
+L'écart est relevé dans CHANTIERS.md, A20 (déjà là, manque 1 à 5, caché, et le point où le film a tort). Il date du 2026-10-03, sur 9c81844 : re-vérifie chaque ligne avant d'y toucher (convention 10). Une ligne déjà résolue se retire, elle ne se corrige pas.
+
+1. Lis ENGINE.md (dont le bloc A18), docs/engine/v1.md (§5.7 et §6.8), docs/engine/moteur-complet.md, docs/engine/assiste-et-hybride.md (l'assisté a son propre payback), design/LOIS-UX.md, la fiche cac-payback de src/content/glossary-deep.ts, lib/engine/scenario.ts, unit-economics.ts, findings.ts, example.ts, _engine/WhatIfPanel.tsx, BoardLever.tsx, Board.tsx, les slides deck/SlideWhatIf, SlideScenario et SlideUnitEconomics, marketing/motion/README.md, et design/ds-extension-07-return/README.md : il dit pourquoi le tableau a été allégé, et ce qu'il ne faut pas re-densifier.
+2. Découpe A20 en étapes (le modèle, puis le portage), ouvre l'entrée B du brief 09, et pose en section C les questions ci-dessous avec ta recommandation. Prends les prochains numéros libres, vérifiés dans le fichier (convention 8 ; C45 est prise par les films). Ne tranche rien toi-même :
+   - l'ouverture du moteur attend-elle ce lot ?
+   - où l'ARR s'affiche-t-il ?
+   - le constat de perte : sa formulation, sa place, et peut-il titrer la première slide ?
+   - l'alerte de payback long : qu'est-ce qui la déclenche ? Options : une trésorerie de l'équipe en mois (saisie facultative, l'alerte quand le payback la dépasse), une cible de payback de l'équipe, ou les repères du glossaire (12 mois pour un SaaS vendu aux petites entreprises, 18 à 24 mois en vente entreprise). Ces repères situent sans désigner (C1). Sa formulation, et sa différence avec le constat de perte ;
+   - faut-il donner une marge à l'exemple intégré (golden-v1 et golden-v2 bougeraient) ?
+   - « Et si » doit-il être déplié par défaut ?
+   - board et investisseurs dans la promesse ?
+3. Écris la spécification (une section d'ENGINE.md, ou un fichier sous docs/engine/ avec un renvoi). Elle dit pour chaque ajout : la formule, les intervalles, les cas incalculables, les hypothèses imprimées.
+4. Crée ta branche depuis origin/main, puis code en pur, dans src/lib/engine, avec tests et non-vacuité, ce qui ne dépend pas du design :
+   a. l'ARR (MRR × 12) aujourd'hui et dans 12 mois, en intervalle comme le reste ;
+   b. la trajectoire du MRR sur 13 points, aujourd'hui et avec les « Et si », tirée de la même boucle que twelveMonths : le MRR dans 12 mois est son dernier point, une seule source ;
+   c. le LTV:CAC dans ScenarioKpis, aujourd'hui et projeté ;
+   d. un constat de perte quand le LTV est entièrement sous le CAC (borne haute du LTV sous la borne basse du CAC). Il dit « peut-être » quand les intervalles se chevauchent, et rien quand une entrée manque. Ce n'est pas un repère (C1), c'est de l'arithmétique sur les chiffres de l'équipe, et il ne désigne aucune étape ;
+   e. le payback face à la trésorerie, en deux faits toujours calculables sans repère :
+      - le payback face à la durée de vie d'un client (1 ÷ churn, le plafond de 36 mois de lifetimeMonths compris) ;
+      - la trésorerie que le rythme d'acquisition du mois immobilise avant de revenir (nouveaux payants × CAC, étalés sur le payback). Spécifie la formule et imprime ses hypothèses : remboursement linéaire ; le churn qui allonge le retour n'est pas compté, donc c'est un minimum.
+      Puis l'alerte elle-même, codée derrière la règle que je trancherai : sans choix de ma part, ne code que les deux faits. Par motion : le libre-service et l'assisté ont chacun leur payback. Dans « Et si », le payback et la trésorerie bougent avec les leviers qui les touchent (ARPA, activation à dépense égale, etc. : vérifie dans scenario.ts lesquels).
+   Pas d'écran neuf avant le retour de Claude Design.
+5. Écris design/DS-EXTENSION-BRIEF-09.md sur le modèle du 07. Joins les captures de l'état actuel dans design/ds-extension-09/ (FR à 1 280 px, EN à 390 px), avec la densité mesurée par scripts/engine-density.capture.ts. Le brief demande à Claude Design :
+   - l'argent sur le tableau : MRR, ARR, MRR dans 12 mois au rythme actuel, et « ce que rapporte un client » (le CAC face au LTV, le constat de perte), sans défaire ce qu'A18 a allégé ;
+   - l'alerte de trésorerie : le payback, ce qu'il immobilise, et l'avertissement quand il est long. C'est un avertissement, pas une alarme : il se distingue du constat de perte (on gagne de l'argent, mais tard) et ne prend pas le rouge de la fuite ;
+   - « Et si » en sommet : la courbe du MRR, l'ARR, le LTV:CAC, le payback et la trésorerie qui bougent, l'effet composé lisible, et où le panneau vit ;
+   - la slide « Et si » avec sa courbe, et la place du payback et de la trésorerie sur la slide d'unit economics, lisibles par un board ou un investisseur ;
+   - la promesse de la page.
+   En tête du brief, les contraintes : jamais de rouge pour une projection (S-5) ; aucun repère ne désigne (C1) ; un chiffre incalculable s'imprime « ? », jamais 0 ; sans marge, pas de LTV ni de payback (jamais calculés sur le revenu) ; FR et EN ; contraste AA ; 390 px. Livrables demandés : les écrans en FR à 1 280 et en EN à 390, un COPY.md pour le bon à tirer, un INVENTORY.md qui dit où va chaque chiffre.
+   Dépose le brief dans le projet Claude Design 23b9671c-a55b-452e-aa41-39906ee71ba8, comme pour les briefs 07 et 08, puis arrête-toi : c'est moi qui le lance.
+6. Une PR pour la spécification, le modèle et le brief. Merge-la quand elle est verte en suivant /livrer (lu, pas appelé). Ajoute l'entrée de JOURNAL.md à la fin.
+
+Réponds-moi en français, court : l'écart que tu as confirmé ou corrigé, ce qui est codé et vérifié, les questions posées, et ce que je dois faire dans Claude Design.
+```
+
+### Prompt F — au retour du brief 09 (A20)
+
+```text
+Le retour du brief 09 est dans le projet Claude Design. Recopie-le dans design/ds-extension-09-return/ comme pour le 07, compare-le au brief, et pose-moi en section C de CHANTIERS.md les décisions qu'il demande, avec ta recommandation.
+
+Une fois que je les ai tranchées, porte-le (le lot A20, une PR par étape, ENGINE_ENABLED fermé) :
+- chaque écran vérifié en FR et en EN, à 1 280 et 390 px ;
+- la densité mesurée avec scripts/engine-density.capture.ts, avant contre après ;
+- toute copie neuve en « TODO: à relire », ajoutée au bon à tirer que j'aurai choisi (le nº9 ou un nº10) ;
+- puis la re-synchro (prompt B) ;
+- et le film « Le moteur » remis d'accord avec le moteur porté (marketing/motion/, son README dit comment republier la page et réexporter les MP4) : les vrais écrans, aucune projection en rouge, et l'alerte de trésorerie si tu l'as retenue.
+
+Réponds-moi en français, court.
 ```
