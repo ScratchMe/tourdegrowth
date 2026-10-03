@@ -836,6 +836,7 @@ export type SlideTitleKey =
   | "unitEconomicsOneSideSlg"
   | "unitEconomicsNoneMargins"
   | "unitEconomicsNoneDifferent"
+  | "unitEconomicsSides"
   /** « Ce qui a bougé » (§19.2.6): how many numbers moved since the month before, and the leak; or why the two months don't compare. */
   | "evolution"
   | "evolutionOne"
@@ -879,6 +880,8 @@ export interface DeckSlide {
    * against what it cost. Drawn, not printed: its figures are the rows'.
    */
   paybackChart?: SlidePaybackChart;
+  /** The hybrid's unit economics (A20.d T4.d): each engine's picture, side by side, compact — never summed. */
+  paybackCharts?: { plg?: SlidePaybackChart; slg?: SlidePaybackChart };
 }
 /** The curve a what-if slide draws: thirteen months, [low, high], today first. */
 export interface SlideCurve {
@@ -927,6 +930,8 @@ export interface SlidePaybackChart {
     short: string;
     /** Pays back: « ~22 mois de marge après ». */
     after: string;
+    /** Compact (the hybrid's two columns): the time story on the axis row, « part vers 17 mois ; rembourserait à 21 mois ». */
+    time: string;
   };
   /** The chart in words, for a screen reader. */
   summary: string;

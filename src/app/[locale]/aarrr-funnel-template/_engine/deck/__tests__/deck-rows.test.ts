@@ -31,7 +31,8 @@ import { OPTIONAL_FIELDS, ROW_FIELDS, type RowKind } from "../deck-rows";
  * lifetime cap is written only when an LTV exists to be capped; dropping
  * `whatIf` fails it naming kpi, funnelStep, lever and together; dropping
  * `hybrid` and `hybridLinked` (2026-10-01) fails it naming totalBlock, link,
- * sum and unitRow — the hybrid's own rows (`salesAssisted` still writes the
+ * sum — the hybrid's own rows; its unit tiles since A20.d T4.d are the
+ * single engine's kinds, tagged with their motion (`salesAssisted` still writes the
  * relays); dropping `series` and `seriesApart` (A14 T1) fails it naming
  * evolution and apart.
  */

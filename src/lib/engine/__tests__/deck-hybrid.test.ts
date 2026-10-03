@@ -4,7 +4,7 @@ import { deriveEngine } from "../derive";
 import type { DeckModel, EngineState } from "../types";
 import { CTX_EN, CTX_FR, EN, FR } from "./props";
 import { QUESTIONS } from "../../../content/copy-library";
-import { estimated, exampleState, hybridState, measured, missing, ratio, salesAssistedState, tourResult, withEntry, withMonthBefore, withTarget } from "./fixtures";
+import { estimated, exampleState, hybridLossState, hybridState, measured, missing, ratio, salesAssistedState, tourResult, withEntry, withMonthBefore, withTarget } from "./fixtures";
 
 /**
  * The deck with sales-assisted ticked (engine spec §18.8, A7.3.c S4): which
@@ -218,11 +218,48 @@ describe("unit economics, side by side (§18.8.2)", () => {
     const deck = deckOf(hybridState());
     const unit = slide(deck, "unit-economics");
     expect(unit.title.key).toBe("unitEconomicsNoneMargins");
-    expect(unit.lines.filter((l) => l.row === "unitRow").map((l) => l.id)).toEqual(["cac", "payback", "basket", "lostInAYear", "ltvCac"]);
-    const lost = unit.lines.find((l) => l.id === "lostInAYear")!;
-    expect([lost.plg, lost.slg]).toEqual([nb("~26^% (2,5^% par mois, composé)"), nb("12^% des contrats échus")]);
+    // Two columns since A20.d T4.d, self-serve first: each engine its five tiles, tagged with its engine.
+    expect(unit.lines.filter((l) => l.motion).map((l) => `${l.motion}:${l.row}`)).toEqual([
+      "plg:cac",
+      "plg:ltv",
+      "plg:ltvCac",
+      "plg:payback",
+      "plg:cash",
+      "slg:cac",
+      "slg:ltv",
+      "slg:ltvCac",
+      "slg:payback",
+      "slg:cash",
+    ]);
+    // A figure that can't be computed says what is missing, in its column; never a « ? » in the text.
+    expect(unit.lines.find((l) => l.motion === "plg" && l.row === "ltv")!.text).toBe("Libre-service · il manque la marge brute");
+    // One note under both: the customers lost in a year, one unit for both (C25 Q5) — never a monthly rate beside an annual one.
+    expect(unit.lines.find((l) => l.row === "assume")!.text).toContain(nb("Clients perdus sur un an^: libre-service ~26^% (2,5^% par mois, composé) · assisté 12^% des contrats échus."));
+    expect(unit.lines.find((l) => l.row === "assume")!.text).not.toMatch(/GRR|NRR/);
     // Two CACs on different spend: the footer says so, in words.
     expect(unit.lines.find((l) => l.row === "footer")!.text).toContain("média seul en libre-service, tout chargé en assisté");
+  });
+
+  it("a certain loss on one side (C48): each side says its own, in ink, and the slide moves right after the total", () => {
+    const deck = deckOf(hybridLossState());
+    const unit = slide(deck, "unit-economics");
+    expect(title(deck, "unit-economics")).toBe(nb("Libre-service^: on perd ~400^€ par nouveau client. Assisté^: remboursé en 13^mois."));
+    expect(title(deckOf(hybridLossState(), "en"), "unit-economics", "en")).toBe("Self-serve: we lose ~€400 on each new customer. Sales-assisted: paid back in 13 months.");
+    expect(deck.slides.filter((s) => s.included).map((s) => s.id).slice(0, 3)).toEqual(["total", "unit-economics", "peloton"]);
+    expect(unit.index).toBe(2);
+    // Never summed: each engine its own picture, its own story.
+    expect(unit.paybackCharts?.plg).toMatchObject({ story: "loss", labels: { time: nb("part vers 17^mois^; rembourserait à 21^mois"), short: nb("il manque ~400^€") } });
+    expect(unit.paybackCharts?.slg).toMatchObject({ story: "pays-back", labels: { time: nb("remboursé à 13^mois, puis ~23^mois de marge") } });
+    // The cash's note only when it reads without the chart: the loss's, not the floor.
+    expect(unit.lines.find((l) => l.motion === "plg" && l.row === "cash")!.note).toBe("ne revient pas toute");
+    expect(unit.lines.find((l) => l.motion === "slg" && l.row === "cash")!.note).toBe("");
+  });
+
+  it("no certain loss: the side-by-side titles of §18.6.4 and the slide's place", () => {
+    const margin = (state: EngineState, id: "rev.gross-margin" | "slg.rev.gross-margin") => withEntry(state, id, measured(ratio(75, 100), { kind: "person", role: "finance" }));
+    const deck = deckOf(margin(margin(hybridState(), "rev.gross-margin"), "slg.rev.gross-margin"));
+    expect(slide(deck, "unit-economics").title.key).toBe("unitEconomicsBoth");
+    expect(deck.slides.filter((s) => s.included).map((s) => s.id).indexOf("unit-economics")).toBeGreaterThan(2);
   });
 
   it("each case of the title: both paybacks, one side, the other, and two different inputs", () => {

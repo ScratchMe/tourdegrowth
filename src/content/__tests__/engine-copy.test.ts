@@ -158,6 +158,7 @@ describe("placeholders", () => {
     unitEconomicsOneSideSlg: ["input", "m"],
     unitEconomicsNoneMargins: [],
     unitEconomicsNoneDifferent: ["plg", "slg"],
+    unitEconomicsSides: ["plg", "slg"],
     evolution: ["leak", "month", "n"],
     evolutionOne: ["leak", "month", "n"],
     evolutionStill: ["leak", "month"],

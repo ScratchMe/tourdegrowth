@@ -92,6 +92,27 @@ export function filmState(): EngineState {
   return state;
 }
 
+/**
+ * The §18.9 hybrid with the film's self-serve half (A20.d T4.d) — its margin,
+ * churn, conversion and CAC, so each new self-serve customer is a loss — and a
+ * sales-assisted margin of 75 %, so its customers pay back: the return of
+ * brief 09's « slide-unit-both ».
+ */
+export function hybridLossState(): EngineState {
+  let state = hybridState();
+  const set = (id: MetricId, value: MetricValue) => {
+    state = withEntry(state, id, measured(value));
+  };
+  set("rev.gross-margin", ratio(36_000, 48_000));
+  set("ret.logo-churn", ratio(24, 400));
+  set("rev.contraction", ratio(468, 46_800));
+  set("rev.expansion", ratio(936, 46_800));
+  set("rev.paid-conversion", ratio(48, 800));
+  set("acq.cac", { kind: "amount", amount: 1_900 });
+  set("slg.rev.gross-margin", ratio(75, 100));
+  return state;
+}
+
 /** The film's three levers: churn 6 → 4 %, expansion 2 → 3 %, activation 18 → 24 %. */
 export const FILM_LEVERS: Partial<Record<LeverId, number>> = { "ret.logo-churn": 4, "rev.expansion": 3, "act.rate": 24 };
 

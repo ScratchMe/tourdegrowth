@@ -169,6 +169,14 @@ export function unitMoney(input: {
         paysBack: known && payback ? fillTemplate(leavesFirst ? w.chartWouldPayBack : w.chartPaysBack, { payback }) : "",
         short: verdict === "loss" && gap ? fillTemplate(strings.money.short, { gap: approx(gap) }) : strings.money.overlap,
         after: verdict === "none" && k.afterPayback ? fillTemplate(w.chartAfter, { after: approxMonths(k.afterPayback) }) : strings.money.overlap,
+        // Compact (the hybrid): the months in one line on the axis row, the plot keeping only its marks and the gap.
+        time: !known || !payback
+          ? ""
+          : leavesFirst
+            ? fillTemplate(k.lifetime!.lo >= LTV_CAP_MONTHS ? w.chartTimeCounted : w.chartTimeLoss, { life, payback })
+            : verdict === "none" && k.afterPayback
+              ? fillTemplate(w.chartTimeHealthy, { payback, after: approxMonths(k.afterPayback) })
+              : fillTemplate(w.chartPaysBack, { payback }),
       },
       summary: !known
         ? fillTemplate(w.chartSummaryNone, { cac: money(k.cac), input: phrase(missingOf(unit.ltv)) })

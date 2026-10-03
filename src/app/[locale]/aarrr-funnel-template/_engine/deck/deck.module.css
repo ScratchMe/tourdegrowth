@@ -428,51 +428,64 @@
 }
 
 /* The unit economics side by side: one table, two columns, self-serve first — never sorted (§18.6.4). */
+/*
+ * The hybrid's unit economics (design system extension 09, Q12, A20.d T4.d):
+ * self-serve then sales-assisted, two columns side by side, never summed. Each
+ * its five tiles — three, then the payback and the cash across two — and its
+ * picture, compact; one note under both.
+ */
 .unitBoth {
   flex: 1;
   min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-content: center;
+  gap: 12px 80px;
+}
+
+.unitEngine {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  gap: 24px;
+  gap: 10px;
+  min-width: 0;
 }
 
-.unitTable {
-  width: 100%;
-  border-collapse: collapse;
-  table-layout: fixed;
-  font: var(--slide-body-sm);
-}
-
-.unitTable th,
-.unitTable td {
-  padding: 14px 20px;
-  text-align: left;
-  vertical-align: top;
-  border-bottom: var(--border-width-hairline) solid var(--border-divider);
-}
-
-.unitTable thead th {
+.unitEngineName {
+  margin: 0;
+  padding-bottom: 8px;
+  border-bottom: var(--border-solid);
   font: var(--slide-heading);
+  font-weight: 700;
   letter-spacing: var(--slide-tracking);
   text-transform: uppercase;
-  color: var(--text-muted);
-  border-bottom: var(--border-solid);
 }
 
-.unitTable thead td {
-  width: 24%;
-  border-bottom: var(--border-solid);
+.figureRowEngine {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
 }
 
-.unitTable tbody th {
-  font: var(--slide-label-sm);
+.figureRowEngine .figure {
+  gap: 4px;
+  padding: 10px 16px;
 }
 
-.unitReference {
-  margin: 0;
+.figureRowEngine .figureLabel {
   font: var(--slide-meta);
-  color: var(--text-muted);
+  letter-spacing: var(--slide-tracking);
+}
+
+.figureRowEngine .figureValue {
+  font: var(--slide-label);
+}
+
+/* The cash across two columns: its label and its note on one line each. */
+.figureWide {
+  grid-column: span 2;
+}
+
+.unitBothNote {
+  grid-column: 1 / -1;
 }
 
 /* ── Slide 2 — the leak (§6.7, §9.3) ────────────────────────────────── */

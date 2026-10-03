@@ -160,7 +160,7 @@ export function withDecidedWords(expected: unknown): unknown {
 export const WHATIF_ROWS_ADDED_BY_A20 = ["arr12", "ltvCac", "cash"] as const;
 export const WHATIF_ROWS_RETIRED_BY_A20 = ["newMrr", "grr"] as const;
 
-type SlideLike = { id: string; lines: Record<string, string>[]; curve?: unknown; leverSum?: unknown; paybackChart?: unknown };
+type SlideLike = { id: string; lines: Record<string, string>[]; curve?: unknown; leverSum?: unknown; paybackChart?: unknown; paybackCharts?: unknown };
 const isWhatIf = (id: string) => id.startsWith("whatif:") || id === "scenario" || id === "slg:scenario";
 const kpiIn = (ids: readonly string[]) => (line: Record<string, string>) => line.row === "kpi" && ids.includes(line.id ?? "");
 
@@ -182,6 +182,24 @@ const kpiIn = (ids: readonly string[]) => (line: Record<string, string>) => line
  */
 export const UNIT_ROWS_ADDED_BY_A20 = ["after", "cash", "retention", "warning", "assume"] as const;
 export const UNIT_ROWS_RETIRED_BY_A20 = ["grr", "nrr"] as const;
+
+/**
+ * The hybrid's unit economics (A20.d T4.d): the two engines side by side, as
+ * the return of brief 09 draws them (`slide-unit-both`).
+ *
+ * - ADDED, dropped from the side a build prints now: each engine's tiles
+ *   (rows tagged with their `motion`), its picture (`paybackCharts`), its
+ *   warning, and the note under both (`assume`);
+ * - RETIRED, dropped from the golden's side: the five rows of two cells
+ *   (`unitRow`: the CAC, the payback, the basket, the customers lost in a
+ *   year, the LTV:CAC), which the columns replace — the LTV and the cash
+ *   take the basket's and the year's places, the note keeps GRR, NRR and the
+ *   renewal. Their markdown lines go with them.
+ *
+ * The footer stays to the character; the title moves only with a certain loss
+ * (C48), which none of the goldens' hybrids has.
+ */
+export const UNIT_BOTH_ROW_RETIRED_BY_A20 = "unitRow";
 const rowIn = (ids: readonly string[]) => (line: Record<string, string>) => ids.includes(line.row ?? "");
 
 /** The deck a build prints now, without what A20.d T4.b adds to its what-if slides and T4.c to its unit economics. On a JSON copy. */
@@ -190,7 +208,10 @@ export function deckBeforeA20<T>(deck: T): T {
   for (const slide of copy.slides) {
     if (slide.id === "unit-economics") {
       delete slide.paybackChart;
+      delete slide.paybackCharts;
       slide.lines = slide.lines
+        // The hybrid's tiles carry their engine; a single engine's rows don't.
+        .filter((line) => !line.motion)
         .filter((line) => !rowIn(UNIT_ROWS_ADDED_BY_A20)(line))
         .map((line) => (line.row === "ltvCac" && line.value ? { ...line, note: "", text: line.value } : line));
       continue;
@@ -212,8 +233,9 @@ export function withoutRetiredWhatIfRows(expected: unknown): unknown {
     const gone = new Set<string>();
     for (const slide of out.deck.slides) {
       if (slide.id === "unit-economics") {
-        for (const line of slide.lines.filter(rowIn(UNIT_ROWS_RETIRED_BY_A20))) gone.add(`- ${line.label} · ${line.text}`);
-        slide.lines = slide.lines.filter((line) => !rowIn(UNIT_ROWS_RETIRED_BY_A20)(line));
+        const retired = rowIn([...UNIT_ROWS_RETIRED_BY_A20, UNIT_BOTH_ROW_RETIRED_BY_A20]);
+        for (const line of slide.lines.filter(retired)) gone.add(`- ${line.label} · ${line.text}`);
+        slide.lines = slide.lines.filter((line) => !retired(line));
         continue;
       }
       if (!isWhatIf(slide.id)) continue;

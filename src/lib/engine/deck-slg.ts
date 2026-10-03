@@ -24,6 +24,7 @@ import {
   formatApproxMoneyInterval,
   formatChange,
   formatCountInterval,
+  formatDuration,
   formatDurationInterval,
   formatInterval,
   formatMonth,
@@ -38,6 +39,7 @@ import {
 import { mapBounds, point } from "./interval";
 import { fillSegments, positionLabel, subjectOf, unitInputsPhrase } from "./phrases";
 import { coverageText, pipelineCoverage } from "./pipeline";
+import { buildScenario } from "./scenario";
 import { buildSlgScenario, oppsCreated, oppsFromSelfServe, slgLeverAlone, type SlgScenario } from "./slg-scenario";
 import { sanityText } from "./sentences";
 import { STATUS_KEY } from "./strings";
@@ -357,12 +359,22 @@ function stageOf(derived: EngineDerived, motion: Motion, strings: Words, metrics
 const monthsText = (d: DerivedValue, strings: Words, ctx: EngineCalcContext) => (d.kind === "known" ? formatDurationInterval(d.value, "months", ctx, strings.units) : "");
 
 /**
- * The hybrid's unit-economics slide: one title for both motions, self-serve
- * first whichever side is known (§18.6.4), then five rows of two cells. A
- * figure that can't be computed says what is missing; the footer carries
- * the fixed sentence of §18.6.4 and whatever the reader must know before
- * quoting a cell — the lifetime cap, a company-wide margin standing in for a
- * motion's (C25 Q4), two CACs that count different spend.
+ * The hybrid's unit-economics slide (§18.8.2), side by side since design
+ * system extension 09 (Q12, A20.d T4.d): self-serve then sales-assisted, two
+ * columns, never summed and never sorted — the LTV, the payback, the loss
+ * belong to one engine (§18.6.4, C4). Each column: its five tiles (the CAC
+ * with its variant, the LTV, the LTV:CAC, the payback, the cash tied up) and
+ * its picture (`PaybackChart`, compact: its months on the axis row), from the
+ * same scenarios as the board's money blocks. One note under both: GRR and NRR
+ * for self-serve, the renewal for sales-assisted, what the cash assumes, the
+ * dotted reference. The footer stays the model's: the two segments, the
+ * lifetime cap, a company-wide margin standing in for a motion's (C25 Q4),
+ * two CACs that count different spend.
+ *
+ * The title: both paybacks, one, or why neither (§18.6.4) — and, when a loss
+ * is certain on either side, what each side says (C48): « Libre-service : on
+ * perd ~400 € par nouveau client. Assisté : remboursé en 19 mois. » In ink
+ * (C53), self-serve first.
  */
 export function buildUnitBoth(
   state: EngineState,
@@ -370,7 +382,7 @@ export function buildUnitBoth(
   strings: Words,
   metrics: ResolvedMetric[],
   ctx: EngineCalcContext,
-): { present: boolean; title: SlideTitle; lines: Row[] } {
+): { present: boolean; title: SlideTitle; lines: Row[]; paybackCharts: { plg?: SlidePaybackChart; slg?: SlidePaybackChart }; loss: boolean } {
   const plg = motionOf(derived, "plg") as PlgDerived;
   const slg = motionOf(derived, "slg") as SlgDerived;
   const units = strings.units;
@@ -383,6 +395,9 @@ export function buildUnitBoth(
   const money = (i: Interval | null) => (i ? formatInterval(i, "money", ctx, units, { currency }) : "");
   const missingOf = (d: DerivedValue) => (d.kind === "uncomputable" ? d.missing : []);
   const phrase = (ids: readonly MetricId[]) => unitInputsPhrase(ids, strings, metrics);
+  // Today's money, each engine's own, from the scenarios the board's money blocks read: nothing moved.
+  const plgMoney = unitMoney({ state, k: buildScenario(state, {}, ctx).today.kpis, slg: false, unit: plg.unit, strings, metrics, ctx });
+  const slgMoney = unitMoney({ state, k: buildSlgScenario(state, {}, ctx).today, slg: true, unit: slg.unit, strings, metrics, ctx });
 
   // The title: both paybacks, one, or why neither.
   const pb = monthsText(plg.unit.payback, strings, ctx);
@@ -393,19 +408,48 @@ export function buildUnitBoth(
   else if (sb) title = { key: "unitEconomicsOneSideSlg", values: { m: sb, input: phrase(missingOf(plg.unit.payback)) } };
   else if (!known("rev.gross-margin") && !known("slg.rev.gross-margin")) title = { key: "unitEconomicsNoneMargins", values: {} };
   else title = { key: "unitEconomicsNoneDifferent", values: { plg: phrase(missingOf(plg.unit.payback)), slg: phrase(missingOf(slg.unit.payback)) } };
+  // A certain loss on either side: what each side says (C48).
+  const loss = Boolean(plgMoney.lossTitle || slgMoney.lossTitle);
+  if (loss) {
+    const side = (m: typeof plgMoney, payback: string) =>
+      m.lossTitle ? fillTemplate(s.unitSideLoss, { gap: m.lossTitle.values.gap ?? "" }) : payback ? fillTemplate(s.unitSideRepaid, { m: payback }) : s.unitSideUnknown;
+    title = { key: "unitEconomicsSides", values: { plg: side(plgMoney, pb), slg: side(slgMoney, sb) } };
+  }
 
-  const uncomputable = (d: DerivedValue) => (d.kind === "uncomputable" ? fillTemplate(s.unitUncomputable, { input: phrase(d.missing) }) : "");
+  // Each engine's five tiles, its cash note and its warning: the column's rows, tagged with their engine (`motion`).
+  const uncomputable = (d: DerivedValue) => (d.kind === "uncomputable" ? fillTemplate(s.unitMissing, { input: phrase(d.missing) }) : "");
   const variantOf = (id: "acq.cac" | "slg.acq.cac") => {
     const variant = currentSnapshot(state).metrics[id]?.variant;
     return metricOf(metrics, id).variants?.find((v) => v.id === variant)?.label ?? "";
   };
-  const cac = (id: "acq.cac" | "slg.acq.cac") => {
-    const value = money(known(id));
-    return value ? [value, lowerFirst(variantOf(id))].filter(Boolean).join(" · ") : s.noNumber;
+  const names = strings.hybrid.motionName;
+  const column = (motion: Motion, m: typeof plgMoney, unit: { ltv: DerivedValue; payback: DerivedValue; ltvCac: DerivedValue }, cacId: "acq.cac" | "slg.acq.cac"): Row[] => {
+    const tile = (row: string, id: string, label: string, value: string, note: string): Row => ({
+      row,
+      motion,
+      id,
+      label,
+      value,
+      note,
+      // The export says what is missing, never a bare « ? »: the slide draws the « ? », the text explains it.
+      text: [names[motion], value || (note ? "" : s.noNumber), note].filter(Boolean).join(" · "),
+    });
+    const cac = money(known(cacId));
+    const variant = variantOf(cacId);
+    const cash = m.rows.find((r) => r.row === "cash");
+    return [
+      { row: "cac", motion, id: cacId, label: strings.scenario.kpiCac, value: cac, variant, text: [names[motion], cac || s.noNumber, cac ? lowerFirst(variant) : ""].filter(Boolean).join(" · ") },
+      tile("ltv", "ltv", strings.scenario.kpiLtv, unit.ltv.kind === "known" ? formatApproxMoneyInterval(unit.ltv.value, currency, ctx, units) : "", uncomputable(unit.ltv)),
+      tile("ltvCac", "ltvCac", strings.scenario.rowLtvCac, unit.ltvCac.kind === "known" ? fillTemplate(units.times, { n: formatInterval(unit.ltvCac.value, "ratio", ctx, units) }) : "", uncomputable(unit.ltvCac)),
+      tile("payback", "payback", strings.scenario.kpiPayback, monthsText(unit.payback, strings, ctx), uncomputable(unit.payback)),
+      // The cash's note only when it reads without the chart: « ne revient pas toute », or what is missing.
+      tile("cash", "cash", strings.scenario.rowCash, cash?.value ?? "", cash && (!cash.value || m.lossTitle) ? (cash.note ?? "") : ""),
+      ...m.rows.filter((r) => r.row === "warning").map((r) => ({ ...r, motion })),
+    ];
   };
-  const ratio = (d: DerivedValue) => (d.kind === "known" ? fillTemplate(units.times, { n: formatInterval(d.value, "ratio", ctx, units) }) : uncomputable(d));
-  const arpa = known("rev.arpa");
-  const acv = known("slg.rev.acv");
+  const lines: Row[] = [...column("plg", plgMoney, plg.unit, "acq.cac"), ...column("slg", slgMoney, slg.unit, "slg.acq.cac")];
+
+  // One note under both: the customers lost in a year, one unit for both (C25 Q5), what the cash assumes, the reference.
   const lost = (motion: Motion) => {
     const d = lostInAYear(state, ctx, motion);
     if (d.kind !== "known") return s.noNumber;
@@ -416,20 +460,15 @@ export function buildUnitBoth(
     }
     return fillTemplate(slg.unit.renewalTerm === "monthly" ? s.unitLostSlgMonthly : s.unitLostSlg, { rate: annual });
   };
-
-  const cells: [keyof Words["slide"]["unitRows"], string, string][] = [
-    ["cac", cac("acq.cac"), cac("slg.acq.cac")],
-    ["payback", pb || uncomputable(plg.unit.payback), sb || uncomputable(slg.unit.payback)],
-    [
-      "basket",
-      arpa ? fillTemplate(s.unitBasketPlg, { arpa: money(arpa) }) : s.noNumber,
-      acv ? fillTemplate(s.unitBasketSlg, { acv: money(acv), monthly: money(mapBounds(acv, (v) => Math.round(v / 12))) }) : s.noNumber,
-    ],
-    ["lostInAYear", lost("plg"), lost("slg")],
-    ["ltvCac", ratio(plg.unit.ltvCac), ratio(slg.unit.ltvCac)],
-  ];
-  const names = strings.hybrid.motionName;
-  const lines: Row[] = cells.map(([id, a, b]) => ({ row: "unitRow", id, label: s.unitRows[id], plg: a, slg: b, text: `${names.plg} ${a} · ${names.slg} ${b}` }));
+  const cashes = [plgMoney, slgMoney].map((m) => m.rows.find((r) => r.row === "assume")).filter(Boolean);
+  const outpaced = [buildScenario(state, {}, ctx).today.kpis.cash, buildSlgScenario(state, {}, ctx).today.cash].some((c) => c && !c.floor);
+  const reference = plgMoney.chart?.reference ?? slgMoney.chart?.reference ?? null;
+  const note = [
+    fillTemplate(s.unitBothLost, { plg: lost("plg"), slg: lost("slg") }),
+    cashes.length > 0 ? (outpaced ? s.unitBothCashOutpaced : s.unitBothCash) : "",
+    reference !== null ? fillTemplate(s.unitBothReference, { n: formatDuration(reference, "months", ctx, units) }) : "",
+  ].filter(Boolean);
+  if (note.length > 0) lines.push({ row: "assume", text: note.join(" ") });
 
   // The footer: what the two columns are, and what to know before quoting a cell.
   const wide = (["plg", "slg"] as const).filter((m) => marginIsCompanyWide(state, m));
@@ -443,7 +482,8 @@ export function buildUnitBoth(
   lines.push({ row: "footer", text: footer.join(" · ") });
 
   const present = [plg.unit.ltv, plg.unit.payback, plg.unit.ltvCac, slg.unit.ltv, slg.unit.payback, slg.unit.ltvCac].some((d) => d.kind === "known") || Boolean(known("acq.cac") || known("slg.acq.cac"));
-  return { present, title, lines };
+  const paybackCharts = { ...(plgMoney.chart ? { plg: plgMoney.chart } : {}), ...(slgMoney.chart ? { slg: slgMoney.chart } : {}) };
+  return { present, title, lines, paybackCharts, loss };
 }
 
 /**

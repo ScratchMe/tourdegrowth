@@ -2223,6 +2223,38 @@ export const ENGINE_COPY = {
       fr: "Un client, mois par mois : son coût est connu ({cac}), ce qu'il rapporte non : il manque {input}.",
       en: "One customer, month by month: its cost is known ({cac}), what it brings back is not. Missing: {input}.",
     },
+    /**
+     * TODO: à relire (convention 6) — neuf le 2026-10-03 (A20.d T4.d, retour du brief 09, Q12) : l'unit economics de
+     * l'hybride, les deux moteurs côte à côte, de `chartTimeLoss` à `unitBothReference`. La ligne des mois du graphique
+     * en petit, ce que dit chaque côté du titre quand une perte est certaine, et la note commune sous les deux colonnes.
+     * Provenance : du retour (COPY.md) `chartTimeLoss`, `chartTimeHealthy` (`slide.chart.time*`), `unitSideLoss` et
+     * `unitSideRepaid` (découpés de `slide.unit.titleBoth`), `unitBothCash` et `unitBothReference` (découpés de
+     * `slide.bothNote`, « d'acquisition » rétabli, le repère lu dans le catalogue) ; écrits par la session, absents du
+     * retour : `chartTimeCounted`, `unitSideUnknown`, `unitBothCashOutpaced` et `unitBothLost`. La note du retour mettait
+     * la GRR et la NRR par mois du libre-service à côté du renouvellement par an de l'assisté : elle garde à la place les
+     * clients perdus sur un an des deux côtés, une seule unité par ligne (C25 Q5, `unitLost*`).
+     */
+    chartTimeLoss: { fr: "part vers {life} ; rembourserait à {payback}", en: "leaves at ~{life}; would pay back at {payback}" },
+    chartTimeCounted: { fr: "compté jusqu'à {life}, le plafond ; rembourserait à {payback}", en: "counted to {life}, the cap; would pay back at {payback}" },
+    chartTimeHealthy: { fr: "remboursé à {payback}, puis {after} de marge", en: "paid back at {payback}, then {after} of margin" },
+    unitSideLoss: { fr: "on perd {gap} par nouveau client", en: "we lose {gap} on each new customer" },
+    unitSideRepaid: { fr: "remboursé en {m}", en: "paid back in {m}" },
+    unitSideUnknown: { fr: "on ne peut pas encore dire ce que rapporte un client", en: "we can't say yet what a customer is worth" },
+    /** `{plg}`: `unitLostPlg` filled; `{slg}`: `unitLostSlg` or `unitLostSlgMonthly`; either `noNumber`. */
+    unitBothLost: {
+      fr: "Clients perdus sur un an : libre-service {plg} · assisté {slg}.",
+      en: "Customers lost in a year: self-serve {plg} · sales-assisted {slg}.",
+    },
+    unitBothCash: {
+      fr: "Trésorerie immobilisée : dépense d'acquisition du mois × payback ÷ 2, un plancher, facturation mensuelle.",
+      en: "Cash tied up: the month's acquisition spend × the payback ÷ 2 — a floor, monthly billing.",
+    },
+    unitBothCashOutpaced: {
+      fr: "Trésorerie immobilisée : dépense d'acquisition du mois × payback ÷ 2, facturation mensuelle ; l'expansion peut la réduire, ce n'est donc plus un plancher.",
+      en: "Cash tied up: the month's acquisition spend × the payback ÷ 2, monthly billing; expansion may reduce it, so it is no longer a floor.",
+    },
+    /** `{n}`: the commonly cited payback reference, « 12 mois », read from the catalogue. */
+    unitBothReference: { fr: "Pointillé à {n} : repère couramment cité.", en: "Dotted, at {n}: a commonly cited reference." },
     askFunds: { fr: "Ce que ça finance", en: "What it funds" },
     askKnow: { fr: "Comment nous saurons", en: "How we'll know" },
     askMeasure: { fr: "Ce qu'il faut d'abord mesurer", en: "What to measure first" },
@@ -2312,20 +2344,12 @@ export const ENGINE_COPY = {
     },
     /** A sales-assisted slide's footer: `{flows}` and `{leads}` with their preposition (« de juin à août 2026 »). */
     footerSlg: { fr: "Flux assistés {flows} · leads {leads} · sources : {tools}", en: "Sales-assisted flows {flows} · leads {leads} · sources: {tools}" },
-    unitRows: {
-      cac: { fr: "CAC", en: "CAC" },
-      payback: { fr: "Payback", en: "Payback" },
-      basket: { fr: "Panier", en: "Revenue per customer" },
-      lostInAYear: { fr: "Clients perdus sur un an", en: "Customers lost in a year" },
-      ltvCac: { fr: "LTV:CAC", en: "LTV:CAC" },
-    },
-    unitBasketPlg: { fr: "ARPA {arpa} par mois", en: "ARPA {arpa} a month" },
-    unitBasketSlg: { fr: "ACV {acv} par an ({monthly} par mois)", en: "ACV {acv} a year ({monthly} a month)" },
+    // The five rows of two cells (`unitRows`, the basket) left with A20.d T4.d: each engine's column now prints its own
+    // tiles, with the board's labels (`scenario.kpi*`). The customers lost in a year stay, in the note under both (C25 Q5).
     /** Self-serve's churn annualised and compounded (C25 Q5): « ~26 % (2,5 % par mois, composé) ». */
     unitLostPlg: { fr: "{annual} ({monthly} par mois, composé)", en: "{annual} ({monthly} a month, compounded)" },
     unitLostSlg: { fr: "{rate} des contrats échus", en: "{rate} of contracts up for renewal" },
     unitLostSlgMonthly: { fr: "{rate} (contrats mensuels, composé)", en: "{rate} (monthly contracts, compounded)" },
-    unitUncomputable: { fr: "incalculable — manque : {input}", en: "can't be computed — missing: {input}" },
     /** The footer when a margin is the company-wide one (C25 Q4): `{motion}` a `hybrid.motionSubject`. */
     unitCompanyWide: { fr: "marge globale reprise dans {motion}", en: "company-wide margin used for {motion}" },
     // TODO: à relire (convention 6) — retouché le 2026-10-03 (A18.d, Antoine) : « motion » → « moteur ».
@@ -2592,6 +2616,13 @@ export const ENGINE_COPY = {
       fr: "**On ne peut pas encore dire ce que rapporte un client** : la marge brute n'est mesurée dans aucun des deux moteurs.",
       en: "**We can't yet say what a customer is worth**: gross margin isn't measured for either engine.",
     },
+    /**
+     * TODO: à relire (convention 6) — neuf le 2026-10-03 (A20.d T4.d, C48, retour du brief 09 : `slide.unit.titleBoth`,
+     * découpé) : l'hybride quand une perte est certaine
+     * d'un côté au moins. `{plg}`, `{slg}`: `slide.unitSide*` (« on perd ~400 € par nouveau client », « remboursé en
+     * 19 mois », « on ne peut pas encore dire ce que rapporte un client »). Sans accent : à l'encre, comme toute perte (C53).
+     */
+    unitEconomicsSides: { fr: "Libre-service : {plg}. Assisté : {slg}.", en: "Self-serve: {plg}. Sales-assisted: {slg}." },
     /** `{plg}`, `{slg}`: `unitInput` phrases, with their article. */
     unitEconomicsNoneDifferent: {
       fr: "**On ne peut pas encore dire ce que rapporte un client** : il manque {plg} en libre-service et {slg} en assisté.",

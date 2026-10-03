@@ -1,6 +1,6 @@
 import type { Page } from "@playwright/test";
 import type { EngineState } from "../src/lib/engine/types";
-import { exampleState, filmState, measured as entry, ratio, salesAssistedState, withEntry } from "../src/lib/engine/__tests__/fixtures";
+import { exampleState, filmState, hybridLossState, hybridState, measured as entry, ratio, salesAssistedState, withEntry } from "../src/lib/engine/__tests__/fixtures";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, readEachOnScreen, SKIP_ADMIN_REASON, test } from "./helpers";
 import { engineSeed } from "./engine-helpers";
 
@@ -52,6 +52,9 @@ async function measure(page: Page) {
     const foot = slide.querySelector("footer")!;
     const footTop = (foot.getBoundingClientRect().top - box.top) / scale;
     const body = foot.previousElementSibling!;
+    const titleBottom = (slide.querySelector("h3")!.getBoundingClientRect().bottom - box.top) / scale;
+    // The body's first box: a centred body taller than its room spills up under the title as well as down.
+    const top = Math.min(...[...body.querySelectorAll("*")].filter((el) => !el.parentElement?.closest("svg")).map((el) => (el.getBoundingClientRect().top - box.top) / scale));
     // The <svg> as a whole, not its shapes: off screen a thumbnail leaves them unlaid (A20.d T4.b).
     const deepest = Math.max(...[...body.querySelectorAll("*")].filter((el) => !el.parentElement?.closest("svg")).map((el) => (el.getBoundingClientRect().bottom - box.top) / scale));
     const right = Math.max(...[...body.querySelectorAll("*")].filter((el) => !el.closest("svg") || el.tagName === "text").map((el) => (el.getBoundingClientRect().right - box.left) / scale));
@@ -60,7 +63,7 @@ async function measure(page: Page) {
         .filter((el) => [...el.childNodes].some((n) => n.nodeType === Node.TEXT_NODE && n.textContent!.trim()))
         .map((el) => parseFloat(getComputedStyle(el).fontSize)),
     );
-    return { deepest: Math.round(deepest), footTop: Math.round(footTop), right: Math.round(right), smallest, text: (slide as HTMLElement).innerText };
+    return { deepest: Math.round(deepest), footTop: Math.round(footTop), top: Math.round(top), titleBottom: Math.round(titleBottom), right: Math.round(right), smallest, text: (slide as HTMLElement).innerText };
   });
   return m!;
 }
@@ -136,4 +139,51 @@ for (const locale of ["fr", "en"] as const) {
     expect(m.deepest).toBeLessThanOrEqual(m.footTop);
     expect(m.right).toBeLessThanOrEqual(1920 - 120 + 2);
   });
+}
+
+/**
+ * The hybrid, side by side (A20.d T4.d): each engine its column, its tiles
+ * and its picture, never summed; a certain loss on either side titles the
+ * slide in ink and moves it right after the total.
+ */
+for (const locale of ["fr", "en"] as const) {
+  for (const width of [1280, 390] as const) {
+    test.describe(`unit economics, the hybrid (${locale}, ${width})`, () => {
+      test.beforeEach(async ({ page }) => {
+        await page.setViewportSize({ width, height: width === 1280 ? 900 : 844 });
+      });
+
+      test("self-serve loses, sales-assisted pays back: nº 2 after the total, two columns, two pictures, everything in its room", async ({ page }) => {
+        await openDeck(page, locale, hybridLossState());
+        expect((await thumbOrder(page)).slice(0, 3)).toEqual(["total", "unit-economics", "peloton"]);
+        const slide = page.locator('[data-slide="unit-economics"]');
+        await expect(slide.locator("h3").first()).toHaveText(
+          locale === "fr" ? "Libre-service : on perd ~400 € par nouveau client. Assisté : remboursé en 13 mois." : "Self-serve: we lose ~€400 on each new customer. Sales-assisted: paid back in 13 months.",
+        );
+        await expect(slide.locator('h3 [class*="accent"]')).toHaveCount(0);
+        for (const motion of ["plg", "slg"] as const) await expect(slide.getByTestId(`slide-unit-${motion}`).locator('[data-testid^="slide-figure-"]')).toHaveCount(5);
+        await expect(slide.getByTestId("slide-payback-chart-plg")).toHaveAttribute("data-story", "loss");
+        await expect(slide.getByTestId("slide-payback-chart-slg")).toHaveAttribute("data-story", "pays-back");
+        await expect(slide.getByTestId("slide-payback-chart-plg-time")).toHaveText(locale === "fr" ? "part vers 17 mois ; rembourserait à 21 mois" : "leaves at ~17 months; would pay back at 21 months");
+        await expect(slide.getByTestId("slide-figure-plg-cash")).toContainText(locale === "fr" ? "ne revient pas toute" : "does not all come back");
+        await expect(slide.getByTestId("slide-unit-note")).toContainText(locale === "fr" ? "12 % des contrats échus" : "12% of contracts up for renewal");
+        const m = await measure(page);
+        expect(m.top, "the body starts under the title").toBeGreaterThanOrEqual(m.titleBottom);
+        expect(m.deepest, "the body ends above the footer").toBeLessThanOrEqual(m.footTop);
+        expect(m.right).toBeLessThanOrEqual(1920 - 120 + 2);
+        expect(m.smallest).toBeGreaterThanOrEqual(18);
+        expect(m.text).not.toMatch(/\{[a-zA-Z]+\}|\bundefined\b|\bNaN\b|\*\*/);
+      });
+
+      test("no margin on either side: « ? » tiles that say what is missing, no « ? » box, the body under a three-line title", async ({ page }) => {
+        await openDeck(page, locale, hybridState());
+        const slide = page.locator('[data-slide="unit-economics"]');
+        await expect(slide.getByTestId("slide-figure-slg-cash")).toContainText("?");
+        await expect(slide.locator('[data-testid^="slide-payback-chart"]')).toHaveCount(0);
+        const m = await measure(page);
+        expect(m.top).toBeGreaterThanOrEqual(m.titleBottom);
+        expect(m.deepest).toBeLessThanOrEqual(m.footTop);
+      });
+    });
+  }
 }

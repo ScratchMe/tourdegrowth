@@ -204,6 +204,27 @@ describe("golden v2 — a v2 engine reads the same after the change", () => {
     }
   });
 
+  it("the hybrid's unit economics (A20.d T4.d): the golden had five rows of two cells to drop, a build now has two columns and their pictures", () => {
+    type Reading = { deck: { slides: { id: string; lines: Record<string, string>[] }[] }; markdown: string };
+    const golden = outputs.hybrid as Record<string, Reading>;
+    const projected = withoutRetiredWhatIfRows(golden) as Record<string, Reading>;
+    const rows = (r: Reading) => r.deck.slides.find((x) => x.id === "unit-economics")?.lines.map((l) => l.row) ?? [];
+    for (const locale of ["fr", "en"]) {
+      // Non-vacuity: the v2 build printed the five unitRow rows, and their markdown lines.
+      expect(rows(golden[locale]!).filter((r) => r === "unitRow")).toHaveLength(5);
+      expect(rows(projected[locale]!)).toEqual(["footer"]);
+      expect(projected[locale]!.markdown.split("\n").length).toBe(golden[locale]!.markdown.split("\n").length - 5);
+    }
+    const state = openV2(inputs.hybrid!.state);
+    const p = FR;
+    const deck = buildDeck(state, deriveEngine(state, CTX_FR, null, p.bridges, p.strings.units), p.strings, p.metrics, CTX_FR, { derived: p.derived, bridges: p.bridges });
+    const unit = (d: typeof deck) => d.slides.find((x) => x.id === "unit-economics")!;
+    expect(unit(deck).lines.filter((l) => l.motion).length).toBe(10);
+    expect(Object.keys(unit(deck).paybackCharts ?? {})).toEqual(["plg", "slg"]);
+    expect(unit(deckBeforeA20(deck)).lines.map((l) => l.row)).toEqual(["footer"]);
+    expect("paybackCharts" in unit(deckBeforeA20(deck))).toBe(false);
+  });
+
   it("the decided words (A18.d) rewrite the v2 hybrid's slides, and only where the old words were", () => {
     const before = JSON.stringify(outputs.hybrid);
     const after = JSON.stringify(withDecidedWords(outputs.hybrid));

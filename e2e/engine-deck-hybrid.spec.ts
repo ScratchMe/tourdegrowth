@@ -77,10 +77,11 @@ for (const locale of ["fr", "en"] as const) {
 
     test("unit economics: two columns, self-serve then sales-assisted, whatever their values", async ({ page }) => {
       await openDeck(page, locale, linkedHybrid());
-      const plg = await page.getByTestId("slide-unit-col-plg").boundingBox();
-      const slg = await page.getByTestId("slide-unit-col-slg").boundingBox();
+      // Two columns since A20.d T4.d, each its five tiles: never summed, self-serve on the left whatever the values.
+      const plg = await page.getByTestId("slide-unit-plg").boundingBox();
+      const slg = await page.getByTestId("slide-unit-slg").boundingBox();
       expect(plg!.x).toBeLessThan(slg!.x);
-      await expect(page.getByTestId("slide-unit-table").locator("tbody tr")).toHaveCount(5);
+      for (const motion of ["plg", "slg"]) await expect(page.getByTestId(`slide-unit-${motion}`).locator('[data-testid^="slide-figure-"]')).toHaveCount(5);
       const blocks = await page.locator('[data-testid^="slide-total-p"], [data-testid^="slide-total-s"]').evaluateAll((els) => els.map((e) => e.getAttribute("data-testid")));
       expect(blocks.filter((id) => id === "slide-total-plg" || id === "slide-total-slg")).toEqual(["slide-total-plg", "slide-total-slg"]);
     });

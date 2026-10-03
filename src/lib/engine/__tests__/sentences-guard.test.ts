@@ -12,7 +12,7 @@ import { SLIDE_ORDER } from "../types";
 import type { EngineState, FindingKind, MetricEntry, SanityId, SlideTitleKey, SourceRef, ToolId } from "../types";
 import { knownIn } from "../values";
 import { CTX_EN, CTX_FR, EN, FR } from "./props";
-import { emptyState, estimated, exampleState, filmState, hybridState, measured, missing, ratio, salesAssistedState, tourResult, withEntry, withMonthBefore, withTarget, withoutTargets } from "./fixtures";
+import { emptyState, estimated, exampleState, filmState, hybridLossState, hybridState, measured, missing, ratio, salesAssistedState, tourResult, withEntry, withMonthBefore, withTarget, withoutTargets } from "./fixtures";
 
 /**
  * The guard: every sentence the engine can produce, read as a reader would.
@@ -251,6 +251,7 @@ const SCENARIOS: { name: string; build: () => { state: EngineState; result?: Ret
   { name: "what if: a lever, no ARPA (unpriced)", build: () => ({ state: withWhatIf(noArpa(), { "act.rate": 24 }) }) },
   // Sales-assisted and the hybrid (A7.3.c S4): every title the two motions add, each on a state that fires it.
   { name: "hybrid §18.9", build: () => ({ state: withWhatIf(hybridState(), { "act.rate": 24, "slg.rev.win-rate": 30, "link.pql-handoff": 40 }) }) },
+  { name: "hybrid: self-serve loses on each customer, sales-assisted pays back (A20.d T4.d)", build: () => ({ state: hybridLossState() }) },
   { name: "hybrid, Tour linked", build: () => linked(hybridState(), TOUR_ANSWERS) },
   { name: "hybrid, relays complete", build: () => ({ state: withEntry(hybridState(), "slg.act.go-live", measured(ratio(12, 20), tool("hubspot"))) }) },
   { name: "hybrid, relays gap of one", build: () => ({ state: withEntry(withEntry(hybridState(), "slg.rev.win-rate", missing("not-tracked", "sprint")), "slg.act.go-live", measured(ratio(12, 20))) }) },
