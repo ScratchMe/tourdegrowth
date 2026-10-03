@@ -129,113 +129,12 @@
   overflow-wrap: anywhere;
 }
 
-/* --- Collect (E4) ------------------------------------------------------ */
-.collect {
-  container: collect / inline-size;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-6);
-  min-width: 0;
-}
-
+/* --- Section titles ---------------------------------------------------- */
 .sectionTitle {
   font: var(--display-section);
   letter-spacing: var(--display-letter-spacing);
   text-transform: uppercase;
   margin: 0;
-}
-
-.collectColumns {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: var(--space-9);
-}
-
-/* Two columns once the hub has the room (its own width, design audit S-18);
-   "to ask for" stays first. */
-@container collect (min-width: 860px) {
-  .collectColumns {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-.collectColumn {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-7);
-  min-width: 0;
-}
-
-.columnTitle {
-  font: var(--title-card);
-  margin: 0;
-}
-
-.roleGroup {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-  background: var(--surface-card);
-  border: var(--border-solid);
-  border-radius: var(--radius-panel);
-  padding: var(--space-5) var(--space-6);
-}
-
-.roleTitle {
-  font: var(--meta-sm);
-  letter-spacing: var(--meta-tracking);
-  text-transform: uppercase;
-  color: var(--text-muted);
-  margin: 0;
-}
-
-.items {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
-.item {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2) var(--space-4);
-  min-width: 0;
-}
-
-.itemName {
-  font: var(--body-md);
-  color: var(--text-body);
-  min-width: 0;
-  overflow-wrap: anywhere;
-}
-
-.itemMeta {
-  font: var(--meta-xs);
-  color: var(--text-muted);
-}
-
-/* A number's menu path in the team's tool (§19.5.2), under its name: where to click, not a sentence. */
-.itemPath {
-  display: block;
-  font: var(--meta-xs);
-  color: var(--text-muted);
-}
-
-.itemStale {
-  font: var(--meta-xs);
-  color: var(--text-alert);
-}
-
-.groupActions {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  align-items: flex-start;
 }
 
 /* --- Unreadable storage, and the slides' slot -------------------------- */

@@ -3,7 +3,7 @@ import type { Locator, Page } from "@playwright/test";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import { exampleState, hybridState } from "../src/lib/engine/__tests__/fixtures";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
-import { engineSeed, nextStep, openEngineMenu, storedEngineEntry, openNumber, backToBoard, expectLeft } from "./engine-helpers";
+import { engineSeed, nextStep, openEngineMenu, storedEngineEntry, openNumber, backToBoard, expectLeft, skipToAsks } from "./engine-helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
 // owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
@@ -62,6 +62,10 @@ async function measureScreens(page: Page, locale: "fr" | "en"): Promise<Record<s
   await page.getByTestId("engine-setup-start").click();
   await expect(page.getByTestId("engine-targets-start")).toBeVisible();
   out.targets = await overflow(page);
+  // E4 — the requests, one screen, both motions' (A18 T3.c): the five-minute numbers passed to reach it.
+  await page.getByTestId("engine-targets-next").click();
+  await skipToAsks(page);
+  out.asks = await overflow(page);
 
   // E2 — the hybrid board, then sales-assisted's stages and a sheet.
   await seedHybrid(page, locale);
@@ -71,10 +75,7 @@ async function measureScreens(page: Page, locale: "fr" | "en"): Promise<Record<s
   await expect(page.getByTestId("engine-sheet-slg-rev-win-rate")).toBeVisible();
   out.sheet = await overflow(page);
 
-  // E4 — the collect list, both motions' numbers owed (on the board: the way back from the number's screen first).
   await backToBoard(page);
-  await page.getByTestId("engine-collect-disclosure").locator("summary").first().click();
-  out.collect = await overflow(page);
 
   // E5 — the slide screen of the hybrid.
   await page.getByTestId("engine-open-deck").click();
@@ -87,7 +88,7 @@ for (const locale of ["fr", "en"] as const) {
   for (const width of [360, 390, 430] as const) {
     test(`${locale} at ${width}: nothing the two motions add pushes the page sideways`, async ({ page }) => {
       await page.setViewportSize({ width, height: 800 });
-      expect(await measureScreens(page, locale)).toEqual({ start: 0, setup: 0, targets: 0, board: 0, sheet: 0, collect: 0, deck: 0 });
+      expect(await measureScreens(page, locale)).toEqual({ start: 0, setup: 0, targets: 0, asks: 0, board: 0, sheet: 0, deck: 0 });
     });
   }
 

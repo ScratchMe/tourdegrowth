@@ -10,12 +10,11 @@ import { Segmented } from "@/components/core/Segmented";
 import { candidatesOf } from "@/lib/engine/catalog-shape";
 import { totalIn12 } from "@/lib/engine/deck-motions";
 import { findingText } from "@/lib/engine/sentences";
-import type { CandidateId, Interval, Motion, MotionDerived, SlideTitle } from "@/lib/engine/types";
+import type { CandidateId, Interval, MetricId, Motion, MotionDerived, SlideTitle } from "@/lib/engine/types";
 import { knownIn } from "@/lib/engine/values";
 import { knownSharedCount } from "@/lib/engine/shared-counts";
 import { BoardBar, BoardNextStep, boardNextStep, type EngineControls, type SeriesControls } from "./BoardHead";
 import type { CollectPlan } from "./collect";
-import { CollectHub } from "./CollectHub";
 import { Diagnosis } from "./Diagnosis";
 import { Mirror } from "./Mirror";
 import { Peloton } from "./Peloton";
@@ -82,6 +81,7 @@ export function Board({
   onErase,
   onSettings,
   onRename,
+  onRequests,
   series,
   engines,
   onTemplate,
@@ -101,6 +101,8 @@ export function Board({
   onImport: () => void;
   onErase: () => void;
   onSettings: () => void;
+  /** The next step's « Demande tes {n} chiffres » (A18 T3.c): the requests' screen, with the numbers to ask for. */
+  onRequests: (ids: readonly MetricId[]) => void;
   /** « Renommer », in the menu: the settings, at the company's name. */
   onRename: () => void;
   /** The monthly series (§19.2, A14 T2): the month selector, a past month read only or corrected, the next month. */
@@ -115,8 +117,7 @@ export function Board({
   // A past month on screen (§19.2.4): read only — no « Et si », no entry, no file actions — unless it is being corrected.
   const past = series ? series.shown !== series.months.length - 1 : false;
   const readOnly = past && !series?.correcting;
-  // Opened from the next step (« Copier tes {n} demandes ») and from the menu (« Saisie en tableau »): the person asked for the move.
-  const [collectOpen, setCollectOpen] = useState(false);
+  // Opened from the menu (« Saisie en tableau »): the person asked for the move.
   const [tableOpen, setTableOpen] = useState(false);
   const [whatIfOpen, setWhatIfOpen] = useState(false);
   const next = boardNextStep(view, plan, writeFailed, past);
@@ -221,10 +222,7 @@ export function Board({
         correcting={Boolean(series?.correcting)}
         onSave={onSave}
         onDeck={onDeck}
-        onRequests={() => {
-          setCollectOpen(true);
-          reveal("engine-collect");
-        }}
+        onRequests={onRequests}
       />
 
       {hybrid && plgD && slgD ? (
@@ -326,19 +324,8 @@ export function Board({
         <Mirror mirror={null} strings={strings} locale={ctx.locale} bridges={view.bridges} metrics={view.metrics} derived={view.derivedCopy} />
       )}
 
-      {plan.count > 0 && !past ? (
-        <Disclosure
-          summary={fill(strings.board.collectTitle, { n: plan.count })}
-          open={collectOpen}
-          onOpenChange={setCollectOpen}
-          id="engine-collect"
-          data-testid="engine-collect-disclosure"
-        >
-          <CollectHub plan={plan} view={view} actions={actions} />
-        </Disclosure>
-      ) : null}
-
-      {/* Beside the collection, even once it is done: a table also corrects what was typed (§19.6). Opened from the menu. */}
+      {/* « À aller chercher » left the board with A18 T3.c: the requests are one screen (AskList), the rest is « Tes chiffres ». */}
+      {/* A table also corrects what was typed (§19.6). Opened from the menu. */}
       {!past && onTemplate && onApplyTable ? (
         <TableEntry view={view} onTemplate={onTemplate} onApply={onApplyTable} open={tableOpen} onOpenChange={setTableOpen} id="engine-table" />
       ) : null}

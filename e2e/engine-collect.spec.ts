@@ -5,7 +5,7 @@ import { ENGINE_COPY } from "@/content/engine-copy";
 import { fillTemplate } from "@/lib/engine/format";
 import { EXAMPLE_EXPECTED, exampleState } from "../src/lib/engine/__tests__/fixtures";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, openFold, SKIP_ADMIN_REASON, test, trackedEvents } from "./helpers";
-import { activeEngineKey, openWords, storedEngineEntry, writeEngineSeed, openEngineMenu, openNumber, backToBoard, expectFound, expectLeft } from "./engine-helpers";
+import { activeEngineKey, openWords, storedEngineEntry, writeEngineSeed, openEngineMenu, openNumber, backToBoard, expectFound, expectLeft, skipToAsks } from "./engine-helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
 // owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
@@ -280,20 +280,37 @@ test.describe("asking and collecting", () => {
     await expect.poll(() => trackedEvents(page)).toContain("engine_request_copied");
   });
 
-  test("the collect list counts what's left, groups by person, and Fill in opens the sheet", async ({ page }) => {
-    await startEngine(page);
-    const fold = page.getByTestId("engine-collect-disclosure");
-    await expect(fold.locator("summary")).toContainText("(17)");
-    await fold.locator("summary").click();
-    const collect = page.getByTestId("engine-collect");
-    await expect(collect).toBeVisible();
-    await expect(collect.getByTestId("engine-collect-ask")).toBeVisible();
-    await expect(collect.getByTestId("engine-collect-self")).toBeVisible();
-    // One copy button per person, not one per number.
-    const groups = collect.locator('[data-testid^="engine-collect-role-"]');
-    expect(await groups.count()).toBeGreaterThan(0);
-    await collect.getByTestId("engine-fill-acq-signup-rate").click();
-    await expect(page.getByTestId("engine-sheet-acq-signup-rate")).toBeVisible();
+  test("the requests, one screen: a card per person; copied, it says when; « Sent » goes on to the hour-long numbers", async ({ page }) => {
+    await openEngine(page);
+    await page.getByTestId("engine-start-go").click();
+    await page.getByTestId("engine-targets-next").click();
+    // The five-minute numbers passed: the next step is the requests, every one on one screen (A18 T3.c).
+    await skipToAsks(page);
+    await expect(page.locator("#engine-asks-title")).toBeFocused();
+    await expect(page.locator("#engine-asks-title")).toHaveText(fillTemplate(ENGINE_COPY.asks.title.en, { n: 5 }));
+    await expectNoSeriousA11y(page, "requests");
+    // One card per person, not one per number: Finance (CAC, gross margin), Support, Data (K, paid conversion).
+    await expect(page.getByTestId("engine-asks").locator(":scope > ul > li")).toHaveCount(3);
+    const finance = page.getByTestId("engine-asks-finance");
+    await expect(finance).toContainText("CAC");
+    await expect(finance).toContainText("Gross margin");
+
+    await finance.getByTestId("engine-request-copy").click();
+    // Copied: both numbers asked of Finance, the card says when, on its pending edge.
+    await expect(finance).toContainText(/Copied on /);
+    // Said once on screen: the card's line; « Request copied » is only announced (`quietStatus`).
+    await expect(finance.getByRole("status")).toHaveText(ENGINE_COPY.request.copied.en);
+    await expect(finance.getByRole("status")).toHaveClass(/tdg-visually-hidden/);
+    const stored = (await storedEngine(page))?.state.snapshots[0]?.metrics;
+    expect(stored?.["acq.cac"]?.status).toBe("requested");
+    expect(stored?.["rev.gross-margin"]?.status).toBe("requested");
+    await expect.poll(() => trackedEvents(page)).toContain("engine_request_copied");
+
+    // « Sent, next number »: the hour-long numbers; the requests not copied stay « to do ».
+    await expect(page.getByTestId("engine-asks-done")).toHaveText(ENGINE_COPY.asks.done.en);
+    await page.getByTestId("engine-asks-done").click();
+    await expect(page.getByTestId("engine-number")).toHaveAttribute("data-metric", "acq.top-channel-share");
+    expect((await storedEngine(page))?.state.snapshots[0]?.metrics["ret.churn-cause"]).toBeUndefined();
   });
 
   test("a returning visit says the last visit, the one next step, and what is waiting on someone", async ({ page }) => {
@@ -628,8 +645,6 @@ test.describe("accessibility of each screen", () => {
     await sheet.getByTestId("engine-triage").getByRole("radio").first().check();
     await expectNoSeriousA11y(page, "triage");
     await backToBoard(page);
-    await page.getByTestId("engine-collect-disclosure").locator("summary").click();
-    await expectNoSeriousA11y(page, "collect");
     await openEngineMenu(page);
     await page.getByTestId("engine-import-open-screen").click();
     await expectNoSeriousA11y(page, "import");
