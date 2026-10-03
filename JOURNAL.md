@@ -802,4 +802,4 @@ Tout autre accent passe à l'encre, sans couleur, au poids du titre (déjà 700)
 
 **Vérifié** : captures en haute définition regardées, en FR et en EN (le film, ses trois leviers, l'hybride, les neuf leviers et le pire cas : un titre sur trois lignes avec cinq étapes du funnel). Les 62 specs du deck passent en local, dont celles qui mesurent chaque corps au-dessus de son pied et rien sous 18 px. **Non-vacuité**, quatre sabotages, chacun rougit son test : la courbe sans sa ligne « Et si », la ligne d'ARR retirée, la somme d'un seul levier, la courbe laissée par la projection.
 
-**La copie** : quatre chaînes neuves, « à relire » : les deux noms de la courbe (« avec cet « Et si » », « avec les {n} « Et si » ») et les deux lignes du funnel et du trimestre.
+**La copie** : quatre chaînes neuves, « à relire » : les deux noms de la courbe (« avec cet « Et si » », « avec les {n} « Et si » ») et les deux lignes du funnel et du trimestre. Le relecteur de copie a fait préciser celle du trimestre, écrite ici : « les opportunités et les signatures du trimestre », car « le trimestre » se lisait comme son MRR, que la courbe montre bouger.

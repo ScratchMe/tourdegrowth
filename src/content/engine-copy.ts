@@ -2204,8 +2204,15 @@ export const ENGINE_COPY = {
     curveWhatifOne: { fr: "avec cet « Et si »", en: "with this what-if" },
     curveWhatifAll: { fr: "avec les {n} « Et si »", en: "with the {n} what-ifs" },
     funnelUnmoved: { fr: "Ce levier laisse le funnel du mois tel quel.", en: "This lever leaves the month's funnel as it is." },
-    /** Not on the return: sales-assisted's, whose second table is its quarter. */
-    quarterUnmoved: { fr: "Ce levier laisse le trimestre tel quel.", en: "This lever leaves the quarter as it is." },
+    /**
+     * TODO: à relire (convention 6) — neuf le 2026-10-03 (A20.d T4.b), écrit par la session, absent du retour :
+     * sales-assisted's, whose second table holds the quarter's opportunities and deals — not « the quarter », which
+     * would read as its MRR, which the curve beside it shows moving.
+     */
+    quarterUnmoved: {
+      fr: "Ce levier laisse les opportunités et les signatures du trimestre telles quelles.",
+      en: "This lever leaves the quarter's opportunities and deals as they are.",
+    },
     /**
      * TODO: à relire (convention 6) — neuf le 2026-10-01 (A7.3.c S2, ENGINE.md §18.8.1-§18.8.2) :
      * the chrome of a motion's slides, and the side-by-side unit economics.
