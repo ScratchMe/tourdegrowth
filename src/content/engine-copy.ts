@@ -1636,14 +1636,17 @@ export const ENGINE_COPY = {
       fr: "Trésorerie immobilisée : la dépense d'acquisition du mois × le payback ÷ 2. La dépense de chaque mois revient régulièrement sur le payback ; le churn et la rétrogradation, qui la ralentissent, ne sont pas comptés (un plancher), sauf si l'expansion les dépasse. Facturation mensuelle. Même dépense avec les « Et si » : plus de payants rendent chacun moins cher.",
       en: "Cash tied up: the month's acquisition spend × the payback ÷ 2. Each month's spend comes back evenly over the payback; churn and contraction, which slow it, are not counted (a floor), unless expansion outpaces them. Monthly billing. The same spend with the what-ifs: more payers make each one cheaper.",
     },
-    /** Not on the return: sales-assisted's two, in its own words (renewals, the ACV). */
+    /**
+     * TODO: à relire (convention 6) — neuf le 2026-10-03 (A20.d T3.b), écrit par la session, absent du retour 09 :
+     * `assumeLtvSlg`, `assumeCashSlg` — sales-assisted's two, in its own words (renewals, the ACV).
+     */
     assumeLtvSlg: {
       fr: "LTV : la marge mensuelle d'un contrat sur sa durée de vie comptée (d'après le renouvellement, plafonnée à 36 mois), à l'ACV d'aujourd'hui.",
       en: "LTV: a contract's monthly margin over its counted lifetime (from the renewal, capped at 36 months), on today's ACV.",
     },
     assumeCashSlg: {
-      fr: "Trésorerie immobilisée : la dépense d'acquisition du mois × le payback ÷ 2. La dépense de chaque mois revient régulièrement sur le payback ; les non-renouvellements, qui la ralentissent, ne sont pas comptés (un plancher), sauf si la NRR dépasse 100 %. Facturation mensuelle supposée. Même dépense avec les « Et si » : plus de contrats rendent chacun moins cher.",
-      en: "Cash tied up: the month's acquisition spend × the payback ÷ 2. Each month's spend comes back evenly over the payback; non-renewals, which slow it, are not counted (a floor), unless the NRR is above 100%. Monthly billing assumed. The same spend with the what-ifs: more contracts make each one cheaper.",
+      fr: "Trésorerie immobilisée : la dépense d'acquisition du mois × le payback ÷ 2. La dépense de chaque mois revient régulièrement sur le payback ; les non-renouvellements, qui la ralentissent, ne sont pas comptés (un plancher), sauf si la NRR sur 12 mois dépasse 100 %. Facturation mensuelle supposée : une année payée d'avance revient plus tôt. Même dépense avec les « Et si » : plus de contrats rendent chacun moins cher.",
+      en: "Cash tied up: the month's acquisition spend × the payback ÷ 2. Each month's spend comes back evenly over the payback; non-renewals, which slow it, are not counted (a floor), unless the 12-month NRR is above 100%. Monthly billing assumed: a year paid up front comes back sooner. The same spend with the what-ifs: more contracts make each one cheaper.",
     },
     kpiUnknown: { fr: "il manque {input}", en: "missing: {input}" },
     aloneTitle: { fr: "Ce que chaque levier rapporte seul, sur le MRR dans 12 mois", en: "What each lever brings on its own, on MRR in 12 months" },
@@ -1683,7 +1686,6 @@ export const ENGINE_COPY = {
     perHundredNote: { fr: "Sans le nombre d'inscrits du mois, le funnel se lit pour 100 inscrits.", en: "Without the month's sign-up count, the funnel reads per 100 sign-ups." },
     /** A grid's text equivalent: `{label}` a step, `{value}` the projection, `{today}` today's count. */
     gridAria: { fr: "{label} : {value}, contre {today} aujourd'hui", en: "{label}: {value}, against {today} today" },
-    /** The table of what each lever brings alone: its header cells. */
     assumptionsTitle: { fr: "Ce que le calcul suppose", en: "What the calculation assumes" },
     /** One sentence per rule of `lib/engine/scenario.ts`, printed only when it applied. */
     assumption: {
@@ -1704,11 +1706,10 @@ export const ENGINE_COPY = {
     } satisfies Record<ScenarioAssumption, Translatable>,
     /**
      * TODO: à relire (convention 6) — neuf le 2026-10-01 (A7.3.c S2, ENGINE.md §18.5.5, C25 Q7) :
-     * the sales-assisted panel and the one line both panels share.
+     * the sales-assisted panel.
      */
     /** The link's slider, in WHOLE opportunities: its own label, not `sliderLabel`'s « cible testée ». */
     linkSlider: { fr: "Opportunités venues du libre-service, par trimestre", en: "Opportunities from self-serve, per quarter" },
-    /** The hybrid's one line, in the full « Et si » panel of the engine shown (A18 T5): a sum, never a comparison. */
     kpiNrr12: { fr: "NRR sur douze mois", en: "12-month NRR" },
     kpiWon: { fr: "Nouveaux clients par trimestre", en: "New customers a quarter" },
     /** The sales-assisted panel's quarter, where self-serve shows its month's funnel. */
