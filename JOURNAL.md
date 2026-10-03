@@ -1119,7 +1119,7 @@ Pour le bon à tirer A18.d :
 - `next build` avec les variables de la CI ;
 - les **359 specs** du moteur, du kit des espaces, des cibles, de l'accessibilité, de la plateforme, du clavier, du glossaire et du quiz (les autres « ? » du site, que le correctif de la bulle touche) sur le build final : 358 passées, une ignorée par construction ; 927 specs au total (`--list`, hors captures temporaires).
 
-## A18 T7 : l'intégration, l'avant et l'après mesurés, et les champs qui prenaient 42 px (2026-10-03)
+## A18 T7 : l'intégration, l'avant et l'après mesurés, et les champs qui prenaient 42 px (2026-10-03, #301)
 
 Treizième et dernière étape du portage du retour 07, drapeau fermé : **l'intégration**. Le code du moteur simplifié est entier ; reste son bon à tirer unique, A18.d.
 
