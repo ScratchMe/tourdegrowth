@@ -1386,7 +1386,7 @@ En réexportant les vingt-quatre films (FR et EN, un format par terminal comme l
 - les huit MP4 en 4:5 (1080×1350, de 29 à 47 s, son AAC) : deux images de chacun regardées, puis remis à Antoine en deux zips ;
 - la page en 4:5, à 1 280 et 390 px : le bouton « 4:5 », un écran de 520 × 650 et de 350 × 438, sans défilement horizontal. L'artifact est republié à la même adresse.
 
-## Les films : le jeu s'annonce comme un jeu, et tout finit sur une note positive (2026-10-03, PR à venir)
+## Les films : le jeu s'annonce comme un jeu, et tout finit sur une note positive (2026-10-03, #307)
 
 **Le retour d'Antoine** : « c'est peut-être la partie jeu qui pêche un peu maintenant ». Même dans le film d'ensemble, qui finit par le jeu, « on ne comprend pas trop ce qu'on y fait ». Il demandait d'être clair dès le début sur ce qu'est le jeu (apprendre ce qu'il faut faire et ne pas faire), une musique plus positive, et surtout de finir sur une note positive : « maintenant tu sais quoi faire, let's go ».
 
