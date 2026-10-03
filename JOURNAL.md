@@ -1478,7 +1478,7 @@ Le « % » du levier paraît rogné à droite sur la capture, déjà dans celles
 - les douze MP4 des deux films (trois formats, deux langues ; 52 s et 42,5 s, son AAC) : des images de chacun regardées, puis remis à Antoine en zips ;
 - la page republiée à la même adresse, identique au fichier du dépôt.
 
-## Les films : tout télécharger en un zip, depuis la page (2026-10-03, PR à venir)
+## Les films : tout télécharger en un zip, depuis la page (2026-10-03, #308)
 
 **La demande** : « Tu ne peux pas me faire une fois un zip avec tout ensemble ? » Après les envois successifs (les douze premiers MP4, les zips par format, le 4:5, la refonte du jeu), Antoine ne savait plus où trouver la dernière version de chaque format.
 
