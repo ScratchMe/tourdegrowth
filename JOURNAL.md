@@ -1366,6 +1366,26 @@ Rien sous `src/` ne change, donc ni build ni Playwright. `scripts/vercel-ignore.
 
 En réexportant les vingt-quatre films (FR et EN, un format par terminal comme le conseille l'en-tête du script), l'export 9:16 anglais a échoué au démarrage : `window.__tdg` était indéfini. Chaque processus réécrit `out/films.html` en ouvrant sa page, et celui-ci l'a chargée pendant qu'un autre était en train de l'écrire : une page tronquée, sans son script. `standalonePage()` écrit maintenant dans un fichier temporaire propre au processus, puis le renomme : un lecteur voit l'ancienne page entière ou la nouvelle, jamais une moitié. L'export relancé avec le correctif est passé, cinq autres tournant en même temps.
 
+## Les films passent du 1:1 au 4:5 (2026-10-03, #305)
+
+**La demande** : on a dit à Antoine que le 4:5 valait mieux que le 1:1. La session l'a confirmé : en 1080×1350, la vidéo prend un quart de hauteur de plus dans un fil sur téléphone, et c'est le format que Meta recommande pour le fil. Elle a recommandé de **remplacer** le 1:1 plutôt que de l'ajouter, pour garder trois formats qui ont chacun leur usage. Antoine a dit oui.
+
+**Comment** :
+- La clé `s` de la page désigne maintenant le 4:5 : une scène de 960×1200 au lieu de 960×960, le bouton « 4:5 », et un export en 1080×1350 (`films.mjs`, nom `4x5`).
+- **Un premier passage par script** (resté dans le scratchpad) a multiplié par 1,25 chaque position verticale du format `s` : 107 valeurs, avec les tailles intactes. La largeur ne change pas, donc les blocs ne peuvent pas grossir ; ils gagnent de l'air.
+- **Puis une retouche scène par scène**, sur des planches de contact (une image par seconde, les quatre films, FR et EN) :
+  - le road book de la course et celui de la fin sont recentrés ;
+  - les deux cartes du moteur du film d'ensemble passent de côte à côte réduites à décalées en diagonale, à taille réelle ;
+  - les éventails de slides sont agrandis et descendus ;
+  - le quiz, le choix du ton, le résultat et la fin du diagnostic, l'accroche, la carte « Et si ? », les « 17 chiffres » et la fin du moteur, et la main de cartes du jeu sont redescendus pour équilibrer le cadre.
+- **Ce que le script ne pouvait pas voir** : des positions écrites en texte, une transformation CSS (`translate(0px,210px)`), un `top:640px` dans une chaîne, et l'objet `{ right, top }` de l'étiquette des clics. Cette étiquette chevauchait le bas du téléphone du jeu et passait derrière une tuile ; elle est revenue sous le téléphone, dans les deux films.
+
+**Vérifié** :
+- les planches des quatre films en 4:5, en français et en anglais : rien ne déborde ni ne se chevauche, et « WHAT IF? » passe sur deux lignes en anglais, comme dans le carré ;
+- **le 16:9 et le 9:16 ne bougent pas** : quatre images du film d'ensemble et du jeu, dans les deux formats, sont identiques au pixel près avant et après ;
+- les huit MP4 en 4:5 (1080×1350, de 29 à 47 s, son AAC) : deux images de chacun regardées, puis remis à Antoine en deux zips ;
+- la page en 4:5, à 1 280 et 390 px : le bouton « 4:5 », un écran de 520 × 650 et de 350 × 438, sans défilement horizontal. L'artifact est republié à la même adresse.
+
 ## A20, prompt E : l'argent du moteur, spécifié, modélisé et briefé (2026-10-03, #306)
 
 **La demande** (Antoine, prompt E de `CHANTIERS.md`) : mettre le moteur à la hauteur de son film. Le film « Le moteur » montre l'ARR, la courbe du MRR, un client qui coûte plus qu'il ne rapporte et des slides pour un board ; le moteur n'en montrait qu'une partie. Cette session écrit la spécification, code en pur ce qui ne dépend pas du design, pose les questions et dépose le brief 09. Aucun écran ne change.
