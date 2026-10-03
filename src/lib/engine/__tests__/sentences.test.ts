@@ -3,7 +3,7 @@ import { deriveEngine } from "../derive";
 import { findingText, sanityText } from "../sentences";
 import type { EngineState, Finding, FindingKind, MetricEntry, SanityCheck, SanityId } from "../types";
 import { CTX_EN, CTX_FR, EN, FR } from "./props";
-import { exampleState, hybridState, measured, ratio, tourResult, withEntry } from "./fixtures";
+import { exampleState, hybridState, measured, ratio, tourResult, withEntry, noMarginState } from "./fixtures";
 
 // lib/engine/sentences.ts — the finished sentence of a finding and of a
 // sanity check. One case per kind and per id, read through the real copy,
@@ -66,10 +66,10 @@ describe("findingText — one sentence per kind", () => {
   });
 
   it("unit economics: the missing inputs with their article after « Il manque »", () => {
-    expect(sentence(exampleState(), "unit-econ-uncomputable")).toBe(
+    expect(sentence(noMarginState(), "unit-econ-uncomputable")).toBe(
       "Impossible de dire en combien de mois un client rembourse son coût d'acquisition. Il manque la marge brute.",
     );
-    expect(sentence(exampleState(), "unit-econ-uncomputable", "en")).toBe(
+    expect(sentence(noMarginState(), "unit-econ-uncomputable", "en")).toBe(
       "We can't say how many months a customer takes to pay back their acquisition cost. Missing: gross margin.",
     );
   });
@@ -92,8 +92,9 @@ describe("findingText — one sentence per kind", () => {
   });
 
   it("the Tour bridge: a blind spot names a computed figure by its own name; hidden knowledge the number's", () => {
-    const linked: EngineState = { ...exampleState(), tourLink: { resultId: tourResult({}).id, linkedAt: "x" } };
-    // rev-2 at 20 points (declared tracked), the payback uncomputable; acq-3 at 0 points, the CAC found.
+    // The example without its margin (C50 gave it one, estimated): rev-2 at 20 points (declared tracked), the
+    // payback uncomputable; acq-3 at 0 points, the CAC found.
+    const linked: EngineState = { ...noMarginState(), tourLink: { resultId: tourResult({}).id, linkedAt: "x" } };
     const result = tourResult({ "rev-2": 0, "acq-3": 2, "ret-1": 0 });
     const blind = derived(linked, "fr", result).findings.filter((f) => f.kind === "blind-spot").map((f) => findingText(f, linked, FR.strings, FR.metrics, FR.derived, "fr"));
     expect(blind).toContain(`Rétention à J30${NB}: le Tour dit que ce chiffre est suivi, mais on n'a pas pu le sortir.`);

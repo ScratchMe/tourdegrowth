@@ -12,7 +12,7 @@ import { SLIDE_ORDER } from "../types";
 import type { EngineState, FindingKind, MetricEntry, SanityId, SlideTitleKey, SourceRef, ToolId } from "../types";
 import { knownIn } from "../values";
 import { CTX_EN, CTX_FR, EN, FR } from "./props";
-import { emptyState, estimated, exampleState, filmState, hybridLossState, hybridState, measured, missing, ratio, salesAssistedState, tourResult, withEntry, withMonthBefore, withTarget, withoutTargets } from "./fixtures";
+import { emptyState, estimated, exampleState, filmState, hybridLossState, hybridNoMarginState, hybridState, noMarginState, measured, missing, ratio, salesAssistedState, tourResult, withEntry, withMonthBefore, withTarget, withoutTargets } from "./fixtures";
 
 /**
  * The guard: every sentence the engine can produce, read as a reader would.
@@ -118,6 +118,8 @@ const TOUR_ANSWERS = { "acq-1": 0, "acq-3": 2, "act-1": 0, "act-2": 1, "ret-1": 
 
 const SCENARIOS: { name: string; build: () => { state: EngineState; result?: ReturnType<typeof tourResult> } }[] = [
   { name: "§6.0 example", build: () => ({ state: exampleState() }) },
+  // The example without its margin, as before C50 (A20.d T6): what the engine says when it can't price a customer.
+  { name: "§6.0 example without its margin", build: () => ({ state: noMarginState() }) },
   { name: "months that start with a vowel", build: () => ({ state: vowelMonths(exampleState()) }) },
   { name: "ARPA unknown", build: () => ({ state: noArpa() }) },
   { name: "everything unknown", build: () => ({ state: emptyState() }) },
@@ -252,6 +254,9 @@ const SCENARIOS: { name: string; build: () => { state: EngineState; result?: Ret
   // Sales-assisted and the hybrid (A7.3.c S4): every title the two motions add, each on a state that fires it.
   { name: "hybrid §18.9", build: () => ({ state: withWhatIf(hybridState(), { "act.rate": 24, "slg.rev.win-rate": 30, "link.pql-handoff": 40 }) }) },
   { name: "hybrid: self-serve loses on each customer, sales-assisted pays back (A20.d T4.d)", build: () => ({ state: hybridLossState() }) },
+  // Before C50 (A20.d T6) the hybrid had no self-serve margin: neither margin, then sales-assisted's alone.
+  { name: "hybrid, neither margin", build: () => ({ state: hybridNoMarginState() }) },
+  { name: "hybrid, sales-assisted's margin alone", build: () => ({ state: withEntry(hybridNoMarginState(), "slg.rev.gross-margin", measured(ratio(75, 100), tool("stripe"))) }) },
   { name: "hybrid, Tour linked", build: () => linked(hybridState(), TOUR_ANSWERS) },
   { name: "hybrid, relays complete", build: () => ({ state: withEntry(hybridState(), "slg.act.go-live", measured(ratio(12, 20), tool("hubspot"))) }) },
   { name: "hybrid, relays gap of one", build: () => ({ state: withEntry(withEntry(hybridState(), "slg.rev.win-rate", missing("not-tracked", "sprint")), "slg.act.go-live", measured(ratio(12, 20))) }) },

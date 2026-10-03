@@ -75,7 +75,8 @@ test.describe("the numbers list", () => {
 
     // What remains, first: the example has a request out and nothing left to type.
     await expect(page.getByTestId("engine-progress-remaining")).toHaveText(L.noneToGo.en);
-    await expect(page.getByTestId("engine-progress-counts")).toHaveText("11 found · 2 estimated · 1 asked · 3 can't be found");
+    // The gross margin, estimated since C50: three estimated, two that can't be found.
+    await expect(page.getByTestId("engine-progress-counts")).toHaveText("11 found · 3 estimated · 1 asked · 2 can't be found");
   });
 
   test("a row says its value or its status; it opens the number's own screen, and « ← Your numbers » comes back to it", async ({ page }) => {

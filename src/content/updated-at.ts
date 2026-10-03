@@ -30,7 +30,7 @@ export const CONTENT_UPDATED_AT: Record<string, string> = {
   "/game/retention": "2026-10-01", // le bloc « Niveau suivant » devient un lien vers le niveau 2 (C31)
   // Le moteur de growth (engine spec §11.1). Same rule as the game: in the
   // sitemap only when ENGINE_ENABLED is open at build (app/sitemap.ts).
-  "/aarrr-funnel-template": "2026-10-03", // A18 T5 : la FAQ de la vente assistée ne dit plus « côte à côte » ; A18 T4 : la promesse en une ligne pour un lecteur qui revient (page.promiseLine), « Combien de temps ça prend » sous l'outil ; avant, A18 T3.b : la durée ne promet plus que « le pas à pas garde ta place » (page.durationReady) ; avant, A7.3.c S3 : la promesse, la durée et le catalogue comptent les deux motions ; S2 : la sixième question de la FAQ, la vente assistée ; avant, A7.1 (C1) : la promesse, la FAQ et les réserves des repères, qui ne désignent plus
+  "/aarrr-funnel-template": "2026-10-03", // A20.d T6 (C52) : la promesse dit ce que rapporte chaque nouveau client, et le board ou les investisseurs à côté du CODIR ; avant, A18 T5 : la FAQ de la vente assistée ne dit plus « côte à côte » ; A18 T4 : la promesse en une ligne pour un lecteur qui revient (page.promiseLine), « Combien de temps ça prend » sous l'outil ; avant, A18 T3.b : la durée ne promet plus que « le pas à pas garde ta place » (page.durationReady) ; avant, A7.3.c S3 : la promesse, la durée et le catalogue comptent les deux motions ; S2 : la sixième question de la FAQ, la vente assistée ; avant, A7.1 (C1) : la promesse, la FAQ et les réserves des repères, qui ne désignent plus
 };
 
 /** The day the long-form `extended` copy of every term was approved. */

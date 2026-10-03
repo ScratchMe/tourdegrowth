@@ -4,7 +4,7 @@ import { buildMirror, declaredLevel, latestTourWithAnswers, verdictOf } from "..
 import { ENGINE_BRIDGES, SLG_ENGINE_BRIDGES } from "../catalog-shape";
 import type { MetricEntry, MirrorVerdict, TrackingLevel } from "../types";
 import { FR } from "./props";
-import { exampleState, hybridState, salesAssistedState, tourResult, withEntry } from "./fixtures";
+import { exampleState, hybridState, noMarginState, salesAssistedState, tourResult, withEntry } from "./fixtures";
 
 // Engine spec §13.1 "bridge". Non-vacuity, measured: giving todo/requested/
 // not-applicable a verdict (found "unknown") fails "no verdict for what
@@ -77,9 +77,12 @@ describe("buildMirror on the §6.0 example", () => {
     expect(verdict("act-1")).toMatchObject({ declaredPoints: 0, found: "tracked", verdict: "better" });
     expect(verdict("ret-1")).toMatchObject({ declared: "tracked", found: "unknown", verdict: "blind-spot" });
     expect(verdict("ret-3")).toMatchObject({ declared: "approximate", found: "unknown", verdict: "blind-spot-light" });
-    // LTV is found as its weakest input: the margin is missing.
-    expect(verdict("rev-2")).toMatchObject({ metric: "rev.ltv", found: "unknown", verdict: "blind-spot" });
-    expect(mirror.counts).toEqual({ coherent: 3, "blind-spot": 2, "blind-spot-light": 1, better: 1, "known-gap": 0 });
+    // LTV is found as its weakest input: the margin is estimated (C50, 70 to 80 %), so approximate.
+    expect(verdict("rev-2")).toMatchObject({ metric: "rev.ltv", found: "approximate", verdict: "blind-spot-light" });
+    expect(mirror.counts).toEqual({ coherent: 3, "blind-spot": 1, "blind-spot-light": 2, better: 1, "known-gap": 0 });
+    // Without the margin, the LTV is not found at all.
+    const noMargin = buildMirror(noMarginState(), tourResult(answers), FR.bridges);
+    expect(noMargin.rows.find((r) => r.questionId === "rev-2")).toMatchObject({ found: "unknown", verdict: "blind-spot" });
     expect(mirror).toMatchObject({ resultId: "11111111-1111-4111-8111-111111111111", total: 58, takenAt: "2026-09-01T10:00:00.000Z" });
   });
 

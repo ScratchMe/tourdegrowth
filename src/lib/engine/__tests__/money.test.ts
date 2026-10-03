@@ -6,7 +6,7 @@ import { buildSlgScenario, slgMrrPath } from "../slg-scenario";
 import { addBoth, buildTotal, sumPaths, timesTwelve } from "../total";
 import type { EngineState, Interval, LeverId } from "../types";
 import { lifetimeMonths, unitEconomics } from "../unit-economics";
-import { FILM_LEVERS, exampleState, filmState, hybridState, measured, ratio, withEntry } from "./fixtures";
+import { FILM_LEVERS, filmState, hybridState, measured, noMarginState, ratio, withEntry } from "./fixtures";
 import { CTX_FR } from "./props";
 
 /**
@@ -126,7 +126,7 @@ describe("the ARR and the MRR month by month — one loop, one source", () => {
     expect(path[12]!.hi - path[12]!.lo).toBeGreaterThan(0);
     expect(mrrPath(null, { lo: 1, hi: 1 }, { lo: 95, hi: 95 })).toBeNull();
     // The §6.0 example: no margin, but a retention and new MRR — the curve exists, the LTV doesn't.
-    const example = buildScenario(exampleState(), {}, CTX_FR).today.kpis;
+    const example = buildScenario(noMarginState(), {}, CTX_FR).today.kpis;
     expect(example.mrrPath).toHaveLength(13);
     expect(example.ltv).toBeNull();
   });
@@ -141,7 +141,7 @@ describe("the LTV:CAC in « Et si »", () => {
   });
 
   it("without the margin, no LTV and no LTV:CAC — never computed on revenue", () => {
-    const kpis = buildScenario(exampleState(), {}, CTX_FR).today.kpis;
+    const kpis = buildScenario(noMarginState(), {}, CTX_FR).today.kpis;
     expect(kpis.ltvCac).toBeNull();
     expect(kpis.loss).toBeNull();
     expect(kpis.cash).toBeNull();

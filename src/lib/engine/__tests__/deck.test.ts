@@ -4,7 +4,7 @@ import { deriveEngine } from "../derive";
 import { buildScenario } from "../scenario";
 import type { DeckModel, EngineState, SlideId, SlideTitleKey } from "../types";
 import { CTX_EN, CTX_FR, EN, FR } from "./props";
-import { EXAMPLE_EXPECTED, FILM_LEVERS, emptyState, exampleState, filmState, hybridState, measured, missing, ratio, salesAssistedState, tourResult, withEntry, withTarget } from "./fixtures";
+import { EXAMPLE_EXPECTED, FILM_LEVERS, emptyState, exampleState, filmState, hybridState, measured, missing, ratio, salesAssistedState, tourResult, withEntry, withTarget, noMarginState } from "./fixtures";
 
 // Engine spec §13.1 "deck" — §9.2 presence and order, `visibility` first
 // under two ★, one case that triggers each title template and one that
@@ -42,7 +42,8 @@ describe("§9.2 — presence, default inclusion, order", () => {
       ["annex", true, true, 6],
       ["annex:2", true, true, 7],
     ]);
-    expect(model.dataPill).toEqual({ measured: 11, approximate: 2, missing: 3 });
+    // The margin estimated since C50 (A20.d T6): one approximate more, one missing less.
+    expect(model.dataPill).toEqual({ measured: 11, approximate: 3, missing: 2 });
   });
 
   it("the mirror exists once a Tour is linked, but is unchecked by default", () => {
@@ -188,8 +189,8 @@ describe("title templates — each one triggered, and not", () => {
     ["visibility", "visibility", exampleState(), allDocumented],
     ["visibilityOne", "visibility", withEntry(allDocumented, "rev.gross-margin", missing("no-access", "meeting")), exampleState()],
     ["visibilityAllDocumented", "visibility", allDocumented, exampleState()],
-    ["unitEconomics", "unit-economics", withEntry(exampleState(), "rev.gross-margin", measured(ratio(80, 100), tool)), exampleState()],
-    ["unitEconomicsUnknown", "unit-economics", exampleState(), withEntry(exampleState(), "rev.gross-margin", measured(ratio(80, 100), tool))],
+    ["unitEconomics", "unit-economics", withEntry(exampleState(), "rev.gross-margin", measured(ratio(80, 100), tool)), noMarginState()],
+    ["unitEconomicsUnknown", "unit-economics", noMarginState(), withEntry(exampleState(), "rev.gross-margin", measured(ratio(80, 100), tool))],
     ["askMeasureFirst", "ask", exampleState(), allDocumented],
   ];
   for (const [key, id, yes, no] of cases) {
@@ -267,18 +268,19 @@ describe("the §6.0 example, in words", () => {
     expect(leak.lines.find((l) => l.row === "footer")!.text).not.toMatch(/repère/);
   });
 
-  it("visibility: 13 of 17 documented, the missing ones sorted from a meeting to a sprint", () => {
+  it("visibility: 14 of 17 documented, the missing ones sorted from a meeting to a sprint", () => {
+    // The margin estimated since C50 (A20.d T6): documented, one missing less.
     const v = slide(deck(exampleState()), "visibility");
-    expect(v.title).toEqual({ key: "visibility", values: { documented: "13 chiffres sur 17", k: "4", repair: "entre une réunion et un sprint" } });
-    expect(renderTitle(v.title, FR.strings)).toBe("On documente **13 chiffres sur 17**. Les 4 qui manquent se réparent entre une réunion et un sprint.");
-    expect(v.lines.filter((l) => l.row === "missing").map((l) => l.repair)).toEqual(["une réunion", "une réunion", "un sprint", "un sprint"]);
+    expect(v.title).toEqual({ key: "visibility", values: { documented: "14 chiffres sur 17", k: "3", repair: "entre une réunion et un sprint" } });
+    expect(renderTitle(v.title, FR.strings)).toBe("On documente **14 chiffres sur 17**. Les 3 qui manquent se réparent entre une réunion et un sprint.");
+    expect(v.lines.filter((l) => l.row === "missing").map((l) => l.repair)).toEqual(["une réunion", "un sprint", "un sprint"]);
   });
 
-  it("unit economics: the margin is named as missing", () => {
-    const title = slide(deck(exampleState()), "unit-economics").title;
+  it("unit economics: without a margin, the margin is named as missing", () => {
+    const title = slide(deck(noMarginState()), "unit-economics").title;
     expect(title).toEqual({ key: "unitEconomicsUnknown", values: { input: "la marge brute" } });
     expect(renderTitle(title, FR.strings)).toBe("**On ne peut pas encore dire ce que rapporte un client.** Il manque la marge brute.");
-    expect(renderTitle(slide(deck(exampleState(), "en"), "unit-economics").title, EN.strings)).toBe("**We can't yet say what a customer is worth.** Missing: gross margin.");
+    expect(renderTitle(slide(deck(noMarginState(), "en"), "unit-economics").title, EN.strings)).toBe("**We can't yet say what a customer is worth.** Missing: gross margin.");
   });
 });
 
@@ -326,7 +328,7 @@ describe("deckMarkdown", () => {
     const titles = md.split("\n").filter((l) => l.startsWith("## "));
     expect(titles.map((t) => t.slice(0, 5))).toEqual(["## 1.", "## 2.", "## 3.", "## 4.", "## 5.", "## 6.", "## 7."]);
     expect(titles[1]).toContain("**~600 € de MRR nouveau**");
-    expect(md).toContain("Données\u00a0: mesurées 11 · approximatives 2 · introuvables 3");
+    expect(md).toContain("Données\u00a0: mesurées 11 · approximatives 3 · introuvables 2");
     expect(md).toContain("> ");
     // A title-only slide is not followed by an empty body: never two blank lines in a row.
     expect(md).not.toContain("\n\n\n");
@@ -557,8 +559,8 @@ describe("the what-if slides (2026-09-26)", () => {
     expect(moved.length).toBeGreaterThan(100);
   });
 
-  it("a figure nobody can compute prints nothing, never 0: the example has no margin, so no LTV", () => {
-    const ltv = row(slide(deck(withWhatIf({ "act.rate": 24 })), "whatif:act.rate"), "kpi", "ltv");
+  it("a figure nobody can compute prints nothing, never 0: without a margin, no LTV", () => {
+    const ltv = row(slide(deck(withWhatIf({ "act.rate": 24 }, noMarginState())), "whatif:act.rate"), "kpi", "ltv");
     expect(ltv).toMatchObject({ tone: "unknown", today: "", projected: "", change: "" });
   });
 
@@ -710,7 +712,7 @@ describe("A20.d T4.c — the unit economics with the money", () => {
   });
 
   it("no margin: every money tile is « ? » and says so, the picture is the « ? » box under a known cost", () => {
-    const model = deck(exampleState());
+    const model = deck(noMarginState());
     expect(row(model, "after")).toMatchObject({ value: "", text: "il manque la marge brute" });
     expect(row(model, "cash")).toMatchObject({ value: "", text: "il manque la marge brute" });
     expect(row(model, "assume")).toBeUndefined();

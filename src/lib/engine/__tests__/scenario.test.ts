@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { buildScenario, leverAlone, leverViews } from "../scenario";
 import type { Interval, LeverId } from "../types";
 import { CTX_FR } from "./props";
-import { exampleState, withEntry } from "./fixtures";
+import { exampleState, withEntry, noMarginState } from "./fixtures";
 
 /**
  * « Et si ? », cumulated (Antoine, 2026-09-26). The §6.0 example reads:
@@ -36,9 +36,15 @@ describe("buildScenario — nothing moved", () => {
     expect(kpis.cac).toEqual({ lo: 500, hi: 500 });
     expect(kpis.grr?.lo).toBeCloseTo(100 - 2.5 - (480 / 46_800) * 100, 9);
     expect(kpis.nrr?.lo).toBeCloseTo(100 - 2.5 - (480 / 46_800) * 100 + (1_440 / 46_800) * 100, 9);
-    // No margin: no LTV, no payback — never a fallback on revenue.
-    expect(kpis.ltv).toBeNull();
-    expect(kpis.payback).toBeNull();
+    // The margin estimated at 70 to 80 % since C50: ARPA 120 × margin, 36 months counted (churn 2.5 %, capped), CAC 500.
+    expect(kpis.ltv?.lo).toBeCloseTo(120 * 0.7 * 36, 6);
+    expect(kpis.ltv?.hi).toBeCloseTo(120 * 0.8 * 36, 6);
+    expect(kpis.payback?.lo).toBeCloseTo(500 / (120 * 0.8), 9);
+    expect(kpis.payback?.hi).toBeCloseTo(500 / (120 * 0.7), 9);
+    // Without it: no LTV, no payback — never a fallback on revenue.
+    const none = buildScenario(noMarginState(), {}, CTX_FR).today.kpis;
+    expect(none.ltv).toBeNull();
+    expect(none.payback).toBeNull();
   });
 
   it("twelve months at this pace: the base retained at NRR every month, each month's new MRR retained from then on", () => {

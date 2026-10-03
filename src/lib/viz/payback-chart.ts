@@ -182,3 +182,49 @@ export function paybackChartGeometry({ story, monthlyMargin, cac, lifetime, payb
     unknown: null,
   };
 }
+
+/** A label's width on the slide's canvas, from its characters: 0.6em each, the widest of the slide's faces (its mono). */
+export function estimateLabelWidth(chars: number, px = 18): number {
+  return chars * px * 0.6;
+}
+
+/** The months-after bracket's width, in px, from which its label is centred under it: shorter, it ends at its right end. */
+export const AFTER_CENTRED_FROM = 320;
+
+export interface PaysBackLabels {
+  /** The crossing's own label, ending left of it on the cost line's row — or null: the bracket's label says it. */
+  crossing: { x: number; y: number } | null;
+  /** The bracket's label: `after` (« ~4 mois de marge après ») or `time` (« remboursé à 5 à 6 mois, puis ~30 à 31 mois de marge »). */
+  after: { text: "after" | "time"; x: number; y: number; anchor: "middle" | "end" } | null;
+}
+
+/**
+ * Where the pays-back story's words go, at full size (A20.d T6, C50 — the
+ * example's payback of 5 to 6 months): the crossing's label ends left of the
+ * crossing, on the row of « ce que coûte un nouveau client », which starts at
+ * the plot's left end. An early crossing leaves it no room there — it ran off
+ * the slide and over the cost's words — so the crossing goes unlabelled and
+ * the bracket says both, as the compact chart's line does (`time`), right of
+ * the crossing, where the plot is empty under the cost line. In characters,
+ * since a label's width is only known once drawn: `estimateLabelWidth` errs
+ * wide.
+ */
+export function paysBackLabels(g: PaybackChartGeometry, chars: { paysBack: number; cost: number; time: number | null }, px = 18): PaysBackLabels {
+  if (g.story !== "pays-back") return { crossing: null, after: null };
+  const bracket = (text: "after" | "time", width: number) => {
+    const a = g.after!;
+    if (text === "after") return a.width < AFTER_CENTRED_FROM ? { text, x: a.x2, y: a.labelY + 6, anchor: "end" as const } : { text, x: a.labelX, y: a.labelY + 6, anchor: "middle" as const };
+    // Centred under the bracket, kept right of the crossing and inside the plot; wider than that room, it ends at the plot's end.
+    if (width > g.axis.x2 - a.x1) return { text, x: g.axis.x2, y: a.labelY + 6, anchor: "end" as const };
+    return { text, x: Math.min(Math.max(a.labelX, a.x1 + width / 2), g.axis.x2 - width / 2), y: a.labelY + 6, anchor: "middle" as const };
+  };
+  const crossingFits =
+    g.crossing !== null && g.crossing.x - 12 - estimateLabelWidth(chars.paysBack, px) >= g.cost.labelX + estimateLabelWidth(chars.cost, px) + 16;
+  if (g.crossing && !crossingFits && g.after && chars.time !== null) {
+    return { crossing: null, after: bracket("time", estimateLabelWidth(chars.time, px)) };
+  }
+  return {
+    crossing: g.crossing ? { x: g.crossing.x - 12, y: g.crossing.y - 14 } : null,
+    after: g.after ? bracket("after", 0) : null,
+  };
+}

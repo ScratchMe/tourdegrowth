@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { exampleState, hybridState, salesAssistedState, withEntry } from "@/lib/engine/__tests__/fixtures";
+import { exampleState, hybridState, salesAssistedState, withEntry, noMarginState } from "@/lib/engine/__tests__/fixtures";
 import { CTX_EN, CTX_FR, EN, FR } from "@/lib/engine/__tests__/props";
-import type { LeverId } from "@/lib/engine/types";
+import type { EngineState, LeverId } from "@/lib/engine/types";
 import {
   dotsInUse,
   funnelSteps,
@@ -119,7 +119,7 @@ describe("kpiRows — the growth numbers, better or worse in words", () => {
   });
 
   it("a figure nobody can compute says what to enter, and only what is missing", () => {
-    const rows = kpiRows(scenarioFor(exampleState(), {}, CTX_FR), CTX_FR, FR.strings, "EUR", { state: exampleState(), metrics: FR.metrics });
+    const rows = kpiRows(scenarioFor(noMarginState(), {}, CTX_FR), CTX_FR, FR.strings, "EUR", { state: noMarginState(), metrics: FR.metrics });
     const ltv = rows.find((r) => r.id === "ltv")!;
     expect(ltv.projected).toBeNull();
     expect(ltv.unknown).toContain("marge brute");
@@ -258,10 +258,10 @@ describe("leverGains — what each lever brings alone, and together", () => {
 });
 
 describe("kpiAnnouncement — the figures, read once when a slider settles (audit S-4)", () => {
-  const rowsFor = (targets: Partial<Record<LeverId, number>>, locale: "fr" | "en") => {
+  const rowsFor = (targets: Partial<Record<LeverId, number>>, locale: "fr" | "en", state: EngineState = exampleState()) => {
     const [ctx, bundle] = locale === "fr" ? [CTX_FR, FR] : [CTX_EN, EN];
-    const s = scenarioFor(exampleState(), targets, ctx);
-    return { rows: kpiRows(s, ctx, bundle.strings, "EUR", { state: exampleState(), metrics: bundle.metrics }), moved: s.moved.length > 0, strings: bundle.strings };
+    const s = scenarioFor(state, targets, ctx);
+    return { rows: kpiRows(s, ctx, bundle.strings, "EUR", { state, metrics: bundle.metrics }), moved: s.moved.length > 0, strings: bundle.strings };
   };
 
   it("names only the figures that moved, each with its change and whether it is better", () => {
@@ -271,7 +271,7 @@ describe("kpiAnnouncement — the figures, read once when a slider settles (audi
     expect(text).toContain("MRR dans 12 mois");
     expect(text).toContain("CAC");
     expect(text).toContain("mieux");
-    // Churn did not move: NRR and GRR are not news. LTV is unknown: never read.
+    // Churn did not move: NRR, GRR and the LTV are not news.
     expect(text).not.toContain("NRR");
     expect(text).not.toContain("GRR");
     expect(text).not.toContain("LTV");
@@ -284,7 +284,11 @@ describe("kpiAnnouncement — the figures, read once when a slider settles (audi
     expect(text.startsWith("Tes chiffres de croissance, aujourd'hui\u00a0: ")).toBe(true);
     expect(text).toContain("NRR mensuelle");
     expect(text).not.toContain("mieux");
-    expect(text).not.toContain("LTV");
+    // The example's margin is estimated (C50): its LTV is read as a range.
+    expect(text).toContain("LTV ~3\u00a0000\u00a0€ à 3\u00a0500\u00a0€");
+    // Without a margin, the LTV is unknown: never read.
+    const blind = rowsFor({}, "fr", noMarginState());
+    expect(kpiAnnouncement(blind.rows, blind.moved, blind.strings)).not.toContain("LTV");
   });
 
   it("reads in English too, and says worse when it is worse", () => {

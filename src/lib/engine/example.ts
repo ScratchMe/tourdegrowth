@@ -55,7 +55,9 @@ export function exampleMetrics(words: ExampleWords): Partial<Record<MetricId, Me
     "ref.k-factor": { status: "requested", request: { role: "data", requestedAt: "2026-09-20T09:00:00.000Z" }, updatedAt: at },
     "rev.paid-conversion": { status: "estimated", estimate: { low: 6, high: 9, basis: "old-number" }, updatedAt: at },
     "rev.arpa": measured(ratio(48_000, 400), tool("stripe")),
-    "rev.gross-margin": { status: "missing", missing: { cause: "no-access", repair: "meeting", ownerRole: "finance" }, updatedAt: at },
+    // C50 (Antoine, 2026-10-03): an estimated margin, 70 to 80 %, so the example shows its money in ranges — healthy,
+    // paid back in 5 to 6 months, LTV:CAC of 6 to 7, neither loss nor warning. It was missing until A20.d T6.
+    "rev.gross-margin": { status: "estimated", estimate: { low: 70, high: 80, basis: "old-number" }, updatedAt: at },
     // MRR movements (2026-09-26), on the MRR of 1 August — 46 800 €, before the month's new customers took it to 48 000.
     "rev.expansion": measured(ratio(1_440, 46_800), tool("stripe")),
     "rev.contraction": measured(ratio(480, 46_800), tool("stripe")),

@@ -57,6 +57,20 @@ export function exampleState(): EngineState {
 }
 
 /**
+ * The §6.0 example without its gross margin, as it was until C50 gave it an estimated 70 to 80 % (A20.d T6): missing,
+ * asked of finance in a meeting. What the engine does without a margin — no LTV, no payback, no cash, never computed on
+ * revenue — is tested on it; the example the page shows has its margin.
+ */
+export function noMarginState(): EngineState {
+  return withEntry(exampleState(), "rev.gross-margin", { status: "missing", missing: { cause: "no-access", repair: "meeting", ownerRole: "finance" }, updatedAt: at });
+}
+
+/** The §18.9 hybrid with self-serve's margin missing too, as before C50: neither motion has one. */
+export function hybridNoMarginState(): EngineState {
+  return withEntry(hybridState(), "rev.gross-margin", { status: "missing", missing: { cause: "no-access", repair: "meeting", ownerRole: "finance" }, updatedAt: at });
+}
+
+/**
  * The §18.9 hybrid: self-serve is exactly §6.0, sales-assisted and the link
  * are new — flows June to August, leads May to July, new customers March to
  * May, its own targets (18 %, 32 %, 92 %) and its three counts (130, 18, 100).

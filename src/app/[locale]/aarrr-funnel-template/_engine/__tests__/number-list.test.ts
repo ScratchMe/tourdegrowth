@@ -37,7 +37,8 @@ describe("listStages — the §6.0 example", () => {
       activation: ["found", "found", "est"],
       retention: ["cant", "found", "cant"],
       referral: ["found", "found", "asked"],
-      revenue: ["est", "found", "cant", "found", "found"],
+      // The margin, estimated since C50.
+      revenue: ["est", "found", "est", "found", "found"],
     });
     expect(stages.find((s) => s.stage === "activation")!.rows[0]!.id).toBe("act.rate");
   });
@@ -57,7 +58,7 @@ describe("listStages — the §6.0 example", () => {
   });
 
   it("says what remains: the example has a request out and nothing to do, so « none to go »", () => {
-    expect(listProgress(stages)).toEqual({ remaining: 0, found: 11, est: 2, asked: 1, cant: 3 });
+    expect(listProgress(stages)).toEqual({ remaining: 0, found: 11, est: 3, asked: 1, cant: 2 });
   });
 
   it("a number still to do is the only thing « to go »", () => {

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { deriveEngine } from "../derive";
 import type { EngineState, Finding, FindingKind, MetricEntry } from "../types";
 import { CTX_FR, FR } from "./props";
-import { estimated, exampleState, filmState, hybridState, measured, missing, ratio, salesAssistedState, tourResult, withEntry } from "./fixtures";
+import { estimated, exampleState, filmState, hybridState, measured, missing, ratio, salesAssistedState, tourResult, withEntry, hybridNoMarginState, noMarginState } from "./fixtures";
 import { findingText } from "../sentences";
 
 // Engine spec §13.1 "findings" — a table case → kinds, and stable ranks.
@@ -22,13 +22,16 @@ const kinds = (fs: Finding[]): FindingKind[] => fs.map((f) => f.kind);
 describe("findings — the §6.0 example", () => {
   const { findings } = derive(exampleState());
 
-  it("in rank order: the break, the missing definition, the stage below its target, the uncomputable payback", () => {
+  it("in rank order: the break, the missing definition, the stage below its target — the margin estimated since C50, the payback computes", () => {
     expect(findings).toEqual([
       { kind: "chain-break", motion: "plg", rank: 1, metrics: ["ret.d30"], values: {} },
       { kind: "no-definition", motion: "plg", rank: 2, metrics: ["ret.churn-cause"], values: {} },
       { kind: "below-comparator", motion: "plg", rank: 2, metrics: ["act.rate"], values: { value: "18 %", comparator: "20 %" } },
-      { kind: "unit-econ-uncomputable", motion: "plg", rank: 3, metrics: ["rev.cac-payback", "rev.gross-margin"], values: {} },
     ]);
+  });
+
+  it("without its margin, the uncomputable payback comes last (the example before C50)", () => {
+    expect(derive(noMarginState()).findings.at(-1)).toEqual({ kind: "unit-econ-uncomputable", motion: "plg", rank: 3, metrics: ["rev.cac-payback", "rev.gross-margin"], values: {} });
   });
 
   it("ranks never decrease, and the list is the same on every call", () => {
@@ -122,7 +125,8 @@ describe("findings — the §18.9 hybrid", () => {
   const nb = (s: string) => s.replace(/\^/g, " ");
 
   it("each motion's findings, tagged, in rank order: self-serve's before sales-assisted's within a kind", () => {
-    expect(derive(hybridState()).findings).toEqual([
+    // Without self-serve's margin (the hybrid before C50), so each kind shows both motions, self-serve first.
+    expect(derive(hybridNoMarginState()).findings).toEqual([
       { kind: "chain-break", motion: "plg", rank: 1, metrics: ["ret.d30"], values: {} },
       { kind: "chain-break", motion: "slg", rank: 1, metrics: ["slg.act.go-live"], values: {} },
       { kind: "no-definition", motion: "plg", rank: 2, metrics: ["ret.churn-cause"], values: {} },
