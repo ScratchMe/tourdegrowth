@@ -699,7 +699,7 @@ Le zip est rangé par langue puis par format, avec un LISEZ-MOI. La section n'ap
 
 **Les décisions** : C46 à C52 gagnent chacune une ligne « Le retour » (il suit les recos de C47, C48, C51 et C52, et dessine l'option 1 de C49) ; trois sont neuves. C53 : les chiffres des titres de slides à l'encre, le rouge gardé au verdict et au diagnostic, comme Antoine l'a tranché au nº9 (d-verdict-red). C54 : le tableau réordonné, avec l'argent après le diagnostic, « Et si » remonté et le panneau en tableaux. C55 : un bon à tirer nº10 plutôt qu'ajouter au nº9, déjà en cours de lecture (ses six décisions sont tranchées). Le découpage d'A20.d est revu sur les composants du retour ; D16 est retirée (faite) ; B14 attend la re-synchro d'A20.f.
 
-## A20.d T1 : C45 à C55 tranchées, le constat de perte et l'alerte de payback dans le modèle (2026-10-03)
+## A20.d T1 : C45 à C55 tranchées, le constat de perte et l'alerte de payback dans le modèle (2026-10-03, #310)
 
 **Les décisions** : Antoine a pris toutes les recos de C45 à C55, avec deux précisions à C49. Le mot sera « runway », avec un « ? » qui dit « tes mois de trésorerie ». Et sans runway saisi, **un CAC payback de 30 mois ou plus alerte quand même** : un plancher du produit, pas un repère publié (ceux-là sont 12 et 18-24 mois), donc C1 tient. Les réponses d'A20 sont dans `docs/engine/argent.md` §20.13, celle des films dans `marketing/motion/README.md`, l'index dans `docs/decisions.md`. La section C de `CHANTIERS.md` est vide.
 
