@@ -1,10 +1,21 @@
-import { fillTemplate, formatApproxMoneyInterval, formatDurationInterval, formatInterval, formatMonth, formatNumber } from "@/lib/engine/format";
+import { nextMonth } from "@/lib/engine/cohort";
+import { totalIn12 } from "@/lib/engine/deck-motions";
+import {
+  approxRounding,
+  fillTemplate,
+  formatApproxMoneyInterval,
+  formatDurationInterval,
+  formatInterval,
+  formatMonth,
+  formatNumber,
+  pairPrecision,
+} from "@/lib/engine/format";
 import { sub } from "@/lib/engine/interval";
 import type { MoneyKpis } from "@/lib/engine/money";
 import { unitInputsPhrase } from "@/lib/engine/phrases";
 import { findingText } from "@/lib/engine/sentences";
 import type { EngineStrings, ResolvedDerived, ResolvedMetric } from "@/lib/engine/strings";
-import type { Currency, EngineCalcContext, EngineDerived, EngineState, Interval, MetricId, Motion } from "@/lib/engine/types";
+import type { Currency, EngineCalcContext, EngineDerived, EngineState, Interval, LeverId, MetricId, Motion, YearMonth } from "@/lib/engine/types";
 import { knownIn } from "@/lib/engine/values";
 import { KPI_INPUTS, SLG_KPI_INPUTS, scenarioFor, slgScenarioFor } from "./scenario-view";
 
@@ -181,4 +192,138 @@ export function moneyView(
       assumptions,
     },
   };
+}
+
+// --- « Et si ? »: the card's money (design system extension 09, Q8–Q10, A20.d T3.a) -------
+
+export interface LeverMoneyView {
+  /** The MRR month by month, today's pace and — once anything moved — with the what-ifs. null: the MRR can't be projected. */
+  curve: {
+    today: [number, number][];
+    whatif: [number, number][] | null;
+    keys: { today: string; whatif: string };
+    start: string;
+    xLabels: [string, string, string];
+    summary: string;
+  } | null;
+  /** « ARR dans 12 mois »: the value with the what-ifs (or today's), `today` once anything moved; `unknown` says what is missing. */
+  arr12: { label: string; value: string; today: string | null; unknown: boolean };
+  /** One line on one new customer, when the board shows a certain loss and the what-ifs moved; or sales-assisted's straight line. */
+  worth: string | null;
+  /** The hybrid, once anything moved: both engines' MRR in twelve months. */
+  total: string | null;
+}
+
+const tuple = (i: Interval): [number, number] => [i.lo, i.hi];
+const middle = (i: Interval) => (i.lo + i.hi) / 2;
+
+function monthsAfter(month: YearMonth, n: number): YearMonth {
+  let m = month;
+  for (let i = 0; i < n; i += 1) m = nextMonth(m);
+  return m;
+}
+
+/**
+ * What the card carries beside its lever: the curve, the ARR in twelve
+ * months, the one-customer line, the hybrid's total line. Read from the same
+ * scenario as the panel (`scenarioFor`, `slgScenarioFor`, the same targets),
+ * so the card, the panel and the slides can never disagree.
+ *
+ * The one-customer line speaks only when today's numbers say a certain loss
+ * (C48: the board's finding) and a what-if moved: the loss gone (every
+ * reading of the LTV covers every reading of the CAC), no longer certain,
+ * smaller, or untouched — then because the levers moved change neither the
+ * LTV nor the CAC (expansion, contraction). `cardLever`: the card's own
+ * lever, so the line can say « this lever » when it alone moved.
+ */
+export function leverMoneyView(
+  input: { state: EngineState; derived: EngineDerived; ctx: EngineCalcContext; strings: EngineStrings; metrics: ResolvedMetric[] },
+  motion: Motion,
+  targets: Partial<Record<LeverId, number>>,
+  cardLever: LeverId,
+  hybrid = false,
+): LeverMoneyView {
+  const { state, derived, ctx, strings, metrics } = input;
+  const l = strings.lever;
+  const u = strings.units;
+  const currency = state.setup.currency;
+  const s = motion === "plg" ? scenarioFor(state, targets, ctx) : null;
+  const g = motion === "slg" ? slgScenarioFor(state, targets, ctx) : null;
+  const t: MoneyKpisWithBase & { mrr12: Interval | null } = s ? s.today.kpis : g!.today;
+  const p: MoneyKpisWithBase & { mrr12: Interval | null } = s ? s.projected.kpis : g!.projected;
+  const moved: readonly LeverId[] = s ? s.moved : g!.moved;
+  const isMoved = moved.length > 0;
+  const approx = (i: Interval, extra = 0) => formatApproxMoneyInterval(i, currency, ctx, u, extra);
+  const money = (i: Interval) => factMoney(i, currency, ctx, strings);
+
+  // The two figures of a pair gain a digit only when two would print the same (§6.2, `pairPrecision`).
+  const pair = (a: Interval | null, b: Interval | null): [string | null, string | null] => {
+    const extra = a && b && isMoved ? pairPrecision(middle(a), middle(b), approxRounding) : 0;
+    return [a ? approx(a, extra) : null, b ? approx(b, extra) : null];
+  };
+
+  // --- The curve ---
+  let curve: LeverMoneyView["curve"] = null;
+  if (t.mrrPath && t.mrr && t.mrr12) {
+    const ref = state.snapshots[state.snapshots.length - 1]!.referenceMonth;
+    const whatifPath = isMoved && p.mrrPath ? p.mrrPath : null;
+    const [today12, whatif12] = pair(t.mrr12, whatifPath ? p.mrr12 : null);
+    curve = {
+      today: t.mrrPath.map(tuple),
+      whatif: whatifPath ? whatifPath.map(tuple) : null,
+      keys: { today: l.curveToday, whatif: l.curveWhatif },
+      start: fillTemplate(l.curveStart, { mrr: money(t.mrr) }),
+      xLabels: [formatMonth(ref, ctx.locale), formatMonth(monthsAfter(ref, 6), ctx.locale), formatMonth(monthsAfter(ref, 12), ctx.locale)],
+      summary: whatif12
+        ? fillTemplate(l.curveSummaryWhatif, { start: money(t.mrr), today: today12 ?? "", whatif: whatif12 })
+        : fillTemplate(l.curveSummary, { start: money(t.mrr), today: today12 ?? "" }),
+    };
+  }
+
+  // --- The ARR in twelve months: the MRR in twelve months × 12, the same inputs, the same « il manque » ---
+  const [arrToday, arrWhatif] = pair(t.arr12, isMoved ? p.arr12 : null);
+  const value = isMoved ? arrWhatif : arrToday;
+  const inputs = motion === "plg" ? KPI_INPUTS.mrr12 : SLG_KPI_INPUTS.mrr12;
+  const absent = inputs.filter((id) => knownIn(state, id, ctx).kind !== "known");
+  const unknown =
+    absent.length > 0 ? fillTemplate(strings.scenario.kpiUnknown, { input: unitInputsPhrase(absent, strings, metrics) }) : strings.scenario.unknownStep;
+  const arr12 = {
+    label: l.arr12,
+    value: value ?? unknown,
+    today: isMoved && arrToday ? fillTemplate(strings.scenario.leverToday, { value: arrToday }) : null,
+    unknown: value === null,
+  };
+
+  // --- One new customer ---
+  let worth: string | null = null;
+  if (isMoved && t.loss?.verdict === "loss" && p.loss && p.ltv && p.cac && t.ltv && t.cac) {
+    const sameCac = Math.abs(middle(p.cac) - middle(t.cac)) < 0.5;
+    const sameLtv = Math.abs(middle(p.ltv) - middle(t.ltv)) < 0.5;
+    const cacText = sameCac ? money(p.cac) : approx(p.cac);
+    const gap = (i: Interval) => approx(abs(i));
+    if (p.loss.verdict === "none") worth = fillTemplate(l.worthOut, { ltv: approx(p.ltv), cac: cacText, gap: approx(p.loss.gap) });
+    else if (p.loss.verdict === "maybe") worth = fillTemplate(l.worthMaybe, { ltv: approx(p.ltv), cac: cacText });
+    else if (sameCac && sameLtv) worth = fillTemplate(moved.length === 1 && moved[0] === cardLever ? l.worthStill : l.worthStillMany, { gap: gap(p.loss.gap) });
+    else {
+      // Two amounts side by side: a digit more when two would print the same (`pairPrecision`).
+      const [now, before] = pair(abs(p.loss.gap), abs(t.loss.gap));
+      worth = fillTemplate(l.worthLess, { gap: now ?? "", before: before ?? "" });
+    }
+  }
+  // Sales-assisted with annual contracts, or a term not known (counted as annual): its line is straight, and says why.
+  if (!worth && motion === "slg" && curve) {
+    const unit = derived.motions.find((m) => m.motion === "slg");
+    if (unit?.motion === "slg" && unit.unit.renewalTerm === "annual") worth = l.curveStraight;
+    else if (unit?.motion === "slg" && unit.unit.renewalTerm === null) worth = l.curveStraightAssumed;
+  }
+
+  // --- The hybrid's total, once anything moved ---
+  let total: string | null = null;
+  if (hybrid) {
+    // The same targets as the card: in the app they are `state.whatIf`; a test may hand others.
+    const line = totalIn12({ ...state, whatIf: targets }, strings, ctx);
+    if (line?.projected) total = fillTemplate(l.totalBoth, { whatif: line.projected, today: line.today });
+  }
+
+  return { curve, arr12, worth, total };
 }

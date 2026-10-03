@@ -471,10 +471,68 @@ export const ENGINE_COPY = {
     /** The figures count the levers moved in the full panel too. */
     movedWithOthers: { fr: "Et si : {lever}, {to} au lieu de {from}, avec tes autres leviers", en: "What if: {lever}, {to} instead of {from}, with your other levers" },
     label: { fr: "{lever} ({today})", en: "{lever} ({today})" },
-    /** The funnel is the month's: so is this figure, beside « MRR dans 12 mois ». */
-    payingMonth: { fr: "Nouveaux payants par mois", en: "New paying customers a month" },
-    /** Without the month's sign-up count, the funnel reads per 100 sign-ups: so does this figure. */
-    payingPerHundred: { fr: "Nouveaux payants pour 100 inscrits", en: "New paying customers per 100 sign-ups" },
+    /**
+     * TODO: à relire (convention 6) — neuf le 2026-10-03 (A20.d T3.a, le retour du brief 09, `COPY.md`) : the card's
+     * second figure, beside « MRR dans 12 mois » — was the month's new paying customers, which stay in the panel's
+     * funnel. Then the curve (`MrrCurve`), sales-assisted's straight line (`curveStraight`), one line on one new
+     * customer when the board shows a loss, and the hybrid's total (`totalBoth`): from `arr12` to `totalBoth`. `{ltv}`,
+     * `{cac}`, `{gap}`, `{before}` arrive formatted; `{whatif}`, `{today}` are MRRs in twelve months.
+     */
+    arr12: { fr: "ARR dans 12 mois", en: "ARR in 12 months" },
+    curveToday: { fr: "au rythme d'aujourd'hui", en: "at today's pace" },
+    curveWhatif: { fr: "avec tes « Et si »", en: "with your what-ifs" },
+    curveStart: { fr: "{mrr} aujourd'hui", en: "{mrr} today" },
+    curveSummary: {
+      fr: "Le MRR mois par mois, de {start} aujourd'hui à {today} dans 12 mois au rythme actuel.",
+      en: "The MRR month by month, from {start} today to {today} in 12 months at today's pace.",
+    },
+    curveSummaryWhatif: {
+      fr: "Le MRR mois par mois, depuis {start} aujourd'hui : {today} dans 12 mois au rythme actuel, {whatif} avec tes « Et si ».",
+      en: "The MRR month by month, from {start} today: {today} in 12 months at today's pace, {whatif} with your what-ifs.",
+    },
+    /** Sales-assisted with annual contracts: why its line is straight. */
+    curveStraight: {
+      fr: "Les contrats annuels arrivent à renouvellement régulièrement dans l'année : la base avance en ligne droite.",
+      en: "Annual contracts come up for renewal evenly over the year: the base moves in a straight line.",
+    },
+    /** Not on the return: the contracts' term is not known, and the calculation counts them as annual. */
+    curveStraightAssumed: {
+      fr: "Sans durée de contrat connue, le calcul compte des contrats annuels, renouvelés régulièrement dans l'année : la base avance en ligne droite.",
+      en: "With no contract term known, the calculation counts annual contracts, renewed evenly over the year: the base moves in a straight line.",
+    },
+    /** The loss is gone with the what-ifs: every reading of the LTV covers every reading of the CAC. */
+    worthOut: {
+      fr: "Un nouveau client : plus de perte. Il rapporte {ltv} pour {cac} : {gap} de plus.",
+      en: "One new customer: no longer a loss. It brings back {ltv} for {cac}: {gap} more.",
+    },
+    /** Not on the return: the ranges overlap with the what-ifs — a loss is no longer certain, nor is a gain. */
+    worthMaybe: {
+      fr: "Un nouveau client : plus de perte certaine. Il rapporte {ltv} pour {cac} : les deux fourchettes se chevauchent.",
+      en: "One new customer: no longer a certain loss. It brings back {ltv} for {cac}: the two ranges overlap.",
+    },
+    /** Not on the return: still a loss, a smaller (or larger) one. */
+    worthLess: {
+      fr: "Un nouveau client : toujours une perte, de {gap} au lieu de {before}.",
+      en: "One new customer: still a loss, of {gap} instead of {before}.",
+    },
+    /** The card's lever alone moved, and it moves neither the LTV nor the CAC (expansion, contraction). */
+    worthStill: {
+      fr: "Un nouveau client : toujours une perte de {gap}. Ce levier ne change ni ce que rapporte un client ni ce qu'il coûte.",
+      en: "One new customer: still a loss of {gap}. This lever changes neither what a customer brings back nor what it costs.",
+    },
+    /** Not on the return: several what-ifs moved, or one other than the card's. */
+    worthStillMany: {
+      fr: "Un nouveau client : toujours une perte de {gap}. Tes « Et si » ne changent ni ce que rapporte un client ni ce qu'il coûte.",
+      en: "One new customer: still a loss of {gap}. Your what-ifs change neither what a customer brings back nor what it costs.",
+    },
+    /**
+     * The hybrid: both engines' MRR in twelve months — a sum, never a comparison. The return said « avec cet « Et si » »:
+     * the total counts every lever moved, in either engine's panel, hence « tes « Et si » ».
+     */
+    totalBoth: {
+      fr: "Les deux moteurs dans 12 mois : {whatif} de MRR avec tes « Et si » (aujourd'hui {today}).",
+      en: "Both engines in 12 months: {whatif} of MRR with your what-ifs (today {today}).",
+    },
     all: { fr: "Vois les {n} leviers et ce que le calcul suppose →", en: "See the {n} levers and what the calculation assumes →" },
     allOne: { fr: "Vois ce que le calcul suppose →", en: "See what the calculation assumes →" },
     /** The full panel's summary, under the card: not « Et si ? » a second time. */

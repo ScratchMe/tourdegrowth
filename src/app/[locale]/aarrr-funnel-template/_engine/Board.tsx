@@ -47,10 +47,11 @@ type SlgDerived = Extract<MotionDerived, { motion: "slg" }>;
  * the file), the verdict title (the board's h2 and its focus target), the
  * coverage in fractions, the next step — the screen's one primary — then
  * the diagnosis, the money (`BoardMoney`, design system extension 09, A20.d
- * T2), the funnel in the screen's one raised card, the five
- * numbers, every stage in one list whose rows open each number's screen
- * (`BoardNumbers`, A18 T2.b),
- * « et si », the declared × measured mirror, what is left to go and get
+ * T2), « et si » moved up under it (its card with the MRR's curve and its
+ * panel folded, C51, C54, A20.d T3.a), the funnel in the screen's one raised
+ * card, the five numbers, every stage in one list whose rows open each
+ * number's screen (`BoardNumbers`, A18 T2.b), the declared × measured
+ * mirror, what is left to go and get
  * (folded), the table entry (folded, opened from the menu), and the slides
  * as a quiet link while they are not the next step.
  *
@@ -61,9 +62,9 @@ type SlgDerived = Extract<MotionDerived, { motion: "slg" }>;
  * - **the hybrid**, « deux moteurs, un total »: the total band once, at the
  *   top (`TotalBand`: its title is the board's heading), the next step, then
  *   « Moteur affiché » — one engine's board at a time, never two columns
- *   (A18 T5): its own verdict, diagnosis, drawing, list and lever, in the
- *   fixed order, never by value; the MRR in twelve months of both sits in
- *   the full « Et si » panel, whichever is shown.
+ *   (A18 T5): its own verdict, diagnosis, money, lever, drawing and list, in
+ *   the fixed order, never by value; the MRR in twelve months of both, with
+ *   the what-ifs, sits in the card's total line, whichever is shown.
  *
  * Every visual is fed from the SAME derived object the verdict and the
  * slides read (`view.derived`): a diagnosis cannot name a stage its funnel
@@ -171,6 +172,7 @@ export function Board({
       <BoardLever
         view={view}
         motion={motion}
+        hybrid={hybrid}
         onChange={actions.setWhatIf}
         onAll={() => {
           setWhatIfOpen(true);
@@ -192,8 +194,9 @@ export function Board({
   const slgBody = slgD ? (
     <>
       <Diagnosis diagnosis={slgD.diagnosis} strings={strings} locale={ctx.locale} metrics={view.metrics} values={candidateValues} previous={previousLeakLine(view, "slg")} />
-      {/* The money, right after the diagnosis (design system extension 09, C54). */}
+      {/* The money, right after the diagnosis, then « Et si ? » under it (design system extension 09, C54). */}
       <BoardMoney view={view} motion="slg" hybrid={hybrid} />
+      {past ? null : whatIf}
       <Card elevation="raised" className={styles.pelotonCard} data-testid="engine-board-relays">
         {relaysOf(false)}
         {/* Keyed by the month: a past month read on its own shows its own open pipeline (§19.2.4). */}
@@ -217,8 +220,10 @@ export function Board({
         values={candidateValues}
         previous={previousLeakLine(view, "plg")}
       />
-      {/* The money, right after the diagnosis (design system extension 09, C54): flat, so the peloton stays the one raised card. */}
+      {/* The money, right after the diagnosis (design system extension 09, C54): flat, so the peloton stays the one raised card.
+          Then « Et si ? », moved up under it: move a lever, watch the ARR move right under the money. */}
       <BoardMoney view={view} motion="plg" hybrid={hybrid} />
+      {past ? null : whatIf}
       {/* The screen's one raised card (Card's own rule): the peloton is what the board is about. */}
       <Card elevation="raised" className={styles.pelotonCard} data-testid="engine-board-peloton">
         {pelotonOf(false)}
@@ -310,23 +315,16 @@ export function Board({
           />
           {motion === "slg" ? slgBody : plgBody}
           {numbers}
-          {past ? null : whatIf}
         </>
       ) : motion === "slg" && slgD ? (
         <>
           {slgBody}
           {numbers}
-          {past ? null : whatIf}
         </>
       ) : (
         <>
           {plgBody}
           {numbers}
-
-          {/* Folded on the board: the funnel it redraws is the one just above, and a
-              second full funnel open by default made the longest page of the site
-              longer (Antoine, 2026-09-25). */}
-          {past ? null : whatIf}
         </>
       )}
 

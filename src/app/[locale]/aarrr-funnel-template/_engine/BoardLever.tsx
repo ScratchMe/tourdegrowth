@@ -1,13 +1,14 @@
 "use client";
 
 import { LeverCard } from "@/components/engine/LeverCard";
+import { MrrCurve } from "@/components/engine/MrrCurve";
 import { shapeOf } from "@/lib/engine/catalog-shape";
 import type { LeverView } from "@/lib/engine/scenario";
 import type { DiagnosisState, LeverId, MetricId, Motion } from "@/lib/engine/types";
 import { diagnosisOf } from "./BoardNumbers";
+import { leverMoneyView } from "./money-view";
 import { namedStages } from "./number-list";
 import {
-  funnelSteps,
   kpiRows,
   leverRows,
   scenarioFor,
@@ -24,7 +25,7 @@ import type { EngineView } from "./view";
 
 type Targets = Partial<Record<LeverId, number>>;
 
-/** One of the card's two figures: its value, or — unknown with the what-ifs — what is missing, in words (`scenario.kpiUnknown`). */
+/** The card's first figure: its value, or — unknown with the what-ifs — what is missing, in words (`scenario.kpiUnknown`). */
 type Figure = { label: string; value: string; unknown: boolean; today: string | null };
 
 function figureOf(kpi: KpiView): Figure {
@@ -73,12 +74,27 @@ export function titleKey(c: { moved: boolean; others: boolean; byStage: boolean;
  * A18 T2.c), in front of the full panel — every lever moving together, the
  * calculation's assumptions printed — which « Les {n} leviers » opens. The
  * card writes the same targets the panel does (`state.whatIf`), through the
- * same `withTarget` and `targetAt`, and reads its two figures from the same
- * calculation: MRR in twelve months, and the month's new paying customers in
- * self-serve (per 100 sign-ups without the month's count), the quarter's new
- * customers in sales-assisted.
+ * same `withTarget` and `targetAt`, and reads its figures from the same
+ * calculation.
+ *
+ * Extension 09 (A20.d T3.a): the curve of the MRR month by month, the MRR
+ * and the ARR in twelve months (the month's new paying customers stay in the
+ * panel's funnel), the one-customer line when the board shows a loss, and in
+ * the hybrid both engines' MRR in twelve months — `money-view.ts#leverMoneyView`.
  */
-export function BoardLever({ view, motion, onChange, onAll }: { view: EngineView; motion: Motion; onChange: (targets: Targets) => void; onAll: () => void }) {
+export function BoardLever({
+  view,
+  motion,
+  hybrid = false,
+  onChange,
+  onAll,
+}: {
+  view: EngineView;
+  motion: Motion;
+  hybrid?: boolean;
+  onChange: (targets: Targets) => void;
+  onAll: () => void;
+}) {
   const { state, ctx, strings, metrics } = view;
   const l = strings.lever;
   const currency = state.setup.currency;
@@ -93,29 +109,18 @@ export function BoardLever({ view, motion, onChange, onAll }: { view: EngineView
   let levers: LeverView[];
   let moved: readonly LeverId[];
   let kpis: KpiView[];
-  let second: Figure;
   if (motion === "plg") {
     const scenario = scenarioFor(state, targets, ctx);
     rows = leverRows(scenario, ctx, strings, currency, metrics);
     levers = scenario.levers;
     moved = scenario.moved;
     kpis = kpiRows(scenario, ctx, strings, currency, { state, metrics });
-    const paying = funnelSteps(scenario, ctx, strings).find((s) => s.id === "paying")!;
-    // The funnel's numeral is « ? » when unknown: the card says so in words, as the panel's step does.
-    const known = paying.numeral !== "?";
-    second = {
-      label: scenario.today.funnel.perHundred ? l.payingPerHundred : l.payingMonth,
-      value: known ? paying.numeral : strings.scenario.unknownStep,
-      unknown: !known,
-      today: paying.today === strings.scenario.unknownStep ? null : paying.today,
-    };
   } else {
     const scenario = slgScenarioFor(state, targets, ctx);
     rows = slgLeverRows(scenario, ctx, strings, currency, metrics);
     levers = scenario.levers;
     moved = scenario.moved;
     kpis = slgKpiRows(scenario, ctx, strings, currency, { state, metrics });
-    second = figureOf(kpis.find((k) => k.id === "won")!);
   }
 
   const chosen = cardLever(rows, named);
@@ -123,6 +128,7 @@ export function BoardLever({ view, motion, onChange, onAll }: { view: EngineView
   const { row } = chosen;
   const lever = levers.find((x) => x.id === row.id)!;
   const mrr12 = figureOf(kpis.find((k) => k.id === "mrr12")!);
+  const money = leverMoneyView(view, motion, targets, row.id, hybrid);
   // « aujourd'hui … » once anything moved, and only under a figure known today: never « aujourd'hui ? ».
   const today = (figure: Figure) => (moved.length > 0 && figure.today ? fill(strings.scenario.leverToday, { value: figure.today }) : undefined);
   const known = rows.filter((r) => r.today !== null).length;
@@ -148,7 +154,26 @@ export function BoardLever({ view, motion, onChange, onAll }: { view: EngineView
         valueText: row.valueText,
         onChange: (position) => onChange(withTarget(targets, row.id, targetAt(lever, position))),
       }}
-      figures={[mrr12, second].map((f) => ({ label: f.label, value: f.value, unknown: f.unknown, today: today(f) }))}
+      curve={
+        money.curve ? (
+          <MrrCurve
+            id={`engine-lever-curve-${motion}`}
+            today={money.curve.today}
+            whatif={money.curve.whatif}
+            keys={money.curve.keys}
+            start={money.curve.start}
+            xLabels={money.curve.xLabels}
+            summary={money.curve.summary}
+            data-testid="engine-lever-curve"
+          />
+        ) : undefined
+      }
+      figures={[
+        { key: "mrr12", label: mrr12.label, value: mrr12.value, unknown: mrr12.unknown, today: today(mrr12) },
+        { key: "arr12", label: money.arr12.label, value: money.arr12.value, unknown: money.arr12.unknown, today: money.arr12.today ?? undefined },
+      ]}
+      worth={money.worth ?? undefined}
+      total={money.total ?? undefined}
       allLabel={known > 1 ? fill(l.all, { n: known }) : l.allOne}
       onAll={onAll}
       resetLabel={strings.scenario.reset}
