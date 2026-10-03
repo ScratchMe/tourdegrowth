@@ -383,8 +383,15 @@ LTV:CAC ~2,8, aucun constat ; un mois d'acquisition coûte 114 000 € (six
 contrats à 19 000 €), la trésorerie immobilisée est ~722 000 € et **n'est pas
 un plancher** (NRR estimée à 104-108 %).
 
-**L'exemple intégré** (§6.0) n'a pas de marge : ni LTV, ni payback, donc ni
-constat, ni trésorerie. Lui en donner une est C50.
+**L'exemple intégré** (§6.0) a une marge depuis C50 (A20.d T6) : estimée,
+70 à 80 % (« ancien chiffre »), donc tout son argent en fourchettes. Durée de
+vie 40 mois (churn 2,5 %), plafonnée à 36 ; LTV ~3 000 à 3 500 € ; payback 5
+à 6 mois ; LTV:CAC 6 à 6,9 ; ~30 à 31 mois de marge après le remboursement ;
+trésorerie immobilisée ~55 000 à 63 000 €, un plancher (NRR 100 %) ; ni
+constat, ni alerte. Avant, il n'en avait pas : ni LTV, ni payback, donc ni
+constat, ni trésorerie. Ce que fait le moteur sans marge se teste maintenant
+sur `noMarginState()` et `hybridNoMarginState()` (`__tests__/fixtures.ts`),
+l'exemple tel qu'il était.
 
 ### 20.11 Tests et non-vacuité
 

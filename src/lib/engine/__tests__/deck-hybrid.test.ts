@@ -4,7 +4,7 @@ import { deriveEngine } from "../derive";
 import type { DeckModel, EngineState } from "../types";
 import { CTX_EN, CTX_FR, EN, FR } from "./props";
 import { QUESTIONS } from "../../../content/copy-library";
-import { estimated, exampleState, hybridLossState, hybridState, measured, missing, ratio, salesAssistedState, tourResult, withEntry, withMonthBefore, withTarget } from "./fixtures";
+import { estimated, exampleState, hybridLossState, hybridNoMarginState, hybridState, measured, missing, ratio, salesAssistedState, tourResult, withEntry, withMonthBefore, withTarget } from "./fixtures";
 
 /**
  * The deck with sales-assisted ticked (engine spec §18.8, A7.3.c S4): which
@@ -215,7 +215,8 @@ describe("sales-assisted's slides", () => {
 
 describe("unit economics, side by side (§18.8.2)", () => {
   it("no gross margin in either motion: the « neither margin » title; self-serve's column first", () => {
-    const deck = deckOf(hybridState());
+    // The example's self-serve margin is estimated since C50: taken away here, sales-assisted has none.
+    const deck = deckOf(hybridNoMarginState());
     const unit = slide(deck, "unit-economics");
     expect(unit.title.key).toBe("unitEconomicsNoneMargins");
     // Two columns since A20.d T4.d, self-serve first: each engine its five tiles, tagged with its engine.
@@ -264,14 +265,14 @@ describe("unit economics, side by side (§18.8.2)", () => {
 
   it("each case of the title: both paybacks, one side, the other, and two different inputs", () => {
     const margin = (state: EngineState, id: "rev.gross-margin" | "slg.rev.gross-margin") => withEntry(state, id, measured(ratio(75, 100), { kind: "person", role: "finance" }));
-    const both = deckOf(margin(margin(hybridState(), "rev.gross-margin"), "slg.rev.gross-margin"));
+    const both = deckOf(margin(margin(hybridNoMarginState(), "rev.gross-margin"), "slg.rev.gross-margin"));
     expect(slide(both, "unit-economics").title.key).toBe("unitEconomicsBoth");
-    expect(slide(deckOf(margin(hybridState(), "rev.gross-margin")), "unit-economics").title.key).toBe("unitEconomicsOneSidePlg");
-    expect(slide(deckOf(margin(hybridState(), "slg.rev.gross-margin")), "unit-economics").title.key).toBe("unitEconomicsOneSideSlg");
-    const different = withEntry(margin(hybridState(), "slg.rev.gross-margin"), "slg.acq.cac", undefined);
+    expect(slide(deckOf(margin(hybridNoMarginState(), "rev.gross-margin")), "unit-economics").title.key).toBe("unitEconomicsOneSidePlg");
+    expect(slide(deckOf(margin(hybridNoMarginState(), "slg.rev.gross-margin")), "unit-economics").title.key).toBe("unitEconomicsOneSideSlg");
+    const different = withEntry(margin(hybridNoMarginState(), "slg.rev.gross-margin"), "slg.acq.cac", undefined);
     expect(slide(deckOf(different), "unit-economics").title.key).toBe("unitEconomicsNoneDifferent");
     // Self-serve first even when only sales-assisted can be said.
-    expect(title(deckOf(margin(hybridState(), "slg.rev.gross-margin")), "unit-economics")).toMatch(/^Côté libre-service/);
+    expect(title(deckOf(margin(hybridNoMarginState(), "slg.rev.gross-margin")), "unit-economics")).toMatch(/^Côté libre-service/);
   });
 
   it("a company-wide margin standing in is said in the footer (C25 Q4)", () => {
@@ -285,11 +286,12 @@ describe("each motion's chrome, and the shared slides", () => {
     const deck = deckOf(hybridState());
     expect(deck.byMotion!.plg.kicker).toBe("Moteur de growth · août 2026 · libre-service · données internes");
     expect(deck.byMotion!.slg.kicker).toBe("Moteur de growth · août 2026 · assisté · données internes");
-    expect(deck.byMotion!.plg.dataPill).toEqual({ measured: 11, approximate: 2, missing: 3 });
+    // The self-serve margin, estimated since C50: one approximate more, one missing less.
+    expect(deck.byMotion!.plg.dataPill).toEqual({ measured: 11, approximate: 3, missing: 2 });
     expect(deck.byMotion!.slg.dataPill).toEqual({ measured: 10, approximate: 1, missing: 2 });
     expect(deck.byMotion!.slg.footer).toBe(nb("Flux assistés de juin à août 2026 · leads de mai à juillet 2026 · sources^: HubSpot et Stripe"));
     // The deck's own pill and footer: both motions together, the link never counted.
-    expect(deck.dataPill).toEqual({ measured: 21, approximate: 3, missing: 5 });
+    expect(deck.dataPill).toEqual({ measured: 21, approximate: 4, missing: 4 });
     expect(deck.footer.text).toMatch(/^Flux/);
     expect(slide(deck, "visibility").motion).toBeUndefined();
     expect(slide(deck, "peloton").motion).toBe("plg");
@@ -297,7 +299,7 @@ describe("each motion's chrome, and the shared slides", () => {
 
   it("visibility counts the union and says each missing number's motion; the appendix groups by motion, the link last", () => {
     const deck = deckOf(hybridState());
-    expect(title(deck, "visibility")).toBe(nb("On documente **24 chiffres sur 32**. Les 8 qui manquent se réparent entre une réunion et un sprint."));
+    expect(title(deck, "visibility")).toBe(nb("On documente **25 chiffres sur 32**. Les 7 qui manquent se réparent entre une réunion et un sprint."));
     const missingRows = slide(deck, "visibility").lines.filter((l) => l.row === "missing");
     expect(missingRows.find((l) => l.id === "slg.act.go-live")!.text).toBe("assisté · aucune mesure · Customer Success · un sprint");
     const annex = deck.slides.filter((s) => s.id.startsWith("annex")).flatMap((s) => s.lines);

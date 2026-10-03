@@ -3,7 +3,7 @@ import { LTV_CAP_MONTHS } from "../catalog-shape";
 import type { DerivedValue, MetricEntry } from "../types";
 import { lifetimeMonths, lostInAYear, marginIsCompanyWide, revenueRetention, slgLifetimeMonths, slgUnitEconomics, unitEconomics } from "../unit-economics";
 import { CTX_FR } from "./props";
-import { exampleState, hybridState, measured, ratio, withEntry } from "./fixtures";
+import { exampleState, hybridState, measured, ratio, withEntry, noMarginState } from "./fixtures";
 
 // Engine spec §13.1 "unit-economics". Non-vacuity, measured: falling back
 // on ARPA when the margin is missing (the flattering 500 ÷ 120 = 4.2
@@ -14,7 +14,7 @@ const tool = { kind: "tool", tool: "stripe" } as const;
 
 describe("unit economics", () => {
   it("margin unknown: LTV, payback and LTV:CAC are uncomputable — never a fallback on revenue", () => {
-    const u = unitEconomics(exampleState(), CTX_FR);
+    const u = unitEconomics(noMarginState(), CTX_FR);
     expect(u.payback).toEqual({ kind: "uncomputable", missing: ["rev.gross-margin"] });
     expect(u.ltv).toEqual({ kind: "uncomputable", missing: ["rev.gross-margin"] });
     expect(u.ltvCac).toEqual({ kind: "uncomputable", missing: ["rev.gross-margin"] });
@@ -51,7 +51,7 @@ describe("unit economics", () => {
   });
 
   it("a missing CAC names the CAC; a margin that spans 0 has no payback at all", () => {
-    const noCac = unitEconomics(withEntry(exampleState(), "acq.cac", undefined), CTX_FR);
+    const noCac = unitEconomics(withEntry(noMarginState(), "acq.cac", undefined), CTX_FR);
     expect(noCac.payback).toEqual({ kind: "uncomputable", missing: ["acq.cac", "rev.gross-margin"] });
     expect(noCac.cacVariant).toBeNull();
     const span = withEntry(exampleState(), "rev.gross-margin", { status: "estimated", estimate: { low: -5, high: 10, basis: "team-hunch" }, updatedAt: "2026-09-20T10:00:00.000Z" });

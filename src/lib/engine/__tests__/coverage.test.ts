@@ -49,8 +49,8 @@ function prng(seed: number): () => number {
 }
 
 describe("coverage", () => {
-  it("the §6.0 example: 11 found · 2 approximate · 1 requested · 3 missing, of 17", () => {
-    expect(coverage(exampleState().snapshots[0]!)).toEqual({ denominator: 17, found: 11, approximate: 2, missing: 3, inProgress: 1, requested: 1, todo: 0 });
+  it("the §6.0 example: 11 found · 3 approximate · 1 requested · 2 missing, of 17 (the margin estimated since C50)", () => {
+    expect(coverage(exampleState().snapshots[0]!)).toEqual({ denominator: 17, found: 11, approximate: 3, missing: 2, inProgress: 1, requested: 1, todo: 0 });
   });
 
   it("the sum invariant holds for the full cartesian product of statuses over any three consecutive numbers (7³ each)", () => {
@@ -99,12 +99,13 @@ describe("coverage", () => {
 describe("coverage per motion, and the union", () => {
   it("the §18.9 example: self-serve 11 of 17, sales-assisted 10 of 15, the union 21 of 32 — the link left out", () => {
     const snapshot = hybridState().snapshots[0]!;
-    expect(motionCoverage(snapshot, "plg")).toEqual({ denominator: 17, found: 11, approximate: 2, missing: 3, inProgress: 1, requested: 1, todo: 0 });
+    // Self-serve's margin estimated since C50 (A20.d T6): one approximate more, one missing less.
+    expect(motionCoverage(snapshot, "plg")).toEqual({ denominator: 17, found: 11, approximate: 3, missing: 2, inProgress: 1, requested: 1, todo: 0 });
     expect(motionCoverage(snapshot, "slg")).toEqual({ denominator: 15, found: 10, approximate: 1, missing: 2, inProgress: 2, requested: 1, todo: 1 });
-    expect(setupCoverage(snapshot, hybridState().setup)).toEqual({ denominator: 32, found: 21, approximate: 3, missing: 5, inProgress: 3, requested: 2, todo: 1 });
-    // « On documente 24 chiffres sur 32 » (§18.9.2): found + approximate.
+    expect(setupCoverage(snapshot, hybridState().setup)).toEqual({ denominator: 32, found: 21, approximate: 4, missing: 4, inProgress: 3, requested: 2, todo: 1 });
+    // « On documente 25 chiffres sur 32 » (§18.9.2, 24 before C50): found + approximate.
     const union = setupCoverage(snapshot, hybridState().setup);
-    expect(union.found + union.approximate).toBe(24);
+    expect(union.found + union.approximate).toBe(25);
   });
 
   it("the link is optional: its status never moves the coverage", () => {

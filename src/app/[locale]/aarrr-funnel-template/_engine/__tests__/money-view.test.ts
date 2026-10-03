@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { deriveEngine } from "@/lib/engine/derive";
 import type { EngineState, LeverId } from "@/lib/engine/types";
-import { estimated, exampleState, filmState, hybridState, measured, ratio, salesAssistedState, withEntry } from "@/lib/engine/__tests__/fixtures";
+import { estimated, exampleState, filmState, hybridState, measured, ratio, salesAssistedState, withEntry, noMarginState } from "@/lib/engine/__tests__/fixtures";
 import { CTX_EN, CTX_FR, EN, FR } from "@/lib/engine/__tests__/props";
 import { leverMoneyView, moneyView } from "../money-view";
 
@@ -75,7 +75,7 @@ describe("the money block — the other states", () => {
   });
 
   it("no margin (the §6.0 example): « ? », what is missing, why nothing is computed on revenue — and the spend still known", () => {
-    const m = viewFr(exampleState());
+    const m = viewFr(noMarginState());
     expect(m.worth.tag).toBeNull();
     expect(m.worth.finding).toBe(`On ne peut pas encore dire ce que rapporte un nouveau client${N}: il manque la marge brute.`);
     expect(m.worth.bars?.brings).toMatchObject({ value: "?", amount: null, unknown: "il manque la marge brute" });

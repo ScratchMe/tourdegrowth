@@ -1560,7 +1560,7 @@ tous ses tests tiennent). L'assisté et la liaison sont neufs.
 | `slg.rev.win-rate` | measured · HubSpot | 18 ÷ 75 opportunités conclues (juin à août) = 24 % |
 | `slg.rev.acv` | measured · HubSpot | 432 000 € ÷ 18 contrats = 24 000 € |
 | `slg.rev.arpa` | measured · Stripe | 180 000 € de MRR ÷ 100 clients assistés (fin août) = 1 800 € |
-| `rev.gross-margin` (libre-service) | **missing** · no-access (déjà dans §6.0) | — |
+| `rev.gross-margin` (libre-service) | **missing** · no-access (déjà dans §6.0) ; **estimated · 70 à 80 %** depuis C50 (2026-10-03, voir sous §18.9.6) | — |
 | `slg.rev.gross-margin` | **missing** · no-access · une réunion · finance | — |
 | `link.pql-handoff` | measured · HubSpot · « espace avec 3 membres actifs » | 31 ÷ 130 opportunités créées = 24 % (23,8) |
 
@@ -1681,6 +1681,12 @@ se lit contre ses cibles.
 - Titre : les deux marges manquent ⇒ « **On ne peut pas encore dire ce que
   rapporte un client** : la marge brute n'est mesurée dans aucune des deux
   motions. » (Q4 : deux marges, deux entrées manquantes.)
+- **Depuis C50 (2026-10-03)**, la marge du libre-service est estimée (70 à
+  80 %) : la colonne du libre-service a son argent (payback 5 à 6 mois, LTV:CAC
+  6 à 6,9) et le titre devient « Un client libre-service rembourse son coût
+  d'acquisition en **5 à 6 mois**. Côté assisté, **on ne peut pas encore le
+  dire** : il manque la marge brute de l'assisté. » (`unitEconomicsOneSidePlg`).
+  Le cas des deux marges manquantes se teste sur `hybridNoMarginState()`.
 - Pied : `cac-variants-differ` (« Les deux CAC ne comptent pas les mêmes
   dépenses : média seul en libre-service, tout chargé en assisté. »).
 - **Cas de test**, pas de l'exemple affiché : avec une marge de 75 % (et une

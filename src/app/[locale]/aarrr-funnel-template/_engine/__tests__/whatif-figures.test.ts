@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { FILM_LEVERS, exampleState, filmState, salesAssistedState } from "@/lib/engine/__tests__/fixtures";
+import { FILM_LEVERS, exampleState, filmState, salesAssistedState, noMarginState } from "@/lib/engine/__tests__/fixtures";
 import { CTX_EN, CTX_FR, EN, FR } from "@/lib/engine/__tests__/props";
 import type { EngineState, LeverId } from "@/lib/engine/types";
 import { leverSumView, moneyAssumptions, whatIfFigureGroups, type FigureRow } from "../whatif-figures";
@@ -54,7 +54,7 @@ describe("whatIfFigureGroups", () => {
   });
 
   it("no margin (the §6.0 example): « ? » and what is missing on every row it stops, never 0; the spend still known", () => {
-    const g = groups(exampleState());
+    const g = groups(noMarginState());
     for (const id of ["ltv", "ltvCac", "gap", "payback", "after", "cash"]) expect(rowOf(g, id)).toMatchObject({ today: "?", missing: "il manque la marge brute" });
     expect(rowOf(g, "spend")).toMatchObject({ today: nb("21^000^€"), missing: null });
   });
@@ -93,6 +93,6 @@ describe("leverSumView", () => {
 describe("moneyAssumptions", () => {
   it("the LTV's and the cash's rules when the tables print them; none without a margin", () => {
     expect(moneyAssumptions(fr(filmState()), "plg", {})).toEqual([FR.strings.scenario.assumeLtv, FR.strings.scenario.assumeCash]);
-    expect(moneyAssumptions(fr(exampleState()), "plg", {})).toEqual([]);
+    expect(moneyAssumptions(fr(noMarginState()), "plg", {})).toEqual([]);
   });
 });
