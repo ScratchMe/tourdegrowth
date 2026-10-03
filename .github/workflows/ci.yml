@@ -1,7 +1,8 @@
 # REVIEW.md R-05 — the repo had no CI at all: 19 PRs were merged without a
 # single automated check, while Vitest and tsc only ever ran when someone
-# remembered to. Vercel builds every push, but a build passing says nothing
-# about the tests.
+# remembered to. Vercel builds what reaches main (and, since 2026-10-03,
+# nothing else: VERCEL.md §1.10), but a build passing says nothing about the
+# tests.
 #
 # One job, not several: a side project pays for `npm ci` once, and the steps
 # below are ordered cheapest-first so a broken type or a failing test reports

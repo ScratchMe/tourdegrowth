@@ -182,11 +182,14 @@ Trois faits qui changent l'écriture de la commande :
 - **Le clone est superficiel : `git clone --depth=10`.** Un SHA plus ancien
   que dix commits n'est pas dans le clone, `git diff` échoue, donc le build
   se déclenche. Sûr, mais à savoir avant de déboguer.
-- **Un build sauté ne crée aucun déploiement** — « No build minutes consumed,
-  no new production deployment created ». Donc aucune fonction, donc aucune
-  contribution à Functions Storage : l'économie est réelle. (Ne pas
-  confondre avec un build **annulé en cours**, qui a déjà exécuté la commande
-  de build et compte, lui, dans les quotas.)
+- **Un build sauté ne produit aucune fonction** — « No build minutes consumed,
+  no new production deployment created ». Donc aucune contribution à
+  Functions Storage : l'économie est réelle. (Ne pas confondre avec un build
+  **annulé en cours**, qui a déjà exécuté la commande de build et compte, lui,
+  dans les quotas.) **Mais l'entrée de déploiement existe** : elle est créée
+  avant que la commande tourne, apparaît comme annulée, et compte dans le
+  quota de déploiements du jour (§1.12). Pour qu'une branche n'en crée pas du
+  tout, c'est `git.deploymentEnabled` (§1.10).
 
 Forme recommandée : ne sortir en 0 que sur une détermination **positive et
 vérifiée**, et sortir en 1 partout ailleurs, y compris sur le chemin d'erreur.
@@ -276,16 +279,45 @@ Deux faits à garder en tête :
 
 Chaque push de branche déclenche un déploiement de prévisualisation. Si la
 vérification se fait en local contre un build de production puis en CI, ces
-prévisualisations ne servent à rien et consomment le quota :
+prévisualisations ne servent à rien et consomment le quota. **Le bon réglage
+est `git.deploymentEnabled`**, qui empêche le déploiement d'exister :
 
 ```json
-{ "ignoreCommand": "if [ \"$VERCEL_ENV\" = \"production\" ]; then exit 1; else exit 0; fi" }
+{ "git": { "deploymentEnabled": { "**": false, "main": true } } }
 ```
 
-**Corollaire utile** : une fois cette ligne posée, **un push de branche ne
-construit plus rien**. Travailler et pousser sur une branche ne coûte plus de
-Functions Storage ; seul le merge en coûte. Le push crée quand même un
-déploiement, refusé ou sauté, qui compte dans le quota du jour (§1.12).
+**`ignoreCommand` ne suffit pas.** Il tourne **après** la création du
+déploiement : le build est sauté (pas de Functions Storage), mais le
+déploiement existe, apparaît comme annulé, et compte dans le quota du jour
+(§1.12). Le 2026-10-03, un relevé fait depuis une autre session en comptait
+48 chez Tour de Growth sur 24 heures (chiffre rapporté, pas relu ici :
+`list_deployments` répond toujours 403, §1.9). Sur Ramille, un autre projet du
+même compte, le réglage ci-dessus a fait disparaître toute entrée à chaque
+push de branche.
+
+Trois pièges, tous payés sur Ramille :
+
+- **`"**"`, jamais `"*"`.** Les motifs sont du minimatch, où `*` s'arrête au
+  `/` : `claude/<nom>` et `dependabot/<chemin>` déploieraient encore.
+- **Nommer la branche de production.** Sans `"main": true`, la production ne
+  se déploie plus. Une branche qui répond à plusieurs motifs déploie dès que
+  l'un d'eux vaut `true` (documentation Vercel, *Git configuration*).
+- **Le réglage suit la branche.** Vercel lit le `vercel.json` du commit
+  poussé : une branche créée avant le merge continue de déployer tant qu'elle
+  n'a pas récupéré le nouveau `main`.
+
+**Le vérifier** : pousser une branche qui porte le réglage. Aucun statut
+`Vercel` ne doit apparaître sur son commit
+(`/repos/<owner>/<repo>/commits/<sha>/status`), et aucune entrée dans la liste
+des déploiements du projet. Ça se vérifie **avant le merge**, sur la branche
+même de la PR : le 2026-10-03, ses commits sont restés sans statut quatre
+minutes, quand celui d'une branche sans le réglage arrivait en cinq secondes.
+Un déploiement refusé par le quota laisse lui aussi un statut (`failure`),
+donc l'absence de statut veut bien dire « aucun déploiement ».
+
+Garder quand même la ligne de `ignoreCommand` qui saute tout ce qui n'est pas
+la production (`[ "$VERCEL_ENV" = "production" ] || exit 0`) : elle rattrape
+une branche d'avant le réglage, et un déploiement fait à la main.
 
 ### 1.11 Une variable d'environnement modifiée n'atteint que les nouveaux déploiements
 
@@ -320,7 +352,9 @@ temps ; si aucun merge n'arrive, il faut un « Redeploy » du dernier commit de
 build, donc avant `ignoreCommand` (§1.6). Chaque push de branche crée un
 aperçu, doc seule comprise : le même jour, la PR de doc #225 a reçu le même
 refus, en commentaire du robot Vercel. Plusieurs sessions qui poussent leurs
-branches en parallèle le vident donc sans rien merger.
+branches en parallèle le vident donc sans rien merger. **Corrigé le
+2026-10-03** par `git.deploymentEnabled` (§1.10) : un push de branche ne crée
+plus de déploiement, seul un merge sur `main` en crée un.
 
 ---
 
