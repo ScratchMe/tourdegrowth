@@ -56,8 +56,8 @@ for (const [locale, width] of [
     });
 
     const months = (n: number) => (locale === "fr" ? `${n} mois` : `${n} months`);
-    const floor = () => M.warnFloor[locale].replace("{payback}", months(32)).replace("{n}", "30");
-    const runway = (n: number) => M.warnRunway[locale].replace("{payback}", months(32)).replace("{n}", String(n));
+    const floor = () => M.warnFloor[locale].replace("{payback}", months(32)).replace("{n}", months(30));
+    const runway = (n: number) => M.warnRunway[locale].replace("{payback}", months(32)).replace("{n}", n === 1 ? (locale === "fr" ? "1\u00a0mois" : "1 month") : months(n));
 
     test("typed in Settings, the warning holds the payback against it; erased, against the 30-month floor", async ({ page }) => {
       await openBoard(page, locale);
@@ -79,7 +79,12 @@ for (const [locale, width] of [
       await page.keyboard.press("Escape");
       await expect(page.getByRole("dialog")).toHaveCount(0);
 
+      // The box's unit follows the number: « 1 month », "24 months" (A11.1: never « 1 months »).
+      await box.fill("1");
+      // The suffix follows the label and its « optional »: the box's value is not part of the text.
+      if (locale === "en") await expect(cash).toContainText(/optional\s*month(?!s)/);
       await box.fill("24");
+      if (locale === "en") await expect(cash).toContainText(/optional\s*months/);
       await page.getByTestId("engine-settings-save").click();
       await expect(page.getByTestId("engine-board")).toBeVisible();
       await expectText(warning, runway(24));

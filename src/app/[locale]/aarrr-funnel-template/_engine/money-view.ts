@@ -4,10 +4,10 @@ import {
   approxRounding,
   fillTemplate,
   formatApproxMoneyInterval,
+  formatDuration,
   formatDurationInterval,
   formatInterval,
   formatMonth,
-  formatNumber,
   pairPrecision,
 } from "@/lib/engine/format";
 import { sub } from "@/lib/engine/interval";
@@ -175,7 +175,8 @@ export function moneyView(
     const runway = k.warning.limit.kind === "runway";
     const maybe = k.warning.verdict === "maybe";
     const template = runway ? (maybe ? w.warnRunwayMaybe : w.warnRunway) : maybe ? w.warnFloorMaybe : w.warnFloor;
-    warning = { text: fillTemplate(template, { payback: months(k.payback), n: formatNumber(k.warning.limit.months, ctx.locale) }), maybe };
+    // The limit with its unit, in its grammatical number: « 24 mois », "1 month" (a runway can be typed since A20.d T5).
+    warning = { text: fillTemplate(template, { payback: months(k.payback), n: formatDuration(k.warning.limit.months, "months", ctx, u) }), maybe };
   }
 
   return {

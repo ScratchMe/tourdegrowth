@@ -128,7 +128,7 @@ export function unitMoney(input: {
   if (k.warning && k.payback) {
     const maybe = k.warning.verdict === "maybe";
     const template = k.warning.limit.kind === "runway" ? (maybe ? w.unitWarnRunwayMaybe : w.unitWarnRunway) : maybe ? w.unitWarnFloorMaybe : w.unitWarnFloor;
-    rows.push({ row: "warning", maybe: maybe ? "true" : "", text: fillTemplate(template, { payback: months(k.payback), n: formatNumber(k.warning.limit.months, ctx.locale) }) });
+    rows.push({ row: "warning", maybe: maybe ? "true" : "", text: fillTemplate(template, { payback: months(k.payback), n: formatDuration(k.warning.limit.months, "months", ctx, u) }) });
   }
 
   // --- What the cash figure assumes, printed with it ---

@@ -24,7 +24,7 @@ import { Select } from "@/components/core/Select";
 import { TextField } from "@/components/core/TextField";
 import { monthsEndingAt } from "@/lib/forms/date";
 import { isUnreadableNumber } from "@/lib/forms/number";
-import { moneyUnit, percentUnit } from "./sources";
+import { moneyUnit, percentUnit, wordUnit } from "./sources";
 import { DEFAULT_CURRENCY, DEFAULT_WINDOWS } from "./start";
 import { EngineTerm } from "./EngineTerm";
 import styles from "./Screens.module.css";
@@ -532,8 +532,7 @@ export function Setup({
             onChange={setRunway}
             locale={locale}
             digits={3}
-            suffix={st.runwayMonths}
-            unitName={st.runwayUnit}
+            {...wordUnit({ one: st.runwayMonth, other: st.runwayMonths }, locale, runway)}
             error={tried && runwayOut ? fill(st.runwayRange, { max: RUNWAY_MAX_MONTHS }) : undefined}
             parseError={strings.workbench.notANumber}
           />
