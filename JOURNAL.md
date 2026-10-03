@@ -858,3 +858,55 @@ Huitième étape du portage du retour 07, drapeau fermé, et la troisième de T3
 - `next build` avec les variables de la CI ;
 - les **301 specs** du moteur, des cibles, de l'accessibilité et de la plateforme sur le build final : 300 passées, une ignorée par construction ; 913 specs au total (`--list`, hors captures temporaires) ;
 - **captures** de l'écran avant et après une copie, en français et en anglais, à 1 280, 390 et 320 px, sans défilement horizontal : la carte copiée ne dit sa confirmation qu'une fois, et quand le presse-papiers refuse, le texte de secours s'affiche sous la carte.
+
+## A18 T3.d : les cibles et les nombres partagés dans les Réglages (2026-10-03, #PR)
+
+Neuvième étape du portage du retour 07, drapeau fermé, et la dernière de T3 : **les Réglages reçoivent ce que le parcours a quitté**, les cibles de l'écran « Cibles » (T3.a) et la base du pas à pas (« Ta base », partie avec T3.b). T3 est fini.
+
+**Maintenant** :
+- **« Cibles »** : une case par chiffre qui peut nommer une étape (C1), libellée par son nom, son `oneLiner` en aide, un groupe par moteur coché (le titre du moteur seulement dans l'hybride). Les mêmes cases que sur l'écran « Cibles » et sur l'écran de chacun de ces chiffres.
+- **« Nombres partagés »** : un champ par compte que plusieurs chiffres utilisent (`settingsSharedCounts`, testé) : les inscrits de la cohorte et du mois en libre-service ; les affaires gagnées et les clients en assisté, et les opportunités créées dans l'hybride, où le lien les porte aussi. Le libellé est celui du catalogue dans le premier chiffre qui le porte, ses mois remplis (`{period}`) ; l'aide dit « Utilisé par {list}. », les noms en milieu de phrase.
+- **Écrits avec le reste** : tapés dans les Réglages, cibles et nombres attendent « Enregistrer les réglages » comme tous les autres champs, et « Annuler » les laisse tomber. L'écran « Cibles » et l'écran d'un chiffre, eux, écrivent toujours en quittant la case. Un nombre changé s'écrit dans la base et dans chaque chiffre qui le porte (`withSettingsNumbers`, sur `withSharedCount`), dans la même écriture que les réglages.
+- **Les gardes** : une case illisible arrête l'enregistrement, le focus dessus (A15.2) ; un nombre partagé à zéro, négatif ou effacé aussi, avec « Un nombre entier plus grand que zéro. » (la garde d'A15.9, partie avec la base).
+- **`settings.lead`** sous le titre : « Tout ici a une valeur par défaut. Change-la quand un chiffre le demande. »
+- **`targetsStart.lead`** dit maintenant « ou dans les Réglages ».
+
+**Ce qui n'y est pas** :
+- **Les deux MRR** restent sur l'écran de leurs chiffres : un montant dans une devise se tape avec le chiffre auquel il appartient.
+- **Un compte qu'un seul chiffre porte** n'est pas offert : en assisté seul, les opportunités créées (leur second chiffre est le lien de l'hybride). La fiche, de même, ne dit rien d'autres chiffres quand aucun ne porte le nombre.
+- **L'avertissement de fenêtre sous la fenêtre**, dès qu'elle change (le retour, `settings.windowWarn`) : les réglages le disent toujours en bas de la carte, avant l'enregistrement (`resets`, depuis le 2026-09-25). À voir avec T7.
+
+**Ce qui part** : l'action `setBase`, sans appelant depuis T3.b.
+
+**La copie** : sept clés neuves dans `settings`, « à relire ». `lead`, `targets`, `targetsLead`, `shared` et `sharedHint` viennent du retour ; `sharedLead` et `wholeCount` sont de la session.
+- `targetsLead` y disait « de chaque chiffre », ramené à « de chacun de ces chiffres », la correction de T3.a sur `targetsStart.lead`.
+- `pipeline.noTarget` passe à « in Settings » en anglais, comme `targetsStart.lead`.
+- **La relecture (`relecteur-copie`)** a trouvé six points :
+  - deux libellés de l'assisté affichaient `{period}` brut, le défaut que `text.test.ts` décrit déjà pour la fiche ;
+  - les noms des chiffres étaient en majuscule en milieu de phrase ;
+  - le compte à un seul porteur ;
+  - « de chaque chiffre » ;
+  - l'anglais de `noTarget` ;
+  - et `settings.lead`.
+- Les cinq premiers sont appliqués, et la spec de l'hybride vérifie maintenant qu'aucune accolade ne reste à l'écran.
+
+**Pour le bon à tirer A18.d** :
+- `settings.lead` n'est plus vrai des cibles ni des nombres partagés, qui n'ont pas de valeur par défaut ;
+- « Utilisé par {list}. » cite des noms sans article, et « Utilisé » se lit sous des libellés au féminin pluriel (« Opportunités créées… »).
+
+**Les specs** :
+- `engine-settings.spec.ts`, neuve (4 tests) :
+  - les cibles et les nombres tapés dans les Réglages, enregistrés avec eux, oubliés par « Annuler », le nombre écrit dans les chiffres qui le portent, axe sur la carte ;
+  - les gardes (zéro, effacé, cible illisible), rien d'écrit ;
+  - l'hybride en français (un groupe par moteur, cinq nombres, aucune accolade) ;
+  - l'assisté seul (deux nombres).
+- `engine-mobile` mesure les réglages de l'hybride à 360, 390 et 430 px, et à 320.
+- **Non-vacuité, mesurée** : l'enregistrement des réglages qui écrit l'état d'avant les nombres fait échouer le premier test sur la cible enregistrée (le 2026-10-03, sur les trois tests d'alors ; les deux autres passaient : ils n'enregistrent rien).
+- Les tests unitaires de `settingsSharedCounts` et `withSettingsNumbers` (4).
+
+**Vérifié** :
+- `tsc` et `npm run lint` propres ;
+- **3 045 tests unitaires** verts, dont les 4 des deux fonctions neuves ;
+- `next build` avec les variables de la CI ;
+- les **304 specs** du moteur, des cibles, de l'accessibilité et de la plateforme sur le build final : 303 passées, une ignorée par construction ; 917 specs au total (`--list`, hors captures temporaires) ;
+- **captures** des réglages, en libre-service et en hybride, en français et en anglais, à 1 280, 390 et 320 px, sans défilement horizontal : les libellés de l'assisté disent leurs mois, les aides leurs chiffres en minuscule.

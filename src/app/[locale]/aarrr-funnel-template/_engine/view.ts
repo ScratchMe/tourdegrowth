@@ -1,5 +1,5 @@
 import type { EngineStrings, ResolvedBridge, ResolvedDerived, ResolvedMetric } from "@/lib/engine/strings";
-import type { EngineCalcContext, EngineDerived, EngineState, LeverId, MetricEntry, MetricId, RoleId, SharedCount } from "@/lib/engine/types";
+import type { EngineCalcContext, EngineDerived, EngineState, LeverId, MetricEntry, MetricId, RoleId } from "@/lib/engine/types";
 import type { StoredResult } from "@/lib/quiz/storage";
 import type { CommitResult } from "./engine-store";
 
@@ -34,9 +34,6 @@ export interface EngineView {
 export interface EngineActions {
   saveEntry: (id: MetricId, entry: MetricEntry) => CommitResult;
   setTarget: (id: MetricId, target: number | null) => void;
-  /** A count several numbers share, typed once (shared-counts.ts): the base and every entry carrying it. */
-  /** One write for all the counts given: see EngineWorkbench. */
-  setBase: (counts: Partial<Record<SharedCount, number>>) => void;
   /** Sales-assisted: the quarter's open pipeline, in ACV, for the month on screen (§19.4); `null` takes it off. */
   setPipelineOpen: (open: number | null) => void;
   /**
