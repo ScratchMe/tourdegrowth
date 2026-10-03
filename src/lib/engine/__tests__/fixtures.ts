@@ -1,7 +1,7 @@
 import type { StoredResult } from "../../quiz/storage";
 import { exampleEngine, exampleMetrics } from "../example";
 import { previousMonth } from "../cohort";
-import type { CandidateId, EngineState, MetricEntry, MetricId, MetricValue, Snapshot, SourceRef, ToolId } from "../types";
+import type { CandidateId, EngineState, LeverId, MetricEntry, MetricId, MetricValue, Snapshot, SourceRef, ToolId } from "../types";
 
 /**
  * The engine spec's §6.0 example — ONE data set for every unit test and
@@ -69,6 +69,31 @@ export function hybridState(): EngineState {
 export function salesAssistedState(): EngineState {
   return exampleEngine(HYBRID_WORDS, { plg: false, slg: true });
 }
+
+/**
+ * The SaaS of the film « Le moteur » (`marketing/motion/README.md`, engine
+ * spec §20.10): the §6.0 example with a gross margin of 75 %, churn 6 %,
+ * contraction 1 % and expansion 2 % a month, 6 % who pay, and a CAC of
+ * 1 900 € typed as an amount — so the new payers are the 820 sign-ups × 6 %.
+ * Its customer costs more than they bring in (LTV 1 500 €): the money of A20
+ * in every state. Shared by `money.test.ts` and the brief 09 captures.
+ */
+export function filmState(): EngineState {
+  let state = exampleState();
+  const set = (id: MetricId, value: MetricValue) => {
+    state = withEntry(state, id, measured(value));
+  };
+  set("rev.gross-margin", ratio(36_000, 48_000));
+  set("ret.logo-churn", ratio(24, 400));
+  set("rev.contraction", ratio(468, 46_800));
+  set("rev.expansion", ratio(936, 46_800));
+  set("rev.paid-conversion", ratio(48, 800));
+  set("acq.cac", { kind: "amount", amount: 1_900 });
+  return state;
+}
+
+/** The film's three levers: churn 6 → 4 %, expansion 2 → 3 %, activation 18 → 24 %. */
+export const FILM_LEVERS: Partial<Record<LeverId, number>> = { "ret.logo-churn": 4, "rev.expansion": 3, "act.rate": 24 };
 
 /** The state with one entry replaced (or removed with `undefined`). */
 export function withEntry(state: EngineState, id: MetricId, entry: MetricEntry | undefined): EngineState {

@@ -6,7 +6,7 @@ import { buildSlgScenario, slgMrrPath } from "../slg-scenario";
 import { addBoth, buildTotal, sumPaths, timesTwelve } from "../total";
 import type { EngineState, Interval, LeverId } from "../types";
 import { lifetimeMonths, unitEconomics } from "../unit-economics";
-import { exampleState, hybridState, measured, ratio, withEntry } from "./fixtures";
+import { FILM_LEVERS, exampleState, filmState, hybridState, measured, ratio, withEntry } from "./fixtures";
 import { CTX_FR } from "./props";
 
 /**
@@ -36,28 +36,6 @@ import { CTX_FR } from "./props";
  */
 
 const mid = (i: Interval | null | undefined) => (i ? (i.lo + i.hi) / 2 : Number.NaN);
-
-/**
- * The film's SaaS (`marketing/motion/README.md`): MRR 48 000 €, ARPA 120 €,
- * gross margin 75 %, churn 6 %, contraction 1 %, expansion 2 % a month, 820
- * sign-ups a month, 6 % who pay, activation 18 %, CAC 1 900 € — typed as an
- * amount, so the new payers are the sign-ups × the paid conversion (49.2).
- */
-function filmState(): EngineState {
-  let s = exampleState();
-  const set = (id: Parameters<typeof withEntry>[1], value: Parameters<typeof measured>[0]) => {
-    s = withEntry(s, id, measured(value));
-  };
-  set("rev.gross-margin", ratio(36_000, 48_000));
-  set("ret.logo-churn", ratio(24, 400));
-  set("rev.contraction", ratio(468, 46_800));
-  set("rev.expansion", ratio(936, 46_800));
-  set("rev.paid-conversion", ratio(48, 800));
-  set("acq.cac", { kind: "amount", amount: 1_900 });
-  return s;
-}
-
-const FILM_LEVERS: Partial<Record<LeverId, number>> = { "ret.logo-churn": 4, "rev.expansion": 3, "act.rate": 24 };
 
 describe("the film's SaaS, through the engine's own model", () => {
   const today = buildScenario(filmState(), {}, CTX_FR).today.kpis;
