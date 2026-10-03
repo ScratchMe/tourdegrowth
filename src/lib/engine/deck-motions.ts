@@ -118,8 +118,8 @@ export function totalSums(total: TotalView, state: EngineState, strings: Words, 
 }
 
 /**
- * The link's sentence (§18.6.3): « {n} des {m} opportunités assistées
- * viennent de comptes du libre-service (juin à août 2026). » Counted when
+ * The link's sentence (§18.6.3, the return 07's since A18.d): « {n}
+ * opportunités sont venues du libre-service (juin à août 2026). » Counted when
  * the link was entered as counts; a share alone gives « ~n » of the
  * opportunities. null without the link or without the opportunities: a
  * share of nothing says nothing. A share of the pipeline, never an
@@ -144,7 +144,7 @@ export function linkSentence(total: TotalView, state: EngineState, strings: Word
   const range = periodRangeOf(shapeOf("link.pql-handoff"), entryOf(snapshot, "link.pql-handoff"), snapshot, state.setup, ctx.today);
   const period = range ? formatMonthRange(range, ctx.locale, strings.units) : "";
   const key = numbered("link", point(count), ctx.locale);
-  return fillTemplate(strings.total[key], { n, m: formatInterval(point(m), "ratio", ctx, strings.units), period });
+  return fillTemplate(strings.total[key], { n, period });
 }
 
 /**

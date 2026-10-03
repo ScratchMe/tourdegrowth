@@ -1253,7 +1253,20 @@ Sur chacun, à 1 280 et 390 px : aucune violation axe sérieuse ou critique (le 
 
 **Les tests** : les deux qui citaient l'ancienne liaison, la garde des slides (`hybrid.twoEngines` est maintenant sur une slide), la garde des comparatifs (une seule phrase admise, au masculin) et le titre d'une spec.
 
+**La relecture (`relecteur-copie`)** :
+- **bloquant, corrigé** : les deux libellés d'effacement n'avaient que le marqueur d'en-tête du fichier. Ils ont maintenant le leur ;
+- **appliqué** :
+  - des marqueurs traçables (« retouché le 2026-10-03 (A18.d) ») sur chaque chaîne réécrite ;
+  - l'exception de `goNumber` à la règle de l'impératif, écrite pour qu'on ne la « corrige » pas ;
+  - la clé `m` morte dans `linkSentence`, retirée ;
+- **pour le bon à tirer**, posés sur leurs cartes :
+  - `linkNote` dit « ces comptes », qui n'a plus d'antécédent depuis que la liaison parle d'opportunités. Une première correction a été retirée : la note s'imprime sur les slides, et golden-v2 l'a refusée, à raison, puisque seule une décision fait bouger une slide ;
+  - `asks.done` dit encore « passe au chiffre suivant » ;
+  - « moteur » prend deux sens dans la même phrase de la confidentialité ;
+  - « motion » reste dans le glossaire anglais (le terme GTM usuel) et dans `marketing/` (la fiche de faits, deux posts) : hors du moteur, à trancher.
+
 **Vérifié** :
 - `tsc` et `npm run lint` propres ;
 - **3 061 tests unitaires** verts ;
-- `next build` avec les variables de la CI.
+- `next build` avec les variables de la CI ;
+- les **272 specs** du moteur et de la confidentialité, toutes passées sur ce build.

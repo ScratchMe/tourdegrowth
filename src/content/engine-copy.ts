@@ -370,7 +370,9 @@ export const ENGINE_COPY = {
     leadQuick: { fr: "Les plus rapides d'abord : tu le trouves seul, en cinq minutes environ.", en: "The quickest first: this one you can find on your own, in about five minutes." },
     leadLong: { fr: "Plus de chiffre rapide : tu le trouves seul, en une heure environ.", en: "No quick number left: this one you can find on your own, in about an hour." },
     leadBuild: { fr: "Plus de chiffre rapide : celui-ci est à construire, compte plus d'une heure.", en: "No quick number left: this one needs building, count on more than an hour." },
-    // A18.d (Antoine, 2026-10-03) : la version du retour 07, à la place de « Passe au chiffre suivant : {number} → ».
+    // TODO: à relire (convention 6) — A18.d (Antoine, 2026-10-03) : la version du retour 07, à la place de « Passe au chiffre
+    // suivant : {number} → ». Exception voulue à la règle des appels fléchés à l'impératif (en-tête du fichier) : ne pas
+    // la « corriger ». `asks.done` dit encore « passe au chiffre suivant », au bon à tirer de trancher.
     goNumber: { fr: "Chiffre suivant : {number} →", en: "Next number: {number} →" },
     /** Rank 5, one number to ask for: its screen, « Je le demande » open. */
     leadAskOne: { fr: "À demander à quelqu'un d'autre : {number}. Envoie la demande maintenant, remplis le reste en attendant.", en: "To ask someone else: {number}. Send the request now, fill in the rest while you wait." },
@@ -495,7 +497,9 @@ export const ENGINE_COPY = {
     deck: { fr: "Prépare tes slides →", en: "Prepare your slides →" },
     save: { fr: "Sauvegarder (.json)", en: "Save (.json)" },
     import: { fr: "Importer un fichier", en: "Import a file" },
-    // A18.d (Antoine, 2026-10-03, option 2) : les deux gestes gardés, renommés pour se distinguer de « Supprimer ce moteur ».
+    // TODO: à relire (convention 6) — renommé le 2026-10-03 (A18.d, décision 3, option 2 d'Antoine) ; avant « Tout effacer ».
+    // Les deux gestes gardés, celui-ci renommé pour se distinguer de « Supprimer ce moteur ». La carte proposait « Effacer
+    // tout l'appareil », qui se lit comme une réinitialisation du téléphone.
     erase: { fr: "Tout effacer sur cet appareil", en: "Erase everything on this device" },
   },
 
@@ -1072,7 +1076,8 @@ export const ENGINE_COPY = {
     stageLevel: { fr: "rien ne freine", en: "nothing holds it back" },
     stageNotEnough: { fr: "pas assez de cibles", en: "not enough targets" },
     /**
-     * `{period}`: the three months, bare (« juin à août 2026 »). A18.d (Antoine, 2026-10-03) : la version du retour 07
+     * `{period}`: the three months, bare (« juin à août 2026 »). TODO: à relire (convention 6) — A18.d (Antoine, 2026-10-03) :
+     * la version du retour 07
      * (« {n} opportunités sont venues du libre-service en août 2026 »), sa période entre parenthèses parce qu'elle tient
      * trois mois ; elle remplace « {n} des {m} opportunités assistées viennent de comptes du libre-service ».
      */
@@ -1084,11 +1089,15 @@ export const ENGINE_COPY = {
       fr: "{n} opportunité est venue du libre-service ({period}).",
       en: "{n} opportunity came from self-serve ({period}).",
     },
+    // TODO: à relire (convention 6) — relevé le 2026-10-03 (A18.d) : depuis que la liaison parle d'opportunités venues du
+    // libre-service, « ces comptes » n'a plus d'antécédent. La note s'imprime sur les slides (golden-v2) : la changer est
+    // une décision du bon à tirer nº9, pas une retouche.
     linkNote: {
       fr: "Une part du pipeline, pas une attribution : on ne sait pas combien de ces comptes auraient signé sans le libre-service.",
       en: "A share of the pipeline, not an attribution: we don't know how many of these accounts would have signed without self-serve.",
     },
     /** The `total` slide's footer, rule S8 printed (C25 Q3). */
+    // TODO: à relire (convention 6) — retouché le 2026-10-03 (A18.d) : « motion » → « moteur ».
     footer: {
       fr: "MRR à fin {month} · un client compte dans le moteur qui a signé son contrat en cours · sources : {tools}",
       en: "MRR at the end of {month} · a customer counts in the engine that signed their current contract · sources: {tools}",
@@ -1973,6 +1982,7 @@ export const ENGINE_COPY = {
     unitUncomputable: { fr: "incalculable — manque : {input}", en: "can't be computed — missing: {input}" },
     /** The footer when a margin is the company-wide one (C25 Q4): `{motion}` a `hybrid.motionSubject`. */
     unitCompanyWide: { fr: "marge globale reprise dans {motion}", en: "company-wide margin used for {motion}" },
+    // TODO: à relire (convention 6) — retouché le 2026-10-03 (A18.d, Antoine) : « motion » → « moteur ».
     unitCompanyWideBoth: { fr: "marge globale reprise dans les deux moteurs", en: "company-wide margin used for both engines" },
     /** The appendix's third group, after each motion's (§18.8.2). */
     annexLink: { fr: "Liaison", en: "Link" },
@@ -2223,6 +2233,7 @@ export const ENGINE_COPY = {
       fr: "Côté libre-service, **on ne peut pas encore le dire** : il manque {input}. Un client assisté rembourse son coût d'acquisition en **{m}**.",
       en: "On the self-serve side, **we can't say yet**. Missing: {input}. A sales-assisted customer pays back their acquisition cost in **{m}**.",
     },
+    // TODO: à relire (convention 6) — retouché le 2026-10-03 (A18.d, Antoine) : « motion » → « moteur ».
     unitEconomicsNoneMargins: {
       fr: "**On ne peut pas encore dire ce que rapporte un client** : la marge brute n'est mesurée dans aucun des deux moteurs.",
       en: "**We can't yet say what a customer is worth**: gross margin isn't measured for either engine.",
@@ -2287,6 +2298,7 @@ export const ENGINE_COPY = {
     },
     // TODO: à relire (convention 6) — neuf le 2026-10-01 (A7.3.c S2, ENGINE.md §18.8.3) : the hybrid's and sales-assisted's objections.
     /** `{i}`, `{j}`: the two leak slides, self-serve's first. */
+    // TODO: à relire (convention 6) — retouché le 2026-10-03 (A18.d, Antoine) : « motion » → « moteur ».
     whyNotCompare: {
       fr: "Pourquoi ne pas comparer les deux ? — Les deux moteurs vendent à des segments différents : chacun se lit contre ses cibles (slides {i} et {j}).",
       en: "Why not compare the two? — The two engines sell to different segments: each is read against its own targets (slides {i} and {j}).",
@@ -2312,6 +2324,7 @@ export const ENGINE_COPY = {
       fr: "Et le cycle ? — Cycle médian de {c}, plus long que les trois mois de la fenêtre : le CAC du trimestre divise sa dépense par des clients venus des dépenses d'avant. C'est un ordre de grandeur.",
       en: "What about the cycle? — Median cycle of {c}, longer than the three-month window: this quarter's CAC divides its spend by customers from earlier spend. It's an order of magnitude.",
     },
+    // TODO: à relire (convention 6) — retouché le 2026-10-03 (A18.d, Antoine) : « motion » → « moteur ».
     whoCountsWhere: {
       fr: "Qui compte où ? — Un client compte dans le moteur qui a signé son contrat en cours. Un compte du libre-service signé par un commercial compte en assisté, et ce passage n'est pas un départ du libre-service.",
       en: "Who counts where? — A customer counts in the engine that signed their current contract. A self-serve account signed by a salesperson counts as sales-assisted, and that move isn't a self-serve departure.",
@@ -2755,6 +2768,7 @@ export const ENGINE_COPY = {
     previousLeakShared: { fr: "En {month}, la fuite se partageait entre {list}.", en: "In {month}, the leak was shared between {list}." },
   },
   erase: {
+    // TODO: à relire (convention 6) — renommé le 2026-10-03 (A18.d, décision 3) ; avant « Tout effacer ». Le même que `actions.erase`.
     title: { fr: "Tout effacer sur cet appareil", en: "Erase everything on this device" },
     body: {
       fr: "Tes chiffres seront supprimés de cet appareil, et rien d'autre ne les garde. Sauvegarde-les d'abord si tu veux les retrouver.",

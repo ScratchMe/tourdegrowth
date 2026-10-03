@@ -131,7 +131,8 @@ export const PRIVACY: LegalDocument = {
   // Moved for the growth engine (engine spec §11.5): two paragraphs added; then
   // 2026-09-30, its French name (« moteur de growth », A7.2); then 2026-10-01,
   // what it counts once sales-assisted is in (A7.3.c, C25 Q14); and the same
-  // day, what the complete engine adds (A14 T7, engine spec §19.12).
+  // day, what the complete engine adds (A14 T7, engine spec §19.12); then 2026-10-03,
+  // « chaque motion » becomes « chaque moteur » (A18.d, Antoine's decision).
   updatedAt: "2026-10-03",
   intro: t(
     "Tour de Growth enregistre le strict nécessaire pour calculer ton score, te le redonner par son lien, et mesurer si l'outil fonctionne. Cette page dit précisément quoi, pourquoi, pendant combien de temps, et ce que tu peux exiger.",
