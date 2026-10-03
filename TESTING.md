@@ -111,6 +111,12 @@ bon élément — deux « défauts » se sont révélés être des artefacts de 
   d'une plage de texte, lui, mesure ce qui s'affiche.
 - **Une passe d'accessibilité automatique ne voit que le visible.** Un
   `<details>` fermé ne prouve rien : l'ouvrir dans la spec avant d'asserter.
+- **Une cible se mesure là où le doigt tombe, pas sur la boîte dessinée.** Un
+  champ de 48 px dont le bord (bordure et marge interne) appartient à la
+  boîte, et pas au champ, ne prend que 42 px sous le doigt. La mesure du
+  retour 07 comptait la boîte et ne l'a pas vu ; `elementFromPoint`, sur une
+  bande de 44 px qui traverse le milieu de la cible, l'a vu au premier
+  passage (`e2e/engine-screens.spec.ts`, 2026-10-03).
 
 ### 2.3 Lire la source servie quand c'est elle qui compte
 

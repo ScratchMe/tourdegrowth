@@ -23,9 +23,70 @@ Antoine a tranché sur la planche : **le pas à pas et le tableau ne font plus
 qu'un**, avec une seule prochaine étape et **un écran « Cibles » gardé au
 début** (C40), **une liste par étape à la place des onglets** (C41, qui
 renverse le bloc du 2026-09-27 ci-dessous), **les renommages** relus au bon à
-tirer (C42), et **le portage avant un bon à tirer unique** (C38). Le portage
-est `CHANTIERS.md` A18 ; tant qu'il n'est pas livré, les blocs ci-dessous
-décrivent le code. Le modèle de données ne change pas.
+tirer (C42), et **le portage avant un bon à tirer unique** (C38). Le modèle de
+données ne change pas.
+
+**Le moteur simplifié, porté (A18, du 2026-10-02 au 2026-10-03).** Le portage
+est `CHANTIERS.md` A18, T0 à T7, une PR par étape. Ce qui suit est le code
+d'aujourd'hui. Dans les blocs plus bas, ce qui le contredit est de
+l'histoire : le pas à pas, « Tout voir d'un coup », l'écran de la base, les
+onglets, la liste « à aller chercher » pliée.
+
+- **Un seul parcours.** La première visite pose une question, le type de
+  moteur (libre-service par défaut), sur la carte de départ (`EngineStart`).
+  Elle dit les réglages par défaut en une phrase et les ouvre sur
+  « Changer ». « Commencer » mène à l'écran « Cibles », gardé au début et
+  sautable (C40), puis au premier chiffre.
+- **Chaque chiffre a son écran** (`_engine/NumberScreen.tsx`, la fiche
+  recomposée sur `NumberSheet`). On y trouve les quatre réponses
+  (`AnswerSwitch`), « Ta définition et une note » plié, « Où le trouver »
+  plié, le piège (`TrapNote`) et « Comment il se compare »
+  (`HowItCompares`), où se saisit aussi la cible.
+- **« Enregistre et continue » mène à la prochaine étape.** Une seule
+  fonction pure la choisit (`_engine/next-step.ts`) : les chiffres de cinq
+  minutes d'abord, puis **toutes les demandes sur un écran** (`AskList`),
+  puis les chiffres d'une heure, puis les slides.
+- **La base n'a plus d'écran.** Un nombre partagé se tape dans le premier
+  chiffre qui le porte, et se propage comme avant (`shared-counts.ts`).
+- **Le tableau** :
+  - en tête, la barre du moteur (`EngineBar`, son menu « Moteur, mois et
+    fichier » replié) et la prochaine étape (`NextStep`), seule ;
+  - puis le verdict, le diagnostic, le peloton « Pour 100 inscrits » et
+    **« Tes chiffres », une liste par étape** (C41 ; `NumberList` et
+    `EngineProgress`), où chaque ligne ouvre l'écran du chiffre ;
+  - le levier « Et si » (`LeverCard`), avec le panneau complet plié derrière
+    lui ;
+  - ce que quitte le réglage est dans les **Réglages** : les cibles et les
+    nombres partagés.
+- **Ce qui est retiré** : les onglets (`stage-tabs.ts`), le pas à pas
+  (`steps-model.ts`) et « Tout voir d'un coup ».
+- **La page** (`EngineLanding`) :
+  - à la première visite, la promesse en carte avant l'appel, et la durée
+    sous l'outil ;
+  - au retour, un script en ligne ne lit que l'existence de la clé du moteur
+    (`lib/engine/known-script.ts`) et rend la page courte avant le premier
+    rendu (la CSP : `NEXTJS.md` §2.2). L'outil y commence à environ 360 px
+    au lieu de 1 267 ;
+  - le HTML prérendu, celui que lisent les moteurs de recherche, est celui
+    de la première visite.
+- **L'hybride** : « Deux moteurs, un total » une fois, en tête (`TotalBand`).
+  C'est une somme, jamais une comparaison : ni signe, ni ordre qui suive les
+  valeurs. Puis un moteur affiché à la fois, au sélecteur « Moteur affiché ».
+- **Les mots** (C42) :
+  - les renommages ;
+  - cinq « ? » : cohorte, cible, repère, fenêtre, nombre partagé. Chacun est
+    là où son mot sert d'abord, et une seule définition est ouverte à la fois
+    (`_engine/EngineTerm.tsx`).
+- **Ce qui n'a pas bougé** :
+  - le modèle de données et le fichier ;
+  - les slides : golden-v1 et golden-v2 sont inchangés, et celles qui disent
+    encore « motion » attendent A18.d.
+- **La copie neuve** porte « TODO: à relire » jusqu'au bon à tirer unique
+  A18.d, qui absorbe A7.3.d et A14.d (C38).
+- **Mesures et captures** : l'avant (B10), la proposition du retour et le
+  portage, mesurés de la même façon (`scripts/engine-density.capture.ts`),
+  sont dans le journal, à l'entrée d'A18 T7. Les captures du portage sont
+  dans `design/ds-extension-07-after/`.
 
 **Décisions prises par défaut le 2026-09-24 pour que le travail avance** —
 chacune se renverse en une phrase :
@@ -141,7 +202,8 @@ chacune se renverse en une phrase :
    l'ouverture attend le nº8 et le lot A7.3 (décision 3). À coder :
    `CHANTIERS.md` A7.4.
 
-**Refonte de la saisie (2026-09-26, sur les premiers retours d'Antoine).** Ce
+**Refonte de la saisie (2026-09-26, sur les premiers retours d'Antoine ;
+le pas à pas, la base et les onglets sont remplacés par A18, bloc plus haut).** Ce
 qui change par rapport aux §4, §7 et §8 (dans `docs/engine/v1.md`) — le reste tient :
 
 - **Deux façons de remplir.** Après le réglage, « Commencer pas à pas » (par
