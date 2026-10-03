@@ -162,7 +162,8 @@ export function AskForm({ locale, strings, metrics, state, ask, titlePreview, on
       {titlePreview ? (
         <p className={styles.askPreview} data-testid="deck-ask-preview">
           <span className={styles.askPreviewLabel}>{u.askPreview}</span>{" "}
-          <SlideText text={titlePreview} />
+          {/* The ask's title is never the verdict nor the diagnosis: its figure in ink (C53). */}
+          <SlideText text={titlePreview} accent={false} />
         </p>
       ) : null}
 
