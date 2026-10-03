@@ -210,10 +210,13 @@ export const ENGINE_COPY = {
    */
   targetsStart: {
     title: { fr: "Ton équipe a-t-elle déjà des cibles ?", en: "Does your team already have targets?" },
-    /** Only these numbers take a target (C1): the other screens have no box. The Settings receive them with A18 T3.d. */
+    /**
+     * Only these numbers take a target (C1): the other screens have no box.
+     * TODO: à relire (convention 6) — « ou dans les Réglages » ajouté le 2026-10-02 (A18 T3.d), qui les y met.
+     */
     lead: {
-      fr: "Si oui, tape-les : ce sont elles qui nomment l'étape qui freine. Sinon, passe : tu pourras en fixer plus tard, sur l'écran de chacun de ces chiffres.",
-      en: "If so, type them in: they are what names the stage that holds you back. If not, skip: you can set them later, on each of these numbers' screens.",
+      fr: "Si oui, tape-les : ce sont elles qui nomment l'étape qui freine. Sinon, passe : tu pourras en fixer plus tard, sur l'écran de chacun de ces chiffres ou dans les Réglages.",
+      en: "If so, type them in: they are what names the stage that holds you back. If not, skip: you can set them later, on each of these numbers' screens or in Settings.",
     },
     /** One label, true whether a target was typed or not: a label that changed on the box's blur changed under the pointer. */
     go: { fr: "Passe à ton premier chiffre →", en: "On to your first number →" },
@@ -1127,7 +1130,8 @@ export const ENGINE_COPY = {
       fr: "Les opportunités encore ouvertes ce mois-là, à la valeur annuelle de leurs contrats.",
       en: "Opportunities still open that month, at the annual value of their contracts.",
     },
-    noTarget: { fr: "Pour lire la couverture, ajoute l'objectif du trimestre dans les Réglages.", en: "To read the coverage, add the quarter's goal in the Settings." },
+    // TODO: à relire (convention 6) — retouché le 2026-10-02 (A18 T3.d) : l'anglais dit « in Settings », comme `targetsStart.lead`.
+    noTarget: { fr: "Pour lire la couverture, ajoute l'objectif du trimestre dans les Réglages.", en: "To read the coverage, add the quarter's goal in Settings." },
     targetLabel: { fr: "Objectif de nouveaux contrats du trimestre (en ACV)", en: "New-contract goal for the quarter (in ACV)" },
     thresholdLabel: { fr: "Seuil de couverture de l'équipe", en: "Team coverage threshold" },
     /** The threshold box's unit, read out after the number (« 3 fois l'objectif »). */
@@ -2426,6 +2430,31 @@ export const ENGINE_COPY = {
       en: "The go-live window is part of the go-live rate's definition: the number you already entered will go back to \"to do\", so you can measure it again over {n} days.",
     },
     saved: { fr: "Réglages enregistrés.", en: "Settings saved." },
+    /**
+     * TODO: à relire (convention 6) — le 2026-10-02 (A18 T3.d, le retour 07, design/ds-extension-07-return/COPY.md) :
+     * les Réglages reçoivent les cibles et les nombres partagés (« Ta base », partie avec le pas à pas en T3.b).
+     * `{list}` : les chiffres qui utilisent le nombre, en milieu de phrase (`midSentence`), joints par `grammar`
+     * (« A, B et C »). Écarts au retour : `sharedLead` et `wholeCount` n'y sont pas, la session les a écrits (le
+     * premier reprend la définition que le glossaire donnera au terme avec T6, le second la garde d'A15.9 sur un
+     * compte à zéro) ; `targetsLead` y dit « de chaque chiffre », ramené à « de chacun de ces chiffres » : seuls
+     * ceux qui peuvent nommer une étape ont une case (la relecture de T3.a, sur `targetsStart.lead`).
+     */
+    lead: {
+      fr: "Tout ici a une valeur par défaut. Change-la quand un chiffre le demande.",
+      en: "Everything here has a default. Change it when a number asks for it.",
+    },
+    targets: { fr: "Cibles", en: "Targets" },
+    targetsLead: {
+      fr: "Les mêmes cases que sur l'écran de chacun de ces chiffres, toutes au même endroit, pour une équipe qui garde ses cibles dans un tableau.",
+      en: "The same boxes as on each of these numbers' screens, all in one place, for a team that keeps its targets in a sheet.",
+    },
+    shared: { fr: "Nombres partagés", en: "Shared counts" },
+    sharedLead: {
+      fr: "Un nombre que plusieurs chiffres utilisent, saisi une fois : le modifier ici le modifie dans chacun d'eux.",
+      en: "A count several numbers use, typed once: change it here and it changes in each of them.",
+    },
+    sharedHint: { fr: "Utilisé par {list}.", en: "Used by {list}." },
+    wholeCount: { fr: "Un nombre entier plus grand que zéro.", en: "A whole number above zero." },
   },
 
   // TODO: à relire — nouveau (2026-09-25, retours d'Antoine) : l'exemple rempli.

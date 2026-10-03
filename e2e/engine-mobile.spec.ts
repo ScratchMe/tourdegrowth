@@ -17,8 +17,8 @@ test.beforeEach(async ({ context }) => {
  * spec §13.3, §18.10.3). The width checks of v1 are spread across
  * engine-board-tabs, engine-collect, engine-deck and engine-whatif; this
  * spec holds the screens the two motions add — the setup with both boxes
- * unfolded, the hybrid board, the relays, a sales-assisted sheet, the
- * collect list and the slide screen — at 360, 390 and 430, in both
+ * unfolded, the hybrid board and its settings, the relays, a sales-assisted
+ * sheet, the requests and the slide screen — at 360, 390 and 430, in both
  * languages, with 320 measured and reported but not held (§18.10.3: « à 320,
  * mesure seulement »). Then: the two columns as tall as each other at 1280,
  * axe on the hybrid board with sales-assisted's red diagnosis showing, and
@@ -67,9 +67,15 @@ async function measureScreens(page: Page, locale: "fr" | "en"): Promise<Record<s
   await skipToAsks(page);
   out.asks = await overflow(page);
 
-  // E2 — the hybrid board, then sales-assisted's stages and a sheet.
+  // E2 — the hybrid board, its settings (the targets and the shared counts of both motions, A18 T3.d), then
+  // sales-assisted's stages and a sheet.
   await seedHybrid(page, locale);
   out.board = await overflow(page);
+  await page.getByTestId("engine-bar-settings").click();
+  await expect(page.getByTestId("engine-settings-shared")).toBeVisible();
+  out.settings = await overflow(page);
+  await page.getByTestId("engine-settings-cancel").click();
+  await expect(page.getByTestId("engine-board")).toBeVisible();
   await page.getByTestId("engine-motion-selector").getByRole("button", { name: ENGINE_COPY.hybrid.motionName.slg[locale] }).click();
   await openNumber(page, "slg-rev-win-rate");
   await expect(page.getByTestId("engine-sheet-slg-rev-win-rate")).toBeVisible();
@@ -88,7 +94,7 @@ for (const locale of ["fr", "en"] as const) {
   for (const width of [360, 390, 430] as const) {
     test(`${locale} at ${width}: nothing the two motions add pushes the page sideways`, async ({ page }) => {
       await page.setViewportSize({ width, height: 800 });
-      expect(await measureScreens(page, locale)).toEqual({ start: 0, setup: 0, targets: 0, asks: 0, board: 0, sheet: 0, deck: 0 });
+      expect(await measureScreens(page, locale)).toEqual({ start: 0, setup: 0, targets: 0, asks: 0, board: 0, settings: 0, sheet: 0, deck: 0 });
     });
   }
 
@@ -96,8 +102,9 @@ for (const locale of ["fr", "en"] as const) {
     await page.setViewportSize({ width: 320, height: 640 });
     const measured = await measureScreens(page, locale);
     test.info().annotations.push({ type: "overflow at 320", description: JSON.stringify(measured) });
-    // The start, its full card and the « Targets » screen joined the screens measured (A18 T3.a).
-    expect(Object.keys(measured)).toHaveLength(7);
+    // The start, its full card and the « Targets » screen joined the screens measured (A18 T3.a), the requests
+    // took the collect list's place (T3.c), and the hybrid's settings joined them (T3.d).
+    expect(Object.keys(measured)).toHaveLength(8);
   });
 
   test(`${locale}: each relay's words stay inside its card, at 390 and 1280`, async ({ page }) => {

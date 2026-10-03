@@ -144,3 +144,42 @@ export function offBase(snapshot: Snapshot, count: SharedCount): MetricId[] {
     })
     .map((slot) => slot.metric);
 }
+
+/**
+ * The shared counts the Settings offer (A18 T3.d, the return's « Nombres
+ * partagés »): the whole counts — people, deals, opportunities — of the
+ * numbers the engine shows (`shown`, `shapesOf`: the link in the hybrid),
+ * each with the shown numbers that carry it, in the catalogue's order. The
+ * two MRRs stay on their numbers' screens: an amount in a currency is typed
+ * with the figure it belongs to. A count only one shown number carries is
+ * not shared: it is typed on that number's screen, whose own line says
+ * nothing of others (sales-assisted alone: the opportunities created, whose
+ * second number is the hybrid's link).
+ */
+export function settingsSharedCounts(shown: readonly MetricId[]): { count: SharedCount; slots: SharedSlot[] }[] {
+  return WHOLE_SHARED_COUNTS.flatMap((count) => {
+    const slots = SHARED_COUNTS[count].filter((slot) => shown.includes(slot.metric));
+    return slots.length > 1 ? [{ count, slots }] : [];
+  });
+}
+
+/**
+ * What the Settings write on « Enregistrer les réglages » (A18 T3.d), in one
+ * snapshot: each target typed (`null` takes it away, as on a number's
+ * screen), then each shared count changed, into the base and every entry
+ * that carries it (`withSharedCount`).
+ */
+export function withSettingsNumbers(
+  snapshot: Snapshot,
+  changes: { targets?: Partial<Record<MetricId, number | null>>; base?: Partial<Record<SharedCount, number>> },
+): Snapshot {
+  const targets = { ...snapshot.targets };
+  for (const [id, target] of Object.entries(changes.targets ?? {}) as [MetricId, number | null][]) {
+    if (target === null) delete targets[id];
+    else targets[id] = target;
+  }
+  return (Object.entries(changes.base ?? {}) as [SharedCount, number][]).reduce(
+    (acc, [count, value]) => withSharedCount(acc, count, value),
+    { ...snapshot, targets },
+  );
+}
