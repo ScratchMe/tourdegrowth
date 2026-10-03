@@ -103,6 +103,16 @@ export const ENGINE_COPY = {
     },
     cta: { fr: "Entre tes chiffres →", en: "Enter your numbers →" },
     ctaNote: { fr: "Gratuit, sans compte. Tout reste sur ton appareil.", en: "Free, no sign-up. Everything stays on your device." },
+    /**
+     * TODO: à relire (convention 6) — neuf le 2026-10-03 (A18 T4, le retour 07, design/ds-extension-07-return/COPY.md) :
+     * la page d'un lecteur qui revient (`EngineLanding`). `promiseLine` : la promesse en une ligne, à la place de la
+     * carte, jamais repliée. `reserve` : la place de l'outil tenue, en pointillés, le temps de lire le moteur.
+     */
+    promiseLine: {
+      fr: "Rien de ce que tu saisis ne sort d'ici : ton moteur ne vit que dans ce navigateur.",
+      en: "Nothing you enter leaves this page: your engine lives in this browser only.",
+    },
+    reserve: { fr: "Ouverture de ton moteur…", en: "Opening your engine…" },
     tourFirst: { fr: "Démarre ton Tour d'abord (3 min)", en: "Start your Tour first (3 min)" },
     // TODO: à relire (convention 6) — réécrit le 2026-10-01 (A7.3.c S3) : la liste compte les deux motions.
     noscript: {

@@ -23,63 +23,6 @@
   min-width: 0;
 }
 
-.intro {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-6);
-  max-width: var(--width-reading);
-}
-
-/*
- * The engine wears its colour (design I + B, 2026-09-28): the ultramarine of
- * its band on the eyebrow, the privacy promise, the four durations and the
- * rule over the tool — 9.23 on a card, 7.45 on the page. Two classes where a
- * component's own class sets the same property, so the override never
- * depends on the order the stylesheets are emitted in (lesson nº2).
- */
-.intro .eyebrow {
-  color: var(--space-engine-accent);
-  font-weight: 600;
-}
-
-/*
- * The time trial's stopwatch, beside the intro on a wide screen only: under
- * 1100px it would squeeze the title into a narrow column, and the band's
- * pictogram already says « contre-la-montre ».
- */
-.stopwatch {
-  position: absolute;
-  top: var(--space-12);
-  right: var(--gutter-desktop);
-  width: 280px;
-  pointer-events: none;
-}
-
-@media (min-width: 1100px) {
-  /* The intro leaves the stopwatch its 280px and a gutter. */
-  .intro {
-    max-width: min(var(--width-reading), 100% - 320px);
-  }
-}
-
-@media (max-width: 1099px) {
-  .stopwatch {
-    display: none;
-  }
-}
-
-.title {
-  font: var(--display-hero);
-  color: var(--text-body);
-}
-
-/* The standfirst: grey and at the larger UI size, read once (ProsePage). */
-.lead {
-  font: var(--body-lg);
-  color: var(--text-muted);
-  max-width: var(--measure-read);
-}
-
 .text {
   font: var(--body-read);
   color: var(--text-body);
@@ -92,35 +35,6 @@
   max-width: var(--measure-read);
 }
 
-.privacy {
-  max-width: var(--measure-read);
-}
-
-/* Callout's `.caveat` draws a dashed edge; the engine's promise is solid ultramarine, lifted on its own shadow. */
-.intro .privacy {
-  border: var(--border-width) solid var(--space-engine-accent);
-  background: var(--surface-card);
-  box-shadow: 5px 5px 0 var(--space-engine-accent);
-}
-
-.privacyTitle {
-  font: var(--body-md);
-  font-weight: 600;
-  color: var(--space-engine-accent);
-}
-
-.cta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-5);
-}
-
-.ctaNote {
-  font: var(--meta-xs);
-  color: var(--text-muted);
-}
-
 /* The island's section. `scroll-margin-top` so the in-page anchor from the
    CTA does not land the tool's first line under the top edge. */
 .tool {
@@ -131,6 +45,38 @@
   scroll-margin-top: var(--space-8);
   border-top: var(--border-width-stamp) solid var(--space-engine-accent);
   padding-top: var(--space-11);
+}
+
+/*
+ * A returning reader's first instant (A18 T4, the return's `return-instant`): the tool's place held by a
+ * dashed box — dashed is « not yet » — until the island renders. Shown only under `[data-engine="known"]`
+ * (set on <html> before the first paint), gone as soon as the workbench says it is ready: its height keeps
+ * what follows from jumping above the fold, and only what is below the fold moves when the board arrives.
+ */
+.reserve {
+  display: none;
+}
+
+[data-engine="known"] .reserve {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--engine-reserve);
+  margin: 0;
+  border: var(--border-dashed);
+  border-radius: var(--radius-card);
+  font: var(--body-md);
+  color: var(--text-muted);
+}
+
+.tool:has(> [data-state="ready"]) .reserve {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  [data-engine="known"] .reserve {
+    min-height: var(--engine-reserve-mobile);
+  }
 }
 
 /* ---- The static catalogue: the fifteen numbers, readable without JS ---- */

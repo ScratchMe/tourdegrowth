@@ -43,14 +43,10 @@ const WAITING: Record<string, string> = {
  */
 const A18_STEP = {
   T2: "A18 T2, the board (EngineBar, NextStep, EngineProgress, NumberList, LeverCard, the verdict)",
-  T4: "A18 T4, the page (EngineLanding)",
   T5: "A18 T5, the hybrid (TotalBand)",
 } as const;
+// T4 (the page, EngineLanding) took its four off on 2026-10-03: the reserve and the returning title.
 const WAITING_FOR_A18: Record<string, string> = {
-  "--engine-reserve": A18_STEP.T4,
-  "--engine-reserve-mobile": A18_STEP.T4,
-  "--engine-landing-title": A18_STEP.T4,
-  "--engine-landing-title-mobile": A18_STEP.T4,
   "--engine-figure": A18_STEP.T5,
 };
 Object.assign(WAITING, WAITING_FOR_A18);

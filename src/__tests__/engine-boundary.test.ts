@@ -78,7 +78,8 @@ const SHARE_IMAGE = "app/[locale]/aarrr-funnel-template/opengraph-image.tsx";
 /** The engine's shipped code: its pure library and its route. Tests are not shipped. */
 const ENGINE = FILES.filter(
   (f) =>
-    (f.path.startsWith("lib/engine/") || f.path.startsWith("app/[locale]/aarrr-funnel-template/")) &&
+    // `components/engine/` since A18 T4: the island's own components, which show what was typed (the security review).
+    (f.path.startsWith("lib/engine/") || f.path.startsWith("app/[locale]/aarrr-funnel-template/") || f.path.startsWith("components/engine/")) &&
     !f.path.includes("__tests__/"),
 );
 
@@ -120,6 +121,9 @@ const ALL_IMPORTS = (source: string) => [
  * link is. `<a href>` to a glossary page is a link, not a carrier: its
  * address comes from the catalogue, never from what the person typed.
  */
+/** The page's inline script that marks a returning reader (A18 T4): rule 3's one exception, held by its own test. */
+const KNOWN_SCRIPT = "<script dangerouslySetInnerHTML={{ __html: engineKnownScript() }} />";
+
 const NETWORK = [
   /\bfetch\s*\(/,
   /\bXMLHttpRequest\b/,
@@ -344,10 +348,28 @@ describe("growth engine boundary (engine spec §11.4)", () => {
    */
   it("rule 3 — no primitive that sends something somewhere is written in the engine's code", () => {
     const offenders = ENGINE.flatMap((f) => {
-      const code = stripComments(f.source);
+      const code = stripComments(f.source).split(KNOWN_SCRIPT).join("");
       return NETWORK.filter((re) => re.test(code)).map((re) => `${f.path} → ${re}`);
     });
     expect(offenders).toEqual([]);
+  });
+
+  /**
+   * The one `<script>` rule 3 lets through (A18 T4): the page's inline script
+   * that marks a returning reader before the first paint. No `src`, and its
+   * text is `engineKnownScript()`, built from constants — `known-script.test.ts`
+   * holds that it parses nothing, sends nothing and writes nothing. Exactly
+   * once, in the page: a second one, or the same one elsewhere, is not this
+   * exception. Non-vacuity, measured on 2026-10-03: without the allowance,
+   * rule 3 names the page.
+   */
+  it("rule 3's one exception: the page's inline script that marks a returning reader, once, without a src", () => {
+    const uses = ENGINE.filter((f) => stripComments(f.source).includes(KNOWN_SCRIPT)).map((f) => f.path);
+    expect(uses).toEqual(["app/[locale]/aarrr-funnel-template/page.tsx"]);
+    const page = stripComments(BY_PATH.get("app/[locale]/aarrr-funnel-template/page.tsx")!);
+    expect(page.split(KNOWN_SCRIPT)).toHaveLength(2);
+    // The name is bound to the real one, never to another function under its name.
+    expect(page).toContain('import { engineKnownScript } from "@/lib/engine/known-script";');
   });
 
   /**

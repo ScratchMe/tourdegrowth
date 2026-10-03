@@ -7,9 +7,11 @@ import { Stopwatch } from "@/components/brand/Stopwatch";
 import { Button } from "@/components/core/Button";
 import { Callout } from "@/components/core/Callout";
 import { Disclosure } from "@/components/core/Disclosure";
+import { EngineLanding } from "@/components/engine/EngineLanding";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import { isEngineOpenAtBuild } from "@/lib/engine/access";
 import { formatInterval } from "@/lib/engine/format";
+import { engineKnownScript } from "@/lib/engine/known-script";
 import { staticCatalogueValues } from "@/lib/engine/phrases";
 import {
   DERIVED_SHAPES,
@@ -229,40 +231,42 @@ export default async function EnginePage({ params }: PageProps) {
       <ContentHeader locale={locale} path={PATH} width="wide" space="engine" />
 
       <main id="main" className={styles.main}>
-        {/* A box of the page's own: the drawing fills whatever width it is given. */}
-        <div className={styles.stopwatch}>
-          <Stopwatch data-testid="engine-stopwatch" />
-        </div>
-        <div className={styles.intro}>
-          <MetaLabel size="xs" className={styles.eyebrow}>
-            {t.eyebrow}
-          </MetaLabel>
-          <h1 className={styles.title}>{t.title}</h1>
-          <p className={styles.lead}>{t.positioning}</p>
-          <p className={styles.text}>{t.promise}</p>
+        {/* Before the first paint (A18 T4, brief 07 Q1): a returning reader is known by the storage key alone, and
+            the page draws their short version by CSS — `engineKnownScript` reads no value and sends nothing.
+            Before any content, so the attribute is there when the landing paints; a search engine, which has no
+            storage, always reads the first visit's page. */}
+        <script dangerouslySetInnerHTML={{ __html: engineKnownScript() }} />
+        {/* The promise comes BEFORE the call to action and never folds away (D16): it is the condition under
+            which anyone types an employer's numbers into a web page — a card on a first visit, a line on return. */}
+        <EngineLanding
+          eyebrow={t.eyebrow}
+          title={t.title}
+          lede={t.positioning}
+          positioning={t.promise}
+          promiseTitle={t.privacyTitle}
+          promiseBody={t.privacyBody}
+          promiseLine={t.promiseLine}
+          cta={t.cta}
+          ctaNote={t.ctaNote}
+          aside={<Stopwatch data-testid="engine-stopwatch" />}
+          data-testid="engine-landing"
+        />
 
-          {/* The promise comes BEFORE the call to action and never folds
-              away (D16): it is the condition under which anyone types an
-              employer's numbers into a web page. */}
-          <Callout tone="caveat" data-testid="engine-privacy" className={styles.privacy}>
-            <h2 className={styles.privacyTitle}>{t.privacyTitle}</h2>
-            <p>{t.privacyBody}</p>
-          </Callout>
+        <section id="engine" className={styles.tool} aria-label={t.eyebrow}>
+          <noscript>
+            <p className={styles.text}>{t.noscript}</p>
+          </noscript>
+          {/* A returning reader's first instant: the tool's place held, dashed (« not yet »), until the island
+              renders the board — its height keeps what follows from jumping above the fold. CSS only: shown under
+              `[data-engine="known"]`, gone once the island says it is ready. */}
+          <p className={styles.reserve} data-testid="engine-reserve">
+            {t.reserve}
+          </p>
+          <EngineWorkbench {...props} />
+        </section>
 
-          <div className={styles.cta}>
-            {/* An in-page anchor to the island, not a route: without
-                JavaScript it still lands on the tool's section and its
-                noscript line. `hard` renders a bare <a>. */}
-            <Button href="#engine" hard size="lg" data-testid="engine-cta">
-              {t.cta}
-            </Button>
-            <p className={styles.ctaNote}>{t.ctaNote}</p>
-          </div>
-        </div>
-
-        {/* How long it takes, said BEFORE the tool (retours d'Antoine
-            2026-09-25): the counts come from the catalogue's own effort
-            tags, so the sentence cannot promise a split the seventeen
+        {/* How long it takes, under the tool since A18 T4 (the return: the start card says the same counts in one
+            line). The counts come from the catalogue's own effort tags, so the sentence cannot promise a split the
             numbers do not have. */}
         <section className={styles.duration} aria-labelledby="engine-duration" data-testid="engine-duration">
           <h2 id="engine-duration" className={styles.durationTitle}>
@@ -285,13 +289,6 @@ export default async function EnginePage({ params }: PageProps) {
               </div>
             ))}
           </dl>
-        </section>
-
-        <section id="engine" className={styles.tool} aria-label={t.eyebrow}>
-          <noscript>
-            <p className={styles.text}>{t.noscript}</p>
-          </noscript>
-          <EngineWorkbench {...props} />
         </section>
 
         <section className={styles.catalogue} aria-labelledby="engine-catalogue" data-testid="engine-catalogue">
