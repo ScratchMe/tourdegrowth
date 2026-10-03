@@ -822,7 +822,7 @@ Tout autre accent passe à l'encre, sans couleur, au poids du titre (déjà 700)
 
 **La copie** : trente et une chaînes neuves, « à relire » : le titre de perte, les notes des tuiles, la ligne de rétention, les quatre alertes au « nous », les quatre hypothèses de trésorerie, et les mots et les quatre résumés du graphique. Le relecteur de copie n'a rien trouvé de bloquant. Corrigé : deux insécables (« GRR ? » ne se coupe plus), la provenance dans le marqueur (la plupart de ces chaînes sont de la session, pas du retour) et l'anglais des hypothèses aligné sur le panneau (« the month's »). **Pour le bon à tirer nº10**, trois points de fond relevés par le relecteur. D'abord, l'alerte dit « nous gagnons de l'argent » même quand la perte n'est que possible (à l'écran aussi). Ensuite, les résumés disent « reste 36 mois » au plafond. Enfin, le pointillé de 12 mois sur la slide assistée vient d'un repère des petites entreprises.
 
-## A20.d T4.d : l'unit economics de l'hybride, les deux moteurs côte à côte (C48, 2026-10-03)
+## A20.d T4.d : l'unit economics de l'hybride, les deux moteurs côte à côte (C48, 2026-10-03, #317)
 
 **Ce qui se voit** (drapeau fermé), d'après `slide-unit-both` du retour du brief 09 :
 - **deux colonnes**, libre-service puis assisté, jamais additionnées ni triées (§18.6.4, C4). Chacune a son nom, ses cinq tuiles (le CAC avec sa variante, la LTV, le LTV:CAC, le payback, la trésorerie immobilisée sur deux colonnes) et son graphique en petit (`PaybackChart`, `size="sm"`) : sa ligne de mois sur l'axe (« part vers 17 mois ; rembourserait à 21 mois », « remboursé à 13 mois, puis ~23 mois de marge »), sans libellé de coût ni fin d'axe, le crochet de la perte gardé ;
