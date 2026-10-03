@@ -843,7 +843,7 @@ Tout autre accent passe à l'encre, sans couleur, au poids du titre (déjà 700)
 
 **La copie** : onze chaînes neuves, « à relire » : le titre des deux côtés et ses trois fragments, les trois lignes de mois, et les quatre morceaux de la note. Leur marqueur dit leur provenance (le retour, découpé, ou la session). Retouches du relecteur : « d'acquisition » rétabli dans la note ; « ce n'est donc plus un plancher » quand l'expansion peut dépasser les départs ; le côté inconnu dit ce qu'on ne peut pas dire (« on ne peut pas encore dire ce que rapporte un client ») ; le pointillé lu dans le catalogue ; « compté jusqu'à 36 mois » sur la ligne des mois aussi.
 
-## A20.d T5 : le runway dans les Réglages, l'alerte qui s'y mesure (C49, 2026-10-03)
+## A20.d T5 : le runway dans les Réglages, l'alerte qui s'y mesure (C49, 2026-10-03, #318)
 
 **Ce qui se voit** (drapeau fermé) : une section « Trésorerie » dans les Réglages, avec une seule case, « Runway, en mois », facultative, de 0 exclu à 240 mois. Le mot reste « runway » ; son « ? » dit « Tes mois de trésorerie : le nombre de mois que couvre ta trésorerie au rythme actuel des dépenses… » (Antoine). Le « ? » est dans l'aide, jamais dans le `<label>`. Une fois le runway saisi, l'alerte du tableau (T2) et celle de la slide (T4.c) comparent le payback au runway (« plus que ton runway (24 mois) »). Une fois effacé, elles reprennent le plancher de 30 mois. Hors de sa plage, l'enregistrement s'arrête sur la case, avec la règle, et n'écrit rien. Le runway vaut pour l'entreprise, donc pour les deux moteurs d'un hybride.
 
