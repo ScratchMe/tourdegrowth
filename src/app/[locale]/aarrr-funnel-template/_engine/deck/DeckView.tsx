@@ -92,7 +92,8 @@ function slideComponent(slide: DeckSlide): ComponentType<SlideProps> {
   // « Ce qui a bougé » (A14 T1, §19.2.6): from the second month, one per motion.
   if (id === "evolution" || id === "slg:evolution") return SlideEvolution;
   // The hybrid sets the two motions side by side; sales-assisted alone keeps the v1 tiles, on its own figures.
-  if (id === "unit-economics" && slide.lines.some((line) => line.row === "unitRow")) return SlideUnitBoth;
+  // The hybrid's tiles carry their engine (A20.d T4.d): two columns side by side.
+  if (id === "unit-economics" && slide.lines.some((line) => line.row === "cac" && line.motion)) return SlideUnitBoth;
   return SLIDES[id as FixedSlideId];
 }
 

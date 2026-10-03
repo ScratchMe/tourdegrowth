@@ -115,7 +115,6 @@ export interface DeckRows {
   /** A sum of the two motions, « a + b = c ». */
   sum: { id: string; text: string };
   /** One row of the hybrid's unit economics, side by side: `plg` and `slg` the two cells, self-serve first. */
-  unitRow: { id: string; label: string; plg: string; slg: string; text: string };
   // Appendix
   // « Ce qui a bougé » (A14 T1, §19.2.6)
   /** One number, the month before then this one, as printed; `change` « +6 points » or `whatIfStable`; `tone` moved | stable; `toward` "true" or "". */
@@ -176,7 +175,6 @@ export const ROW_FIELDS: { readonly [K in RowKind]: readonly (keyof DeckRows[K])
   totalBlock: ["id", "label", "mrr", "newMrr", "stage", "text"],
   link: ["text", "note"],
   sum: ["id", "text"],
-  unitRow: ["id", "label", "plg", "slg", "text"],
   evolution: ["id", "label", "tone", "before", "now", "change", "toward", "text"],
   apart: ["id", "label", "text"],
   annex: ["id", "label", "formula", "window", "period", "source", "status", "confidence", "definition", "text"],
@@ -185,13 +183,21 @@ export const ROW_FIELDS: { readonly [K in RowKind]: readonly (keyof DeckRows[K])
 /**
  * The fields a row may carry beyond its own, in the hybrid only (A7.3.c S4):
  * the motion of a `visibility` row or a mirror bridge, the group of an
- * appendix row — machine ids a slide groups by, never printed as they are.
+ * appendix row, the engine of a unit-economics tile (A20.d T4.d: the two
+ * columns side by side) — machine ids a slide groups by, never printed as
+ * they are.
  */
 export const OPTIONAL_FIELDS: { readonly [K in RowKind]?: readonly string[] } = {
   metric: ["motion"],
   missing: ["motion"],
   bridge: ["motion"],
   annex: ["group"],
+  cac: ["motion"],
+  ltv: ["motion"],
+  ltvCac: ["motion"],
+  payback: ["motion"],
+  cash: ["motion"],
+  warning: ["motion"],
 };
 
 /** Whether a record is a well-formed row of that kind: every field present, every field a string. */

@@ -2207,6 +2207,32 @@ export const ENGINE_COPY = {
     chartWouldPayBack: { fr: "rembourserait à {payback}", en: "would pay back at {payback}" },
     chartPaysBack: { fr: "remboursé : {payback}", en: "paid back: {payback}" },
     chartAfter: { fr: "{after} de marge après", en: "{after} of margin after" },
+    /** TODO: à relire (convention 6) — neuf le 2026-10-03 (A20.d T4.d) : compact (l'hybride, deux colonnes), l'histoire en mois sur la ligne de l'axe. */
+    chartTimeLoss: { fr: "part vers {life} ; rembourserait à {payback}", en: "leaves at ~{life}; would pay back at {payback}" },
+    chartTimeHealthy: { fr: "remboursé à {payback}, puis {after} de marge", en: "paid back at {payback}, then {after} of margin" },
+    /**
+     * TODO: à relire (convention 6) — neuf le 2026-10-03 (A20.d T4.d, retour du brief 09, Q12) : l'unit economics de
+     * l'hybride, les deux moteurs côte à côte. Ce que dit chaque côté du titre quand une perte est certaine, et la
+     * note commune sous les deux colonnes.
+     */
+    unitSideLoss: { fr: "on perd {gap} par nouveau client", en: "we lose {gap} on each new customer" },
+    unitSideRepaid: { fr: "remboursé en {m}", en: "paid back in {m}" },
+    unitSideUnknown: { fr: "on ne peut pas encore le dire", en: "we can't say yet" },
+    unitBothRetention: {
+      fr: "Libre-service : GRR {grr} · NRR {nrr} par mois, approximatives (churn logo).",
+      en: "Self-serve: monthly GRR {grr} · NRR {nrr}, approximate (logo churn).",
+    },
+    unitBothRenewal: { fr: "Assisté : renouvellement {rate} par an.", en: "Sales-assisted: renewal {rate} a year." },
+    unitBothRenewalMonthly: { fr: "Assisté : renouvellement {rate} par mois.", en: "Sales-assisted: renewal {rate} a month." },
+    unitBothCash: {
+      fr: "Trésorerie immobilisée : dépense du mois × payback ÷ 2, un plancher, facturation mensuelle.",
+      en: "Cash tied up: the month's spend × the payback ÷ 2 — a floor, monthly billing.",
+    },
+    unitBothCashOutpaced: {
+      fr: "Trésorerie immobilisée : dépense du mois × payback ÷ 2, facturation mensuelle ; l'expansion peut la raccourcir.",
+      en: "Cash tied up: the month's spend × the payback ÷ 2, monthly billing; expansion may shorten it.",
+    },
+    unitBothReference: { fr: "Pointillé à 12 mois : repère couramment cité.", en: "Dotted, at 12 months: a commonly cited reference." },
     chartSummaryLoss: {
       fr: "Un client, mois par mois : il rapporte {mm} de marge par mois et part après environ {life}, à {gap} des {cac} qu'il a coûté ; il aurait remboursé à {payback}.",
       en: "One customer, month by month: it brings back {mm} of margin a month and leaves after about {life}, {gap} short of the {cac} it cost; it would have paid back at {payback}.",
@@ -2312,20 +2338,8 @@ export const ENGINE_COPY = {
     },
     /** A sales-assisted slide's footer: `{flows}` and `{leads}` with their preposition (« de juin à août 2026 »). */
     footerSlg: { fr: "Flux assistés {flows} · leads {leads} · sources : {tools}", en: "Sales-assisted flows {flows} · leads {leads} · sources: {tools}" },
-    unitRows: {
-      cac: { fr: "CAC", en: "CAC" },
-      payback: { fr: "Payback", en: "Payback" },
-      basket: { fr: "Panier", en: "Revenue per customer" },
-      lostInAYear: { fr: "Clients perdus sur un an", en: "Customers lost in a year" },
-      ltvCac: { fr: "LTV:CAC", en: "LTV:CAC" },
-    },
-    unitBasketPlg: { fr: "ARPA {arpa} par mois", en: "ARPA {arpa} a month" },
-    unitBasketSlg: { fr: "ACV {acv} par an ({monthly} par mois)", en: "ACV {acv} a year ({monthly} a month)" },
-    /** Self-serve's churn annualised and compounded (C25 Q5): « ~26 % (2,5 % par mois, composé) ». */
-    unitLostPlg: { fr: "{annual} ({monthly} par mois, composé)", en: "{annual} ({monthly} a month, compounded)" },
-    unitLostSlg: { fr: "{rate} des contrats échus", en: "{rate} of contracts up for renewal" },
-    unitLostSlgMonthly: { fr: "{rate} (contrats mensuels, composé)", en: "{rate} (monthly contracts, compounded)" },
-    unitUncomputable: { fr: "incalculable — manque : {input}", en: "can't be computed — missing: {input}" },
+    // The five rows of two cells (`unitRows`, the basket, the customers lost in a year, C25 Q5) left with A20.d T4.d:
+    // each engine's column now prints its own tiles, with the board's labels (`scenario.kpi*`).
     /** The footer when a margin is the company-wide one (C25 Q4): `{motion}` a `hybrid.motionSubject`. */
     unitCompanyWide: { fr: "marge globale reprise dans {motion}", en: "company-wide margin used for {motion}" },
     // TODO: à relire (convention 6) — retouché le 2026-10-03 (A18.d, Antoine) : « motion » → « moteur ».
@@ -2592,6 +2606,12 @@ export const ENGINE_COPY = {
       fr: "**On ne peut pas encore dire ce que rapporte un client** : la marge brute n'est mesurée dans aucun des deux moteurs.",
       en: "**We can't yet say what a customer is worth**: gross margin isn't measured for either engine.",
     },
+    /**
+     * TODO: à relire (convention 6) — neuf le 2026-10-03 (A20.d T4.d, C48) : l'hybride quand une perte est certaine
+     * d'un côté au moins. `{plg}`, `{slg}`: `slide.unitSide*` (« on perd ~400 € par nouveau client », « remboursé en
+     * 19 mois », « on ne peut pas encore le dire »). Sans accent : à l'encre, comme toute perte (C53).
+     */
+    unitEconomicsSides: { fr: "Libre-service : {plg}. Assisté : {slg}.", en: "Self-serve: {plg}. Sales-assisted: {slg}." },
     /** `{plg}`, `{slg}`: `unitInput` phrases, with their article. */
     unitEconomicsNoneDifferent: {
       fr: "**On ne peut pas encore dire ce que rapporte un client** : il manque {plg} en libre-service et {slg} en assisté.",

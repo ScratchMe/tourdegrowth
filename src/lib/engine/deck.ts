@@ -1421,7 +1421,8 @@ function buildMotionsDeck(state: EngineState, derived: EngineDerived, strings: W
   // The slides the two motions share.
   const visibility = buildVisibility(state, derived, strings, metrics, ctx);
   const unitSlg = hybrid ? null : buildUnitSlg(state, slg, strings, metrics, ctx, prose.derived ?? []);
-  const unit = unitSlg ?? buildUnitBoth(state, derived, strings, metrics, ctx);
+  const unitBoth = hybrid ? buildUnitBoth(state, derived, strings, metrics, ctx) : null;
+  const unit = unitSlg ?? unitBoth!;
   const ask = buildAsk(state, derived, strings, metrics, ctx);
   const mirror = derived.mirror;
   const mirrorLinked = Boolean(state.tourLink && mirror && mirror.resultId === state.tourLink.resultId);
@@ -1431,7 +1432,9 @@ function buildMotionsDeck(state: EngineState, derived: EngineDerived, strings: W
     // Sales-assisted alone: its unit economics are its own slide, in its chrome.
     {
       id: "unit-economics",
-      slide: { present: unit.present, title: unit.title, lines: unit.lines, notes: [], ...(unitSlg?.paybackChart ? { paybackChart: unitSlg.paybackChart } : {}) },
+      slide: { present: unit.present, title: unit.title, lines: unit.lines, notes: [], ...(unitSlg?.paybackChart ? { paybackChart: unitSlg.paybackChart } : {}),
+        ...(unitBoth && Object.keys(unitBoth.paybackCharts).length > 0 ? { paybackCharts: unitBoth.paybackCharts } : {}),
+      },
       byDefault: true,
       ...(hybrid ? {} : { motion: "slg" as const }),
     },
@@ -1464,8 +1467,9 @@ function buildMotionsDeck(state: EngineState, derived: EngineDerived, strings: W
   const ordered = allBlind
     ? [...totalEntry, visibilityEntry, ...plgEntries, ...slgEntries, ...shared]
     : [...totalEntry, ...plgEntries, ...slgEntries, visibilityEntry, ...shared];
-  // Sales-assisted alone, a certain loss moves its unit economics right after the first slide (C48). The hybrid: A20.d T4.d.
-  const entries = unitSlg?.loss ? moveToSecond(ordered, (e) => e.id === "unit-economics") : ordered;
+  // A certain loss moves the unit economics right after the first slide (C48): sales-assisted alone, or either side of the
+  // hybrid, whose first slide is the total.
+  const entries = unit.loss ? moveToSecond(ordered, (e) => e.id === "unit-economics") : ordered;
 
   let index = 0;
   const slides: DeckSlide[] = entries.map(({ id, slide, byDefault, motion }) => {

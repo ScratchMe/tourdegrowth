@@ -36,11 +36,18 @@ export interface PaybackChartProps {
     short: ReactNode;
     /** Pays back: « ~22 mois de marge après ». */
     after: ReactNode;
+    /** `size="sm"` only: the time story on the axis row, « part vers 17 mois ; rembourserait à 21 mois ». */
+    time?: ReactNode;
   };
   /** The chart in words, for a screen reader: the SVG is decoration. */
   summary: ReactNode;
   /** Unique per page: the hatch patterns' ids. */
   id: string;
+  /**
+   * `sm`: the hybrid's two columns (A20.d T4.d) — no cost label (the tile above says it), the months in one line on the
+   * axis row, the reference explained in the slide's note; the plot keeps only its marks and the money gap.
+   */
+  size?: "md" | "sm";
   className?: string;
   "data-testid"?: string;
 }
@@ -71,13 +78,31 @@ const AFTER_CENTRED_FROM = 320;
 /** A label hung right of a point this close to the plot's end would run off it: it ends at the point instead. */
 const LABEL_ROOM = 320;
 const nearEnd = (x: number, end: number) => x > end - LABEL_ROOM;
+/** `size="sm"`: where the months' line starts, past the axis's « 0 ». */
+const TIME_INDENT = 34;
 
-export function PaybackChart({ story, monthlyMargin, cac, lifetime, payback, reference, width, height, labels, summary, id, className, "data-testid": testId }: PaybackChartProps) {
+export function PaybackChart({
+  story,
+  monthlyMargin,
+  cac,
+  lifetime,
+  payback,
+  reference,
+  width,
+  height,
+  labels,
+  summary,
+  id,
+  size = "md",
+  className,
+  "data-testid": testId,
+}: PaybackChartProps) {
+  const compact = size === "sm";
   const g = paybackChartGeometry({ story, monthlyMargin, cac, lifetime, payback, width, height, reference });
   const hatch = `${id}-hatch`;
   const plotClip = `${id}-plot`;
   return (
-    <figure className={[styles.root, className].filter(Boolean).join(" ")} data-story={g.story} data-testid={testId}>
+    <figure className={[styles.root, className].filter(Boolean).join(" ")} data-story={g.story} data-size={size} data-testid={testId}>
       <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} className={styles.svg} aria-hidden="true" focusable="false">
         <defs>
           <clipPath id={plotClip}>
@@ -92,24 +117,37 @@ export function PaybackChart({ story, monthlyMargin, cac, lifetime, payback, ref
         <text x={g.ticks.x0} y={g.ticks.y} className={styles.tick} textAnchor="start">
           {labels.start}
         </text>
-        <text x={g.ticks.x36} y={g.ticks.y} className={styles.tick} textAnchor="end">
-          {labels.end}
-        </text>
+        {/* `sm`: the months' line takes the axis row; the 36-month cap is in the slide's footer. */}
+        {!compact ? (
+          <text x={g.ticks.x36} y={g.ticks.y} className={styles.tick} textAnchor="end">
+            {labels.end}
+          </text>
+        ) : null}
         {g.ticks.reference !== null ? (
           <>
             {/* From the cost line down: above it, the cost's own label runs from the left. */}
             <line x1={g.ticks.reference} x2={g.ticks.reference} y1={g.cost.y + 6} y2={g.axis.y + 6} className={styles.reference} />
-            <text x={g.ticks.reference} y={g.ticks.y} className={styles.tick} textAnchor="middle" data-testid={testId ? `${testId}-reference` : undefined}>
-              {labels.reference}
-            </text>
+            {!compact ? (
+              <text x={g.ticks.reference} y={g.ticks.y} className={styles.tick} textAnchor="middle" data-testid={testId ? `${testId}-reference` : undefined}>
+                {labels.reference}
+              </text>
+            ) : null}
           </>
+        ) : null}
+        {compact && labels.time ? (
+          // From the left, after the « 0 »: centred, a long line ran into the « 36 mois » at the axis's end.
+          <text x={g.ticks.x0 + TIME_INDENT} y={g.ticks.y} className={`${styles.label} ${styles.strong}`} textAnchor="start" data-testid={testId ? `${testId}-time` : undefined}>
+            {labels.time}
+          </text>
         ) : null}
 
         {g.cost.band ? <rect x={g.axis.x1} width={g.axis.x2 - g.axis.x1} y={g.cost.band.y} height={g.cost.band.height} fill={`url(#${hatch})`} className={styles.band} /> : null}
         <line x1={g.axis.x1} x2={g.axis.x2} y1={g.cost.y} y2={g.cost.y} className={styles.cost} />
-        <text x={g.cost.labelX} y={g.cost.labelY} className={`${styles.label} ${styles.halo}`} textAnchor="start">
-          {labels.cost}
-        </text>
+        {!compact ? (
+          <text x={g.cost.labelX} y={g.cost.labelY} className={`${styles.label} ${styles.halo}`} textAnchor="start">
+            {labels.cost}
+          </text>
+        ) : null}
 
         {g.unknown ? (
           <>
@@ -137,7 +175,7 @@ export function PaybackChart({ story, monthlyMargin, cac, lifetime, payback, ref
               </>
             ) : null}
             {/* Above the cost line, where the loss leaves room (its label runs from the left end): right of the tick, or ending at it near the plot's end. */}
-            <text
+            {compact ? null : <text
               x={nearEnd(g.wouldPayBack.x, g.axis.x2) ? g.wouldPayBack.x - 10 : g.wouldPayBack.x + 10}
               y={g.cost.labelY}
               className={`${styles.note} ${styles.halo}`}
@@ -145,13 +183,13 @@ export function PaybackChart({ story, monthlyMargin, cac, lifetime, payback, ref
               data-testid={testId ? `${testId}-pays-back` : undefined}
             >
               {labels.paysBack}
-            </text>
+            </text>}
             <path d={g.short.path} className={styles.bracket} />
             <text x={g.short.labelX} y={g.short.labelY} className={`${styles.label} ${styles.strong} ${styles.halo}`} textAnchor="end" data-testid={testId ? `${testId}-short` : undefined}>
               {labels.short}
             </text>
             {/* Under the line's end: right of it (crossing only the dashed tick), or ending at it near the plot's end. */}
-            <text
+            {compact ? null : <text
               x={nearEnd(g.margin.x2, g.axis.x2) ? g.margin.x2 - 8 : g.margin.x2 + 8}
               y={g.margin.y2 + 32}
               className={`${styles.note} ${styles.halo}`}
@@ -159,7 +197,7 @@ export function PaybackChart({ story, monthlyMargin, cac, lifetime, payback, ref
               data-testid={testId ? `${testId}-leaves` : undefined}
             >
               {labels.leaves}
-            </text>
+            </text>}
           </>
         ) : null}
 
@@ -168,16 +206,16 @@ export function PaybackChart({ story, monthlyMargin, cac, lifetime, payback, ref
             {g.crossing ? (
               <>
                 <circle cx={g.crossing.x} cy={g.crossing.y} r={6} className={styles.dot} />
-                <text x={g.crossing.x - 12} y={g.crossing.y - 14} className={`${styles.note} ${styles.halo}`} textAnchor="end" data-testid={testId ? `${testId}-pays-back` : undefined}>
+                {compact ? null : <text x={g.crossing.x - 12} y={g.crossing.y - 14} className={`${styles.note} ${styles.halo}`} textAnchor="end" data-testid={testId ? `${testId}-pays-back` : undefined}>
                   {labels.paysBack}
-                </text>
+                </text>}
               </>
             ) : null}
             {g.after ? (
               <>
                 <path d={g.after.path} className={styles.bracket} />
                 {/* A short bracket (a late payback) ends its label at its right end, so it never runs off the plot. */}
-                <text
+                {compact ? null : <text
                   x={g.after.width < AFTER_CENTRED_FROM ? g.after.x2 : g.after.labelX}
                   y={g.after.labelY + 6}
                   className={`${styles.label} ${styles.strong} ${styles.halo}`}
@@ -185,13 +223,13 @@ export function PaybackChart({ story, monthlyMargin, cac, lifetime, payback, ref
                   data-testid={testId ? `${testId}-after` : undefined}
                 >
                   {labels.after}
-                </text>
+                </text>}
               </>
             ) : null}
             {/* Above the line's end, which is above the cost line here: the crossing's label sits lower, left of it. */}
-            <text x={g.margin.x2} y={Math.max(g.margin.y2, PAYBACK_CHART_PX.top) - 16} className={`${styles.note} ${styles.halo}`} textAnchor="end">
+            {compact ? null : <text x={g.margin.x2} y={Math.max(g.margin.y2, PAYBACK_CHART_PX.top) - 16} className={`${styles.note} ${styles.halo}`} textAnchor="end">
               {labels.leaves}
-            </text>
+            </text>}
           </>
         ) : null}
       </svg>
