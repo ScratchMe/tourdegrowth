@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { deriveEngine } from "@/lib/engine/derive";
 import type { EngineState, LeverId } from "@/lib/engine/types";
-import { estimated, exampleState, filmState, hybridState, measured, ratio, salesAssistedState, withEntry, noMarginState } from "@/lib/engine/__tests__/fixtures";
+import { estimated, filmState, hybridState, measured, noMarginState, ratio, salesAssistedState, withEntry } from "@/lib/engine/__tests__/fixtures";
 import { CTX_EN, CTX_FR, EN, FR } from "@/lib/engine/__tests__/props";
 import { leverMoneyView, moneyView } from "../money-view";
 

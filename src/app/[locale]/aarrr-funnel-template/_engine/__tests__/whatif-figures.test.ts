@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { FILM_LEVERS, exampleState, filmState, salesAssistedState, noMarginState } from "@/lib/engine/__tests__/fixtures";
+import { FILM_LEVERS, filmState, noMarginState, salesAssistedState } from "@/lib/engine/__tests__/fixtures";
 import { CTX_EN, CTX_FR, EN, FR } from "@/lib/engine/__tests__/props";
 import type { EngineState, LeverId } from "@/lib/engine/types";
 import { leverSumView, moneyAssumptions, whatIfFigureGroups, type FigureRow } from "../whatif-figures";

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { PAYBACK_CHART_PX, PAYBACK_MONTHS, paybackChartGeometry, type PaybackChartInput } from "../payback-chart";
+import { PAYBACK_CHART_PX, PAYBACK_MONTHS, estimateLabelWidth, paybackChartGeometry, paysBackLabels, type PaybackChartInput } from "../payback-chart";
 
 // `PaybackChart` (design system extension 09, Q12, A20.d T4.c): one customer, month by month. The rules that make the
 // picture honest are geometry, so they are tested here rather than eyeballed — the loss and its months are one picture.
@@ -104,5 +104,43 @@ describe("paybackChartGeometry", () => {
     expect(paybackChartGeometry(film).ticks.reference).toBeCloseTo(xOf(12));
     expect(paybackChartGeometry({ ...film, reference: null }).ticks.reference).toBeNull();
     expect(paybackChartGeometry(film).ticks).toMatchObject({ x0: plot.L, x36: plot.R, y: plot.B + PAYBACK_CHART_PX.tickBaseline });
+  });
+});
+
+// A20.d T6 (C50): the example pays back in 5 to 6 months. Non-vacuity, measured: always giving the crossing its own
+// label fails « an early crossing », and always moving the words to the bracket fails « a late crossing ».
+describe("paysBackLabels — where the pays-back story's words go at full size", () => {
+  // The example's self-serve: 90 € a month (75 % of 120 €, the middle of 70 to 80 %), a CAC of 500 €, 36 months counted.
+  const example: PaybackChartInput = { ...film, story: "pays-back", monthlyMargin: [84, 96], cac: [500, 500], lifetime: [36, 36], payback: [5.21, 5.95] };
+  const fr = { paysBack: "remboursé : 5 à 6 mois".length, cost: "ce que coûte un nouveau client".length, time: "remboursé à 5 à 6 mois, puis ~30 à 31 mois de marge".length };
+
+  it("an early crossing: no room left of it beside the cost's words, so the bracket says both, right of the crossing and inside the plot", () => {
+    const g = paybackChartGeometry(example);
+    const placed = paysBackLabels(g, fr);
+    expect(placed.crossing).toBeNull();
+    expect(placed.after).toMatchObject({ text: "time", anchor: "middle" });
+    const half = estimateLabelWidth(fr.time) / 2;
+    expect(placed.after!.x - half).toBeGreaterThanOrEqual(g.crossing!.x);
+    expect(placed.after!.x + half).toBeLessThanOrEqual(g.axis.x2);
+  });
+
+  it("a late crossing keeps its own label, clear of the cost's words, and the bracket its months", () => {
+    const g = paybackChartGeometry(late);
+    const placed = paysBackLabels(g, { paysBack: "remboursé : 32 mois".length, cost: fr.cost, time: "remboursé à 32 mois, puis ~4 mois de marge".length });
+    expect(placed.crossing).toEqual({ x: g.crossing!.x - 12, y: g.crossing!.y - 14 });
+    expect(placed.crossing!.x - estimateLabelWidth("remboursé : 32 mois".length)).toBeGreaterThan(g.cost.labelX + estimateLabelWidth(fr.cost));
+    // A short bracket: its label ends at its right end.
+    expect(placed.after).toEqual({ text: "after", x: g.after!.x2, y: g.after!.labelY + 6, anchor: "end" });
+  });
+
+  it("a time line wider than the room right of the crossing ends at the plot's end; no time line, the crossing keeps its label", () => {
+    const g = paybackChartGeometry(example);
+    expect(paysBackLabels(g, { ...fr, time: 200 }).after).toMatchObject({ text: "time", x: g.axis.x2, anchor: "end" });
+    expect(paysBackLabels(g, { ...fr, time: null }).crossing).not.toBeNull();
+  });
+
+  it("only the pays-back story has these labels", () => {
+    expect(paysBackLabels(paybackChartGeometry(film), fr)).toEqual({ crossing: null, after: null });
+    expect(paysBackLabels(paybackChartGeometry({ ...film, story: "unknown", monthlyMargin: null, lifetime: null, payback: null }), fr)).toEqual({ crossing: null, after: null });
   });
 });

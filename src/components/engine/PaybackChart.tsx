@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { PAYBACK_CHART_PX, paybackChartGeometry, type PaybackStory, type Range } from "@/lib/viz/payback-chart";
+import { PAYBACK_CHART_PX, paybackChartGeometry, paysBackLabels, type PaybackStory, type Range } from "@/lib/viz/payback-chart";
 import styles from "./PaybackChart.module.css";
 
 export interface PaybackChartProps {
@@ -73,8 +73,6 @@ export interface PaybackChartProps {
  * Ink only, never red: a loss is arithmetic on the team's own numbers, not
  * the leak (C48). Labels carry a paper halo where they cross a line.
  */
-/** The months-after bracket's width, in px, from which its label is centred under it: shorter, it ends at its right end. */
-const AFTER_CENTRED_FROM = 320;
 /** A label hung right of a point this close to the plot's end would run off it: it ends at the point instead. */
 const LABEL_ROOM = 320;
 const nearEnd = (x: number, end: number) => x > end - LABEL_ROOM;
@@ -99,6 +97,8 @@ export function PaybackChart({
 }: PaybackChartProps) {
   const compact = size === "sm";
   const g = paybackChartGeometry({ story, monthlyMargin, cac, lifetime, payback, width, height, reference });
+  const chars = (node: ReactNode) => (typeof node === "string" ? node.length : 0);
+  const placed = paysBackLabels(g, { paysBack: chars(labels.paysBack), cost: chars(labels.cost), time: typeof labels.time === "string" ? labels.time.length : null });
   const hatch = `${id}-hatch`;
   const plotClip = `${id}-plot`;
   return (
@@ -206,7 +206,7 @@ export function PaybackChart({
             {g.crossing ? (
               <>
                 <circle cx={g.crossing.x} cy={g.crossing.y} r={6} className={styles.dot} />
-                {compact ? null : <text x={g.crossing.x - 12} y={g.crossing.y - 14} className={`${styles.note} ${styles.halo}`} textAnchor="end" data-testid={testId ? `${testId}-pays-back` : undefined}>
+                {compact || !placed.crossing ? null : <text x={placed.crossing.x} y={placed.crossing.y} className={`${styles.note} ${styles.halo}`} textAnchor="end" data-testid={testId ? `${testId}-pays-back` : undefined}>
                   {labels.paysBack}
                 </text>}
               </>
@@ -214,15 +214,15 @@ export function PaybackChart({
             {g.after ? (
               <>
                 <path d={g.after.path} className={styles.bracket} />
-                {/* A short bracket (a late payback) ends its label at its right end, so it never runs off the plot. */}
-                {compact ? null : <text
-                  x={g.after.width < AFTER_CENTRED_FROM ? g.after.x2 : g.after.labelX}
-                  y={g.after.labelY + 6}
+                {/* A short bracket (a late payback) ends its label at its right end; an early crossing's words ride it (`paysBackLabels`). */}
+                {compact || !placed.after ? null : <text
+                  x={placed.after.x}
+                  y={placed.after.y}
                   className={`${styles.label} ${styles.strong} ${styles.halo}`}
-                  textAnchor={g.after.width < AFTER_CENTRED_FROM ? "end" : "middle"}
-                  data-testid={testId ? `${testId}-after` : undefined}
+                  textAnchor={placed.after.anchor}
+                  data-testid={testId ? `${testId}-${placed.after.text === "time" ? "time" : "after"}` : undefined}
                 >
-                  {labels.after}
+                  {placed.after.text === "time" ? labels.time : labels.after}
                 </text>}
               </>
             ) : null}

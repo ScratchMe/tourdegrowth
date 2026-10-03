@@ -1,7 +1,7 @@
 import type { Page } from "@playwright/test";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import type { EngineState } from "../src/lib/engine/types";
-import { exampleState, filmState, hybridState, salesAssistedState } from "../src/lib/engine/__tests__/fixtures";
+import { exampleState, filmState, hybridState, noMarginState, salesAssistedState } from "../src/lib/engine/__tests__/fixtures";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
 import { writeEngineSeed } from "./engine-helpers";
 
@@ -64,9 +64,18 @@ for (const [locale, width] of [
   });
 }
 
-test("the §6.0 example has no margin: « ? », what is missing, and the « ? » of « cash tied up » teaches the word", async ({ page }) => {
+test("the §6.0 example has its money in ranges (C50): an estimated margin, healthy, neither loss nor warning", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await open(page, exampleState(), "en");
+  await expect(page.getByTestId("engine-money-plg-tag")).toHaveCount(0);
+  await expect(page.getByTestId("engine-money-plg-finding")).toHaveText("Each new customer costs €500 and brings back ~€3,000–€3,500 of margin: ~€2,500–€3,000 more than it costs.");
+  await expect(page.getByTestId("engine-money-warning")).toHaveCount(0);
+});
+
+test("without a margin: « ? », what is missing, and the « ? » of « cash tied up » teaches the word", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  // The example as it was before C50 gave it a margin.
+  await open(page, noMarginState(), "en");
   await expect(page.getByTestId("engine-money-plg-tag")).toHaveCount(0);
   await expect(page.getByTestId("engine-money-plg-finding")).toHaveText("We can't tell yet what a new customer brings back. Missing: gross margin.");
   await expect(page.getByTestId("engine-money-plg-fact-tied")).toContainText("?");

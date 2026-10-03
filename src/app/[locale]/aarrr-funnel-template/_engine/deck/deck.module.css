@@ -859,6 +859,37 @@
   font-weight: 600;
 }
 
+/*
+ * And the money known (C50, A20.d T6): eight growth numbers, three of them
+ * long labels, beside nine levers. The table takes more of the width and its
+ * cells a tighter step, so « MRR dans 12 mois » or « Trésorerie immobilisée »
+ * stays on one line where it can, and may still wrap where it can't — never
+ * past the card. Measured on the example in French, all nine levers moved:
+ * 41px under the footer before, 21px above it after; the lever rows keep
+ * one line each.
+ */
+.scenarioDense {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+}
+
+.scenarioDense .changeTable th,
+.scenarioDense .changeTable td {
+  padding: 3px 0 3px 10px;
+}
+
+.scenarioDense .changeTable tbody th {
+  padding-left: 0;
+}
+
+.scenarioDense .changeTable thead th {
+  padding-top: 0;
+}
+
+.scenarioDense .changeTable tbody tr:last-child th,
+.scenarioDense .changeTable tbody tr:last-child td {
+  padding-bottom: 0;
+}
+
 /* ── Slide 3 — visibility (§9.3) ────────────────────────────────────── */
 
 .visibility {
@@ -1055,7 +1086,8 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 40px;
+  /* 24px, not 40 (A20.d T6): a range's two lines in a tile left the body 3px under the footer, the example in French. */
+  gap: 24px;
 }
 
 .figureRow {
@@ -1135,6 +1167,18 @@
 
 .figureRowSix .figureValue {
   font: var(--slide-label-md);
+}
+
+/*
+ * A range (an estimated input, C50: the example's margin) is two amounts:
+ * « ~3 000 € à 3 500 € » ran past a sixth of the row, out of the slide. It
+ * may wrap at the space around « à » (or after the en dash), never inside an
+ * amount, whose spaces don't break; a single figure stays on its line.
+ */
+.figureRowSix .figureValue,
+.figureRowEngine .figureValue {
+  white-space: normal;
+  text-wrap: balance;
 }
 
 .unitLower {

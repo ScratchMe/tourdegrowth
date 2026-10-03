@@ -140,11 +140,12 @@ for (const locale of ["fr", "en"] as const) {
       // The company label is on the slides because showCompany is on.
       await expect(page.getByTestId("slide-peloton")).toContainText(COMPANY_CANARY);
       // A blank ask is prefilled once (§7 E5): the success target comes from
-      // the comparator, and the three missing numbers are proposed as the
+      // the comparator, and the two missing numbers (day-30 retention, the
+      // churn's cause; the margin is estimated since C50) are proposed as the
       // things to measure first. The target field shows it — a stale local
       // draft once hid a default that had reached the state.
       await expect(page.getByTestId("deck-ask-target")).toHaveValue("20");
-      await expect(page.getByTestId("deck-ask-form").locator('input[type="checkbox"]:checked')).toHaveCount(3);
+      await expect(page.getByTestId("deck-ask-form").locator('input[type="checkbox"]:checked')).toHaveCount(2);
     });
 
     /**

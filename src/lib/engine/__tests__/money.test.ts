@@ -6,7 +6,7 @@ import { buildSlgScenario, slgMrrPath } from "../slg-scenario";
 import { addBoth, buildTotal, sumPaths, timesTwelve } from "../total";
 import type { EngineState, Interval, LeverId } from "../types";
 import { lifetimeMonths, unitEconomics } from "../unit-economics";
-import { FILM_LEVERS, exampleState, filmState, hybridState, measured, ratio, withEntry, noMarginState } from "./fixtures";
+import { FILM_LEVERS, filmState, hybridState, measured, noMarginState, ratio, withEntry } from "./fixtures";
 import { CTX_FR } from "./props";
 
 /**

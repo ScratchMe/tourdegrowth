@@ -93,7 +93,8 @@ export const ENGINE_COPY = {
     // TODO: à relire (convention 6) — réécrit le 2026-09-30 (A7.1, C1 : aucun repère ne désigne).
     // TODO: à relire (convention 6) — réécrit le 2026-10-01 (A7.3.c S3) : les chiffres de l'assisté.
     // TODO: à relire (convention 6) — réécrit le 2026-10-03 (A20.d T6, C52, le retour 09, design/ds-extension-09-return/COPY.md) :
-    // ce que rapporte chaque nouveau client, et le board ou les investisseurs à côté du CODIR. La suite est inchangée.
+    // ce que rapporte chaque nouveau client, le board ou les investisseurs à côté du CODIR, et « prêtes » / « ready » retirés comme
+    // dans le retour. La suite est inchangée.
     promise: {
       fr: "Dix-sept chiffres en libre-service, quinze en assisté : va les chercher, vois où ton moteur perd du monde et ce que te rapporte chaque nouveau client, et repars avec des slides pour ton CODIR, ton board ou tes investisseurs. Tes chiffres ne sont comparés qu'à toi-même et à ta propre cible : les repères publiés sont là pour situer, jamais pour désigner une étape.",
       en: "Seventeen numbers for self-serve, fifteen for sales-assisted: go and get them, see where your engine loses people and what each new customer earns you, and leave with slides for your leadership meeting, your board or your investors. Your numbers are only compared with yourself and your own target: published references are there for context, never to name a stage.",

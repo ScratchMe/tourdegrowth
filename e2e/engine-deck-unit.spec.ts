@@ -63,7 +63,37 @@ async function measure(page: Page) {
         .filter((el) => [...el.childNodes].some((n) => n.nodeType === Node.TEXT_NODE && n.textContent!.trim()))
         .map((el) => parseFloat(getComputedStyle(el).fontSize)),
     );
-    return { deepest: Math.round(deepest), footTop: Math.round(footTop), top: Math.round(top), titleBottom: Math.round(titleBottom), right: Math.round(right), smallest, text: (slide as HTMLElement).innerText };
+    // The text itself, not its box (A20.d T6): a range ran past its tile while the tile's box stayed in place.
+    const textRect = (el: Element) => {
+      const range = document.createRange();
+      range.selectNodeContents(el);
+      return range.getBoundingClientRect();
+    };
+    const tileOverflow = Math.max(
+      0,
+      ...[...slide.querySelectorAll('[data-testid^="slide-figure-"]')].map((tile) => (textRect(tile).right - tile.getBoundingClientRect().right) / scale),
+    );
+    // The picture's words: inside the slide, and never one over another.
+    const labels = [...slide.querySelectorAll("svg text")].filter((t) => t.textContent!.trim()).map((t) => ({ text: t.textContent!.trim(), r: t.getBoundingClientRect() }));
+    const labelLeft = Math.min(0, ...labels.map((l) => (l.r.left - box.left) / scale));
+    const labelOverlaps: string[] = [];
+    labels.forEach((a, i) =>
+      labels.slice(i + 1).forEach((b) => {
+        if (a.r.left < b.r.right - 1 && b.r.left < a.r.right - 1 && a.r.top < b.r.bottom - 1 && b.r.top < a.r.bottom - 1) labelOverlaps.push(`${a.text} × ${b.text}`);
+      }),
+    );
+    return {
+      deepest: Math.round(deepest),
+      footTop: Math.round(footTop),
+      top: Math.round(top),
+      titleBottom: Math.round(titleBottom),
+      right: Math.round(right),
+      smallest,
+      text: (slide as HTMLElement).innerText,
+      tileOverflow: Math.round(tileOverflow),
+      labelLeft: Math.round(labelLeft),
+      labelOverlaps,
+    };
   });
   return m!;
 }
@@ -95,6 +125,9 @@ for (const locale of ["fr", "en"] as const) {
         const m = await measure(page);
         expect(m.deepest, "the body ends above the footer").toBeLessThanOrEqual(m.footTop);
         expect(m.right, "nothing runs past the slide's right margin").toBeLessThanOrEqual(1920 - 120 + 2);
+        expect(m.tileOverflow, "no figure runs past its tile").toBe(0);
+        expect(m.labelLeft, "no label of the picture starts left of the slide").toBe(0);
+        expect(m.labelOverlaps, "no label of the picture over another").toEqual([]);
         expect(m.smallest, "nothing under 18px").toBeGreaterThanOrEqual(18);
         expect(m.text).not.toMatch(/\{[a-zA-Z]+\}|\bundefined\b|\bNaN\b|\*\*/);
       });
@@ -113,6 +146,9 @@ for (const locale of ["fr", "en"] as const) {
         const m = await measure(page);
         expect(m.deepest).toBeLessThanOrEqual(m.footTop);
         expect(m.right).toBeLessThanOrEqual(1920 - 120 + 2);
+        expect(m.tileOverflow, "no figure runs past its tile").toBe(0);
+        expect(m.labelLeft, "no label of the picture starts left of the slide").toBe(0);
+        expect(m.labelOverlaps, "no label of the picture over another").toEqual([]);
         expect(m.smallest).toBeGreaterThanOrEqual(18);
       });
 
@@ -132,12 +168,20 @@ for (const locale of ["fr", "en"] as const) {
         expect((await thumbOrder(page)).indexOf("unit-economics")).toBeGreaterThan(1);
         const slide = page.locator('[data-slide="unit-economics"]');
         await expect(slide.getByTestId("slide-figure-payback")).toContainText(locale === "fr" ? "5 à 6 mois" : "5–6 months");
-        await expect(slide.getByTestId("slide-figure-ltv")).toContainText(locale === "fr" ? "~3 000 € à 3 500 €" : "~€3,000–3,500");
+        await expect(slide.getByTestId("slide-figure-ltv")).toContainText(locale === "fr" ? "~3 000 € à 3 500 €" : "~€3,000–€3,500");
         await expect(slide.getByTestId("slide-payback-chart")).toHaveAttribute("data-story", "pays-back");
+        // An early crossing: the bracket says both, the crossing has no label of its own (paysBackLabels).
+        await expect(slide.getByTestId("slide-payback-chart-pays-back")).toHaveCount(0);
+        await expect(slide.getByTestId("slide-payback-chart-time")).toHaveText(
+          locale === "fr" ? "remboursé à 5 à 6 mois, puis ~30 à 31 mois de marge" : "paid back at 5–6 months, then ~30–31 months of margin",
+        );
         await expect(slide.getByTestId("slide-unit-warning")).toHaveCount(0);
         const m = await measure(page);
         expect(m.deepest).toBeLessThanOrEqual(m.footTop);
         expect(m.right).toBeLessThanOrEqual(1920 - 120 + 2);
+        expect(m.tileOverflow, "no figure runs past its tile").toBe(0);
+        expect(m.labelLeft, "no label of the picture starts left of the slide").toBe(0);
+        expect(m.labelOverlaps, "no label of the picture over another").toEqual([]);
         expect(m.smallest).toBeGreaterThanOrEqual(18);
         expect(m.text).not.toMatch(/\{[a-zA-Z]+\}|\bundefined\b|\bNaN\b|\*\*/);
       });
@@ -187,6 +231,9 @@ for (const locale of ["fr", "en"] as const) {
         expect(m.top, "the body starts under the title").toBeGreaterThanOrEqual(m.titleBottom);
         expect(m.deepest, "the body ends above the footer").toBeLessThanOrEqual(m.footTop);
         expect(m.right).toBeLessThanOrEqual(1920 - 120 + 2);
+        expect(m.tileOverflow, "no figure runs past its tile").toBe(0);
+        expect(m.labelLeft, "no label of the picture starts left of the slide").toBe(0);
+        expect(m.labelOverlaps, "no label of the picture over another").toEqual([]);
         expect(m.smallest).toBeGreaterThanOrEqual(18);
         expect(m.text).not.toMatch(/\{[a-zA-Z]+\}|\bundefined\b|\bNaN\b|\*\*/);
       });
@@ -201,6 +248,9 @@ for (const locale of ["fr", "en"] as const) {
         expect(m.top).toBeGreaterThanOrEqual(m.titleBottom);
         expect(m.deepest).toBeLessThanOrEqual(m.footTop);
         expect(m.right).toBeLessThanOrEqual(1920 - 120 + 2);
+        expect(m.tileOverflow, "no figure runs past its tile").toBe(0);
+        expect(m.labelLeft, "no label of the picture starts left of the slide").toBe(0);
+        expect(m.labelOverlaps, "no label of the picture over another").toEqual([]);
         expect(m.smallest).toBeGreaterThanOrEqual(18);
       });
 
