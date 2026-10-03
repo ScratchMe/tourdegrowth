@@ -1182,3 +1182,43 @@ Sur chacun, à 1 280 et 390 px : aucune violation axe sérieuse ou critique (le 
 - **3 060 tests unitaires** verts ;
 - `next build` avec les variables de la CI ;
 - **422 specs** sur ce build : celles du moteur, du kit des espaces, des cibles, de l'accessibilité (aux deux largeurs), de la plateforme, du clavier, de l'audit (l'autre écran qui dessine des champs) et du glossaire. 421 passent, une est ignorée par construction ; 933 specs au total (`--list`).
+
+## A18.d : le bon à tirer unique du moteur, construit (nº9, 2026-10-03)
+
+**Ce qui est construit** : le [bon à tirer nº9](https://claude.ai/artifact/5oYQ3ZF2sCUd6yiVajifC7), tout le texte du moteur après A18, en une passe (C38) : 120 cartes, 1 786 chaînes, chacune en français et en anglais. Les décisions s'écrivent dans `cards/`, comme depuis le nº5. Il suit l'ordre où l'on rencontre le moteur :
+- **À trancher**, six décisions en tête. Chaque carte cite les chaînes concernées, qui se relisent aussi sur leur propre carte ;
+- la page, le départ, l'écran d'un chiffre, les demandes, le tableau de bord, « Et si », l'assisté et l'hybride, les réglages et les fichiers, les slides ;
+- le catalogue, une carte par chiffre (17 du libre-service, 15 de l'assisté, la liaison) et deux pour les calculés ;
+- **hors de l'outil** : l'image de partage, la reprise du moteur sur l'accueil et sur un résultat du Tour, les deux paragraphes de la confidentialité, le repère du churn réécrit (C1), et les quatre termes du glossaire de la vente assistée (A7.3.e).
+
+**Ce qu'il absorbe** : A7.3.d et A14.d, comme C38 l'a voulu. **Et il remplace le nº8**, décision de cette session, à renverser d'un mot. Le nº8 avait été construit le 2026-09-28, avant A7.3, A14 et A18, et la plupart de ses 82 cartes décrivaient des écrans qui n'existent plus (le pas à pas, la base, les onglets). Une seule y était tranchée, les deux repères (C1), et le code l'applique. Le garder ouvert aurait fait relire la même copie dans deux documents, ce que la méthode interdit.
+
+**Les six décisions** :
+- la clause rouge du verdict et l'étape du diagnostic, qui peuvent nommer deux étapes en rouge sur le même écran (la trouvaille 9 du retour) ;
+- « motion » sur les slides, les notes et deux pièges du catalogue, que golden-v2 fige ;
+- « Supprimer ce moteur » et « Tout effacer », contre le seul « Effacer ce moteur » du retour ;
+- quatre libellés gardés contre le retour (« Commence → », « Passe au chiffre suivant : {number} → », la phrase de la liaison, « Pas assez de cibles pour conclure ») ;
+- la relance d'une demande après cinq jours, ou sept ;
+- « × » ou « fois ».
+
+**Les relevés des relectures**, de T1 à T7, d'A7.3 et d'A14, sont posés chacun sur la carte de la chaîne qu'ils visent, dans son paragraphe gris, et vérifiés contre le code avant d'y entrer. Trois ne tenaient plus et sont restés dehors :
+- « Le pas à pas garde ta place » (réécrit à T3.b) ;
+- le montant négatif dit comme un compte (corrigé à A14) ;
+- « ton moteur » au singulier, qui visait la confidentialité et pas le menu.
+
+**Trouvé en construisant** : la demande à copier (`request.message`) dit encore « notre moteur de croissance », alors que l'outil s'appelle « moteur de growth » depuis C2. C'est le seul texte du moteur qui quitte l'appareil. Posé en gras sur la carte de la demande, pas corrigé : la copie se tranche au bon à tirer.
+
+**La méthode**, celle de `/bon-a-tirer` (le skill, lu et suivi, pas appelé ; Antoine a demandé d'aller jusqu'au bout du chantier) :
+- l'inventaire part de `grep -rn "TODO: à relire" src/`. `engine-copy.ts` et `engine-catalog.ts` sont marqués en tête, donc entiers. Hors de l'îlot, chaque marqueur est rangé par sa provenance : A7.3.e, C1, C2, A14 T6. Les autres (le jeu, A15, la bande des espaces, `llms`, l'audit) restent à leurs bons à tirer ou dans la liste « hors de tout bon à tirer » ;
+- les textes viennent du code, par la sonde jetable `scripts/live/_bat-export.live.ts`, supprimée ensuite ;
+- la page est celle du nº8 : seuls changent la charge utile, l'en-tête et le titre, et la barre collante gagne l'encart de sécurité du haut ;
+- chaque carte dit, depuis le nº8, combien de ses chaînes sont neuves ou changées.
+
+**Vérifié** :
+- chaque chaîne des sources entières est dans une carte et une seule (le générateur refuse sinon) ;
+- les 120 identifiants sont uniques ;
+- rendu dans Chromium à 1 280 et 390 px, sans défilement de côté et sans erreur de script ;
+- la collection `cards` est vide à la publication ;
+- l'écriture d'une décision ne s'exerce que depuis un clic sur la page, pas d'ici.
+
+**Ce qui reste** : les réponses d'Antoine, puis leur application (`/bon-a-tirer appliquer`), qui lèvera les marqueurs. Ensuite B13, la re-synchro, et l'ouverture du moteur (D2), qui attend aussi le nº7.
