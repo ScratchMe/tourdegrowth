@@ -7,6 +7,8 @@ rien ici n'est importé par `src/`. **Statut : proposition.** La direction et
 le calendrier attendent Antoine ([`CHANTIERS.md`](../../CHANTIERS.md), C45).
 Toute la copie écrite pour les films est « à relire » (convention 6).*
 
+<!-- TODO: à relire (convention 6) : la copie neuve des films (entrées p: 0 de l'objet C, et les libellés écrits en dur listés plus bas). -->
+
 **La page publiée :** https://claude.ai/artifact/MDSptVBYtkDuT8vFPJW49Z (privée,
 à partager depuis son menu). Elle joue les quatre films, avec un sélecteur de
 format, de langue et de son, et le storyboard de chaque film dessous.
@@ -17,7 +19,7 @@ format, de langue et de son, et le storyboard de chaque film dessous.
 | Film | Durée | Ce qu'il montre | Quand le diffuser |
 |---|---|---|---|
 | Le Tour, en entier | 47 s | Le problème (une étape cale, les quatre autres la cachent), puis le road book : plaine, contre-la-montre, montagne. Une étape traverse le film, Retention : le diagnostic la nomme, le moteur la chiffre, le jeu montre la tentation de tricher | À l'ouverture du moteur. Si le jeu ouvre plus tard, sa partie porte « bientôt » |
-| Le diagnostic | 29 s | De l'accueil au partage : la vraie question de rétention, le ton, le résultat d'exemple 74/100, l'action, le lien qui lance d'autres Tours | Maintenant : il ne montre que ce qui est ouvert |
+| Le diagnostic | 29 s | De l'accueil au partage : la vraie question de rétention, le ton, le résultat d'exemple 74/100, l'action, le lien qui lance d'autres Tours | La page d'accueil et les annuaires maintenant : il ne montre que ce qui est ouvert. Les réseaux attendent l'ouverture du moteur, comme tout le lancement (C19, C20) |
 | Le moteur | 44 s | Le MRR monte, mais un client coûte 1 900 € et rapporte 1 500 € de marge ; « Freine ici » ; « Et si ? » fait passer le MRR dans 12 mois de 80 212 € à 122 402 € et l'ARR de 963 k€ à 1 469 k€ ; trois slides pour le board ; « 17 chiffres, une demi-journée » | À l'ouverture du moteur, **après A20** : le film montre des choses que le moteur n'affiche pas encore (voir plus bas) |
 | Le côté obscur | 34 s | Le DG de Flixo, deux astuces qui font baisser les résiliations, décembre qui défloute la confiance et le radar, le catalogue | À l'ouverture du jeu |
 
@@ -82,14 +84,27 @@ autour, comme le fait `films.mjs page`.
 
 ## Ce qui doit rester vrai
 
-- **La copie du film est marquée une par une.** Dans le storyboard, `produit`
-  veut dire repris mot pour mot du site ; `neuf · à relire` veut dire écrit
-  pour les films. L'origine de chaque texte est le champ `p` de l'objet `C`
-  (1 = produit, 0 = neuf).
+- **La copie du film vit dans l'objet `C`**, une entrée par texte, avec son
+  origine dans le champ `p` : 1 = repris mot pour mot du site, 0 = écrit pour
+  les films, donc à relire. Le storyboard affiche ces étiquettes (`produit`,
+  `neuf · à relire`) pour les textes qu'il cite, pas pour tous. **Le bon à
+  tirer se construit donc depuis `C`**, pas depuis le storyboard. S'y
+  ajoutent quelques libellés écrits en dur hors de `C`, tous neufs : les axes
+  « AUJ. » et « M+12 », les petites lignes sous les chiffres du moteur
+  (« cible : 24 % », « 820 / 26 000 »…), « au lieu de », le titre du radar
+  de confiance du jeu, « Flixo Premium » et les dossards « ÉTAPE 4 SUR 5 »
+  et « ÉTAPE 5 SUR 5 ».
+- **« Produit » ne veut pas dire approuvé.** Plusieurs entrées `p: 1`
+  reprennent des chaînes encore « à relire » dans `src/` : le bandeau et la
+  bande de l'accueil, « Moteur de growth », la copie du moteur (bon à tirer
+  nº9) et celle du jeu (nº7). Quand ces bons à tirer changent une chaîne, le
+  film se remet d'accord avec elle.
 - **Les chiffres du moteur viennent de ses formules** : `scenario.ts#twelveMonths`
   pour le MRR dans 12 mois, `unit-economics.ts` pour le LTV et le payback.
-  Ils portent l'étiquette « Chiffres d'exemple ». Le SaaS d'exemple n'est pas
-  celui d'`example.ts` : ce dernier n'a pas de marge, donc ni LTV ni payback.
+  Ils portent l'étiquette « Chiffres d'exemple » sur les écrans du moteur,
+  mais pas encore partout (voir « Ce qui reste à reprendre »). Le SaaS
+  d'exemple n'est pas celui d'`example.ts` : ce dernier n'a pas de marge, donc
+  ni LTV ni payback.
 
   | Hypothèse | Valeur |
   |---|---|
@@ -112,7 +127,7 @@ autour, comme le fait `films.mjs page`.
   activation de 18 à 24 % (à dépense égale, le CAC tombe à 1 425 €). Pris
   seuls, ils ajoutent 13 344 €, 6 362 € et 18 091 € de MRR dans 12 mois.
   Ensemble, ils ajoutent 42 190 €, soit 4 393 € d'effet composé.
-- **Aucun nom, aucun LinkedIn**, comme dans le reste de `marketing/` (C22).
+- **Aucun nom, aucun LinkedIn pour l'instant**, comme dans le reste de `marketing/` (C22, une question de calendrier).
 - **Le résultat du diagnostic est l'échantillon du site** (74/100, Retention
   à 08/20), étiqueté « Résultat d'exemple ».
 - **En 9:16, les textes restent hors des 20 % du bas**, que couvrent les
@@ -131,5 +146,10 @@ autour, comme le fait `films.mjs page`.
   constat « chaque nouveau client coûte plus qu'il ne rapporte ». Tout cela
   est le lot A20, qui ajoute aussi l'alerte de trésorerie quand le CAC
   payback est long.
+- **Des chiffres sans leur étiquette.** « Chiffres d'exemple » manque sur la
+  partie moteur du film d'ensemble (de 22,3 à 24,9 s, et ses slides), au
+  début du film du moteur (0 à 4,2 s) et sur ses slides (30 à 37 s) ;
+  « Résultat d'exemple » manque sur la carte de partage du diagnostic. À
+  poser avant toute diffusion.
 - **Les MP4 en anglais** ne sont pas exportés : `--lang en`.
 - **La copie neuve** passe au bon à tirer une fois la direction validée (C45).

@@ -585,8 +585,8 @@ sont dans [`marketing/motion/`](marketing/motion/README.md) et se jouent sur
 la page https://claude.ai/artifact/MDSptVBYtkDuT8vFPJW49Z, avec le storyboard
 de chaque film. Trois points :
 - **La direction.** Le road book des trois espaces comme fil rouge (plaine, contre-la-montre, montagne, la nuit qui tombe en montant), et Retention comme étape qui traverse le film d'ensemble. *Reco : la garder.*
-- **Le calendrier.** Le diagnostic maintenant ; le moteur à son ouverture, après A20 (son film montre ce qu'A20 ajoute) ; le jeu à la sienne ; le film d'ensemble avec le moteur, sa partie jeu marquée « bientôt » si le jeu ouvre plus tard. *Reco : celui-là.*
-- **La copie neuve des films** (marquée « neuf · à relire » dans le storyboard). *Reco : un bon à tirer à part, construit depuis la page une fois la direction validée.*
+- **Le calendrier.** Le diagnostic maintenant, mais seulement sur la page d'accueil et dans les annuaires : C19 et C20 gardent les réseaux pour l'ouverture du moteur. Le moteur à son ouverture, après A20 (son film montre ce qu'A20 ajoute) ; le jeu à la sienne ; le film d'ensemble avec le moteur, sa partie jeu marquée « bientôt » si le jeu ouvre plus tard. *Reco : celui-là, sauf si tu rouvres C20.*
+- **La copie neuve des films** (les entrées `p: 0` de l'objet `C` de la page, et quelques libellés écrits en dur, listés dans le README). *Reco : un bon à tirer à part, construit depuis `C` une fois la direction validée, avec les étiquettes « Chiffres d'exemple » qui manquent encore sur certains plans.*
 
 Avant elle, rien : C25 est tranchée le 2026-09-30, C30 à C33 le 2026-10-01, C34 à C44 le 2026-10-02 (`docs/decisions.md`).
 

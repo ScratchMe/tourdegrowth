@@ -1328,6 +1328,29 @@ Sur chacun, à 1 280 et 390 px : aucune violation axe sérieuse ou critique (le 
 
 Le prompt E code ce qui ne dépend pas du design. Il laisse à Antoine ce qui déclenche l'alerte de payback (une trésorerie de l'équipe en mois, une cible, ou les repères du glossaire, qui situent sans désigner, C1), et à Claude Design la place de chaque chiffre.
 
+**La relecture (`relecteur-copie`)**, après l'ouverture de la PR :
+- **bloquant, corrigé** :
+  - le marqueur `TODO: à relire` manquait dans le README et la page : un `grep` sur `marketing/` ne trouvait pas les films ;
+  - deux entrées étiquetées « produit » ne l'étaient pas mot pour mot. L'anglais de `pitch3` était retouché, et le français de `pitch1` avait des espaces ordinaires dans ses guillemets ;
+  - le README disait la copie « marquée une par une ». C'est faux : quinze entrées neuves ne sont citées par aucune scène du storyboard, et quelques libellés sont écrits en dur hors de `C`. Le bon à tirer se construit donc depuis `C`, et le README liste les libellés en dur ;
+  - **le calendrier contredisait C19 et C20** (« le Tour au seul SEO, sans fil ») : le diagnostic était proposé aux réseaux tout de suite. Il va maintenant à la page d'accueil et aux annuaires, et les réseaux attendent l'ouverture du moteur ;
+- **corrigé aussi** :
+  - le curseur du quiz choisissait « On peut le sortir… » (7 points), alors que l'action montrée ensuite est celle d'un « Non » à `ret-1` (`sample.ts`). Il choisit maintenant « Non », dans les deux films, et la cible du curseur a suivi ;
+  - deux insécables, les guillemets droits en anglais, deux entrées du produit marquées `p: 1` ;
+  - « The more you grow » au lieu de « The faster you grow », pour coller au français ;
+  - « pour l'instant » ajouté à la règle sur LinkedIn ;
+- **laissé au bon à tirer des films** :
+  - « board » (voulu par Antoine pour le film) contre « CODIR » dans le moteur : c'est la question d'A20 ;
+  - « growth » contre « croissance » ;
+  - « La retention freine » ;
+  - Amazon, « a accepté de payer » ;
+  - les insécables des notes de la page ;
+  - « Ton action » contre « Prochaine action » ;
+  - « Expansion du mois » contre « Expansion mensuelle » ;
+  - les étiquettes « Chiffres d'exemple » qui manquent sur quelques plans (listés dans le README).
+
+Les écrans touchés ont été refaits en image et regardés : le quiz dans les deux films, les cartes et le catalogue du jeu en FR et en EN dans les trois formats, la phrase du moteur en 9:16. L'artifact est republié à la même adresse.
+
 **Les MP4 ne sont pas versionnés.** Les douze en français pèsent environ 55 Mo, plus que tout le dépôt (44 Mo). Ils resteraient dans l'historique, et chaque checkout les téléchargerait. Ils ont été remis à Antoine dans la session, et `node marketing/motion/films.mjs mp4` les reconstruit en une vingtaine de minutes.
 
 **Vérifié** :

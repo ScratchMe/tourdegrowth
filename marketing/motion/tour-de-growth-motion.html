@@ -333,12 +333,12 @@ body.export .screen { border: 0; border-radius: 0; box-shadow: none; max-width: 
         <span class="ask">4 · Le calendrier</span>
         <h3>Le diagnostic d'abord</h3>
         <ul>
-          <li><strong>Le diagnostic</strong> peut sortir maintenant : il ne montre que ce qui est ouvert.</li>
+          <li><strong>Le diagnostic</strong> peut aller sur la page d'accueil et dans les annuaires maintenant : il ne montre que ce qui est ouvert. Les réseaux attendent l'ouverture du moteur, comme tout le lancement (C19, C20).</li>
           <li><strong>Le moteur</strong> sort avec l'ouverture du moteur (bon à tirer nº9, A18.d).</li>
           <li><strong>Le côté obscur</strong> sort avec l'ouverture du jeu (bon à tirer nº7, recette).</li>
           <li><strong>Le film d'ensemble</strong> attend le moteur ; sa partie jeu peut porter « bientôt » si le jeu ouvre plus tard.</li>
         </ul>
-        <p>Aucun film ne porte de nom ni ne renvoie à LinkedIn, comme le veut le plan de distribution.</p>
+        <p>Aucun film ne porte de nom ni ne renvoie à LinkedIn, comme le veut pour l'instant le plan de distribution.</p>
       </div>
     </div>
   </section>
@@ -749,6 +749,8 @@ function slide(L, kind, o = {}) {
 /* ================================================================== */
 /* Copy — every on-screen text, once, in both languages.               */
 /* p: 1 = already in the product, word for word ; 0 = new, to proofread */
+/* TODO: à relire (convention 6) : every entry with p: 0, and the few labels */
+/* written inline outside C (listed in marketing/motion/README.md).          */
 /* ================================================================== */
 const C = {
   h1a: { p: 1, fr: `Où ta croissance`, en: `Where does` },
@@ -808,7 +810,7 @@ const C = {
   ueFacts: { p: 0, fr: `LTV:CAC 0,79 · CAC payback 21${N}mois · un client reste environ 17${N}mois`, en: `LTV:CAC 0.79 · CAC payback 21 months · a customer stays about 17 months` },
   lossStamp: { p: 0, fr: `−400${N}€ par nouveau client`, en: `−€400 per new customer` },
   lev1: { p: 1, fr: `Churn logo mensuel`, en: `Monthly logo churn` },
-  lev2: { p: 0, fr: `Expansion mensuelle`, en: `Monthly expansion` },
+  lev2: { p: 1, fr: `Expansion mensuelle`, en: `Monthly expansion` },
   lev3: { p: 1, fr: `Taux d'activation`, en: `Activation rate` },
   slideHead: { p: 0, fr: `Où en est notre growth · septembre 2026`, en: `Where our growth stands · September 2026` },
   slideVerdict: { p: 0, fr: `La retention freine`, en: `Retention holds us back` },
@@ -851,7 +853,7 @@ const C3 = {
   hook1: { p: 0, fr: `Ton MRR monte.`, en: `Your MRR is going up.` },
   hook2: { p: 0, fr: `Mais ta growth fonctionne-t-elle vraiment${N}?`, en: `But is your growth actually working?` },
   truth1: { p: 0, fr: `Chaque nouveau client te coûte plus qu'il ne te rapporte.`, en: `Every new customer costs you more than they bring in.` },
-  truth2: { p: 0, fr: `Plus tu grandis, plus tu creuses.`, en: `The faster you grow, the deeper the hole.` },
+  truth2: { p: 0, fr: `Plus tu grandis, plus tu creuses.`, en: `The more you grow, the deeper the hole.` },
   where: { p: 0, fr: `Où investir${N}? Ton moteur te montre l'étape qui freine, chiffres à l'appui.`, en: `Where to invest? Your engine shows the stage holding you back, with the numbers to prove it.` },
   compound: { p: 0, fr: `Ensemble${N}: +42${N}190${N}€, soit environ 4${N}390${N}€ de plus que la somme des leviers pris seuls${N}: c'est l'effet composé.`, en: `Together: +€42,190, about €4,390 more than the sum of the levers taken alone: that's the compounding.` },
   arrBig: { p: 0, fr: `ARR dans 12 mois`, en: `ARR in 12 months` },
@@ -879,9 +881,9 @@ const C4 = {
   january: { p: 0, fr: `janvier`, en: `January` },
   card3: { p: 1, fr: `Résiliation accompagnée`, en: `Assisted cancellation` },
   card4: { p: 1, fr: `Rappel avant prélèvement`, en: `Pre-billing reminder` },
-  pitch1: { p: 1, fr: `Le lien « Résilier » passe dans Paramètres › Compte › Autres options.`, en: `The "Cancel" link moves to Settings › Account › Other options.` },
+  pitch1: { p: 1, fr: `Le lien «${N}Résilier${N}» passe dans Paramètres › Compte › Autres options.`, en: `The "Cancel" link moves to Settings › Account › Other options.` },
   pitch2: { p: 1, fr: `Trois mois sans prélèvement, proposés une fois sur la page de résiliation.`, en: `Three months with no charge, offered once on the cancellation page.` },
-  pitch3: { p: 1, fr: `La résiliation se fait par téléphone, du lundi au vendredi, le matin.`, en: `Cancelling happens by phone, Monday to Friday, mornings only.` },
+  pitch3: { p: 1, fr: `La résiliation se fait par téléphone, du lundi au vendredi, le matin.`, en: `Cancellation happens by phone, Monday to Friday, in the morning.` },
   pitch4: { p: 1, fr: `Un e-mail trois jours avant chaque échéance.`, en: `An email three days before each renewal.` },
   rule: { p: 0, fr: `Deux chantiers par trimestre · aucune carte ne dit ce qu'elle coûte`, en: `Two projects a quarter · no card tells you what it costs` },
   run: { p: 1, fr: `Lancer le trimestre`, en: `Run the quarter` },
@@ -893,8 +895,8 @@ const C4 = {
   catalogue: { p: 0, fr: `Le catalogue · 8 astuces`, en: `The catalogue · 8 tricks` },
   used: { p: 1, fr: `Celles que tu as utilisées`, en: `The ones you used` },
   forced: { p: 1, fr: `Action forcée`, en: `Forced action` },
-  lawL: { p: 1, fr: `Ce que dit la loi`, en: `What the law says` }, caseL: { p: 0, fr: `Un cas réel`, en: `A real case` }, tellL: { p: 1, fr: `Le repère`, en: `How to spot it` },
-  law1: { p: 0, fr: `Article L215-1-1 du Code de la consommation, la loi dite « des trois clics ».`, en: `Article L215-1-1 of the French Consumer Code, the "three-click" law.` },
+  lawL: { p: 1, fr: `Ce que dit la loi`, en: `What the law says` }, caseL: { p: 1, fr: `Un cas réel`, en: `A real case` }, tellL: { p: 1, fr: `Le repère`, en: `How to spot it` },
+  law1: { p: 0, fr: `Article L215-1-1 du Code de la consommation, la loi dite «${N}des trois clics${N}».`, en: `Article L215-1-1 of the French Consumer Code, the "three-click" law.` },
   tell1: { p: 1, fr: `Si tu cherches le bouton depuis plus de dix secondes, ce n'est pas toi. C'est voulu.`, en: `If you've been looking for the button for more than ten seconds, it isn't you. It's on purpose.` },
   case2: { p: 0, fr: `Amazon, 2025${N}: 2,5 milliards de dollars, en partie pour son parcours de désabonnement Prime.`, en: `Amazon, 2025: $2.5 billion, partly over its Prime cancellation flow.` },
   tell2: { p: 1, fr: `On t'a vendu en un clic, on te retient au téléphone.`, en: `They sold it to you in one click. They keep you on the phone.` },
@@ -962,7 +964,7 @@ function buildTour(L) {
       <div class="a mo" style="right:32px;top:28px;font-size:14px">Q 07 / 15</div>
       <div class="a segs" style="left:32px;right:32px;top:62px"><i><b></b></i><i><b></b></i><i><b style="transform:scaleX(.33)"></b></i><i></i><i></i></div>
       <div class="a" style="left:32px;right:32px;top:96px;font:700 30px/1.2 var(--f-ui);letter-spacing:-.02em">${L.q}</div>
-      ${[L.o1, L.o2, L.o3].map((o, i) => `<div class="a opt" style="${px(32, 196 + i * 58, 536, 48)}font-size:18px;${i === 1 ? an(["press", 14.5, 0.3], ["sel", 14.6, 0.15]) : ""}">${o}</div>`).join("")}`,
+      ${[L.o1, L.o2, L.o3].map((o, i) => `<div class="a opt" style="${px(32, 196 + i * 58, 536, 48)}font-size:18px;${i === 2 ? an(["press", 14.5, 0.3], ["sel", 14.6, 0.15]) : ""}">${o}</div>`).join("")}`,
     an(["up", 13.9, 0.45], ["xL", 15.0, 0.3]), "card");
   [9, 12, 15].forEach((q, i) => {
     cue("paper", 15.0 + i * 0.32);
@@ -1091,7 +1093,7 @@ function buildDiag(L) {
       <div class="a segs" style="left:40px;right:40px;top:70px"><i><b></b></i><i><b></b></i><i><b style="${an(["grow", 4.4, 4.0, "l"])}"></b></i><i><b style="${an(["grow", 8.5, 0.9, "l"])}"></b></i><i><b style="${an(["grow", 9.4, 0.9, "l"])}"></b></i></div>
       <div class="a" style="left:40px;top:108px;right:40px;${an(["in", 4.2, 0.3], ["xL", 6.4, 0.3])}">
         <div style="font:700 34px/1.2 var(--f-ui);letter-spacing:-.02em">${L.q}</div>
-        ${[L.o1, L.o2, L.o3].map((o, i) => `<div class="a opt" style="${px(0, 132 + i * 70, 720, 56)}${i === 1 ? an(["press", 5.85, 0.3], ["sel", 5.95, 0.15]) : ""}">${o}</div>`).join("")}
+        ${[L.o1, L.o2, L.o3].map((o, i) => `<div class="a opt" style="${px(0, 132 + i * 70, 720, 56)}${i === 2 ? an(["press", 5.85, 0.3], ["sel", 5.95, 0.15]) : ""}">${o}</div>`).join("")}
       </div>
       <div class="a" style="left:40px;top:108px;right:40px;${an(["fromR", 6.5, 0.35], ["xL", 8.2, 0.3])}">
         <div style="font:700 34px/1.2 var(--f-ui);letter-spacing:-.02em">${L.q2}</div>
@@ -1102,7 +1104,7 @@ function buildDiag(L) {
           ${[0, 1, 2].map((i) => `<div class="a opt" style="${px(0, 132 + i * 70, 720, 56)}"></div>`).join("")}</div>`).join("")}`,
     an(["up", 4.0, 0.45], ["xup", 10.6, 0.35]), "card");
   [0, 1, 2, 3].forEach((k) => cue("paper", 8.3 + k * 0.45));
-  const c0 = L2S(qs, 740, 560), c1 = L2S(qs, 400, 338), c2 = L2S(qs, 420, 340), c3 = L2S(qs, 400, 408);
+  const c0 = L2S(qs, 740, 560), c1 = L2S(qs, 400, 408), c2 = L2S(qs, 430, 400), c3 = L2S(qs, 400, 408);
   h += cursor([[c0[0], c0[1], 4.9], [c1[0], c1[1], 5.7], [c2[0], c2[1], 7.0], [c3[0], c3[1], 7.45]], 8.0);
   h += sup(L.fast, 8.4, 10.6, { y: { h: 600, s: 700, v: 680 }, align: "center", size: { h: 36, s: 36, v: 34 } });
 
@@ -1351,7 +1353,7 @@ function buildGame(L) {
     const z = bigE ? 1.3 : 1;
     h += `<div class="a ncard" style="${px(ex, ey, ew, eh)}padding:${24 * z}px ${26 * z}px;${an(...timing)}">
       <div class="row" style="justify-content:space-between;align-items:flex-start"><div class="st" style="font-size:${40 * z}px;color:#ff6a52">${off}</div><span class="mo" style="font-size:${11 * z}px;border:1.5px solid #f0b43c;color:#f0b43c;padding:3px 8px;border-radius:999px">${L.inProd}</span></div>
-      <div style="font:600 ${18 * z}px/1.3 var(--f-ui);color:#b5ab98;margin-top:8px">${x(`«${N}${meet}${N}»`, `“${meet}”`)}</div>
+      <div style="font:600 ${18 * z}px/1.3 var(--f-ui);color:#b5ab98;margin-top:8px">${x(`«${N}${meet}${N}»`, `"${meet}"`)}</div>
       <div class="mo" style="font-size:${12 * z}px;color:#b5ab98;margin-top:${22 * z}px">${l2}</div>
       <div style="font:500 ${16.5 * z}px/1.45 var(--f-ui);margin-top:6px">${t2}</div>
       <div class="mo" style="font-size:${12 * z}px;color:#f0b43c;margin-top:${20 * z}px">${L.tellL}</div>
@@ -1396,8 +1398,8 @@ const FILMS = {
     music: [[0, 4, "pad", "A"], [4, 10.8, "groove", "A"], [10.8, 14, "break", "A"], [14, 21, "full", "A"], [21, 25.4, "groove", "A"], [25.4, 29, "outro", "OUT"]],
     brief: {
       title: "Le diagnostic",
-      intent: "Montrer que trois minutes suffisent pour passer d'une impression vague à une étape et une action, puis que le résultat se partage. Tout ce qui est à l'écran existe déjà dans le site, avec ses vrais mots : la vraie question de rétention, l'écran du ton, le résultat d'exemple 74/100 et son action. Le seul ajout est le garde-fou du roast, dit à voix haute.",
-      facts: [["Durée", "29 s ; une coupe de 15 s possible (scènes 2, 4 et 6)"], ["Formats", "16:9, 1:1 et 9:16. En vertical, la carte de question rétrécit, les cartes du ton s'empilent, le résultat passe en colonne"], ["Pour", "Les réseaux, les annuaires, la vague de lancement du Tour"], ["Quand", "Maintenant : il ne montre que ce qui est ouvert"], ["Musique", "La même piste que le film d'ensemble, en plus léger : groove sous les questions, suspension sur le ton, groove complet sur le résultat, une note qui monte par Tour lancé"]],
+      intent: "Montrer que trois minutes suffisent pour passer d'une impression vague à une étape et une action, puis que le résultat se partage. Tout ce qui est à l'écran existe déjà dans le site, avec ses vrais mots : la vraie question de rétention, l'écran du ton, le résultat d'exemple 74/100 et son action. Ce qui est neuf : le garde-fou du roast, dit à voix haute, et quelques étiquettes (« Résultat d'exemple », « L'étape qui freine », « Ton action », le partage). La liste complète est l'objet C de la page, entrées p: 0.",
+      facts: [["Durée", "29 s ; une coupe de 15 s possible (scènes 2, 4 et 6)"], ["Formats", "16:9, 1:1 et 9:16. En vertical, la carte de question rétrécit, les cartes du ton s'empilent, le résultat passe en colonne"], ["Pour", "La page d'accueil et les annuaires maintenant ; les réseaux avec le lancement"], ["Quand", "Maintenant hors réseaux : il ne montre que ce qui est ouvert. Les réseaux attendent l'ouverture du moteur (C19, C20)"], ["Musique", "La même piste que le film d'ensemble, en plus léger : groove sous les questions, suspension sur le ton, groove complet sur le résultat, une note qui monte par Tour lancé"]],
     },
     scenes: [
       { t: 0, title: "L'accueil", img: "Le dossard « № 15 questions » tombe, le titre se peint au pochoir, le sous-titre arrive, le bouton s'enfonce.", txt: ["bibtag", "h1a", "h1c", "subtitle", "cta"], son: "Nappe, bombe de peinture, un clic, une montée." },
