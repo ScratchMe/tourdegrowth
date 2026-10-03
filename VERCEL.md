@@ -306,10 +306,14 @@ Trois pièges, tous payés sur Ramille :
   poussé : une branche créée avant le merge continue de déployer tant qu'elle
   n'a pas récupéré le nouveau `main`.
 
-**Le vérifier** : après le merge, pousser une branche partie du nouveau `main`.
-Aucun statut `Vercel` ne doit apparaître sur son commit
+**Le vérifier** : pousser une branche qui porte le réglage. Aucun statut
+`Vercel` ne doit apparaître sur son commit
 (`/repos/<owner>/<repo>/commits/<sha>/status`), et aucune entrée dans la liste
-des déploiements du projet.
+des déploiements du projet. Ça se vérifie **avant le merge**, sur la branche
+même de la PR : le 2026-10-03, ses commits sont restés sans statut quatre
+minutes, quand celui d'une branche sans le réglage arrivait en cinq secondes.
+Un déploiement refusé par le quota laisse lui aussi un statut (`failure`),
+donc l'absence de statut veut bien dire « aucun déploiement ».
 
 Garder quand même la ligne de `ignoreCommand` qui saute tout ce qui n'est pas
 la production (`[ "$VERCEL_ENV" = "production" ] || exit 0`) : elle rattrape

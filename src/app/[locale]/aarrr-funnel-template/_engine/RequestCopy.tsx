@@ -38,6 +38,7 @@ export function RequestCopy({
   onCopied,
   variant = "secondary",
   inline = false,
+  quietStatus = false,
 }: {
   role: RoleId;
   ids: MetricId[];
@@ -47,6 +48,11 @@ export function RequestCopy({
   variant?: "primary" | "secondary" | "quiet";
   /** On one row, the confirmation beside the button: a line's action in the board's next step (A18 T2.a). */
   inline?: boolean;
+  /**
+   * The confirmation announced but not shown: where the card already says it, on its own line (the requests'
+   * screen, `AskList`, A18 T3.c), a second « Demande copiée » beside « Copiée le … » would say it twice.
+   */
+  quietStatus?: boolean;
 }) {
   const [outcome, setOutcome] = useState<{ ok: boolean; text: string } | null>(null);
   // The numbers asked, kept from the copy: copying marks them requested, which empties `ids`.
@@ -106,7 +112,7 @@ export function RequestCopy({
         </Button>
       ) : null}
       {/* Always in the DOM so the confirmation is announced when it appears. */}
-      <p className={styles.requestStatus} role="status" aria-live="polite">
+      <p className={quietStatus ? "tdg-visually-hidden" : styles.requestStatus} role="status" aria-live="polite">
         {outcome?.ok ? view.strings.request.copied : ""}
       </p>
       {outcome && !outcome.ok ? (

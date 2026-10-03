@@ -1,0 +1,76 @@
+/* AskList — design system extension 07 (design/ds-extension-07-return/components/engine/AskList). */
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+  max-width: var(--engine-measure);
+}
+
+.title {
+  font: var(--display-section);
+  letter-spacing: var(--display-letter-spacing);
+  color: var(--text-body);
+  margin: 0;
+}
+
+/* Focused by script when a person comes here (R-19), never reachable by Tab. */
+.title:focus {
+  outline: none;
+}
+
+.lead {
+  font: var(--body-lg);
+  color: var(--text-body);
+  margin: 0;
+}
+
+.groups {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+  margin: 0;
+  padding: 0;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-5);
+}
+
+.numbers {
+  font: var(--field-label);
+  color: var(--text-body);
+  margin: 0;
+}
+
+/* The request as it will be copied: kept as typed, its line breaks too. */
+.request {
+  align-self: stretch;
+  margin: 0;
+  padding: var(--space-6) var(--space-7);
+  background: var(--surface-sunken);
+  border-radius: var(--radius-field);
+  font: var(--body-sm);
+  color: var(--text-body);
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+/* Copied, waiting for the answer: the pending edge, dashed, never a colour. */
+.copied {
+  margin: 0;
+  padding-left: var(--space-5);
+  border-left: var(--engine-pending-edge);
+  font: var(--body-sm);
+  color: var(--text-body);
+}
+
+@media (max-width: 760px) {
+  .doneButton {
+    width: 100%;
+  }
+}

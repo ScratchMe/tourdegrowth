@@ -34,6 +34,7 @@ import { engineName } from "./_engine/EngineSwitcher";
 import { EraseDialog } from "./_engine/EraseDialog";
 import { ExampleView } from "./_engine/ExampleView";
 import { ImportPanel, type ImportChoice } from "./_engine/ImportPanel";
+import { AskScreen } from "./_engine/AskScreen";
 import { NumberScreen } from "./_engine/NumberScreen";
 import { Setup, type SetupChoice } from "./_engine/Setup";
 import { motionsOf, startDefaults, startPlan } from "./_engine/start";
@@ -74,7 +75,8 @@ export interface EngineWorkbenchProps {
 // `targets` since A18 T3.a: the « Cibles » screen right after the start (C40); `new-settings`, the full card of another engine.
 // Before an engine exists, `settings` is that full card, opened by the start screen's « Modifier ».
 // `steps` until A18 T3.b: the step-by-step, folded into the board since (« Enregistre et continue »).
-type Screen = "board" | "number" | "targets" | "deck" | "import" | "erase" | "settings" | "example" | "new" | "new-settings" | "delete";
+// `asks` since A18 T3.c: the requests, one screen (AskList), in place of « À aller chercher » on the board.
+type Screen = "board" | "number" | "asks" | "targets" | "deck" | "import" | "erase" | "settings" | "example" | "new" | "new-settings" | "delete";
 
 // Once per page session, not per mount (§11.6: "first view of the island in the session").
 let openedTracked = false;
@@ -129,6 +131,8 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
   const [numberId, setNumberId] = useState<MetricId | null>(null);
   // The numbers passed this session (« Passe pour l'instant », A18 T3.b): still « à faire », not offered again by « Enregistre et continue ».
   const [skipped, setSkipped] = useState<MetricId[]>([]);
+  // The numbers the requests' screen opened with (A18 T3.c), frozen: a card copied stays on screen, with its date.
+  const [askIds, setAskIds] = useState<readonly MetricId[]>([]);
   // The hybrid's selector (§18.7): the motion of the number opened last in this session, else self-serve.
   const [motionView, setMotionView] = useState<Motion | null>(null);
   // The motions the start screen had chosen when « Voir un exemple rempli » was pressed (§18.7).
@@ -422,6 +426,28 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
     },
   };
 
+  /** The requests' screen (A18 T3.c), on the numbers to ask for, its heading focused: the person asked for the move (R-19). */
+  function openAsks(ids: readonly MetricId[]) {
+    setAskIds(ids);
+    setScreen("asks");
+    focus("engine-asks-title");
+  }
+
+  /**
+   * Where « Enregistre et continue » and the requests' « C'est envoyé » lead
+   * (`continueFrom`, A18 T3.b): another number; one number to ask for, its
+   * screen opened on « Je le demande », as the board's next step opens it;
+   * the requests' screen; else the board, whose next step says the rest.
+   */
+  function goTo(to: Continuation) {
+    if (to.kind === "number") actions.openMetric(to.id);
+    else if (to.kind === "ask-one") {
+      seedAskDraft(lastSnapshot(current), to.id);
+      actions.openMetric(to.id);
+    } else if (to.kind === "ask-all") openAsks(to.ids);
+    else openBoard();
+  }
+
   function exportJson() {
     // The file records its own export, so re-importing it doesn't raise the backup band.
     const saved: EngineState = { ...current, lastExportedAt: new Date().toISOString() };
@@ -674,22 +700,32 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
     },
   };
 
+  if (screen === "asks") {
+    const shapes = motionShapes(current.setup.motions);
+    // Past every number of the screen, copied or not: the ones not copied stay « à faire », passed for now.
+    const after = continueFrom(plan, shapes, [...askIds, ...skipped]);
+    return shell(
+      <AskScreen
+        ids={askIds}
+        view={view}
+        actions={actions}
+        doneLabel={after.kind === "board" ? strings.asks.doneBoard : strings.asks.done}
+        onDone={() => {
+          const notCopied = askIds.filter((a) => (lastSnapshot(current).metrics[a]?.status ?? "todo") === "todo");
+          if (notCopied.length > 0) setSkipped((was) => [...was, ...notCopied.filter((a) => !was.includes(a))]);
+          goTo(after);
+        }}
+        onBack={openBoard}
+      />,
+    );
+  }
+
   if (screen === "number" && numberId) {
     const id = numberId;
     const shapes = motionShapes(current.setup.motions);
     // Where this screen leads (A18 T3.b): the board's next step once this number is left — read from the plan
     // as it is now, before the save, with this number and the ones passed for now taken out.
     const after = continueFrom(plan, shapes, [id, ...skipped]);
-    const go = (to: Continuation) => {
-      if (to.kind === "number") actions.openMetric(to.id);
-      else if (to.kind === "ask-one") {
-        // One number to ask for: its screen, « Je le demande » open, as the board's next step opens it.
-        seedAskDraft(lastSnapshot(current), to.id);
-        actions.openMetric(to.id);
-      }
-      // The requests (until A18 T3.c gives them their screen), the slides, a month to start: the board says them.
-      else openBoard();
-    };
     // A past month is corrected, not walked through: its sheet only saves.
     const walking = month === null;
     return shell(
@@ -707,7 +743,7 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
             ? {
                 // « … et vois ton moteur » when nothing is left to find alone or to ask for, the numbers passed aside (`saveLast`).
                 label: after.kind === "board" ? strings.sheet.saveLast : strings.sheet.saveNext,
-                onSaved: () => go(after),
+                onSaved: () => goTo(after),
               }
             : undefined
         }
@@ -716,7 +752,7 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
           walking && (lastSnapshot(current).metrics[id]?.status ?? "todo") === "todo"
             ? () => {
                 setSkipped((was) => (was.includes(id) ? was : [...was, id]));
-                go(after);
+                goTo(after);
               }
             : undefined
         }
@@ -765,6 +801,7 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
         setScreen("settings");
         setRenaming(true);
       }}
+      onRequests={openAsks}
       engines={
         engines.length > 0
           ? {

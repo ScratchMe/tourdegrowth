@@ -155,3 +155,17 @@ export async function startEngine(page: Page, motion: "ss" | "sa" | "both" = "ss
 export async function expectLeft(page: Page, metricDomId: string): Promise<void> {
   await expect(page.getByTestId(`engine-sheet-${metricDomId}`)).toHaveCount(0);
 }
+
+/**
+ * From a number's screen, « Skip for now » until the requests' screen (A18
+ * T3.c): the five-minute numbers passed, the next step is the requests, all
+ * on one screen. Its heading is focused on arrival.
+ */
+export async function skipToAsks(page: Page): Promise<void> {
+  const asks = page.getByTestId("engine-asks");
+  for (let i = 0; i < 20 && !(await asks.count()); i += 1) {
+    await page.getByTestId("engine-number-skip").click();
+    await expect(page.getByTestId("engine-number").or(asks)).toBeVisible();
+  }
+  await expect(asks).toBeVisible();
+}

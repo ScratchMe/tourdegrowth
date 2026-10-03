@@ -103,16 +103,6 @@ test.describe("the numbers list", () => {
     await expect(page.getByTestId("engine-metric-act-event")).toBeFocused();
   });
 
-  test("« Fill in » from the collect list opens that number's screen, its heading focused", async ({ page }) => {
-    await page.setViewportSize({ width: 1280, height: 900 });
-    await startEngine(page);
-    await page.getByTestId("engine-collect-disclosure").locator("summary").click();
-    await page.getByTestId("engine-fill-rev-arpa").click();
-    await expect(page.getByTestId("engine-number")).toHaveAttribute("data-metric", "rev.arpa");
-    await expect(page.locator("#engine-number-title")).toBeFocused();
-    await expect(page.getByTestId("engine-number")).toContainText(/^.*Revenue · \d of 5/);
-  });
-
   test("the next step's « Go to the next number » opens the five-minute number's screen", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await startEngine(page);
