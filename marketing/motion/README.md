@@ -1,7 +1,7 @@
 # marketing/motion/ — les films de Tour de Growth
 
 *Quatre films de motion design, proposés le 2026-10-03 : un pour tout Tour de
-Growth, puis un par espace. Ils sont en musique, en 16:9, 1:1 et 9:16, en
+Growth, puis un par espace. Ils sont en musique, en 16:9, 4:5 et 9:16, en
 français et en anglais, avec leur storyboard. Rien ici ne tourne dans l'app ;
 rien ici n'est importé par `src/`. **Statut : proposition.** La direction et
 le calendrier attendent Antoine ([`CHANTIERS.md`](../../CHANTIERS.md), C45).
@@ -33,7 +33,7 @@ node marketing/motion/films.mjs mp4 --fmt v --film engine --lang en
 node marketing/motion/films.mjs frames --film engine --fmt v --at 2.6,16.2,24.6
 ```
 
-`mp4` demande ffmpeg. Il sort en 1920×1080, 1080×1080 et 1080×1920, à 30
+`mp4` demande ffmpeg. Il sort en 1920×1080, 1080×1350 et 1080×1920, à 30
 images par seconde, en H.264 (CRF 18) avec un son AAC normalisé à −14 LUFS,
 le niveau des plateformes. Tout atterrit dans `out/`, que git ignore.
 
@@ -59,10 +59,13 @@ autour, comme le fait `films.mjs page`.
   pause (`getAnimations()`), puis chaque image règle leur `currentTime`. Les
   compteurs et les sous-titres qui s'écrivent lisent la même horloge. C'est
   ce qui permet d'avancer, de reculer, et d'exporter image par image.
-- **Trois formats, une timeline.** La scène fait 1280×720, 960×960 ou
+- **Trois formats, une timeline.** La scène fait 1280×720, 960×1200 ou
   720×1280. Chaque bloc est placé par format (`pick({ h, s, v })`, `P()`,
   `blk()`), et son contenu garde ses propres coordonnées. Le minutage est le
-  même dans les trois formats.
+  même dans les trois formats. **La clé `s` désigne le 4:5 depuis le
+  2026-10-03** ; c'était le 1:1, et Antoine a retenu le 4:5, qui prend plus
+  de hauteur dans un fil sur téléphone. Ses positions sont celles du carré,
+  étirées verticalement de 1,25, puis retouchées scène par scène.
 - **Le son est synthétisé par le code.** Aucun échantillon, aucune piste de
   banque : libre de droits par construction.
   - Chaque film a ses sections de musique (`music`, à 120 bpm, en la mineur).

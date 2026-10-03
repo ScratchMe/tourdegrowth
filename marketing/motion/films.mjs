@@ -10,7 +10,8 @@
  *   node marketing/motion/films.mjs mp4    [--fmt h,s,v] [--film tour,diag,engine,game] [--lang fr]
  *   node marketing/motion/films.mjs frames --film engine --fmt v [--lang fr] --at 2.6,16.2,24.6
  *
- * Formats: h = 16:9 (1920×1080), s = 1:1 (1080×1080), v = 9:16 (1080×1920).
+ * Formats: h = 16:9 (1920×1080), s = 4:5 (1080×1350), v = 9:16 (1080×1920).
+ * The s format was 1:1 until 2026-10-03: 4:5 takes more of a phone's feed.
  * Everything lands in marketing/motion/out/, which git ignores.
  *
  * Needs the dev dependencies (Playwright's Chromium) and, for `mp4`, ffmpeg on
@@ -39,7 +40,7 @@ const option = (name, fallback) => {
 
 const FORMATS = {
   h: { width: 1920, height: 1080, scale: 1.5, name: "16x9" },
-  s: { width: 1080, height: 1080, scale: 1.125, name: "1x1" },
+  s: { width: 1080, height: 1350, scale: 1.125, name: "4x5" },
   v: { width: 1080, height: 1920, scale: 1.5, name: "9x16" },
 };
 const FILMS = { tour: "1-le-tour", diag: "2-le-diagnostic", engine: "3-le-moteur", game: "4-le-cote-obscur" };
