@@ -1385,3 +1385,63 @@ En réexportant les vingt-quatre films (FR et EN, un format par terminal comme l
 - **le 16:9 et le 9:16 ne bougent pas** : quatre images du film d'ensemble et du jeu, dans les deux formats, sont identiques au pixel près avant et après ;
 - les huit MP4 en 4:5 (1080×1350, de 29 à 47 s, son AAC) : deux images de chacun regardées, puis remis à Antoine en deux zips ;
 - la page en 4:5, à 1 280 et 390 px : le bouton « 4:5 », un écran de 520 × 650 et de 350 × 438, sans défilement horizontal. L'artifact est republié à la même adresse.
+
+## A20, prompt E : l'argent du moteur, spécifié, modélisé et briefé (2026-10-03, #306)
+
+**La demande** (Antoine, prompt E de `CHANTIERS.md`) : mettre le moteur à la hauteur de son film. Le film « Le moteur » montre l'ARR, la courbe du MRR, un client qui coûte plus qu'il ne rapporte et des slides pour un board ; le moteur n'en montrait qu'une partie. Cette session écrit la spécification, code en pur ce qui ne dépend pas du design, pose les questions et dépose le brief 09. Aucun écran ne change.
+
+**L'écart, re-vérifié sur `db7fc72`** (le relevé datait de `9c81844`) : confirmé ligne à ligne, avec deux corrections et un ajout.
+- *Corrigé* : « l'argent n'est pas sur le tableau » était trop fort. La carte du levier montre le MRR dans 12 mois, et en hybride `TotalBand` ouvre le tableau sur le MRR des deux moteurs et leur total (A18 T5, déjà sur `9c81844`).
+- *Corrigé* : le LTV:CAC est aussi sur la slide des deux moteurs en regard, pas seulement sur celle d'unit economics.
+- *Ajouté* : le film a tort sur un second point. Il imprime les montants projetés à l'euro et calcule ses écarts sur ces arrondis (13 344 € = 93 556 − 80 212), là où le moteur imprime une projection à deux chiffres significatifs (§6.2). Trouvé en tenant les chiffres du film par un test : le film se remettra d'accord au prompt F, comme pour le rouge.
+
+**La spécification** : `ENGINE.md` §20, dans [`docs/engine/argent.md`](docs/engine/argent.md), avec un renvoi dans la table d'`ENGINE.md` et un bloc en tête. Pour chaque ajout : la formule, les intervalles, les cas incalculables, les hypothèses imprimées, ce qui bouge avec quel levier (§20.9, vérifié dans `scenario.ts` et `slg-scenario.ts`), et l'exemple chiffré du film.
+
+**Le modèle (A20.a)**, `src/lib/engine/money.ts`, et deux interfaces qui l'étendent (`ScenarioKpis`, `SlgScenarioKpis` gagnent `MoneyKpis`), aujourd'hui et avec les « Et si », par motion :
+- **l'ARR** et l'ARR dans 12 mois (× 12) ;
+- **la courbe du MRR**, 13 points. `twelveMonths` rend maintenant ses treize points, et le MRR dans 12 mois **est** `mrrPath[12]` : une seule boucle. En assisté, `slgMrrPath` remplace `twelveMonthsOfNew`. Les contrats annuels arrivent à échéance également répartis (la base en ligne droite), les mensuels se composent ; cette forme est une hypothèse neuve, à imprimer sous la courbe, qui ne change aucun chiffre déjà imprimé ;
+- **le LTV:CAC** dans « Et si », égal au bit à celui de la slide aujourd'hui ;
+- **le constat de perte** (`lossCheck`) : `loss` si `LTV.hi < CAC.lo`, `maybe` si les fourchettes se chevauchent, `none` si le LTV couvre le CAC (l'équilibre compris), rien si une entrée manque, et l'écart par client. Il n'est **pas encore dans `findings()`** : sa phrase, son rang et sa place sont C48 ;
+- **la durée de vie comptée et les mois de marge après le remboursement**. Avec le plafond de 36 mois, une perte **est** un payback au-delà de la durée de vie : un test le vérifie sur 2 000 cas tirés d'une graine fixe, les trois verdicts rencontrés ;
+- **la trésorerie qu'un mois d'acquisition immobilise** : dépense × payback ÷ 2, soit l'intégrale d'un remboursement linéaire au rythme d'une cohorte par mois. C'est un plancher, sauf quand l'expansion peut dépasser les départs (`floor: false`), et ses hypothèses (`CashAssumption`) sont rendues **à part** de `assumptions`, pour qu'aucune phrase neuve n'apparaisse dans le panneau avant le portage. **La dépense est celle d'aujourd'hui**, quels que soient les leviers : recalculée depuis les payants et le CAC projetés, l'arithmétique des intervalles l'élargissait sans que rien n'ait bougé ;
+- **les sommes de l'hybride** (`total.ts`) : `timesTwelve` (l'ARR d'une ligne du total, S9 tenue), `sumPaths`, `addBoth`. Aucune somme du LTV, du payback ni de la perte : chaque moteur a les siens.
+
+**L'alerte de payback long n'est pas codée.** Son déclencheur attend C49 ; seuls les deux faits qu'elle lirait le sont.
+
+**Les goldens tiennent au caractère près.** Les champs ajoutés sortent de leur projection (`golden-projection.ts#asBeforeA20`), et un test de `golden-v2` vérifie qu'elle en retire exactement huit par côté, puis zéro. Le MRR dans 12 mois est identique au bit, dans les deux motions.
+
+**Les tests** : `money.test.ts`, trente tests, dont le SaaS du film de bout en bout (`filmState` et `FILM_LEVERS`, partagés avec le script de capture dans `__tests__/fixtures.ts`). **Non-vacuité mesurée**, chaque sabotage prouvé appliqué :
+- la dépense projetée fait rougir « la dépense ne bouge jamais » ;
+- `≤` pour une perte fait rougir « l'équilibre n'est pas une perte » ;
+- la trésorerie sans « ÷ 2 » fait rougir trois tests ;
+- la base annuelle en géométrique fait rougir « à mi-année, la moitié de la NRR » ;
+- **un sabotage passe**, et c'est écrit en tête du test (`TESTING.md` §1.2) : la ligne droite écrite `M × (1 + (f − 1) × m/12)` garde les goldens verts, parce que sur les NRR de l'exemple (1,04 et 1,08) `1 + (f − 1)` vaut `f` au bit. La forme choisie le garantit pour toutes les NRR : une assurance, pas un correctif observable.
+
+**Les questions, C46 à C52**, avec une reco chacune : l'ouverture attend-elle A20 (oui, le portage et son bon à tirer) ; où l'ARR (à côté de chaque MRR, en second) ; le constat de perte (rang 1 si certain ; il titre la slide d'unit economics, qui monte après le funnel, pas la première) ; l'alerte (la trésorerie de l'équipe en mois, facultative, les repères en contexte seulement) ; la marge de l'exemple (oui, estimée 70-80 %) ; « Et si » déplié (non, la carte porte la courbe) ; board et investisseurs dans la promesse (oui, une fois A20 porté). **Une prémisse corrigée dans C50** : les goldens v1 et v2 ne bougeraient pas avec une marge dans l'exemple, ils lisent des entrées figées en JSON (`buildInputs` ne sert qu'à leur écriture) ; ce qui bougerait, ce sont l'écran, les slides, la couverture et les 61 fichiers de tests et de specs qui lisent §6.0.
+
+**Le brief 09** : [`design/DS-EXTENSION-BRIEF-09.md`](design/DS-EXTENSION-BRIEF-09.md), sur le modèle du 07, contraintes en tête. Il demande l'argent sur le tableau sans défaire A18, l'avertissement de trésorerie distinct de la perte et sans le rouge de la fuite, « Et si » en sommet avec la courbe, les slides pour un board, la promesse ; quatorze questions, les états attendus, un `INVENTORY.md` et un `COPY.md` en retour. **Vingt et une captures** dans `design/ds-extension-09/`, prises sur le SaaS du film par `scripts/engine-density.capture.ts` (tests « brief 09 », lignes `MEASURE09`), regardées une à une :
+- le tableau du film fait 3 438 px et 26 contrôles à 1 280 ;
+- le levier « Et si » y commence à 3 237 px ;
+- le panneau ouvert ajoute 1 774 px et 9 contrôles (2 485 px à 390) ;
+- le tableau de référence du brief 07, au retour, fait 3 480 px et 27 contrôles, 3 contrôles au premier écran.
+
+Le « % » du levier paraît rogné à droite sur la capture, déjà dans celles d'A18 : mesuré, la boîte de la valeur finit au bord exact de la carte, sans débordement. Seule la capture rogne l'encre du glyphe.
+
+**Le dépôt** : 22 fichiers écrits par `DesignSync` dans le projet `23b9671c-…`, aux mêmes chemins que dans le dépôt, sous un plan qui ne nommait qu'eux, sans suppression ; le brief redéposé seul une fois, pour une précision sur `EngineTerm`. Vérifiés : `get_project` (un design system, modifiable) ; `list_files` avant (aucun `09` dans le projet, seul le 07 sous `design/`) et après (le brief, les 21 captures, rien d'autre de changé) ; le brief relu par `get_file`. Le bundle, la sentinelle et `_ds_sync.json` ne sont pas touchés. **Rien ne tourne côté Claude Design tant qu'Antoine ne le lance pas** : c'est D16, avec le message à coller.
+
+**Un piège d'environnement** : en session cloud, `next build` échouait sur « next/font/google queries have exactly one entry », le message que `NEXTJS.md` attribue à un `.next` recopié. Ici, c'était le réseau : le `fetch` de Node n'utilise pas `HTTPS_PROXY`. `NODE_USE_ENV_PROXY=1` le règle, et c'est écrit dans `NEXTJS.md` §1.9.
+
+**Consigné** :
+- `CHANTIERS.md` : A20 réécrit (l'écart re-vérifié, les étapes A20.a à A20.g), B14, C46 à C52, D16, la vue d'ensemble ;
+- `ENGINE.md` : le renvoi vers §20 ;
+- `design/README.md` : la ligne du brief 09 ;
+- `CLAUDE.md` : l'état (les décisions ouvertes, le nombre de tests) ;
+- `NEXTJS.md` : le piège du proxy.
+
+**Vérifié** :
+- `npm run lint` et `tsc` propres ;
+- `vitest --coverage` : 3 094 tests verts, 31 de plus, seuils tenus ;
+- le build comme la CI, puis Playwright complet sur ce build (résultat dans la PR) ;
+- les captures regardées.
+
+**Ce qui reste** : D16 (Antoine lance le brief), C46 à C52, puis le prompt F au retour : recopier le retour, poser ses décisions, porter A20.d.

@@ -37,6 +37,30 @@ export function asBeforeT3(scenario: unknown, slg: boolean): number {
 }
 
 /**
+ * The money A20 adds to « Et si » (engine spec §20, `money.ts`), which the
+ * goldens' projection drops — fields ADDED to each motion's figures, today
+ * and projected, beside the ones a v1 or v2 build printed. Those keep
+ * matching to the character, the MRR in twelve months above all: it is now
+ * the last point of `mrrPath`, computed with the same operations.
+ */
+export const KPIS_ADDED_BY_A20 = ["arr", "arr12", "mrrPath", "ltvCac", "lifetime", "afterPayback", "loss", "cash"] as const;
+
+/** The scenario's figures without A20's, in place, on a JSON copy. Self-serve keeps its figures under `kpis`, sales-assisted at the top. Returns how many fields it dropped. */
+export function asBeforeA20(scenario: unknown): number {
+  if (!scenario) return 0;
+  const s = scenario as { today: Record<string, unknown>; projected: Record<string, unknown> };
+  let dropped = 0;
+  for (const side of [s.today, s.projected]) {
+    const kpis = (side.kpis ?? side) as Record<string, unknown>;
+    for (const key of KPIS_ADDED_BY_A20) {
+      if (key in kpis) dropped++;
+      delete kpis[key];
+    }
+  }
+  return dropped;
+}
+
+/**
  * The board's stage tabs as v1 and v2 builds printed them, from the list that
  * replaced them (« Tes chiffres », C41, A18 T2.b). The list says the same
  * things — one mark per number, ★ first, found out of those that apply, the

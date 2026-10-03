@@ -1,7 +1,7 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
 import { renameSync } from "node:fs";
 import sharp from "sharp";
-import { exampleState, hybridState, withEntry, withMonthBefore } from "../src/lib/engine/__tests__/fixtures";
+import { FILM_LEVERS, exampleState, filmState, hybridState, measured, ratio, withEntry, withMonthBefore } from "../src/lib/engine/__tests__/fixtures";
 import type { EngineState } from "../src/lib/engine/types";
 import { engineSeed, openNumber, skipToAsks } from "../e2e/engine-helpers";
 
@@ -32,6 +32,12 @@ import { engineSeed, openNumber, skipToAsks } from "../e2e/engine-helpers";
  * The data is the §6.0 example (`exampleState`); « returning » is that
  * example with four numbers back to « to do », last touched twelve days
  * before the clock (24 September 2026).
+ *
+ * Since A20 (2026-10-03) it also takes the screens of brief 09, the money
+ * (`design/ds-extension-09/`), on the film's SaaS (`filmState`, engine spec
+ * §20.10): the tests named « brief 09 », with their own MEASURE09 lines.
+ *
+ *   OUT=design/ds-extension-09 npx playwright test --config scripts/engine-density.config.ts --grep "brief 09"
  */
 const OUT = process.env.OUT ?? "design/ds-extension-07-after";
 const DESKTOP = { width: 1280, height: 900 } as const;
@@ -388,4 +394,124 @@ test("the catalogue as text", async ({ page }) => {
     `${OUT}/CATALOGUE.md`,
     `# The engine's numbers, as its page prints them\n\n*Extracted on 2026-10-02 from the prerendered page (\`/en/aarrr-funnel-template\`, \`/fr/aarrr-funnel-template\`), section "The engine's numbers", folded by default. Generic slots (\`[cohort month]\`, the activation event) stand where a real setup fills in its own words. Every string is still marked "to be reviewed" in the code. This is the expertise brief 07 asks to keep: read it, do not rewrite it.*\n\n${parts.join("\n")}`,
   );
+});
+
+// --- Brief 09 (A20, 2026-10-03): the money, on the film's SaaS -------------------------------
+
+/** The film's SaaS with its three levers moved: the « Et si » the film plays. */
+function filmWithLevers(): EngineState {
+  return { ...filmState(), whatIf: { ...FILM_LEVERS } };
+}
+
+/** The §18.9 hybrid with a sales-assisted margin of 75 %: both engines carry their money. */
+function hybridWithMargins(): EngineState {
+  let state = hybridState();
+  for (const [id, value] of [
+    ["rev.gross-margin", ratio(36_000, 48_000)],
+    ["slg.rev.gross-margin", ratio(135_000, 180_000)],
+  ] as const)
+    state = withEntry(state, id, measured(value));
+  return state;
+}
+
+async function openWhatIf(page: Page): Promise<Locator> {
+  const fold = page.getByTestId("engine-board-whatif");
+  await fold.evaluate((el) => ((el as HTMLDetailsElement).open = true));
+  await page.evaluate(() => Promise.all(document.getAnimations().map((a) => a.finished.catch(() => undefined))));
+  return fold;
+}
+
+async function openDeck(page: Page): Promise<void> {
+  await page.getByTestId("engine-open-deck").click();
+  await expect(page.getByTestId("engine-deck")).toBeVisible();
+}
+
+for (const { locale, size, viewport } of SCREENS) {
+  const tag = `${locale}-${size}`;
+
+  test(`brief 09: the board and its lever (${tag})`, async ({ page }) => {
+    await page.setViewportSize(viewport);
+    await seed(page, locale, filmState());
+    const board = page.getByTestId("engine-board");
+    await expect(board).toBeVisible();
+    await shootEl(board, `01-board-full-${tag}`);
+    await shootEl(page.getByTestId("engine-lever"), `02-lever-${tag}`);
+    await openWhatIf(page);
+    await shootEl(page.getByTestId("engine-whatif-panel"), `03-whatif-panel-${tag}`);
+  });
+
+  test(`brief 09: the film's three levers (${tag})`, async ({ page }) => {
+    await page.setViewportSize(viewport);
+    await seed(page, locale, filmWithLevers());
+    await expect(page.getByTestId("engine-board")).toBeVisible();
+    await shootEl(page.getByTestId("engine-lever"), `04-lever-moved-${tag}`);
+    await openWhatIf(page);
+    await shootEl(page.getByTestId("engine-whatif-panel"), `05-whatif-three-levers-${tag}`);
+  });
+
+  test(`brief 09: the slides (${tag})`, async ({ page }) => {
+    await page.setViewportSize(viewport);
+    await seed(page, locale, filmWithLevers());
+    await openDeck(page);
+    await shootEl(page.getByTestId("slide-unit-economics"), `06-slide-unit-economics-${tag}`);
+    await shootEl(page.locator('[data-testid="slide-whatif:ret.logo-churn"]'), `07-slide-whatif-one-lever-${tag}`);
+    await shootEl(page.getByTestId("slide-scenario"), `08-slide-scenario-${tag}`);
+  });
+
+  test(`brief 09: the page's promise (${tag})`, async ({ page }) => {
+    await page.setViewportSize(viewport);
+    await page.clock.setFixedTime(CLOCK);
+    await page.goto(`/${locale}/aarrr-funnel-template`);
+    await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
+    await shootViewport(page, `09-page-arrival-${tag}`);
+  });
+}
+
+test("brief 09: the example without a margin, its unit economics (fr-desktop)", async ({ page }) => {
+  await page.setViewportSize(DESKTOP);
+  await seed(page, "fr", exampleState());
+  await openDeck(page);
+  await shootEl(page.getByTestId("slide-unit-economics"), "10-slide-unit-economics-no-margin-fr-desktop");
+});
+
+test("brief 09: the hybrid, both engines with a margin (fr-desktop)", async ({ page }) => {
+  await page.setViewportSize(DESKTOP);
+  await seed(page, "fr", hybridWithMargins());
+  const board = page.getByTestId("engine-board");
+  await expect(board).toBeVisible();
+  await shootEl(board, "11-hybrid-board-full-fr-desktop");
+  await openDeck(page);
+  await shootEl(page.getByTestId("slide-unit-economics"), "12-slide-unit-both-fr-desktop");
+});
+
+/** The board and the full « Et si » panel, on the film's SaaS: what A20 must not make denser (brief 07's measures). */
+test("brief 09: measurements", async ({ browser }) => {
+  for (const [label, viewport] of [["1280", DESKTOP], ["390", MOBILE]] as const) {
+    for (const locale of ["fr", "en"]) {
+      const context = await browser.newContext({ viewport });
+      const page = await context.newPage();
+      await seed(page, locale, filmState());
+      await expect(page.getByTestId("engine-board")).toBeVisible();
+      await page.evaluate(() => window.scrollTo(0, 0));
+      const out: Record<string, number | null> = {};
+      const board = await page.evaluate(probe, '[data-testid="engine-board"]');
+      out.boardHeight = board.height;
+      out.boardControls = board.controls;
+      out.boardFirstControls = board.controlsFirstScreen;
+      out.leverTop = await page.getByTestId("engine-lever").evaluate((el) => Math.round(el.getBoundingClientRect().top + window.scrollY));
+      const lever = await page.evaluate(probe, '[data-testid="engine-lever"]');
+      out.leverHeight = lever.height;
+      out.leverControls = lever.controls;
+      await openWhatIf(page);
+      await page.waitForTimeout(300);
+      const panel = await page.evaluate(probe, '[data-testid="engine-whatif-panel"]');
+      out.panelHeight = panel.height;
+      out.panelControls = panel.controls;
+      const open = await page.evaluate(probe, '[data-testid="engine-board"]');
+      out.boardOpenHeight = open.height;
+      out.boardOpenControls = open.controls;
+      console.log(`MEASURE09 ${locale} ${label} ${JSON.stringify(out)}`);
+      await context.close();
+    }
+  }
 });

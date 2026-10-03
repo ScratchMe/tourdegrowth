@@ -1,5 +1,5 @@
 import { fillTemplate, formatInterval, type UnitWords } from "./format";
-import { add, mapBounds } from "./interval";
+import { add, mapBounds, scale } from "./interval";
 import { buildScenario, mrrToday } from "./scenario";
 import { knownSharedCount } from "./shared-counts";
 import { buildSlgScenario, oppsCreated, slgMrrToday } from "./slg-scenario";
@@ -11,7 +11,9 @@ import { countsOf, currentSnapshot, entryOf, knownIn } from "./values";
  * total.ts — « deux moteurs, un total » (engine spec §18.6.2), the hybrid only.
  *
  * The one module that reads both motions, and it only ADDS: the MRR, the
- * new MRR a month, the MRR in twelve months at the current pace. It never
+ * new MRR a month, the MRR in twelve months at the current pace — and, since
+ * A20 (§20), their ARR, the two curves of the MRR month by month and the cash
+ * each motion's acquisition keeps tied up. It never
  * compares, ranks or subtracts one motion from the other (§18.6.4), and a
  * leak of one motion is never added to the other's (§18.5.4).
  *
@@ -70,6 +72,28 @@ export function buildTotal(state: EngineState, ctx: EngineCalcContext): TotalVie
     mrrIn12Months: { plg: plg12, slg: slg12, total: sumParts(plg12, slg12) },
     link: { known: knownIn(state, "link.pql-handoff", ctx), fromSelfServe: linkCounts?.numerator ?? null, oppsCreated: oppsCreated(state) },
   };
+}
+
+/**
+ * A total row × 12 (A20, §20.1): the ARR of the MRR row, or of the MRR in
+ * twelve months. A known part stays known with its confidence, a missing one
+ * stays missing with what it lacks: the total still exists only when both
+ * parts do (S9), and `formatSum` prints it by the same rule.
+ */
+export function timesTwelve(row: TotalView["mrr"]): TotalView["mrr"] {
+  const twelve = (v: DerivedValue): DerivedValue => (v.kind === "known" ? { ...v, value: scale(v.value, 12) } : v);
+  return { plg: twelve(row.plg), slg: twelve(row.slg), total: twelve(row.total) };
+}
+
+/** Two amounts added: both known, or null — never one part passed off as the total (S9). */
+export function addBoth(a: Interval | null | undefined, b: Interval | null | undefined): Interval | null {
+  return a && b ? add(a, b) : null;
+}
+
+/** The hybrid's MRR month by month (§20.2): the two curves added point by point, or null when either is missing. */
+export function sumPaths(a: Interval[] | null, b: Interval[] | null): Interval[] | null {
+  if (!a || !b || a.length !== b.length) return null;
+  return a.map((p, m) => add(p, b[m]!));
 }
 
 /** `v` rounded to a multiple of `unit`, a power of ten — without the float residue of 0.1 × 3. */

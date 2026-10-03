@@ -274,6 +274,10 @@ plus bas dans le même fichier** par un prop qui n'existait pas encore.
 - **Un dossier `.next` recopié ou laissé dans un worktree** fait échouer
   `next build` sur « next/font/google queries have exactly one entry », pour
   chaque police — ce qui ressemble à une panne réseau. `rm -rf .next`.
+  **En session cloud, le même message est une vraie panne réseau** (2026-10-03,
+  A20) : le `fetch` de Node, qui télécharge les polices Google au build,
+  n'utilise pas `HTTPS_PROXY`. `NODE_USE_ENV_PROXY=1 npm run build` (Node
+  ≥ 22.21) ; `/root/.ccr/README.md` le dit pour tout client Node.
 - **Après la suppression d'une route**, `tsc --noEmit` échoue sur
   `.next/types/validator.ts` (types générés par le build précédent) jusqu'au
   prochain build. Ce n'est pas une erreur du code.

@@ -1,4 +1,5 @@
 import { div, mapBounds, mul, point, scale } from "./interval";
+import { acquisitionSpend, afterPayback, arrOf, cashTiedUp, lossCheck, type MoneyKpis } from "./money";
 import { correlatedRatio, leverViews, type LeverView } from "./scenario";
 import { knownSharedCount } from "./shared-counts";
 import { renewalTermOf, wonPerQuarter } from "./slg-impact";
@@ -28,6 +29,11 @@ import { countsOf, currentSnapshot, entryOf, knownIn } from "./values";
  * - MRR in twelve months = that base + 12 × the new MRR a month: with
  *   annual contracts, none of the new ones comes up for renewal in the year.
  * - CAC' = the same spend ÷ W'. LTV' and the payback' by §18.5.6.
+ * - The MRR month by month (A20, §20.2), 13 points ending on the MRR in
+ *   twelve months: annual contracts come up for renewal evenly over the
+ *   year, so the base moves in a straight line from the MRR to MRR × NRR';
+ *   monthly ones compound, month after month. The new MRR adds up month by
+ *   month, as the twelve-month figure counts it.
  *
  * **The link's lever** (C25 Q7, 2026-09-30), in the hybrid only: a slider
  * in WHOLE opportunities from self-serve per quarter. O' = O + (L' − L): the
@@ -51,7 +57,7 @@ const RATE_AND_MONEY_LEVERS = [
   "slg.rev.acv",
 ] as const satisfies readonly Exclude<SlgLeverId, "link.pql-handoff">[];
 
-export interface SlgScenarioKpis {
+export interface SlgScenarioKpis extends MoneyKpis {
   /** The sales-assisted MRR at the end of the flows' month. */
   mrr: Interval | null;
   /** New MRR a month: a third of the quarter's new contracts, at their ACV ÷ 12. */
@@ -153,14 +159,34 @@ export function slgMrrToday(state: EngineState, ctx: EngineCalcContext): Interva
   return arpa && customers ? scale(arpa, customers.value) : null;
 }
 
-/** Twelve months of the NEW MRR a month: annual contracts keep all of it; monthly ones renew month after month. */
-function twelveMonthsOfNew(newMrr: Interval, term: "annual" | "monthly" | null, renewal: Interval | null): Interval {
-  if (term !== "monthly" || !renewal) return scale(newMrr, 12);
-  const factor = (r: number) => {
+/**
+ * The MRR month by month (§20.2): 13 points, the MRR today first and the MRR
+ * in twelve months last — the twelve-month figure IS the last point, computed
+ * with the same operations it always was. Annual contracts (or a term not
+ * known) come up for renewal evenly over the year: the base moves in a
+ * straight line from M to M × f. Monthly ones compound: M × f^(m/12). The new
+ * MRR a month adds up month by month: annual contracts keep all of it,
+ * monthly ones renew month after month.
+ */
+export function slgMrrPath(
+  mrr: Interval | null,
+  factor: Interval | null,
+  newMrr: Interval | null,
+  term: "annual" | "monthly" | null,
+  renewal: Interval | null,
+): Interval[] | null {
+  if (!mrr || !factor || !newMrr) return null;
+  const monthly = term === "monthly";
+  const base = (m: number, f: number, v: number) => (monthly ? v * Math.pow(f, m / 12) : v * (1 - m / 12) + v * f * (m / 12));
+  const added = (m: number, n: number, r: number | null) => {
+    if (!monthly || r === null) return n * m;
     const q = Math.min(100, Math.max(0, r)) / 100;
-    return q >= 1 ? 12 : (1 - Math.pow(q, 12)) / (1 - q);
+    return q >= 1 ? n * m : n * ((1 - Math.pow(q, m)) / (1 - q));
   };
-  return { lo: newMrr.lo * factor(renewal.lo), hi: newMrr.hi * factor(renewal.hi) };
+  return Array.from({ length: 13 }, (_, m) => ({
+    lo: base(m, factor.lo, mrr.lo) + added(m, newMrr.lo, renewal?.lo ?? null),
+    hi: base(m, factor.hi, mrr.hi) + added(m, newMrr.hi, renewal?.hi ?? null),
+  }));
 }
 
 /** What the base keeps over a year, as a factor: the NRR, else the renewal (logos for revenue), compounded for monthly contracts. */
@@ -240,8 +266,9 @@ export function buildSlgScenario(state: EngineState, targets: Partial<Record<Lev
     if (projected && rRen && tRen !== null) assumptions.add("slg-renewal-as-nrr");
     const factor = baseFactor(nrr, renewal, term);
     if (!nrr && factor) assumptions.add("slg-logos-for-revenue");
-    const newOverYear = newMrr ? twelveMonthsOfNew(newMrr, term, renewal) : null;
-    const mrr12 = mrr && factor && newOverYear ? { lo: mrr.lo * factor.lo + newOverYear.lo, hi: mrr.hi * factor.hi + newOverYear.hi } : null;
+    // One source for the curve and the MRR in twelve months: its last point (§20.2).
+    const path = slgMrrPath(mrr, factor, newMrr, term, renewal);
+    const mrr12 = path ? path[12]! : null;
     if (mrr12) assumptions.add("slg-twelve-months");
 
     // Same spend, more contracts: the CAC falls in the same proportion.
@@ -251,8 +278,30 @@ export function buildSlgScenario(state: EngineState, targets: Partial<Record<Lev
     const monthlyMargin = acv && margin ? mul(scale(acv, 1 / 12), scale(margin, 1 / 100)) : null;
     const lifetime = renewal && term ? slgLifetimeMonths(renewal, term) : null;
     const ltv = monthlyMargin && lifetime ? mul(monthlyMargin, lifetime) : null;
-    const payback = cac && monthlyMargin ? div(cac, monthlyMargin) : null;
-    return { mrr, newMrr, mrr12, nrr, cac, ltv, payback: payback && mapBounds(payback, (v) => Math.max(0, v)), won, opps };
+    const rawPayback = cac && monthlyMargin ? div(cac, monthlyMargin) : null;
+    const payback = rawPayback && mapBounds(rawPayback, (v) => Math.max(0, v));
+    // A month of acquisition: a third of the quarter's new contracts × the CAC, at today's spend whatever the what-ifs (§20.6).
+    const spend = w ? acquisitionSpend(scale(w, 1 / 3), cacToday) : null;
+    return {
+      mrr,
+      newMrr,
+      mrr12,
+      nrr,
+      cac,
+      ltv,
+      payback,
+      won,
+      opps,
+      arr: arrOf(mrr),
+      arr12: arrOf(mrr12),
+      mrrPath: path,
+      ltvCac: ltv && cac ? div(ltv, cac) : null,
+      lifetime,
+      afterPayback: afterPayback(lifetime, payback),
+      loss: lossCheck(ltv, cac),
+      // The 12-month NRR above 100 % means expansion may outpace the losses; the renewal alone never does.
+      cash: cashTiedUp(spend, payback, Boolean(nrr && nrr.hi > 100)),
+    };
   }
 
   const result = { levers, moved, today: kpis(false), projected: kpis(true) };
