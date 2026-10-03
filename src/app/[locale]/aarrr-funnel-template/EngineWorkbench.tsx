@@ -6,7 +6,7 @@ import { Card } from "@/components/core/Card";
 import { EngineStart, type StartMotion } from "@/components/engine/EngineStart";
 import { motionOfMetric, motionShapes, shapeOf } from "@/lib/engine/catalog-shape";
 import type { EngineStrings, ResolvedBridge, ResolvedDerived, ResolvedMetric } from "@/lib/engine/strings";
-import { MAX_ENGINES, type EngineCalcContext, type EngineDerived, type EngineSetup, type EngineState, type LeverId, type MetricEntry, type MetricId, type Motion, type MotionDerived, type RoleId, type SharedCount, type SlideTitle, type Snapshot, type YearMonth } from "@/lib/engine/types";
+import { MAX_ENGINES, type EngineCalcContext, type EngineDerived, type EngineSetup, type EngineState, type LeverId, type MetricEntry, type MetricId, type Motion, type MotionDerived, type RoleId, type SlideTitle, type Snapshot, type YearMonth } from "@/lib/engine/types";
 import type { Locale } from "@/lib/i18n/locale";
 import { Board } from "./_engine/Board";
 import type { SeriesControls } from "./_engine/BoardHead";
@@ -24,7 +24,7 @@ import { monthView, nextMonthOf, startNextMonth, withMonth } from "@/lib/engine/
 import { teamTools } from "@/lib/engine/tools";
 import { requestPersistence } from "@/lib/engine/storage";
 import { newEngineState } from "@/lib/engine/validate";
-import { propagateFrom, withSharedCount } from "@/lib/engine/shared-counts";
+import { propagateFrom, withSettingsNumbers } from "@/lib/engine/shared-counts";
 import { engineSetupDetail, engineStageDetail, trackEngine, type EngineStageDetail } from "./_engine/engine-events";
 import { commit, erase, getClientSnapshot, getServerSnapshot, removeEngine, subscribe, switchEngine, type CommitResult } from "./_engine/engine-store";
 import { tableTemplate, type TablePreview } from "./_engine/csv";
@@ -37,6 +37,7 @@ import { ImportPanel, type ImportChoice } from "./_engine/ImportPanel";
 import { AskScreen } from "./_engine/AskScreen";
 import { NumberScreen } from "./_engine/NumberScreen";
 import { Setup, type SetupChoice } from "./_engine/Setup";
+import { settingsNumbers } from "./_engine/settings-numbers";
 import { motionsOf, startDefaults, startPlan } from "./_engine/start";
 import { TargetsStart } from "./_engine/TargetsStart";
 import { continueFrom, nextSelfNumber, type Continuation } from "./_engine/next-step";
@@ -382,15 +383,6 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
         }),
       );
     },
-    // Every count in ONE write: two calls in the same tick would both start from the
-    // same `current`, and the second would silently drop the first.
-    setBase(counts: Partial<Record<SharedCount, number>>) {
-      write(
-        withSnapshot(lensState, (s) =>
-          (Object.entries(counts) as [SharedCount, number][]).reduce((acc, [count, value]) => withSharedCount(acc, count, value), s),
-        ),
-      );
-    },
     setPipelineOpen(open: number | null) {
       write(
         withSnapshot(lensState, (s) => {
@@ -596,6 +588,7 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
           entered: enteredCounts(snapshot),
         }}
         focusCompany={renaming}
+        numbers={settingsNumbers(current, metrics, strings, locale, view.ctx.today)}
         onCancel={() => {
           setRenaming(false);
           openBoard();
@@ -604,7 +597,11 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
           setRenaming(false);
           // The Tour box (C8): ticked keeps the link there is, or links this Tour; unticked unlinks —
           // and the Tour stays on the device either way.
-          const settled = withSettings(current, choice.setup, choice.referenceMonth, choice.cohortMonth);
+          const withSetup = withSettings(current, choice.setup, choice.referenceMonth, choice.cohortMonth);
+          // The targets and the shared counts (A18 T3.d), in the same write, on the month the settings edit.
+          const settled = choice.numbers
+            ? { ...withSetup, snapshots: [...withSetup.snapshots.slice(0, -1), withSettingsNumbers(lastSnapshot(withSetup), choice.numbers)] }
+            : withSetup;
           const linking = choice.tourResultId !== null && current.tourLink === null;
           const tourLink = choice.tourResultId === null ? null : (current.tourLink ?? { resultId: choice.tourResultId, linkedAt: new Date().toISOString() });
           const result = persist({ ...settled, tourLink });

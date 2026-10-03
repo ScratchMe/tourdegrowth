@@ -5,13 +5,13 @@ import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
 import { METRIC_SHAPES, SLG_METRIC_SHAPES, TEXT_LIMITS, shapeOf } from "@/lib/engine/catalog-shape";
 import type { EngineStrings } from "@/lib/engine/strings";
-import type { Currency, EngineSetup, Motion, ToolId, YearMonth } from "@/lib/engine/types";
+import type { Currency, EngineSetup, MetricId, Motion, SharedCount, ToolId, YearMonth } from "@/lib/engine/types";
 import { SETUP_TOOLS, TOOL_FAMILIES, teamTools } from "@/lib/engine/tools";
 import { SETUP_V2_DEFAULTS } from "@/lib/engine/types";
 import type { StoredResult } from "@/lib/quiz/storage";
 import { defaultReferenceMonth, defaultSpanEnd, matureCohortMonth, monthsBefore, nextMonth } from "@/lib/engine/cohort";
 import { formatMonthRange } from "@/lib/engine/format";
-import { fill, formatDate, formatMonth } from "./text";
+import { domId, fill, formatDate, formatMonth } from "./text";
 import { Checkbox } from "@/components/core/Checkbox";
 import { Disclosure } from "@/components/core/Disclosure";
 import { Choices } from "@/components/core/Choices";
@@ -22,7 +22,8 @@ import { Segmented } from "@/components/core/Segmented";
 import { Select } from "@/components/core/Select";
 import { TextField } from "@/components/core/TextField";
 import { monthsEndingAt } from "@/lib/forms/date";
-import { moneyUnit } from "./sources";
+import { isUnreadableNumber } from "@/lib/forms/number";
+import { moneyUnit, percentUnit } from "./sources";
 import { DEFAULT_CURRENCY, DEFAULT_WINDOWS } from "./start";
 import styles from "./Screens.module.css";
 
@@ -37,6 +38,18 @@ export interface SetupChoice {
   cohortMonth: YearMonth;
   /** The Tour result to compare with, when the person kept the box ticked. */
   tourResultId: string | null;
+  /** In the settings (A18 T3.d): the targets and the shared counts changed, written with the rest (`withSettingsNumbers`). */
+  numbers?: { targets: Partial<Record<MetricId, number | null>>; base: Partial<Record<SharedCount, number>> };
+}
+
+/**
+ * What the settings show of the numbers (A18 T3.d), labelled by the caller,
+ * which has the catalogue: the targets, one group per motion ticked (`title`
+ * only in the hybrid), and the shared counts (`settingsSharedCounts`).
+ */
+export interface SettingsNumbers {
+  targets: { motion: Motion; title: string | null; boxes: { id: MetricId; label: string; hint: string; value: number | null }[] }[];
+  shared: { count: SharedCount; label: string; hint: string; value: number | null }[];
 }
 
 /**
@@ -73,6 +86,7 @@ export function Setup({
   after,
   onCancel,
   focusCompany,
+  numbers,
 }: {
   strings: EngineStrings;
   locale: "en" | "fr";
@@ -99,6 +113,8 @@ export function Setup({
   onCancel?: () => void;
   /** « Renommer », from the engine bar's menu (A18 T2.a): the focus goes to the company's name, the field the person came to change. */
   focusCompany?: boolean;
+  /** In the settings (A18 T3.d): the targets and the shared counts, saved with the rest, dropped by « Annuler ». */
+  numbers?: SettingsNumbers;
 }) {
   const s = strings.setup;
   const editing = Boolean(initial);
@@ -128,6 +144,12 @@ export function Setup({
   // A new engine offers the link ticked; the settings open on what is (C8).
   const [linkTour, setLinkTour] = useState(editing ? Boolean(linked) : true);
   const [tried, setTried] = useState(false);
+  // The targets and the shared counts (A18 T3.d), held here until « Enregistrer les réglages », like every other field.
+  const targetBoxes = numbers?.targets.flatMap((g) => g.boxes) ?? [];
+  const [targets, setTargets] = useState<Partial<Record<MetricId, number | null>>>(() => Object.fromEntries(targetBoxes.map((b) => [b.id, b.value])));
+  const [shared, setShared] = useState<Partial<Record<SharedCount, number | null>>>(() => Object.fromEntries((numbers?.shared ?? []).map((c) => [c.count, c.value])));
+  // A shared count typed at zero or below, or erased, stops the save with its message, as a number's own box would (A15.9).
+  const [notPositive, setNotPositive] = useState<SharedCount | null>(null);
 
   const cohortWindow = Math.max(30, paid);
   const cohortMonth = chosenCohort ?? matureCohortMonth(cohortWindow, today);
@@ -147,6 +169,36 @@ export function Setup({
       return;
     }
     if (companyTooLong) return;
+    // A box holding text it cannot read stops the save, the focus on it: it writes nothing (A15.2), and the
+    // card would close on it unseen. A shared count must be a whole number above zero.
+    const unread = [
+      ...targetBoxes.map((b) => ({ el: `${id}-target-${b.id}`, integer: false })),
+      ...(numbers?.shared ?? []).map((c) => ({ el: `${id}-shared-${c.count}`, integer: true })),
+    ]
+      .map(({ el, integer }) => ({ box: document.getElementById(el) as HTMLInputElement | null, integer }))
+      .find(({ box, integer }) => box !== null && isUnreadableNumber(box.value, locale, integer));
+    if (unread?.box) {
+      unread.box.focus();
+      return;
+    }
+    const zero = (numbers?.shared ?? []).find((c) => {
+      const n = shared[c.count] ?? null;
+      return (n === null && c.value !== null) || (n !== null && n <= 0);
+    });
+    if (zero) {
+      setNotPositive(zero.count);
+      document.getElementById(`${id}-shared-${zero.count}`)?.focus();
+      return;
+    }
+    const changedTargets = Object.fromEntries(
+      targetBoxes.filter((b) => (targets[b.id] ?? null) !== b.value).map((b) => [b.id, targets[b.id] ?? null]),
+    ) as Partial<Record<MetricId, number | null>>;
+    const changedBase = Object.fromEntries(
+      (numbers?.shared ?? []).flatMap((c) => {
+        const n = shared[c.count] ?? null;
+        return n !== null && n !== c.value ? [[c.count, n]] : [];
+      }),
+    ) as Partial<Record<SharedCount, number>>;
     const pipeline = {
       ...(quarterTarget !== null && quarterTarget > 0 ? { quarterTarget } : {}),
       ...(threshold !== null && threshold > 0 ? { threshold } : {}),
@@ -169,6 +221,7 @@ export function Setup({
       referenceMonth,
       cohortMonth,
       tourResultId: tour && linkTour ? tour.id : null,
+      ...(numbers ? { numbers: { targets: changedTargets, base: changedBase } } : {}),
     });
   }
 
@@ -233,6 +286,7 @@ export function Setup({
       <h2 id="engine-setup-title" className={styles.panelTitle} tabIndex={-1}>
         {editing ? strings.settings.title : s.title}
       </h2>
+      {editing ? <p className={styles.lead}>{st.lead}</p> : null}
 
       <Choices
         id={`${id}-type`}
@@ -370,6 +424,64 @@ export function Setup({
         <p className={styles.periodsLine} data-testid="engine-setup-slg-periods">
           {slgPeriods}
         </p>
+      ) : null}
+
+      {/* The targets and the shared counts (A18 T3.d): what the start's « Cibles » and the step-by-step's base asked,
+          in one place. Only the motions ticked when the card opened: a motion ticked here starts empty. */}
+      {numbers && numbers.targets.length > 0 ? (
+        <section className={styles.settingsGroup} aria-labelledby={`${id}-targets-title`} data-testid="engine-settings-targets">
+          <h3 id={`${id}-targets-title`} className={styles.settingsGroupTitle}>
+            {st.targets}
+          </h3>
+          <p className={styles.periodsLine}>{st.targetsLead}</p>
+          {numbers.targets.map((group) => (
+            <div key={group.motion} className={styles.settingsBoxes}>
+              {group.title ? <h4 className={styles.toolFamilyTitle}>{group.title}</h4> : null}
+              {group.boxes.map((b) => (
+                <NumberField
+                  key={b.id}
+                  size="sm"
+                  id={`${id}-target-${b.id}`}
+                  data-testid={`engine-settings-target-${domId(b.id)}`}
+                  label={b.label}
+                  hint={b.hint}
+                  optional={strings.workbench.optional}
+                  value={targets[b.id] ?? null}
+                  onChange={(v) => setTargets((was) => ({ ...was, [b.id]: v }))}
+                  locale={locale}
+                  digits={5}
+                  {...percentUnit(locale)}
+                  parseError={strings.workbench.notANumber}
+                />
+              ))}
+            </div>
+          ))}
+        </section>
+      ) : null}
+      {numbers && numbers.shared.length > 0 ? (
+        <section className={styles.settingsGroup} aria-labelledby={`${id}-shared-title`} data-testid="engine-settings-shared">
+          <h3 id={`${id}-shared-title`} className={styles.settingsGroupTitle}>
+            {st.shared}
+          </h3>
+          <p className={styles.periodsLine}>{st.sharedLead}</p>
+          {numbers.shared.map((c) => (
+            <NumberField
+              key={c.count}
+              size="sm"
+              id={`${id}-shared-${c.count}`}
+              data-testid={`engine-settings-shared-${c.count}`}
+              label={c.label}
+              hint={c.hint}
+              value={shared[c.count] ?? null}
+              onChange={(v) => setShared((was) => ({ ...was, [c.count]: v }))}
+              locale={locale}
+              integer
+              digits={9}
+              error={notPositive === c.count && !((shared[c.count] ?? 0) > 0) ? st.wholeCount : undefined}
+              parseError={st.wholeCount}
+            />
+          ))}
+        </section>
       ) : null}
 
       {/* A three-letter code, so a box its size, not the column's (extension 04, Q18.11). */}

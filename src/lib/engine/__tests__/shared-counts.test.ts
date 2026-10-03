@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { ALL_METRIC_SHAPES } from "../catalog-shape";
-import { knownSharedCount, offBase, propagateFrom, SHARED_COUNTS, sharedCountAt, withSharedCount } from "../shared-counts";
+import { ALL_METRIC_SHAPES, shapesOf } from "../catalog-shape";
+import { knownSharedCount, offBase, propagateFrom, SHARED_COUNTS, settingsSharedCounts, sharedCountAt, withSettingsNumbers, withSharedCount } from "../shared-counts";
 import { validateEngine } from "../validate";
 import { ENGINE_CATALOG } from "@/content/engine-catalog";
 import { emptyState, exampleState, measured, ratio } from "./fixtures";
@@ -131,5 +131,51 @@ describe("the MRR counts (2026-09-26)", () => {
     const next = propagateFrom(withMargin, "rev.gross-margin");
     expect(next.base?.mrrEnd).toBe(40_000);
     expect(next.metrics["rev.arpa"]?.value).toEqual({ kind: "ratio", numerator: 40_000, denominator: 400 });
+  });
+});
+
+describe("the Settings' shared counts (A18 T3.d)", () => {
+  const shown = (plg: boolean, slg: boolean) => shapesOf({ plg, slg }).map((shape) => shape.id);
+  const offered = (plg: boolean, slg: boolean) =>
+    settingsSharedCounts(shown(plg, slg)).map(({ count, slots }) => [count, slots.map((slot) => slot.metric)]);
+
+  it("self-serve: the cohort's and the month's sign-ups, each with the numbers that carry it, in the catalogue's order", () => {
+    expect(offered(true, false)).toEqual([
+      ["cohortSignups", ["act.rate", "ret.d30", "ref.referred-share", "ref.k-factor", "rev.paid-conversion"]],
+      ["monthSignups", ["acq.signup-rate", "acq.top-channel-share"]],
+    ]);
+  });
+
+  it("sales-assisted alone: two counts, the opportunities left out — without the hybrid's link, one number carries them", () => {
+    expect(offered(false, true)).toEqual([
+      ["slgDealsWon", ["slg.rev.win-rate", "slg.rev.acv", "slg.acq.cac"]],
+      ["slgCustomers", ["slg.rev.arpa", "slg.ref.referenceable"]],
+    ]);
+    expect(offered(true, true).map(([count]) => count)).toEqual(["cohortSignups", "monthSignups", "slgOppsCreated", "slgDealsWon", "slgCustomers"]);
+    expect(offered(true, true)[2]).toEqual(["slgOppsCreated", ["slg.ref.referred-share", "link.pql-handoff"]]);
+  });
+
+  it("never the MRRs: an amount is typed with the figure it belongs to", () => {
+    const counts = settingsSharedCounts(ALL_METRIC_SHAPES.map((shape) => shape.id)).map(({ count }) => count);
+    expect(counts).not.toContain("mrrEnd");
+    expect(counts).not.toContain("mrrStart");
+  });
+
+  it("writes the targets typed (null takes one away) and the counts changed, into the base and the entries, in one snapshot", () => {
+    const start = exampleState().snapshots[0]!;
+    const before = JSON.stringify(start);
+    // The example's team has two targets, activation's among them.
+    expect(start.targets["act.rate"]).toBeDefined();
+    const next = withSettingsNumbers(start, { targets: { "acq.signup-rate": 4, "act.rate": null }, base: { cohortSignups: 820 } });
+    expect(next.targets["acq.signup-rate"]).toBe(4);
+    expect(next.targets).not.toHaveProperty("act.rate");
+    expect(next.base?.cohortSignups).toBe(820);
+    expect(next.metrics["act.rate"]?.value).toEqual(ratio(144, 820));
+    // The other targets are kept, and the snapshot given is not touched.
+    const others = Object.keys(start.targets).filter((id) => id !== "act.rate");
+    expect(others.length).toBeGreaterThan(0);
+    for (const id of others) expect(next.targets[id as never]).toBe(start.targets[id as never]);
+    expect(JSON.stringify(start)).toBe(before);
+    expect(withSettingsNumbers(start, {})).toEqual(start);
   });
 });
