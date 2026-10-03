@@ -18,10 +18,10 @@ format, de langue et de son, et le storyboard de chaque film dessous.
 
 | Film | Durée | Ce qu'il montre | Quand le diffuser |
 |---|---|---|---|
-| Le Tour, en entier | 47 s | Le problème (une étape cale, les quatre autres la cachent), puis le road book : plaine, contre-la-montre, montagne. Une étape traverse le film, Retention : le diagnostic la nomme, le moteur la chiffre, le jeu montre la tentation de tricher | À l'ouverture du moteur. Si le jeu ouvre plus tard, sa partie porte « bientôt » |
+| Le Tour, en entier | 52 s | Le problème (une étape cale, les quatre autres la cachent), puis le road book : plaine, contre-la-montre, montagne. Une étape traverse le film, Retention : le diagnostic la nomme, le moteur la chiffre, le jeu, annoncé comme un jeu, apprend ce qu'il ne faut pas faire puis montre ce qui marche. Dernière ligne : « Maintenant, tu sais quoi faire. C'est parti ! » | À l'ouverture du moteur. Si le jeu ouvre plus tard, sa partie porte « bientôt » |
 | Le diagnostic | 29 s | De l'accueil au partage : la vraie question de rétention, le ton, le résultat d'exemple 74/100, l'action, le lien qui lance d'autres Tours | La page d'accueil et les annuaires maintenant : il ne montre que ce qui est ouvert. Les réseaux attendent l'ouverture du moteur, comme tout le lancement (C19, C20) |
 | Le moteur | 44 s | Le MRR monte, mais un client coûte 1 900 € et rapporte 1 500 € de marge ; « Freine ici » ; « Et si ? » fait passer le MRR dans 12 mois de 80 212 € à 122 402 € et l'ARR de 963 k€ à 1 469 k€ ; trois slides pour le board ; « 17 chiffres, une demi-journée » | À l'ouverture du moteur, **après A20** : le film montre des choses que le moteur n'affiche pas encore (voir plus bas) |
-| Le côté obscur | 34 s | Le DG de Flixo, deux astuces qui font baisser les résiliations, décembre qui défloute la confiance et le radar, le catalogue | À l'ouverture du jeu |
+| Le côté obscur | 42 s | Annoncé comme un jeu dès le premier plan (« un jeu pour apprendre ce qu'il ne faut pas faire »). Le DG de Flixo, deux astuces qui font baisser les résiliations, décembre qui défloute la confiance et le radar, le catalogue. Puis l'année rejouée sans tricher, la confiance qui monte, et la fin sur fond clair : « Maintenant, tu sais quoi faire. À toi de jouer. » | À l'ouverture du jeu |
 
 ## Ouvrir, exporter
 
@@ -59,6 +59,12 @@ autour, comme le fait `films.mjs page`.
   pause (`getAnimations()`), puis chaque image règle leur `currentTime`. Les
   compteurs et les sous-titres qui s'écrivent lisent la même horloge. C'est
   ce qui permet d'avancer, de reculer, et d'exporter image par image.
+- **Un décalage global, `TS`.** Pour insérer une scène au milieu d'un film
+  sans retaper les temps qui la suivent : tant que `TS` vaut 3,2, un élément
+  écrit à 10 s part à 13,2 s. `an()`, `cue()`, les compteurs, les sous-titres,
+  l'horloge de la visio et le point du road book le lisent. Chaque film
+  repart de `TS = 0`. Le film du jeu s'en sert pour son annonce (3,2 s), le
+  film d'ensemble pour celle du jeu (2 s) et pour la bascule positive (2,4 s).
 - **Trois formats, une timeline.** La scène fait 1280×720, 960×1200 ou
   720×1280. Chaque bloc est placé par format (`pick({ h, s, v })`, `P()`,
   `blk()`), et son contenu garde ses propres coordonnées. Le minutage est le
