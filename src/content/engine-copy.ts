@@ -1240,6 +1240,14 @@ export const ENGINE_COPY = {
     ssMrr: { fr: "MRR libre-service", en: "Self-serve MRR" },
     saMrr: { fr: "MRR assisté", en: "Sales-assisted MRR" },
     sumMrr: { fr: "MRR total", en: "Total MRR" },
+    /**
+     * TODO: à relire (convention 6) — neuf le 2026-10-03 (A20.d T3.b, le retour du brief 09, `total.arr`, `total.mrr12`,
+     * `total.cash`) : the band's line of what adds up across the two engines, and only that. The LTV, the payback and the
+     * loss never add: each engine's money block carries its own.
+     */
+    sumArr: { fr: "ARR total", en: "Total ARR" },
+    sumMrr12: { fr: "MRR dans 12 mois au rythme actuel", en: "MRR in 12 months at today's pace" },
+    sumCash: { fr: "Trésorerie immobilisée totale", en: "Total cash tied up" },
     newMrr: { fr: "Nouveau MRR du mois", en: "New MRR this month" },
     /** `{plg} + {slg} = {total}`: `total.formatSum`'s three strings, each part rounded to the common unit. */
     newMrrSum: { fr: "Nouveau MRR du mois : {plg} + {slg} = {total}", en: "New MRR this month: {plg} + {slg} = {total}" },
@@ -1598,11 +1606,61 @@ export const ENGINE_COPY = {
     kpiCac: { fr: "CAC", en: "CAC" },
     kpiLtv: { fr: "LTV", en: "LTV" },
     kpiPayback: { fr: "CAC payback", en: "CAC payback" },
+    /**
+     * TODO: à relire (convention 6) — neuf le 2026-10-03 (A20.d T3.b, le retour du brief 09, `panel.*` et `row.*`) : the
+     * panel's three tables (`WhatIfFigures`), replacing its seven tiles — their groups, their columns, the rows the money
+     * adds, and how a change that did not happen, or a customer who leaves before paying back, is said.
+     */
+    figuresGrowth: { fr: "Croissance", en: "Growth" },
+    figuresCustomer: { fr: "Un nouveau client", en: "One new customer" },
+    figuresCash: { fr: "Trésorerie", en: "Cash" },
+    colFigure: { fr: "Chiffre", en: "Figure" },
+    colToday: { fr: "Aujourd'hui", en: "Today" },
+    colWhatif: { fr: "Avec tes « Et si »", en: "With your what-ifs" },
+    colChange: { fr: "Écart", en: "Change" },
+    rowLtvCac: { fr: "LTV:CAC", en: "LTV:CAC" },
+    rowGap: { fr: "Par nouveau client", en: "Per new customer" },
+    rowAfter: { fr: "Mois après remboursement", en: "Months after payback" },
+    rowSpend: { fr: "Dépensé en acquisition par mois", en: "Spent on acquisition a month" },
+    rowCash: { fr: "Trésorerie immobilisée", en: "Cash tied up" },
+    /** Months after payback below zero: the customer leaves before paying their cost back — the loss, said in months. */
+    leavesFirst: { fr: "part avant", en: "leaves first" },
+    /** A figure the what-ifs did not move. */
+    stable: { fr: "stable", en: "unchanged" },
+    /** The money's own rules, printed with the scenario's when the table shows the figure. */
+    assumeLtv: {
+      fr: "LTV : la marge mensuelle sur la durée de vie comptée d'un client (1 ÷ churn, plafonnée à 36 mois), à l'ARPA d'aujourd'hui : l'expansion n'y entre pas.",
+      en: "LTV: the monthly margin over a customer's counted lifetime (1 ÷ churn, capped at 36 months), on today's ARPA: expansion is not in it.",
+    },
+    assumeCash: {
+      fr: "Trésorerie immobilisée : la dépense d'acquisition du mois × le payback ÷ 2. La dépense de chaque mois revient régulièrement sur le payback ; le churn et la rétrogradation, qui la ralentissent, ne sont pas comptés (un plancher), sauf si l'expansion les dépasse. Facturation mensuelle. Même dépense avec les « Et si » : plus de payants rendent chacun moins cher.",
+      en: "Cash tied up: the month's acquisition spend × the payback ÷ 2. Each month's spend comes back evenly over the payback; churn and contraction, which slow it, are not counted (a floor), unless expansion outpaces them. Monthly billing. The same spend with the what-ifs: more payers make each one cheaper.",
+    },
+    /** Not on the return: sales-assisted's two, in its own words (renewals, the ACV). */
+    assumeLtvSlg: {
+      fr: "LTV : la marge mensuelle d'un contrat sur sa durée de vie comptée (d'après le renouvellement, plafonnée à 36 mois), à l'ACV d'aujourd'hui.",
+      en: "LTV: a contract's monthly margin over its counted lifetime (from the renewal, capped at 36 months), on today's ACV.",
+    },
+    assumeCashSlg: {
+      fr: "Trésorerie immobilisée : la dépense d'acquisition du mois × le payback ÷ 2. La dépense de chaque mois revient régulièrement sur le payback ; les non-renouvellements, qui la ralentissent, ne sont pas comptés (un plancher), sauf si la NRR dépasse 100 %. Facturation mensuelle supposée. Même dépense avec les « Et si » : plus de contrats rendent chacun moins cher.",
+      en: "Cash tied up: the month's acquisition spend × the payback ÷ 2. Each month's spend comes back evenly over the payback; non-renewals, which slow it, are not counted (a floor), unless the NRR is above 100%. Monthly billing assumed. The same spend with the what-ifs: more contracts make each one cheaper.",
+    },
     kpiUnknown: { fr: "il manque {input}", en: "missing: {input}" },
     aloneTitle: { fr: "Ce que chaque levier rapporte seul, sur le MRR dans 12 mois", en: "What each lever brings on its own, on MRR in 12 months" },
     aloneRow: { fr: "{lever} : {from} → {to}", en: "{lever}: {from} → {to}" },
     together: { fr: "Ensemble : {total}, soit {extra} de plus que la somme des leviers pris seuls : c'est l'effet composé.", en: "Together: {total}, {extra} more than the sum of the levers taken alone: that's the compounding." },
     togetherNoExtra: { fr: "Ensemble : {total}.", en: "Together: {total}." },
+    /**
+     * TODO: à relire (convention 6) — neuf le 2026-10-03 (A20.d T3.b, le retour du brief 09, `sum.oneByOne`, `sum.together`,
+     * `sum.extra`) : the panel's compounding, drawn (`LeverSum`): its two bars' labels, and the sentence that says what the
+     * bracket measures. The slides keep `together` until T4 draws them the same way.
+     */
+    sumOneByOne: { fr: "Chacun seul, additionnés", en: "Each alone, added up" },
+    sumTogether: { fr: "Ensemble", en: "Together" },
+    sumExtra: {
+      fr: "Ensemble, ils rapportent {extra} de plus que chacun seul, additionnés : chaque levier agit sur ce que les autres ajoutent. C'est l'effet composé.",
+      en: "Together they bring {extra} more than each alone, added up: each lever works on what the others add. That's compounding.",
+    },
     noneMoved: { fr: "Aucun levier bougé : le funnel et les chiffres sont ceux d'aujourd'hui.", en: "No lever moved: the funnel and the numbers are today's." },
     noLever: { fr: "Il faut au moins un chiffre saisi pour tester un « Et si ».", en: "You need at least one number entered to test a what-if." },
     /** A KPI tile says whether a change is good news in words, never by color alone (StatTile.tsx). */
@@ -1626,8 +1684,6 @@ export const ENGINE_COPY = {
     /** A grid's text equivalent: `{label}` a step, `{value}` the projection, `{today}` today's count. */
     gridAria: { fr: "{label} : {value}, contre {today} aujourd'hui", en: "{label}: {value}, against {today} today" },
     /** The table of what each lever brings alone: its header cells. */
-    aloneLever: { fr: "Levier", en: "Lever" },
-    aloneGain: { fr: "MRR dans 12 mois", en: "MRR in 12 months" },
     assumptionsTitle: { fr: "Ce que le calcul suppose", en: "What the calculation assumes" },
     /** One sentence per rule of `lib/engine/scenario.ts`, printed only when it applied. */
     assumption: {
@@ -1653,11 +1709,6 @@ export const ENGINE_COPY = {
     /** The link's slider, in WHOLE opportunities: its own label, not `sliderLabel`'s « cible testée ». */
     linkSlider: { fr: "Opportunités venues du libre-service, par trimestre", en: "Opportunities from self-serve, per quarter" },
     /** The hybrid's one line, in the full « Et si » panel of the engine shown (A18 T5): a sum, never a comparison. */
-    totalIn12: { fr: "MRR total dans 12 mois", en: "Total MRR in 12 months" },
-    totalIn12Row: {
-      fr: "{today} aujourd'hui, {projected} avec les « Et si » des deux panneaux",
-      en: "{today} today, {projected} with the what-ifs of both panels",
-    },
     kpiNrr12: { fr: "NRR sur douze mois", en: "12-month NRR" },
     kpiWon: { fr: "Nouveaux clients par trimestre", en: "New customers a quarter" },
     /** The sales-assisted panel's quarter, where self-serve shows its month's funnel. */

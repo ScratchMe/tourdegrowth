@@ -4,8 +4,9 @@
    (deck.module.css): a projected change is neither a diagnosis nor advice
    (Antoine, 2026-09-28, design audit S-5). What the what-ifs change is told
    by a mark — a ring, a centre, a strike — never by a colour. Neither green:
-   the growth tiles' changes are bold ink (StatTile `sentiment="neutral"`),
-   gains and losses alike, as the slides' « change » column. */
+   the growth figures' changes are bold ink (WhatIfFigures, extension 09; the
+   tiles' StatTile `neutral` before them), gains and losses alike, as the
+   slides' « change » column. */
 .panel {
   container: whatif / inline-size;
   display: flex;
@@ -33,8 +34,9 @@
 }
 
 @container whatif (min-width: 860px) {
+  /* The figures' column the wider (extension 09): three tables read across, today against the what-if. */
   .top {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
   }
 
   /* Eight sliders run twice as tall as the figures they move: the figures stay in view while the last ones move. */
@@ -166,12 +168,6 @@
   margin-top: var(--space-5);
 }
 
-.tiles {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-5);
-}
-
 .kpis > .note {
   margin-top: var(--space-5);
 }
@@ -288,13 +284,7 @@
   min-width: 0;
 }
 
-.together {
-  font: var(--body-md);
-  font-weight: 600;
-  color: var(--text-body);
-  margin: 0;
-  max-width: 62ch;
-}
+
 
 .assumptions {
   display: flex;

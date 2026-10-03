@@ -1,0 +1,145 @@
+/*
+ * WhatIfFigures — design system extension 09 (design/ds-extension-09-return/
+ * components/engine/WhatIfFigures), ported by A20.d T3.b. Tokens only.
+ *
+ * The ruled table of DataTable.module.css (`sm`), restated here because a
+ * cell holds a second line; the return's narrow fold is a container query,
+ * not the viewport's 760px: the panel's figures sit in a column of the
+ * opened panel on a desktop, and across the page on a phone.
+ */
+.root {
+  container: whatif-figures / inline-size;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  min-width: 0;
+}
+
+/* Fixed columns, the same in the three tables: today, the what-if and the change line up down the panel. */
+.table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  color: var(--text-body);
+}
+
+.table thead th:nth-child(1) {
+  width: 34%;
+}
+
+.root[data-moved="true"] .table thead th:nth-child(2),
+.root[data-moved="true"] .table thead th:nth-child(3) {
+  width: 21%;
+}
+
+.root[data-moved="false"] .table thead th:nth-child(1) {
+  width: 60%;
+}
+
+.caption {
+  font: var(--meta-xs);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  text-align: left;
+  padding-bottom: var(--space-2);
+}
+
+.table thead th {
+  font: var(--chart-label);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  text-align: left;
+  vertical-align: bottom;
+  border-bottom: var(--border-solid);
+}
+
+.table tbody th,
+.table tbody td {
+  font: var(--body-sm);
+  text-align: left;
+  vertical-align: baseline;
+  border-bottom: var(--border-width-hairline) dashed var(--border-divider);
+}
+
+.table tbody tr:last-child th,
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.table th,
+.table td {
+  padding: var(--space-2) var(--space-4);
+}
+
+.table th:first-child,
+.table td:first-child {
+  padding-left: 0;
+}
+
+.table th:last-child,
+.table td:last-child {
+  padding-right: 0;
+}
+
+.table .numeric {
+  text-align: right;
+  font: var(--meta-md);
+  font-variant-numeric: var(--tabular);
+}
+
+.table thead .numeric {
+  font: var(--chart-label);
+}
+
+/* The change is the news: bold ink, as the tiles' neutral delta was. */
+.table .change {
+  font-weight: 700;
+}
+
+/* What a « ? » is missing, under the row's name. */
+.missing {
+  display: block;
+  font: var(--meta-xs);
+  color: var(--text-muted);
+}
+
+/* The narrow layout's second line in the what-if cell: hidden while « today » has its own column. */
+.todayLine {
+  display: none;
+}
+
+@container whatif-figures (max-width: 520px) {
+  .todayColumn {
+    display: none;
+  }
+
+  .table thead th:nth-child(1) {
+    width: 38%;
+  }
+
+  .root[data-moved="true"] .table thead th:nth-child(3) {
+    width: 31%;
+  }
+
+  .todayLine {
+    display: block;
+    font: var(--meta-xs);
+    color: var(--text-muted);
+  }
+
+  .table th,
+  .table td {
+    padding-left: var(--space-2);
+    padding-right: var(--space-2);
+  }
+
+  .table .numeric {
+    font: var(--meta-sm);
+  }
+
+  .table thead .numeric {
+    font: var(--chart-label);
+  }
+}

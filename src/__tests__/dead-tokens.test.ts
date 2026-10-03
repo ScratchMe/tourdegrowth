@@ -46,16 +46,8 @@ const WAITING: Record<string, string> = {
 const WAITING_FOR_A18: Record<string, string> = {};
 Object.assign(WAITING, WAITING_FOR_A18);
 
-/**
- * The engine's money (A20.d, 2026-10-03) ports tokens/money.css in T2, with
- * the board's money block, and its other screens a step at a time: each
- * token below waits for the step whose component reads it first (the return
- * 09's own CSS says which), and leaves this list with it.
- */
-const WAITING_FOR_A20: Record<string, string> = {
-  "--money-sum-bar": "T3: LeverSum, the compounding as lengths",
-};
-Object.assign(WAITING, WAITING_FOR_A20);
+// The engine's money (A20.d, 2026-10-03) ported tokens/money.css in T2 and
+// held here the tokens T3 read first; T3.b read the last of them.
 
 const sheets = readdirSync(TOKENS).filter((f) => f.endsWith(".css"));
 const declared = new Map<string, string>();

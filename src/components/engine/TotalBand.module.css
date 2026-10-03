@@ -1,4 +1,4 @@
-/* TotalBand — design system extension 07 (design/ds-extension-07-return/components/engine/TotalBand). Tokens only. */
+/* TotalBand — design system extension 07 (design/ds-extension-07-return/components/engine/TotalBand), changed by extension 09 (the totals line, A20.d T3.b). Tokens only. */
 .root {
   display: flex;
   flex-direction: column;
@@ -69,15 +69,44 @@
   margin: 0;
 }
 
+/* Extension 09: what adds up across the two engines, under the sum — the
+ * ARR, the MRR in 12 months, the cash tied up. One line, set off by a hairline. */
+.totals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-5) var(--space-9);
+  margin: 0;
+  padding-top: var(--space-5);
+  border-top: var(--border-width-hairline) dashed var(--border-divider);
+}
+
+.totals .value {
+  font: var(--chart-value);
+}
+
+/* A phone (extension 09): the two engines side by side over their total, the
+ * total's rule above it, and the totals two by two — the band grows by a row. */
 @media (max-width: 760px) {
   .sum {
-    flex-direction: column;
-    align-items: stretch;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-5) var(--space-7);
   }
 
   .total {
+    grid-column: 1 / -1;
     padding: var(--space-5) 0 0;
     border-left: none;
     border-top: var(--border-solid);
+  }
+
+  .totals {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-4) var(--space-7);
+  }
+
+  .totals .value {
+    font: var(--chart-value-compact);
   }
 }

@@ -7,9 +7,10 @@ import { DataTable } from "@/components/core/DataTable";
 import { Disclosure } from "@/components/core/Disclosure";
 import { fillTemplate, joinList, lowerFirst } from "@/lib/engine/format";
 import type { LeverId } from "@/lib/engine/types";
-import { quarterRows, slgKpiRows, slgLeverRows, slgScenarioFor, targetAt, withTarget } from "./scenario-view";
+import { quarterRows, slgLeverRows, slgScenarioFor, targetAt, withTarget } from "./scenario-view";
 import type { EngineView } from "./view";
-import { Kpi } from "./WhatIfPanel";
+import { Figures } from "./WhatIfPanel";
+import { moneyAssumptions, whatIfFigureGroups } from "./whatif-figures";
 import styles from "./WhatIfPanel.module.css";
 
 type Targets = Partial<Record<LeverId, number>>;
@@ -37,7 +38,9 @@ export function SlgWhatIfPanel({ view, onChange }: { view: EngineView; onChange:
   const scenario = slgScenarioFor(state, targets, ctx);
   const levers = slgLeverRows(scenario, ctx, strings, currency, metrics);
   const knownLevers = levers.filter((l) => l.today !== null);
-  const kpis = slgKpiRows(scenario, ctx, strings, currency, { state, metrics });
+  // The three tables (design system extension 09, A20.d T3.b): growth, one new customer, cash.
+  const figures = whatIfFigureGroups(view, "slg", targets);
+  const money = moneyAssumptions(view, "slg", targets);
   const quarter = quarterRows(state, scenario, ctx, strings);
   const moved = scenario.moved.length > 0;
   const own = new Set<LeverId>(scenario.levers.map((l) => l.id));
@@ -125,11 +128,7 @@ export function SlgWhatIfPanel({ view, onChange }: { view: EngineView; onChange:
             </h3>
             <span className={styles.sectionMeta}>{moved ? w.kpiIf : w.kpiToday}</span>
           </div>
-          <div className={styles.tiles}>
-            {kpis.map((k) => (
-              <Kpi key={k.id} kpi={k} better={w.better} worse={w.worse} todayTemplate={w.leverToday} testIdPrefix="whatif-slg-kpi" />
-            ))}
-          </div>
+          <Figures groups={figures.groups} moved={figures.moved} strings={w} testId="whatif-slg-figures" />
           {!moved ? <p className={styles.note}>{w.noneMovedSlg}</p> : null}
         </section>
       </div>
@@ -154,11 +153,14 @@ export function SlgWhatIfPanel({ view, onChange }: { view: EngineView; onChange:
         </div>
       ) : null}
 
-      {scenario.assumptions.length > 0 ? (
+      {scenario.assumptions.length > 0 || money.length > 0 ? (
         <Disclosure summary={w.assumptionsTitle} size="sm" data-testid="whatif-slg-assumptions">
           <ul className={styles.assumptions}>
             {scenario.assumptions.map((a) => (
               <li key={a}>{w.slgAssumption[a]}</li>
+            ))}
+            {money.map((text) => (
+              <li key={text}>{text}</li>
             ))}
           </ul>
         </Disclosure>

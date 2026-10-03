@@ -4,30 +4,15 @@ import { useEffect, useId, useRef, useState } from "react";
 import { Button } from "@/components/core/Button";
 import { Callout } from "@/components/core/Callout";
 import { Card } from "@/components/core/Card";
-import { DataTable } from "@/components/core/DataTable";
 import { Disclosure } from "@/components/core/Disclosure";
+import { LeverSum } from "@/components/engine/LeverSum";
+import { WhatIfFigures } from "@/components/engine/WhatIfFigures";
 import { DotGrid, DotLegend } from "@/components/viz/DotGrid";
-import { StatTile } from "@/components/viz/StatTile";
 import { fillTemplate, joinList, lowerFirst } from "@/lib/engine/format";
 import type { LeverId } from "@/lib/engine/types";
-import {
-  dotsInUse,
-  funnelSteps,
-  gainText,
-  roundedMoney,
-  gridAria,
-  kpiAnnouncement,
-  kpiRows,
-  leverGains,
-  leverRows,
-  scenarioFor,
-  targetAt,
-  withTarget,
-  type FunnelStepView,
-  type KpiView,
-  type ScenarioDot,
-} from "./scenario-view";
+import { dotsInUse, funnelSteps, gridAria, kpiAnnouncement, kpiRows, leverRows, scenarioFor, targetAt, withTarget, type FunnelStepView, type ScenarioDot } from "./scenario-view";
 import type { EngineView } from "./view";
+import { leverSumView, moneyAssumptions, whatIfFigureGroups, type FigureGroup } from "./whatif-figures";
 import styles from "./WhatIfPanel.module.css";
 
 type Targets = Partial<Record<LeverId, number>>;
@@ -46,11 +31,13 @@ const ANNOUNCE_DELAY_MS = 500;
  * - the funnel starts at the VISITORS — a better sign-up rate finally shows —
  *   and its grids grow past 100 dots, ringed, for what the what-ifs add (no red:
  *   a projected change is not a diagnosis — audit S-5, 2026-09-28);
- * - the growth numbers (MRR in twelve months, new MRR, NRR, GRR, CAC, LTV,
- *   payback) move with the sliders, each saying whether a change is better
- *   or worse in words;
- * - with two levers or more, a table of what each brings alone, and the one
- *   sentence that shows the compounding.
+ * - the growth numbers move with the sliders, each saying whether a change
+ *   is better or worse in words — since design system extension 09 (A20.d
+ *   T3.b), three tables by meaning (`WhatIfFigures`: growth, one new
+ *   customer, cash), the MRR and the ARR in twelve months being the card's,
+ *   right above;
+ * - with two levers or more, the compounding drawn (`LeverSum`): each lever
+ *   alone, the solo gains added up, together, and the one sentence.
  *
  * Every number comes from `lib/engine/scenario.ts` through `scenario-view.ts`:
  * nothing is computed here, so the panel and the slides cannot disagree.
@@ -96,7 +83,9 @@ export function WhatIfPanel({ view, onChange }: { view: EngineView; onChange: (t
 
   const unknownLevers = levers.filter((l) => l.today === null);
   const steps = funnelSteps(scenario, ctx, strings);
-  const gains = scenario.moved.length >= 2 ? leverGains(state, scenario, ctx) : null;
+  const figures = whatIfFigureGroups(view, "plg", targets);
+  const sum = leverSumView(view, targets);
+  const money = moneyAssumptions(view, "plg", targets);
   const inUse = dotsInUse(steps);
   const [visitors, ...columns] = steps;
 
@@ -180,17 +169,26 @@ export function WhatIfPanel({ view, onChange }: { view: EngineView; onChange: (t
           </div>
           {/* Not a live region: seven tiles re-read at every step of a slider was
               the audit's S-4. The one sentence below says what moved, once. */}
-          <div className={styles.tiles}>
-            {kpis.map((k) => (
-              <Kpi key={k.id} kpi={k} better={w.better} worse={w.worse} todayTemplate={w.leverToday} />
-            ))}
-          </div>
+          <Figures groups={figures.groups} moved={figures.moved} strings={w} testId="whatif-figures" />
           {!moved ? <p className={styles.note}>{w.noneMoved}</p> : null}
           <p className="tdg-visually-hidden" aria-live="polite" aria-atomic="true" data-testid="whatif-announce">
             {announced}
           </p>
         </section>
       </div>
+
+      {/* The compounding, drawn (extension 09), under the two columns: in the figures' sticky column it would
+          make it taller than the screen beside the last levers (the return drew it there, without the sticky). */}
+      {sum ? (
+        <LeverSum
+          title={sum.title}
+          rows={sum.rows}
+          sum={sum.sum}
+          together={sum.together}
+          extra={sum.extra ?? undefined}
+          data-testid="whatif-alone"
+        />
+      ) : null}
 
       <Card elevation="flat" className={styles.funnel}>
         <p className={styles.funnelTitle} data-testid="engine-whatif-funnel-title">
@@ -206,44 +204,15 @@ export function WhatIfPanel({ view, onChange }: { view: EngineView; onChange: (t
         <Legend inUse={inUse} strings={w} range={strings.peloton.legendRange} />
       </Card>
 
-      {gains ? (
-        <div className={styles.alone} data-testid="whatif-alone">
-          <DataTable
-            caption={w.aloneTitle}
-            size="sm"
-            columns={[
-              { key: "lever", header: w.aloneLever },
-              { key: "gain", header: w.aloneGain, numeric: true },
-            ]}
-            rows={gains.alone.map((g) => {
-              const row = levers.find((l) => l.id === g.id)!;
-              return {
-                id: g.id,
-                cells: {
-                  lever: fillTemplate(w.aloneRow, { lever: row.name, from: row.todayValue ?? "", to: row.valueText }),
-                  gain: g.gain === null ? w.unknownStep : gainText(g.gain, currency, ctx),
-                },
-              };
-            })}
-          />
-          {gains.together !== null ? (
-            <p className={styles.together} data-testid="whatif-together">
-              {gains.sumAlone !== null && gains.together - gains.sumAlone >= 1
-                ? fillTemplate(w.together, {
-                    total: gainText(gains.together, currency, ctx),
-                    extra: fillTemplate(view.strings.units.approx, { n: roundedMoney(gains.together - gains.sumAlone, currency, ctx) }),
-                  })
-                : fillTemplate(w.togetherNoExtra, { total: gainText(gains.together, currency, ctx) })}
-            </p>
-          ) : null}
-        </div>
-      ) : null}
-
-      {scenario.assumptions.length > 0 ? (
+      {scenario.assumptions.length > 0 || money.length > 0 ? (
         <Disclosure summary={w.assumptionsTitle} size="sm" data-testid="whatif-assumptions">
           <ul className={styles.assumptions}>
             {scenario.assumptions.map((a) => (
               <li key={a}>{w.assumption[a]}</li>
+            ))}
+            {/* The money's own rules, for the figures the tables print (extension 09). */}
+            {money.map((text) => (
+              <li key={text}>{text}</li>
             ))}
           </ul>
         </Disclosure>
@@ -252,31 +221,17 @@ export function WhatIfPanel({ view, onChange }: { view: EngineView; onChange: (t
   );
 }
 
-/** One growth figure's tile — the sales-assisted panel's too (`testIdPrefix`: two panels can be on one screen). */
-export function Kpi({
-  kpi,
-  better,
-  worse,
-  todayTemplate,
-  testIdPrefix = "whatif-kpi",
-}: {
-  kpi: KpiView;
-  better: string;
-  worse: string;
-  todayTemplate: string;
-  testIdPrefix?: string;
-}) {
-  const common = { label: kpi.label, size: "auto" as const, "data-testid": `${testIdPrefix}-${kpi.id}` };
-  if (kpi.projected === null) return <StatTile {...common} value={null} unknownLabel={kpi.unknown} />;
-  // « aujourd'hui … » only once it differs: the same figure twice says nothing.
-  const sub = kpi.today !== null && kpi.today !== kpi.projected ? fillTemplate(todayTemplate, { value: kpi.today }) : undefined;
-  // Bold ink, neither green nor red, like the slides' « change » column: the sign and the word say
-  // which way, and a projection is no verdict (Antoine, 2026-09-28 — green and red read as one).
-  const delta =
-    kpi.delta && kpi.direction && kpi.tone
-      ? { text: `${kpi.delta} · ${kpi.tone === "better" ? better : worse}`, direction: kpi.direction, sentiment: "neutral" as const }
-      : undefined;
-  return <StatTile {...common} value={kpi.projected} sub={sub} delta={delta} />;
+/** The three tables — the sales-assisted panel's too (`testId`: two panels can be on one screen). */
+export function Figures({ groups, moved, strings, testId }: { groups: FigureGroup[]; moved: boolean; strings: EngineView["strings"]["scenario"]; testId: string }) {
+  return (
+    <WhatIfFigures
+      groups={groups}
+      moved={moved}
+      columns={{ figure: strings.colFigure, today: strings.colToday, whatif: strings.colWhatif, change: strings.colChange }}
+      todayLine={(value) => fillTemplate(strings.leverToday, { value: String(value) })}
+      data-testid={testId}
+    />
+  );
 }
 
 /** The visitors, above the grids: 26 000 dots would say nothing, so a numeral and its change. */
