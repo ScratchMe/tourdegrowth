@@ -774,7 +774,7 @@ Le zip est rangé par langue puis par format, avec un LISEZ-MOI. La section n'ap
 
 **Vérifié** : en FR et en EN, à 1 280 et 390 px, captures regardées (les tableaux, le repli d'« aujourd'hui », `LeverSum`, la bande et ses totaux à 390). L'e2e `engine-whatif.spec.ts` couvre les quatre combinaisons ; celles du moteur sont adaptées (les lignes des tableaux à la place des tuiles, la bande à deux listes et sa disposition sur téléphone, le total sur la carte) ; 308 specs du moteur et d'accessibilité passent en local. La garde « pas de rouge » (`whatif-no-red.test.ts`) lit maintenant aussi les feuilles de la courbe, des tableaux, de `LeverSum`, des barres et de la carte, et suit un jeton rouge à travers `engine.css` et `money.css` (seul `--money-warning-edge` l'est, l'alerte). Le build a attrapé un sélecteur `..list` laissé par une substitution, que les tests ne lisaient pas. **Non-vacuité**, cinq sabotages, chacun rougit son test : l'écart sans « stable », le crochet toujours dessiné, le « ? » sans ce qui manque, la règle de trésorerie toujours imprimée, l'écart peint en rouge.
 
-## A20.d T4.a : les chiffres des titres à l'encre, le rouge gardé au verdict et au diagnostic (C53, 2026-10-03)
+## A20.d T4.a : les chiffres des titres à l'encre, le rouge gardé au verdict et au diagnostic (C53, 2026-10-03, #314)
 
 **T4 est coupé en trois PR** : les titres d'abord (celle-ci), puis les slides « Et si » avec leur courbe (T4.b), puis l'unit economics, `PaybackChart` et la perte en titre, en nº 2 (T4.c).
 
