@@ -620,13 +620,54 @@
  * At the deck's usual 24px the growth table alone ran 200px under the
  * footer; these tables are 20px, and the assumptions take the dense footer.
  */
+/*
+ * A what-if slide (design system extension 09, Q11, A20.d T4.b): left, the
+ * MRR's curve and the month's funnel (or the line saying the lever leaves it
+ * as it is); right, the growth numbers' one table, the wider: an estimate
+ * prints a range (« ~1 300 000 à 1 700 000 € »). The curve is drawn at
+ * 650px, the left column's inner width (SlideWhatIf.tsx#SLIDE_CURVE), on
+ * this slide and on « together ».
+ */
 .whatIf {
   flex: 1;
   min-height: 0;
   display: grid;
-  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr);
   gap: 40px;
   align-items: start;
+}
+
+.whatIfSide {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.curveCard {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 24px;
+  border: var(--border-solid);
+  border-radius: var(--radius-card);
+  background: var(--surface-card);
+}
+
+/* A table inside the curve's card: its eyebrow and rows, no card of its own. */
+.changeBare {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* A lever that leaves the month's funnel as it is: one line, not a table of « stable ». */
+.funnelNote {
+  margin: 0;
+  font: var(--slide-body-sm);
+  color: var(--text-muted);
 }
 
 .changeCard {
@@ -634,22 +675,23 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 18px 26px;
+  padding: 14px 24px;
   border: var(--border-solid);
   border-radius: var(--radius-card);
   background: var(--surface-card);
 }
 
+/* The what-if tables at the slide's smallest step (extension 09, A20.d T4.b): eight rows beside the curve, ranges included. */
 .changeTable {
   width: 100%;
   border-collapse: collapse;
-  font: var(--slide-figures);
+  font: var(--slide-table);
   font-variant-numeric: tabular-nums;
 }
 
 .changeTable th,
 .changeTable td {
-  padding: 6px 0 6px 16px;
+  padding: 4px 0 4px 14px;
   text-align: right;
   border-bottom: var(--border-rule);
 }
@@ -713,7 +755,7 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 12px;
 }
 
 .leverCard {
@@ -795,6 +837,12 @@
 .together {
   margin: 0;
   font: var(--slide-body-xs);
+  font-weight: 600;
+}
+
+/* Four levers or more, and their assumptions in a taller footer: the sentence at the slide's note step. */
+.scenarioDense .together {
+  font: var(--slide-note);
   font-weight: 600;
 }
 

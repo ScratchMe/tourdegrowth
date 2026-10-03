@@ -14,7 +14,7 @@ import { buildSlgScenario } from "../slg-scenario";
 import type { EngineState, MetricId } from "../types";
 import { currentSnapshot } from "../values";
 import { EXAMPLE_TODAY, exampleState, hybridState, salesAssistedState, tourResult } from "./fixtures";
-import { asBeforeA20, asBeforeT3, asTabs, withDecidedWords, withoutResume } from "./golden-projection";
+import { asBeforeA20, asBeforeT3, asTabs, deckBeforeA20, withDecidedWords, withoutResume, withoutRetiredWhatIfRows } from "./golden-projection";
 import { CTX_EN, CTX_FR, EN, FR } from "./props";
 
 /**
@@ -85,8 +85,9 @@ function outputsOf(state: EngineState, tour: StoredResult | null) {
     const motions = state.setup.motions;
     out[locale] = {
       derived,
-      deck,
-      markdown: deckMarkdown(deck, p.strings),
+      // The what-if slides' drawings and three rows A20.d T4.b adds, dropped; their markdown written from what remains.
+      deck: deckBeforeA20(deck),
+      markdown: deckMarkdown(deckBeforeA20(deck), p.strings),
       scenario: motions.plg ? buildScenario(state, state.whatIf ?? {}, ctx) : null,
       slgScenario: motions.slg ? buildSlgScenario(state, state.whatIf ?? {}, ctx) : null,
       tabs: Object.fromEntries(derived.motions.map((m) => [m.motion, asTabs(listStages(snapshot, m.diagnosis, m.motion))])),
@@ -152,6 +153,28 @@ describe("golden v2 — a v2 engine reads the same after the change", () => {
     expect(copies.map(asBeforeA20)).toEqual([0, 0]);
   });
 
+  it("the what-if slides' projection (A20.d T4.b): the golden had the two retired rows to drop, a build now has the three added ones", () => {
+    type Reading = { deck: { slides: { id: string; lines: Record<string, string>[] }[] }; markdown: string };
+    const golden = outputs["hybrid-whatif-tour"] as Record<string, Reading>;
+    const projected = withoutRetiredWhatIfRows(golden) as Record<string, Reading>;
+    for (const locale of ["fr", "en"]) {
+      const whatIf = (r: Reading) => r.deck.slides.filter((x) => x.id.startsWith("whatif:") || x.id.endsWith("scenario"));
+      const kpis = (r: Reading) => whatIf(r).flatMap((x) => x.lines.filter((l) => l.row === "kpi").map((l) => l.id));
+      // Non-vacuity: the v2 build printed the new MRR and the GRR on its what-if slides, and their markdown lines.
+      expect(kpis(golden[locale]!)).toContain("newMrr");
+      expect(kpis(projected[locale]!)).not.toContain("newMrr");
+      expect(kpis(projected[locale]!)).not.toContain("grr");
+      expect(projected[locale]!.markdown.split("\n").length).toBeLessThan(golden[locale]!.markdown.split("\n").length);
+    }
+    const state = openV2(inputs["hybrid-whatif-tour"]!.state);
+    const p = FR;
+    const deck = buildDeck(state, deriveEngine(state, CTX_FR, null, p.bridges, p.strings.units), p.strings, p.metrics, CTX_FR, { derived: p.derived, bridges: p.bridges });
+    const added = (d: typeof deck) => d.slides.filter((x) => x.id.startsWith("whatif:")).flatMap((x) => x.lines.filter((l) => ["arr12", "ltvCac", "cash"].includes(l.id ?? "")));
+    expect(added(deck).length).toBeGreaterThan(0);
+    expect(added(deckBeforeA20(deck))).toEqual([]);
+    expect(deckBeforeA20(deck).slides.some((x) => "curve" in x || "leverSum" in x)).toBe(false);
+  });
+
   it("the decided words (A18.d) rewrite the v2 hybrid's slides, and only where the old words were", () => {
     const before = JSON.stringify(outputs.hybrid);
     const after = JSON.stringify(withDecidedWords(outputs.hybrid));
@@ -183,7 +206,8 @@ describe("golden v2 — a v2 engine reads the same after the change", () => {
       const { state, tour } = inputs[name]!;
       // The step-by-step's resume position retired with it (A18 T3.b): dropped from the expected side, the file untouched;
       // and the words Antoine decided at bon à tirer nº9 (A18.d) replace the old ones there (`withDecidedWords`).
-      expect(outputsOf(openV2(state), tour)).toEqual(withDecidedWords(withoutResume(outputs[name])));
+      // And the two rows the what-if slides retired for them (A20.d T4.b), dropped from the expected side too.
+      expect(outputsOf(openV2(state), tour)).toEqual(withoutRetiredWhatIfRows(withDecidedWords(withoutResume(outputs[name]))));
     });
   }
 });

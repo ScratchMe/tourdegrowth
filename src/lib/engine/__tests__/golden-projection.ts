@@ -140,3 +140,58 @@ export function withDecidedWords(expected: unknown): unknown {
   };
   return rewrite(JSON.parse(JSON.stringify(expected)));
 }
+
+/**
+ * The what-if slides of design system extension 09 (A20.d T4.b), which the
+ * return of brief 09 redrew and Antoine had ported (prompt F, « porte-le »):
+ *
+ * - ADDED, dropped from the side a build prints now: each what-if slide's
+ *   curve and the « together » slide's compounding drawn (`curve`,
+ *   `leverSum`, drawings no text carries), and three rows of their table —
+ *   the ARR in twelve months, the LTV:CAC, the cash tied up;
+ * - RETIRED, dropped from the golden's side, on a JSON copy: the new MRR of
+ *   the month and the GRR, which left the slide's table for them (the panel
+ *   keeps both). Their markdown lines go with them, as the export wrote
+ *   them (`- {label} · {text}`).
+ *
+ * Every other row, every title, every word of the what-if slides still has
+ * to match to the character.
+ */
+export const WHATIF_ROWS_ADDED_BY_A20 = ["arr12", "ltvCac", "cash"] as const;
+export const WHATIF_ROWS_RETIRED_BY_A20 = ["newMrr", "grr"] as const;
+
+type SlideLike = { id: string; lines: Record<string, string>[]; curve?: unknown; leverSum?: unknown };
+const isWhatIf = (id: string) => id.startsWith("whatif:") || id === "scenario" || id === "slg:scenario";
+const kpiIn = (ids: readonly string[]) => (line: Record<string, string>) => line.row === "kpi" && ids.includes(line.id ?? "");
+
+/** The deck a build prints now, without what A20.d T4.b adds to its what-if slides. On a JSON copy. */
+export function deckBeforeA20<T>(deck: T): T {
+  const copy = JSON.parse(JSON.stringify(deck)) as { slides: SlideLike[] };
+  for (const slide of copy.slides) {
+    if (!isWhatIf(slide.id)) continue;
+    delete slide.curve;
+    delete slide.leverSum;
+    slide.lines = slide.lines.filter((line) => !kpiIn(WHATIF_ROWS_ADDED_BY_A20)(line));
+  }
+  return copy as T;
+}
+
+/** The golden's readings without the two rows the what-if slides retired, in its deck and its markdown. On a JSON copy. */
+export function withoutRetiredWhatIfRows(expected: unknown): unknown {
+  // One reading per locale: { fr: { deck, markdown, … }, en: { … } }.
+  const copy = JSON.parse(JSON.stringify(expected)) as Record<string, { deck?: { slides: SlideLike[] }; markdown?: string }>;
+  for (const out of Object.values(copy)) {
+    if (!out?.deck || typeof out.markdown !== "string") continue;
+    const gone = new Set<string>();
+    for (const slide of out.deck.slides) {
+      if (!isWhatIf(slide.id)) continue;
+      for (const line of slide.lines.filter(kpiIn(WHATIF_ROWS_RETIRED_BY_A20))) gone.add(`- ${line.label} · ${line.text}`);
+      slide.lines = slide.lines.filter((line) => !kpiIn(WHATIF_ROWS_RETIRED_BY_A20)(line));
+    }
+    out.markdown = out.markdown
+      .split("\n")
+      .filter((l) => !gone.has(l))
+      .join("\n");
+  }
+  return copy;
+}

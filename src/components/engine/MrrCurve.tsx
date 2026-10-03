@@ -30,6 +30,8 @@ export interface MrrCurveProps {
   summary: ReactNode;
   /** Unique per page: the hatch pattern's id. */
   id: string;
+  /** « slide »: the deck's type sizes (18px and up on its 1 920 canvas), the names in a legend under the plot; give it a `width`. */
+  medium?: "screen" | "slide";
   className?: string;
   "data-testid"?: string;
 }
@@ -65,6 +67,7 @@ export function MrrCurve({
   xLabels,
   summary,
   id,
+  medium = "screen",
   className,
   "data-testid": testId,
 }: MrrCurveProps) {
@@ -80,8 +83,9 @@ export function MrrCurve({
     return () => observer.disconnect();
   }, [fixed]);
   const width = fixed ?? (measured && measured > 0 ? measured : DEFAULT_WIDTH);
-  const compact = fixed === undefined && width < compactBelow;
-  const g = mrrCurveGeometry({ today, whatif, width, height, compact });
+  // A slide lays its names under the plot too: its column is narrow for names set at 18px, and the plot gets the width.
+  const compact = medium === "slide" || (fixed === undefined && width < compactBelow);
+  const g = mrrCurveGeometry({ today, whatif, width, height, compact, slide: medium === "slide" });
   const hatch = `${id}-hatch`;
 
   const drawLine = (line: CurveLine, kind: "today" | "whatif") => (
@@ -104,7 +108,7 @@ export function MrrCurve({
   return (
     <figure
       ref={box}
-      className={[styles.root, compact ? styles.compact : "", className].filter(Boolean).join(" ")}
+      className={[styles.root, compact ? styles.compact : "", medium === "slide" ? styles.slide : "", className].filter(Boolean).join(" ")}
       data-compact={compact ? "true" : undefined}
       data-testid={testId}
     >
@@ -119,8 +123,8 @@ export function MrrCurve({
         {g.gain ? <polygon points={g.gain} className={styles.gain} /> : null}
         {drawLine(g.today, "today")}
         {g.whatif ? drawLine(g.whatif, "whatif") : null}
-        <circle cx={g.start.x} cy={g.start.y} r={4} className={styles.start} />
-        <text x={g.start.x + 8} y={g.start.labelY} className={`${styles.tick} ${styles.startLabel} ${styles.halo}`} textAnchor="start">
+        <circle cx={g.ticks[0]} cy={g.start.y} r={4} className={styles.start} />
+        <text x={g.start.x} y={g.start.labelY} className={`${styles.tick} ${styles.startLabel} ${styles.halo}`} textAnchor="start">
           {start}
         </text>
         {xLabels ? (

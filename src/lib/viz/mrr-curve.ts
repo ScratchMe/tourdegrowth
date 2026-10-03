@@ -26,6 +26,8 @@ export interface MrrCurveInput {
   height: number;
   /** A phone: the keys go under the plot, so the plot takes the whole width. */
   compact: boolean;
+  /** A slide: its type is set at 18px on a 1 920 canvas, so its margins and gaps are the slide's (`MRR_CURVE_SLIDE_PX`). */
+  slide?: boolean;
 }
 
 export interface CurveLine {
@@ -76,13 +78,30 @@ export const MRR_CURVE_PX = {
   tickBaseline: 6,
 } as const;
 
+/** The same measures on a slide, where every label is 18px on the 1 920 canvas (design audit S-8). */
+export const MRR_CURVE_SLIDE_PX: { [K in keyof typeof MRR_CURVE_PX]: number } = {
+  keyRoom: 280,
+  left: 2,
+  right: 10,
+  // No name at the lines' ends on a slide (its legend is under the plot): the top needs only the dots' room.
+  top: 12,
+  bottom: 52,
+  keyGap: 28,
+  keyBaseline: 6,
+  keyOffset: 14,
+  startDx: 10,
+  startBelow: 26,
+  startAbove: -12,
+  tickBaseline: 8,
+};
+
 const mid = (p: CurvePoint) => (p[0] + p[1]) / 2;
 const isRange = (pts: readonly CurvePoint[]) => pts.some((p) => Math.abs(p[1] - p[0]) > 1e-6);
 const xy = (x: number, y: number) => `${x.toFixed(1)},${y.toFixed(1)}`;
 
-export function mrrCurveGeometry({ today, whatif, width, height, compact }: MrrCurveInput): MrrCurveGeometry {
+export function mrrCurveGeometry({ today, whatif, width, height, compact, slide = false }: MrrCurveInput): MrrCurveGeometry {
   if (today.length !== 13 || (whatif && whatif.length !== 13)) throw new Error("mrrCurveGeometry: 13 points, today first");
-  const P = MRR_CURVE_PX;
+  const P = slide ? MRR_CURVE_SLIDE_PX : MRR_CURVE_PX;
   const L = P.left;
   const R = width - (compact ? 0 : P.keyRoom) - P.right;
   const T = P.top;
@@ -92,11 +111,12 @@ export function mrrCurveGeometry({ today, whatif, width, height, compact }: MrrC
   let hi = Math.max(...all.map((p) => p[1]));
   if (hi - lo < 1) hi = lo + 1;
   // Room under the lowest point for today's figure, which sits under the start when
-  // the MRR grows (over it when it shrinks).
+  // the MRR grows (over it when it shrinks): its line's height and gap, in the plot's units.
   const rising = mid(today[12]!) >= mid(today[0]!);
   const span = hi - lo;
-  lo -= span * (rising ? 0.2 : 0.08);
-  hi += (hi - lo) * (rising ? 0.06 : 0.2);
+  const room = Math.min(0.6, (Math.abs(rising ? P.startBelow : P.startAbove) + 6) / Math.max(1, B - T));
+  lo -= span * (rising ? Math.max(0.2, room) : 0.08);
+  hi += (hi - lo) * (rising ? 0.06 : Math.max(0.2, room));
   const x = (i: number) => L + (i * (R - L)) / 12;
   const y = (v: number) => B - ((v - lo) / (hi - lo)) * (B - T);
   const path = (pts: readonly CurvePoint[], k: (p: CurvePoint) => number) => pts.map((p, i) => xy(x(i), y(k(p)))).join(" ");
@@ -131,7 +151,7 @@ export function mrrCurveGeometry({ today, whatif, width, height, compact }: MrrC
     whatif: whatif ? line(whatif) : null,
     gain,
     level: { x1: L, x2: R, y: y0 },
-    start: { x: x(0), y: y0, labelY: y0 + (rising ? P.startBelow : P.startAbove) },
+    start: { x: x(0) + P.startDx, y: y0, labelY: y0 + (rising ? P.startBelow : P.startAbove) },
     ticks: [x(0), x(6), x(12)],
     tickY: height - P.tickBaseline,
     keys,

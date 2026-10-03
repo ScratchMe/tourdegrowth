@@ -80,7 +80,9 @@ for (const locale of ["fr", "en"] as const) {
       // Each lever's slide carries its two tables; « together » names both levers.
       await expect(page.getByTestId("slide-kpis-whatif:act.rate")).toBeVisible();
       await expect(page.getByTestId("slide-funnel-whatif:act.rate")).toBeVisible();
-      await expect(page.getByTestId("slide-scenario-levers").locator('[data-testid^="slide-lever-"]')).toHaveCount(2);
+      // The levers drawn (extension 09, A20.d T4.b): each alone, then added up and together, under the curve.
+      await expect(page.getByTestId("slide-scenario-levers").locator('[data-row="lever"]')).toHaveCount(2);
+      await expect(page.getByTestId("slide-curve-scenario")).toBeVisible();
       await expect(page.getByTestId("slide-scenario-together")).toBeVisible();
     });
 
@@ -90,6 +92,19 @@ for (const locale of ["fr", "en"] as const) {
       for (const id of ["whatif:act.rate", "whatif:ret.logo-churn", "scenario", "visibility"]) await expect(accents(id), id).toHaveCount(0);
       // The example measures no day 30: its first slide says what we can't see, in red.
       await expect(accents("peloton")).toHaveCount(1);
+    });
+
+    test("extension 09: each what-if slide draws its curve; a lever that leaves the funnel says so in a line, one that moves it keeps its table", async ({ page }) => {
+      await openDeckWith(page, locale, { "ret.logo-churn": 1.5, "act.rate": 24 });
+      for (const id of ["whatif:act.rate", "whatif:ret.logo-churn"]) {
+        await expect(page.getByTestId(`slide-curve-${id}`).locator("svg polyline")).toHaveCount(2);
+        await expect(page.getByTestId(`slide-kpis-${id}-arr12`)).toBeVisible();
+        await expect(page.getByTestId(`slide-kpis-${id}-cash`)).toBeVisible();
+        await expect(page.getByTestId(`slide-kpis-${id}-grr`)).toHaveCount(0);
+      }
+      await expect(page.getByTestId("slide-funnel-whatif:act.rate")).toBeVisible();
+      await expect(page.getByTestId("slide-funnel-whatif:ret.logo-churn")).toHaveCount(0);
+      await expect(page.getByTestId("slide-funnel-note-whatif:ret.logo-churn")).toBeVisible();
     });
 
     test("a what-if slide can be left out, and gives up its number", async ({ page }) => {
@@ -105,7 +120,9 @@ for (const locale of ["fr", "en"] as const) {
       const ids = (await thumbOrder(page)).filter((id) => id.startsWith("whatif:") || id === "scenario");
       // Non-vacuity: the nine levers and « together », not an empty list that passes by being empty.
       expect(ids).toHaveLength(10);
+      // Nine levers keep the denser list, without the curve: drawn, they run under the footer (DENSE_FROM).
       await expect(page.getByTestId("slide-scenario-levers").locator('[data-testid^="slide-lever-"]')).toHaveCount(9);
+      await expect(page.getByTestId("slide-curve-scenario")).toHaveCount(0);
 
       // Each slide read on screen (readEachOnScreen): off screen a thumbnail skips its text, and an empty text has no placeholder to find.
       const measured = await readEachOnScreen(page, page.locator('[data-slide^="whatif:"], [data-slide="scenario"]'), (slide) => {
@@ -115,7 +132,8 @@ for (const locale of ["fr", "en"] as const) {
         const foot = slide.querySelector("footer")!;
         const footTop = (foot.getBoundingClientRect().top - box.top) / scale;
         const body = foot.previousElementSibling!;
-        const deepest = Math.max(...[...body.querySelectorAll("*")].map(y));
+        // Inside an <svg>, the shapes are measured by the <svg> itself: off screen, a thumbnail leaves them unlaid (A20.d T4.b).
+        const deepest = Math.max(...[...body.querySelectorAll("*")].filter((el) => !el.parentElement?.closest("svg")).map(y));
         // The smallest size set on any element with text of its own (A2.1: nothing under 18px on a slide).
         const smallest = Math.min(
           ...[...slide.querySelectorAll("*")]

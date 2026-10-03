@@ -2197,6 +2197,16 @@ export const ENGINE_COPY = {
      */
     whatIfLeverRow: { fr: "à {to} (aujourd'hui : {from}) · {gain}", en: "from {from} to {to} · {gain}" },
     /**
+     * TODO: à relire (convention 6) — neuf le 2026-10-03 (A20.d T4.b, le retour du brief 09, `curve.whatifSlide`,
+     * `curve.togetherSlide`) : the what-if slides' curve, its line's name — « this » what-if on a lever's slide, « the
+     * {n} » on the one that adds them up — and the line that replaces a funnel (or a quarter) the lever leaves as it is.
+     */
+    curveWhatifOne: { fr: "avec cet « Et si »", en: "with this what-if" },
+    curveWhatifAll: { fr: "avec les {n} « Et si »", en: "with the {n} what-ifs" },
+    funnelUnmoved: { fr: "Ce levier laisse le funnel du mois tel quel.", en: "This lever leaves the month's funnel as it is." },
+    /** Not on the return: sales-assisted's, whose second table is its quarter. */
+    quarterUnmoved: { fr: "Ce levier laisse le trimestre tel quel.", en: "This lever leaves the quarter as it is." },
+    /**
      * TODO: à relire (convention 6) — neuf le 2026-10-01 (A7.3.c S2, ENGINE.md §18.8.1-§18.8.2) :
      * the chrome of a motion's slides, and the side-by-side unit economics.
      */

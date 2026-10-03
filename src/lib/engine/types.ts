@@ -864,6 +864,37 @@ export interface DeckSlide {
    * common slide (visibility, the ask, the appendix…) has none either.
    */
   motion?: Motion;
+  /**
+   * A what-if slide's curve (design system extension 09, Q11, A20.d T4.b):
+   * the MRR month by month, today's pace and with the what-if(s). Drawn, not
+   * printed: the text export says the slide's figures in its rows.
+   */
+  curve?: SlideCurve;
+  /** The « together » slide's compounding, drawn (`LeverSum`): each lever alone, added up, together. */
+  leverSum?: SlideLeverSum;
+}
+/** The curve a what-if slide draws: thirteen months, [low, high], today first. */
+export interface SlideCurve {
+  today: [number, number][];
+  whatif: [number, number][] | null;
+  /** « 48 000 € aujourd'hui »: the curve's one figure. */
+  start: string;
+  xLabels: [string, string, string];
+  keys: { today: string; whatif: string };
+  /** The curve in words, for a screen reader. */
+  summary: string;
+}
+export interface SlideLeverSumRow {
+  id: string;
+  label: string;
+  value: string;
+  /** The gain on the MRR in twelve months, the middle of its range: the bar's length. */
+  amount: number;
+}
+export interface SlideLeverSum {
+  rows: SlideLeverSumRow[];
+  sum: SlideLeverSumRow;
+  together: SlideLeverSumRow;
 }
 /** One motion's chrome in the hybrid: its kicker names it, its pill counts its numbers, its footer cites its months and tools. */
 export interface DeckMotionChrome {
