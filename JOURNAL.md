@@ -1497,7 +1497,7 @@ Le zip est rangé par langue puis par format, avec un LISEZ-MOI. La section n'ap
 - les vingt-quatre fichiers stockés : ils sont bien les derniers exports. Le diagnostic et le moteur n'ont pas changé depuis le leur, et le Tour et le jeu sont ceux de #307 ;
 - **pas vérifié d'ici** : le clic lui-même dans claude.ai (le téléchargement depuis le stockage de la page, et la confirmation d'enregistrement), qui ne se joue que dans le lecteur.
 
-## A20, prompt F : le retour du brief 09 recopié, comparé, ses décisions posées (2026-10-03)
+## A20, prompt F : le retour du brief 09 recopié, comparé, ses décisions posées (2026-10-03, #309)
 
 **La demande** : recopier le retour dans `design/ds-extension-09-return/` comme pour le 07, le comparer au brief, poser en section C les décisions qu'il demande, avec une reco ; ne rien porter avant qu'Antoine ait tranché.
 
