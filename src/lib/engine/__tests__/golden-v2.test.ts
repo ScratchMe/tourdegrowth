@@ -14,7 +14,7 @@ import { buildSlgScenario } from "../slg-scenario";
 import type { EngineState, MetricId } from "../types";
 import { currentSnapshot } from "../values";
 import { EXAMPLE_TODAY, exampleState, hybridState, salesAssistedState, tourResult } from "./fixtures";
-import { asBeforeT3, asTabs, withDecidedWords, withoutResume } from "./golden-projection";
+import { asBeforeA20, asBeforeT3, asTabs, withDecidedWords, withoutResume } from "./golden-projection";
 import { CTX_EN, CTX_FR, EN, FR } from "./props";
 
 /**
@@ -95,10 +95,12 @@ function outputsOf(state: EngineState, tour: StoredResult | null) {
   }
   // A round trip through JSON: `undefined` fields drop out exactly as they do in the file.
   const json = JSON.parse(JSON.stringify(out)) as Record<string, Record<string, unknown>>;
-  // The levers A14 T3 adds to « Et si », and only them (golden-projection.ts): a field added, not a change.
+  // The levers A14 T3 adds to « Et si », and only them, then the money A20 adds (golden-projection.ts): fields added, not a change.
   for (const o of Object.values(json)) {
     asBeforeT3(o.scenario, false);
+    asBeforeA20(o.scenario);
     asBeforeT3(o.slgScenario, true);
+    asBeforeA20(o.slgScenario);
   }
   return json as unknown;
 }
@@ -136,6 +138,18 @@ describe("golden v2 — a v2 engine reads the same after the change", () => {
     // Day 30 (no value in the hybrid: a lever without a slider), then the referred share of opportunities.
     expect(asBeforeT3(scenario, false) + asBeforeT3(slg, true)).toBe(2);
     expect(slg.today.opps).toBeUndefined();
+  });
+
+  it("the projection drops what A20 adds to each motion's figures, and the MRR in twelve months it keeps is the curve's last point", () => {
+    const state = openV2(inputs.hybrid!.state);
+    const plg = buildScenario(state, {}, CTX_FR);
+    const slg = buildSlgScenario(state, {}, CTX_FR);
+    // The two curves exist on the hybrid: the projection has something to drop, eight fields a side, today and projected.
+    expect(plg.today.kpis.mrrPath?.[12]).toEqual(plg.today.kpis.mrr12);
+    expect(slg.today.mrrPath?.[12]).toEqual(slg.today.mrr12);
+    const copies = [JSON.parse(JSON.stringify(plg)) as unknown, JSON.parse(JSON.stringify(slg)) as unknown];
+    expect(copies.map(asBeforeA20)).toEqual([16, 16]);
+    expect(copies.map(asBeforeA20)).toEqual([0, 0]);
   });
 
   it("the decided words (A18.d) rewrite the v2 hybrid's slides, and only where the old words were", () => {

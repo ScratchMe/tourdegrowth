@@ -1,5 +1,6 @@
 import { LEVER_IDS, shapeOf } from "./catalog-shape";
 import { div, mapBounds, mul, point, scale } from "./interval";
+import { acquisitionSpend, afterPayback, arrOf, cashTiedUp, lossCheck, type MoneyKpis } from "./money";
 import { knownSharedCount } from "./shared-counts";
 import type { EngineCalcContext, EngineState, Interval, LeverId, MetricId } from "./types";
 import { lifetimeMonths, revenueRetention } from "./unit-economics";
@@ -40,6 +41,12 @@ import { countsOf, currentSnapshot, entryOf, knownIn } from "./values";
  * - CAC: the same spend buys the extra payers — so it falls with them.
  * - Twelve months: the base retained at NRR each month, plus that month's
  *   new MRR, itself retained from then on. No seasonality, no saturation.
+ *   The thirteen points of that loop are the MRR month by month
+ *   (`mrrPath`, A20): the MRR in twelve months is its last point.
+ *
+ * The money A20 adds (engine spec §20, `money.ts`) reads the same figures:
+ * the ARR, the LTV:CAC, the loss check, the payback against the customer's
+ * lifetime, and the cash a month of acquisition keeps tied up.
  *
  * Intervals all the way: an estimate stays a range, and every function of
  * the model is monotonic in its inputs, so each bound is computed from the
@@ -78,8 +85,8 @@ export interface ScenarioFunnel {
   paying: Interval | null;
 }
 
-/** The growth figures a leadership meeting asks about. Rates in percent, money in the engine's currency. */
-export interface ScenarioKpis {
+/** The growth figures a leadership meeting asks about. Rates in percent, money in the engine's currency. The money of §20 comes with them (`MoneyKpis`). */
+export interface ScenarioKpis extends MoneyKpis {
   /** MRR at the end of the month the engine reads. */
   mrr: Interval | null;
   /** New MRR the month's new customers bring. */
@@ -204,19 +211,27 @@ function newPayers(state: EngineState, ctx: EngineCalcContext, signups: Interval
   return signups && paid ? mul(signups, scale(paid, 1 / 100)) : null;
 }
 
-/** Σ over twelve months: the base retained at q each month, plus each month's new MRR retained from the month it arrived. */
-function twelveMonths(mrr: number, newMrr: number, q: number): number {
+/** Month by month: the base retained at q each month, plus each month's new MRR retained from the month it arrived. 13 points, [0] = today. */
+function twelveMonths(mrr: number, newMrr: number, q: number): number[] {
+  const path = [mrr];
   let total = mrr;
-  for (let m = 0; m < 12; m++) total = total * q + newMrr;
-  return total;
+  for (let m = 0; m < 12; m++) {
+    total = total * q + newMrr;
+    path.push(total);
+  }
+  return path;
 }
 
-function projectMrr(mrr: Interval | null, newMrr: Interval | null, nrr: Interval | null): Interval | null {
+/**
+ * The MRR month by month, at this month's pace (§20.2): 13 points, the MRR
+ * today first, the MRR in twelve months last. Each bound from the bounds that
+ * push it the same way. null without the MRR, the new MRR or a retention.
+ */
+export function mrrPath(mrr: Interval | null, newMrr: Interval | null, nrr: Interval | null): Interval[] | null {
   if (!mrr || !newMrr || !nrr) return null;
-  return {
-    lo: twelveMonths(mrr.lo, newMrr.lo, nrr.lo / 100),
-    hi: twelveMonths(mrr.hi, newMrr.hi, nrr.hi / 100),
-  };
+  const lo = twelveMonths(mrr.lo, newMrr.lo, nrr.lo / 100);
+  const hi = twelveMonths(mrr.hi, newMrr.hi, nrr.hi / 100);
+  return lo.map((v, m) => ({ lo: v, hi: hi[m]! }));
 }
 
 /**
@@ -335,7 +350,9 @@ export function buildScenario(state: EngineState, targets: Partial<Record<LeverI
       if (!expansion) assumptions.add("expansion-unknown");
     }
     // The projection needs a monthly retention: a movement nobody entered counts as 0 — said in `assumptions`.
-    const mrr12 = projectMrr(mrr, newMrr, retention?.nrr ?? null);
+    // One loop for the curve and the MRR in twelve months: its last point (§20.2).
+    const path = mrrPath(mrr, newMrr, retention?.nrr ?? null);
+    const mrr12 = path ? path[12]! : null;
     if (mrr12) assumptions.add("twelve-months");
 
     // Same spend, more payers: the CAC falls in the same proportion.
@@ -343,8 +360,14 @@ export function buildScenario(state: EngineState, targets: Partial<Record<LeverI
     const cac = cacToday && moves ? div(cacToday, fPayers) : cacToday;
     if (cacToday && moves) assumptions.add("same-spend");
     const monthlyMargin = arpa && margin ? mul(arpa, scale(margin, 1 / 100)) : null;
-    const ltv = monthlyMargin && churn ? mul(monthlyMargin, lifetimeMonths(churn)) : null;
-    const payback = cac && monthlyMargin ? div(cac, monthlyMargin) : null;
+    const lifetime = churn ? lifetimeMonths(churn) : null;
+    const ltv = monthlyMargin && lifetime ? mul(monthlyMargin, lifetime) : null;
+    const rawPayback = cac && monthlyMargin ? div(cac, monthlyMargin) : null;
+    const payback = rawPayback && nonNegative(rawPayback);
+    // A month of acquisition, at today's spend whatever the what-ifs (same spend, §20.6).
+    const spend = acquisitionSpend(payersToday, cacToday);
+    // Expansion can only outpace the losses when it was entered (§20.6): a movement nobody entered counts as 0.
+    const expansionMayOutpace = Boolean(expansion && retention?.nrr && retention.nrr.hi > 100);
     return {
       mrr,
       newMrr,
@@ -353,7 +376,15 @@ export function buildScenario(state: EngineState, targets: Partial<Record<LeverI
       nrr: churn && contraction && expansion ? retention!.nrr : null,
       cac,
       ltv,
-      payback: payback && nonNegative(payback),
+      payback,
+      arr: arrOf(mrr),
+      arr12: arrOf(mrr12),
+      mrrPath: path,
+      ltvCac: ltv && cac ? div(ltv, cac) : null,
+      lifetime,
+      afterPayback: afterPayback(lifetime, payback),
+      loss: lossCheck(ltv, cac),
+      cash: cashTiedUp(spend, payback, expansionMayOutpace),
     };
   }
 

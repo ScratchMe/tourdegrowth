@@ -11,7 +11,7 @@ import { buildScenario } from "../scenario";
 import type { DeckModel, EngineDerived, EngineState, MetricEntry } from "../types";
 import { currentSnapshot } from "../values";
 import { EXAMPLE_TODAY, emptyState, exampleState, tourResult, withEntry, withoutTargets } from "./fixtures";
-import { asBeforeT3, asTabs, withoutResume } from "./golden-projection";
+import { asBeforeA20, asBeforeT3, asTabs, withoutResume } from "./golden-projection";
 import { CTX_EN, CTX_FR, EN, FR } from "./props";
 import { fullState } from "./storage-fixtures";
 
@@ -134,9 +134,10 @@ function outputsOf(state: EngineState, tour: StoredResult | null) {
   }
   // A round trip through JSON: `undefined` fields drop out exactly as they do in the file.
   const json = JSON.parse(JSON.stringify(out)) as Record<string, Record<string, unknown>>;
-  // The levers A14 T3 adds to « Et si », and only them (golden-projection.ts): a field added, not a change.
+  // The levers A14 T3 adds to « Et si », and only them, then the money A20 adds (golden-projection.ts): fields added, not a change.
   for (const o of Object.values(json)) {
     asBeforeT3(o.scenario, false);
+    asBeforeA20(o.scenario);
   }
   return json as unknown;
 }
