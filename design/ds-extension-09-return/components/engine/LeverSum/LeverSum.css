@@ -1,0 +1,125 @@
+/* LeverSum — design system extension 09. Tokens only. */
+.LeverSum_root {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.LeverSum_title {
+  font: var(--title-card);
+}
+
+.LeverSum_list {
+  display: grid;
+  grid-template-columns: minmax(0, max-content) minmax(6em, 1fr) max-content;
+  align-items: center;
+  gap: var(--space-4) var(--space-6);
+  margin: 0;
+}
+
+.LeverSum_row {
+  display: contents;
+}
+
+.LeverSum_label {
+  font: var(--body-sm);
+  color: var(--text-body);
+}
+
+.LeverSum_track {
+  position: relative;
+  height: var(--money-sum-bar);
+  margin: 0;
+}
+
+.LeverSum_bar {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  background: var(--money-bar-ink);
+  border-radius: var(--radius-mark);
+}
+
+/* One after the other: the solo bars end to end, a paper hairline between
+ * them so each length still reads. */
+.LeverSum_segment {
+  border-radius: 0;
+  box-shadow: inset calc(var(--border-width) * -1) 0 0 var(--surface-page);
+}
+
+.LeverSum_value {
+  margin: 0;
+  font: var(--meta-md);
+  font-variant-numeric: var(--tabular);
+  text-align: right;
+}
+
+.LeverSum_rowSum .LeverSum_label,
+.LeverSum_rowTogether .LeverSum_label {
+  font-weight: 700;
+}
+
+.LeverSum_rowSum .LeverSum_label {
+  padding-top: var(--space-4);
+}
+
+.LeverSum_rowSum > * {
+  border-top: var(--border-width-hairline) dashed var(--border-divider);
+  padding-top: var(--space-4);
+}
+
+.LeverSum_rowSum .LeverSum_track {
+  height: calc(var(--money-sum-bar) + var(--space-4));
+  background-clip: content-box;
+}
+
+.LeverSum_rowSum .LeverSum_bar {
+  top: var(--space-4);
+}
+
+.LeverSum_rowTogether .LeverSum_value {
+  font-weight: 700;
+}
+
+/* What the levers do to each other: a bracket over the end of "together". */
+.LeverSum_bracket {
+  position: absolute;
+  bottom: calc(100% + var(--space-1));
+  height: var(--money-bracket);
+  border: var(--border-width) solid var(--money-bracket-ink);
+  border-bottom: none;
+  border-radius: var(--radius-mark) var(--radius-mark) 0 0;
+}
+
+.LeverSum_extra {
+  font: var(--body-md);
+  color: var(--text-body);
+  max-width: 62ch;
+}
+
+@media (max-width: 760px) {
+  /* A phone: each label on its own line, the bar and the figure under it.
+   * Not on a slide, which is a fixed 960 × 540 canvas at any width. */
+  .LeverSum_screen .LeverSum_list {
+    grid-template-columns: minmax(0, 1fr) max-content;
+  }
+  .LeverSum_screen .LeverSum_label {
+    grid-column: 1 / -1;
+  }
+  .LeverSum_screen .LeverSum_rowSum .LeverSum_label {
+    padding-top: var(--space-4);
+  }
+  .LeverSum_screen .LeverSum_rowSum .LeverSum_track,
+  .LeverSum_screen .LeverSum_rowSum .LeverSum_value {
+    border-top: none;
+    padding-top: 0;
+  }
+  .LeverSum_screen .LeverSum_rowSum .LeverSum_track {
+    height: var(--money-sum-bar);
+  }
+  .LeverSum_screen .LeverSum_rowSum .LeverSum_bar {
+    top: 0;
+  }
+}

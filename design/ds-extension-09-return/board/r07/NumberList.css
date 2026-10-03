@@ -1,0 +1,104 @@
+/* NumberList — design system extension 07. Tokens only. */
+.NumberList_root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
+  max-width: var(--engine-measure);
+}
+
+.NumberList_title {
+  font: var(--display-section);
+  letter-spacing: var(--display-letter-spacing);
+}
+
+.NumberList_stage {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* The stage a team target names: the diagnosis edge (constraint 5). */
+.NumberList_holds {
+  padding-left: var(--space-7);
+  border-left: var(--engine-diagnosis-edge);
+}
+
+.NumberList_head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-5);
+}
+
+.NumberList_stageName {
+  font: var(--engine-stage-title);
+  letter-spacing: var(--display-letter-spacing);
+  text-transform: uppercase;
+}
+
+.NumberList_headProgress {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-left: auto;
+}
+
+.NumberList_headProgress .EngineProgress_text {
+  display: none;
+}
+
+.NumberList_rows {
+  list-style: none;
+}
+
+.NumberList_item + .NumberList_item {
+  border-top: var(--border-rule);
+}
+
+.NumberList_row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-5);
+  width: 100%;
+  min-height: var(--engine-row-height);
+  padding: var(--space-3) 0;
+  border: none;
+  background: none;
+  color: var(--text-body);
+  font: var(--body-md);
+  text-align: left;
+  cursor: pointer;
+}
+
+.NumberList_row:hover .NumberList_name {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.NumberList_row:focus-visible {
+  outline: var(--focus-width) solid var(--focus-ring);
+  outline-offset: var(--focus-offset-tight);
+}
+
+.NumberList_name {
+  flex: 1 1 12em;
+  min-width: 0;
+  font-weight: 600;
+}
+
+.NumberList_value {
+  font: var(--chart-value-compact);
+  font-variant-numeric: var(--tabular);
+  text-align: right;
+}
+
+.NumberList_note {
+  flex-basis: 100%;
+  font: var(--meta-xs);
+  color: var(--text-muted);
+}
+
+.NumberList_computed .NumberList_row {
+  cursor: pointer;
+}

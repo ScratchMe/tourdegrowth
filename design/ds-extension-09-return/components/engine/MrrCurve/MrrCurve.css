@@ -1,0 +1,141 @@
+/* MrrCurve — design system extension 09. Tokens only. */
+.MrrCurve_root {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.MrrCurve_svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.MrrCurve_level {
+  stroke: var(--viz-grid);
+  stroke-width: var(--border-width-hairline);
+}
+
+.MrrCurve_gain {
+  fill: var(--money-gain-fill);
+  stroke: none;
+}
+
+.MrrCurve_line {
+  fill: none;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.MrrCurve_today .MrrCurve_line {
+  stroke: var(--money-line-today);
+  stroke-width: var(--money-curve-line-today);
+}
+
+.MrrCurve_whatif .MrrCurve_line {
+  stroke: var(--money-line-whatif);
+  stroke-width: var(--money-curve-line-whatif);
+}
+
+/* A range: its two paths are thinner, the hatch between them. */
+.MrrCurve_today .MrrCurve_edge,
+.MrrCurve_whatif .MrrCurve_edge {
+  stroke-width: var(--border-width-fine);
+}
+
+.MrrCurve_hatch {
+  fill: var(--money-range-ink);
+}
+
+.MrrCurve_band {
+  stroke: none;
+}
+
+.MrrCurve_today .MrrCurve_dot {
+  fill: var(--money-line-today);
+}
+
+.MrrCurve_whatif .MrrCurve_dot {
+  fill: var(--money-line-whatif);
+}
+
+.MrrCurve_start {
+  fill: var(--viz-ink);
+}
+
+.MrrCurve_tick {
+  font: var(--chart-label);
+  fill: var(--text-muted);
+}
+
+.MrrCurve_key {
+  font: var(--meta-sm);
+}
+
+.MrrCurve_keyWhatif {
+  font-weight: 700;
+  fill: var(--text-body);
+}
+
+.MrrCurve_keyToday {
+  fill: var(--text-muted);
+}
+
+/* On a phone: the keys under the plot, each with its line. */
+.MrrCurve_legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-8);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font: var(--meta-sm);
+  color: var(--text-muted);
+}
+
+.MrrCurve_legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.MrrCurve_legendItem::before {
+  content: "";
+  display: inline-block;
+  width: var(--space-8);
+  border-top: var(--money-curve-line-today) solid var(--money-line-today);
+}
+
+.MrrCurve_legendWhatif {
+  color: var(--text-body);
+  font-weight: 700;
+}
+
+.MrrCurve_legendWhatif::before {
+  border-top: var(--money-curve-line-whatif) solid var(--money-line-whatif);
+}
+
+
+.MrrCurve_slide .MrrCurve_tick,
+.MrrCurve_slide .MrrCurve_key {
+  font: var(--money-slide-note);
+}
+
+.MrrCurve_slide .MrrCurve_keyWhatif {
+  font-weight: 700;
+}
+
+.MrrCurve_startLabel {
+  fill: var(--text-body);
+}
+
+/* Labels keep a paper halo where they cross a line, so they keep their
+ * contrast (constraint 6). */
+.MrrCurve_halo {
+  paint-order: stroke;
+  stroke: var(--surface-page);
+  stroke-width: var(--border-width-stamp);
+  stroke-linejoin: round;
+}

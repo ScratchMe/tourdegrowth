@@ -1,0 +1,111 @@
+/* PaybackChart — design system extension 09. Tokens only. */
+.PaybackChart_root {
+  margin: 0;
+}
+
+.PaybackChart_svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.PaybackChart_axis {
+  stroke: var(--viz-axis);
+  stroke-width: var(--border-width-hairline);
+}
+
+.PaybackChart_tick,
+.PaybackChart_note {
+  font: var(--money-slide-note);
+  fill: var(--text-muted);
+}
+
+.PaybackChart_label {
+  font: var(--money-slide-note);
+  fill: var(--text-body);
+}
+
+.PaybackChart_strong {
+  font-weight: 700;
+}
+
+.PaybackChart_reference {
+  stroke: var(--viz-axis);
+  stroke-width: var(--border-width-hairline);
+  stroke-dasharray: 1 3;
+}
+
+.PaybackChart_cost {
+  stroke: var(--viz-ink);
+  stroke-width: var(--border-width);
+}
+
+.PaybackChart_margin {
+  fill: none;
+  stroke: var(--money-line-whatif);
+  stroke-width: var(--money-curve-line-whatif);
+  stroke-linecap: round;
+}
+
+.PaybackChart_marginRange {
+  fill: none;
+  stroke: var(--money-range-ink);
+  stroke-width: var(--border-width);
+  stroke-linecap: round;
+}
+
+/* Never reached: dashed. */
+.PaybackChart_thread,
+.PaybackChart_threadTick {
+  fill: none;
+  stroke: var(--viz-axis);
+  stroke-width: var(--border-width-fine);
+  stroke-dasharray: 5 4;
+}
+
+.PaybackChart_dot,
+.PaybackChart_cross {
+  fill: var(--viz-ink);
+}
+
+.PaybackChart_bracket {
+  fill: none;
+  stroke: var(--money-bracket-ink);
+  stroke-width: var(--border-width);
+}
+
+.PaybackChart_hatch {
+  fill: var(--money-range-ink);
+}
+
+.PaybackChart_band {
+  stroke: none;
+}
+
+.PaybackChart_unknown {
+  stroke: var(--border-soft);
+  stroke-width: var(--border-width);
+  stroke-dasharray: 6 4;
+}
+
+.PaybackChart_unknownMark {
+  fill: var(--surface-card);
+  stroke: var(--viz-ink);
+  stroke-width: var(--border-width);
+}
+
+.PaybackChart_q {
+  font: var(--money-chart-mark);
+  fill: var(--text-body);
+}
+
+
+/* Labels keep a paper halo where they cross a line, so they keep their
+ * contrast (constraint 6). */
+.PaybackChart_halo {
+  paint-order: stroke;
+  stroke: var(--surface-page);
+  stroke-width: var(--border-width-stamp);
+  stroke-linejoin: round;
+}

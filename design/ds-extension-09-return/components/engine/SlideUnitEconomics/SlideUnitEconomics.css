@@ -1,0 +1,124 @@
+/* SlideUnitEconomics — design system extension 09. Tokens only. Sized for
+ * the deck's 960 × 540 slide. */
+.SlideUnit_root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.SlideUnit_lower {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: var(--space-9);
+  align-items: start;
+}
+
+.SlideUnit_side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.SlideUnit_tiles {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.SlideUnit_tile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface-card);
+  border: var(--border-width-fine) solid var(--border-hard);
+  border-radius: var(--radius-field);
+  min-width: 0;
+}
+
+.SlideUnit_tileUnknown {
+  border-style: dashed;
+  border-color: var(--border-soft);
+}
+
+.SlideUnit_tileLabel {
+  font: var(--money-slide-note);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.SlideUnit_tileValue {
+  font: var(--money-slide-figure);
+  font-variant-numeric: var(--tabular);
+  letter-spacing: var(--display-letter-spacing);
+  color: var(--text-body);
+}
+
+.SlideUnit_tileNote {
+  font: var(--money-slide-note);
+  color: var(--text-body);
+}
+
+.SlideUnit_line {
+  font: var(--money-slide-note);
+  color: var(--text-muted);
+}
+
+.SlideUnit_side .CashWarning_root {
+  padding-left: var(--space-5);
+  font: var(--money-slide-body);
+}
+
+/* The hybrid: two engines side by side, never summed. */
+.SlideUnit_both {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4) var(--space-11);
+}
+
+.SlideUnit_engine {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.SlideUnit_engineName {
+  font: var(--money-slide-note);
+  font-weight: 700;
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-body);
+  padding-bottom: var(--space-2);
+  border-bottom: var(--border-solid);
+}
+
+.SlideUnit_tilesCompact {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.SlideUnit_tilesCompact .SlideUnit_tile {
+  padding: var(--space-2) var(--space-3);
+}
+
+.SlideUnit_tilesCompact .SlideUnit_tileValue {
+  font: var(--money-slide-figure);
+}
+
+/* What the cash figure assumes: printed with it, in the slide's note. */
+.SlideUnit_note {
+  font: var(--money-slide-note);
+  color: var(--text-muted);
+}
+
+.SlideUnit_noteBoth {
+  grid-column: 1 / -1;
+}
+
+/* A tile across two columns (the hybrid's cash tied up): its label and its
+ * note on one line each. */
+.SlideUnit_tileWide {
+  grid-column: span 2;
+}

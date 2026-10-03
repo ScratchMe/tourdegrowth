@@ -1,0 +1,68 @@
+<!-- @dsCard group="Extension 09 · proposal" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The engine's money · all states</title>
+<link rel="stylesheet" href="../../../fonts/fonts.css">
+<link rel="stylesheet" href="system-snapshot.css">
+<link rel="stylesheet" href="r07/engine.css">
+<style>
+  body { padding: var(--space-11) var(--gutter-desktop) var(--space-15); }
+  main { max-width: var(--width-desktop); margin: 0 auto; display: flex; flex-direction: column; gap: var(--space-10); }
+  h1 { font: var(--display-title); letter-spacing: var(--display-letter-spacing); }
+  .lead { font: var(--body-lg); max-width: var(--measure-read); }
+  .note { font: var(--body-sm); color: var(--text-muted); max-width: var(--measure-read); }
+  h2 { font: var(--title-card); padding-top: var(--space-5); border-top: var(--border-rule); }
+  table { width: 100%; border-collapse: collapse; font: var(--body-sm); }
+  th, td { text-align: left; padding: var(--space-3) var(--space-5) var(--space-3) 0; vertical-align: top; }
+  th { font: var(--meta-xs); letter-spacing: var(--meta-tracking); text-transform: uppercase; color: var(--text-muted); }
+  td a { display: inline-flex; align-items: center; min-height: var(--hit-min); color: var(--text-body); }
+  .key { font: var(--meta-2xs); letter-spacing: var(--meta-tracking); text-transform: uppercase; color: var(--text-muted); margin-left: var(--space-3); }
+  @media (max-width: 760px) { body { padding: var(--space-8) var(--gutter-mobile); } td:first-child { min-width: 12em; } .wrap { overflow-x: auto; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>The engine's money — every state</h1>
+  <p class="lead">Brief 09's states, drawn from the components' own source, every figure computed by one replica of the engine's money (<code>money.js</code>). Each opens at its width (390 or 1280), in English or French; every one exists in both languages from the same components.</p>
+  <p class="note">Serve this folder over http (ES modules do not load from <code>file://</code>), e.g. <code>python3 -m http.server</code> from the project root, then open <code>design/ds-extension-09-return/board/index.html</code>. “Key” marks the key screens the brief asks for (FR 1280, EN 390); “measures” marks today's board, redrawn only to measure what the money adds.</p>
+  <div id="list"></div>
+</main>
+<script type="module">
+  import { SCREENS } from "./screens.js";
+  const list = document.getElementById("list");
+  const groups = [...new Set(SCREENS.map((s) => s.group))];
+  for (const g of groups) {
+    const h2 = document.createElement("h2");
+    h2.textContent = g;
+    list.append(h2);
+    const wrap = document.createElement("div");
+    wrap.className = "wrap";
+    const table = document.createElement("table");
+    table.innerHTML = "<thead><tr><th>State</th><th>EN 1280</th><th>EN 390</th><th>FR 1280</th><th>FR 390</th></tr></thead>";
+    const tbody = document.createElement("tbody");
+    for (const s of SCREENS.filter((x) => x.group === g)) {
+      const tr = document.createElement("tr");
+      const name = document.createElement("td");
+      name.textContent = s.title;
+      if (s.key || s.measure) { const k = document.createElement("span"); k.className = "key"; k.textContent = s.key ? "key" : "measures"; name.append(k); }
+      tr.append(name);
+      for (const [lang, w] of [["en", 1280], ["en", 390], ["fr", 1280], ["fr", 390]]) {
+        const td = document.createElement("td");
+        const a = document.createElement("a");
+        a.href = `board.html?screen=${s.id}&lang=${lang}&w=${w}`;
+        a.textContent = `${lang.toUpperCase()} ${w}`;
+        td.append(a);
+        tr.append(td);
+      }
+      tbody.append(tr);
+    }
+    table.append(tbody);
+    wrap.append(table);
+    list.append(wrap);
+  }
+</script>
+</body>
+</html>

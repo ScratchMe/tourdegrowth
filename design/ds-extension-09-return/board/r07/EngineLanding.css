@@ -1,0 +1,145 @@
+/* EngineLanding — design system extension 07. Tokens only. */
+.EngineLanding_root {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-8);
+}
+
+.EngineLanding_main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+  max-width: var(--engine-measure);
+}
+
+.EngineLanding_eyebrow {
+  color: var(--engine-accent);
+}
+
+.EngineLanding_title {
+  font: var(--display-hero);
+  letter-spacing: var(--display-letter-spacing);
+  color: var(--text-body);
+}
+
+.EngineLanding_lede {
+  font: var(--body-lead);
+  color: var(--text-muted);
+}
+
+.EngineLanding_positioning {
+  font: var(--body-lg);
+  color: var(--text-body);
+  max-width: var(--measure-read);
+}
+
+/* The promise, first visit: the one raised card above the tool. */
+.EngineLanding_promise {
+  background: var(--surface-card);
+  border: var(--border-solid);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  padding: var(--pad-card);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.EngineLanding_promiseTitle {
+  font: var(--field-label);
+  color: var(--engine-accent);
+}
+
+.EngineLanding_promiseBody {
+  font: var(--body-lg);
+  color: var(--text-body);
+}
+
+/* The promise, returning: one line, same words, never folded. */
+.EngineLanding_promiseLine {
+  display: none;
+  font: var(--body-md);
+  color: var(--text-body);
+  padding-left: var(--space-5);
+  border-left: var(--border-width-stamp) solid var(--engine-accent);
+}
+
+.EngineLanding_cta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-5) var(--space-8);
+}
+
+.EngineLanding_aside {
+  display: none;
+}
+
+.EngineLanding_reserve {
+  display: none;
+}
+
+@media (min-width: 761px) {
+  .EngineLanding_root {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+  }
+  .EngineLanding_aside {
+    display: block;
+  }
+}
+
+@media (max-width: 760px) {
+  .EngineLanding_title {
+    font: var(--display-hero-mobile);
+  }
+  .EngineLanding_promise {
+    padding: var(--pad-card-mobile);
+  }
+}
+
+/* ── Returning: set before the first paint by engineKnownScript ─────────── */
+[data-engine=known] .EngineLanding_root {
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-7);
+}
+[data-engine=known] .EngineLanding_main {
+  gap: var(--space-5);
+}
+[data-engine=known] .EngineLanding_title {
+  font: var(--engine-landing-title);
+}
+[data-engine=known] .EngineLanding_intro,
+[data-engine=known] .EngineLanding_promise,
+[data-engine=known] .EngineLanding_cta,
+[data-engine=known] .EngineLanding_aside {
+  display: none;
+}
+[data-engine=known] .EngineLanding_promiseLine {
+  display: block;
+}
+/* The tool's place, held until the engine is read: dashed, because it is
+ * "not yet" (constraint 7). Removed by the app once the board renders. */
+[data-engine=known] .EngineLanding_reserve {
+  display: flex;
+  align-items: flex-start;
+  min-height: var(--engine-reserve);
+  max-width: var(--engine-measure);
+  padding: var(--pad-card);
+  border: var(--engine-pending-edge);
+  border-radius: var(--radius-card);
+  font: var(--meta-sm);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+@media (max-width: 760px) {
+  [data-engine=known] .EngineLanding_title {
+    font: var(--engine-landing-title-mobile);
+  }
+  [data-engine=known] .EngineLanding_reserve {
+    min-height: var(--engine-reserve-mobile);
+    padding: var(--pad-card-mobile);
+  }
+}
