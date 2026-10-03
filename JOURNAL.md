@@ -981,7 +981,7 @@ La note sur un futur `script-src` (l'autoriser par le hash de ce script, jamais 
 - les **318 specs** du moteur, du kit des espaces, des cibles, de l'accessibilité et de la plateforme sur le build final : 317 passées, une ignorée par construction ; 922 specs au total (`--list`, hors captures temporaires) ;
 - **captures** du haut de la page, premier passage et retour (avant l'îlot et lu), en français et en anglais, à 1 280 et 390 px : l'outil commence au même endroit avant et après la lecture.
 
-## A18 T5 : l'hybride, un total et un moteur à la fois (2026-10-03, #PR)
+## A18 T5 : l'hybride, un total et un moteur à la fois (2026-10-03, #299)
 
 Onzième étape du portage du retour 07, drapeau fermé : **le tableau hybride** (brief 07 Q18, `TotalBand`), l'écran le plus dense du moteur.
 
