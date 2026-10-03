@@ -1,0 +1,87 @@
+/*
+ * Tokens of the engine's money — design system extension 09
+ * (design/ds-extension-09-return/tokens/money.css), ported by A20.d T2.
+ *
+ * Built on the existing layers and on return 07's tokens/engine.css. No new
+ * primitive colour: every colour below is a semantic name over the system's
+ * ink, axis, grid and red, by meaning. The measures and the type sizes are
+ * new.
+ *
+ * Paper only, like the engine. The colour block is declared on
+ * `[data-world]`, as engine.css's is: a var() resolves where it is declared,
+ * and one built on a world-scoped token must follow a world's rebinding
+ * (token-sources.test.ts holds the rule).
+ *
+ * Ported in T2, read a step at a time: the tokens a step of A20.d does not
+ * read yet wait in dead-tokens.test.ts, under the step that will. The
+ * return's slide sizes (--money-slide-*, --money-bar-slide,
+ * --money-chart-mark) are NOT ported: the return drew its slides at
+ * 960 × 540, and the deck draws them at 1920 × 1080 with its own scale
+ * (--slide-*, 18px and up, design audit S-8). The money slides (T4) read it.
+ * Nor are the seven tokens no component of the return reads (the curve's
+ * height, keys and dot, the loss's two colours — Tag's `ink` tone carries
+ * them — and the reference line).
+ */
+
+:root {
+  /* ── Measures ─────────────────────────────────────────────────────────── */
+
+  /* MrrCurve's two lines. Its height and the room for its keys are props
+   * of the SVG (it is drawn at the column's real width, so its type never
+   * scales), not tokens. */
+  --money-curve-line-today: 2px;
+  --money-curve-line-whatif: 3px;
+
+  /* WorthBars: the two bars of "what one new customer is worth". */
+  --money-bar: 14px;
+  --money-bar-gap: var(--space-6);
+  /* The bracket that measures the gap between the two bars. */
+  --money-bracket: 8px;
+
+  /* LeverSum: the bars of "each lever on its own, together". */
+  --money-sum-bar: 12px;
+
+  /* ── Type ─────────────────────────────────────────────────────────────── */
+
+  /* MRR and ARR on the board, the MRR and ARR in 12 months in LeverCard: the
+   * engine's large figure (return 07). */
+  --money-figure: var(--engine-figure-lg);
+  /* The same on a phone: two figures side by side down to 320px ("~€1,500,000"
+   * in a 132px column). */
+  --money-figure-mobile: 700 22px/1 var(--font-display);
+}
+
+:root,
+[data-world] {
+  /* ── Colour, by meaning ──────────────────────────────────────────────── */
+
+  /* A projection is ink, never red (constraint 1). "At today's pace" is the
+   * axis ink, thinner; "with your what-ifs" the full ink, thicker; the room
+   * between them is the grid's wash. Neither line is dashed: dashed means
+   * "not yet", and both lines are equally projections. */
+  --money-line-today: var(--viz-axis);
+  --money-line-whatif: var(--viz-ink);
+  --money-gain-fill: var(--viz-grid);
+
+  /* A range (an estimate somewhere upstream): the system's hatch for an
+   * estimate, as the peloton and the status marks draw it. */
+  --money-range-ink: var(--viz-unknown);
+  --money-range-fill: var(--viz-unknown-fill);
+
+  /* What one new customer costs and brings back: both in ink (one unit,
+   * two lengths); the line where the cost ends is the axis ink, dashed only
+   * because it is a reading guide, not a mark. */
+  --money-bar-ink: var(--viz-ink);
+  --money-cost-line: var(--border-width) dashed var(--viz-axis);
+  --money-bracket-ink: var(--viz-axis);
+
+  /* The long-payback warning: the system's advice (dashed red edge), the
+   * same look as the backup line — a warning, not an alarm; never the solid
+   * red of a diagnosis. */
+  --money-warning-edge: var(--engine-advice-edge);
+
+  /* An unknown ("?"): the dashed, hatched box of the peloton and the
+   * unit-economics slide. */
+  --money-unknown-edge: var(--border-dashed);
+  --money-unknown-fill: var(--viz-unknown-fill);
+}

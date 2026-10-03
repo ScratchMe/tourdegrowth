@@ -720,3 +720,20 @@ Le zip est rangé par langue puis par format, avec un LISEZ-MOI. La section n'ap
 - le plafond de 240 retiré.
 
 **Le journal est archivé** une fois de plus : les 24 entrées du 2026-10-02 sont parties telles quelles dans `docs/journal/11-moteur-simplifie-en-tete-compact.md`. Le bloc a été vérifié identique, et ce fichier repart à environ 78 000 caractères.
+
+## A20.d T2 : l'argent sur le tableau, après le diagnostic (2026-10-03, #311)
+
+**Ce qui se voit** (drapeau fermé) : sous le diagnostic de chaque motion, avant le peloton (C54), un bloc plat « L'argent · <mois> » en trois temps, tel que le retour 09 le dessine. Le MRR et son ARR (« le MRR × 12 », dit dans le libellé), sauf dans l'hybride, dont la bande des totaux portera la somme (T3). « Ce que vaut un nouveau client » : la phrase du constat d'abord, puis les barres (coûte, rapporte, l'écart mesuré et nommé), puis les mois (un client reste ~17 mois, le rembourser en prendrait 21 : il part avant). « Trésorerie » : la dépense d'acquisition du mois, ce qu'elle immobilise, si elle revient et quand, l'emplacement de l'alerte, et ce que le chiffre suppose.
+
+**Les règles tenues, testées plutôt que regardées** (`_engine/money-view.ts`, pur) :
+- chaque chiffre est celui d'aujourd'hui, lu dans le scénario du panneau sans levier bougé (`scenarioFor`, `slgScenarioFor`) : le bloc, la carte et les slides ne peuvent pas se contredire ;
+- la perte se dit une fois, en argent, avec la phrase du constat de T1 (`findingText`) : une seule source pour le tableau, les slides et un export. Son étiquette est à l'encre (le ton `ink` de `Tag`), son « peut-être » en pointillé, **jamais en rouge** (S-5, C48) ; ses mois sont son chiffre, pas une seconde nouvelle ;
+- un inconnu est « ? », dit ce qui manque, jamais 0, et rien ne se calcule sur le chiffre d'affaires : l'exemple du §6.0, sans marge, montre la case hachurée et pourquoi (C50 changera sa marge en T6) ;
+- un fait (le MRR, un CAC saisi, la dépense du mois) s'imprime à l'unité ; une estimation ou une projection à deux chiffres significatifs, avec « ~ » ;
+- l'alerte vient de `paybackWarning` (T1) : jamais avec une perte certaine. Le film ne l'affiche donc pas ; elle se voit dès qu'un payback dépasse le runway ou 30 mois, et sa saisie arrive en T5.
+
+**Les composants** : `MoneyBlock`, `WorthBars` et `CashWarning` dans `src/components/engine/`, sur les jetons `tokens/money.css`. Leurs variantes de slide et les tailles de slide du retour (`--money-slide-*`) ne sont pas portées : le retour dessinait ses slides à 960 × 540, le deck les dessine à 1 920 × 1 080 avec sa propre échelle, que T4 lira. Les jetons de la courbe et de la somme attendent T3 dans `dead-tokens.test.ts`. Deux termes neufs, avec leur « ? » : « immobilisé » (`cashTied`) et « après le payback » (`afterPayback`).
+
+**La copie** : la section `money` d'`engine-copy.ts` (36 chaînes par langue) et les deux termes, reprises du retour, toutes « à relire » ; elles iront au bon à tirer nº10 (A20.e, C55). Le relecteur de copie y a trouvé quatre écarts, corrigés avant la PR : l'espace insécable de « 100 % » (que la garde typographique ne regarde pas) et entre un nombre et « mois », les 30 mois du plancher lus dans `{n}` plutôt qu'écrits en dur, l'anglais de « trésorerie immobilisée » rendu au retour (« la moitié de la dépense d'un payback », pas d'un mois, et le français précisé dans ce sens), et deux tournures ambiguës (« le compte s'arrête à 36 mois » dans la vente assistée, « pour le comparer à ta trésorerie » dont l'antécédent était le runway).
+
+**Vérifié** : en FR et en EN, à 1 280 et 390 px, sur le SaaS du film (la perte) et sur l'exemple (la marge qui manque), captures regardées et e2e (`e2e/engine-money.spec.ts`) : l'étiquette a le fond de `--ink-0`, pas d'alerte avec la perte, le bloc au-dessus du peloton, aucun défilement horizontal ; l'assisté a son bloc, l'hybride celui du moteur affiché, sans MRR ni ARR propres. **Non-vacuité**, quatre sabotages, chacun rougit son test : l'étiquette de la perte passée en `alert`, la case inconnue qui affiche 0, la dépense du mois imprimée en estimation, les mois de la perte dits avec la phrase du « peut-être ».

@@ -109,7 +109,7 @@ describe("each layer only references the layer beneath it", () => {
   });
 
   it("every shorthand in the other token files that reads a world-scoped token is redeclared per world", () => {
-    const files = ["shape.css", "spacing.css", "typography.css", "motion.css", "engine.css"];
+    const files = ["shape.css", "spacing.css", "typography.css", "motion.css", "engine.css", "money.css"];
     const blocks = files.flatMap((file) => parseBlocks(file).map((b) => ({ file, ...b })));
     // World-scoped = the semantic layer, plus anything already declared on
     // [data-world] (so --state-hover-shadow, built on --shadow-hover, is

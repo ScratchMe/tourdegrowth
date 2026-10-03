@@ -481,6 +481,121 @@ export const ENGINE_COPY = {
     panel: { fr: "Tous les leviers ensemble", en: "All the levers together" },
   },
 
+  /**
+   * TODO: à relire (convention 6) — neuf le 2026-10-03 (A20.d T2, le retour du brief 09, `COPY.md`) : the money on
+   * the board (`MoneyBlock`, `WorthBars`, `CashWarning`). Figures arrive in their placeholders already formatted:
+   * facts to the unit, estimates and projections at two significant digits with « ~ ». No sentence asserts a cause,
+   * none names a stage, and none compares with a published reference (C1).
+   */
+  money: {
+    eyebrow: { fr: "L'argent · {month}", en: "The money · {month}" },
+    mrr: { fr: "MRR", en: "MRR" },
+    arr: { fr: "ARR, le MRR × 12", en: "ARR, the MRR × 12" },
+    worthTitle: { fr: "Ce que vaut un nouveau client", en: "What one new customer is worth" },
+    tagLoss: { fr: "Perte", en: "Loss" },
+    tagMaybe: { fr: "Perte possible", en: "Maybe a loss" },
+    /** `findings.unitEconLoss` and `unitEconLossMaybe` say the loss; this, the customer who pays back. */
+    healthy: {
+      fr: "Chaque nouveau client coûte {cac} et rapporte {ltv} de marge : {gap} de plus que ce qu'il coûte.",
+      en: "Each new customer costs {cac} and brings back {ltv} of margin: {gap} more than it costs.",
+    },
+    /** No LTV: never computed on revenue. `{input}` is `unitInputsPhrase`. */
+    noLtv: {
+      fr: "On ne peut pas encore dire ce que rapporte un nouveau client : il manque {input}.",
+      en: "We can't tell yet what a new customer brings back. Missing: {input}.",
+    },
+    noCac: {
+      fr: "Un nouveau client rapporte {ltv} de marge ; ce qu'il coûte, on ne le sait pas encore : il manque {input}.",
+      en: "A new customer brings back {ltv} of margin; what it costs isn't known yet. Missing: {input}.",
+    },
+    /** Only when the gross margin is what is missing. */
+    noMarginNote: {
+      fr: "Sans elle, pas de LTV, pas de payback, pas de trésorerie : calculés sur le chiffre d'affaires, ils flatteraient ton moteur.",
+      en: "Without it, no LTV, no payback, no cash figure: computed on revenue, they would flatter your engine.",
+    },
+    maybeWhy: {
+      fr: "Les fourchettes viennent de tes chiffres estimés : précise-les et le moteur tranchera.",
+      en: "The ranges come from your estimated numbers: pin them down and the engine will tell.",
+    },
+    costs: { fr: "Coûte", en: "Costs" },
+    brings: { fr: "Rapporte", en: "Brings back" },
+    short: { fr: "il manque {gap}", en: "{gap} short" },
+    more: { fr: "{gap} de plus", en: "{gap} more" },
+    overlap: { fr: "les deux peuvent se croiser", en: "the two may cross" },
+    missing: { fr: "il manque {input}", en: "missing: {input}" },
+    /** A loss IS a payback longer than the lifetime: its months, inside the finding, never a second piece of news. */
+    monthsLoss: {
+      fr: "Un client reste {life} ; rembourser son coût en prendrait {payback} : il part avant.",
+      en: "A customer stays {life}; paying back its cost would take {payback}: it leaves before.",
+    },
+    monthsMaybe: {
+      fr: "Un client reste {life} ; rembourser son coût en prend {payback} : il peut partir avant.",
+      en: "A customer stays {life}; paying back its cost takes {payback}: it may leave before.",
+    },
+    /** The « ? » of `terms.afterPayback` follows it. */
+    monthsHealthy: {
+      fr: "Il rembourse son coût en {payback} et reste {life} : {after} de marge après le remboursement.",
+      en: "It pays back its cost in {payback} and stays {life}: {after} of margin after payback.",
+    },
+    /** Sales-assisted, annual contracts. */
+    slgAnnual: {
+      fr: "Ses renouvellements reviennent une fois par an, et la durée de vie est plafonnée à 36 mois.",
+      en: "Its renewals come up once a year, and the lifetime is capped at 36 months.",
+    },
+    cashTitle: { fr: "Trésorerie", en: "Cash" },
+    spend: { fr: "Dépensé en acquisition ce mois-ci", en: "Spent on acquisition this month" },
+    /** The « ? » of `terms.cashTied` follows it. */
+    tied: { fr: "Immobilisé à ce rythme", en: "Tied up at this pace" },
+    lineLoss: {
+      fr: "Et elle ne revient pas toute : les clients partent avant d'avoir remboursé.",
+      en: "And it does not all come back: customers leave before they pay back.",
+    },
+    lineMaybe: {
+      fr: "Qu'elle revienne toute n'est pas sûr : les clients peuvent partir avant d'avoir remboursé.",
+      en: "Whether it all comes back isn't certain: customers may leave before they pay back.",
+    },
+    lineHealthy: { fr: "Elle revient toute, au fil des remboursements.", en: "It all comes back, as customers pay back." },
+    lineNone: {
+      fr: "Pas de chiffre de trésorerie sans payback : c'est lui qui dit quand la dépense revient.",
+      en: "No cash figure without a payback: it says when the spend comes back.",
+    },
+    /** The `CashAssumption`s, said once (§20.6). */
+    assumePlg: {
+      fr: "Un plancher : la dépense de chaque mois revient régulièrement sur la durée du payback, la moitié est donc dehors à tout moment ; le churn et la rétrogradation ralentissent le retour et ne sont pas comptés. Facturation mensuelle.",
+      en: "A floor: each month's spend comes back evenly over the payback, so half of it is out at any time; churn and contraction slow the return and are not counted. Monthly billing.",
+    },
+    assumePlgOutpaced: {
+      fr: "La dépense de chaque mois revient régulièrement sur la durée du payback, la moitié est donc dehors à tout moment. L'expansion peut dépasser le churn et la rétrogradation : elle raccourcit le retour, et ce chiffre n'est plus un plancher. Facturation mensuelle.",
+      en: "Each month's spend comes back evenly over the payback, so half of it is out at any time. Expansion may outpace churn and contraction: it shortens the return, and this figure is no longer a floor. Monthly billing.",
+    },
+    assumeSlg: {
+      fr: "Un plancher : la dépense de chaque mois revient régulièrement sur la durée du payback, la moitié est donc dehors à tout moment ; les non-renouvellements ralentissent le retour et ne sont pas comptés. Facturation mensuelle supposée : une année payée d'avance revient plus tôt.",
+      en: "A floor: each month's spend comes back evenly over the payback, so half of it is out at any time; non-renewals slow the return and are not counted. Monthly billing assumed: a year paid up front comes back sooner.",
+    },
+    assumeSlgOutpaced: {
+      fr: "La dépense de chaque mois revient régulièrement sur la durée du payback, la moitié est donc dehors à tout moment. La NRR sur 12 mois peut dépasser 100 % : elle raccourcit le retour, et ce chiffre n'est plus un plancher. Facturation mensuelle supposée : une année payée d'avance revient plus tôt.",
+      en: "Each month's spend comes back evenly over the payback, so half of it is out at any time. The 12-month NRR may exceed 100%: it shortens the return, and this figure is no longer a floor. Monthly billing assumed: a year paid up front comes back sooner.",
+    },
+    /** C49: the team's runway, typed in Settings. */
+    warnRunway: {
+      fr: "Rembourser un client prend {payback}, plus que ton runway ({n} mois) : tu gagnes de l'argent, mais peut-être après la fin de ta trésorerie.",
+      en: "Paying back a customer takes {payback}, longer than your runway ({n} months): you make money, but maybe after your cash runs out.",
+    },
+    warnRunwayMaybe: {
+      fr: "Rembourser un client prend {payback} : peut-être plus que ton runway ({n} mois).",
+      en: "Paying back a customer takes {payback}: maybe longer than your runway ({n} months).",
+    },
+    /** C49, Antoine: with no runway typed, a payback of 30 months or more warns. */
+    warnFloor: {
+      fr: "Rembourser un client prend {payback} : {n} mois ou plus. Tu gagnes de l'argent, mais tard. Saisis ton runway dans les Réglages pour y comparer ton payback.",
+      en: "Paying back a customer takes {payback}: {n} months or more. You make money, but late. Type your runway in Settings to hold your payback against it.",
+    },
+    warnFloorMaybe: {
+      fr: "Rembourser un client prend {payback} : peut-être {n} mois ou plus. Saisis ton runway dans les Réglages pour y comparer ton payback.",
+      en: "Paying back a customer takes {payback}: maybe {n} months or more. Type your runway in Settings to hold your payback against it.",
+    },
+  },
+
   coverage: {
     found: { fr: "{n} chiffres sur {N} trouvés", en: "{n} of {N} numbers found" },
     foundOne: { fr: "1 chiffre sur {N} trouvé", en: "1 of {N} numbers found" },
@@ -1622,6 +1737,22 @@ export const ENGINE_COPY = {
       definition: {
         fr: "Un nombre que plusieurs chiffres utilisent, comme les inscrits du mois. Saisi une fois : le modifier dans un chiffre le modifie dans les autres, sauf celui qu'il rendrait impossible : il garde sa base, et son écran le dit.",
         en: "A count several numbers use, like the month's sign-ups. Typed once: change it in one number and it changes in the others, except one it would make impossible: that one keeps its own base, and its screen says so.",
+      },
+    },
+    /** TODO: à relire (convention 6) — neuf le 2026-10-03 (A20.d T2, le retour du brief 09) : the cash a pace of acquisition keeps out of the bank (§20.6). */
+    cashTied: {
+      term: { fr: "trésorerie immobilisée", en: "cash tied up" },
+      definition: {
+        fr: "Ce que ton acquisition garde hors de la banque à tout moment. Chaque mois, tu dépenses pour gagner des clients ; chacun te le rembourse sur la durée du payback. À rythme constant, la moitié de la dépense d'un payback est dehors. Un plancher : le churn et la rétrogradation ralentissent le retour.",
+        en: "What your acquisition keeps out of the bank at any time. Each month you spend to win new customers; each of them pays that back over the payback. At a steady pace, half a payback's worth of spend is out. A floor: churn and contraction slow the return.",
+      },
+    },
+    /** TODO: à relire (convention 6) — neuf le 2026-10-03 (A20.d T2) : the customer's lifetime minus the payback (§20.5). */
+    afterPayback: {
+      term: { fr: "mois après remboursement", en: "months after payback" },
+      definition: {
+        fr: "Combien de temps un client continue de payer une fois son coût d'acquisition remboursé : sa durée de vie moins le payback. Sous zéro, il part avant d'avoir remboursé : c'est la perte, dite en mois.",
+        en: "How long a customer keeps paying once its acquisition cost is paid back: its lifetime minus the payback. Below zero, it leaves before paying back: that is the loss, said in months.",
       },
     },
   },
