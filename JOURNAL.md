@@ -721,7 +721,7 @@ Le zip est rangé par langue puis par format, avec un LISEZ-MOI. La section n'ap
 
 **Le journal est archivé** une fois de plus : les 24 entrées du 2026-10-02 sont parties telles quelles dans `docs/journal/11-moteur-simplifie-en-tete-compact.md`. Le bloc a été vérifié identique, et ce fichier repart à environ 78 000 caractères.
 
-## A20.d T2 : l'argent sur le tableau, après le diagnostic (2026-10-03)
+## A20.d T2 : l'argent sur le tableau, après le diagnostic (2026-10-03, #311)
 
 **Ce qui se voit** (drapeau fermé) : sous le diagnostic de chaque motion, avant le peloton (C54), un bloc plat « L'argent · <mois> » en trois temps, tel que le retour 09 le dessine. Le MRR et son ARR (« le MRR × 12 », dit dans le libellé), sauf dans l'hybride, dont la bande des totaux portera la somme (T3). « Ce que vaut un nouveau client » : la phrase du constat d'abord, puis les barres (coûte, rapporte, l'écart mesuré et nommé), puis les mois (un client reste ~17 mois, le rembourser en prendrait 21 : il part avant). « Trésorerie » : la dépense d'acquisition du mois, ce qu'elle immobilise, si elle revient et quand, l'emplacement de l'alerte, et ce que le chiffre suppose.
 
