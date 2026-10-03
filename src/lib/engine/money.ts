@@ -161,6 +161,8 @@ export interface MoneyKpis {
   ltvCac: Interval | null;
   /** Months a customer is counted for — the LTV's own lifetime, capped at 36 (§20.5). */
   lifetime: Interval | null;
+  /** What one customer brings back a month: ARPA × margin, or a contract's ACV ÷ 12 × margin. The payback chart's slope (A20.d T4.c). */
+  monthlyMargin: Interval | null;
   afterPayback: Interval | null;
   loss: LossCheck | null;
   /** A month of acquisition at today's spend (§20.6) — known without a margin, unlike the cash it ties up. */

@@ -1042,7 +1042,7 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 52px;
+  gap: 40px;
 }
 
 .figureRow {
@@ -1050,7 +1050,7 @@
   padding: 0;
   list-style: none;
   display: grid;
-  /* Six tiles since GRR and NRR (2026-09-26): two rows of three. */
+  /* Three a row by default; the money's six in one row below (`figureRowSix`). */
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 20px 28px;
 }
@@ -1098,89 +1098,57 @@
   color: var(--text-muted);
 }
 
-.timeline {
-  margin: 0;
+/*
+ * The money (design system extension 09, Q12, A20.d T4.c): the six tiles in
+ * one row, as the return draws them — the CAC, the LTV, the LTV:CAC, the
+ * payback, the months after payback, the cash — their figures a step down
+ * from the 64px of three tiles a row, so « ~2 300 000 € » holds in a sixth of
+ * the slide. Under them, the picture and, beside it, what it assumes.
+ */
+.figureRowSix {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.figureRowSix .figure {
+  gap: 8px;
+  padding: 18px 20px;
+}
+
+.figureRowSix .figureLabel {
+  font: var(--slide-meta);
+  letter-spacing: var(--slide-tracking);
+}
+
+.figureRowSix .figureValue {
+  font: var(--slide-label-md);
+}
+
+.unitLower {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 56px;
+  align-items: start;
+}
+
+.unitSide {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  min-width: 0;
 }
 
-.timelineTrack {
-  position: relative;
-  height: 48px;
-  border: var(--border-solid);
-  border-radius: var(--radius-tag);
-  background: var(--surface-card);
-}
-
-.timelinePayback {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  background: var(--viz-ink);
-}
-
-.timelineRange {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  background: var(--viz-unknown-fill);
-}
-
-.timelineUnknown {
-  border: var(--border-dashed);
-  background: var(--viz-unknown-fill);
-}
-
-/* The same paper disc as the peloton's unknown grid: one shape for "not measured" everywhere. */
-.timelineQuestion {
-  position: absolute;
-  inset: 0;
-  margin: auto;
-  width: 64px;
-  height: 64px;
-  display: grid;
-  place-items: center;
-  border: var(--border-solid);
-  border-radius: var(--radius-round);
-  background: var(--surface-card);
-  font: var(--slide-label-lg);
-  color: var(--text-body);
-}
-
-/* The commonly cited reference: a dashed ink tick, never a pass mark in red or green. */
-.timelineTick {
-  position: absolute;
-  top: -14px;
-  bottom: -14px;
-  width: 0;
-  border-left: var(--border-width-stamp) dashed var(--viz-axis);
-}
-
-.timelineScale {
-  position: relative;
-  height: 28px;
-  font: var(--slide-meta);
+.unitLine {
+  margin: 0;
+  font: var(--slide-note);
   color: var(--text-muted);
 }
 
-.timelineScale > span {
-  position: absolute;
-  top: 0;
-  white-space: nowrap;
-}
-
-.timelineScale > span:first-child {
-  left: 0;
-}
-
-.timelineTickLabel {
-  transform: translateX(-50%);
-}
-
-.timelineCap {
-  right: 0;
+/* The long-payback warning: the advice's dashed edge (CashWarning), at the slide's scale. */
+.unitWarning {
+  max-width: none;
+  padding-left: 20px;
+  font: var(--slide-body-xs);
 }
 
 /* ── Slide 5 — the mirror (§8.5, D13) ───────────────────────────────── */

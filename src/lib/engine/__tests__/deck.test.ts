@@ -4,7 +4,7 @@ import { deriveEngine } from "../derive";
 import { buildScenario } from "../scenario";
 import type { DeckModel, EngineState, SlideId, SlideTitleKey } from "../types";
 import { CTX_EN, CTX_FR, EN, FR } from "./props";
-import { EXAMPLE_EXPECTED, FILM_LEVERS, emptyState, exampleState, filmState, hybridState, measured, missing, ratio, tourResult, withEntry, withTarget } from "./fixtures";
+import { EXAMPLE_EXPECTED, FILM_LEVERS, emptyState, exampleState, filmState, hybridState, measured, missing, ratio, salesAssistedState, tourResult, withEntry, withTarget } from "./fixtures";
 
 // Engine spec §13.1 "deck" — §9.2 presence and order, `visibility` first
 // under two ★, one case that triggers each title template and one that
@@ -634,5 +634,102 @@ describe("the what-if slides, extension 09 (A20.d T4.b)", () => {
     expect(s.lines.filter((l) => l.row === "kpi").map((l) => l.id)).toEqual(["mrr12", "arr12", "nrr", "cac", "ltv", "ltvCac", "payback", "cash"]);
     expect(row(s, "kpi", "nrr").label).toBe(FR.strings.scenario.kpiNrr12);
     expect(s.curve!.today).toHaveLength(13);
+  });
+});
+
+// A20.d T4.c (design system extension 09, Q12): the unit economics with the money. Non-vacuity, measured: see the
+// journal's entry for T4.c (dropping the move to nº 2, the loss title, and the warning's « nous » each fail here).
+describe("A20.d T4.c — the unit economics with the money", () => {
+  const unit = (model: DeckModel) => slide(model, "unit-economics");
+  const row = (model: DeckModel, kind: string) => unit(model).lines.find((l) => l.row === kind);
+  const order = (model: DeckModel) => model.slides.filter((s) => s.included).map((s) => s.id);
+  /** The film's SaaS with churn at 2 %: counted 36 months, a CAC of 2 900 € paid back in 32 — no loss, past the floor. */
+  const late = () => withEntry(withEntry(filmState(), "ret.logo-churn", measured(ratio(8, 400), tool)), "acq.cac", measured({ kind: "amount", amount: 2_900 }));
+
+  it("a certain loss titles the slide in ink and moves it right after the funnel (C48, C53)", () => {
+    const model = deck(filmState());
+    expect(order(model).slice(0, 3)).toEqual(["peloton", "unit-economics", "leak"]);
+    expect(unit(model).index).toBe(2);
+    expect(unit(model).title).toEqual({ key: "unitEconomicsLoss", values: { cac: "1 900 €", ltv: "~1 500 €", gap: "~400 €" } });
+    expect(renderTitle(unit(deck(filmState(), "en")).title, EN.strings)).toBe("Each new customer costs us €1,900 and brings back ~€1,500: **we lose ~€400 on each one**.");
+    expect(deck(filmState(), "en").slides.find((s) => s.id === "unit-economics")!.title.values).toEqual({ cac: "€1,900", ltv: "~€1,500", gap: "~€400" });
+  });
+
+  it("the loss in months and in cash: the customer leaves first, the cash does not all come back, no warning", () => {
+    const model = deck(filmState());
+    expect(row(model, "after")).toMatchObject({ value: "–4 mois", note: "part ~4 mois avant d'avoir remboursé" });
+    expect(row(model, "cash")).toMatchObject({ note: FR.strings.slide.unitNotAllBack });
+    expect(row(model, "cash")!.value).toMatch(/^~/);
+    // A customer who leaves before paying back is the loss, not a late return (§20.5) — even past a 12-month runway.
+    expect(row(model, "warning")).toBeUndefined();
+    const shortRunway = filmState();
+    shortRunway.setup = { ...shortRunway.setup, runwayMonths: 12 };
+    expect(row(deck(shortRunway), "warning")).toBeUndefined();
+    expect(row(model, "assume")!.text).toBe(FR.strings.slide.unitAssume);
+  });
+
+  it("GRR and NRR are one line with their approximation, no longer two tiles", () => {
+    const lines = unit(deck(filmState())).lines;
+    expect(lines.map((l) => l.row)).not.toContain("grr");
+    expect(lines.map((l) => l.row)).not.toContain("nrr");
+    expect(row(deck(filmState(), "en"), "retention")!.text).toBe(
+      "Monthly GRR 93% · NRR 95% — approximate: logo churn stands in for revenue churn, as if the customers who left paid the average ARPA.",
+    );
+  });
+
+  it("the LTV:CAC prints the commonly cited 3:1 in context, from the catalogue — never as a verdict", () => {
+    expect(row(deck(filmState()), "ltvCac")).toMatchObject({ value: "0,79\u00a0fois", note: "repère couramment cité : environ 3 pour 1" });
+    expect(row(deck(filmState(), "en"), "ltvCac")!.text).toBe("0.79× · commonly cited reference: about 3:1");
+  });
+
+  it("the picture tells the loss: the margin line stops short of the cost, the bracket is the loss itself", () => {
+    const chart = unit(deck(filmState())).paybackChart!;
+    expect(chart).toMatchObject({ story: "loss", cac: [1900, 1900], monthlyMargin: [90, 90], reference: 12 });
+    expect(chart.labels).toMatchObject({ short: "il manque ~400 €", paysBack: "rembourserait à 21 mois", leaves: "part vers 17 mois" });
+    expect(chart.summary).toContain("à ~400 € des 1 900 € qu'il a coûté");
+  });
+
+  it("no certain loss: the v1 title, the slide in its place; a payback of 30 months or more warns in the slide's « nous » (C49)", () => {
+    const model = deck(late());
+    expect(unit(model).title.key).toBe("unitEconomics");
+    expect(order(model).indexOf("unit-economics")).toBe(3);
+    expect(row(model, "warning")!.text).toBe("Rembourser un client prend 32 mois : 30 mois ou plus. Nous gagnons de l'argent, mais tard.");
+    expect(row(model, "after")).toMatchObject({ value: "~4 mois", note: "" });
+    const chart = unit(model).paybackChart!;
+    expect(chart.story).toBe("pays-back");
+    // Counted to the cap, the customer doesn't « leave at 36 months ».
+    expect(chart.labels).toMatchObject({ paysBack: "remboursé : 32 mois", after: "~4 mois de marge après", leaves: "compté jusqu'à 36 mois, le plafond" });
+  });
+
+  it("with a runway typed, the warning holds the payback against it", () => {
+    const state = late();
+    state.setup = { ...state.setup, runwayMonths: 24 };
+    expect(row(deck(state, "en"), "warning")!.text).toBe(
+      "Paying back a customer takes 32 months, longer than our runway (24 months): we make money, but maybe after our cash runs out.",
+    );
+  });
+
+  it("no margin: every money tile is « ? » and says so, the picture is the « ? » box under a known cost", () => {
+    const model = deck(exampleState());
+    expect(row(model, "after")).toMatchObject({ value: "", text: "il manque la marge brute" });
+    expect(row(model, "cash")).toMatchObject({ value: "", text: "il manque la marge brute" });
+    expect(row(model, "assume")).toBeUndefined();
+    expect(unit(model).paybackChart).toMatchObject({ story: "unknown", monthlyMargin: null, cac: [500, 500], labels: { unknown: "il manque la marge brute", leaves: "", paysBack: "" } });
+  });
+
+  it("no CAC: no picture — its cost line is the one thing it can't do without", () => {
+    expect(unit(deck(withEntry(filmState(), "acq.cac", undefined))).paybackChart).toBeUndefined();
+  });
+
+  it("sales-assisted alone: the same money, no GRR or NRR line, and a certain loss moves it to nº 2", () => {
+    const state = withEntry(salesAssistedState(), "slg.rev.gross-margin", measured(ratio(10, 100), tool));
+    const model = deck(state);
+    expect(unit(model).title.key).toBe("unitEconomicsLoss");
+    expect(order(model).slice(0, 3)).toEqual(["slg:peloton", "unit-economics", "slg:leak"]);
+    expect(unit(model).lines.map((l) => l.row)).toEqual(expect.arrayContaining(["after", "cash", "assume"]));
+    expect(row(model, "retention")).toBeUndefined();
+    // Its 12-month NRR may exceed 100 %: expansion may outpace non-renewals, and the cash figure is no longer a floor.
+    expect(row(model, "assume")!.text).toBe(FR.strings.slide.unitAssumeSlgOutpaced);
+    expect(unit(model).paybackChart!.story).toBe("loss");
   });
 });

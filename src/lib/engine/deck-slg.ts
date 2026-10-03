@@ -17,6 +17,7 @@ import {
   whatIfKpiLabel,
 } from "./deck";
 import { linkSentence, relaysTitle, totalBlocks, totalSums, totalTitle } from "./deck-motions";
+import { unitMoney } from "./deck-unit";
 import {
   capitalise,
   fillTemplate,
@@ -55,6 +56,7 @@ import type {
   SanityCheck,
   SlgLeverId,
   SlideId,
+  SlidePaybackChart,
   SlideTitle,
 } from "./types";
 import { currentSnapshot, entryOf, knownIn, statusOf } from "./values";
@@ -456,14 +458,18 @@ export function buildUnitSlg(
   metrics: ResolvedMetric[],
   ctx: EngineCalcContext,
   derivedNames: readonly ResolvedDerived[],
-): { present: boolean; title: SlideTitle; lines: Row[] } {
+): { present: boolean; title: SlideTitle; lines: Row[]; paybackChart: SlidePaybackChart | null; loss: boolean } {
   const { unit } = slg;
   const units = strings.units;
   const currency = state.setup.currency;
   const cac = knownIn(state, "slg.acq.cac", ctx);
+  // Today's money, from the scenario the board's money block reads (A20.d T4.c): nothing moved.
+  const money = unitMoney({ state, k: buildSlgScenario(state, {}, ctx).today, slg: true, unit, strings, metrics, ctx });
   const present = cac.kind === "known" || [unit.ltv, unit.payback, unit.ltvCac].some((d) => d.kind === "known");
-  const title: SlideTitle =
-    unit.payback.kind === "known" && unit.ltvCac.kind === "known"
+  // A certain loss titles the slide (C48); otherwise the v1 title.
+  const title: SlideTitle = money.lossTitle
+    ? money.lossTitle
+    : unit.payback.kind === "known" && unit.ltvCac.kind === "known"
       ? {
           key: "unitEconomics",
           values: {
@@ -485,17 +491,19 @@ export function buildUnitSlg(
   const variantId = currentSnapshot(state).metrics["slg.acq.cac"]?.variant;
   const cacValue = cac.kind === "known" ? formatInterval(cac.value, "money", ctx, units, { currency }) : "";
   const variant = metricOf(metrics, "slg.acq.cac").variants?.find((v) => v.id === variantId)?.label ?? "";
-  const figure = (row: string, id: string, d: DerivedValue, value: string): Row => {
+  const figure = (row: string, id: string, d: DerivedValue, value: string, caveat = ""): Row => {
     const named = derivedNames.find((x) => x.id === id);
-    const note = !value && d.kind === "uncomputable" && named ? fillTemplate(named.uncomputable, { input: unitInputsPhrase(d.missing, strings, metrics) }) : "";
+    const note = !value && d.kind === "uncomputable" && named ? fillTemplate(named.uncomputable, { input: unitInputsPhrase(d.missing, strings, metrics) }) : value ? caveat : "";
     return { row, id, label: named?.name ?? "", value, note, text: [value, note].filter(Boolean).join(" · ") || strings.slide.noNumber };
   };
   const lines: Row[] = [
     { row: "cac", id: "slg.acq.cac", label: metricOf(metrics, "slg.acq.cac").name, value: cacValue, variant, text: cacValue ? [cacValue, lowerFirst(variant)].filter(Boolean).join(" · ") : strings.slide.noNumber },
     figure("payback", "slg.rev.cac-payback", unit.payback, monthsText(unit.payback, strings, ctx)),
     figure("ltv", "slg.rev.ltv", unit.ltv, unit.ltv.kind === "known" ? formatApproxMoneyInterval(unit.ltv.value, currency, ctx, units) : ""),
-    figure("ltvCac", "slg.rev.ltv-cac", unit.ltvCac, unit.ltvCac.kind === "known" ? fillTemplate(units.times, { n: formatInterval(unit.ltvCac.value, "ratio", ctx, units) }) : ""),
+    figure("ltvCac", "slg.rev.ltv-cac", unit.ltvCac, unit.ltvCac.kind === "known" ? fillTemplate(units.times, { n: formatInterval(unit.ltvCac.value, "ratio", ctx, units) }) : "", money.ratioNote),
+    // The months after payback, the cash, the warning, what the cash assumes (A20.d T4.c). No GRR or NRR: see above.
+    ...money.rows,
   ];
   if (unit.ltv.kind === "known") lines.push({ row: "cap", text: strings.slide.unitCap });
-  return { present, title, lines };
+  return { present, title, lines, paybackChart: money.chart, loss: money.lossTitle !== null };
 }

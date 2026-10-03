@@ -799,6 +799,7 @@ export type SlideTitleKey =
   | "visibilityAllDocumented"
   | "unitEconomics"
   | "unitEconomicsUnknown"
+  | "unitEconomicsLoss"
   | "mirror"
   | "ask"
   /** The team wrote what it asks for, but no success metric with a target: the ask alone, no half-empty goal. */
@@ -872,6 +873,12 @@ export interface DeckSlide {
   curve?: SlideCurve;
   /** The « together » slide's compounding, drawn (`LeverSum`): each lever alone, added up, together. */
   leverSum?: SlideLeverSum;
+  /**
+   * The unit-economics slide's picture (design system extension 09, Q12,
+   * A20.d T4.c): one customer, month by month, the margin it brings back
+   * against what it cost. Drawn, not printed: its figures are the rows'.
+   */
+  paybackChart?: SlidePaybackChart;
 }
 /** The curve a what-if slide draws: thirteen months, [low, high], today first. */
 export interface SlideCurve {
@@ -882,6 +889,46 @@ export interface SlideCurve {
   xLabels: [string, string, string];
   keys: { today: string; whatif: string };
   /** The curve in words, for a screen reader. */
+  summary: string;
+}
+/**
+ * One customer, month by month (`PaybackChart`): [low, high] each, from the
+ * same scenario as the board's money block. Absent without a CAC: the cost
+ * line is the picture's one certainty.
+ */
+export interface SlidePaybackChart {
+  /** null: no margin, or no lifetime — the « ? » box under the cost line. */
+  monthlyMargin: [number, number] | null;
+  cac: [number, number];
+  lifetime: [number, number] | null;
+  payback: [number, number] | null;
+  /**
+   * What the picture tells: the customer leaves first (`loss`), pays back, or
+   * « ? » (no margin or lifetime). Decided by the loss verdict, so the drawing
+   * and the slide's words never disagree; a possible loss is drawn by its
+   * middles, its labels saying « may ».
+   */
+  story: "unknown" | "loss" | "pays-back";
+  /** The commonly cited payback reference, in months (12): a dotted line that situates, never judges. */
+  reference: number | null;
+  labels: {
+    /** « 0 », « 36 mois »: the axis's two ends. */
+    start: string;
+    end: string;
+    /** « 12 mois · repère couramment cité ». */
+    reference: string;
+    cost: string;
+    /** No margin or lifetime: « il manque la marge brute ». */
+    unknown: string;
+    leaves: string;
+    /** Loss: « rembourserait à 21 mois »; otherwise « remboursé : 11 mois ». */
+    paysBack: string;
+    /** Loss: « il manque ~400 € ». */
+    short: string;
+    /** Pays back: « ~22 mois de marge après ». */
+    after: string;
+  };
+  /** The chart in words, for a screen reader. */
   summary: string;
 }
 export interface SlideLeverSumRow {

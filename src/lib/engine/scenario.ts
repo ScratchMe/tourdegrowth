@@ -383,6 +383,7 @@ export function buildScenario(state: EngineState, targets: Partial<Record<LeverI
       mrrPath: path,
       ltvCac: ltv && cac ? div(ltv, cac) : null,
       lifetime,
+      monthlyMargin,
       afterPayback: afterPayback(lifetime, payback),
       loss,
       spend,

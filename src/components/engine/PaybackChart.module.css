@@ -1,0 +1,115 @@
+/*
+ * PaybackChart — design system extension 09 (design/ds-extension-09-return/
+ * components/engine/PaybackChart), ported by A20.d T4.c. Tokens only.
+ *
+ * Drawn on the deck's 1 920 canvas only, so its type is the slides' own
+ * scale (--slide-*, 18px and up, design audit S-8), not the return's 960
+ * one. Mono, as MrrCurve on a slide: SVG text in the UI font dropped its
+ * spaces in the PNG export (« août2026 », A20.d T4.b).
+ */
+.root {
+  margin: 0;
+}
+
+.svg {
+  display: block;
+  overflow: visible;
+}
+
+.axis {
+  stroke: var(--viz-axis);
+  stroke-width: var(--border-width-hairline);
+}
+
+.tick,
+.note {
+  font: var(--slide-meta);
+  fill: var(--text-muted);
+}
+
+.label {
+  font: var(--slide-meta);
+  fill: var(--text-body);
+}
+
+.strong {
+  font-weight: 700;
+}
+
+/* The commonly cited reference: dotted, the axis ink — it situates, never a pass mark. */
+.reference {
+  stroke: var(--viz-axis);
+  stroke-width: var(--border-width);
+  stroke-dasharray: 1 5;
+  stroke-linecap: round;
+}
+
+.cost {
+  stroke: var(--viz-ink);
+  stroke-width: var(--border-width-stamp);
+}
+
+.margin {
+  fill: none;
+  stroke: var(--money-line-whatif);
+  stroke-width: var(--money-curve-line-whatif);
+  stroke-linecap: round;
+}
+
+.marginRange {
+  fill: none;
+  stroke: var(--money-range-ink);
+  stroke-width: var(--border-width);
+  stroke-linecap: round;
+}
+
+/* Never reached: dashed. */
+.thread {
+  fill: none;
+  stroke: var(--viz-axis);
+  stroke-width: var(--border-width-fine);
+  stroke-dasharray: 6 5;
+}
+
+.dot {
+  fill: var(--viz-ink);
+}
+
+.bracket {
+  fill: none;
+  stroke: var(--money-bracket-ink);
+  stroke-width: var(--border-width);
+}
+
+.hatch {
+  fill: var(--money-range-ink);
+}
+
+.band {
+  stroke: none;
+}
+
+.unknown {
+  stroke: var(--border-soft);
+  stroke-width: var(--border-width);
+  stroke-dasharray: 6 4;
+}
+
+.unknownMark {
+  fill: var(--surface-card);
+  stroke: var(--viz-ink);
+  stroke-width: var(--border-width);
+}
+
+.question {
+  font: var(--slide-label-sm);
+  fill: var(--text-body);
+}
+
+/* Labels keep a paper halo where they cross a line, so they keep their contrast. */
+.halo {
+  paint-order: stroke;
+  stroke: var(--surface-page);
+  stroke-width: var(--border-width-stamp);
+  stroke-linejoin: round;
+}
