@@ -180,8 +180,9 @@ export function slgUnitEconomics(state: EngineState, ctx: EngineCalcContext): Sl
 }
 
 /**
- * « Clients perdus sur un an », the line the two motions share on the slide
- * that sets them side by side (C25 Q5) — one unit per line, never a monthly
+ * « Clients perdus sur un an », what the two motions share in the note under
+ * their columns on the slide that sets them side by side (C25 Q5, the note
+ * since A20.d T4.d) — one unit per line, never a monthly
  * rate next to an annual one. Self-serve: the monthly logo churn compounded,
  * 100 × (1 − (1 − c)^12), always approximate (it assumes the churn holds all
  * year). Sales-assisted: the contracts up for renewal that weren't renewed,

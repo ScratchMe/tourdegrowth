@@ -233,8 +233,9 @@ describe("unit economics, side by side (§18.8.2)", () => {
     ]);
     // A figure that can't be computed says what is missing, in its column; never a « ? » in the text.
     expect(unit.lines.find((l) => l.motion === "plg" && l.row === "ltv")!.text).toBe("Libre-service · il manque la marge brute");
-    // One note under both: self-serve's GRR and NRR, sales-assisted's renewal.
-    expect(unit.lines.find((l) => l.row === "assume")!.text).toContain(nb("Assisté^: renouvellement 88^% par an."));
+    // One note under both: the customers lost in a year, one unit for both (C25 Q5) — never a monthly rate beside an annual one.
+    expect(unit.lines.find((l) => l.row === "assume")!.text).toContain(nb("Clients perdus sur un an^: libre-service ~26^% (2,5^% par mois, composé) · assisté 12^% des contrats échus."));
+    expect(unit.lines.find((l) => l.row === "assume")!.text).not.toMatch(/GRR|NRR/);
     // Two CACs on different spend: the footer says so, in words.
     expect(unit.lines.find((l) => l.row === "footer")!.text).toContain("média seul en libre-service, tout chargé en assisté");
   });

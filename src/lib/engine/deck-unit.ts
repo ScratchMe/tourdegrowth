@@ -173,7 +173,7 @@ export function unitMoney(input: {
         time: !known || !payback
           ? ""
           : leavesFirst
-            ? fillTemplate(w.chartTimeLoss, { life, payback })
+            ? fillTemplate(k.lifetime!.lo >= LTV_CAP_MONTHS ? w.chartTimeCounted : w.chartTimeLoss, { life, payback })
             : verdict === "none" && k.afterPayback
               ? fillTemplate(w.chartTimeHealthy, { payback, after: approxMonths(k.afterPayback) })
               : fillTemplate(w.chartPaysBack, { payback }),

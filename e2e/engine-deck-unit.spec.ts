@@ -166,7 +166,7 @@ for (const locale of ["fr", "en"] as const) {
         await expect(slide.getByTestId("slide-payback-chart-slg")).toHaveAttribute("data-story", "pays-back");
         await expect(slide.getByTestId("slide-payback-chart-plg-time")).toHaveText(locale === "fr" ? "part vers 17 mois ; rembourserait à 21 mois" : "leaves at ~17 months; would pay back at 21 months");
         await expect(slide.getByTestId("slide-figure-plg-cash")).toContainText(locale === "fr" ? "ne revient pas toute" : "does not all come back");
-        await expect(slide.getByTestId("slide-unit-note")).toContainText(locale === "fr" ? "renouvellement 88 % par an" : "renewal 88% a year");
+        await expect(slide.getByTestId("slide-unit-note")).toContainText(locale === "fr" ? "12 % des contrats échus" : "12% of contracts up for renewal");
         const m = await measure(page);
         expect(m.top, "the body starts under the title").toBeGreaterThanOrEqual(m.titleBottom);
         expect(m.deepest, "the body ends above the footer").toBeLessThanOrEqual(m.footTop);

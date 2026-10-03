@@ -24,6 +24,7 @@ import {
   formatApproxMoneyInterval,
   formatChange,
   formatCountInterval,
+  formatDuration,
   formatDurationInterval,
   formatInterval,
   formatMonth,
@@ -43,7 +44,7 @@ import { buildSlgScenario, oppsCreated, oppsFromSelfServe, slgLeverAlone, type S
 import { sanityText } from "./sentences";
 import { STATUS_KEY } from "./strings";
 import type { EngineStrings, ResolvedDerived, ResolvedMetric } from "./strings";
-import { marginIsCompanyWide } from "./unit-economics";
+import { lostInAYear, marginIsCompanyWide } from "./unit-economics";
 import type {
   DerivedValue,
   EngineCalcContext,
@@ -448,18 +449,24 @@ export function buildUnitBoth(
   };
   const lines: Row[] = [...column("plg", plgMoney, plg.unit, "acq.cac"), ...column("slg", slgMoney, slg.unit, "slg.acq.cac")];
 
-  // One note under both: self-serve's GRR and NRR, sales-assisted's renewal, what the cash assumes, the reference.
-  const percent = (d: DerivedValue | Interval | null) => (!d ? "" : "kind" in d ? (d.kind === "known" ? formatInterval(d.value, "percent", ctx, units) : "") : formatInterval(d, "percent", ctx, units));
-  const grr = percent(plg.unit.grr);
-  const nrr = percent(plg.unit.nrr);
-  const renewal = percent(known("slg.ret.renewal"));
+  // One note under both: the customers lost in a year, one unit for both (C25 Q5), what the cash assumes, the reference.
+  const lost = (motion: Motion) => {
+    const d = lostInAYear(state, ctx, motion);
+    if (d.kind !== "known") return s.noNumber;
+    const annual = formatInterval(d.value, "percent", ctx, units);
+    if (motion === "plg") {
+      const churn = known("ret.logo-churn")!;
+      return fillTemplate(s.unitLostPlg, { annual: fillTemplate(units.approx, { n: annual }), monthly: formatInterval(churn, "percent", ctx, units) });
+    }
+    return fillTemplate(slg.unit.renewalTerm === "monthly" ? s.unitLostSlgMonthly : s.unitLostSlg, { rate: annual });
+  };
   const cashes = [plgMoney, slgMoney].map((m) => m.rows.find((r) => r.row === "assume")).filter(Boolean);
   const outpaced = [buildScenario(state, {}, ctx).today.kpis.cash, buildSlgScenario(state, {}, ctx).today.cash].some((c) => c && !c.floor);
+  const reference = plgMoney.chart?.reference ?? slgMoney.chart?.reference ?? null;
   const note = [
-    grr || nrr ? fillTemplate(s.unitBothRetention, { grr: grr || "?", nrr: nrr || "?" }) : "",
-    renewal ? fillTemplate(slg.unit.renewalTerm === "monthly" ? s.unitBothRenewalMonthly : s.unitBothRenewal, { rate: renewal }) : "",
+    fillTemplate(s.unitBothLost, { plg: lost("plg"), slg: lost("slg") }),
     cashes.length > 0 ? (outpaced ? s.unitBothCashOutpaced : s.unitBothCash) : "",
-    plgMoney.chart?.reference != null || slgMoney.chart?.reference != null ? s.unitBothReference : "",
+    reference !== null ? fillTemplate(s.unitBothReference, { n: formatDuration(reference, "months", ctx, units) }) : "",
   ].filter(Boolean);
   if (note.length > 0) lines.push({ row: "assume", text: note.join(" ") });
 
