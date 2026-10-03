@@ -757,7 +757,7 @@ Le zip est rangé par langue puis par format, avec un LISEZ-MOI. La section n'ap
 
 **Pour le bon à tirer nº10** (le relecteur de copie) : « ne change ni ce que rapporte un client » est vrai dans le calcul, où le LTV ignore l'expansion, pas dans la réalité. Antoine voudra peut-être « dans le calcul ».
 
-## A20.d T3.b : le panneau « Et si » en trois tableaux, l'effet composé dessiné, les totaux de la bande hybride (2026-10-03)
+## A20.d T3.b : le panneau « Et si » en trois tableaux, l'effet composé dessiné, les totaux de la bande hybride (2026-10-03, #313)
 
 **Ce qui se voit** (drapeau fermé), une fois le panneau ouvert :
 - **les sept tuiles deviennent trois tableaux** (`WhatIfFigures`, nouveau) : Croissance (nouveau MRR, NRR, GRR ; l'assisté met ses nouveaux clients du trimestre à la place de la GRR), Un nouveau client (CAC, LTV, LTV:CAC, par nouveau client, CAC payback, mois après remboursement), Trésorerie (la dépense du mois, la trésorerie immobilisée). Chaque tableau montre aujourd'hui, avec les « Et si » et l'écart. Le MRR et l'ARR dans 12 mois n'y sont pas répétés : la carte, juste au-dessus, les porte. Sur le film avec ses trois « Et si » : CAC « −480 € · mieux », par nouveau client « il manque ~400 € » puis « ~830 € de plus », « part avant » puis « ~9 mois », la dépense « stable », la trésorerie « −250 000 € · mieux » ;
