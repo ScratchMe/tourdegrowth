@@ -911,7 +911,7 @@ Neuvième étape du portage du retour 07, drapeau fermé, et la dernière de T3 
 - les **304 specs** du moteur, des cibles, de l'accessibilité et de la plateforme sur le build final : 303 passées, une ignorée par construction ; 917 specs au total (`--list`, hors captures temporaires) ;
 - **captures** des réglages, en libre-service et en hybride, en français et en anglais, à 1 280, 390 et 320 px, sans défilement horizontal : les libellés de l'assisté disent leurs mois, les aides leurs chiffres en minuscule.
 
-## A18 T4 : la page courte au retour, avant le premier rendu (2026-10-03, #PR)
+## A18 T4 : la page courte au retour, avant le premier rendu (2026-10-03, #298)
 
 Dixième étape du portage du retour 07, drapeau fermé : **la page** (brief 07 Q1, `EngineLanding`).
 
