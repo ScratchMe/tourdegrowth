@@ -804,7 +804,7 @@ Tout autre accent passe à l'encre, sans couleur, au poids du titre (déjà 700)
 
 **La copie** : quatre chaînes neuves, « à relire » : les deux noms de la courbe (« avec cet « Et si » », « avec les {n} « Et si » ») et les deux lignes du funnel et du trimestre. Le relecteur de copie a fait préciser celle du trimestre, écrite ici : « les opportunités et les signatures du trimestre », car « le trimestre » se lisait comme son MRR, que la courbe montre bouger.
 
-## A20.d T4.c : la slide d'unit economics avec l'argent, titrée par la perte et montée en nº 2 (C48, 2026-10-03)
+## A20.d T4.c : la slide d'unit economics avec l'argent, titrée par la perte et montée en nº 2 (C48, 2026-10-03, #316)
 
 **Ce qui se voit** (drapeau fermé), en libre-service seul et en assisté seul (l'hybride est T4.d) :
 - **six tuiles sur une ligne**, celles du retour : CAC, LTV, LTV:CAC, CAC payback, mois après remboursement, trésorerie immobilisée. Sous zéro, les mois après remboursement disent la perte en mois (« –4 mois · part ~4 mois avant d'avoir remboursé »). La trésorerie dit « ne revient pas toute » avec la perte, « un plancher · facturation mensuelle » sinon. Le LTV:CAC imprime en contexte le 3 pour 1 couramment cité, lu dans le catalogue (C1 : il situe, ne juge pas). Les chiffres passent de 64 à 34 px pour que « ~2 300 000 € » tienne dans un sixième de la slide ;
