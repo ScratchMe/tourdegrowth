@@ -1222,3 +1222,38 @@ Sur chacun, à 1 280 et 390 px : aucune violation axe sérieuse ou critique (le 
 - l'écriture d'une décision ne s'exerce que depuis un clic sur la page, pas d'ici.
 
 **Ce qui reste** : les réponses d'Antoine, puis leur application (`/bon-a-tirer appliquer`), qui lèvera les marqueurs. Ensuite B13, la re-synchro, et l'ouverture du moteur (D2), qui attend aussi le nº7.
+
+## A18.d : les six décisions du bon à tirer nº9, appliquées (2026-10-03)
+
+**Ce qu'Antoine a tranché**, en tête du [nº9](https://claude.ai/artifact/5oYQ3ZF2sCUd6yiVajifC7), ses six cartes « À trancher » (lues dans `cards/`) :
+- **la clause rouge du verdict** : option 1. Les deux rouges restent : le verdict dit ce qu'on ne voit pas, le diagnostic ce qui freine parmi ce qu'on voit. Rien ne change ;
+- **« motion » sur les slides** : option 1, tout passe à « moteur » et le golden se refige (voir plus bas) ;
+- **les deux effacements** : option 2, les deux gestes gardés, renommés ;
+- **les quatre libellés gardés contre le retour** : `next.goNumber` et `total.link` prennent la version du retour ; « Commence → » et « Pas assez de cibles pour conclure » restent ;
+- **la relance après cinq jours** : ça passe ;
+- **« 2,6× »** : ça passe.
+
+**Ce qui change, chaîne par chaîne** :
+- **« motion » devient « moteur »**, accords au masculin compris (« chacun », « aucun des deux moteurs », « le seul moteur »). Sont concernés :
+  - le pied de la slide du total ;
+  - la marge globale des deux moteurs, et le titre unit economics sans marge ;
+  - les notes « Pourquoi ne pas comparer les deux ? » et « Qui compte où ? » ;
+  - les deux pièges du catalogue (l'ARPA et la marge brute de l'assisté) ;
+  - un paragraphe de la confidentialité (« chaque étape de chaque moteur »), dont la date passe au 2026-10-03.
+
+  `hybrid.twoSegments` disparaît : au mot « moteur », c'était mot pour mot `twoEngines`, que la slide côte à côte imprime maintenant ;
+- **`next.goNumber`** : « Chiffre suivant : {number} → » / "Next number: {number} →" ;
+- **`total.link`** : « {n} opportunités sont venues du libre-service ({period}). » / "{n} opportunities came from self-serve ({period})." (et le singulier). Le retour écrivait « en août 2026 », un mois. Le nôtre en tient trois, donc la période reste entre parenthèses. « de juin à août » aurait marché en français, mais aurait donné en anglais "came from self-serve from June…". Le compte des opportunités (`{m}`) n'est plus dit ;
+- **l'effacement de l'appareil** : « Tout effacer sur cet appareil » / "Erase everything on this device", au menu et en titre de l'écran. Il se distingue ainsi de « Supprimer ce moteur ». L'exemple de la carte, « Effacer tout l'appareil », aurait pu se lire comme une réinitialisation du téléphone. L'écart est dit à Antoine sous sa note.
+
+**Le golden refigé, sans réécrire son fichier.** golden-v2 fige à la lettre ce qu'une version v2 imprimait, et sa règle ne laisse bouger un texte que par une décision. La décision est écrite comme ce qu'elle change : `withDecidedWords` (`golden-projection.ts`) remplace les fragments décidés dans le côté attendu, sur une copie. Le fichier `golden-v2.json` n'est pas touché, et tout autre caractère doit toujours correspondre.
+- Sans elle, trois cas de l'hybride échouaient : c'est la non-vacuité, observée.
+- Un test neuf vérifie que la projection réécrit bien les slides de l'hybride v2 dans les deux langues, et qu'il n'y reste plus « motion » comme mot.
+- golden-v1 n'a pas d'hybride et ne bouge pas.
+
+**Les tests** : les deux qui citaient l'ancienne liaison, la garde des slides (`hybrid.twoEngines` est maintenant sur une slide), la garde des comparatifs (une seule phrase admise, au masculin) et le titre d'une spec.
+
+**Vérifié** :
+- `tsc` et `npm run lint` propres ;
+- **3 061 tests unitaires** verts ;
+- `next build` avec les variables de la CI.

@@ -887,7 +887,7 @@ export interface TotalView {
   newMrrPerMonth: Record<Motion | "total", DerivedValue>;
   /** At the current pace, without any what-if (C25 Q11). */
   mrrIn12Months: Record<Motion | "total", DerivedValue>;
-  /** « {n} des {m} opportunités assistées viennent de comptes du libre-service ». A share of the pipeline, not an attribution. */
+  /** « {n} opportunités sont venues du libre-service » (A18.d) : the opportunities from self-serve accounts, not an attribution. */
   link: { known: Known; fromSelfServe: number | null; oppsCreated: number | null };
 }
 

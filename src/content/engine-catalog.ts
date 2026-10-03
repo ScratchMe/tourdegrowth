@@ -1134,7 +1134,7 @@ export const ENGINE_CATALOG: Record<MetricId, EngineCatalogEntry> = {
       { source: tool("stripe"), label: { fr: "Stripe, Chargebee ou ChartMogul", en: "Stripe, Chargebee or ChartMogul" }, path: { fr: "le MRR et les clients filtrés sur les clients assistés : un segment, un plan, une propriété", en: "MRR and customers filtered on sales-assisted customers: a segment, a plan, a property" } },
       { source: role("finance"), label: { fr: "Finance", en: "Finance" }, path: { fr: "l'ARR assisté ÷ 12, et le nombre de clients assistés", en: "sales-assisted ARR ÷ 12, and the number of sales-assisted customers" } },
     ],
-    trap: { fr: "En hybride, un client compte dans la seule motion qui a signé son contrat en cours : un client du libre-service passé par un commercial compte ici.", en: "In a hybrid, a customer counts in the one motion that signed their current contract: a self-serve customer moved over by a salesperson counts here." },
+    trap: { fr: "En hybride, un client compte dans le seul moteur qui a signé son contrat en cours : un client du libre-service passé par un commercial compte ici.", en: "In a hybrid, a customer counts in the one engine that signed their current contract: a self-serve customer moved over by a salesperson counts here." },
     request: { fr: "le MRR des clients assistés à fin {month}, et leur nombre", en: "the MRR of the sales-assisted customers at the end of {month}, and how many there are" },
     noReferenceReason: { fr: "trois ordres de grandeur séparent les catégories : aucun repère ne vaut pour tous", en: "three orders of magnitude separate categories: no reference holds for all" },
   },
@@ -1146,7 +1146,7 @@ export const ENGINE_CATALOG: Record<MetricId, EngineCatalogEntry> = {
     where: [
       { source: role("finance"), label: { fr: "Finance", en: "Finance" }, path: { fr: "le compte de résultat par offre ou par segment, quand elle le tient ; sinon, la marge globale en repli", en: "the income statement by offer or segment, when it keeps one; otherwise the company-wide margin as a fallback" } },
     ],
-    trap: { fr: "Une marge globale flatte l'assisté quand son offre comprend de la mise en service : demande la marge par motion à la finance.", en: "A company-wide margin flatters sales-assisted when its offer includes onboarding: ask finance for the margin by motion." },
+    trap: { fr: "Une marge globale flatte l'assisté quand son offre comprend de la mise en service : demande la marge par moteur à la finance.", en: "A company-wide margin flatters sales-assisted when its offer includes onboarding: ask finance for the margin by engine." },
     request: { fr: "la marge brute de l'activité assistée {period}, mise en service et Customer Success compris dans les coûts", en: "the gross margin of the sales-assisted business {period}, onboarding and customer success included in the costs" },
     noReferenceReason: { fr: "la mise en service et le Customer Success pèsent différemment dans chaque offre", en: "onboarding and customer success weigh differently in every offer" },
   },

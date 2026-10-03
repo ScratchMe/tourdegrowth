@@ -132,7 +132,7 @@ export const PRIVACY: LegalDocument = {
   // 2026-09-30, its French name (« moteur de growth », A7.2); then 2026-10-01,
   // what it counts once sales-assisted is in (A7.3.c, C25 Q14); and the same
   // day, what the complete engine adds (A14 T7, engine spec §19.12).
-  updatedAt: "2026-10-01",
+  updatedAt: "2026-10-03",
   intro: t(
     "Tour de Growth enregistre le strict nécessaire pour calculer ton score, te le redonner par son lien, et mesurer si l'outil fonctionne. Cette page dit précisément quoi, pourquoi, pendant combien de temps, et ce que tu peux exiger.",
     "Tour de Growth records the bare minimum needed to compute your score, hand it back to you through its link, and measure whether the tool works. This page says exactly what, why, for how long, and what you can ask for.",
@@ -255,8 +255,9 @@ export const PRIVACY: LegalDocument = {
           // devient l'ouverture des slides, leur export ou la copie de leur texte, et l'export d'un fichier (sauvegarde,
           // rappel ou modèle) — la sauvegarde était comptée depuis la v1 sans être dite —, et le lien par lequel on y
           // entre (les portes, A7.9 et §19.10), compté sans être dit lui non plus.
-          "Sur le moteur de growth, seuls sont comptés l'ouverture de la page, la façon de vendre cochée (libre-service, assisté ou les deux), le premier chiffre enregistré dans chaque étape de chaque motion, le démarrage d'un nouveau mois, la copie d'une demande, le rapprochement avec ton Tour, l'ouverture des slides, leur export ou la copie de leur texte, l'export d'un fichier (sauvegarde, rappel ou modèle) et le lien par lequel tu y entres — jamais un chiffre, un statut ni un texte que tu y saisis.",
-          "On the growth engine, the only things counted are the page being opened, how you sell as ticked (self-serve, sales-assisted or both), the first number saved in each stage of each motion, a new month being started, a request being copied, the link with your Tour, the slides being opened, exported or copied as text, a file being exported (backup, reminder or template), and the link you came in through — never a number, a status or any text you enter.",
+          // Le 2026-10-03 (A18.d, décision d'Antoine) : « chaque motion » devient « chaque moteur », comme partout.
+          "Sur le moteur de growth, seuls sont comptés l'ouverture de la page, la façon de vendre cochée (libre-service, assisté ou les deux), le premier chiffre enregistré dans chaque étape de chaque moteur, le démarrage d'un nouveau mois, la copie d'une demande, le rapprochement avec ton Tour, l'ouverture des slides, leur export ou la copie de leur texte, l'export d'un fichier (sauvegarde, rappel ou modèle) et le lien par lequel tu y entres — jamais un chiffre, un statut ni un texte que tu y saisis.",
+          "On the growth engine, the only things counted are the page being opened, how you sell as ticked (self-serve, sales-assisted or both), the first number saved in each stage of each engine, a new month being started, a request being copied, the link with your Tour, the slides being opened, exported or copied as text, a file being exported (backup, reminder or template), and the link you came in through — never a number, a status or any text you enter.",
         ),
       ],
     },

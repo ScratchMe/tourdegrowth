@@ -270,7 +270,7 @@ describe("the slides", () => {
    */
   it("never addresses the reader on a slide", () => {
     const onSlide = [
-      ...under("slideTitles", "slide", "notes", "side", "worth", "unitInput", "relays", "total", "hybrid.motionName", "hybrid.twoSegments"),
+      ...under("slideTitles", "slide", "notes", "side", "worth", "unitInput", "relays", "total", "hybrid.motionName", "hybrid.twoEngines"),
       // A14 T3.2: the three pipeline keys the relays' slide and its notes print (the board's own say « ton »).
       ...under("pipeline.coverage", "pipeline.coverageBelowSlide", "pipeline.previousNote"),
       ...under("peloton").filter(([p]) => /clause|unmeasured/.test(p)),
@@ -377,13 +377,9 @@ describe("the hybrid never compares, and always reads self-serve first", () => {
     ...under("slideTitles").filter(([p]) => /^slideTitles\.(total|unitEconomics(Both|OneSide|None))/.test(p)),
   ];
   /** The fixed sentence says what the hybrid refuses: its negation is the one « contre » / "against" allowed. */
-  // The one sentence that says « against » to refuse a comparison: the slide's (`twoSegments`) and, since A18 T6, the
-  // screens' (`twoEngines`, « moteur »). The English is the same words for both.
-  const ALLOWED = [
-    "chacune se lit contre ses cibles, pas contre l'autre",
-    "chacun se lit contre ses cibles, pas contre l'autre",
-    "each is read against its own targets, not against the other",
-  ];
+  // The one sentence that says « against » to refuse a comparison (`twoEngines`): on the screens since A18 T6, and on the
+  // side-by-side slide since A18.d, where it replaced `twoSegments` (« Deux motions… chacune… »).
+  const ALLOWED = ["chacun se lit contre ses cibles, pas contre l'autre", "each is read against its own targets, not against the other"];
   const COMPARATIVE: Record<Locale, RegExp> = {
     fr: /\b(vs|versus)\b|contre|face à|plus rentable|mieux|meilleur|moins bien|fois plus/i,
     en: /\b(vs|versus|better|worse|than|against)\b/i,

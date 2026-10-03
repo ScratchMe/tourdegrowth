@@ -103,12 +103,12 @@ describe("« deux moteurs, un total » (§18.6.2, §18.8.2)", () => {
     expect(totalTitle(both.total!, neither, FR.strings, CTX_FR).key).toBe("totalUnknownBoth");
   });
 
-  it("the link: a share of the pipeline, counted, with its three months", () => {
+  it("the link: the opportunities that came from self-serve, counted, with its three months (A18.d: the return's sentence)", () => {
     const state = hybridState();
     const { derived } = slgOf(state);
-    expect(linkSentence(derived.total!, state, FR.strings, CTX_FR)).toBe("31 des 130 opportunités assistées viennent de comptes du libre-service (juin à août 2026).");
+    expect(linkSentence(derived.total!, state, FR.strings, CTX_FR)).toBe("31 opportunités sont venues du libre-service (juin à août 2026).");
     const en = slgOf(state, EN, CTX_EN).derived;
-    expect(linkSentence(en.total!, state, EN.strings, CTX_EN)).toBe("31 of the 130 sales-assisted opportunities come from self-serve accounts (June to August 2026).");
+    expect(linkSentence(en.total!, state, EN.strings, CTX_EN)).toBe("31 opportunities came from self-serve (June to August 2026).");
     const noLink = withEntry(state, "link.pql-handoff", undefined);
     expect(linkSentence(slgOf(noLink).derived.total!, noLink, FR.strings, CTX_FR)).toBeNull();
   });
