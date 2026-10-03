@@ -1294,3 +1294,47 @@ Sur chacun, à 1 280 et 390 px : aucune violation axe sérieuse ou critique (le 
 - **3 061 tests unitaires** verts ;
 - `next build` avec les variables de la CI ;
 - les **272 specs** du moteur et de la confidentialité, toutes passées sur ce build.
+
+## Les quatre films de motion design, et l'écart qu'ils révèlent dans le moteur (2026-10-03, PR à venir)
+
+**La demande d'Antoine**, en quatre temps dans la même session :
+1. un film qui donne envie de se servir de tout Tour de Growth (le diagnostic, le moteur, le jeu), puis un film par espace ;
+2. du son (« pour les réseaux, c'est impératif »), les versions 1:1 et 9:16, et un film du moteur plus fort : « Et si ? » au centre, la growth rendue lisible pour un board ou un investisseur, et le vrai problème, « je ne sais pas où en est ma growth », jusqu'au cas où chaque nouveau client creuse l'ARR ;
+3. le prompt pour mettre le moteur à la hauteur du film (« je pensais honnêtement que c'était déjà le cas »), puis l'alerte quand le CAC payback est long, parce que c'est la trésorerie qui le paie ;
+4. tout pousser dans le dépôt, prompts compris, pour qu'une autre session reprenne le sujet.
+
+**Ce qui entre dans le dépôt** :
+- `marketing/motion/` : la source de la page publiée (https://claude.ai/artifact/MDSptVBYtkDuT8vFPJW49Z, identique au caractère près), `films.mjs` (la page autonome, les MP4, les images à un instant donné), et un README qui dit comment la page est faite, d'où viennent les chiffres du moteur et ce qui reste à reprendre ;
+- **C45** en section C de `CHANTIERS.md` : la direction, le calendrier et la copie neuve des films, avec une recommandation pour chacun ;
+- **A20**, le moteur à la hauteur de son film : l'écart relevé dans le code, puis les **prompts E et F**. E écrit la spécification, code le modèle pur et envoie le brief 09 à Claude Design. F porte le retour, puis remet le film d'accord avec le moteur.
+
+**Les films** : 47 s pour le Tour entier, 29 s pour le diagnostic, 44 s pour le moteur, 34 s pour le jeu. Chacun existe en trois formats et deux langues. Le fil rouge est le road book : la plaine, le contre-la-montre, la montagne, et la nuit qui tombe en montant. Retention traverse le film d'ensemble : le diagnostic la nomme, le moteur la chiffre, le jeu montre la tentation de tricher. Le film du moteur tient sur un SaaS d'exemple dont les chiffres sortent des formules du moteur (`scenario.ts#twelveMonths`, `unit-economics.ts`). Le client coûte 1 900 € et rapporte 1 500 € de marge. « Et si ? » fait passer le MRR dans 12 mois de 80 212 € à 122 402 €, et l'ARR de 963 k€ à 1 469 k€. Les hypothèses et le détail par levier sont dans le README.
+
+**Les pièges** :
+- **Une animation en `forwards` avec un délai montre l'élément avant son entrée.** Ce mode ne remplit qu'après la fin ; pendant le délai, l'élément garde son état de base, visible. Les entrées sont passées en `both`, et seules les animations de sortie gardent `forwards` (`FWD`).
+- **La leçon 2 de `CLAUDE.md`, encore.** Le gros bouton de lecture avait un `display: flex`, et il restait affiché avec `hidden`. Corrigé par `.big-play[hidden] { display: none; }`.
+- **La police pochoir met tout en capitales**, et « k€ » devenait « K€ ». Les chiffres en Stardos Stencil ont maintenant `text-transform: none`.
+- **Google Fonts n'a pas chargé pendant l'un des rendus de contrôle.** Les trois polices sont maintenant embarquées en base64 (sous-ensemble latin, licence OFL) : un export ne dépend plus du réseau.
+- **Le son rendu en une passe prenait 15 s** et bloquait la lecture. Il est maintenant rendu par tranches de 3 s, plus une passe pour les bourdons, soit environ 1,5 s. L'image part tout de suite et la musique la rejoint.
+- **Deux exports ne sont pas identiques à l'octet.** Les indices de son sont les mêmes, mais le rendu audio hors ligne de Chromium varie au huitième chiffre d'un lancement à l'autre, et l'encodeur en fait un écart de la taille de son propre bruit (46 dB de PSNR au pire sur l'image). C'est le même film : le README et l'en-tête de `films.mjs` le disent, au lieu de promettre une copie à l'identique.
+- **Le film a tort sur un point, laissé tel quel.** Il colore en rouge ce que les « Et si » ajoutent, alors que la règle du produit dit qu'une projection n'est jamais rouge (audit S-5). Le film suivra le moteur porté (prompt F), et pas l'inverse.
+
+**L'écart du moteur (A20)**, relevé sur `9c81844`. Le moteur calcule déjà presque tout ce que montre le film : les « Et si » cumulés, ce que chaque levier rapporte seul, l'effet composé, le LTV:CAC sur une slide. Mais il le garde plié derrière une carte à un levier, et l'argent n'est pas sur le tableau. Il lui manque cinq choses :
+1. l'ARR ;
+2. la trajectoire du MRR mois par mois ;
+3. le LTV:CAC dans « Et si » ;
+4. un constat quand le LTV passe sous le CAC ;
+5. un signal quand le payback est long. La fiche `cac-payback` du glossaire le dit déjà, mais le moteur n'a aucune notion de trésorerie.
+
+Le prompt E code ce qui ne dépend pas du design. Il laisse à Antoine ce qui déclenche l'alerte de payback (une trésorerie de l'équipe en mois, une cible, ou les repères du glossaire, qui situent sans désigner, C1), et à Claude Design la place de chaque chiffre.
+
+**Les MP4 ne sont pas versionnés.** Les douze en français pèsent environ 55 Mo, plus que tout le dépôt (44 Mo). Ils resteraient dans l'historique, et chaque checkout les téléchargerait. Ils ont été remis à Antoine dans la session, et `node marketing/motion/films.mjs mp4` les reconstruit en une vingtaine de minutes.
+
+**Vérifié** :
+- **Chaque film**, dans les trois formats et les deux langues, sur des planches de contact (aucun débordement, rien dans les 20 % du bas en 9:16) ;
+- **le son**, par la mesure et par l'image de la forme d'onde : −15,2 LUFS intégrés sur le MP4 du diagnostic, pour une cible de −14 (`loudnorm` en une passe reste un peu sous la cible) ;
+- **la page** : lecture et pause, le son, le changement de format, et 390 px sans défilement horizontal ;
+- **`films.mjs` depuis le dépôt** : `page`, `frames`, et `mp4` sur le diagnostic en 16:9 (870 images, 52 s, H.264 1920×1080 et AAC), lancé deux fois pour comparer les deux sorties ;
+- **les vérifications locales** de cette PR : voir plus bas.
+
+Rien sous `src/` ne change, donc ni build ni Playwright. `scripts/vercel-ignore.sh` ignore `marketing/` et le Markdown de la racine : ce merge ne déploie rien.
