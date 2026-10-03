@@ -738,7 +738,7 @@ Le zip est rangé par langue puis par format, avec un LISEZ-MOI. La section n'ap
 
 **Vérifié** : en FR et en EN, à 1 280 et 390 px, sur le SaaS du film (la perte) et sur l'exemple (la marge qui manque), captures regardées et e2e (`e2e/engine-money.spec.ts`) : l'étiquette a le fond de `--ink-0`, pas d'alerte avec la perte, le bloc au-dessus du peloton, aucun défilement horizontal ; l'assisté a son bloc, l'hybride celui du moteur affiché, sans MRR ni ARR propres. **Non-vacuité**, quatre sabotages, chacun rougit son test : l'étiquette de la perte passée en `alert`, la case inconnue qui affiche 0, la dépense du mois imprimée en estimation, les mois de la perte dits avec la phrase du « peut-être ».
 
-## A20.d T3.a : la carte « Et si » remontée sous l'argent, avec la courbe du MRR (2026-10-03)
+## A20.d T3.a : la carte « Et si » remontée sous l'argent, avec la courbe du MRR (2026-10-03, #312)
 
 **T3 est coupé en deux PR** : la carte d'abord (celle-ci), le panneau en tableaux, `LeverSum` et les totaux de `TotalBand` ensuite (T3.b).
 
