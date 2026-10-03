@@ -1,4 +1,5 @@
 import type { EngineStrings } from "@/lib/engine/strings";
+import { titleAccent } from "@/lib/engine/title-accent";
 import type { SlideTitle } from "@/lib/engine/types";
 import { accentRuns, fill } from "./text";
 import styles from "./Board.module.css";
@@ -9,7 +10,8 @@ import styles from "./Board.module.css";
  * (`deck.ts` picks the key, §9.3) — so the screen and the slide cannot word
  * one diagnosis two ways. Its `**…**` segment is the red accent, large text
  * only (40px stencil: `--accent-mark` at 3.57:1 on the page ground, AA for
- * large text).
+ * large text) — for the verdict (what we can't see) and the diagnosis only;
+ * a figure is ink, like the slide's (C53, `title-accent.ts`).
  *
  * The board's heading and its focus target: entering the board (after the
  * setup, an import, closing the slides) puts focus here, never on the first
@@ -36,10 +38,11 @@ export function Verdict({
   id?: string;
 }) {
   const text = fill(strings.slideTitles[title.key], title.values);
+  const red = titleAccent(title.key) === "red";
   return (
     <h2 id={id} className={styles.verdict} tabIndex={-1} data-testid={id}>
       {accentRuns(text).map((run, i) =>
-        run.accent ? (
+        run.accent && red ? (
           <span key={i} className={styles.verdictAccent}>
             {run.text}
           </span>

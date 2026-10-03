@@ -84,6 +84,14 @@ for (const locale of ["fr", "en"] as const) {
       await expect(page.getByTestId("slide-scenario-together")).toBeVisible();
     });
 
+    test("C53: the what-ifs' titles say their gain in ink; the red stays the verdict's (what we can't see)", async ({ page }) => {
+      await openDeckWith(page, locale, { "ret.logo-churn": 1.5, "act.rate": 24 });
+      const accents = (id: string) => page.getByTestId(`slide-${id}`).locator('h3 [class*="accent"]');
+      for (const id of ["whatif:act.rate", "whatif:ret.logo-churn", "scenario", "visibility"]) await expect(accents(id), id).toHaveCount(0);
+      // The example measures no day 30: its first slide says what we can't see, in red.
+      await expect(accents("peloton")).toHaveCount(1);
+    });
+
     test("a what-if slide can be left out, and gives up its number", async ({ page }) => {
       await openDeckWith(page, locale, { "act.rate": 24 });
       expect(await thumbOrder(page)).not.toContain("scenario");

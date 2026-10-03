@@ -4,6 +4,7 @@ import { fillTemplate } from "@/lib/engine/format";
 import { fillSegments } from "@/lib/engine/phrases";
 import type { EngineStrings, ResolvedBridge, ResolvedDerived, ResolvedMetric } from "@/lib/engine/strings";
 import type { DeckModel, DeckSlide, EngineCalcContext, EngineDerived, EngineState } from "@/lib/engine/types";
+import { titleAccent } from "@/lib/engine/title-accent";
 import type { Locale } from "@/lib/i18n/locale";
 import { SlideText } from "./slide-text";
 import styles from "./deck.module.css";
@@ -116,7 +117,8 @@ export function SlideFrame({
       </header>
 
       <h3 id={titleId} className={[styles.slideTitle, titleClass(title)].filter(Boolean).join(" ")}>
-        <SlideText text={title} />
+        {/* Red only for the verdict and the diagnosis; every other figure in ink (C53). */}
+        <SlideText text={title} accent={titleAccent(slide.title.key) === "red"} />
       </h3>
 
       <div className={styles.slideBody}>{children}</div>
