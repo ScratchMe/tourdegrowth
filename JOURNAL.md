@@ -1366,7 +1366,7 @@ Rien sous `src/` ne change, donc ni build ni Playwright. `scripts/vercel-ignore.
 
 En réexportant les vingt-quatre films (FR et EN, un format par terminal comme le conseille l'en-tête du script), l'export 9:16 anglais a échoué au démarrage : `window.__tdg` était indéfini. Chaque processus réécrit `out/films.html` en ouvrant sa page, et celui-ci l'a chargée pendant qu'un autre était en train de l'écrire : une page tronquée, sans son script. `standalonePage()` écrit maintenant dans un fichier temporaire propre au processus, puis le renomme : un lecteur voit l'ancienne page entière ou la nouvelle, jamais une moitié. L'export relancé avec le correctif est passé, cinq autres tournant en même temps.
 
-## Les films passent du 1:1 au 4:5 (2026-10-03, PR à venir)
+## Les films passent du 1:1 au 4:5 (2026-10-03, #305)
 
 **La demande** : on a dit à Antoine que le 4:5 valait mieux que le 1:1. La session l'a confirmé : en 1080×1350, la vidéo prend un quart de hauteur de plus dans un fil sur téléphone, et c'est le format que Meta recommande pour le fil. Elle a recommandé de **remplacer** le 1:1 plutôt que de l'ajouter, pour garder trois formats qui ont chacun leur usage. Antoine a dit oui.
 
