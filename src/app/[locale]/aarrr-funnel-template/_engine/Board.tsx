@@ -8,7 +8,8 @@ import { Disclosure } from "@/components/core/Disclosure";
 import { Field } from "@/components/core/Field";
 import { Segmented } from "@/components/core/Segmented";
 import { candidatesOf } from "@/lib/engine/catalog-shape";
-import { totalIn12 } from "@/lib/engine/deck-motions";
+import { pelotonTitle } from "@/lib/engine/deck";
+import { relaysTitle, totalIn12 } from "@/lib/engine/deck-motions";
 import { findingText } from "@/lib/engine/sentences";
 import type { CandidateId, Interval, MetricId, Motion, MotionDerived, SlideTitle } from "@/lib/engine/types";
 import { knownIn } from "@/lib/engine/values";
@@ -26,7 +27,6 @@ import { BoardNumbers } from "./BoardNumbers";
 import type { TablePreview } from "./csv";
 import { TableEntry } from "./TableEntry";
 import { fill } from "./text";
-import { MotionColumns } from "./MotionColumns";
 import { PipelineBand } from "./PipelineBand";
 import { TotalBand } from "./TotalBand";
 import { Verdict } from "./Verdict";
@@ -56,11 +56,12 @@ type SlgDerived = Extract<MotionDerived, { motion: "slg" }>;
  * - **self-serve alone**: the v1 board, unchanged to the character;
  * - **sales-assisted alone**: the same board, the relays in place of the
  *   peloton, its own diagnosis, list and « et si »;
- * - **the hybrid**, « deux moteurs, un total »: the total band (the verdict
- *   is its title), then the two motions side by side — coverage, diagnosis,
- *   compact funnel — in the fixed order, never by value; a selector picks
- *   whose stages and « et si » show below; the MRR in twelve months of both
- *   stays under the panel whichever is picked.
+ * - **the hybrid**, « deux moteurs, un total »: the total band once, at the
+ *   top (`TotalBand`: its title is the board's heading), the next step, then
+ *   « Moteur affiché » — one engine's board at a time, never two columns
+ *   (A18 T5): its own verdict, diagnosis, drawing, list and lever, in the
+ *   fixed order, never by value; the MRR in twelve months of both sits in
+ *   the full « Et si » panel, whichever is shown.
  *
  * Every visual is fed from the SAME derived object the verdict and the
  * slides read (`view.derived`): a diagnosis cannot name a stage its funnel
@@ -93,7 +94,7 @@ export function Board({
   plan: CollectPlan;
   returningFrom: string | null;
   writeFailed: boolean;
-  /** The hybrid's selector (§18.7): whose stages and « et si » show. null: the default — self-serve. */
+  /** The hybrid's « Moteur affiché » (§18.7, A18 T5): whose board shows. null: the default — self-serve. */
   motionView: Motion | null;
   onMotion: (motion: Motion) => void;
   onDeck: () => void;
@@ -176,11 +177,52 @@ export function Board({
       <Disclosure summary={strings.lever.panel} open={whatIfOpen} onOpenChange={setWhatIfOpen} id="engine-whatif-full" data-testid="engine-board-whatif">
         <div className={styles.whatIf}>
           {motion === "plg" ? <WhatIfPanel view={view} onChange={actions.setWhatIf} /> : <SlgWhatIfPanel view={view} onChange={actions.setWhatIf} />}
+          {/* The hybrid's MRR in twelve months, with the what-ifs of both engines: in the full panel (A18 T5). */}
+          {hybrid ? <TotalIn12 view={view} /> : null}
         </div>
       </Disclosure>
     </>
   );
   const numbers = <BoardNumbers view={view} motion={motion} readOnly={readOnly} onOpen={actions.openMetric} />;
+
+  // One engine's diagnosis and drawing: the board of a single motion, and the hybrid's engine shown (A18 T5).
+  const slgBody = slgD ? (
+    <>
+      <Diagnosis diagnosis={slgD.diagnosis} strings={strings} locale={ctx.locale} metrics={view.metrics} values={candidateValues} previous={previousLeakLine(view, "slg")} />
+      <Card elevation="raised" className={styles.pelotonCard} data-testid="engine-board-relays">
+        {relaysOf(false)}
+        {/* Keyed by the month: a past month read on its own shows its own open pipeline (§19.2.4). */}
+        <PipelineBand key={snapshot.id} view={view} actions={actions} readOnly={readOnly} />
+      </Card>
+      {/* In the hybrid, the caveat sits right under « Moteur affiché » instead (the return). */}
+      {!hybrid && smallSampleText ? (
+        <Callout tone="caveat" data-testid="engine-small-sample">
+          <p>{smallSampleText}</p>
+        </Callout>
+      ) : null}
+    </>
+  ) : null;
+  const plgBody = (
+    <>
+      <Diagnosis
+        diagnosis={plgD?.diagnosis ?? derived.diagnosis}
+        strings={strings}
+        locale={ctx.locale}
+        metrics={view.metrics}
+        values={candidateValues}
+        previous={previousLeakLine(view, "plg")}
+      />
+      {/* The screen's one raised card (Card's own rule): the peloton is what the board is about. */}
+      <Card elevation="raised" className={styles.pelotonCard} data-testid="engine-board-peloton">
+        {pelotonOf(false)}
+      </Card>
+      {(plgD?.peloton ?? derived.peloton).smallCohort ? (
+        <Callout tone="caveat" data-testid="engine-small-cohort">
+          <p>{strings.board.smallCohort}</p>
+        </Callout>
+      ) : null}
+    </>
+  );
 
   return (
     <div className={styles.board} data-testid="engine-board" data-motions={hybrid ? "hybrid" : motion}>
@@ -227,13 +269,8 @@ export function Board({
 
       {hybrid && plgD && slgD ? (
         <>
-          <MotionColumns view={view} actions={actions} readOnly={readOnly} />
-          {smallSampleText ? (
-            <Callout tone="caveat" data-testid="engine-small-sample">
-              <p>{smallSampleText}</p>
-            </Callout>
-          ) : null}
-
+          {/* « Moteur affiché » (A18 T5, the return's TotalBand): one engine's board at a time, never two columns —
+              self-serve first, the order fixed whatever the values. */}
           <div className={styles.motionSelector} data-testid="engine-motion-selector">
             <Field group label={strings.hybrid.selectorLabel}>
               {({ labelId }) => (
@@ -249,40 +286,34 @@ export function Board({
               )}
             </Field>
           </div>
-          {numbers}
-          {past ? null : whatIf}
-          <TotalIn12 view={view} />
-        </>
-      ) : motion === "slg" && slgD ? (
-        <>
-          <Diagnosis diagnosis={slgD.diagnosis} strings={strings} locale={ctx.locale} metrics={view.metrics} values={candidateValues} previous={previousLeakLine(view, "slg")} />
-          <Card elevation="raised" className={styles.pelotonCard} data-testid="engine-board-relays">
-            {relaysOf(false)}
-            {/* Keyed by the month: a past month read on its own shows its own open pipeline (§19.2.4). */}
-            <PipelineBand key={snapshot.id} view={view} actions={actions} readOnly={readOnly} />
-          </Card>
-          {smallSampleText ? (
+          {/* The small-sample caveat, under « Moteur affiché » when sales-assisted is shown (the return). */}
+          {motion === "slg" && smallSampleText ? (
             <Callout tone="caveat" data-testid="engine-small-sample">
               <p>{smallSampleText}</p>
             </Callout>
           ) : null}
+          <p className={styles.twoSegments} data-testid="engine-two-segments">
+            {strings.hybrid.twoSegments}
+          </p>
+          {/* The engine's own verdict: its deck's own slide title (`pelotonTitle`, `relaysTitle`), the stencil's size. */}
+          <Verdict
+            title={motion === "plg" ? pelotonTitle(state, plgD.peloton, strings, view.metrics, ctx) : relaysTitle(state, slgD.relays, strings, view.metrics, ctx)}
+            strings={strings}
+            id="engine-motion-verdict"
+          />
+          {motion === "slg" ? slgBody : plgBody}
+          {numbers}
+          {past ? null : whatIf}
+        </>
+      ) : motion === "slg" && slgD ? (
+        <>
+          {slgBody}
           {numbers}
           {past ? null : whatIf}
         </>
       ) : (
         <>
-          <Diagnosis diagnosis={derived.diagnosis} strings={strings} locale={ctx.locale} metrics={view.metrics} values={candidateValues} previous={previousLeakLine(view, "plg")} />
-          {/* The screen's one raised card (Card's own rule): the peloton is what the board is about. */}
-          <Card elevation="raised" className={styles.pelotonCard} data-testid="engine-board-peloton">
-            {pelotonOf(false)}
-          </Card>
-
-          {derived.peloton.smallCohort ? (
-            <Callout tone="caveat" data-testid="engine-small-cohort">
-              <p>{strings.board.smallCohort}</p>
-            </Callout>
-          ) : null}
-
+          {plgBody}
           {numbers}
 
           {/* Folded on the board: the funnel it redraws is the one just above, and a
@@ -343,7 +374,7 @@ export function Board({
 }
 
 /**
- * The hybrid's one line under the « et si » panel, whichever motion it shows
+ * The hybrid's one line in the full « et si » panel, whichever engine it shows
  * (§18.5.5): the total MRR in twelve months, today and with the what-ifs of
  * both panels. A sum, not a comparison. Nothing when either motion can't
  * project its MRR — a partial total is no total (S9).

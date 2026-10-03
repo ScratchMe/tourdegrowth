@@ -111,8 +111,10 @@ for (const locale of ["fr", "en"] as const) {
     for (const width of [390, 1280]) {
       await page.setViewportSize({ width, height: 900 });
       await seedHybrid(page, locale);
-      const card = await page.getByTestId("engine-column-slg").getByTestId("engine-board-relays").boundingBox();
-      const words = page.getByTestId("engine-column-slg").getByTestId("engine-relays").locator("p, h3, h4, span, dt, dd");
+      // One engine shown at a time (A18 T5): sales-assisted's, under « Engine shown ».
+      await page.getByTestId("engine-motion-selector").getByRole("button", { name: ENGINE_COPY.hybrid.motionName.slg[locale] }).click();
+      const card = await page.getByTestId("engine-board-relays").boundingBox();
+      const words = page.getByTestId("engine-relays").locator("p, h3, h4, span, dt, dd");
       const boxes = await words.evaluateAll((els) => els.map((e) => e.getBoundingClientRect()).filter((r) => r.width > 0).map((r) => [r.left, r.right]));
       expect(boxes.length).toBeGreaterThan(5);
       for (const [left, right] of boxes) {
@@ -123,19 +125,14 @@ for (const locale of ["fr", "en"] as const) {
   });
 }
 
-test("at 1280 the two columns are as tall as each other", async ({ page }) => {
-  await page.setViewportSize({ width: 1280, height: 900 });
-  await seedHybrid(page, "fr");
-  const plg = await page.getByTestId("engine-column-plg").boundingBox();
-  const slg = await page.getByTestId("engine-column-slg").boundingBox();
-  expect(Math.abs(plg!.height - slg!.height)).toBeLessThanOrEqual(2);
-});
+// « At 1280 the two columns are as tall as each other » left with the columns (A18 T5): the board shows one engine at a time.
 
 test("the hybrid board has no serious or critical accessibility violation, sales-assisted's red diagnosis showing", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await seedHybrid(page, "fr");
-  // The §18.9 diagnosis names the win rate: the red surface is on screen.
-  await expect(page.getByTestId("engine-column-slg").getByTestId("relays-stamp")).toBeVisible();
+  // The §18.9 diagnosis names the win rate: the red surface is on screen, sales-assisted shown (A18 T5).
+  await page.getByTestId("engine-motion-selector").getByRole("button", { name: ENGINE_COPY.hybrid.motionName.slg.fr }).click();
+  await expect(page.getByTestId("relays-stamp")).toBeVisible();
   const results = await new AxeBuilder({ page }).include('[data-testid="engine-board"]').analyze();
   const serious = results.violations.filter((v) => v.impact === "serious" || v.impact === "critical");
   expect(serious.flatMap((v) => v.nodes.map((n) => `${v.id} on ${n.target.join(" ")}`))).toEqual([]);

@@ -122,7 +122,8 @@ export async function openNumber(page: Page, metricDomId: string): Promise<Locat
  * counts after what remains (« 11 found · 2 estimated… »), on the board — the
  * way back first from a number's screen. 0: no « found » in the counts. The
  * single-engine board's coverage chips said it before (« 1 of 17 numbers
- * found »); the hybrid's columns keep theirs until T5.
+ * found »); the hybrid's columns kept theirs until A18 T5, where each engine
+ * is shown on its own and says its count here.
  */
 export async function expectFound(page: Page, n: number): Promise<void> {
   await backToBoard(page);

@@ -1,0 +1,83 @@
+/* TotalBand — design system extension 07 (design/ds-extension-07-return/components/engine/TotalBand). Tokens only. */
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  max-width: var(--engine-measure);
+  min-width: 0;
+}
+
+.title {
+  font: var(--title-card);
+  color: var(--text-body);
+  margin: 0;
+}
+
+/* Focused by script when a person comes to the board (R-19), never reachable by Tab. */
+.title:focus {
+  outline: none;
+}
+
+.sum {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-5) var(--space-7);
+  margin: 0;
+}
+
+.term {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.label {
+  font: var(--meta-xs);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.value {
+  margin: 0;
+  font: var(--engine-figure);
+  font-variant-numeric: var(--tabular);
+  color: var(--text-body);
+}
+
+/* The total, set off by a solid rule as in an account: never a « + » nor a « = » (constraint 8). */
+.total {
+  padding-left: var(--space-7);
+  border-left: var(--border-solid);
+}
+
+.total .value {
+  font: var(--engine-figure-lg);
+}
+
+.link {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  font: var(--body-sm);
+  color: var(--text-muted);
+}
+
+.link p {
+  margin: 0;
+}
+
+@media (max-width: 760px) {
+  .sum {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .total {
+    padding: var(--space-5) 0 0;
+    border-left: none;
+    border-top: var(--border-solid);
+  }
+}
