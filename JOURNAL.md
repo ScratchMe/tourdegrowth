@@ -855,7 +855,7 @@ Tout autre accent passe à l'encre, sans couleur, au poids du titre (déjà 700)
 
 **Le relecteur de copie a trouvé deux défauts réels**, que T5 rend visibles. Le suffixe anglais commençait par une espace ordinaire, que la case avale (« 24months »). Le pluriel était figé (« 1 months »), dans la case comme dans les huit alertes du tableau et de la slide, où `{n}` vaut le runway saisi. La case passe donc par `wordUnit` (« 1 month », « 24 months »), et les alertes reçoivent une durée déjà formatée (« 24 mois », « 1 month ») au lieu d'un nombre suivi de « mois » écrit en dur. Le texte du plancher reste identique (« 30 mois »).
 
-## A20.d T6 : l'exemple a sa marge (C50), la promesse nomme le board (C52) (2026-10-03)
+## A20.d T6 : l'exemple a sa marge (C50), la promesse nomme le board (C52) (2026-10-03, #319)
 
 **Ce qui se voit** (drapeau fermé) : l'exemple intégré (§6.0) a une marge brute **estimée, 70 à 80 %** (« ancien chiffre »). Son argent apparaît donc partout, en fourchettes : LTV ~3 000 à 3 500 €, payback 5 à 6 mois, LTV:CAC 6 à 6,9, ~30 à 31 mois de marge après le remboursement, trésorerie immobilisée ~55 000 à 63 000 € (un plancher). Ni perte ni alerte : l'exemple est sain, et sa slide d'unit economics reste à sa place. Dans l'hybride de l'exemple, la colonne du libre-service a son image, l'assisté dit ce qui lui manque (le titre `unitEconomicsOneSidePlg`). La promesse de la page (C52) dit maintenant « … vois où ton moteur perd du monde et ce que te rapporte chaque nouveau client, et repars avec des slides pour ton CODIR, ton board ou tes investisseurs ».
 
