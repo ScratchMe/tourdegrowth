@@ -1,4 +1,5 @@
 import type { Page } from "@playwright/test";
+import { ENGINE_COPY } from "@/content/engine-copy";
 import { exampleState, hybridState, measured, ratio, withMonthBefore } from "../src/lib/engine/__tests__/fixtures";
 import type { EngineState } from "../src/lib/engine/types";
 import { engineSeed, nextStep, openEngineMenu, storedEngineEntry, backToBoard, openNumber } from "./engine-helpers";
@@ -205,7 +206,7 @@ for (const width of [390, 1280]) {
 test("in a series, the settings never offer a flows month before the month before's", async ({ page }) => {
   await openBoard(page, "fr", twoMonths(), new Date(2026, 8, 24, 12));
   await page.getByTestId("engine-bar-settings").click();
-  const months = await page.getByLabel("Mois des flux").locator("option").allTextContents();
+  const months = await page.getByLabel(ENGINE_COPY.setup.referenceMonth.fr, { exact: true }).locator("option").allTextContents();
   expect(months).toContain("août 2026");
   expect(months).not.toContain("juillet 2026");
   expect(months).not.toContain("juin 2026");

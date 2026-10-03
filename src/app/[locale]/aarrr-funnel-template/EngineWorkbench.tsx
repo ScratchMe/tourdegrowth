@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactN
 import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
 import { EngineStart, type StartMotion } from "@/components/engine/EngineStart";
+import { EngineTermScope } from "./_engine/EngineTerm";
 import { motionOfMetric, motionShapes, shapeOf } from "@/lib/engine/catalog-shape";
 import type { EngineStrings, ResolvedBridge, ResolvedDerived, ResolvedMetric } from "@/lib/engine/strings";
 import { MAX_ENGINES, type EngineCalcContext, type EngineDerived, type EngineSetup, type EngineState, type LeverId, type MetricEntry, type MetricId, type Motion, type MotionDerived, type RoleId, type SlideTitle, type Snapshot, type YearMonth } from "@/lib/engine/types";
@@ -257,7 +258,8 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
   const hydrated = snap !== null;
   const shell = (children: ReactNode) => (
     <div data-testid="engine-workbench" data-state={hydrated ? "ready" : "ssr"} data-locale={locale}>
-      {children}
+      {/* One « ? » definition open at a time across the island's screens (A18 T6). */}
+      <EngineTermScope>{children}</EngineTermScope>
     </div>
   );
 

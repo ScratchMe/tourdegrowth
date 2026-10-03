@@ -210,3 +210,10 @@
   letter-spacing: var(--meta-tracking);
   margin-bottom: 0;
 }
+
+/* The board's title over the drawing (A18 T6): « Tes 100 inscrits ». */
+.title {
+  font: var(--title-card);
+  color: var(--text-body);
+  margin: 0;
+}

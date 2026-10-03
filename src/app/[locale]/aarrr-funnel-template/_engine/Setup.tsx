@@ -25,6 +25,7 @@ import { monthsEndingAt } from "@/lib/forms/date";
 import { isUnreadableNumber } from "@/lib/forms/number";
 import { moneyUnit, percentUnit } from "./sources";
 import { DEFAULT_CURRENCY, DEFAULT_WINDOWS } from "./start";
+import { EngineTerm } from "./EngineTerm";
 import styles from "./Screens.module.css";
 
 const CURRENCIES: readonly Currency[] = ["EUR", "USD", "GBP", "CHF"];
@@ -321,7 +322,17 @@ export function Setup({
               />
               {motions.plg ? (
                 <div className={styles.motionSettings}>
-                  <Field group label={s.activationWindow}>
+                  {/* « fenêtre »'s « ? » under the first window it names (A18 T6): in the hint, never in the group's label. */}
+                  <Field
+                    group
+                    label={s.activationWindow}
+                    hint={
+                      <>
+                        {st.windowHint}
+                        <EngineTerm id="window" strings={strings} />
+                      </>
+                    }
+                  >
                     {({ labelId }) => (
                       <Segmented
                         labelledBy={labelId}
@@ -432,6 +443,7 @@ export function Setup({
         <section className={styles.settingsGroup} aria-labelledby={`${id}-targets-title`} data-testid="engine-settings-targets">
           <h3 id={`${id}-targets-title`} className={styles.settingsGroupTitle}>
             {st.targets}
+            <EngineTerm id="target" strings={strings} />
           </h3>
           <p className={styles.periodsLine}>{st.targetsLead}</p>
           {numbers.targets.map((group) => (
@@ -462,6 +474,7 @@ export function Setup({
         <section className={styles.settingsGroup} aria-labelledby={`${id}-shared-title`} data-testid="engine-settings-shared">
           <h3 id={`${id}-shared-title`} className={styles.settingsGroupTitle}>
             {st.shared}
+            <EngineTerm id="sharedCount" strings={strings} />
           </h3>
           <p className={styles.periodsLine}>{st.sharedLead}</p>
           {numbers.shared.map((c) => (

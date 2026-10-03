@@ -143,7 +143,7 @@ test.describe("the hybrid board (§18.7 E2)", () => {
     await expect(page.getByTestId("engine-relays")).toHaveCount(0);
     await expect(page.getByTestId("engine-small-sample")).toHaveCount(0);
     const plgVerdict = await page.getByTestId("engine-motion-verdict").innerText();
-    await expect(page.getByTestId("engine-two-segments")).toHaveText(ENGINE_COPY.hybrid.twoSegments.en);
+    await expect(page.getByTestId("engine-two-segments")).toHaveText(ENGINE_COPY.hybrid.twoEngines.en);
 
     await selector.getByRole("button", { name: ENGINE_COPY.hybrid.motionName.slg.en }).click();
     await expect(page.getByTestId("engine-board-peloton")).toHaveCount(0);
