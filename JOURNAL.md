@@ -1361,3 +1361,7 @@ Les écrans touchés ont été refaits en image et regardés : le quiz dans les 
 - **`npm run lint`, `tsc` et `vitest --coverage`** : propres, 3 063 tests verts (liens de documentation et budget de `CLAUDE.md` compris) ;
 
 Rien sous `src/` ne change, donc ni build ni Playwright. `scripts/vercel-ignore.sh` ignore `marketing/` et le Markdown de la racine : ce merge ne déploie rien.
+
+## `films.mjs` : la page autonome écrite d'un coup (2026-10-03, #304)
+
+En réexportant les vingt-quatre films (FR et EN, un format par terminal comme le conseille l'en-tête du script), l'export 9:16 anglais a échoué au démarrage : `window.__tdg` était indéfini. Chaque processus réécrit `out/films.html` en ouvrant sa page, et celui-ci l'a chargée pendant qu'un autre était en train de l'écrire : une page tronquée, sans son script. `standalonePage()` écrit maintenant dans un fichier temporaire propre au processus, puis le renomme : un lecteur voit l'ancienne page entière ou la nouvelle, jamais une moitié. L'export relancé avec le correctif est passé, cinq autres tournant en même temps.

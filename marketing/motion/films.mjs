@@ -24,7 +24,7 @@
  */
 import { chromium } from "@playwright/test";
 import { spawn } from "node:child_process";
-import { mkdirSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, renameSync, unlinkSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -45,15 +45,21 @@ const FORMATS = {
 const FILMS = { tour: "1-le-tour", diag: "2-le-diagnostic", engine: "3-le-moteur", game: "4-le-cote-obscur" };
 const FPS = 30;
 
-/** The artifact's file is a body: the viewer wraps it in a document. Off the viewer, this does. */
+/**
+ * The artifact's file is a body: the viewer wraps it in a document. Off the viewer, this does.
+ * Written to a temporary file then renamed: with one export per shell, a page
+ * loaded while another process was rewriting it came out truncated.
+ */
 function standalonePage() {
   const body = readFileSync(join(ROOT, "tour-de-growth-motion.html"), "utf8");
   const page = join(OUT, "films.html");
+  const draft = `${page}.${process.pid}.tmp`;
   mkdirSync(OUT, { recursive: true });
   writeFileSync(
-    page,
+    draft,
     `<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>[hidden]{display:none!important}body{margin:0}</style></head><body>${body}</body></html>`,
   );
+  renameSync(draft, page);
   return page;
 }
 
