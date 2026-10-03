@@ -165,6 +165,15 @@ test.describe("the growth engine keeps everything in the browser (D16)", () => {
     await page.getByTestId("engine-import-open").click();
     await expect(page.getByTestId("engine-board")).toBeVisible();
 
+    // The analytics stub keeps its events in the page: read before the reload below.
+    const events = await trackedEvents(page);
+
+    // --- A returning reader's full load (A18 T4): the page's inline script takes its « known » branch before the
+    // first paint, and the island reads the device again — the session's requests include that load too.
+    await page.reload();
+    await expect(page.locator("html")).toHaveAttribute("data-engine", "known");
+    await expect(page.getByTestId("engine-board")).toBeVisible();
+
     // --- What the spec proves -------------------------------------------------
 
     // First that the canaries ARE in the engine. Without this, a spec that had
@@ -184,7 +193,6 @@ test.describe("the growth engine keeps everything in the browser (D16)", () => {
 
     // Analytics are paths from the closed vocabulary, and they did fire: the
     // stub is really injected (otherwise this would pass on an empty list).
-    const events = await trackedEvents(page);
     const vocabulary = engineEventPaths();
     expect(events.filter((e) => !vocabulary.includes(e))).toEqual([]);
     for (const expected of [
