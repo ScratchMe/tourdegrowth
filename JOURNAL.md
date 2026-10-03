@@ -786,7 +786,7 @@ Tout autre accent passe à l'encre, sans couleur, au poids du titre (déjà 700)
 
 **Vérifié** : trois tests unitaires (les seize, chacun a bien un accent dans les deux langues, les titres chiffrés à l'encre), deux sabotages qui rougissent chacun leur test (un titre « Et si » rendu rouge, un verdict retiré de la liste) ; en e2e, les titres des « Et si », de « tous ensemble » et de la visibilité n'ont plus d'accent rouge, et la première slide de l'exemple, qui dit ce qu'on ne voit pas, garde le sien. 119 specs du deck, du tableau et d'accessibilité passent en local.
 
-## A20.d T4.b : les slides « Et si » avec leur courbe, l'effet composé dessiné (2026-10-03)
+## A20.d T4.b : les slides « Et si » avec leur courbe, l'effet composé dessiné (2026-10-03, #315)
 
 **Ce qui se voit** (drapeau fermé), sur chaque slide d'un levier et sur « tous ensemble », en libre-service comme en assisté :
 - **la courbe du MRR** mois par mois, au rythme d'aujourd'hui contre cet « Et si » (ou « les 3 « Et si » »). Elle est dessinée par `MrrCurve` à l'échelle du deck (`medium="slide"`, 18 px et plus sur la toile de 1 920 px), sa légende sous le tracé pour lui laisser la largeur. Le modèle la porte (`DeckSlide.curve`, `slideCurve`) : un dessin, pas une ligne de texte ;
