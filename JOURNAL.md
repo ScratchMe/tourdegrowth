@@ -1383,4 +1383,5 @@ En réexportant les vingt-quatre films (FR et EN, un format par terminal comme l
 **Vérifié** :
 - les planches des quatre films en 4:5, en français et en anglais : rien ne déborde ni ne se chevauche, et « WHAT IF? » passe sur deux lignes en anglais, comme dans le carré ;
 - **le 16:9 et le 9:16 ne bougent pas** : quatre images du film d'ensemble et du jeu, dans les deux formats, sont identiques au pixel près avant et après ;
-- les huit MP4 en 4:5 : voir plus bas.
+- les huit MP4 en 4:5 (1080×1350, de 29 à 47 s, son AAC) : deux images de chacun regardées, puis remis à Antoine en deux zips ;
+- la page en 4:5, à 1 280 et 390 px : le bouton « 4:5 », un écran de 520 × 650 et de 350 × 438, sans défilement horizontal. L'artifact est republié à la même adresse.
