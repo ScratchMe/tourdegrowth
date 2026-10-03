@@ -109,6 +109,34 @@ describe("a figure and its unit", () => {
   });
 });
 
+describe("a field takes a tap on its whole box", () => {
+  it("the control reaches over the box's edge, which is the same 3px valid or not", () => {
+    // A18 T7 (2026-10-03, e2e/engine-screens.spec.ts): the box is drawn 48px
+    // (44 small), but its edge — border and padding — was the box's, and a tap
+    // there reached nothing: the field took 42px (38). The control reaches over
+    // it by --field-edge-invalid, and gives it back as padding. That holds only
+    // while the edge stays that wide in both states: border-width + 1px, and
+    // the invalid border with no padding.
+    const field = sheets.find(({ file }) => file.endsWith("/Field.module.css"))!.css;
+    const control = field.match(/(?:^|\})\s*\.control\s*\{([^}]*)\}/)![1]!;
+    expect(control).toMatch(/margin:\s*calc\(-1 \* var\(--field-edge-invalid\)\) 0;/);
+    expect(control).toMatch(/padding:\s*var\(--field-edge-invalid\) var\(--pad-field-inline\);/);
+    expect(control).toMatch(/background-clip:\s*content-box;/);
+    const box = field.match(/(?:^|\})\s*\.box\s*\{([^}]*)\}/)![1]!;
+    expect(box).toMatch(/padding:\s*1px;/);
+    expect(box).toMatch(/border:\s*var\(--border-width\) solid/);
+    expect(field).toMatch(/\.boxInvalid,\s*\.boxInvalid:hover\s*\{[^}]*border-width:\s*var\(--field-edge-invalid\);[^}]*padding:\s*0;/);
+    // The two widths, read from the shape tokens: 2px + 1px of padding = 3px.
+    const shape = strip(readFileSync(join(SRC, "styles/tokens/shape.css"), "utf8"));
+    const px = (name: string): number => {
+      const value = new RegExp(`--${name}:\\s*([^;]+);`).exec(shape)?.[1]?.trim() ?? "";
+      const ref = /^var\(--([\w-]+)\)$/.exec(value);
+      return ref ? px(ref[1]!) : Number(/^(\d+)px$/.exec(value)?.[1]);
+    };
+    expect(px("border-width") + 1).toBe(px("field-edge-invalid"));
+  });
+});
+
 describe("no opacity to draw a state on a form control", () => {
   it("draws disabled and « not yet » with tokens that pass, never by fading", () => {
     const offending: string[] = [];

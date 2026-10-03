@@ -201,16 +201,25 @@
   cursor: not-allowed;
 }
 
-/* The native element inside the box: no edge and no ring of its own. */
+/* The native element inside the box: no edge and no ring of its own.
+ *
+ * It reaches over the box's edge, top and bottom (A18 T7, 2026-10-03): the
+ * box is drawn 48px (44 small), but its 3px edge — 2px of border and 1px of
+ * padding, or the 3px invalid border alone, always 3 — was the box's, so a
+ * tap there reached nothing, and the field took 42px (38). The margin pulls
+ * the control over it; the padding gives the 3px back, so the text sits where
+ * it sat; the background stops at the content, so an autofill colour never
+ * covers the edge. Nothing is drawn differently. */
 .control {
   flex: 1 1 auto;
   min-width: 0;
   width: 100%;
-  margin: 0;
-  padding: 0 var(--pad-field-inline);
+  margin: calc(-1 * var(--field-edge-invalid)) 0;
+  padding: var(--field-edge-invalid) var(--pad-field-inline);
   font: var(--field-value);
   color: inherit;
   background: transparent;
+  background-clip: content-box;
   border: 0;
   border-radius: calc(var(--radius-field) - var(--border-width));
   outline: none;
