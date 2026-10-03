@@ -859,7 +859,7 @@ Huitième étape du portage du retour 07, drapeau fermé, et la troisième de T3
 - les **301 specs** du moteur, des cibles, de l'accessibilité et de la plateforme sur le build final : 300 passées, une ignorée par construction ; 913 specs au total (`--list`, hors captures temporaires) ;
 - **captures** de l'écran avant et après une copie, en français et en anglais, à 1 280, 390 et 320 px, sans défilement horizontal : la carte copiée ne dit sa confirmation qu'une fois, et quand le presse-papiers refuse, le texte de secours s'affiche sous la carte.
 
-## A18 T3.d : les cibles et les nombres partagés dans les Réglages (2026-10-03, #PR)
+## A18 T3.d : les cibles et les nombres partagés dans les Réglages (2026-10-03, #297)
 
 Neuvième étape du portage du retour 07, drapeau fermé, et la dernière de T3 : **les Réglages reçoivent ce que le parcours a quitté**, les cibles de l'écran « Cibles » (T3.a) et la base du pas à pas (« Ta base », partie avec T3.b). T3 est fini.
 
