@@ -1044,3 +1044,77 @@ Onzième étape du portage du retour 07, drapeau fermé : **le tableau hybride**
 - `next build` avec les variables de la CI ;
 - les **317 specs** du moteur, du kit des espaces, des cibles, de l'accessibilité et de la plateforme sur le build de T5 : 316 passées, une ignorée par construction ; après la relecture, les 77 de l'hybride, de la page, du téléphone, du pipeline et de l'accessibilité repassent ; 921 specs au total (`--list`, hors captures temporaires) ;
 - **captures** du tableau hybride, le libre-service puis l'assisté affichés, en français et en anglais, à 1 280 et 390 px, sans défilement horizontal.
+
+## A18 T6 : les mots, les renommages de C42 et les cinq « ? » (2026-10-03, #PR)
+
+Douzième étape du portage du retour 07, drapeau fermé : **les mots**. Le retour liste 49 chaînes changées (sa colonne « *was* »), et C42 retient tous les renommages, relus au bon à tirer.
+
+**D'abord, un relevé chaîne par chaîne contre le code.** La plupart étaient déjà portées par T1 à T5 avec les écrans qui les portent :
+- « Comment vends-tu ? », « Moteur, mois et fichier », « Dernière visite » ;
+- « Le piège, avant de taper », « Comment il se situe », « La cible de ton équipe » ;
+- « Tes chiffres », « À demander », « Moteur affiché », « Cibles », « Nombres partagés »…
+
+**Ce que T6 renomme, sur les écrans** :
+- « Mois des flux » → **« Mois des chiffres »** (`setup.referenceMonth`, le champ du mois). Le retour proposait « Chiffres de », qui, lu avec la liste, donnait « Chiffres de août 2026 » (jamais « de {month} ») ; « Mois des chiffres » est la phrase de la carte de départ ;
+- « Liaison avec le libre-service » → **« La liaison entre les deux »** (`hybrid.linkBlock`) ;
+- « Ce que tu as déclaré au Tour × ce que tu retrouves ici » → **« Le Tour et tes chiffres »** (`mirror.title`) ;
+- le peloton reçoit son titre, **« Pour 100 inscrits »** (`board.pelotonTitle`, la légende de sa figure, sur le tableau). Le retour disait « Tes 100 inscrits », mais la ligne sous le dessin dit que tes inscrits sont « ramenés à 100 », et ce 100 a déjà été lu comme un vrai chiffre ;
+- « Deux motions, deux segments : chacune… » → **« Deux moteurs, deux segments : chacun… »**, sous une clé neuve pour les écrans (`hybrid.twoEngines`, sous « Moteur affiché » et sous les colonnes de l'exemple) ;
+- « motion » → « moteur » dans l'aide de la marge globale (`sheet.companyWideHint`) ;
+- en anglais, « the relays » → « the steps of a deal » dans la bannière de l'exemple de l'assisté (`rename.relays` ; le français garde « les relais »).
+
+**Ce que T6 ne renomme pas, et pourquoi** :
+- **Les slides et leurs notes**, qui disent encore « motion » (le pied « chacune se lit contre ses cibles », la règle « un client compte dans la motion qui a signé », la marge « des deux motions ») : golden-v2 fige à la lettre ce qu'une build v2 imprimait, et la règle du golden n'autorise une projection que pour un champ ajouté. Renommer une slide est une décision du bon à tirer A18.d, qui refigerait le golden en connaissance de cause. Les deux pièges du catalogue qui disent la même règle (`engine-catalog.ts`, la marge et « qui compte où ») restent avec elles, pour que l'écran et la slide ne disent pas la règle de deux façons.
+- **Les choix déjà tranchés par une relecture**, gardés et listés pour A18.d :
+  - « Commence → » (la carte de départ, T3.a) contre « Commencer par ton premier chiffre → » ;
+  - « Passe au chiffre suivant : {number} → », à l'impératif comme les autres appels fléchés, contre « Chiffre suivant : {number} → » ;
+  - la phrase de la liaison avec ses chiffres et sa note (« n des m opportunités… ») contre « {n} opportunités sont venues du libre-service » ;
+  - « Pas assez de cibles pour conclure » contre « Aucune étape désignée : aucun des six chiffres… » ;
+  - les phrases de la fiche (`value.cohortHint`, `value.invalid`) et l'avertissement de fenêtre, que les écrans de T1 et des Réglages disent déjà à leur façon.
+- **« Effacer ce moteur »** : le menu garde « Supprimer ce moteur » (un moteur parmi plusieurs, A14 T5) et « Tout effacer » (l'appareil) ; le retour fond les deux, à trancher au bon à tirer.
+
+**Les cinq « ? »** (le retour, « Glossary entries: 5 new ») : « cohorte », « cible », « repère », « fenêtre », « nombre partagé ». Chacun est là où son mot sert pour la première fois :
+- sur les mois d'un chiffre de cohorte du libre-service ;
+- dans l'aide de la case de cible ;
+- dans la légende du repère de « Comment il se situe » ;
+- sous la fenêtre d'activation, dans une aide neuve (`settings.windowHint`) ;
+- sur les titres « Cibles » et « Nombres partagés » des Réglages.
+
+Une définition est ouverte à la fois (`EngineTermScope`, autour de chaque écran de l'îlot).
+
+**Un défaut trouvé par la spec, dans le design system** : la bulle (`DefinitionPopover`) rend le focus à son « ? » quand elle se ferme (R-19). Un appui sur un autre « ? » la ferme dès son `pointerdown`, et ce retour de focus faisait défiler la page jusqu'au premier « ? ». Le second partait de sous le pointeur avant la fin de l'appui : le clic ne tombait sur rien, aucune définition ne s'ouvrait.
+- Mesuré sur l'écran d'un chiffre, deux « ? » à 400 px l'un de l'autre : le `pointerdown` sur la cible, le `click` sur le corps de la fiche.
+- Correctif : le focus revient sans défiler (`preventScroll`), pour tous les « ? » du site.
+- La spec qui ouvre la cohorte puis la cible le tient : elle échouait avant.
+
+**La mécanique** :
+- **Pourquoi pas `GlossaryTerm`** : il lit le glossaire du site, que l'îlot n'importe jamais (`engine-boundary`, règle 2). Les cinq mots viennent donc avec la copie du moteur (`strings.terms`), résolue côté serveur comme tout le reste.
+- **`EngineTerm`** monte le déclencheur et la bulle du design system (`DefinitionTrigger`, `DefinitionPopover`), sans « En savoir plus » : ces mots n'ont pas de page.
+- **Jamais dans un `<label>`** : un bouton y deviendrait le contrôle qu'il nomme. Le « ? » se met dans une aide, une légende ou un titre.
+
+**La relecture (`relecteur-copie`)** a trouvé quatre points bloquants, appliqués :
+- « Chiffres de » (« de {month} ») ;
+- la définition de la cohorte, qui disait « la cohorte du mois précédent » alors que la cohorte suivie recule avec la fenêtre de paiement et se choisit ;
+- celle du repère, « pour des entreprises comparables », plus que ce que dit sa réserve ;
+- celle du nombre partagé, « le modifie dans tous », alors qu'un chiffre borné que le nouveau nombre rendrait impossible garde sa base (`withSharedCount`) ; `settings.sharedLead` (T3.d) avait le même défaut.
+
+Pour le bon à tirer A18.d :
+- le seul « ? » de « fenêtre » est sous le choix de la fenêtre, alors que sa définition renvoie aux Réglages ;
+- la ligne des périodes de l'assisté, juste sous le champ renommé, dit encore « les flux » ;
+- les deux pièges du catalogue et les slides qui disent « motion ».
+
+**La copie** : le groupe `terms` (les deux mots de la bulle reprennent ceux du glossaire, validés), `settings.windowHint`, `board.pelotonTitle`, `hybrid.twoEngines`, et les renommages, tous « à relire ». La garde des comparatifs de l'hybride (`engine-copy.test.ts`) admet la phrase des deux moteurs, comme elle admettait celle des deux motions.
+
+**Les specs** :
+- `engine-terms.spec.ts`, neuve, 6 tests :
+  - l'écran d'un chiffre de cohorte, les trois « ? », un à la fois, axe avec la bulle ouverte ;
+  - les Réglages ;
+  - les libellés renommés à l'écran ;
+  - chacun en français et en anglais.
+- `engine-series` cherche le champ du mois par son libellé dans la copie, `engine-hybrid` lit `twoEngines`.
+
+**Vérifié** :
+- `tsc` et `npm run lint` propres ;
+- **3 059 tests unitaires** verts ;
+- `next build` avec les variables de la CI ;
+- les **359 specs** du moteur, du kit des espaces, des cibles, de l'accessibilité, de la plateforme, du clavier, du glossaire et du quiz (les autres « ? » du site, que le correctif de la bulle touche) sur le build final : 358 passées, une ignorée par construction ; 927 specs au total (`--list`, hors captures temporaires).

@@ -1,0 +1,10 @@
+/* The engine's « ? » (A18 T6): an inline anchor, as `GlossaryTerm`'s. */
+.anchor {
+  display: inline;
+  margin-inline-start: var(--space-2);
+}
+
+/* What the open popover hangs under (DefinitionPopover, `auto`): one at a time, by EngineTermScope. */
+.anchorOpen {
+  anchor-name: --glossary-definition;
+}

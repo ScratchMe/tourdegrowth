@@ -377,7 +377,13 @@ describe("the hybrid never compares, and always reads self-serve first", () => {
     ...under("slideTitles").filter(([p]) => /^slideTitles\.(total|unitEconomics(Both|OneSide|None))/.test(p)),
   ];
   /** The fixed sentence says what the hybrid refuses: its negation is the one « contre » / "against" allowed. */
-  const ALLOWED = ["chacune se lit contre ses cibles, pas contre l'autre", "each is read against its own targets, not against the other"];
+  // The one sentence that says « against » to refuse a comparison: the slide's (`twoSegments`) and, since A18 T6, the
+  // screens' (`twoEngines`, « moteur »). The English is the same words for both.
+  const ALLOWED = [
+    "chacune se lit contre ses cibles, pas contre l'autre",
+    "chacun se lit contre ses cibles, pas contre l'autre",
+    "each is read against its own targets, not against the other",
+  ];
   const COMPARATIVE: Record<Locale, RegExp> = {
     fr: /\b(vs|versus)\b|contre|face à|plus rentable|mieux|meilleur|moins bien|fois plus/i,
     en: /\b(vs|versus|better|worse|than|against)\b/i,

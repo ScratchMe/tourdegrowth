@@ -73,7 +73,7 @@ export function MotionColumns({ view, actions, readOnly }: { view: EngineView; a
         </section>
       </div>
       <p className={styles.twoSegments} data-testid="engine-two-segments">
-        {strings.hybrid.twoSegments}
+        {strings.hybrid.twoEngines}
       </p>
     </>
   );

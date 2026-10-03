@@ -157,6 +157,7 @@ export function Board({
       diagnosis={plgD?.diagnosis ?? derived.diagnosis}
       cohortSignups={knownSharedCount(snapshot, "cohortSignups")?.value ?? null}
       compact={compact}
+      title={strings.board.pelotonTitle}
     />
   );
   const relaysOf = (compact: boolean) =>
@@ -293,7 +294,7 @@ export function Board({
             </Callout>
           ) : null}
           <p className={styles.twoSegments} data-testid="engine-two-segments">
-            {strings.hybrid.twoSegments}
+            {strings.hybrid.twoEngines}
           </p>
           {/* The engine's own verdict: its deck's own slide title (`pelotonTitle`, `relaysTitle`), the stencil's size. */}
           <Verdict

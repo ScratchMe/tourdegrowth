@@ -85,12 +85,19 @@ export function DefinitionPopover({
    * a mobile copy that would steal the focus from the desktop one.
    *
    * Not on `docked`, which is only ever drawn in place, never opened.
+   *
+   * The way back never scrolls (`preventScroll`, A18 T6): a press on another
+   * « ? » closes this one on its pointerdown, and a focus that scrolled the
+   * page back to this opener moved the other « ? » away before the press
+   * ended — the click landed on nothing and no definition opened (measured on
+   * the engine's number screen, two « ? » 400px apart). The focus still
+   * returns; the page stays where the reader is.
    */
   useEffect(() => {
     if (docked) return;
     const opener = document.activeElement as HTMLElement | null;
     ref.current?.focus();
-    return () => opener?.focus?.();
+    return () => opener?.focus?.({ preventScroll: true });
   }, [docked]);
 
   useEffect(() => {
