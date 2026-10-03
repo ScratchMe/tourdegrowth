@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { deriveEngine } from "@/lib/engine/derive";
-import type { EngineState } from "@/lib/engine/types";
-import { estimated, exampleState, filmState, hybridState, measured, ratio, withEntry } from "@/lib/engine/__tests__/fixtures";
+import type { EngineState, LeverId } from "@/lib/engine/types";
+import { estimated, exampleState, filmState, hybridState, measured, ratio, salesAssistedState, withEntry } from "@/lib/engine/__tests__/fixtures";
 import { CTX_EN, CTX_FR, EN, FR } from "@/lib/engine/__tests__/props";
-import { moneyView } from "../money-view";
+import { leverMoneyView, moneyView } from "../money-view";
 
 /**
  * The money on the board (design system extension 09, A20.d T2), its four
@@ -106,5 +106,85 @@ describe("the money block — the warning (C49)", () => {
       `Rembourser un client prend 21${N}mois, plus que ton runway (9${N}mois)${N}: tu gagnes de l'argent, mais peut-être après la fin de ta trésorerie.`,
     );
     expect(viewEn(state).cash.warning?.text).toBe("Paying back a customer takes 21 months, longer than your runway (9 months): you make money, but maybe after your cash runs out.");
+  });
+});
+
+describe("« Et si ? »: the card's money (A20.d T3.a)", () => {
+  const card = (state: EngineState, targets: Partial<Record<LeverId, number>>, lever: LeverId, motion: "plg" | "slg" = "plg", hybrid = false) =>
+    leverMoneyView(
+      { state, derived: deriveEngine(state, CTX_FR, null, FR.bridges, FR.strings.units), ctx: CTX_FR, strings: FR.strings, metrics: FR.metrics },
+      motion,
+      targets,
+      lever,
+      hybrid,
+    );
+  const nb = (s: string) => s.replace(/\^/g, N);
+
+  it("untouched: today's pace alone, from the MRR to the MRR in twelve months; the ARR in twelve months; nothing on one customer", () => {
+    const m = card(filmState(), {}, "ret.logo-churn");
+    expect(m.curve!.today).toHaveLength(13);
+    expect(m.curve!.today[0]).toEqual([48_000, 48_000]);
+    expect(m.curve!.whatif).toBeNull();
+    expect(m.curve!.start).toBe(nb("48^000^€ aujourd'hui"));
+    expect(m.curve!.xLabels).toEqual(["août 2026", "février 2027", "août 2027"]);
+    expect(m.curve!.summary).toBe(nb("Le MRR mois par mois, de 48^000^€ aujourd'hui à ~80^000^€ dans 12^mois au rythme actuel."));
+    expect(m.arr12).toEqual({ label: nb("ARR dans 12^mois"), value: nb("~960^000^€"), today: null, unknown: false });
+    expect(m.worth).toBeNull();
+    expect(m.total).toBeNull();
+  });
+
+  it("churn 6 → 4 %, the film's: the what-ifs' line, « today » under the ARR, and the loss gone in the return's own words", () => {
+    const m = card(filmState(), { "ret.logo-churn": 4 }, "ret.logo-churn");
+    expect(m.curve!.whatif![12]![0]).toBeCloseTo(93_556, 0);
+    expect(m.curve!.summary).toContain(nb("~94^000^€ avec tes «^Et si^»"));
+    expect(m.arr12.value).toBe(nb("~1^100^000^€"));
+    expect(m.arr12.today).toBe(nb("aujourd'hui ~960^000^€"));
+    // The CAC didn't move: it prints as typed.
+    expect(m.worth).toBe(nb("Un nouveau client^: plus de perte. Il rapporte ~2^300^€ pour 1^900^€^: ~350^€ de plus."));
+  });
+
+  it("expansion moves neither the LTV nor the CAC: still the loss — « this lever » when the card's alone moved, « your what-ifs » otherwise", () => {
+    expect(card(filmState(), { "rev.expansion": 3 }, "rev.expansion").worth).toBe(
+      nb("Un nouveau client^: toujours une perte de ~400^€. Ce levier ne change ni ce que rapporte un client ni ce qu'il coûte."),
+    );
+    expect(card(filmState(), { "rev.expansion": 3 }, "ret.logo-churn").worth).toContain("Tes «");
+  });
+
+  it("activation 18 → 20 %: the CAC falls (the same spend), the loss shrinks and says by how much; at 24 % it is gone, the CAC an estimate", () => {
+    expect(card(filmState(), { "act.rate": 20 }, "act.rate").worth).toBe(nb("Un nouveau client^: toujours une perte, de ~210^€ au lieu de ~400^€."));
+    expect(card(filmState(), { "act.rate": 24 }, "act.rate").worth).toBe(nb("Un nouveau client^: plus de perte. Il rapporte ~1^500^€ pour ~1^400^€^: ~75^€ de plus."));
+  });
+
+  it("no loss today (churn at 4 %: ~2 300 € for 1 900 €): no line, whatever moves", () => {
+    const healthy = withEntry(filmState(), "ret.logo-churn", measured(ratio(16, 400)));
+    expect(card(healthy, { "act.rate": 24 }, "act.rate").worth).toBeNull();
+    expect(card(healthy, { "rev.expansion": 3 }, "rev.expansion").worth).toBeNull();
+  });
+
+  it("sales-assisted with annual contracts: a straight line, and why", () => {
+    const m = card(salesAssistedState(), {}, "slg.ret.renewal" as LeverId, "slg");
+    expect(m.curve!.today[0]).toEqual([180_000, 180_000]);
+    expect(m.worth).toBe(nb("Les contrats annuels arrivent à renouvellement régulièrement dans l'année^: la base avance en ligne droite."));
+  });
+
+  it("sales-assisted with no renewal known: the calculation counts annual contracts, and says it assumes them", () => {
+    const m = card(withEntry(salesAssistedState(), "slg.ret.renewal", undefined), {}, "slg.rev.win-rate" as LeverId, "slg");
+    expect(m.curve).not.toBeNull();
+    expect(m.worth).toBe(nb("Sans durée de contrat connue, le calcul compte des contrats annuels, renouvelés régulièrement dans l'année^: la base avance en ligne droite."));
+  });
+
+  it("the hybrid, once moved: both engines' MRR in twelve months — the sum, never per engine; nothing untouched", () => {
+    expect(card(hybridState(), {}, "act.rate", "plg", true).total).toBeNull();
+    const m = card(hybridState(), { "act.rate": 22 }, "act.rate", "plg", true);
+    expect(m.total!.startsWith(nb("Les deux moteurs dans 12^mois^: ~"))).toBe(true);
+    expect(m.total).toContain(nb(" de MRR avec tes «^Et si^» (aujourd'hui ~"));
+    expect(card(hybridState(), { "act.rate": 22 }, "act.rate", "plg", false).total).toBeNull();
+  });
+
+  it("no ARPA: no curve, and the ARR in twelve months says what is missing, never 0", () => {
+    const m = card(withEntry(filmState(), "rev.arpa", undefined), {}, "ret.logo-churn");
+    expect(m.curve).toBeNull();
+    expect(m.arr12.unknown).toBe(true);
+    expect(m.arr12.value).toMatch(/il manque/);
   });
 });

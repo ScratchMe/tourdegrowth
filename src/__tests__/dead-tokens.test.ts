@@ -53,11 +53,6 @@ Object.assign(WAITING, WAITING_FOR_A18);
  * 09's own CSS says which), and leaves this list with it.
  */
 const WAITING_FOR_A20: Record<string, string> = {
-  "--money-curve-line-today": "T3: MrrCurve, the card's curve at today's pace",
-  "--money-curve-line-whatif": "T3: MrrCurve, the curve with the what-ifs",
-  "--money-line-today": "T3: MrrCurve",
-  "--money-line-whatif": "T3: MrrCurve",
-  "--money-gain-fill": "T3: MrrCurve, the room between the two lines",
   "--money-sum-bar": "T3: LeverSum, the compounding as lengths",
 };
 Object.assign(WAITING, WAITING_FOR_A20);

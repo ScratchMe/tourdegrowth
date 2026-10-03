@@ -129,3 +129,29 @@
   flex-wrap: wrap;
   gap: var(--space-6) var(--space-10);
 }
+
+/* Extension 09: the curve, the one-customer line, the hybrid's total line. */
+.curve {
+  margin-top: var(--space-2);
+}
+
+.worth {
+  font: var(--body-md);
+  color: var(--text-body);
+  max-width: 62ch;
+  margin: 0;
+}
+
+.total {
+  font: var(--body-sm);
+  color: var(--text-muted);
+  padding-top: var(--space-4);
+  border-top: var(--border-width-hairline) dashed var(--border-divider);
+  margin: 0;
+}
+
+@media (max-width: 760px) {
+  .figureValue {
+    font: var(--money-figure-mobile);
+  }
+}

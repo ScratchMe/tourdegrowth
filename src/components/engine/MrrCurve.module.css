@@ -1,0 +1,137 @@
+/*
+ * MrrCurve — design system extension 09 (design/ds-extension-09-return/
+ * components/engine/MrrCurve), ported by A20.d T3.a. Tokens only.
+ *
+ * The return's slide variant (`MrrCurve_slide`, --money-slide-note) is not
+ * ported: the deck draws its slides at 1 920 × 1 080 with its own scale (T4).
+ */
+.root {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.level {
+  stroke: var(--viz-grid);
+  stroke-width: var(--border-width-hairline);
+}
+
+.gain {
+  fill: var(--money-gain-fill);
+  stroke: none;
+}
+
+.line {
+  fill: none;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.today .line {
+  stroke: var(--money-line-today);
+  stroke-width: var(--money-curve-line-today);
+}
+
+.whatif .line {
+  stroke: var(--money-line-whatif);
+  stroke-width: var(--money-curve-line-whatif);
+}
+
+/* A range: its two paths are thinner, the hatch between them. */
+.today .edge,
+.whatif .edge {
+  stroke-width: var(--border-width-fine);
+}
+
+.hatch {
+  fill: var(--money-range-ink);
+}
+
+.band {
+  stroke: none;
+}
+
+.today .dot {
+  fill: var(--money-line-today);
+}
+
+.whatif .dot {
+  fill: var(--money-line-whatif);
+}
+
+.start {
+  fill: var(--viz-ink);
+}
+
+.tick {
+  font: var(--chart-label);
+  fill: var(--text-muted);
+}
+
+.key {
+  font: var(--meta-sm);
+}
+
+.keyWhatif {
+  font-weight: 700;
+  fill: var(--text-body);
+}
+
+.keyToday {
+  fill: var(--text-muted);
+}
+
+/* On a phone: the keys under the plot, each with its line (the legend is aria-hidden: the figcaption says it). */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-8);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font: var(--meta-sm);
+  color: var(--text-muted);
+}
+
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.legendItem::before {
+  content: "";
+  display: inline-block;
+  width: var(--space-8);
+  border-top: var(--money-curve-line-today) solid var(--money-line-today);
+}
+
+.legendWhatif {
+  color: var(--text-body);
+  font-weight: 700;
+}
+
+.legendWhatif::before {
+  border-top: var(--money-curve-line-whatif) solid var(--money-line-whatif);
+}
+
+.startLabel {
+  fill: var(--text-body);
+}
+
+/* Labels keep a paper halo where they cross a line, so they keep their
+ * contrast (constraint 6). */
+.halo {
+  paint-order: stroke;
+  stroke: var(--surface-page);
+  stroke-width: var(--border-width-stamp);
+  stroke-linejoin: round;
+}

@@ -23,11 +23,18 @@ export interface LeverCardProps {
     valueText: string;
     onChange?: (value: number) => void;
   };
+  /** Extension 09: `MrrCurve` — today's pace, and with the what-ifs once anything moved. */
+  curve?: ReactNode;
   /**
-   * The two figures it moves most, from the engine's own calculation; `today` once anything moved.
+   * « MRR dans 12 mois » and « ARR dans 12 mois » (extension 09; was: the MRR and the month's new paying
+   * customers), from the engine's own calculation; `today` once anything moved.
    * `unknown`: the value is what is missing, in words (« il manque l'ARPA »), set as a note, not a numeral.
    */
-  figures: { label: ReactNode; value: ReactNode; today?: ReactNode; unknown?: boolean }[];
+  figures: { key: string; label: ReactNode; value: ReactNode; today?: ReactNode; unknown?: boolean }[];
+  /** Extension 09: one line on one new customer with the what-ifs, when the board shows a loss — or, sales-assisted, why its line is straight. */
+  worth?: ReactNode;
+  /** Extension 09, the hybrid only: both engines' MRR in twelve months — a sum, never a comparison. */
+  total?: ReactNode;
   /** « Les 8 leviers et ce que le calcul suppose → »: the full panel, unchanged. */
   allLabel: ReactNode;
   onAll?: () => void;
@@ -40,7 +47,10 @@ export interface LeverCardProps {
 }
 
 /**
- * « Et si ? » through one lever — design system extension 07 (brief 07 Q17).
+ * « Et si ? » through one lever — design system extension 07 (brief 07 Q17),
+ * changed by extension 09 (Q8–Q10): the card carries the money's best moment,
+ * move the lever and watch the ARR move — the MRR's curve, the MRR and the
+ * ARR in twelve months, the one-customer line, the hybrid's total line.
  * The way in to the what-if: one lever, the stage a team target names (C1),
  * or with no target the first typed lever in the funnel's order; and the two
  * figures it moves most. The full panel — every lever moving together, the
@@ -55,7 +65,10 @@ export function LeverCard({
   eyebrow,
   title,
   lever,
+  curve,
   figures,
+  worth,
+  total,
   allLabel,
   onAll,
   resetLabel,
@@ -96,16 +109,26 @@ export function LeverCard({
           {lever.valueText}
         </output>
       </div>
+      {curve ? <div className={styles.curve}>{curve}</div> : null}
       <dl className={styles.figures}>
-        {figures.map((figure, i) => (
-          // Two figures, always in the same order: the index is their identity.
-          <div key={i} className={styles.figure} data-testid={testId ? `${testId}-figure-${i}` : undefined}>
+        {figures.map((figure) => (
+          <div key={figure.key} className={styles.figure} data-testid={testId ? `${testId}-figure-${figure.key}` : undefined}>
             <dt className={styles.figureLabel}>{figure.label}</dt>
             <dd className={figure.unknown ? styles.figureUnknown : styles.figureValue}>{figure.value}</dd>
             {figure.today ? <dd className={styles.figureToday}>{figure.today}</dd> : null}
           </div>
         ))}
       </dl>
+      {worth ? (
+        <p className={styles.worth} data-testid={testId ? `${testId}-worth` : undefined}>
+          {worth}
+        </p>
+      ) : null}
+      {total ? (
+        <p className={styles.total} data-testid={testId ? `${testId}-total` : undefined}>
+          {total}
+        </p>
+      ) : null}
       <div className={styles.actions}>
         <Button variant="quiet" onClick={onAll} data-testid={testId ? `${testId}-all` : undefined}>
           {allLabel}
