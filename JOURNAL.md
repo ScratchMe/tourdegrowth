@@ -821,7 +821,7 @@ Le tout est « à relire ».
   - La spec du parcours, complétée après la relecture, repasse seule (13).
 - **Captures** du premier chiffre et du dernier, en français et en anglais, à 1 280 et 390 px, sans défilement horizontal : un bouton principal qui dit où il mène, « Passe pour l'instant » discret à côté.
 
-## Plus d'aperçus Vercel : seul `main` déploie (2026-10-03)
+## Plus d'aperçus Vercel : seul `main` déploie (2026-10-03, #296)
 
 **Le problème** : le quota de déploiements du compte (100 par 24 heures, `VERCEL.md` §1.12) se vidait sans aucun merge. Chaque push de branche crée un déploiement d'aperçu ; `ignoreCommand` en saute le build, mais il tourne **après** la création, donc l'entrée existe (annulée) et compte. Relevé le 2026-10-03 sur GitHub : la tête de #295, poussée le 2026-10-02 à 23 h 58 UTC, porte un statut `Vercel` en `failure`, « Deployment rate limited — retry in 24 hours ». Un relevé fait par Antoine dans une autre session comptait 48 déploiements annulés sur 24 heures ; la session ne peut pas le relire (`list_deployments` répond toujours 403, `VERCEL.md` §1.9).
 
