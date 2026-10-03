@@ -18,22 +18,25 @@ tronquée. Le retour contient 104 U+202F et 2 U+00A0 (la typographie française
 de `board/copy.js` et de `board/r07/copy07.js`, et la regex des séparateurs de
 `board/sys/NumberField.js`).
 
-**Deux fichiers changés après la copie, pour CodeQL.** Ce sont les deux
+**Trois fichiers changés après la copie, pour CodeQL.** Ce sont les trois
 mêmes lignes que dans le retour 07, revenues telles qu'avant leur correction
-(le retour 09 recopie ses fichiers de planche) ; elles auraient relevé les
-mêmes alertes sur la PR, et la règle du dépôt est de corriger une alerte, pas
-de l'écarter :
+(le retour 09 recopie ses fichiers de planche), et la règle du dépôt est de
+corriger une alerte, pas de l'écarter :
 
 - `board/r07/EngineLanding.js` : `engineKnownScript` échappe `<`, `>`, `/`,
   U+2028 et U+2029 dans la clé avant de l'écrire dans le `<script>` en ligne
   (*bad code sanitization*), avec l'assistant du retour 07 ;
 - `board/make-copy.mjs` : une cellule échappe les barres obliques inverses
-  avant les `|` (*incomplete string escaping*).
+  avant les `|` (*incomplete string escaping*) ;
+- `board/board.js` : l'identifiant d'écran est pris dans la liste des écrans
+  connus (`SCREENS.find(…)?.id`), plus la chaîne lue dans l'adresse
+  (*unvalidated dynamic method call*, relevée par CodeQL sur la PR #309) :
+  le retour vérifiait l'écran avec `SCREENS.some(…)`, mais rendait la chaîne
+  de l'adresse, ce que CodeQL ne sait pas lire comme une garde.
 
-`board/board.js` lit déjà l'écran dans la liste des écrans connus, comme le
-retour 07 corrigé. `COPY.md` régénéré par `make-copy.mjs` après ces
-changements est identique à l'octet. **Hors de ces deux fichiers, les 104
-autres restent identiques au retour.**
+`COPY.md` régénéré par `make-copy.mjs` après ces changements est identique à
+l'octet. **Hors de ces trois fichiers, les 103 autres restent identiques au
+retour.**
 
 **La planche se rejoue depuis le dépôt**, servie en http, avec les polices du
 dépôt à la place de `../../../fonts/fonts.css` (le chemin du projet Claude

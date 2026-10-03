@@ -592,7 +592,7 @@ plan à eux, aucune suppression ; ni le bundle ni `_ds_sync.json` touchés),
 relu par `get_file` et `list_files`. **Lancé par Antoine et revenu le même
 jour** : le retour est recopié dans
 [`design/ds-extension-09-return/`](design/ds-extension-09-return/README.md)
-(106 fichiers au caractère près, deux lignes corrigées pour CodeQL comme au
+(106 fichiers au caractère près, trois lignes corrigées pour CodeQL comme au
 retour 07, dit dans son `COPIE.md`), sa planche rejouée (210 états, ses mesures
 retrouvées au pixel), et ses décisions posées (C46 à C55). Neuf composants
 neufs, `LeverCard` et `TotalBand` changés, aucun composant synchronisé touché

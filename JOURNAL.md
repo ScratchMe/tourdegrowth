@@ -1501,7 +1501,7 @@ Le zip est rangé par langue puis par format, avec un LISEZ-MOI. La section n'ap
 
 **La demande** : recopier le retour dans `design/ds-extension-09-return/` comme pour le 07, le comparer au brief, poser en section C les décisions qu'il demande, avec une reco ; ne rien porter avant qu'Antoine ait tranché.
 
-**La copie** : 106 fichiers, lus par `DesignSync` puis écrits par un script depuis les réponses brutes de `get_file` gardées dans la transcription (une réponse trop longue pour l'écran, `system-snapshot.css`, est lue dans son fichier de résultat). Les 104 U+202F et 2 U+00A0 sont intacts. Deux fichiers de la planche ramenaient les deux lignes que CodeQL avait relevées au retour 07 (`r07/EngineLanding.js`, `make-copy.mjs`) : corrigées de la même façon, dit dans `COPIE.md`.
+**La copie** : 106 fichiers, lus par `DesignSync` puis écrits par un script depuis les réponses brutes de `get_file` gardées dans la transcription (une réponse trop longue pour l'écran, `system-snapshot.css`, est lue dans son fichier de résultat). Les 104 U+202F et 2 U+00A0 sont intacts. Trois fichiers de la planche ramenaient les trois lignes que CodeQL avait relevées au retour 07 (`r07/EngineLanding.js`, `make-copy.mjs`, et `board.js`, que CodeQL a relevé sur la PR : sa garde `SCREENS.some(…)` rendait la chaîne de l'adresse) : corrigées de la même façon, dit dans `COPIE.md`.
 
 **Ce qui a été vérifié** :
 - `COPY.md` régénéré par `make-copy.mjs` : identique à l'octet ;

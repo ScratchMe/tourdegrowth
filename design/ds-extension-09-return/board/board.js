@@ -37,7 +37,7 @@ const h = React.createElement;
 
 // ── URL ────────────────────────────────────────────────────────────────────
 const q = new URLSearchParams(location.search);
-const screenId = SCREENS.some((s) => s.id === q.get("screen")) ? q.get("screen") : "board-loss";
+const screenId = SCREENS.find((s) => s.id === q.get("screen"))?.id ?? "board-loss";
 const lang = q.get("lang") === "fr" ? "fr" : "en";
 // No `w` (the design system pane, a plain link): draw at the window's width.
 const width = q.has("w") ? (q.get("w") === "390" ? 390 : 1280) : window.innerWidth <= 760 ? 390 : 1280;
