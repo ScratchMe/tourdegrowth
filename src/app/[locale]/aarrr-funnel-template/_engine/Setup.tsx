@@ -11,6 +11,7 @@ import { SETUP_V2_DEFAULTS } from "@/lib/engine/types";
 import type { StoredResult } from "@/lib/quiz/storage";
 import { defaultReferenceMonth, defaultSpanEnd, matureCohortMonth, monthsBefore, nextMonth } from "@/lib/engine/cohort";
 import { formatMonthRange } from "@/lib/engine/format";
+import { RUNWAY_MAX_MONTHS } from "@/lib/engine/money";
 import { domId, fill, formatDate, formatMonth } from "./text";
 import { Checkbox } from "@/components/core/Checkbox";
 import { Disclosure } from "@/components/core/Disclosure";
@@ -139,6 +140,9 @@ export function Setup({
   // Sales-assisted pipeline coverage (§19.4, A14 T3.2): the quarter's target and the team's threshold, both optional.
   const [quarterTarget, setQuarterTarget] = useState<number | null>(initial?.setup.pipeline?.quarterTarget ?? null);
   const [threshold, setThreshold] = useState<number | null>(initial?.setup.pipeline?.threshold ?? null);
+  // The team's runway (A20.d T5, C49), optional, in the settings only: the long-payback warning holds the payback
+  // against it, and against the 30-month floor without it. Per company: both motions face the same runway.
+  const [runway, setRunway] = useState<number | null>(initial?.setup.runwayMonths ?? null);
   // The team's tools (§19.5.1, A14 T4), optional; a tool the setup doesn't offer that a file brought is kept, unread.
   const [tools, setTools] = useState<ToolId[]>(() => teamTools(initial?.setup.tools));
   const keptTools = (initial?.setup.tools ?? []).filter((t) => !SETUP_TOOLS.includes(t));
@@ -155,6 +159,8 @@ export function Setup({
   const cohortWindow = Math.max(30, paid);
   const cohortMonth = chosenCohort ?? matureCohortMonth(cohortWindow, today);
   const companyTooLong = company.length > TEXT_LIMITS.companyLabel;
+  // validate.ts's guard, said in the box: above 0, up to twenty years.
+  const runwayOut = runway !== null && (runway <= 0 || runway > RUNWAY_MAX_MONTHS);
   const noMotion = !motions.plg && !motions.slg;
   const ticked = MOTIONS.filter((m) => motions[m]);
 
@@ -174,12 +180,17 @@ export function Setup({
     // card would close on it unseen. A shared count must be a whole number above zero.
     const unread = [
       ...targetBoxes.map((b) => ({ el: `${id}-target-${b.id}`, integer: false })),
+      { el: `${id}-runway`, integer: false },
       ...(numbers?.shared ?? []).map((c) => ({ el: `${id}-shared-${c.count}`, integer: true })),
     ]
       .map(({ el, integer }) => ({ box: document.getElementById(el) as HTMLInputElement | null, integer }))
       .find(({ box, integer }) => box !== null && isUnreadableNumber(box.value, locale, integer));
     if (unread?.box) {
       unread.box.focus();
+      return;
+    }
+    if (runwayOut) {
+      document.getElementById(`${id}-runway`)?.focus();
       return;
     }
     const zero = (numbers?.shared ?? []).find((c) => {
@@ -218,6 +229,8 @@ export function Setup({
         // The tools ticked here, plus any a file brought that the setup doesn't offer: never dropped (§19.5).
         ...(tools.length + keptTools.length > 0 ? { tools: [...teamTools(tools), ...keptTools] } : {}),
         ...(Object.keys(pipeline).length > 0 ? { pipeline } : {}),
+        // Kept across a save: the setup is rebuilt here, and a runway left out would be erased.
+        ...(runway !== null ? { runwayMonths: runway } : {}),
       },
       referenceMonth,
       cohortMonth,
@@ -494,6 +507,36 @@ export function Setup({
               parseError={st.wholeCount}
             />
           ))}
+        </section>
+      ) : null}
+
+      {/* The runway (A20.d T5, C49): in the settings only, where the long-payback warning sends the reader. The word stays
+          « runway », its « ? » says « tes mois de trésorerie » (Antoine) — in the hint, never inside the <label>. */}
+      {editing ? (
+        <section className={styles.settingsGroup} aria-labelledby={`${id}-cash-title`} data-testid="engine-settings-cash">
+          <h3 id={`${id}-cash-title`} className={styles.settingsGroupTitle}>
+            {st.cash}
+          </h3>
+          <NumberField
+            size="sm"
+            id={`${id}-runway`}
+            data-testid="engine-settings-runway"
+            label={st.runway}
+            optional={strings.workbench.optional}
+            hint={
+              <>
+                {st.runwayHint} <EngineTerm id="runway" strings={strings} />
+              </>
+            }
+            value={runway}
+            onChange={setRunway}
+            locale={locale}
+            digits={3}
+            suffix={st.runwayMonths}
+            unitName={st.runwayUnit}
+            error={tried && runwayOut ? fill(st.runwayRange, { max: RUNWAY_MAX_MONTHS }) : undefined}
+            parseError={strings.workbench.notANumber}
+          />
         </section>
       ) : null}
 

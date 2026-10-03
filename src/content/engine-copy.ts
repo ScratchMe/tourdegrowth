@@ -1865,6 +1865,18 @@ export const ENGINE_COPY = {
         en: "How long a customer keeps paying once its acquisition cost is paid back: its lifetime minus the payback. Below zero, it leaves before paying back: that is the loss, said in months.",
       },
     },
+    /**
+     * TODO: à relire (convention 6) — neuf le 2026-10-03 (A20.d T5, C49) : le « ? » du runway dans les Réglages. La
+     * définition est celle du retour du brief 09 (`term.runway`), ouverte par « Tes mois de trésorerie » à la demande
+     * d'Antoine.
+     */
+    runway: {
+      term: { fr: "runway", en: "runway" },
+      definition: {
+        fr: "Tes mois de trésorerie : le nombre de mois que couvre ta trésorerie au rythme actuel des dépenses. Facultatif : le moteur le compare seulement au payback, pour te prévenir. Il reste sur cet appareil.",
+        en: "Your months of cash: how many months your cash lasts at today's spending. Optional: the engine only compares it with the payback, to warn you. It stays on this device.",
+      },
+    },
   },
   mirror: {
     // TODO: à relire (convention 6) — renommé le 2026-10-03 (A18 T6, C42 : le retour 07, `tour.title`) ;
@@ -2950,6 +2962,23 @@ export const ENGINE_COPY = {
     // TODO: à relire (convention 6) — neuf le 2026-10-03 (A18 T6, le retour 07 : `settings.windowHint`), sous la fenêtre d'activation.
     windowHint: { fr: "La fenêtre : le nombre de jours qu'a un inscrit pour que ça compte.", en: "The window: how many days a sign-up has for it to count." },
     wholeCount: { fr: "Un nombre entier plus grand que zéro.", en: "A whole number above zero." },
+    /**
+     * TODO: à relire (convention 6) — neuf le 2026-10-03 (A20.d T5, C49, le retour du brief 09 : `settings.cash`,
+     * `settings.runway`, `settings.runwayHint`, `settings.months`) : le runway, facultatif, dans les Réglages. Le mot
+     * reste « runway » avec son « ? » (Antoine : « ça correspond à tes mois de trésorerie », `terms.runway`).
+     * `runwayRange` et `runwayUnit` sont de la session, absents du retour : la garde de `validate.ts` (au-dessus de 0,
+     * jusqu'à 240) et le nom de l'unité pour un lecteur d'écran. `runwayHint` perd son « Facultatif. » du retour : la
+     * case le dit déjà.
+     */
+    cash: { fr: "Trésorerie", en: "Cash" },
+    runway: { fr: "Runway, en mois", en: "Runway, in months" },
+    runwayHint: {
+      fr: "Sert seulement à te prévenir quand rembourser un client prend plus longtemps.",
+      en: "Only used to warn you when paying back a customer takes longer.",
+    },
+    runwayMonths: { fr: " mois", en: " months" },
+    runwayUnit: { fr: "mois", en: "months" },
+    runwayRange: { fr: "Un nombre de mois au-dessus de 0, jusqu'à {max}.", en: "A number of months above 0, up to {max}." },
   },
 
   // TODO: à relire — nouveau (2026-09-25, retours d'Antoine) : l'exemple rempli.
