@@ -1,8 +1,8 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
 import { renameSync } from "node:fs";
 import sharp from "sharp";
-import { FILM_LEVERS, exampleState, filmState, hybridState, measured, ratio, withEntry, withMonthBefore } from "../src/lib/engine/__tests__/fixtures";
-import type { EngineState } from "../src/lib/engine/types";
+import { FILM_LEVERS, exampleState, filmState, hybridState, measured, noMarginState, ratio, withEntry, withMonthBefore } from "../src/lib/engine/__tests__/fixtures";
+import type { EngineState, PlgLeverId } from "../src/lib/engine/types";
 import { engineSeed, openNumber, skipToAsks } from "../e2e/engine-helpers";
 
 /**
@@ -38,8 +38,30 @@ import { engineSeed, openNumber, skipToAsks } from "../e2e/engine-helpers";
  * §20.10): the tests named « brief 09 », with their own MEASURE09 lines.
  *
  *   OUT=design/ds-extension-09 npx playwright test --config scripts/engine-density.config.ts --grep "brief 09"
+ *
+ * Since A20.d T7 (2026-10-03) the same tests take the port, in
+ * `design/ds-extension-09-after/`, numbered alike, with their MEASURE09
+ * lines in `JOURNAL.md` beside the before's. Two changes, so a screen still
+ * shows what it showed: « the example without a margin » is
+ * `noMarginState()` since the example has one (C50), and two screens are
+ * new — the example with its margin (13, 14) and the « together » slide with
+ * every lever moved (15).
+ *
+ *   OUT=design/ds-extension-09-after npx playwright test --config scripts/engine-density.config.ts --grep "brief 09"
  */
 const OUT = process.env.OUT ?? "design/ds-extension-07-after";
+/** Every self-serve lever moved, as `e2e/engine-deck-whatif.spec.ts` moves them: the densest « together » slide. */
+const EVERY_LEVER: Record<PlgLeverId, number> = {
+  "acq.signup-rate": 4,
+  "ref.referred-share": 10,
+  "act.rate": 24,
+  "ret.d30": 18,
+  "rev.paid-conversion": 10,
+  "ret.logo-churn": 1.5,
+  "rev.contraction": 0.5,
+  "rev.expansion": 5,
+  "rev.arpa": 150,
+};
 const DESKTOP = { width: 1280, height: 900 } as const;
 const MOBILE = { width: 390, height: 844 } as const;
 const CLOCK = new Date(2026, 8, 24, 12);
@@ -469,10 +491,30 @@ for (const { locale, size, viewport } of SCREENS) {
 
 test("brief 09: the example without a margin, its unit economics (fr-desktop)", async ({ page }) => {
   await page.setViewportSize(DESKTOP);
-  await seed(page, "fr", exampleState());
+  // The example as it was before C50 gave it a margin.
+  await seed(page, "fr", noMarginState());
   await openDeck(page);
   await shootEl(page.getByTestId("slide-unit-economics"), "10-slide-unit-economics-no-margin-fr-desktop");
 });
+
+for (const { locale, size, viewport } of SCREENS) {
+  const tag = `${locale}-${size}`;
+  test(`brief 09: the example with its estimated margin, C50 (${tag})`, async ({ page }) => {
+    await page.setViewportSize(viewport);
+    await seed(page, locale, exampleState());
+    await expect(page.getByTestId("engine-board")).toBeVisible();
+    await shootEl(page.getByTestId("engine-money-plg"), `13-example-money-${tag}`);
+    await openDeck(page);
+    await shootEl(page.getByTestId("slide-unit-economics"), `14-example-slide-unit-economics-${tag}`);
+  });
+
+  test(`brief 09: the « together » slide, every lever moved (${tag})`, async ({ page }) => {
+    await page.setViewportSize(viewport);
+    await seed(page, locale, { ...withEntry(exampleState(), "ret.d30", measured(ratio(120, 800))), whatIf: EVERY_LEVER });
+    await openDeck(page);
+    await shootEl(page.getByTestId("slide-scenario"), `15-slide-scenario-every-lever-${tag}`);
+  });
+}
 
 test("brief 09: the hybrid, both engines with a margin (fr-desktop)", async ({ page }) => {
   await page.setViewportSize(DESKTOP);
