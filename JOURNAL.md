@@ -1295,7 +1295,7 @@ Sur chacun, à 1 280 et 390 px : aucune violation axe sérieuse ou critique (le 
 - `next build` avec les variables de la CI ;
 - les **272 specs** du moteur et de la confidentialité, toutes passées sur ce build.
 
-## Les quatre films de motion design, et l'écart qu'ils révèlent dans le moteur (2026-10-03, PR à venir)
+## Les quatre films de motion design, et l'écart qu'ils révèlent dans le moteur (2026-10-03, #303)
 
 **La demande d'Antoine**, en quatre temps dans la même session :
 1. un film qui donne envie de se servir de tout Tour de Growth (le diagnostic, le moteur, le jeu), puis un film par espace ;
@@ -1335,6 +1335,6 @@ Le prompt E code ce qui ne dépend pas du design. Il laisse à Antoine ce qui d�
 - **le son**, par la mesure et par l'image de la forme d'onde : −15,2 LUFS intégrés sur le MP4 du diagnostic, pour une cible de −14 (`loudnorm` en une passe reste un peu sous la cible) ;
 - **la page** : lecture et pause, le son, le changement de format, et 390 px sans défilement horizontal ;
 - **`films.mjs` depuis le dépôt** : `page`, `frames`, et `mp4` sur le diagnostic en 16:9 (870 images, 52 s, H.264 1920×1080 et AAC), lancé deux fois pour comparer les deux sorties ;
-- **les vérifications locales** de cette PR : voir plus bas.
+- **`npm run lint`, `tsc` et `vitest --coverage`** : propres, 3 063 tests verts (liens de documentation et budget de `CLAUDE.md` compris) ;
 
 Rien sous `src/` ne change, donc ni build ni Playwright. `scripts/vercel-ignore.sh` ignore `marketing/` et le Markdown de la racine : ce merge ne déploie rien.
