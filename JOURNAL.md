@@ -1477,3 +1477,22 @@ Le « % » du levier paraît rogné à droite sur la capture, déjà dans celles
 - les deux bandes son : continues, sans trou, à −20 et −19,5 LUFS avant normalisation, comme les autres films ;
 - les douze MP4 des deux films (trois formats, deux langues ; 52 s et 42,5 s, son AAC) : des images de chacun regardées, puis remis à Antoine en zips ;
 - la page republiée à la même adresse, identique au fichier du dépôt.
+
+## Les films : tout télécharger en un zip, depuis la page (2026-10-03, #308)
+
+**La demande** : « Tu ne peux pas me faire une fois un zip avec tout ensemble ? » Après les envois successifs (les douze premiers MP4, les zips par format, le 4:5, la refonte du jeu), Antoine ne savait plus où trouver la dernière version de chaque format.
+
+**Le blocage** : le zip complet pèse 115 Mo, et l'envoi de fichiers d'une session plafonne à 30 Mo. L'erreur le dit maintenant en clair ; plus tôt dans la journée, deux essais à 104 et 52 Mo étaient revenus en 502, sans motif.
+
+**La solution** : les vingt-quatre MP4 sont stockés avec la page des films (l'outil Artifact, `asset: true`, en un appel ; chacun pèse moins de 8 Mo). La page gagne une section « Télécharger les films » et un bouton « Tout télécharger · zip » :
+- la page récupère les vingt-quatre fichiers ;
+- elle écrit un zip « stocké » (sans compression : les vidéos ne se compressent pas), avec un petit assembleur maison de quelques dizaines de lignes, sans bibliothèque ;
+- elle le propose à l'enregistrement par la capacité `downloads`.
+
+Le zip est rangé par langue puis par format, avec un LISEZ-MOI. La section n'apparaît que sur claude.ai : sur la page autonome de `films.mjs` et pendant un export, elle reste masquée. Après un nouvel export, il faudra réenvoyer les MP4 et remplacer la liste `DL_FILES`.
+
+**Vérifié** :
+- l'assembleur, en local, sur trois vraies vidéos servies en HTTP : `unzip -t` sans erreur, les fichiers extraits identiques au MD5 près, un nom accentué intact ;
+- la section masquée hors de claude.ai ;
+- les vingt-quatre fichiers stockés : ils sont bien les derniers exports. Le diagnostic et le moteur n'ont pas changé depuis le leur, et le Tour et le jeu sont ceux de #307 ;
+- **pas vérifié d'ici** : le clic lui-même dans claude.ai (le téléchargement depuis le stockage de la page, et la confirmation d'enregistrement), qui ne se joue que dans le lecteur.
