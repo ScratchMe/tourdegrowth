@@ -878,7 +878,7 @@ Tout autre accent passe à l'encre, sans couleur, au poids du titre (déjà 700)
 
 **La copie** : une chaîne réécrite, `page.promise`, « à relire », pour le bon à tirer nº10 (C55, la carte de la promesse du nº9 y passe). « prêtes » / « ready » y sont retirés, comme dans le retour. Le relecteur de copie n'a trouvé aucun défaut. Deux points sont signalés pour le bon à tirer : la meta description et la bande de l'accueil disent encore « des slides pour ton CODIR » seul.
 
-## A20.d T7 : la densité avant contre après, mesurée par le même script (2026-10-03)
+## A20.d T7 : la densité avant contre après, mesurée par le même script (2026-10-03, #320)
 
 **La méthode** : `scripts/engine-density.capture.ts`, tests « brief 09 », sur le SaaS du film, sur un build local où le moteur est ouvert. L'**avant** est le code juste après T1 (`b95c7c2`, #310), construit et mesuré par le même script : ses chiffres retombent au pixel sur ceux du brief 09 (3 438 px, 26 contrôles, levier à 3 237 px à 1 280 en français). L'**après** est la branche de T7. Le **retour** est `design/ds-extension-09-return/board/measures.js`, sa propre planche avant et après : son « avant » est redessiné, plus court que le produit, donc seuls ses écarts se comparent.
 
@@ -901,7 +901,7 @@ En anglais à 1 280 : tableau 3 372 → 4 212 (+840, le retour +828). À 390 : t
 
 **Consigné** : `CLAUDE.md` (3 212 tests unitaires, 982 specs Playwright, A20.d fait) ; `CHANTIERS.md` (A20.d livré, A20.e à faire) ; le script de densité (son en-tête, les trois écrans neufs).
 
-## A20.e : le bon à tirer nº10, l'argent du moteur (C55, 2026-10-03)
+## A20.e : le bon à tirer nº10, l'argent du moteur (C55, 2026-10-03, #320)
 
 **Le document** : le [nº10](https://claude.ai/artifact/EcXYgaHaXXtAE3vqnkpbAd), 22 cartes, 136 chaînes, 1 755 mots en français. Il prend tout ce que le portage A20 a écrit ou réécrit, de T1 à T6, et rien d'autre : le nº9 reste ouvert pour le reste du moteur. Trois décisions en tête : la promesse et le reste du site (la description et la bande de l'accueil disent encore « CODIR » seul) ; la note de l'hybride, qui garde « clients perdus sur un an » (C25 Q5) contre la proposition du retour, citée sur la carte ; l'alerte de payback long, qui dit « tu gagnes de l'argent » même quand la perte est possible. Les relevés des relectures (les « reste 36 mois » au plafond, le pointillé à 12 mois de l'assisté, l'unité deux fois dans la case du runway) sont dans le paragraphe gris de leur carte.
 
