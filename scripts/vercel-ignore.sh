@@ -12,6 +12,10 @@
 # Two rules:
 #   1. Only production builds. Previews were never used on this project
 #      (the check is a local production build, then CI) — 2026-09-07.
+#      Since 2026-10-03, `vercel.json#git.deploymentEnabled` stops a branch
+#      push from creating a deployment at all (VERCEL.md §1.10). This line
+#      stays for what still gets through: a branch that has not merged that
+#      `vercel.json` yet, or a deployment made by hand.
 #   2. A production merge that only touches files the build never reads is
 #      skipped: root-level Markdown, LICENSE, .github/, docs/, marketing/,
 #      design/, .design-sync/, scripts/live/. The list was verified against the
