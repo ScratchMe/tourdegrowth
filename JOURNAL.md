@@ -910,3 +910,73 @@ Neuvième étape du portage du retour 07, drapeau fermé, et la dernière de T3 
 - `next build` avec les variables de la CI ;
 - les **304 specs** du moteur, des cibles, de l'accessibilité et de la plateforme sur le build final : 303 passées, une ignorée par construction ; 917 specs au total (`--list`, hors captures temporaires) ;
 - **captures** des réglages, en libre-service et en hybride, en français et en anglais, à 1 280, 390 et 320 px, sans défilement horizontal : les libellés de l'assisté disent leurs mois, les aides leurs chiffres en minuscule.
+
+## A18 T4 : la page courte au retour, avant le premier rendu (2026-10-03, #PR)
+
+Dixième étape du portage du retour 07, drapeau fermé : **la page** (brief 07 Q1, `EngineLanding`).
+
+**Avant** : une seule page prérendue, la même pour tous. Un lecteur qui revenait voyait l'introduction d'un premier passage (le chapeau, le positionnement, la carte de confidentialité, l'appel, « Combien de temps ça prend ») avant son moteur, qui ne s'affichait qu'à l'hydratation, à plus de 1 000 px sous le haut de la page.
+
+**Maintenant** :
+- **Un script inline avant le contenu** (`engineKnownScript`, `lib/engine/known-script.ts`) demande seulement si l'une des clés du moteur existe (l'index v3, ou une clé v2 ou v1 d'avant la migration). Si oui, il pose `data-engine="known"` sur `<html>`. Il ne lit aucune valeur, n'envoie rien, n'écrit rien. Si le stockage lève (fenêtre privée), il ne fait rien : la page du premier passage est alors la bonne.
+- **La version courte est du CSS seul** (`EngineLanding`, neuf dans `components/engine/`) :
+  - le surtitre ;
+  - le H1 à la taille d'une section (`--engine-landing-title`) ;
+  - la promesse en une ligne (`page.promiseLine`), jamais repliée ;
+  - puis l'outil.
+  
+  Le chapeau, le positionnement, la carte, l'appel et le chronomètre restent dans le HTML, cachés : un moteur de recherche, qui n'a pas de stockage, lit toujours la page entière.
+- **La place de l'outil est tenue** par une boîte en pointillés (« Ouverture de ton moteur… », `--engine-reserve`, 560 px, 640 au téléphone). Elle part dès que l'îlot dit qu'il est prêt (`.tool:has(> [data-state="ready"])`) : rien ne saute au-dessus du pli.
+- **L'outil commence à 356 px à 1 280 et 298 px à 390**, mesuré : le retour annonçait 287 et 288, contre 1 267 et 1 849 avant.
+- **L'îlot pose aussi l'attribut**, une fois, à sa première lecture. Une navigation côté client ne lance pas le script inline. Ensuite il n'y touche plus : un moteur créé, importé ou effacé dans la session ne replie ni ne déplie l'introduction au-dessus de la personne, et la visite suivante relit. Un moteur illisible compte comme connu : son tableau dit ce qui ne va pas, jamais le premier passage.
+- **« Entre tes chiffres → »** devient secondaire (une ancre) : le seul bouton principal de la page est celui de la carte de départ.
+- **« Combien de temps ça prend »** passe sous l'outil, pour tous : la carte de départ dit les mêmes comptes en une ligne.
+
+**Écarts au retour** :
+- **Le chronomètre** reste à côté de l'introduction à partir de 1 100 px, comme depuis la synthèse I + B (le retour le montrait dès 761 px). La carte de confidentialité garde son bord outremer plein et son ombre, que tient `spaces-kit.spec.ts`.
+- **La boîte de réserve vit dans la section de l'outil**, pas dans `EngineLanding` : elle s'en va par `:has()` dès que l'îlot y est prêt, sans état ni effet.
+
+**La règle 3 d'`engine-boundary`** (aucune primitive qui envoie quelque chose, dans le code du moteur) interdisait tout `<script>`. Elle reçoit une exception nommée, tenue par son propre test :
+- ce script-là, sans `src` ;
+- une seule fois, dans `page.tsx` ;
+- le nom lié au vrai import ;
+- et son texte épinglé à l'octet par `known-script.test.ts`.
+
+Mesuré : sans l'exception, la règle nomme la page. La règle couvre aussi `components/engine/`, que l'îlot atteint.
+
+**La relecture de sécurité (`relecteur-securite`)**, rien de bloquant. Appliqué :
+- le script ne prend plus d'argument ;
+- il échappe `<` comme `JsonLd` ;
+- sa sortie exacte est épinglée ;
+- l'import est épinglé dans l'exception ;
+- `components/engine/` est entré dans la règle 3 ;
+- le canari recharge la page une fois le moteur rempli, pour enregistrer aussi la branche « connu » ;
+- la spec de ce que lit un moteur de recherche passe par la requête du contexte, qui porte l'aperçu.
+
+La note sur un futur `script-src` (l'autoriser par le hash de ce script, jamais par un nonce qui rendrait la page dynamique) est dans `NEXTJS.md` §2.2, pas dans `next.config.mjs` : la barrière de `/livrer` exige ce fichier intact pour un merge sans Antoine.
+
+**La copie** : `page.promiseLine` et `page.reserve`, neuves et « à relire », reprises du retour. La date de la page passe au 2026-10-03.
+
+**La relecture (`relecteur-copie`)** :
+- elle a demandé de bouger la date, ce qui est fait ;
+- pour le bon à tirer A18.d, elle relève que la question de la FAQ sur l'assisté dit « Coche « Assisté » au réglage […] coche les deux », alors que la carte de départ est un choix unique depuis T3.a, avec « Les deux » pour troisième option.
+
+**Les specs** :
+- **`engine-landing.spec.ts`**, neuve, 5 tests :
+  - le premier passage ;
+  - le retour avant que l'îlot ne tourne, à 1 280 et 390 px, avec les scripts de la build bloqués : le script inline court seul ;
+  - le retour lu, la réserve remplacée par le tableau ;
+  - ce que lit un moteur de recherche.
+- **`engine-page`** : « Combien de temps ça prend » vient après l'outil.
+- **`engine-canary`** recharge la page avant de compter les requêtes.
+- **Les tests unitaires** : 4 du script, 4 du composant, 1 de l'exception.
+- **`dead-tokens`** : les quatre jetons de T4 sortent de la liste d'attente.
+
+**Pas vérifié en e2e** : la navigation côté client vers la page. Les liens qui y mènent sans recharger (la bande des espaces, le dernier résultat de l'accueil) n'existent qu'avec le moteur ouvert au build ; celui du résultat (`/r/<id>`) change de layout racine, donc recharge.
+
+**Vérifié** :
+- `tsc` et `npm run lint` propres ;
+- **3 054 tests unitaires** verts, dont les 9 neufs ;
+- `next build` avec les variables de la CI, et la page reste prérendue (●) dans les deux langues ;
+- les **318 specs** du moteur, du kit des espaces, des cibles, de l'accessibilité et de la plateforme sur le build final : 317 passées, une ignorée par construction ; 922 specs au total (`--list`, hors captures temporaires) ;
+- **captures** du haut de la page, premier passage et retour (avant l'îlot et lu), en français et en anglais, à 1 280 et 390 px : l'outil commence au même endroit avant et après la lecture.

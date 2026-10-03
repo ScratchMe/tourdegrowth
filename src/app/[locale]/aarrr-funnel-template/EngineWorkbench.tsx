@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
 import { EngineStart, type StartMotion } from "@/components/engine/EngineStart";
@@ -158,6 +158,19 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
       trackEngine({ name: "engine_opened" });
     }
   }, [snap]);
+
+  // The page's short version (A18 T4, `EngineLanding`): the inline script marks <html> before the first paint on
+  // a full load, but a client-side navigation to this page runs no script — so the island marks it too, from what
+  // the device held when it was first read. Only then: an engine started, imported or erased here leaves the page
+  // as it is, rather than folding or unfolding the introduction above the person; the next visit reads anew. An
+  // unreadable engine counts as known: its board says what went wrong, never the first visit again.
+  const known = snap ? snap.result.kind !== "empty" : null;
+  const knownOnArrival = useRef<boolean | null>(null);
+  useEffect(() => {
+    if (known === null || knownOnArrival.current !== null) return;
+    knownOnArrival.current = known;
+    if (known) document.documentElement.setAttribute("data-engine", "known");
+  }, [known]);
 
   const state = snap?.result.kind === "ok" ? snap.result.state : null;
   const openedAt = snap?.openedAt ?? null;

@@ -105,11 +105,11 @@ test("the privacy promise comes before the call to action", async ({ page }) => 
   expect(privacy && cta && privacy.y + privacy.height <= cta.y).toBe(true);
 });
 
-test("how long it takes comes before the tool; the cards are folded but in the HTML", async ({ page }) => {
+test("how long it takes comes after the tool (A18 T4: the start card says the counts); the cards are folded but in the HTML", async ({ page }) => {
   await page.goto("/fr/aarrr-funnel-template");
   const duration = await page.getByTestId("engine-duration").boundingBox();
   const tool = await page.locator("#engine").boundingBox();
-  expect(duration && tool && duration.y + duration.height <= tool.y).toBe(true);
+  expect(duration && tool && tool.y + tool.height <= duration.y).toBe(true);
   // The split is counted from the catalogue's effort tags: 5 + 7 + 5 since the MRR movements, 4 + 5 + 6 for sales-assisted.
   await expect(page.getByTestId("engine-duration")).toContainText("5 se lisent en cinq minutes, 7 demandent");
   await expect(page.getByTestId("engine-duration")).toContainText("Sur les quinze de l'assisté, 4 se lisent en cinq minutes, 5 demandent");

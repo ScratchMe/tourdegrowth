@@ -355,3 +355,15 @@ répond alors 404 avant tout rendu. Chez nous : `lib/og/image-metadata.ts`, et
   dictionnaire (`src/__tests__/client-bundles.test.ts`).
 - Aucune route ne déclare `runtime = "edge"`, et rien sous `src/` n'importe
   `next/image` (`src/__tests__/next-config.test.ts`).
+- **La page du moteur porte un `<script>` inline à elle** (A18 T4,
+  `engineKnownScript`) : il marque `<html data-engine="known">` avant le
+  premier rendu quand l'appareil tient un moteur, et la page prérendue se
+  dessine courte par le CSS seul. Son texte est constant, épinglé à
+  l'octet par `known-script.test.ts`, et c'est la seule exception de la
+  règle 3 d'`engine-boundary.test.ts`. **Le jour où un `script-src` arrive**
+  (`next.config.mjs` dit pourquoi il n'y en a pas), il devra l'autoriser
+  par son hash, calculé depuis `engineKnownScript()` : un nonce rendrait la
+  page dynamique. Sans ça, rien ne casse, mais un lecteur qui revient voit
+  la page longue jusqu'à ce que l'îlot ait lu l'appareil. Une navigation
+  côté client ne lance pas ce script : l'îlot pose l'attribut à sa
+  première lecture.

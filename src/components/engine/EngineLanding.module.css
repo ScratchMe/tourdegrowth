@@ -1,0 +1,164 @@
+/*
+ * EngineLanding — design system extension 07
+ * (design/ds-extension-07-return/components/engine/EngineLanding). Tokens only.
+ *
+ * The first visit keeps the page's look since design I + B (2026-09-28): the
+ * ultramarine eyebrow, the promise solid ultramarine on its own shadow, the
+ * stopwatch beside the intro from 1100px (under that it would squeeze the
+ * title into a narrow column, and the band's pictogram already says
+ * « contre-la-montre »). The return's own rules are under
+ * `[data-engine="known"]`, set on <html> before the first paint.
+ */
+.root {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-8);
+  min-width: 0;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  max-width: var(--width-reading);
+  min-width: 0;
+}
+
+/* Two classes where MetaLabel's own class sets the colour: the override never depends on stylesheet order (lesson nº2). */
+.main .eyebrow {
+  color: var(--engine-accent);
+  font-weight: 600;
+}
+
+.title {
+  font: var(--display-hero);
+  color: var(--text-body);
+  margin: 0;
+}
+
+.intro {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+/* The standfirst: grey and at the larger UI size, read once (ProsePage). */
+.lede {
+  font: var(--body-lg);
+  color: var(--text-muted);
+  max-width: var(--measure-read);
+  margin: 0;
+}
+
+.positioning {
+  font: var(--body-read);
+  color: var(--text-body);
+  max-width: var(--measure-read);
+  margin: 0;
+}
+
+/* The promise, first visit: the one raised card above the tool, solid ultramarine on its own shadow. */
+.promise {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-width: var(--measure-read);
+  padding: var(--pad-card);
+  border: var(--border-width) solid var(--engine-accent);
+  border-radius: var(--radius-card);
+  background: var(--surface-card);
+  box-shadow: 5px 5px 0 var(--engine-accent);
+}
+
+.promiseTitle {
+  font: var(--body-md);
+  font-weight: 600;
+  color: var(--engine-accent);
+  margin: 0;
+}
+
+.promiseBody {
+  font: var(--body-md);
+  color: var(--text-body);
+  margin: 0;
+}
+
+/* The promise, returning: one line, the same words, never folded. */
+.promiseLine {
+  display: none;
+  max-width: var(--measure-read);
+  margin: 0;
+  padding-left: var(--space-5);
+  border-left: var(--border-width-stamp) solid var(--engine-accent);
+  font: var(--body-md);
+  color: var(--text-body);
+}
+
+.cta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-5);
+}
+
+.ctaNote {
+  font: var(--meta-xs);
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.aside {
+  display: none;
+  pointer-events: none;
+}
+
+@media (min-width: 1100px) {
+  .root {
+    grid-template-columns: minmax(0, 1fr) 280px;
+    align-items: start;
+  }
+
+  .aside {
+    display: block;
+  }
+}
+
+@media (max-width: 760px) {
+  .title {
+    font: var(--display-hero-mobile);
+  }
+
+  .promise {
+    padding: var(--pad-card-mobile);
+  }
+}
+
+/* ── Returning: `data-engine="known"` on <html>, set before the first paint by engineKnownScript ── */
+[data-engine="known"] .root {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+[data-engine="known"] .main {
+  gap: var(--space-5);
+}
+
+[data-engine="known"] .title {
+  font: var(--engine-landing-title);
+}
+
+[data-engine="known"] .intro,
+[data-engine="known"] .promise,
+[data-engine="known"] .cta,
+[data-engine="known"] .aside {
+  display: none;
+}
+
+[data-engine="known"] .promiseLine {
+  display: block;
+}
+
+@media (max-width: 760px) {
+  [data-engine="known"] .title {
+    font: var(--engine-landing-title-mobile);
+  }
+}
