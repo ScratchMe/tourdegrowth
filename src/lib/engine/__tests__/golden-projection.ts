@@ -43,7 +43,7 @@ export function asBeforeT3(scenario: unknown, slg: boolean): number {
  * matching to the character, the MRR in twelve months above all: it is now
  * the last point of `mrrPath`, computed with the same operations.
  */
-export const KPIS_ADDED_BY_A20 = ["arr", "arr12", "mrrPath", "ltvCac", "lifetime", "afterPayback", "loss", "cash", "warning"] as const;
+export const KPIS_ADDED_BY_A20 = ["arr", "arr12", "mrrPath", "ltvCac", "lifetime", "afterPayback", "loss", "spend", "cash", "warning"] as const;
 
 /** The scenario's figures without A20's, in place, on a JSON copy. Self-serve keeps its figures under `kpis`, sales-assisted at the top. Returns how many fields it dropped. */
 export function asBeforeA20(scenario: unknown): number {

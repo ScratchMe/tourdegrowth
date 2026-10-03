@@ -23,6 +23,7 @@ import { Relays } from "./Relays";
 import { previousLeakLine } from "./series-view";
 import { SlgWhatIfPanel } from "./SlgWhatIfPanel";
 import { BoardLever } from "./BoardLever";
+import { BoardMoney } from "./BoardMoney";
 import { BoardNumbers } from "./BoardNumbers";
 import type { TablePreview } from "./csv";
 import { TableEntry } from "./TableEntry";
@@ -45,7 +46,8 @@ type SlgDerived = Extract<MotionDerived, { motion: "slg" }>;
  * screen, the settings, and the menu that holds the engines, the month and
  * the file), the verdict title (the board's h2 and its focus target), the
  * coverage in fractions, the next step — the screen's one primary — then
- * the diagnosis, the funnel in the screen's one raised card, the five
+ * the diagnosis, the money (`BoardMoney`, design system extension 09, A20.d
+ * T2), the funnel in the screen's one raised card, the five
  * numbers, every stage in one list whose rows open each number's screen
  * (`BoardNumbers`, A18 T2.b),
  * « et si », the declared × measured mirror, what is left to go and get
@@ -190,6 +192,8 @@ export function Board({
   const slgBody = slgD ? (
     <>
       <Diagnosis diagnosis={slgD.diagnosis} strings={strings} locale={ctx.locale} metrics={view.metrics} values={candidateValues} previous={previousLeakLine(view, "slg")} />
+      {/* The money, right after the diagnosis (design system extension 09, C54). */}
+      <BoardMoney view={view} motion="slg" hybrid={hybrid} />
       <Card elevation="raised" className={styles.pelotonCard} data-testid="engine-board-relays">
         {relaysOf(false)}
         {/* Keyed by the month: a past month read on its own shows its own open pipeline (§19.2.4). */}
@@ -213,6 +217,8 @@ export function Board({
         values={candidateValues}
         previous={previousLeakLine(view, "plg")}
       />
+      {/* The money, right after the diagnosis (design system extension 09, C54): flat, so the peloton stays the one raised card. */}
+      <BoardMoney view={view} motion="plg" hybrid={hybrid} />
       {/* The screen's one raised card (Card's own rule): the peloton is what the board is about. */}
       <Card elevation="raised" className={styles.pelotonCard} data-testid="engine-board-peloton">
         {pelotonOf(false)}

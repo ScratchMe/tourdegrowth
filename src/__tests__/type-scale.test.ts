@@ -42,7 +42,7 @@ const SHEETS = walk(SRC).filter((f) => !f.includes(join("styles", "tokens")));
  * The type scale: typography.css, and the engine's few steps of its own
  * (tokens/engine.css, A18 T0), held to the same floors as the rest.
  */
-const TYPOGRAPHY = ["typography.css", "engine.css"].map((f) => strip(readFileSync(join(SRC, "styles", "tokens", f), "utf8"))).join("\n");
+const TYPOGRAPHY = ["typography.css", "engine.css", "money.css"].map((f) => strip(readFileSync(join(SRC, "styles", "tokens", f), "utf8"))).join("\n");
 
 const NOT_ON_THE_SCALE: Record<string, string> = {
   "src/components/brand/SiteFooter.module.css: font: 700 100px var(--font-display)":

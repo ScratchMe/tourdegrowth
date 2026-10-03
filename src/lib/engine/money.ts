@@ -163,6 +163,8 @@ export interface MoneyKpis {
   lifetime: Interval | null;
   afterPayback: Interval | null;
   loss: LossCheck | null;
+  /** A month of acquisition at today's spend (§20.6) — known without a margin, unlike the cash it ties up. */
+  spend: Interval | null;
   cash: CashTiedUp | null;
   /** The long-payback warning (C49), against the runway or the 30-month floor. */
   warning: PaybackWarning | null;

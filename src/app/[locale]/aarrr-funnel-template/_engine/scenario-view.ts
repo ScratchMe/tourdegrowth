@@ -145,7 +145,7 @@ export interface KpiView {
  * are named, through `unitInputsPhrase` (« la marge brute et l'ARPA ») —
  * never the whole list, which would ask for what is already there.
  */
-const KPI_INPUTS: Record<Exclude<KpiId, "won">, readonly MetricId[]> = {
+export const KPI_INPUTS: Record<Exclude<KpiId, "won">, readonly MetricId[]> = {
   mrr12: ["rev.arpa", "rev.paid-conversion", "ret.logo-churn"],
   newMrr: ["rev.arpa", "rev.paid-conversion"],
   nrr: ["ret.logo-churn", "rev.contraction", "rev.expansion"],
@@ -156,7 +156,7 @@ const KPI_INPUTS: Record<Exclude<KpiId, "won">, readonly MetricId[]> = {
 };
 
 /** Sales-assisted's (§18.5.5): the quarter's new contracts at their ACV, the base at the 12-month NRR. No GRR: nobody types one. */
-const SLG_KPI_INPUTS: Record<Exclude<KpiId, "grr">, readonly MetricId[]> = {
+export const SLG_KPI_INPUTS: Record<Exclude<KpiId, "grr">, readonly MetricId[]> = {
   mrr12: ["slg.rev.arpa", "slg.rev.acv", "slg.ret.renewal"],
   newMrr: ["slg.rev.win-rate", "slg.rev.acv"],
   nrr: ["slg.ret.nrr"],

@@ -46,6 +46,22 @@ const WAITING: Record<string, string> = {
 const WAITING_FOR_A18: Record<string, string> = {};
 Object.assign(WAITING, WAITING_FOR_A18);
 
+/**
+ * The engine's money (A20.d, 2026-10-03) ports tokens/money.css in T2, with
+ * the board's money block, and its other screens a step at a time: each
+ * token below waits for the step whose component reads it first (the return
+ * 09's own CSS says which), and leaves this list with it.
+ */
+const WAITING_FOR_A20: Record<string, string> = {
+  "--money-curve-line-today": "T3: MrrCurve, the card's curve at today's pace",
+  "--money-curve-line-whatif": "T3: MrrCurve, the curve with the what-ifs",
+  "--money-line-today": "T3: MrrCurve",
+  "--money-line-whatif": "T3: MrrCurve",
+  "--money-gain-fill": "T3: MrrCurve, the room between the two lines",
+  "--money-sum-bar": "T3: LeverSum, the compounding as lengths",
+};
+Object.assign(WAITING, WAITING_FOR_A20);
+
 const sheets = readdirSync(TOKENS).filter((f) => f.endsWith(".css"));
 const declared = new Map<string, string>();
 for (const sheet of sheets) {

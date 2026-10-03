@@ -385,6 +385,7 @@ export function buildScenario(state: EngineState, targets: Partial<Record<LeverI
       lifetime,
       afterPayback: afterPayback(lifetime, payback),
       loss,
+      spend,
       cash: cashTiedUp(spend, payback, expansionMayOutpace),
       // C49: against the team's runway, or the 30-month floor when it typed none.
       warning: paybackWarning(payback, loss, paybackLimit(state.setup.runwayMonths)),
