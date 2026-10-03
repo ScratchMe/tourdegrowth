@@ -1445,3 +1445,35 @@ Le « % » du levier paraît rogné à droite sur la capture, déjà dans celles
 - les captures regardées.
 
 **Ce qui reste** : D16 (Antoine lance le brief), C46 à C52, puis le prompt F au retour : recopier le retour, poser ses décisions, porter A20.d.
+
+## Les films : le jeu s'annonce comme un jeu, et tout finit sur une note positive (2026-10-03, #307)
+
+**Le retour d'Antoine** : « c'est peut-être la partie jeu qui pêche un peu maintenant ». Même dans le film d'ensemble, qui finit par le jeu, « on ne comprend pas trop ce qu'on y fait ». Il demandait d'être clair dès le début sur ce qu'est le jeu (apprendre ce qu'il faut faire et ne pas faire), une musique plus positive, et surtout de finir sur une note positive : « maintenant tu sais quoi faire, let's go ».
+
+**Le film du jeu (34 → 42,5 s)** :
+- **une annonce de 3,2 s** : « Tour de Growth · le jeu » (le sur-titre du hub, repris tel quel), LE CÔTÉ OBSCUR au pochoir, et « Un jeu pour apprendre ce qu'il ne faut pas faire. » ;
+- **puis l'ancien film, décalé de 3,2 s** : la visio, le dashboard, la main, le téléphone, décembre, le catalogue ;
+- **« Cette fois, sans tricher. »** Le jour revient, et trois actions honnêtes du même niveau tombent : Offre de pause, Rappel avant prélèvement, et Résiliation en trois clics, le miroir exact des deux astuces jouées. Une courbe de confiance monte en vert, sans chiffre. Le tampon « Le playbook qui a marché » (le titre de la fin du jeu, repris tel quel) arrive avec « Chaque action honnête rapporte moins ce trimestre, et davantage sur l'année. » (adapté de la conclusion du jeu) ;
+- **la fin, sur fond clair** : « Maintenant, tu sais quoi faire. » au pochoir, « À toi de jouer. » en rouge, le bouton.
+
+**Le film d'ensemble (47 → 52 s)** :
+- la nuit tombe sur une carte qui annonce le jeu : LE CÔTÉ OBSCUR, et « Un jeu pour apprendre ce qu'il ne faut pas faire. » ;
+- la partie jouée suit, décalée de 2 s ;
+- puis la bascule « Et ce qui marche, sans tricher. », avec les trois mêmes actions honnêtes ;
+- l'arrivée, décalée de 4,4 s : sa promesse en trois temps cède la place à « Maintenant, tu sais quoi faire. C'est parti ! ».
+
+**La musique** :
+- une progression claire est ajoutée (`BRIGHT` : do, sol, la mineur, fa) ;
+- la seule section sombre qui reste est décembre, dans les deux films ;
+- la montagne passe d'un mode sombre à la mineur ordinaire ;
+- la bascule monte en majeur, et les fins jouent un groove plein en majeur jusqu'au dernier coup.
+
+**Un outil pour décaler une scène** : `TS`, un décalage global que lisent `an()`, `cue()`, les compteurs, les sous-titres, l'horloge de la visio et le point du road book. Il a évité de retaper une centaine de temps. Le premier rendu a buté sur une variable déjà déclarée plus haut dans le film du jeu (`ux`), renommée.
+
+**Toute la copie neuve est marquée** `p: 0` (à relire), et le bon à tirer des films la reprendra. Les reprises du produit sont marquées `p: 1` : le sur-titre du hub, « Résiliation en trois clics » et « Le playbook qui a marché ».
+
+**Vérifié** :
+- les planches des nouvelles scènes, dans les trois formats et les deux langues : rien ne déborde, et en 9:16 tout reste au-dessus des 20 % du bas ;
+- les deux bandes son : continues, sans trou, à −20 et −19,5 LUFS avant normalisation, comme les autres films ;
+- les douze MP4 des deux films (trois formats, deux langues ; 52 s et 42,5 s, son AAC) : des images de chacun regardées, puis remis à Antoine en zips ;
+- la page republiée à la même adresse, identique au fichier du dépôt.

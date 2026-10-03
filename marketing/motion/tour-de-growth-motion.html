@@ -362,8 +362,11 @@ const pick = (o) => (isPer(o) ? (o[FMT] !== undefined ? o[FMT] : o.h) : o);
 
 /* Sound cues collected while a film is built: the soundtrack reads them, so a stamp on screen is a stamp in the ear. */
 let CUES = [];
+/* Time shift (s) added to every time written while it is set: a scene inserted before others shifts them without retyping them. */
+let TS = 0;
+const ts = (t) => +(t + TS).toFixed(3);
 const CUE_OF = { stamp: "stamp", spray: "spray", drop: "thud", press: "click", sel: "select", selA: "select", fromB: "paper", flip: "flip", slam: "slam" };
-const cue = (type, t, d) => { CUES.push({ type, t, d }); return ""; };
+const cue = (type, t, d) => { CUES.push({ type, t: ts(t), d }); return ""; };
 
 /* ---------------- Timing helpers ---------------- */
 const EASE = { o: "cubic-bezier(.2,.7,.3,1)", s: "cubic-bezier(.2,1.4,.4,1)", io: "cubic-bezier(.65,0,.35,1)", l: "linear", i: "cubic-bezier(.55,0,1,.45)" };
@@ -371,7 +374,7 @@ const FWD = /^(x|mv|press|bump|sel|redden|hollow|to[A-Z]|bg[A-Z]|unblur|dim|undi
 function an(...list) {
   return "animation:" + list.map(([n, s, d = 0.45, e = "o", k = 1, dir = "normal"]) => {
     if (CUE_OF[n]) cue(CUE_OF[n], s);
-    return `${n} ${d}s ${EASE[e] || e} ${s}s ${k} ${dir} ${FWD.test(n) ? "forwards" : "both"}`;
+    return `${n} ${d}s ${EASE[e] || e} ${ts(s)}s ${k} ${dir} ${FWD.test(n) ? "forwards" : "both"}`;
   }).join(",") + ";";
 }
 const px = (X, Y, w, h) => `left:${X}px;top:${Y}px;` + (w != null ? `width:${w}px;` : "") + (h != null ? `height:${h}px;` : "");
@@ -382,9 +385,9 @@ function blk(spec, w, h, inner, anim = "", cls = "", st = "") {
 }
 function L2S(spec, lx, ly) { const [X, Y, S = 1] = pick(spec); return [X + lx * S, Y + ly * S]; }
 const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
-const countSeq = (fmt, segs, snd) => { if (snd) segs.forEach(([, , s, d]) => cue("ticks", s, d)); return `<span data-count="${fmt}|${segs.map((g) => g.join(",")).join("|")}">${fmtv(fmt, segs[0][0])}</span>`; };
+const countSeq = (fmt, segs, snd) => { if (snd) segs.forEach(([, , s, d]) => cue("ticks", s, d)); return `<span data-count="${fmt}|${segs.map(([a, b, s, d]) => [a, b, ts(s), d].join(",")).join("|")}">${fmtv(fmt, segs[0][0])}</span>`; };
 const count = (a, b, s, d, fmt, snd) => countSeq(fmt, [[a, b, s, d]], snd);
-const typed = (text, s, d) => { cue("type", s, d); return `<span class="tw" data-type="${s},${d}" data-full="${esc(text)}"></span>`; };
+const typed = (text, s, d) => { cue("type", s, d); return `<span class="tw" data-type="${ts(s)},${d}" data-full="${esc(text)}"></span>`; };
 /* Several values shown in turn in the same place: [[html, from, style]] — each replaces the previous. */
 function swap(items, base = "") {
   return items.map(([html, at, st = ""], i) => {
@@ -486,7 +489,7 @@ function rider(name, schedule, map, size, color) {
   let kf = `@keyframes ${name}{`;
   for (let i = 0; i <= steps; i++) { const t = t0 + span * i / steps; const [X, Y] = pointAt(fracAt(t)); kf += `${(i / steps * 100).toFixed(2)}%{transform:translate(${(map.x + X * map.s - size / 2).toFixed(1)}px,${(map.y + Y * map.s - size / 2).toFixed(1)}px)}`; }
   DYN += kf + "}";
-  return `<div class="a" style="left:0;top:0;${an(["in", t0 - 0.15, 0.2])}"><div class="a" style="left:0;top:0;width:${size}px;height:${size}px;border-radius:50%;background:${color};border:3px solid #fbf9f2;box-shadow:0 0 0 2px #211c15;animation:${name} ${span}s linear ${t0}s 1 normal both"></div></div>`;
+  return `<div class="a" style="left:0;top:0;${an(["in", t0 - 0.15, 0.2])}"><div class="a" style="left:0;top:0;width:${size}px;height:${size}px;border-radius:50%;background:${color};border:3px solid #fbf9f2;box-shadow:0 0 0 2px #211c15;animation:${name} ${span}s linear ${ts(t0)}s 1 normal both"></div></div>`;
 }
 function roadbook(L, t, o = {}) {
   const ink = "#211c15", soft = "#5b5346", lab = o.lab || 1;
@@ -554,13 +557,17 @@ function visio(L, at, size, t0, lines, o = {}) {
   return `<div class="a" style="${px(X, Y, Wv, Hv)}transform-origin:0 0;${o.vars ? pick(o.vars) : ""}${an([o.enter || "pop", t0, 0.45], ...(o.moves || []), ...ex)}">
     <div style="position:absolute;inset:0;border-radius:14px;overflow:hidden;border:2px solid #7d7260;box-shadow:6px 6px 0 #000">${dg(talks, o.calmAt)}
       <div class="a mo" style="left:16px;top:14px;font-size:13px;color:#f3efe4;display:flex;align-items:center;gap:8px"><span style="width:10px;height:10px;border-radius:50%;background:#d2402c;display:inline-block;${an(["blink", t0, 1.1, "io", 30])}"></span>${L.live}</div>
-      <div class="a mo" style="right:16px;top:14px;font-size:13px;color:#b5ab98"><span data-count="clock|0,40,${t0},40">00:00</span></div>
+      <div class="a mo" style="right:16px;top:14px;font-size:13px;color:#b5ab98"><span data-count="clock|0,40,${ts(t0)},40">00:00</span></div>
       <div class="a" style="left:0;right:0;bottom:0;height:${Math.round(Hv * 0.28)}px;background:rgba(0,0,0,.72)"></div>
       <div class="a" style="left:0;right:0;bottom:0;height:${Math.round(Hv * 0.28)}px;font:600 ${pick(o.subSize || 22)}px/1.3 var(--f-ui);color:#f3efe4">${subs}</div>
     </div></div>`;
 }
 
 /* Flixo's cancellation screen (GAME-BRIEF §5.9): default, then buried, then by phone. Content only, 300 wide. */
+const OK_ICON = `<svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true" style="vertical-align:-3px;margin-right:6px"><path d="M3 9.5l4 4 8-9" fill="none" stroke="#1f6b3f" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+function honestCard(L, name, size = 22) {
+  return `<div style="padding:16px 20px"><div class="mo" style="font-size:13px;color:#1f6b3f">${OK_ICON}${L.honestTag}</div><div style="font:700 ${size}px/1.25 var(--f-ui);margin-top:10px">${name}</div></div>`;
+}
 function phone(L, Hp, o) {
   const buryAt = o.buryAt, callAt = o.callAt;
   return `
@@ -905,13 +912,26 @@ const C4 = {
   pitch: { p: 1, fr: `Apprends à reconnaître les astuces avant d'en livrer une.`, en: `Learn to spot the tricks before you ship one.` },
   ctaG: { p: 0, fr: `Joue ton année chez Flixo →`, en: `Play your year at Flixo →` },
   levels: { p: 0, fr: `Niveau 1${N}: Flixo · Niveau 2${N}: Pédalix`, en: `Level 1: Flixo · Level 2: Pédalix` },
+  /* 2026-10-03, Antoine's note: the game says it is a game from its first shot, and the films end on a positive note. */
+  gameEyebrow: { p: 1, fr: `Tour de Growth · le jeu`, en: `Tour de Growth · the game` },
+  gameIntro: { p: 0, fr: `Un jeu pour apprendre ce qu'il ne faut pas faire.`, en: `A game to learn what not to do.` },
+  replay: { p: 0, fr: `Cette fois, sans tricher.`, en: `This time, no tricks.` },
+  card7: { p: 1, fr: `Résiliation en trois clics`, en: `Three-click cancellation` },
+  honestTag: { p: 0, fr: `honnête`, en: `honest` },
+  honestSup: { p: 0, fr: `Chaque action honnête rapporte moins ce trimestre, et davantage sur l'année.`, en: `Every honest action pays less this quarter, and more over the year.` },
+  playbookWin: { p: 1, fr: `Le playbook qui a marché`, en: `The playbook that worked` },
+  worksSup: { p: 0, fr: `Et ce qui marche, sans tricher.`, en: `And what works, no tricks.` },
+  nowKnow: { p: 0, fr: `Maintenant, tu sais quoi faire.`, en: `Now you know what to do.` },
+  letsGo: { p: 0, fr: `C'est parti${N}!`, en: `Let's go!` },
+  yourMove: { p: 0, fr: `À toi de jouer.`, en: `Your move.` },
 };
 Object.assign(C, C1, C3, C4);
 
 /* ================================================================== */
-/* FILM 1 — Le Tour en trois parties (47 s)                            */
+/* FILM 1 — Le Tour en trois parties (52 s)                            */
 /* ================================================================== */
 function buildTour(L) {
+  TS = 0;
   let h = `<div class="g-paper"></div>`;
   /* A · the question (0 – 4.2) */
   h += road({ h: 588, s: 950, v: 1000 }, 0.2, 10.4);
@@ -1019,8 +1039,13 @@ function buildTour(L) {
 
   /* F · 3/3 Mountain — the dark side (30.4 – 40.4) */
   cue("whoosh", 30.3, 0.8);
-  h += `<div class="g-night" style="${an(["in", 30.3, 1.0], ["xin", 40.4, 0.9])}"></div>`;
+  h += `<div class="g-night" style="${an(["in", 30.3, 1.0], ["xin", 42.4, 0.9])}"></div>`;
   h += `<svg class="a" style="left:0;top:0" width="${W()}" height="${H()}" viewBox="0 0 1280 720" preserveAspectRatio="none" aria-hidden="true"><path d="M-20 700 L300 560 L520 600 L760 360 L900 430 L1300 40" fill="none" stroke="#d2402c" stroke-width="8" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" style="${an(["draw", 30.3, 0.9, "io"], ["xin", 31.1, 0.3])}"/></svg>`;
+  /* F0 · the game, announced (30.4 – 32.4) */
+  h += ctext(`<span class="st" style="font-size:${pick({ h: 110, s: 88, v: 76 })}px;color:#f3efe4">${L.n3}</span>`, { h: 230, s: 430, v: 480 }, an(["spray", 30.7, 0.6], ["xin", 32.3, 0.25]));
+  h += ctext(L.gameIntro, { h: 370, s: 580, v: 680 }, an(["up", 31.2, 0.4], ["xin", 32.3, 0.25]), `font:700 ${pick({ h: 38, s: 36, v: 34 })}px/1.25 var(--f-ui);letter-spacing:-.02em;color:#f3efe4;`);
+  /* F1 · the dark side, played. Times written as before the intro card: TS shifts them by 2 s (30.4 – 40.4 becomes 32.4 – 42.4). */
+  TS = 2.0;
   h += chip("game", L.k3, L.n3, 31.0, 40.2, true);
   cue("ring", 31.1, 0.9);
   h += visio(L, { h: [64, 140], s: [48, 162], v: [48, 180] }, { h: [560, 300], s: [448, 240], v: [624, 320] }, 31.2, [[L.dgLine, 31.7, 1.8, 35.3], [L.hit, 35.6, 0.5, null]], { calmAt: 35.6, exit: { h: 40.2, s: 40.2, v: 38.0 }, subSize: { h: 22, s: 18, v: 24 } });
@@ -1045,7 +1070,17 @@ function buildTour(L) {
   h += stampEl(L.obstruction, ox, oy, 37.9, { r: -8, size: pick({ h: 40, s: 34, v: 30 }), night: true, t1: 40.2 });
   h += sup(L.p3, 38.2, 40.2, { y: { h: 590, s: 875, v: 190 }, w: { h: 620, s: 864, v: 624 }, size: { h: 24, s: 30, v: 32 }, night: true });
 
-  /* G · finale (40.4 – 47) */
+  /* F2 · and what works (42.4 – 44.8) */
+  TS = 0;
+  h += ctext(`<span class="st" style="font-size:${pick({ h: 56, s: 54, v: 48 })}px">${L.worksSup}</span>`, { h: 190, s: 300, v: 330 }, an(["up", 42.6, 0.4], ["xin", 44.7, 0.25]));
+  [L.card2, L.card4, L.card7].forEach((n, i) => {
+    const [cx, cy, cw] = pick({ h: [64 + i * 392, 330, 360], s: [48, 470 + i * 124, 864], v: [48, 500 + i * 116, 624] });
+    h += blk([cx, cy, 1], cw, 100, honestCard(L, n, pick({ h: 22, s: 24, v: 24 })), an(["up", 42.9 + i * 0.2, 0.35], ["xin", 44.7, 0.25]), "card");
+    cue("select", 43.0 + i * 0.2);
+  });
+
+  /* G · finale. Times written as before: TS shifts them by 4.4 s (40.4 – 47 becomes 44.8 – 51.4). */
+  TS = 4.4;
   cue("whoosh", 40.4, 0.8);
   const [rx, ry, rs] = pick({ h: [192, -50, 0.7], s: [32, 40, 0.7], v: [14, 100, 0.54] });
   h += `<div class="a" style="left:0;top:0;width:1280px;height:720px;transform-origin:0 0;transform:translate(${rx}px,${ry}px) scale(${rs})">${roadbook(L, 40.8, { id: "b", lab: pick({ h: 1, s: 1.1, v: 1.3 }) })}</div>`;
@@ -1053,11 +1088,16 @@ function buildTour(L) {
   const wmTop = pick({ h: 428, s: 610, v: 500 }), wmSize = pick({ h: 100, s: 88, v: 96 });
   h += ctext(FMT === "v" ? `<span class="st" style="font-size:${wmSize}px">TOUR DE<br><span class="r">GROWTH</span></span>` : wordmark(wmSize), wmTop, an(["spray", 42.3, 0.7]));
   h += `<div class="a" style="left:0;right:0;top:${pick({ h: 540, s: 745, v: 700 })}px;padding:0 40px;text-align:center;font:700 ${pick({ h: 30, s: 30, v: 34 })}px/1.25 var(--f-ui);letter-spacing:-.02em;display:flex;flex-wrap:wrap;justify-content:center;column-gap:12px;${FMT === "v" ? "flex-direction:column;align-items:center;" : ""}">
-      <span style="${an(["up", 42.9, 0.4])}">${L.tagline1}</span><span style="${an(["up", 43.3, 0.4])}">${L.tagline2}</span><span class="rd" style="${an(["up", 43.7, 0.4])}">${L.tagline3}</span></div>`;
+      <span style="${an(["up", 42.9, 0.4], ["xin", 45.2, 0.25])}">${L.tagline1}</span><span style="${an(["up", 43.3, 0.4], ["xin", 45.2, 0.25])}">${L.tagline2}</span><span class="rd" style="${an(["up", 43.7, 0.4], ["xin", 45.2, 0.25])}">${L.tagline3}</span></div>`;
   h += `<div class="a" style="left:0;right:0;top:${pick({ h: 604, s: 905, v: 850 })}px;display:flex;justify-content:center;align-items:center;gap:${FMT === "v" ? 16 : 28}px;${FMT === "v" ? "flex-direction:column;" : ""}">
       <span class="btn" style="${an(["pop", 44.3, 0.4, "s"])}">${L.cta}</span>
       <span class="mo" style="font-size:18px;${an(["in", 44.7, 0.4])}">tourdegrowth.com</span></div>`;
   cue("hit", 44.3);
+  /* G2 · the last line (49.8 – 52) */
+  TS = 0;
+  h += `<div class="a" style="left:0;right:0;top:${pick({ h: 540, s: 745, v: 700 })}px;padding:0 40px;text-align:center;font:700 ${pick({ h: 30, s: 30, v: 34 })}px/1.25 var(--f-ui);letter-spacing:-.02em;display:flex;flex-wrap:wrap;justify-content:center;column-gap:12px;${FMT === "v" ? "flex-direction:column;align-items:center;" : ""}">
+      <span style="${an(["up", 49.8, 0.4])}">${L.nowKnow}</span><span class="rd" style="${an(["up", 50.3, 0.4])}">${L.letsGo}</span></div>`;
+  cue("hit", 50.3);
   return h;
 }
 
@@ -1065,6 +1105,7 @@ function buildTour(L) {
 /* FILM 2 — Le diagnostic (29 s)                                        */
 /* ================================================================== */
 function buildDiag(L) {
+  TS = 0;
   let h = `<div class="g-paper"></div>`;
   h += road({ h: 650, s: 1000, v: 1000 }, 0.1, 28.4);
   /* 1 · the landing (0 – 4) */
@@ -1176,6 +1217,7 @@ function buildDiag(L) {
 /* FILM 3 — Le moteur (44 s)                                            */
 /* ================================================================== */
 function buildEngine(L) {
+  TS = 0;
   let h = `<div class="g-paper"></div>`;
   /* 1 · the hook: MRR goes up (0 – 4) */
   const hook = [41200, 42300, 43500, 44600, 45900, 46800, 48000];
@@ -1263,10 +1305,19 @@ function buildEngine(L) {
 }
 
 /* ================================================================== */
-/* FILM 4 — Le côté obscur (34 s)                                       */
+/* FILM 4 — Le côté obscur (42.5 s)                                     */
 /* ================================================================== */
 function buildGame(L) {
+  TS = 0;
   let h = `<div class="g-night"></div>`;
+  /* 0 · the game, announced (0 – 3.2) */
+  cue("whoosh", 0.05, 0.6);
+  h += ctext(`<span class="mo" style="font-size:16px;color:#f0b43c;letter-spacing:.14em">${L.gameEyebrow}</span>`, { h: 196, s: 396, v: 446 }, an(["in", 0.2, 0.3], ["xin", 3.0, 0.25]));
+  h += ctext(`<span class="st" style="font-size:${pick({ h: 120, s: 92, v: 80 })}px;color:#f3efe4">${L.n3}</span>`, { h: 252, s: 452, v: 502 }, an(["spray", 0.45, 0.6], ["xin", 3.0, 0.25]));
+  h += ctext(L.gameIntro, { h: 410, s: 610, v: 700 }, an(["up", 1.2, 0.45], ["xin", 3.0, 0.25]), `font:700 ${pick({ h: 40, s: 36, v: 34 })}px/1.25 var(--f-ui);letter-spacing:-.02em;color:#f3efe4;`);
+
+  /* 1 to 6 · the year. Their times are written as before the intro: TS shifts them by 3.2 s. */
+  TS = 3.2;
   /* 1 · the call (0 – 6) */
   cue("ring", 0.3, 0.9);
   h += `<div class="a chip n" style="${P({ h: [64, 40], s: [48, 50], v: [48, 100] })}${an(["fromL", 0.2, 0.45], ["xin", 9.8, 0.3])}">${picto("game", 44, "#f3efe4")}<div class="k" style="color:#b5ab98">${L.k3}</div></div>`;
@@ -1361,13 +1412,38 @@ function buildGame(L) {
   });
   h += sup(L.catSup, 28.6, 30.8, { y: { h: 600, s: 850, v: 860 }, size: { h: 34, s: 34, v: 32 }, night: true });
 
-  /* 7 · end card (31 – 34) */
-  h += `<div class="a" style="left:0;right:0;top:${pick({ h: 120, s: 250, v: 300 })}px;display:flex;justify-content:center;align-items:center;gap:14px;${an(["in", 31.1, 0.4])}">${picto("game", 56, "#f3efe4")}<span class="mo" style="font-size:16px;color:#b5ab98;letter-spacing:.14em">${L.k3}</span></div>`;
-  h += ctext(`<span class="st" style="font-size:${pick({ h: 112, s: 84, v: 96 })}px;color:#f3efe4">${L.n3}</span>`, { h: 200, s: 350, v: 380 }, an(["spray", 31.3, 0.7]));
-  h += ctext(L.pitch, { h: 330, s: 525, v: 600 }, an(["up", 31.8, 0.4]), `font:600 ${pick({ h: 28, s: 28, v: 30 })}px/1.3 var(--f-ui);color:#f3efe4;`);
-  h += `<div class="a" style="left:0;right:0;top:${pick({ h: 408, s: 650, v: 740 })}px;display:flex;justify-content:center"><span class="btn n" style="${an(["pop", 32.2, 0.4, "s"])}">${L.ctaG}</span></div>`;
-  h += ctext(`${L.levels} · <span style="text-transform:none">tourdegrowth.com/${LANG}/game</span>`, { h: 530, s: 800, v: 860 }, an(["in", 32.6, 0.4]), "font-size:15px;color:#b5ab98;", "mo");
-  cue("hit", 32.2);
+  /* 7 · this time, no tricks (34.0 – 38.4) */
+  TS = 0;
+  cue("whoosh", 33.9, 0.8);
+  h += `<div class="g-paper" style="${an(["in", 34.0, 0.9])}"></div>`;
+  h += `<div class="a st" style="${P({ h: [64, 70], s: [48, 90], v: [48, 150] })}width:${W() - (FMT === "h" ? 128 : 96)}px;font-size:${pick({ h: 64, s: 60, v: 52 })}px;${an(["up", 34.3, 0.45], ["xin", 38.3, 0.3])}">${L.replay}</div>`;
+  [L.card2, L.card4, L.card7].forEach((n, i) => {
+    const [cx, cy, cw] = pick({ h: [64 + i * 392, 200, 360], s: [48, 230 + i * 124, 864], v: [48, 400 + i * 116, 624] });
+    h += blk([cx, cy, 1], cw, 100, honestCard(L, n, pick({ h: 22, s: 24, v: 24 })), an(["up", 34.7 + i * 0.25, 0.4], ["xin", 38.3, 0.3]), "card");
+    cue("select", 34.8 + i * 0.25);
+  });
+  const upPts = [60, 61, 63, 64, 66, 68, 70, 71, 73, 75, 77, 80];
+  const hx = (k) => 50 + k * 50, hy = (v) => 170 - v * 1.5;
+  h += blk({ h: [64, 330, 1], s: [48, 620, 0.86], v: [48, 760, 0.97] }, 640, 230, `
+      <svg width="640" height="230" viewBox="0 0 640 230" aria-hidden="true">
+        ${[25, 50, 75, 100].map((v) => `<line x1="50" x2="610" y1="${hy(v)}" y2="${hy(v)}" stroke="rgba(33,28,21,.12)" stroke-width="1"/>`).join("")}
+        <line x1="50" x2="610" y1="${hy(0)}" y2="${hy(0)}" stroke="#5b5346" stroke-width="2"/>
+        ${"JFMAMJJASOND".split("").map((m, k) => `<text x="${hx(k)}" y="198" text-anchor="middle" fill="#5b5346" font-family="IBM Plex Mono, monospace" font-size="12">${m}</text>`).join("")}
+        <path d="${"M" + upPts.map((v, k) => `${hx(k)} ${hy(v)}`).join("L")}" fill="none" stroke="#1f6b3f" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" pathLength="1" stroke-dasharray="1" style="${an(["draw", 35.6, 1.2, "io"])}"/>
+        <circle cx="${hx(11)}" cy="${hy(80)}" r="6" fill="#1f6b3f" style="${an(["pop", 36.8, 0.3, "s"])}"/>
+        <text x="50" y="222" fill="#5b5346" font-family="IBM Plex Mono, monospace" font-size="12">${x("CONFIANCE DES ABONNÉS, DE JANVIER À DÉCEMBRE", "SUBSCRIBER TRUST, JANUARY TO DECEMBER")}</text>
+      </svg>`, an(["in", 35.4, 0.4], ["xin", 38.3, 0.3]));
+  h += sup(L.honestSup, 36.2, 38.3, { y: { h: 590, s: 950, v: 270 }, w: { h: 620, s: 864, v: 624 }, size: { h: 28, s: 32, v: 30 } });
+  const [bx, by] = pick({ h: [740, 450], s: [430, 700], v: [250, 900] });
+  h += stampEl(L.playbookWin, bx, by, 37.2, { r: -6, size: pick({ h: 28, s: 28, v: 24 }), good: true, t1: 38.3 });
+
+  /* 8 · now you know (38.4 – 42.5) */
+  h += `<div class="a" style="left:0;right:0;top:${pick({ h: 110, s: 260, v: 300 })}px;display:flex;justify-content:center;align-items:center;gap:14px;${an(["in", 38.5, 0.4])}">${picto("game", 56, "#211c15")}<span class="mo" style="font-size:16px;color:#5b5346">${L.k3}</span></div>`;
+  h += ctext(`<span class="st" style="font-size:${pick({ h: 96, s: 80, v: 72 })}px">${L.nowKnow}</span>`, { h: 190, s: 350, v: 390 }, an(["spray", 38.7, 0.7]));
+  h += ctext(`<span class="st r" style="font-size:${pick({ h: 64, s: 56, v: 52 })}px">${L.yourMove}</span>`, { h: 400, s: 590, v: 640 }, an(["slam", 39.5, 0.4, "s"]));
+  h += `<div class="a" style="left:0;right:0;top:${pick({ h: 500, s: 720, v: 790 })}px;display:flex;justify-content:center"><span class="btn" style="${an(["pop", 40.1, 0.4, "s"])}">${L.ctaG}</span></div>`;
+  h += ctext(`${L.levels} · <span style="text-transform:none">tourdegrowth.com/${LANG}/game</span>`, { h: 600, s: 840, v: 900 }, an(["in", 40.5, 0.4]), "font-size:15px;color:#5b5346;", "mo");
+  cue("hit", 40.1);
   return h;
 }
 
@@ -1376,12 +1452,12 @@ function buildGame(L) {
 /* ================================================================== */
 const FILMS = {
   tour: {
-    tab: { sp: "tour", kind: "Les trois parties", title: "Le Tour" }, dur: 47, poster: 20.4, build: buildTour, cues: {},
-    music: [[0, 4.2, "pad", "A"], [4.2, 6.2, "groove0", "A"], [6.2, 10.5, "groove", "A"], [10.5, 13.6, "break", "A"], [13.6, 21.4, "full", "A"], [21.4, 24.9, "drive", "A"], [24.9, 28.0, "build", "BUILD"], [28.0, 30.4, "full", "OUT"], [30.4, 37.0, "half", "DARK"], [37.0, 40.4, "drone", "DARK"], [40.4, 47, "outro", "OUT"]],
+    tab: { sp: "tour", kind: "Les trois parties", title: "Le Tour" }, dur: 52, poster: 20.4, build: buildTour, cues: {},
+    music: [[0, 4.2, "pad", "A"], [4.2, 6.2, "groove0", "A"], [6.2, 10.5, "groove", "A"], [10.5, 13.6, "break", "A"], [13.6, 21.4, "full", "A"], [21.4, 24.9, "drive", "A"], [24.9, 28.0, "build", "BUILD"], [28.0, 30.4, "full", "OUT"], [30.4, 32.4, "groove0", "A"], [32.4, 39.0, "half", "A"], [39.0, 42.4, "drone", "DARK"], [42.4, 44.8, "build", "BRIGHT"], [44.8, 49.6, "full", "BRIGHT"], [49.6, 52, "outro", "OUT"]],
     brief: {
       title: "Le Tour, en entier",
-      intent: "Faire comprendre en moins d'une minute ce que Tour de Growth fait, et donner envie de tout essayer. Le film part du problème (une étape cale, les quatre autres la cachent), puis parcourt le road book : le diagnostic nomme l'étape, le moteur la chiffre et montre ce qu'elle coûte en MRR, le jeu montre la tentation de tricher pour la corriger. La nuit tombe en montagne, et le jour revient pour l'appel à l'action.",
-      facts: [["Durée", "47 s"], ["Formats", "16:9, 4:5 et 9:16. En vertical, les dossards passent en colonne et les cartes s'empilent ; les textes restent hors des 20 % du bas"], ["Pour", "La page d'accueil (affiche et clic pour lire), Show HN, YouTube, le kit de lancement"], ["Quand", "À l'ouverture du moteur. Si le jeu ouvre plus tard, sa partie porte « bientôt »"], ["Musique", "La menant à 120 bpm, en la mineur : nappe à l'ouverture, groove dès les dossards, pause au road book, chrono et montée au contre-la-montre, demi-tempo grave en montagne, retour en majeur à l'arrivée"]],
+      intent: "Faire comprendre en moins d'une minute ce que Tour de Growth fait, et donner envie de tout essayer. Le film part du problème (une étape cale, les quatre autres la cachent), puis parcourt le road book : le diagnostic nomme l'étape, le moteur la chiffre et montre ce qu'elle coûte en MRR, le jeu, annoncé comme un jeu, apprend ce qu'il ne faut pas faire, puis montre ce qui marche. La nuit tombe en montagne, le jour revient, et la dernière ligne le dit : maintenant, tu sais quoi faire.",
+      facts: [["Durée", "52 s"], ["Formats", "16:9, 4:5 et 9:16. En vertical, les dossards passent en colonne et les cartes s'empilent ; les textes restent hors des 20 % du bas"], ["Pour", "La page d'accueil (affiche et clic pour lire), Show HN, YouTube, le kit de lancement"], ["Quand", "À l'ouverture du moteur. Si le jeu ouvre plus tard, sa partie porte « bientôt »"], ["Musique", "La menant à 120 bpm, en la mineur : nappe à l'ouverture, groove dès les dossards, pause au road book, chrono et montée au contre-la-montre, demi-tempo en montagne, une seule note sombre en décembre, puis une montée en majeur sur ce qui marche et un groove plein jusqu'au bout"]],
     },
     scenes: [
       { t: 0, title: "La question", img: "Une ligne de marquage se peint au sol. Le titre de l'accueil arrive au pochoir, « cale-t-elle ? » en rouge.", txt: ["h1a", "h1c"], son: "Nappe seule, deux souffles de bombe, une montée vers les dossards." },
@@ -1389,8 +1465,10 @@ const FILMS = {
       { t: 10.5, title: "Le road book", img: "Le profil d'étape se trace : une plaine, un contre-la-montre, une montagne. La caméra plonge dans la plaine.", txt: ["race", "k1", "k2", "k3"], son: "Le groove s'arrête, arpège seul ; un souffle pour la plongée." },
       { t: 13.6, title: "1/3 · Plaine : le diagnostic", img: "Une vraie question de l'étape Retention ; une réponse s'enfonce. Les questions défilent jusqu'à 15/15, le ton passe sur « Roast me ». Le score 74 se compte puis se tamponne, Retention passe au rouge. Un mini road book suit la course.", txt: ["q", "toneTitle", "holds", "p1"], son: "Groove complet, clics de réponse, compteur qui monte, tampon du score." },
       { t: 21.4, title: "2/3 · Contre-la-montre : le moteur", img: "Le chrono part. Le churn à 6 % pour une cible de 4 % prend « Freine ici ». À côté, ce que rapporte un client : 1 900 € de CAC, 1 500 € de LTV, « −400 € par nouveau client ». « Et si ? » : le levier ramène le churn à 4 %, les barres du MRR montent en rouge, le MRR dans 12 mois passe de 80 212 € à 93 556 € et le LTV:CAC de 0,79 à 1,18. Trois slides tombent.", txt: ["freine", "ueTitle", "lossStamp", "lev1", "mrr12", "p2"], son: "Le chrono bat ; un impact sur « Et si ? », la montée, le levier qui siffle, le compteur qui grimpe." },
-      { t: 30.4, title: "3/3 · Montagne : le côté obscur", img: "La route monte et la nuit tombe. Le DG de Flixo en visio. « Alléger la page abonnement » se choisit ; le bouton devient un lien gris et la pastille passe à 5 clics. Le churn baisse, le DG dit « Bien joué. ». Décembre : la confiance et le radar se défloutent, « Obstruction » tombe.", txt: ["dgLine", "card1", "clicks5", "hit", "december", "obstruction", "p3"], son: "Sonnerie de visio, demi-tempo grave, frappe des sous-titres, notification ; montée puis chute de basse en décembre." },
-      { t: 40.4, title: "L'arrivée", img: "Le jour revient. Le road book entier, un point rouge le parcourt d'un trait. Le logotype, la promesse en trois temps, le bouton.", txt: ["tagline1", "tagline2", "tagline3", "cta"], son: "Retour en majeur, groove plein, un dernier coup sur le bouton." },
+      { t: 30.4, title: "3/3 · Montagne : le jeu, annoncé", img: "La route monte et la nuit tombe. LE CÔTÉ OBSCUR au pochoir, et ce qu'on y fait : un jeu pour apprendre ce qu'il ne faut pas faire.", txt: ["n3", "gameIntro"], son: "Un souffle, le groove qui se pose." },
+      { t: 32.4, title: "Le côté obscur, joué", img: "Le DG de Flixo en visio. « Alléger la page abonnement » se choisit ; le bouton devient un lien gris et la pastille passe à 5 clics. Le churn baisse, le DG dit « Bien joué. ». Décembre : la confiance et le radar se défloutent, « Obstruction » tombe.", txt: ["dgLine", "card1", "clicks5", "hit", "december", "obstruction", "p3"], son: "Sonnerie de visio, demi-tempo en la mineur, frappe des sous-titres, notification ; montée puis chute de basse en décembre." },
+      { t: 42.4, title: "Ce qui marche", img: "Le jour revient. « Et ce qui marche, sans tricher. » Trois actions honnêtes du même niveau tombent : Offre de pause, Rappel avant prélèvement, Résiliation en trois clics.", txt: ["worksSup", "honestTag", "card2", "card4", "card7"], son: "Montée en majeur, une sélection par carte." },
+      { t: 44.8, title: "L'arrivée", img: "Le road book entier, un point rouge le parcourt d'un trait. Le logotype, la promesse en trois temps, le bouton. La promesse cède la place à la dernière ligne : « Maintenant, tu sais quoi faire. C'est parti ! »", txt: ["tagline1", "tagline2", "tagline3", "cta", "nowKnow", "letsGo"], son: "Groove plein en majeur, un coup sur le bouton, un dernier sur « C'est parti »." },
     ],
   },
   diag: {
@@ -1429,21 +1507,23 @@ const FILMS = {
     ],
   },
   game: {
-    tab: { sp: "game", kind: "3/3 · Montagne", title: "Le côté obscur" }, dur: 34, poster: 19.5, build: buildGame, cues: {},
-    music: [[0, 6, "drone", "DARK"], [6, 14.8, "half", "DARK"], [14.8, 20.8, "groove", "DARK"], [20.8, 21, "none"], [21, 26.8, "drone", "DARK"], [26.8, 30.8, "sparse", "DARK"], [30.8, 34, "outro", "OUT"]],
+    tab: { sp: "game", kind: "3/3 · Montagne", title: "Le côté obscur" }, dur: 42.5, poster: 2.2, build: buildGame, cues: {},
+    music: [[0, 3.2, "groove0", "BRIGHT"], [3.2, 18.0, "half", "A"], [18.0, 24.0, "groove", "A"], [24.0, 24.2, "none"], [24.2, 30.0, "drone", "DARK"], [30.0, 34.0, "sparse", "A"], [34.0, 38.4, "build", "BRIGHT"], [38.4, 42.5, "outro", "OUT"]],
     brief: {
       title: "Le côté obscur",
-      intent: "Faire sentir la tentation, pas la décrire. On est le PM growth de Flixo, le DG veut le chiffre, deux astuces font baisser les résiliations et le DG est content. Puis décembre défloute ce que le dashboard cachait. Le film s'arrête sur le catalogue : le vrai nom de chaque astuce, la loi, un cas réel, le repère.",
-      facts: [["Durée", "34 s, monde de nuit"], ["Formats", "16:9, 4:5 et 9:16. En vertical, les cartes s'empilent, le téléphone et les tuiles se partagent la largeur, le catalogue montre une astuce à la fois"], ["Pour", "La page du jeu, la campagne de lancement du jeu, les enseignants (GAME-BRIEF §2)"], ["Quand", "À l'ouverture du jeu, après le bon à tirer nº7 et la recette"], ["Musique", "Un bourdon grave et un battement de cœur ; un groove en mineur sur la « réussite », sans joie (c'est le piège) ; montée et chute en décembre ; quelques notes de cloche sur le catalogue"]],
+      intent: "Dire dès le premier plan que c'est un jeu, et à quoi il sert : apprendre ce qu'il ne faut pas faire. Puis faire sentir la tentation : on est le PM growth de Flixo, le DG veut le chiffre, deux astuces font baisser les résiliations et le DG est content. Décembre défloute ce que le dashboard cachait, le catalogue donne le vrai nom de chaque astuce. Et le film ne s'arrête plus là : on rejoue l'année sans tricher, la confiance monte, et la fin le dit, sur fond clair : maintenant, tu sais quoi faire. À toi de jouer.",
+      facts: [["Durée", "42 s : la nuit, puis le jour qui revient"], ["Formats", "16:9, 4:5 et 9:16. En vertical, les cartes s'empilent, le téléphone et les tuiles se partagent la largeur, le catalogue montre une astuce à la fois"], ["Pour", "La page du jeu, la campagne de lancement du jeu, les enseignants (GAME-BRIEF §2)"], ["Quand", "À l'ouverture du jeu, après le bon à tirer nº7 et la recette"], ["Musique", "Un groove clair sur l'annonce ; un demi-tempo en la mineur sur la visio et la main, un groove sur la « réussite » ; la seule note sombre est décembre (montée, chute, bourdon) ; puis une montée en majeur sur ce qui marche, et un groove en majeur jusqu'au bouton"]],
     },
     scenes: [
-      { t: 0, title: "La visio", img: "Nuit. Le DG en visio, point rouge « En direct », sous-titres qui s'écrivent. Le cadre se range en haut à gauche.", txt: ["dgOpen"], son: "Sonnerie de visio, bourdon, frappe des sous-titres." },
-      { t: 6, title: "Le dashboard", img: "Qui on est, en une ligne. Cinq tuiles ; la confiance et le radar sont floutés, « pas sur ton dashboard ».", txt: ["you", "facts", "notOn"], son: "Demi-tempo grave." },
-      { t: 10, title: "La main", img: "Quatre cartes aux noms de réunion, sans un chiffre. Le curseur prend « Alléger la page abonnement » et « Résiliation accompagnée ». « Lancer le trimestre ».", txt: ["card1", "card2", "card3", "card4", "rule", "run"], son: "Deux sélections, un déclic." },
-      { t: 14.8, title: "Le téléphone", img: "L'écran de résiliation de Flixo : le bouton devient un lien gris, puis un numéro de téléphone. La pastille passe de 2 clics à 5, puis à l'infini. Le churn tombe à 4,3 %, le DG sourit.", txt: ["clicks2", "clicks5", "clicksInf", "hit", "works"], son: "Groove en mineur, une notification à chaque astuce." },
-      { t: 21, title: "Décembre", img: "« Voici ce que tu as fait. » La confiance et le radar se défloutent ; la courbe de confiance se trace. Le contrôle tombe : 75 000 €.", txt: ["december", "reveal", "control", "controlText"], son: "Montée, chute de basse, bourdon et battement de cœur." },
-      { t: 27, title: "Le catalogue", img: "Les deux astuces utilisées se retournent : Obstruction et Action forcée, leur nom de réunion, la loi ou le cas réel, et le repère.", txt: ["used", "law1", "tell1", "case2", "tell2", "catSup"], son: "Quelques notes de cloche." },
-      { t: 31, title: "L'appel", img: "La montagne, le nom au pochoir, la promesse, le bouton, les deux niveaux.", txt: ["pitch", "ctaG", "levels"], son: "Retour en majeur, un dernier coup." },
+      { t: 0, title: "Le jeu, annoncé", img: "Nuit. « Tour de Growth · le jeu », LE CÔTÉ OBSCUR au pochoir, et ce qu'on y fait : un jeu pour apprendre ce qu'il ne faut pas faire.", txt: ["gameEyebrow", "n3", "gameIntro"], son: "Groove clair en majeur, un coup de bombe sur le titre." },
+      { t: 3.2, title: "La visio", img: "Le DG en visio, point rouge « En direct », sous-titres qui s'écrivent. Le cadre se range en haut à gauche.", txt: ["dgOpen"], son: "Sonnerie de visio, demi-tempo en la mineur, frappe des sous-titres." },
+      { t: 9.2, title: "Le dashboard", img: "Qui on est, en une ligne. Cinq tuiles ; la confiance et le radar sont floutés, « pas sur ton dashboard ».", txt: ["you", "facts", "notOn"], son: "Demi-tempo." },
+      { t: 13.2, title: "La main", img: "Quatre cartes aux noms de réunion, sans un chiffre. Le curseur prend « Alléger la page abonnement » et « Résiliation accompagnée ». « Lancer le trimestre ».", txt: ["card1", "card2", "card3", "card4", "rule", "run"], son: "Deux sélections, un déclic." },
+      { t: 18.0, title: "Le téléphone", img: "L'écran de résiliation de Flixo : le bouton devient un lien gris, puis un numéro de téléphone. La pastille passe de 2 clics à 5, puis à l'infini. Le churn tombe à 4,3 %, le DG sourit.", txt: ["clicks2", "clicks5", "clicksInf", "hit", "works"], son: "Groove en la mineur, une notification à chaque astuce." },
+      { t: 24.2, title: "Décembre", img: "« Voici ce que tu as fait. » La confiance et le radar se défloutent ; la courbe de confiance se trace. Le contrôle tombe : 75 000 €.", txt: ["december", "reveal", "control", "controlText"], son: "Montée, chute de basse, bourdon et battement de cœur : la seule note sombre du film." },
+      { t: 30.2, title: "Le catalogue", img: "Les deux astuces utilisées se retournent : Obstruction et Action forcée, leur nom de réunion, la loi ou le cas réel, et le repère.", txt: ["used", "law1", "tell1", "case2", "tell2", "catSup"], son: "Quelques notes, plus claires." },
+      { t: 34.0, title: "Cette fois, sans tricher", img: "Le jour revient. Trois actions honnêtes du même niveau : Offre de pause, Rappel avant prélèvement, Résiliation en trois clics. La courbe de confiance monte, en vert ; le tampon « Le playbook qui a marché ».", txt: ["replay", "honestTag", "card2", "card4", "card7", "honestSup", "playbookWin"], son: "Montée en majeur, une sélection par carte, le tampon." },
+      { t: 38.4, title: "Maintenant, tu sais quoi faire", img: "Fond clair. MAINTENANT, TU SAIS QUOI FAIRE. au pochoir, « À toi de jouer. » en rouge, le bouton, les deux niveaux.", txt: ["nowKnow", "yourMove", "ctaG", "levels"], son: "Groove en majeur, un dernier coup sur le bouton." },
     ],
   },
 };
@@ -1460,7 +1540,7 @@ const CH = {
   G: { b: NOTE.G2, n: [NOTE.G3, NOTE.B3, NOTE.D4] },
   E: { b: NOTE.E2, n: [NOTE.E3, NOTE.Gs3, NOTE.B3] },
 };
-const PROG = { A: ["Am", "F", "C", "G"], BUILD: ["F", "G", "Am", "C"], DARK: ["Am", "Am", "F", "E"], OUT: ["F", "G", "C", "C"] };
+const PROG = { BRIGHT: ["C", "G", "Am", "F"], A: ["Am", "F", "C", "G"], BUILD: ["F", "G", "Am", "C"], DARK: ["Am", "Am", "F", "E"], OUT: ["F", "G", "C", "C"] };
 /* Rendered in 3-second slices (each holds only the notes that start in it) plus one pass for the long drones,
    then mixed and compressed once: an offline graph pulls every node it holds, so small graphs render far faster. */
 function makeAudio(ctx, off = 0, mode = "chunk") {
