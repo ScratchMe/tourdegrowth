@@ -1415,4 +1415,5 @@ En réexportant les vingt-quatre films (FR et EN, un format par terminal comme l
 **Vérifié** :
 - les planches des nouvelles scènes, dans les trois formats et les deux langues : rien ne déborde, et en 9:16 tout reste au-dessus des 20 % du bas ;
 - les deux bandes son : continues, sans trou, à −20 et −19,5 LUFS avant normalisation, comme les autres films ;
-- les MP4 : voir plus bas.
+- les douze MP4 des deux films (trois formats, deux langues ; 52 s et 42,5 s, son AAC) : des images de chacun regardées, puis remis à Antoine en zips ;
+- la page republiée à la même adresse, identique au fichier du dépôt.
