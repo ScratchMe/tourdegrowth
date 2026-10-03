@@ -41,14 +41,9 @@ const WAITING: Record<string, string> = {
  * ports its component and forgets to take its tokens off this list fails the
  * third test; a step that is dropped leaves its tokens here, in plain sight.
  */
-const A18_STEP = {
-  T2: "A18 T2, the board (EngineBar, NextStep, EngineProgress, NumberList, LeverCard, the verdict)",
-  T5: "A18 T5, the hybrid (TotalBand)",
-} as const;
-// T4 (the page, EngineLanding) took its four off on 2026-10-03: the reserve and the returning title.
-const WAITING_FOR_A18: Record<string, string> = {
-  "--engine-figure": A18_STEP.T5,
-};
+// T4 (the page, EngineLanding) took its four off on 2026-10-03: the reserve and the returning title; T5 (the
+// hybrid, TotalBand) the last, --engine-figure, the same day. The list stays, empty, for a step yet to come.
+const WAITING_FOR_A18: Record<string, string> = {};
 Object.assign(WAITING, WAITING_FOR_A18);
 
 const sheets = readdirSync(TOKENS).filter((f) => f.endsWith(".css"));

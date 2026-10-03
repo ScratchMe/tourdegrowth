@@ -1013,11 +1013,13 @@ export const ENGINE_COPY = {
       plg: { fr: "du libre-service", en: "self-serve" },
       slg: { fr: "de l'assisté", en: "sales-assisted" },
     },
-    /** The motion selector's accessible name: which motion's stages and what-ifs show below it. */
-    selectorLabel: { fr: "Motion affichée : étapes et « Et si »", en: "Motion shown: stages and what-ifs" },
+    /** The motion selector's label: which engine's board shows below it — verdict, diagnosis, drawing, list, lever (A18 T5). */
+    // TODO: à relire (convention 6) — retouché le 2026-10-03 (A18 T5, le retour 07 : `total.shown`) : le sélecteur montre
+    // désormais tout le tableau d'un moteur, pas seulement ses étapes et ses « Et si » ; il disait « Motion affichée : étapes et « Et si » ».
+    selectorLabel: { fr: "Moteur affiché", en: "Engine shown" },
     /** A column's eyebrow over its diagnosis: `{verdict}` a `diagnosis` title, lower-cased by the code. */
     diagnosisEyebrow: { fr: "{motion} — {verdict}", en: "{motion} — {verdict}" },
-    /** The fixed sentence under the two diagnoses and at the foot of the side-by-side slide (§18.6.4). */
+    /** The fixed sentence under « Moteur affiché » (A18 T5) and at the foot of the side-by-side slide (§18.6.4). */
     twoSegments: {
       fr: "Deux motions, deux segments : chacune se lit contre ses cibles, pas contre l'autre.",
       en: "Two motions, two segments: each is read against its own targets, not against the other.",
@@ -1039,6 +1041,13 @@ export const ENGINE_COPY = {
   total: {
     title: { fr: "Deux moteurs, un total", en: "Two engines, one total" },
     mrr: { fr: "MRR", en: "MRR" },
+    /**
+     * TODO: à relire (convention 6) — neuf le 2026-10-03 (A18 T5, le retour 07 : `total.ss`, `total.sa`, `total.sum`) :
+     * les trois termes de la bande du tableau hybride (`TotalBand`), la somme en compte, jamais une comparaison.
+     */
+    ssMrr: { fr: "MRR libre-service", en: "Self-serve MRR" },
+    saMrr: { fr: "MRR assisté", en: "Sales-assisted MRR" },
+    sumMrr: { fr: "MRR total", en: "Total MRR" },
     newMrr: { fr: "Nouveau MRR du mois", en: "New MRR this month" },
     /** `{plg} + {slg} = {total}`: `total.formatSum`'s three strings, each part rounded to the common unit. */
     newMrrSum: { fr: "Nouveau MRR du mois : {plg} + {slg} = {total}", en: "New MRR this month: {plg} + {slg} = {total}" },
@@ -1442,7 +1451,7 @@ export const ENGINE_COPY = {
      */
     /** The link's slider, in WHOLE opportunities: its own label, not `sliderLabel`'s « cible testée ». */
     linkSlider: { fr: "Opportunités venues du libre-service, par trimestre", en: "Opportunities from self-serve, per quarter" },
-    /** The hybrid's one line under both panels: a sum, never a comparison. */
+    /** The hybrid's one line, in the full « Et si » panel of the engine shown (A18 T5): a sum, never a comparison. */
     totalIn12: { fr: "MRR total dans 12 mois", en: "Total MRR in 12 months" },
     totalIn12Row: {
       fr: "{today} aujourd'hui, {projected} avec les « Et si » des deux panneaux",
@@ -2738,12 +2747,13 @@ export const ENGINE_COPY = {
         en: "The Tour measures in three minutes whether your team tracks its numbers, without asking for any number. The engine has you go and get them, and compares the two if you took the Tour on this device.",
       },
     },
-    // TODO: à relire (convention 6) — neuf le 2026-10-01 (A7.3.c S2, ENGINE.md §18.7 E0).
+    // TODO: à relire (convention 6) — neuf le 2026-10-01 (A7.3.c S2, ENGINE.md §18.7 E0) ; retouché le 2026-10-03 (A18 T5) :
+    // plus « côte à côte », le tableau hybride montre un moteur à la fois.
     {
       q: { fr: "Et si on vend avec une équipe commerciale ?", en: "What if we sell through a sales team?" },
       a: {
-        fr: "Coche « Assisté » au réglage : le moteur suit tes leads, tes opportunités, tes signatures, la mise en production et le renouvellement, sur trois mois glissants, avec tes propres cibles. Si tu vends aussi en libre-service, coche les deux : deux moteurs côte à côte et leur total, jamais l'un contre l'autre.",
-        en: "Tick \"Sales-assisted\" in the setup: the engine follows your leads, opportunities, signatures, go-live and renewals, over rolling three-month periods, against your own targets. If you also sell self-serve, tick both: two engines side by side and their total, never one against the other.",
+        fr: "Coche « Assisté » au réglage : le moteur suit tes leads, tes opportunités, tes signatures, la mise en production et le renouvellement, sur trois mois glissants, avec tes propres cibles. Si tu vends aussi en libre-service, coche les deux : deux moteurs et leur total, jamais l'un contre l'autre.",
+        en: "Tick \"Sales-assisted\" in the setup: the engine follows your leads, opportunities, signatures, go-live and renewals, over rolling three-month periods, against your own targets. If you also sell self-serve, tick both: two engines and their total, never one against the other.",
       },
     },
   ],

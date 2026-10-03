@@ -65,8 +65,10 @@ describe("viewport breakpoints are a short, written list (L-11)", () => {
     // the tabs left with A18 T2.b, and the hybrid's columns read the same
     // container query. The collect hub's two columns left with A18 T3.c: the
     // requests are one screen (AskList), one card per role, a single column.
+    // The total band's three blocks left with A18 T5 (TotalBand stacks on a phone by its own 760px rule, on the
+    // list above): the container query now opens with the filled example's two columns.
     const expectations: [string, RegExp, RegExp][] = [
-      ["app/[locale]/aarrr-funnel-template/_engine/Board.module.css", /@container board \(min-width: 860px\)\s*\{\s*\.totalBlocks/, /@media[^{]*960px\)\s*\{\s*\.totalBlocks/],
+      ["app/[locale]/aarrr-funnel-template/_engine/Board.module.css", /@container board \(min-width: 860px\)\s*\{\s*\.motionColumns/, /@media[^{]*960px\)\s*\{\s*\.motionColumns/],
       ["app/[locale]/aarrr-funnel-template/_engine/WhatIfPanel.module.css", /@container whatif \(min-width: 860px\)/, /@media[^{]*960px\)/],
       ["components/game/RevealCells.module.css", /@container \(max-width: 520px\)/, /@media[^{]*560px\)/],
       ["components/game/PatternCatalogue.module.css", /@container \(max-width: 520px\)/, /@media[^{]*560px\)/],

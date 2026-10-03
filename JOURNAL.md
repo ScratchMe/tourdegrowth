@@ -980,3 +980,67 @@ La note sur un futur `script-src` (l'autoriser par le hash de ce script, jamais 
 - `next build` avec les variables de la CI, et la page reste prérendue (●) dans les deux langues ;
 - les **318 specs** du moteur, du kit des espaces, des cibles, de l'accessibilité et de la plateforme sur le build final : 317 passées, une ignorée par construction ; 922 specs au total (`--list`, hors captures temporaires) ;
 - **captures** du haut de la page, premier passage et retour (avant l'îlot et lu), en français et en anglais, à 1 280 et 390 px : l'outil commence au même endroit avant et après la lecture.
+
+## A18 T5 : l'hybride, un total et un moteur à la fois (2026-10-03, #299)
+
+Onzième étape du portage du retour 07, drapeau fermé : **le tableau hybride** (brief 07 Q18, `TotalBand`), l'écran le plus dense du moteur.
+
+**Avant** :
+- la bande « Deux moteurs, un total » avec le verdict en pochoir, deux blocs (MRR et nouveau MRR du mois), la liaison fléchée, les deux sommes ;
+- puis les deux motions côte à côte, chacune avec sa couverture, son diagnostic et son dessin compact ;
+- la phrase des deux segments, le petit échantillon, « Motion affichée : étapes et « Et si » », la liste et les leviers d'une motion, et le MRR dans 12 mois.
+
+**Maintenant** :
+- **`TotalBand`, une fois, en haut** (neuf dans `components/engine/`). Son titre est celui de la slide `total`, et c'est le titre et la cible du focus du tableau (`engine-verdict`). Viennent ensuite le MRR du libre-service, celui de l'assisté et le MRR total, puis la liaison en dernière ligne, avec sa note : une part du pipeline, pas une attribution.
+  - **Une somme, jamais une comparaison** : ni barre, ni part ; l'ordre est fixe, le libre-service d'abord, quelles que soient les valeurs.
+  - **Ni « + » ni « = »** : le total est séparé par un filet plein, à côté, ou au-dessus au téléphone, où les trois termes s'empilent.
+  - **Le titre est sans l'accent rouge** : en 19 px semi-gras, le rouge (3,57) ne passe pas AA.
+- **Puis la prochaine étape**, une seule pour les deux moteurs.
+- **Puis « Moteur affiché »** (`hybrid.selectorLabel`, renommé, C42) : le même sélecteur, qui choisit maintenant **tout le tableau en dessous**. On y voit :
+  - le verdict du moteur, le titre de sa propre slide (`pelotonTitle`, `relaysTitle`) ;
+  - son diagnostic ;
+  - son dessin (le peloton, ou les relais avec la couverture du pipeline) ;
+  - sa liste, son levier.
+  
+  Jamais deux colonnes. Le petit échantillon de l'assisté se lit juste sous le sélecteur quand l'assisté est affiché, et la phrase des deux segments sous le sélecteur.
+- **Le MRR dans 12 mois avec les « Et si »** passe dans le panneau « Et si » complet (l'inventaire du retour).
+
+**Où vont les pièces qui quittent la bande** : le nouveau MRR du mois et les deux sommes, qu'on refait à la calculatrice, restent sur la slide `total` (`SlideTotal`), qui les avait déjà.
+
+**L'exemple rempli** garde ses deux colonnes (`MotionColumns`) sous la nouvelle bande : il n'a pas de sélecteur, et il montre les deux moteurs d'un coup. À revoir avec T7.
+
+**Ce qui part du tableau** : `MotionColumns` (reste à l'exemple), les styles de l'ancienne bande, et les pastilles de couverture par colonne. Chaque moteur dit son compte dans « Tes chiffres » (`EngineProgress`).
+
+**Les jetons** : `--engine-figure`, le dernier de la liste d'attente d'A18, est lu ; la liste est vide.
+
+**La copie** :
+- `total.ssMrr`, `total.saMrr`, `total.sumMrr`, neuves et « à relire », reprises du retour ;
+- `hybrid.selectorLabel`, « Moteur affiché » / "Engine shown", renommé et marqué « retouché ».
+
+**La relecture (`relecteur-copie`)** :
+- **Appliqué** :
+  - la question de la FAQ sur la vente assistée ne dit plus « deux moteurs côte à côte », et la date de la page le dit ;
+  - les commentaires qui situaient encore la copie « sous les deux diagnostics » ou « sous les deux panneaux » sont corrigés ;
+  - la spec construit la phrase de la liaison depuis `total.link`.
+- **Laissé à T6** : `hybrid.twoSegments` dit encore « Deux motions » sous « Moteur affiché ». Elle est aussi au pied d'une slide que golden-v2 fige à la lettre : son renommage va avec ceux de C42, et une projection du golden.
+- **Pour le bon à tirer A18.d** :
+  - `scenario.totalIn12Row` parle des « Et si » des deux panneaux, qu'on ne voit plus qu'un à la fois ;
+  - le titre de la bande (`slideTitles.total`) redit les trois montants que la bande affiche juste dessous, alors que le retour proposait une autre phrase.
+
+**Les specs** :
+- **`engine-hybrid`** :
+  - la bande (l'ordre, le total après son filet, ni « + » ni « = », la liaison, plus de sommes, un seul verdict en tête) ;
+  - **un moteur à la fois**, qui remplace « deux colonnes » : son verdict, son diagnostic, son dessin, le petit échantillon sous le sélecteur avant le verdict de l'assisté, rien de l'autre moteur ;
+  - à 390 px, les trois termes empilés et le total sous son filet.
+- **`engine-hybrid-journey`** : chaque moteur dit son compte sous « Moteur affiché ».
+- **`engine-mobile`** : les relais lus sur l'assisté affiché, et l'axe avec son diagnostic rouge à l'écran. « Les deux colonnes aussi hautes l'une que l'autre » part avec les colonnes.
+- **`engine-pipeline`** : la couverture se lit sur l'assisté affiché.
+- **Le test unitaire de `TotalBand`** (5 tests).
+- **`breakpoints`** : la requête de conteneur du tableau s'ouvre sur les colonnes de l'exemple. **`dead-tokens`** : la liste vide.
+
+**Vérifié** :
+- `tsc` et `npm run lint` propres ;
+- **3 059 tests unitaires** verts, dont les 5 de `TotalBand` ;
+- `next build` avec les variables de la CI ;
+- les **317 specs** du moteur, du kit des espaces, des cibles, de l'accessibilité et de la plateforme sur le build de T5 : 316 passées, une ignorée par construction ; après la relecture, les 77 de l'hybride, de la page, du téléphone, du pipeline et de l'accessibilité repassent ; 921 specs au total (`--list`, hors captures temporaires) ;
+- **captures** du tableau hybride, le libre-service puis l'assisté affichés, en français et en anglais, à 1 280 et 390 px, sans défilement horizontal.

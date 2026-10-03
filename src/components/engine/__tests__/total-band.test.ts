@@ -1,0 +1,68 @@
+import { createElement, type ReactNode } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { describe, expect, it } from "vitest";
+import { TotalBand, type TotalBandProps } from "../TotalBand";
+
+/**
+ * TotalBand (design system extension 07, A18 T5): two engines, one total
+ * (C4). A sum, never a comparison — pinned without a DOM: the order is the
+ * one given, each label sits with its figure, and nothing but a rule sets
+ * the total off.
+ */
+const html = (node: ReactNode) => renderToStaticMarkup(node as never);
+const band = (props: Partial<TotalBandProps> = {}) =>
+  html(
+    createElement(TotalBand, {
+      eyebrow: "Deux moteurs, un total",
+      title: "Le MRR atteint 228 000 €",
+      engines: [
+        { id: "plg", label: "MRR libre-service", value: "48 000 €" },
+        { id: "slg", label: "MRR assisté", value: "180 000 €" },
+      ],
+      total: { label: "MRR total", value: "228 000 €" },
+      link: createElement("p", null, "31 des 130 opportunités assistées viennent du libre-service."),
+      ...props,
+    }),
+  );
+const css = readFileSync(join(__dirname, "..", "TotalBand.module.css"), "utf8");
+
+describe("TotalBand", () => {
+  it("is a section named by its heading, which takes the focus a person's move sends it", () => {
+    expect(band()).toMatch(/<section[^>]*aria-labelledby="engine-total-title"/);
+    expect(band()).toMatch(/<h2 id="engine-total-title"[^>]*tabindex="-1"/);
+  });
+
+  it("keeps the order it is given — self-serve, sales-assisted, then the total — whatever the values", () => {
+    const markup = band({
+      engines: [
+        { id: "plg", label: "MRR libre-service", value: "1 €" },
+        { id: "slg", label: "MRR assisté", value: "999 999 €" },
+      ],
+    });
+    expect(markup.indexOf("MRR libre-service")).toBeLessThan(markup.indexOf("MRR assisté"));
+    expect(markup.indexOf("MRR assisté")).toBeLessThan(markup.indexOf("MRR total"));
+  });
+
+  it("each figure is read with its label (a definition list), and no « + » nor « = » sits between them", () => {
+    const markup = band();
+    expect(markup.match(/<dt/g)).toHaveLength(3);
+    expect(markup.match(/<dd/g)).toHaveLength(3);
+    // The words a reader sees, tags left out (their attributes carry « = »).
+    const sum = markup.slice(markup.indexOf("<dl"), markup.indexOf("</dl>")).replace(/<[^>]*>/g, " ");
+    expect(sum).toContain("228 000 €");
+    expect(sum).not.toMatch(/[+=]/);
+  });
+
+  it("sets the total off by a rule — beside it, or above it on a phone — and never draws a bar", () => {
+    expect(css).toMatch(/\.total \{[^}]*border-left: var\(--border-solid\)/);
+    expect(css).toMatch(/@media \(max-width: 760px\)[\s\S]*\.total \{[^}]*border-top: var\(--border-solid\)/);
+    expect(band()).not.toMatch(/<svg|<progress|<meter/);
+  });
+
+  it("says the link last, and only when there is one", () => {
+    expect(band().indexOf("opportunités assistées")).toBeGreaterThan(band().indexOf("</dl>"));
+    expect(band({ link: undefined })).not.toContain("opportunités");
+  });
+});
