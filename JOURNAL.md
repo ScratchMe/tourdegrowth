@@ -877,3 +877,26 @@ Tout autre accent passe à l'encre, sans couleur, au poids du titre (déjà 700)
 - `tsc` et `eslint` propres.
 
 **La copie** : une chaîne réécrite, `page.promise`, « à relire », pour le bon à tirer nº10 (C55, la carte de la promesse du nº9 y passe). « prêtes » / « ready » y sont retirés, comme dans le retour. Le relecteur de copie n'a trouvé aucun défaut. Deux points sont signalés pour le bon à tirer : la meta description et la bande de l'accueil disent encore « des slides pour ton CODIR » seul.
+
+## A20.d T7 : la densité avant contre après, mesurée par le même script (2026-10-03)
+
+**La méthode** : `scripts/engine-density.capture.ts`, tests « brief 09 », sur le SaaS du film, sur un build local où le moteur est ouvert. L'**avant** est le code juste après T1 (`b95c7c2`, #310), construit et mesuré par le même script : ses chiffres retombent au pixel sur ceux du brief 09 (3 438 px, 26 contrôles, levier à 3 237 px à 1 280 en français). L'**après** est la branche de T7. Le **retour** est `design/ds-extension-09-return/board/measures.js`, sa propre planche avant et après : son « avant » est redessiné, plus court que le produit, donc seuls ses écarts se comparent.
+
+| Mesure (FR · 1 280) | Avant | Après | Écart | Écart du retour |
+|---|---|---|---|---|
+| Tableau | 3 438 px | 4 295 px | +857 | +822 |
+| Contrôles du tableau | 26 | 27 | +1 | +1 |
+| Contrôles au premier écran | 3 | 3 | 0 | 0 |
+| Haut du levier « Et si » | 3 237 px | 1 943 px | −1 294 | −1 243 |
+| Carte du levier | 262 px | 480 px | +218 | +218 |
+| Panneau « Et si » ouvert | 1 774 px · 9 contrôles | 1 774 px · 9 | 0 | 0 |
+
+En anglais à 1 280 : tableau 3 372 → 4 212 (+840, le retour +828). À 390 : tableau 4 077 → 5 032 en français (+955, le retour +934), 4 102 → 5 039 en anglais. Le levier passe de 3 760 à 2 074 px en français. Le premier écran garde ses trois contrôles partout.
+
+**Un écart avec le retour, à 390 seulement** : le panneau « Et si » ouvert passe de 2 485 à 2 775 px en français (+290, +12 %) et de 2 450 à 2 757 en anglais, là où le retour le raccourcissait de 60 px. Mis côte à côte, l'espacement du portage est même plus serré (les leviers). Mais ses trois tableaux (croissance, un nouveau client, trésorerie) portent huit lignes d'argent de plus que les six tuiles d'avant : le LTV:CAC, ce que rapporte un nouveau client, le payback, les mois après le remboursement, la dépense du mois, la trésorerie immobilisée. C'est le contenu qui grandit, à 1 280 les tableaux tiennent côte à côte et le panneau garde sa hauteur. Rien à reprendre sans décision ; noté pour la re-synchro (A20.f).
+
+**Les captures** : 27 dans `design/ds-extension-09-after/`, numérotées comme celles du brief (`design/ds-extension-09/`). Deux changements, pour qu'un écran montre encore ce qu'il montrait : la 10 (« l'exemple sans marge ») part de `noMarginState()`, l'exemple ayant maintenant sa marge ; trois écrans sont neufs, l'argent de l'exemple (13), sa slide (14), et la slide « Ensemble », neuf leviers bougés (15), en FR sur bureau et en EN sur téléphone. Regardées : le tableau avant contre après (l'ordre de C54 : diagnostic, argent, carte « Et si », puis le peloton), le panneau à 390 avant contre après, et les écrans neufs, déjà vus pendant T6.
+
+**Un piège de mesure** : `pkill -f "next start"` lancé depuis le shell de l'outil tue ce shell lui-même, dont la ligne de commande contient le motif. Le serveur, lui, s'appelle `next-server` et survit : le build suivant est alors servi par l'ancien processus, sans hydratation (`data-state="ssr"`). Arrêter le serveur par son PID (`ps aux | grep next-serve[r]`).
+
+**Consigné** : `CLAUDE.md` (3 212 tests unitaires, 982 specs Playwright, A20.d fait) ; `CHANTIERS.md` (A20.d livré, A20.e à faire) ; le script de densité (son en-tête, les trois écrans neufs).
