@@ -14,7 +14,7 @@ import { buildSlgScenario } from "../slg-scenario";
 import type { EngineState, MetricId } from "../types";
 import { currentSnapshot } from "../values";
 import { EXAMPLE_TODAY, exampleState, hybridState, salesAssistedState, tourResult } from "./fixtures";
-import { asBeforeT3, asTabs, withoutResume } from "./golden-projection";
+import { asBeforeT3, asTabs, withDecidedWords, withoutResume } from "./golden-projection";
 import { CTX_EN, CTX_FR, EN, FR } from "./props";
 
 /**
@@ -138,6 +138,20 @@ describe("golden v2 — a v2 engine reads the same after the change", () => {
     expect(slg.today.opps).toBeUndefined();
   });
 
+  it("the decided words (A18.d) rewrite the v2 hybrid's slides, and only where the old words were", () => {
+    const before = JSON.stringify(outputs.hybrid);
+    const after = JSON.stringify(withDecidedWords(outputs.hybrid));
+    // Non-vacuity: the v2 build printed « motion » and the old link sentence, in both languages.
+    for (const old of ["Deux motions, deux segments", "Two motions, two segments", "opportunités assistées viennent de comptes", "sales-assisted opportunities come from"]) {
+      expect(before).toContain(old);
+      expect(after).not.toContain(old);
+    }
+    expect(after).toContain("Deux moteurs, deux segments");
+    expect(after).toContain("opportunités sont venues du libre-service");
+    // No word of « motion » is left as a word in what a v2 hybrid now reads (the `motion` keys of the JSON aside).
+    expect(after.replace(/"motions?":/g, "").match(/\bmotions?\b/gi) ?? []).toEqual([]);
+  });
+
   it("covers the six v2 states, each with a French and an English reading", () => {
     expect(existsSync(INPUTS) && existsSync(OUTPUTS)).toBe(true);
     expect(Object.keys(inputs).sort()).toEqual(Object.keys(outputs).sort());
@@ -153,8 +167,9 @@ describe("golden v2 — a v2 engine reads the same after the change", () => {
   for (const name of Object.keys(inputs)) {
     it(`${name}: same board, same slides, same text, to the character`, () => {
       const { state, tour } = inputs[name]!;
-      // The step-by-step's resume position retired with it (A18 T3.b): dropped from the expected side, the file untouched.
-      expect(outputsOf(openV2(state), tour)).toEqual(withoutResume(outputs[name]));
+      // The step-by-step's resume position retired with it (A18 T3.b): dropped from the expected side, the file untouched;
+      // and the words Antoine decided at bon à tirer nº9 (A18.d) replace the old ones there (`withDecidedWords`).
+      expect(outputsOf(openV2(state), tour)).toEqual(withDecidedWords(withoutResume(outputs[name])));
     });
   }
 });

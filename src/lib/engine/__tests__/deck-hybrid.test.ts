@@ -111,7 +111,7 @@ describe("« deux moteurs, un total » on a slide", () => {
     ]);
     // Each block names its stage and the slide it is on.
     expect(blocks.map((b) => b.stage)).toEqual(["L'activation (slide 3)", "Le taux de closing (slide 5)"]);
-    expect(total.lines.find((l) => l.row === "link")!.text).toBe(nb("31 des 130 opportunités assistées viennent de comptes du libre-service (juin à août 2026)."));
+    expect(total.lines.find((l) => l.row === "link")!.text).toBe(nb("31 opportunités sont venues du libre-service (juin à août 2026)."));
     expect(total.notes.some((n) => n.includes("(slides 3 et 5)"))).toBe(true);
   });
 

@@ -103,7 +103,7 @@ test.describe("the numbers list", () => {
     await expect(page.getByTestId("engine-metric-act-event")).toBeFocused();
   });
 
-  test("the next step's « Go to the next number » opens the five-minute number's screen", async ({ page }) => {
+  test("the next step's « Next number » opens the five-minute number's screen", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await startEngine(page);
     await page.evaluate((key) => {

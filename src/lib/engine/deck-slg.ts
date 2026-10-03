@@ -419,7 +419,7 @@ export function buildUnitBoth(
   const wide = (["plg", "slg"] as const).filter((m) => marginIsCompanyWide(state, m));
   const variants = derived.sanity.find((c) => c.id === "cac-variants-differ");
   const footer = [
-    strings.hybrid.twoSegments,
+    strings.hybrid.twoEngines,
     plg.unit.ltv.kind === "known" || slg.unit.ltv.kind === "known" ? s.unitCap : "",
     wide.length === 2 ? s.unitCompanyWideBoth : wide.length === 1 ? fillTemplate(s.unitCompanyWide, { motion: strings.hybrid.motionSubject[wide[0]!] }) : "",
     variants ? sanityText(variants, strings, ctx.locale, metrics) : "",
