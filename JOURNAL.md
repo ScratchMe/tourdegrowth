@@ -1045,7 +1045,7 @@ Onzième étape du portage du retour 07, drapeau fermé : **le tableau hybride**
 - les **317 specs** du moteur, du kit des espaces, des cibles, de l'accessibilité et de la plateforme sur le build de T5 : 316 passées, une ignorée par construction ; après la relecture, les 77 de l'hybride, de la page, du téléphone, du pipeline et de l'accessibilité repassent ; 921 specs au total (`--list`, hors captures temporaires) ;
 - **captures** du tableau hybride, le libre-service puis l'assisté affichés, en français et en anglais, à 1 280 et 390 px, sans défilement horizontal.
 
-## A18 T6 : les mots, les renommages de C42 et les cinq « ? » (2026-10-03, #PR)
+## A18 T6 : les mots, les renommages de C42 et les cinq « ? » (2026-10-03, #300)
 
 Douzième étape du portage du retour 07, drapeau fermé : **les mots**. Le retour liste 49 chaînes changées (sa colonne « *was* »), et C42 retient tous les renommages, relus au bon à tirer.
 
