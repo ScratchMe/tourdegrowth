@@ -1,0 +1,9 @@
+/* CashWarning — design system extension 09. Tokens only. */
+.CashWarning_root {
+  margin: 0;
+  padding: var(--space-1) 0 var(--space-1) var(--space-7);
+  border-left: var(--money-warning-edge);
+  font: var(--body-md);
+  color: var(--text-body);
+  max-width: var(--measure-read, 62ch);
+}

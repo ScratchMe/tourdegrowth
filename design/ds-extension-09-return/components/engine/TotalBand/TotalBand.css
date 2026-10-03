@@ -1,0 +1,106 @@
+/* TotalBand — design system extension 07, changed by extension 09 (the totals
+ * line). Tokens only. */
+.TotalBand_root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  max-width: var(--engine-measure);
+  /* As ported (A18, `11`): a band of the board, not a boxed card — the
+   * board keeps one raised card and one boxed next step. */
+  padding: 0;
+  background: none;
+  border: none;
+  box-shadow: none;
+}
+
+.TotalBand_title {
+  font: var(--title-card);
+}
+
+.TotalBand_sum {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-5) var(--space-7);
+}
+
+.TotalBand_term {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.TotalBand_label {
+  font: var(--meta-xs);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.TotalBand_value {
+  font: var(--engine-figure);
+  font-variant-numeric: var(--tabular);
+}
+
+.TotalBand_total {
+  padding-left: var(--space-7);
+  border-left: var(--border-solid);
+}
+
+.TotalBand_total .TotalBand_value {
+  font: var(--engine-figure-lg);
+}
+
+@media (max-width: 760px) {
+  .TotalBand_sum {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .TotalBand_total {
+    padding: var(--space-5) 0 0;
+    border-left: none;
+    border-top: var(--border-solid);
+  }
+}
+
+.TotalBand_link {
+  font: var(--body-sm);
+  color: var(--text-muted);
+}
+
+/* Extension 09: what adds up across the two engines, under the sum — the
+ * ARR, the MRR in 12 months, the cash tied up. One line, set off by a hairline. */
+.TotalBand_totals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-5) var(--space-9);
+  margin: 0;
+  padding-top: var(--space-5);
+  border-top: var(--border-width-hairline) dashed var(--border-divider);
+}
+
+.TotalBand_totals .TotalBand_value {
+  font: var(--chart-value);
+}
+
+/* Extension 09, a phone: the two engines side by side over their total, and
+ * the totals two by two — the band stays about as tall as it was before the
+ * totals joined it. */
+@media (max-width: 760px) {
+  .TotalBand_sum {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-5) var(--space-7);
+  }
+  .TotalBand_total {
+    grid-column: 1 / -1;
+  }
+  .TotalBand_totals {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-4) var(--space-7);
+  }
+  .TotalBand_totals .TotalBand_value {
+    font: var(--chart-value-compact);
+  }
+}

@@ -1,0 +1,45 @@
+<!-- @dsCard group="Extension 09 · proposal" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The engine's money · states</title>
+<!-- Everything here is source: no build step, no CDN. Serve the folder over
+     http (ES modules do not load from file://). The project's own fonts: this
+     folder lives at design/ds-extension-09-return/. -->
+<link rel="stylesheet" href="../../../fonts/fonts.css">
+<link rel="stylesheet" href="system-snapshot.css">
+<!-- Return 07's tokens and components, as ported (A18): unchanged. -->
+<link rel="stylesheet" href="r07/engine.css">
+<link rel="stylesheet" href="r07/EngineLanding.css">
+<link rel="stylesheet" href="r07/EngineBar.css">
+<link rel="stylesheet" href="r07/NextStep.css">
+<link rel="stylesheet" href="r07/EngineProgress.css">
+<link rel="stylesheet" href="r07/NumberList.css">
+<!-- Extension 09: the money's tokens and components (LeverCard and
+     TotalBand replace return 07's: same class names, rules added). -->
+<link rel="stylesheet" href="../tokens/money.css">
+<link rel="stylesheet" href="../components/engine/MoneyBlock/MoneyBlock.css">
+<link rel="stylesheet" href="../components/engine/WorthBars/WorthBars.css">
+<link rel="stylesheet" href="../components/engine/CashWarning/CashWarning.css">
+<link rel="stylesheet" href="../components/engine/MrrCurve/MrrCurve.css">
+<link rel="stylesheet" href="../components/engine/LeverCard/LeverCard.css">
+<link rel="stylesheet" href="../components/engine/WhatIfFigures/WhatIfFigures.css">
+<link rel="stylesheet" href="../components/engine/LeverSum/LeverSum.css">
+<link rel="stylesheet" href="../components/engine/TotalBand/TotalBand.css">
+<link rel="stylesheet" href="../components/engine/PaybackChart/PaybackChart.css">
+<link rel="stylesheet" href="../components/engine/SlideUnitEconomics/SlideUnitEconomics.css">
+<link rel="stylesheet" href="../components/engine/SlideWhatIf/SlideWhatIf.css">
+<link rel="stylesheet" href="board.css">
+<!-- The components import React from "react" and the system from
+     "tour-de-growth". On the board those are react-lite.js and sys/ (the
+     synced components' markup and class names); in the app, the real ones. -->
+<script type="importmap">{ "imports": { "react": "./react-lite.js", "tour-de-growth": "./sys/index.js" } }</script>
+</head>
+<body>
+<div id="root"></div>
+<noscript>The board draws its states with a small script (react-lite.js + board.js), from the components' own files.</noscript>
+<script type="module" src="board.js"></script>
+</body>
+</html>

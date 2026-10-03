@@ -1,0 +1,582 @@
+/* The board's own layout: frames, the page stand-ins, the slides' frame.
+ * Board only — never ported. Tokens only, like everything else in the
+ * return, except the stand-ins' fixed heights (the production header 72px,
+ * the space band 46px), copied from the build. */
+
+body {
+  margin: 0;
+}
+
+body.Board_framing {
+  background: var(--surface-desk);
+  padding: var(--space-8);
+}
+
+.Board_frame {
+  display: block;
+  border: var(--border-solid);
+  background: var(--surface-page);
+}
+
+/* ── Page stand-ins (app.js) ── */
+.App_header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 72px;
+  padding: 0 var(--gutter-desktop);
+  background: var(--surface-card);
+}
+
+.App_wordmark {
+  font: var(--display-wordmark);
+  letter-spacing: var(--display-letter-spacing);
+  color: var(--text-body);
+}
+
+.App_wordmarkRed {
+  color: var(--paint-red);
+}
+
+.App_band {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  height: 46px;
+  padding: 0 var(--gutter-desktop);
+  background: var(--space-engine-bg);
+  color: var(--space-engine-text);
+  border-bottom: var(--border-solid);
+  font: var(--meta-2xs);
+  letter-spacing: var(--meta-tracking);
+}
+
+.App_bandTitle {
+  font: var(--display-wordmark);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.App_main {
+  padding: var(--space-12) var(--gutter-desktop) var(--space-15);
+}
+
+.Board_pageInner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-13);
+  max-width: var(--width-desktop);
+  margin: 0 auto;
+}
+
+[data-engine=known].Board_pageInner {
+  gap: var(--space-10);
+}
+
+.Board_toolOnly {
+  padding: var(--space-11) var(--gutter-desktop) var(--space-15);
+}
+
+/* The tool sits in the page's 1040px column; everything in it keeps the
+ * engine's 720px measure, except the opened "What if?" panel, which takes
+ * the column's width, as ported (`03`). */
+.Board_tool {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-11);
+  max-width: var(--width-desktop);
+  width: 100%;
+}
+
+.Board_tool > * {
+  max-width: var(--engine-measure);
+}
+
+.Board_tool > .Board_panel {
+  max-width: none;
+}
+
+.Board_toolOnly .Board_tool {
+  margin: 0 auto;
+}
+
+.Board_wide {
+  padding: var(--space-11) var(--gutter-desktop) var(--space-15);
+  max-width: var(--width-desktop);
+  margin: 0 auto;
+}
+
+.Board_below {
+  max-width: var(--engine-measure);
+}
+
+.Board_note {
+  font: var(--meta-xs);
+  color: var(--text-muted);
+  max-width: var(--engine-measure);
+  margin-bottom: calc(-1 * var(--space-10));
+}
+
+.Board_p {
+  font: var(--body-md);
+  color: var(--text-body);
+}
+
+.Board_h2 {
+  font: var(--display-section);
+  letter-spacing: var(--display-letter-spacing);
+}
+
+.Board_h3 {
+  font: var(--title-card);
+}
+
+.Board_noStage {
+  color: var(--text-muted);
+}
+
+/* The verdict (app): the first slide's title, at --engine-verdict. */
+.App_verdict {
+  font: var(--engine-verdict);
+  letter-spacing: var(--display-letter-spacing);
+  text-transform: uppercase;
+  color: var(--text-body);
+  text-wrap: balance;
+}
+
+.App_verdictRed {
+  color: var(--paint-red);
+}
+
+.App_verdictPending {
+  padding: var(--space-7);
+  border: var(--engine-pending-edge);
+  border-radius: var(--radius-panel);
+  font: var(--body-md);
+  color: var(--text-muted);
+}
+
+.App_diag {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.App_diagStage {
+  font: var(--display-section);
+  letter-spacing: var(--display-letter-spacing);
+  text-transform: uppercase;
+  color: var(--paint-red);
+}
+
+.App_diagNumber {
+  font: var(--meta-sm);
+  color: var(--text-body);
+}
+
+.App_diagValue {
+  font: var(--body-lg);
+}
+
+.App_diagHiding {
+  font: var(--body-md);
+  color: var(--text-alert);
+  max-width: var(--measure-read);
+}
+
+.App_diagTop {
+  font: var(--meta-xs);
+  color: var(--text-muted);
+  max-width: var(--measure-read);
+}
+
+.App_peloton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.App_pelotonTitle {
+  font: var(--title-card);
+}
+
+.App_pelotonLead {
+  font: var(--meta-xs);
+  color: var(--text-muted);
+}
+
+.App_pelotonCols {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-8);
+}
+
+.App_pelotonCol {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  margin: 0;
+}
+
+.App_pelotonText {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.App_pelotonN {
+  font: var(--chart-value-xl);
+}
+
+.App_pelotonLabel {
+  font: var(--engine-stage-title);
+  text-transform: uppercase;
+  margin-bottom: var(--space-3);
+}
+
+.App_pelotonSrc {
+  font: var(--meta-xs);
+  color: var(--text-muted);
+}
+
+/* ── Board compositions around the components ── */
+.Board_meta {
+  font: var(--meta-xs);
+  color: var(--text-muted);
+}
+
+/* A part drawn as it is, unchanged by this brief: one dashed line. */
+.Board_stub {
+  padding: var(--space-5) var(--space-7);
+  border: var(--border-dashed);
+  border-radius: var(--radius-field);
+  font: var(--meta-xs);
+  color: var(--text-muted);
+}
+
+.Board_tour {
+  max-width: var(--engine-measure);
+}
+
+.Board_motion {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-7);
+}
+
+/* Settings */
+.Board_settings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--form-gap-md);
+}
+
+.Board_settingsGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--form-gap-sm);
+  padding-top: var(--space-8);
+  border-top: var(--border-rule);
+}
+
+.Board_targets {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--form-gap-sm) var(--space-10);
+}
+
+.Board_settingsActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-5) var(--space-10);
+}
+
+/* ── The full "What if?" panel, opened in place under the card ── */
+.Board_panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
+}
+
+.Board_panelGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  gap: var(--space-12);
+  align-items: start;
+}
+
+.Board_panelLevers,
+.Board_panelFigures {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+  min-width: 0;
+}
+
+.Board_allBack {
+  align-self: flex-start;
+}
+
+.App_lever {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-bottom: var(--space-5);
+  border-bottom: var(--border-rule);
+}
+
+.App_leverHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-5);
+}
+
+.App_leverToday {
+  font: var(--meta-xs);
+  color: var(--text-muted);
+}
+
+/* Today's tiles (the "before" panel only). */
+.App_tiles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-5);
+}
+
+.App_tile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-6) var(--space-7);
+  background: var(--surface-card);
+  border: var(--border-solid);
+  border-radius: var(--radius-panel);
+}
+
+.App_tileLabel,
+.App_tileToday {
+  font: var(--meta-xs);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.App_tileToday {
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.App_tileValue {
+  font: var(--chart-value);
+}
+
+.App_tileChange {
+  font: var(--meta-sm);
+  font-weight: 700;
+}
+
+/* ── The slides: 960 × 540, scaled to the column on a phone ── */
+.Board_slides {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
+}
+
+.Slide_viewport {
+  width: calc(var(--money-slide-width) * var(--slide-scale));
+  height: calc(var(--money-slide-height) * var(--slide-scale));
+  overflow: hidden;
+  flex: none;
+}
+
+.Slide_root {
+  box-sizing: border-box;
+  width: var(--money-slide-width);
+  height: var(--money-slide-height);
+  transform: scale(var(--slide-scale));
+  transform-origin: top left;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  padding: var(--space-11) var(--money-slide-pad) var(--space-7);
+  background: var(--surface-page);
+  border: var(--border-width-stamp) solid var(--border-hard);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+}
+
+.Slide_top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-7);
+}
+
+.Slide_header {
+  font: var(--money-slide-note);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.Slide_badge {
+  padding: var(--space-1) var(--space-4);
+  border: var(--border-width-hairline) dashed var(--border-soft);
+  border-radius: var(--radius-tag);
+  font: var(--money-slide-note);
+  color: var(--text-body);
+}
+
+.Slide_title {
+  font: var(--money-slide-title);
+  letter-spacing: var(--display-letter-spacing);
+  color: var(--text-body);
+  text-wrap: balance;
+  max-width: 27em;
+}
+
+.Slide_body {
+  flex: 1;
+  min-height: 0;
+}
+
+.Slide_foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: var(--space-10);
+  padding-top: var(--space-5);
+  border-top: var(--border-rule);
+}
+
+.Slide_sources,
+.Slide_assume {
+  font: var(--money-slide-note);
+  color: var(--text-muted);
+  max-width: 62em;
+}
+
+.Slide_brand {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-5);
+  flex: none;
+  font: var(--money-slide-note);
+  color: var(--text-muted);
+}
+
+.Slide_wordmark {
+  font: var(--display-wordmark-sm);
+  color: var(--text-body);
+}
+
+.Slide_page {
+  font-weight: 700;
+  color: var(--text-body);
+}
+
+/* The deck's order (C48). */
+.Board_deck {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.Board_deckList {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: 0;
+  margin: 0;
+}
+
+.Board_deckItem {
+  display: grid;
+  grid-template-columns: 4.5em minmax(0, 1fr);
+  gap: var(--space-1) var(--space-5);
+  padding: var(--space-4) 0;
+  border-bottom: var(--border-rule);
+  font: var(--body-md);
+}
+
+.Board_deckN {
+  font: var(--meta-sm);
+  font-weight: 700;
+}
+
+.Board_deckNote {
+  grid-column: 2;
+  font: var(--meta-xs);
+  color: var(--text-muted);
+}
+
+.Board_thumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+}
+
+@media (max-width: 760px) {
+  .App_header,
+  .App_band {
+    padding: 0 var(--gutter-mobile);
+  }
+  .App_main {
+    padding: var(--space-10) var(--gutter-mobile) var(--space-14);
+  }
+  .Board_pageInner {
+    gap: var(--space-11);
+  }
+  .Board_toolOnly,
+  .Board_wide {
+    padding: var(--space-8) var(--gutter-mobile) var(--space-14);
+  }
+  .Board_tool {
+    gap: var(--space-10);
+  }
+  .App_verdict {
+    font: var(--engine-verdict-mobile);
+  }
+  .App_pelotonCols {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-8);
+  }
+  .App_pelotonCol {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: var(--space-8);
+    padding-bottom: var(--space-8);
+    border-bottom: var(--border-rule);
+  }
+  .App_pelotonN {
+    font: var(--display-section);
+  }
+  .App_pelotonCol > .DotGrid_grid,
+  .App_pelotonCol > .DotGrid_unknown {
+    flex: none;
+    width: 40%;
+  }
+  .Board_targets,
+  .Board_panelGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .App_tiles {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .Board_deckItem {
+    grid-template-columns: 3.5em minmax(0, 1fr);
+  }
+  /* The board's GlossaryTerm stand-in places its popover under the term;
+   * on a phone, across the column (the app's popover finds its own room). */
+  .GlossaryTerm_anchor .DefinitionPopover_popover {
+    position: fixed !important;
+    top: auto !important;
+    left: var(--gutter-mobile) !important;
+    right: var(--gutter-mobile) !important;
+    margin-top: var(--space-8);
+  }
+}

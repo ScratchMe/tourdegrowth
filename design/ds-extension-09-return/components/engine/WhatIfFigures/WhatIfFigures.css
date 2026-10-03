@@ -1,0 +1,65 @@
+/* WhatIfFigures — design system extension 09. Tokens only. */
+.WhatIfFigures_root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.WhatIfFigures_head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-6);
+}
+
+.WhatIfFigures_title {
+  font: var(--title-card);
+}
+
+.WhatIfFigures_table .DataTable_caption {
+  font: var(--meta-xs);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding-bottom: var(--space-2);
+}
+
+/* The change is the news: bold ink, as StatTile's `neutral` delta. */
+.WhatIfFigures_table td:nth-child(4) {
+  font-weight: 700;
+}
+
+/* The phone's second line in the what-if cell: hidden on a desktop, where
+ * "today" has its own column. */
+.WhatIfFigures_todayLine {
+  display: none;
+}
+
+.WhatIfFigures_moved td {
+  white-space: nowrap;
+}
+
+@media (max-width: 760px) {
+  .WhatIfFigures_moved th:nth-child(2),
+  .WhatIfFigures_moved td:nth-child(2) {
+    display: none;
+  }
+  .WhatIfFigures_todayLine {
+    display: block;
+    font: var(--meta-xs);
+    color: var(--text-muted);
+    white-space: normal;
+  }
+  .WhatIfFigures_table th,
+  .WhatIfFigures_table td {
+    padding-left: var(--space-2);
+    padding-right: var(--space-2);
+  }
+  .WhatIfFigures_table tbody th {
+    font: var(--field-label-sm);
+  }
+  .WhatIfFigures_table .DataTable_numeric {
+    font: var(--meta-sm);
+  }
+}

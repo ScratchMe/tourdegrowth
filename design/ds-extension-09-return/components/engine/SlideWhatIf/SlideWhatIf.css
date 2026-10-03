@@ -1,0 +1,104 @@
+/* SlideWhatIf — design system extension 09. Tokens only. Sized for the
+ * deck's 960 × 540 slide. */
+.SlideWhatIf_root {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: var(--space-9);
+  align-items: start;
+}
+
+.SlideWhatIf_left,
+.SlideWhatIf_right {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.SlideWhatIf_note {
+  font: var(--money-slide-note);
+  color: var(--text-muted);
+}
+
+.SlideWhatIf_table {
+  background: var(--surface-card);
+  border: var(--border-width-fine) solid var(--border-hard);
+  border-radius: var(--radius-field);
+  border-collapse: separate;
+  border-spacing: 0;
+  padding: var(--space-3) var(--space-5);
+}
+
+.SlideWhatIf_table .DataTable_caption {
+  font: var(--money-slide-note);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 0 0 var(--space-2);
+}
+
+.SlideWhatIf_table thead th {
+  font: var(--money-slide-note);
+  padding-top: 0;
+}
+
+.SlideWhatIf_table th,
+.SlideWhatIf_table td {
+  padding: calc(var(--space-1) / 2) var(--space-3);
+}
+
+.SlideWhatIf_table tbody th,
+.SlideWhatIf_table tbody td {
+  font: var(--money-slide-body);
+  white-space: nowrap;
+}
+
+.SlideWhatIf_table .DataTable_numeric {
+  font: var(--money-slide-note);
+  font-size: inherit;
+}
+
+.SlideWhatIf_table tbody .DataTable_numeric {
+  font: var(--money-slide-body);
+  font-variant-numeric: var(--tabular);
+}
+
+.SlideWhatIf_table tbody td:last-child {
+  font-weight: 700;
+}
+
+/* "Together": the sum under the curve, smaller. */
+.SlideWhatIf_together .LeverSum_title {
+  font: var(--money-slide-note);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.SlideWhatIf_together .LeverSum_label,
+.SlideWhatIf_together .LeverSum_value,
+.SlideWhatIf_together .LeverSum_extra {
+  font: var(--money-slide-body);
+}
+
+.SlideWhatIf_together .LeverSum_list {
+  row-gap: var(--space-2);
+  grid-template-columns: max-content minmax(var(--space-12), 1fr) max-content;
+}
+
+.SlideWhatIf_together .LeverSum_root {
+  gap: var(--space-3);
+}
+
+.SlideWhatIf_together .LeverSum_rowTogether .LeverSum_value,
+.SlideWhatIf_together .LeverSum_rowTogether .LeverSum_label,
+.SlideWhatIf_together .LeverSum_rowSum .LeverSum_label {
+  font-weight: 700;
+}
+
+/* The compounding, in words, under the figures. */
+.SlideWhatIf_sumNote {
+  font: var(--money-slide-body);
+  font-weight: 600;
+  color: var(--text-body);
+}

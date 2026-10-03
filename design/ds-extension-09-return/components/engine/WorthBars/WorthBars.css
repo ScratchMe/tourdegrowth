@@ -1,0 +1,135 @@
+/* WorthBars — design system extension 09. Tokens only. */
+.WorthBars_root {
+  position: relative;
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr) max-content;
+  grid-template-rows: auto auto auto;
+  align-items: center;
+  gap: var(--money-bar-gap) var(--space-6);
+  margin: 0;
+}
+
+.WorthBars_label {
+  font: var(--field-label);
+  color: var(--text-body);
+}
+
+.WorthBars_track {
+  position: relative;
+  height: var(--money-bar);
+  margin: 0;
+}
+
+.WorthBars_rowCost {
+  grid-row: 1;
+}
+
+.WorthBars_rowBrings {
+  grid-row: 2;
+}
+
+.WorthBars_label.WorthBars_rowCost,
+.WorthBars_label.WorthBars_rowBrings {
+  grid-column: 1;
+}
+
+.WorthBars_track.WorthBars_rowCost,
+.WorthBars_track.WorthBars_rowBrings {
+  grid-column: 2;
+}
+
+.WorthBars_value {
+  grid-column: 3;
+  margin: 0;
+  font: var(--chart-value-compact);
+  font-variant-numeric: var(--tabular);
+  text-align: right;
+}
+
+.WorthBars_bar,
+.WorthBars_range,
+.WorthBars_unknown {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  border-radius: var(--radius-mark);
+}
+
+.WorthBars_bar {
+  background: var(--money-bar-ink);
+}
+
+/* The estimate's reach: hatched, edged in the axis ink so it holds 3:1
+ * against the page on its own. */
+.WorthBars_range {
+  background: var(--money-range-fill);
+  box-shadow: inset 0 0 0 var(--border-width-hairline) var(--money-range-ink);
+  border-radius: 0 var(--radius-mark) var(--radius-mark) 0;
+}
+
+.WorthBars_unknown {
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--money-unknown-fill);
+  border: var(--money-unknown-edge);
+  height: calc(var(--money-bar) + var(--space-5));
+  top: calc(var(--space-5) / -2);
+}
+
+.WorthBars_unknownMark {
+  display: grid;
+  place-items: center;
+  width: calc(var(--money-bar) + var(--space-6));
+  height: calc(var(--money-bar) + var(--space-6));
+  border: var(--border-solid);
+  border-radius: var(--radius-round);
+  background: var(--surface-card);
+  font: var(--chart-value-compact);
+  line-height: 1;
+}
+
+/* The line where the cost ends, carried across both rows, behind the bars. */
+.WorthBars_guide {
+  grid-column: 2;
+  grid-row: 1 / 3;
+  position: relative;
+  align-self: stretch;
+  margin: calc(var(--space-2) * -1) 0;
+  pointer-events: none;
+}
+
+.WorthBars_costLine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-left: var(--money-cost-line);
+  transform: translateX(calc(var(--border-width) / -2));
+}
+
+/* The bracket under the gap, from the end of the margin to the end of the
+ * cost (or beyond it). */
+.WorthBars_bracket {
+  position: absolute;
+  top: calc(100% + var(--space-2));
+  height: var(--money-bracket);
+  border: var(--border-width) solid var(--money-bracket-ink);
+  border-top: none;
+  border-radius: 0 0 var(--radius-mark) var(--radius-mark);
+}
+
+.WorthBars_gap {
+  grid-column: 2 / 4;
+  grid-row: 3;
+  margin: calc(var(--money-bracket) - var(--space-2)) 0 0;
+  font: var(--meta-sm);
+  color: var(--text-body);
+  text-align: right;
+}
+
+/* On a slide: the same bars, a little thicker. */
+.WorthBars_slide {
+  --money-bar: var(--money-bar-slide);
+}

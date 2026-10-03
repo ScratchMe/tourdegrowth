@@ -1,0 +1,104 @@
+/* tokens/money.css — design system extension 09: the engine's money.
+ *
+ * Built on the existing layers and on return 07's tokens/engine.css (ported
+ * as A18). No new primitive colour: every colour below is a semantic name
+ * over the system's ink, axis, grid and red, by meaning. The measures and
+ * the type sizes are new.
+ *
+ * Paper only, like the engine: nothing under [data-world=night].
+ */
+
+:root {
+  /* ── Measures ─────────────────────────────────────────────────────────── */
+
+  /* MrrCurve: the plot's height in LeverCard and the panel. The width is
+   * the column's (720px, or 342px on a phone): the curve is drawn at its
+   * real width, so its type never scales. */
+  --money-curve-height: 200px;
+  --money-curve-height-mobile: 170px;
+  /* Room at the plot's right for the two line keys (desktop only; on a
+   * phone the keys go under the plot). */
+  --money-curve-keys: 168px;
+  --money-curve-line-today: 2px;
+  --money-curve-line-whatif: 3px;
+  --money-curve-dot: 4px;
+
+  /* WorthBars: the two bars of "what one new customer is worth". */
+  --money-bar: 14px;
+  --money-bar-slide: 16px;
+  --money-bar-gap: var(--space-6);
+  /* The bracket that measures the gap between the two bars. */
+  --money-bracket: 8px;
+
+  /* LeverSum: the bars of "each lever on its own, together". */
+  --money-sum-bar: 12px;
+
+  /* The slides: 16:9, drawn at 960 × 540 and exported at 2× (PNG, PDF). */
+  --money-slide-width: 960px;
+  --money-slide-height: 540px;
+  --money-slide-pad: 44px;
+
+  /* ── Type ─────────────────────────────────────────────────────────────── */
+
+  /* MRR and ARR on the board, the MRR and ARR in 12 months in LeverCard: the
+   * engine's large figure (return 07). */
+  --money-figure: var(--engine-figure-lg);
+  /* The same on a phone: two figures side by side down to 320px ("~€1,500,000"
+   * in a 132px column). */
+  --money-figure-mobile: 700 22px/1 var(--font-display);
+  /* A slide's title: the verdict's face, at the size a slide is read at
+   * from across a table. */
+  --money-slide-title: 700 36px/1.1 var(--font-display);
+  /* A figure in the unit-economics slide's row of six tiles. */
+  --money-slide-figure: 700 22px/1 var(--font-display);
+  /* The same, in the hybrid's two columns. */
+  --money-slide-figure-sm: 700 19px/1 var(--font-display);
+  /* The "?" inside a chart's unknown box. */
+  --money-chart-mark: 700 17px/1 var(--font-display);
+  --money-slide-body: 500 13px/1.45 var(--font-ui);
+  --money-slide-note: 500 11px/1.45 var(--font-mono);
+}
+
+:root,
+[data-world=paper] {
+  /* ── Colour, by meaning ──────────────────────────────────────────────── */
+
+  /* A projection is ink, never red (constraint 1). "At today's pace" is the
+   * axis ink, thinner; "with your what-ifs" the full ink, thicker; the room
+   * between them is the grid's wash. Neither line is dashed: dashed means
+   * "not yet", and both lines are equally projections. */
+  --money-line-today: var(--viz-axis);
+  --money-line-whatif: var(--viz-ink);
+  --money-gain-fill: var(--viz-grid);
+
+  /* A range (an estimate somewhere upstream): the system's hatch for an
+   * estimate, as the peloton and the status marks draw it. */
+  --money-range-ink: var(--viz-unknown);
+  --money-range-fill: var(--viz-unknown-fill);
+
+  /* What one new customer costs and brings back: both in ink (one unit,
+   * two lengths); the line where the cost ends is the axis ink, dashed only
+   * because it is a reading guide, not a mark. */
+  --money-bar-ink: var(--viz-ink);
+  --money-cost-line: var(--border-width) dashed var(--viz-axis);
+  --money-bracket-ink: var(--viz-axis);
+
+  /* The loss: ink, solid — serious, and never the leak's red. Its "maybe"
+   * is the same tag, dashed ("not yet": the ranges overlap). */
+  --money-loss-bg: var(--surface-inverse);
+  --money-loss-text: var(--text-on-inverse);
+
+  /* The long-payback warning: the system's advice (dashed red edge), the
+   * same look as the backup line — a warning, not an alarm; never the solid
+   * red of a diagnosis. */
+  --money-warning-edge: var(--engine-advice-edge);
+
+  /* An unknown ("?"): the dashed, hatched box of the peloton and the
+   * unit-economics slide. */
+  --money-unknown-edge: var(--border-dashed);
+  --money-unknown-fill: var(--viz-unknown-fill);
+
+  /* A published reference on a chart: situates only — the axis ink, dotted,
+   * labelled, never a colour or a verdict (constraint 2). */
+  --money-reference-line: var(--border-width-hairline) dotted var(--viz-axis);
+}

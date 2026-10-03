@@ -1496,3 +1496,23 @@ Le zip est rangé par langue puis par format, avec un LISEZ-MOI. La section n'ap
 - la section masquée hors de claude.ai ;
 - les vingt-quatre fichiers stockés : ils sont bien les derniers exports. Le diagnostic et le moteur n'ont pas changé depuis le leur, et le Tour et le jeu sont ceux de #307 ;
 - **pas vérifié d'ici** : le clic lui-même dans claude.ai (le téléchargement depuis le stockage de la page, et la confirmation d'enregistrement), qui ne se joue que dans le lecteur.
+
+## A20, prompt F : le retour du brief 09 recopié, comparé, ses décisions posées (2026-10-03, #309)
+
+**La demande** : recopier le retour dans `design/ds-extension-09-return/` comme pour le 07, le comparer au brief, poser en section C les décisions qu'il demande, avec une reco ; ne rien porter avant qu'Antoine ait tranché.
+
+**La copie** : 106 fichiers, lus par `DesignSync` puis écrits par un script depuis les réponses brutes de `get_file` gardées dans la transcription (une réponse trop longue pour l'écran, `system-snapshot.css`, est lue dans son fichier de résultat). Les 104 U+202F et 2 U+00A0 sont intacts. Trois fichiers de la planche ramenaient les trois lignes que CodeQL avait relevées au retour 07 (`r07/EngineLanding.js`, `make-copy.mjs`, et `board.js`, que CodeQL a relevé sur la PR : sa garde `SCREENS.some(…)` rendait la chaîne de l'adresse) : corrigées de la même façon, dit dans `COPIE.md`.
+
+**Ce qui a été vérifié** :
+- `COPY.md` régénéré par `make-copy.mjs` : identique à l'octet ;
+- la planche rejouée dans Chromium, sur une copie hors du dépôt, avec les polices de `.design-sync/fonts/` : 210 états (35 écrans, deux langues, 1 280, 390 et 320 px), zéro erreur, zéro défilement, zéro cible sous 44 px, et `measures.js` retrouvé au pixel ;
+- sa réplique du modèle (`board/money.js`) contre `lib/engine/money.ts` sur le SaaS du film : le MRR dans 12 mois, le LTV, le CAC, le payback, la durée de vie, les mois après, la dépense et la trésorerie immobilisée tombent juste, aujourd'hui, avec les trois leviers et avec chacun seul ;
+- quatre écrans regardés en capture (l'argent du film, sa slide d'unit economics, la carte, l'hybride).
+
+**Les écarts trouvés** :
+- le tableau « sain » est un moteur inventé, pas l'exemple : l'exemple, avec une marge estimée de 70 à 80 %, donne un payback de 5 à 6 mois et un LTV:CAC de 6 à 7 (un test jetable, retiré), donc jamais l'alerte à 9 mois ;
+- son « avant » est redessiné, plus court que le produit (3 151 px contre 3 438 à 1 280 en français) : seuls ses écarts servent ;
+- son assisté a son propre modèle simplifié ; le produit garde le sien ;
+- il écrit « runway » en français, là où la fiche `cac-payback` dit « ta trésorerie ».
+
+**Les décisions** : C46 à C52 gagnent chacune une ligne « Le retour » (il suit les recos de C47, C48, C51 et C52, et dessine l'option 1 de C49) ; trois sont neuves. C53 : les chiffres des titres de slides à l'encre, le rouge gardé au verdict et au diagnostic, comme Antoine l'a tranché au nº9 (d-verdict-red). C54 : le tableau réordonné, avec l'argent après le diagnostic, « Et si » remonté et le panneau en tableaux. C55 : un bon à tirer nº10 plutôt qu'ajouter au nº9, déjà en cours de lecture (ses six décisions sont tranchées). Le découpage d'A20.d est revu sur les composants du retour ; D16 est retirée (faite) ; B14 attend la re-synchro d'A20.f.
