@@ -1247,7 +1247,7 @@ Sur chacun, à 1 280 et 390 px : aucune violation axe sérieuse ou critique (le 
 - `eslint` et `tsc` propres ; 3 062 tests unitaires après la fusion de `main`, qui avait reçu #295 et #297 à #301 entre-temps (3 060 + 2), couverture au-dessus des seuils. Build et Playwright sautés : `next build` ne lit pas `vercel.json`, et le reste du diff est de la doc et des commentaires.
 - **Le réglage tient déjà sur la branche, avant le merge** : aucun statut `Vercel` ni commentaire du robot sur les deux commits poussés, quatre minutes après. Sur la tête de #295, le statut était arrivé cinq secondes après le commit, et un déploiement refusé par le quota laisse lui aussi un statut (`failure`). Aucun déploiement n'a donc été créé. C'est la preuve que Vercel lit bien le `vercel.json` du commit poussé.
 
-## A18.d : les six décisions du bon à tirer nº9, appliquées (2026-10-03)
+## A18.d : les six décisions du bon à tirer nº9, appliquées (2026-10-03, #302)
 
 **Ce qu'Antoine a tranché**, en tête du [nº9](https://claude.ai/artifact/5oYQ3ZF2sCUd6yiVajifC7), ses six cartes « À trancher » (lues dans `cards/`) :
 - **la clause rouge du verdict** : option 1. Les deux rouges restent : le verdict dit ce qu'on ne voit pas, le diagnostic ce qui freine parmi ce qu'on voit. Rien ne change ;
