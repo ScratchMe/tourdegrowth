@@ -2140,6 +2140,12 @@ export const ENGINE_COPY = {
      * economics avec l'argent. Ses deux tuiles neuves (les mois après remboursement, la trésorerie immobilisée), leurs
      * notes, la ligne de rétention qui remplace les tuiles GRR et NRR, l'alerte de payback long au « nous » d'une
      * slide (C49), ce que suppose la trésorerie, et les mots du graphique (`PaybackChart`).
+     * Provenance : du retour (COPY.md) `unitLeavesBefore`, `unitNotAllBack`, `unitFloor`, `unitAssume`, `chartCost`,
+     * `chartLeaves`, `chartWouldPayBack`, `chartPaysBack`, `chartAfter`, `chartSummaryLoss`, `chartSummaryHealthy` ;
+     * retouchés par la session `unitRatioReference` (« couramment cité », « {n} pour 1 »), `unitRetention` (« GRR … par
+     * mois », « the customers who left ») et `chartSummaryNone` (anglais) ; écrits par la session, absents du retour,
+     * tous les autres : les variantes « peut-être », assisté et sans plancher, les manques, les quatre alertes au
+     * « nous » (l'écran dit « tu »), `chartCounted` et `chartSummaryMaybe`.
      */
     unitRatioReference: { fr: "repère couramment cité : environ {n} pour 1", en: "commonly cited reference: about {n}:1" },
     /** `{n}`: « ~4 mois ». */
@@ -2155,7 +2161,7 @@ export const ENGINE_COPY = {
     unitMissing: { fr: "il manque {input}", en: "missing: {input}" },
     /** GRR and NRR in one line under the tiles: they explain the lifetime. `{grr}`, `{nrr}`: a percent, or « ? ». */
     unitRetention: {
-      fr: "GRR {grr} · NRR {nrr} par mois — approximatives : le churn logo tient lieu de churn en revenu, comme si les clients partis payaient l'ARPA moyen.",
+      fr: "GRR {grr} · NRR {nrr} par mois — approximatives : le churn logo tient lieu de churn en revenu, comme si les clients partis payaient l'ARPA moyen.",
       en: "Monthly GRR {grr} · NRR {nrr} — approximate: logo churn stands in for revenue churn, as if the customers who left paid the average ARPA.",
     },
     unitRetentionMissing: { fr: "Il manque {input}.", en: "Missing: {input}." },
@@ -2180,19 +2186,19 @@ export const ENGINE_COPY = {
     /** What the cash tile assumes, printed with it, as every « Et si » assumption is. */
     unitAssume: {
       fr: "Trésorerie immobilisée : la dépense d'acquisition du mois × le payback ÷ 2 — un plancher, facturation mensuelle.",
-      en: "Cash tied up: a month's acquisition spend × the payback ÷ 2 — a floor, monthly billing.",
+      en: "Cash tied up: the month's acquisition spend × the payback ÷ 2 — a floor, monthly billing.",
     },
     unitAssumeOutpaced: {
       fr: "Trésorerie immobilisée : la dépense d'acquisition du mois × le payback ÷ 2 — l'expansion peut dépasser le churn et la rétrogradation, ce n'est donc plus un plancher ; facturation mensuelle.",
-      en: "Cash tied up: a month's acquisition spend × the payback ÷ 2 — expansion may outpace churn and contraction, so it is no longer a floor; monthly billing.",
+      en: "Cash tied up: the month's acquisition spend × the payback ÷ 2 — expansion may outpace churn and contraction, so it is no longer a floor; monthly billing.",
     },
     unitAssumeSlg: {
       fr: "Trésorerie immobilisée : la dépense d'acquisition du mois × le payback ÷ 2 — un plancher, facturation mensuelle supposée : une année payée d'avance revient plus tôt.",
-      en: "Cash tied up: a month's acquisition spend × the payback ÷ 2 — a floor, monthly billing assumed: a year paid up front comes back sooner.",
+      en: "Cash tied up: the month's acquisition spend × the payback ÷ 2 — a floor, monthly billing assumed: a year paid up front comes back sooner.",
     },
     unitAssumeSlgOutpaced: {
       fr: "Trésorerie immobilisée : la dépense d'acquisition du mois × le payback ÷ 2 — la NRR sur 12 mois peut dépasser 100 %, ce n'est donc plus un plancher ; facturation mensuelle supposée.",
-      en: "Cash tied up: a month's acquisition spend × the payback ÷ 2 — the 12-month NRR may exceed 100%, so it is no longer a floor; monthly billing assumed.",
+      en: "Cash tied up: the month's acquisition spend × the payback ÷ 2 — the 12-month NRR may exceed 100%, so it is no longer a floor; monthly billing assumed.",
     },
     /** `PaybackChart`'s words. `{life}`, `{payback}`: « 17 mois »; `{after}`: « ~22 mois »; `{gap}`: « ~400 € ». */
     chartCost: { fr: "ce que coûte un nouveau client", en: "what a new customer costs" },
