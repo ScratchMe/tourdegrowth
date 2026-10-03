@@ -2135,6 +2135,88 @@ export const ENGINE_COPY = {
     repairSingle: { fr: "en {repair}", en: "{repair}" },
     unitCap: { fr: "durée de vie plafonnée à 36 mois", en: "lifetime capped at 36 months" },
     unitReference: { fr: "repère couramment cité", en: "commonly cited reference" },
+    /**
+     * TODO: à relire (convention 6) — neuf le 2026-10-03 (A20.d T4.c, retour du brief 09, Q12) : la slide d'unit
+     * economics avec l'argent. Ses deux tuiles neuves (les mois après remboursement, la trésorerie immobilisée), leurs
+     * notes, la ligne de rétention qui remplace les tuiles GRR et NRR, l'alerte de payback long au « nous » d'une
+     * slide (C49), ce que suppose la trésorerie, et les mots du graphique (`PaybackChart`).
+     */
+    unitRatioReference: { fr: "repère couramment cité : environ {n} pour 1", en: "commonly cited reference: about {n}:1" },
+    /** `{n}`: « ~4 mois ». */
+    unitLeavesBefore: { fr: "part {n} avant d'avoir remboursé", en: "leaves {n} before paying back" },
+    unitMayLeaveBefore: { fr: "peut partir avant d'avoir remboursé", en: "may leave before paying back" },
+    unitNotAllBack: { fr: "ne revient pas toute", en: "does not all come back" },
+    unitMayNotAllBack: { fr: "peut ne pas revenir toute", en: "may not all come back" },
+    unitFloor: { fr: "un plancher · facturation mensuelle", en: "a floor · monthly billing" },
+    unitFloorSlg: { fr: "un plancher · facturation mensuelle supposée", en: "a floor · monthly billing assumed" },
+    unitBilled: { fr: "facturation mensuelle", en: "monthly billing" },
+    unitBilledSlg: { fr: "facturation mensuelle supposée", en: "monthly billing assumed" },
+    /** `{input}`: `unitInputsPhrase`, with its article. */
+    unitMissing: { fr: "il manque {input}", en: "missing: {input}" },
+    /** GRR and NRR in one line under the tiles: they explain the lifetime. `{grr}`, `{nrr}`: a percent, or « ? ». */
+    unitRetention: {
+      fr: "GRR {grr} · NRR {nrr} par mois — approximatives : le churn logo tient lieu de churn en revenu, comme si les clients partis payaient l'ARPA moyen.",
+      en: "Monthly GRR {grr} · NRR {nrr} — approximate: logo churn stands in for revenue churn, as if the customers who left paid the average ARPA.",
+    },
+    unitRetentionMissing: { fr: "Il manque {input}.", en: "Missing: {input}." },
+    unitRetentionUnknown: { fr: "GRR et NRR incalculables : il manque {input}.", en: "GRR and NRR can't be computed. Missing: {input}." },
+    /** C49, on a slide: « nous », and no « saisis ton runway » — a slide gives the room no orders. `{n}`: months. */
+    unitWarnRunway: {
+      fr: "Rembourser un client prend {payback}, plus que notre runway ({n} mois) : nous gagnons de l'argent, mais peut-être après la fin de notre trésorerie.",
+      en: "Paying back a customer takes {payback}, longer than our runway ({n} months): we make money, but maybe after our cash runs out.",
+    },
+    unitWarnRunwayMaybe: {
+      fr: "Rembourser un client prend {payback} : peut-être plus que notre runway ({n} mois).",
+      en: "Paying back a customer takes {payback}: maybe longer than our runway ({n} months).",
+    },
+    unitWarnFloor: {
+      fr: "Rembourser un client prend {payback} : {n} mois ou plus. Nous gagnons de l'argent, mais tard.",
+      en: "Paying back a customer takes {payback}: {n} months or more. We make money, but late.",
+    },
+    unitWarnFloorMaybe: {
+      fr: "Rembourser un client prend {payback} : peut-être {n} mois ou plus.",
+      en: "Paying back a customer takes {payback}: maybe {n} months or more.",
+    },
+    /** What the cash tile assumes, printed with it, as every « Et si » assumption is. */
+    unitAssume: {
+      fr: "Trésorerie immobilisée : la dépense d'acquisition du mois × le payback ÷ 2 — un plancher, facturation mensuelle.",
+      en: "Cash tied up: a month's acquisition spend × the payback ÷ 2 — a floor, monthly billing.",
+    },
+    unitAssumeOutpaced: {
+      fr: "Trésorerie immobilisée : la dépense d'acquisition du mois × le payback ÷ 2 — l'expansion peut dépasser le churn et la rétrogradation, ce n'est donc plus un plancher ; facturation mensuelle.",
+      en: "Cash tied up: a month's acquisition spend × the payback ÷ 2 — expansion may outpace churn and contraction, so it is no longer a floor; monthly billing.",
+    },
+    unitAssumeSlg: {
+      fr: "Trésorerie immobilisée : la dépense d'acquisition du mois × le payback ÷ 2 — un plancher, facturation mensuelle supposée : une année payée d'avance revient plus tôt.",
+      en: "Cash tied up: a month's acquisition spend × the payback ÷ 2 — a floor, monthly billing assumed: a year paid up front comes back sooner.",
+    },
+    unitAssumeSlgOutpaced: {
+      fr: "Trésorerie immobilisée : la dépense d'acquisition du mois × le payback ÷ 2 — la NRR sur 12 mois peut dépasser 100 %, ce n'est donc plus un plancher ; facturation mensuelle supposée.",
+      en: "Cash tied up: a month's acquisition spend × the payback ÷ 2 — the 12-month NRR may exceed 100%, so it is no longer a floor; monthly billing assumed.",
+    },
+    /** `PaybackChart`'s words. `{life}`, `{payback}`: « 17 mois »; `{after}`: « ~22 mois »; `{gap}`: « ~400 € ». */
+    chartCost: { fr: "ce que coûte un nouveau client", en: "what a new customer costs" },
+    chartLeaves: { fr: "part vers {life}", en: "leaves at ~{life}" },
+    chartCounted: { fr: "compté jusqu'à {life}, le plafond", en: "counted to {life}, the cap" },
+    chartWouldPayBack: { fr: "rembourserait à {payback}", en: "would pay back at {payback}" },
+    chartPaysBack: { fr: "remboursé : {payback}", en: "paid back: {payback}" },
+    chartAfter: { fr: "{after} de marge après", en: "{after} of margin after" },
+    chartSummaryLoss: {
+      fr: "Un client, mois par mois : il rapporte {mm} de marge par mois et part après environ {life}, à {gap} des {cac} qu'il a coûté ; il aurait remboursé à {payback}.",
+      en: "One customer, month by month: it brings back {mm} of margin a month and leaves after about {life}, {gap} short of the {cac} it cost; it would have paid back at {payback}.",
+    },
+    chartSummaryHealthy: {
+      fr: "Un client, mois par mois : il rapporte {mm} de marge par mois, rembourse ses {cac} à {payback} et reste {life}.",
+      en: "One customer, month by month: it brings back {mm} of margin a month, pays back its {cac} at {payback} and stays {life}.",
+    },
+    chartSummaryMaybe: {
+      fr: "Un client, mois par mois : il rapporte {mm} de marge par mois et reste {life} ; rembourser ses {cac} prend {payback} : il peut partir avant.",
+      en: "One customer, month by month: it brings back {mm} of margin a month and stays {life}; paying back its {cac} takes {payback}: it may leave before.",
+    },
+    chartSummaryNone: {
+      fr: "Un client, mois par mois : son coût est connu ({cac}), ce qu'il rapporte non : il manque {input}.",
+      en: "One customer, month by month: its cost is known ({cac}), what it brings back is not. Missing: {input}.",
+    },
     askFunds: { fr: "Ce que ça finance", en: "What it funds" },
     askKnow: { fr: "Comment nous saurons", en: "How we'll know" },
     askMeasure: { fr: "Ce qu'il faut d'abord mesurer", en: "What to measure first" },
@@ -2383,6 +2465,14 @@ export const ENGINE_COPY = {
     unitEconomicsUnknown: {
       fr: "**On ne peut pas encore dire ce que rapporte un client.** Il manque {input}.",
       en: "**We can't yet say what a customer is worth.** Missing: {input}.",
+    },
+    /**
+     * TODO: à relire (convention 6) — neuf le 2026-10-03 (A20.d T4.c, C48) : la perte certaine titre la slide, qui monte
+     * en nº 2. Son accent porte la perte, à l'encre, jamais en rouge (C53). `{cac}`: au chiffre saisi ; `{ltv}`, `{gap}`: « ~1 500 € ».
+     */
+    unitEconomicsLoss: {
+      fr: "Chaque nouveau client nous coûte {cac} et en rapporte {ltv} : **on perd {gap} sur chacun**.",
+      en: "Each new customer costs us {cac} and brings back {ltv}: **we lose {gap} on each one**.",
     },
     mirror: {
       fr: "L'équipe déclare suivre **{k}** de ces chiffres ; on a pu en sortir **{m}**.",

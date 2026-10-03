@@ -61,6 +61,7 @@ import {
 import { annexPages, type AnnexCells } from "./annex-pages";
 import { buildEvolutionSlide, seasonalNote } from "./deck-series";
 import { buildRelaysSlide, buildSlgWhatIfSlides, buildTotalSlide, buildUnitBoth, buildUnitSlg, motionOf } from "./deck-slg";
+import { unitMoney } from "./deck-unit";
 import { linkSentence } from "./deck-motions";
 import { buildScenario, leverAlone } from "./scenario";
 import { renewalTermOf, slgWhatIf } from "./slg-impact";
@@ -96,6 +97,7 @@ import type {
   SlgCandidateId,
   SlideCurve,
   SlideLeverSum,
+  SlidePaybackChart,
   SlideTitle,
   SourceRef,
   TrackingLevel,
@@ -587,9 +589,11 @@ function buildUnitEconomics(
   metrics: ResolvedMetric[],
   ctx: EngineCalcContext,
   prose: DeckProse,
-): { present: boolean; title: SlideTitle; lines: Row[] } {
+): { present: boolean; title: SlideTitle; lines: Row[]; paybackChart: SlidePaybackChart | null; loss: boolean } {
   const { unit } = derived;
   const cac = knownIn(state, "acq.cac", ctx);
+  // Today's money, from the scenario the board's money block reads (A20.d T4.c): nothing moved.
+  const money = unitMoney({ state, k: buildScenario(state, {}, ctx).today.kpis, slg: false, unit, strings, metrics, ctx });
   const currency = state.setup.currency;
   const present = cac.kind === "known" || [unit.ltv, unit.payback, unit.ltvCac, unit.grr, unit.nrr].some((d) => d.kind === "known");
 
@@ -606,6 +610,8 @@ function buildUnitEconomics(
     const missing = [...new Set([...(unit.payback.kind === "uncomputable" ? unit.payback.missing : []), ...(unit.ltvCac.kind === "uncomputable" ? unit.ltvCac.missing : [])])];
     title = { key: "unitEconomicsUnknown", values: { input: unitInputsPhrase(missing, strings, metrics) } };
   }
+  // A certain loss titles the slide (C48): the money first, the payback and the multiple in its tiles.
+  if (money.lossTitle) title = money.lossTitle;
 
   const variantId = currentSnapshot(state).metrics["acq.cac"]?.variant;
   const cacValue = cac.kind === "known" ? formatInterval(cac.value, "money", ctx, strings.units, { currency }) : "";
@@ -616,9 +622,6 @@ function buildUnitEconomics(
     const note = !value && missing && d ? fillTemplate(d.uncomputable, { input: unitInputsPhrase(missing, strings, metrics) }) : value ? caveat : "";
     return { row, id, label: d?.name ?? "", value, note, text: [value, note].filter(Boolean).join(" · ") || strings.slide.noNumber };
   };
-  // NRR and GRR read logo churn as revenue churn: the slide says so under the figure, every time it prints one.
-  const retentionCaveat = (id: DerivedId) => prose.derived?.find((x) => x.id === id)?.caveat ?? "";
-  const percent = (d: typeof unit.grr) => (d.kind === "known" ? formatInterval(d.value, "percent", ctx, strings.units) : "");
   const lines: Row[] = [
     { row: "cac", id: "acq.cac", label: metricOf(metrics, "acq.cac").name, value: cacValue, variant, text: cacValue ? [cacValue, lowerFirst(variant)].filter(Boolean).join(" · ") : strings.slide.noNumber },
     figure("payback", "rev.cac-payback", unit.payback.kind === "known" ? formatDurationInterval(unit.payback.value, "months", ctx, strings.units) : "", unit.payback.kind === "uncomputable" ? unit.payback.missing : null),
@@ -628,13 +631,14 @@ function buildUnitEconomics(
       "rev.ltv-cac",
       unit.ltvCac.kind === "known" ? fillTemplate(strings.units.times, { n: formatInterval(unit.ltvCac.value, "ratio", ctx, strings.units) }) : "",
       unit.ltvCac.kind === "uncomputable" ? unit.ltvCac.missing : null,
+      money.ratioNote,
     ),
-    figure("grr", "rev.grr", percent(unit.grr), unit.grr.kind === "uncomputable" ? unit.grr.missing : null, retentionCaveat("rev.grr")),
-    figure("nrr", "rev.nrr", percent(unit.nrr), unit.nrr.kind === "uncomputable" ? unit.nrr.missing : null, retentionCaveat("rev.nrr")),
+    // The months after payback, the cash; GRR and NRR in one line (they were two tiles); the warning; what the cash assumes.
+    ...money.rows,
   ];
   // The cap only qualifies a lifetime value that exists.
   if (unit.ltv.kind === "known") lines.push({ row: "cap", text: strings.slide.unitCap });
-  return { present, title, lines };
+  return { present, title, lines, paybackChart: money.chart, loss: money.lossTitle !== null };
 }
 
 // --- Slide 6: the ask --------------------------------------------------------
@@ -1222,6 +1226,18 @@ function buildWhatIfSlides(state: EngineState, strings: Words, ctx: EngineCalcCo
 }
 
 /** The drawings a « together » slide carries, each only when it can be drawn. */
+/**
+ * The deck's order with one slide moved right after the first (C48: a certain
+ * loss puts the unit economics at nº 2). The first slide stays where it is —
+ * the funnel, or what we can't see when the engine is blind.
+ */
+export function moveToSecond<T>(order: readonly T[], pick: (item: T) => boolean): T[] {
+  const at = order.findIndex(pick);
+  if (at <= 1) return [...order];
+  const rest = order.filter((_, i) => i !== at);
+  return [rest[0]!, order[at]!, ...rest.slice(1)];
+}
+
 export function withDrawings(curve: SlideCurve | null, leverSum: SlideLeverSum | null): { curve?: SlideCurve; leverSum?: SlideLeverSum } {
   return { ...(curve ? { curve } : {}), ...(leverSum ? { leverSum } : {}) };
 }
@@ -1264,7 +1280,7 @@ export function buildDeck(state: EngineState, derived: EngineDerived, strings: W
     },
     leak: { present: leak.present && !blindEngine, title: leak.title, lines: leak.lines, notes: leak.notes },
     visibility: { present: true, title: visibility.title, lines: visibility.lines, notes: [] },
-    "unit-economics": { present: unit.present, title: unit.title, lines: unit.lines, notes: [] },
+    "unit-economics": { present: unit.present, title: unit.title, lines: unit.lines, notes: [], ...(unit.paybackChart ? { paybackChart: unit.paybackChart } : {}) },
     mirror: {
       present: mirrorLinked,
       title: {
@@ -1284,7 +1300,9 @@ export function buildDeck(state: EngineState, derived: EngineDerived, strings: W
     annex: { present: true, title: { key: "annex", values: { i: "1", n: "1" } }, lines: annexRows, notes: [] },
   };
 
-  const order: FixedSlideId[] = blindEngine ? ["visibility", ...SLIDE_ORDER.filter((id) => id !== "visibility")] : [...SLIDE_ORDER];
+  const base: FixedSlideId[] = blindEngine ? ["visibility", ...SLIDE_ORDER.filter((id) => id !== "visibility")] : [...SLIDE_ORDER];
+  // A certain loss moves the unit economics right after the first slide (C48): the money a board asks about first.
+  const order = unit.loss ? moveToSecond(base, (id) => id === "unit-economics") : base;
   // The what-if slides have no fixed place: they follow the leak, in lever order, then the « together » one.
   const whatIfs = buildWhatIfSlides(state, strings, ctx);
   // « Ce qui a bougé » (§19.2.6): from the second month, after the leak and its what-ifs, unticked until the team ticks it.
@@ -1402,7 +1420,8 @@ function buildMotionsDeck(state: EngineState, derived: EngineDerived, strings: W
 
   // The slides the two motions share.
   const visibility = buildVisibility(state, derived, strings, metrics, ctx);
-  const unit = hybrid ? buildUnitBoth(state, derived, strings, metrics, ctx) : buildUnitSlg(state, slg, strings, metrics, ctx, prose.derived ?? []);
+  const unitSlg = hybrid ? null : buildUnitSlg(state, slg, strings, metrics, ctx, prose.derived ?? []);
+  const unit = unitSlg ?? buildUnitBoth(state, derived, strings, metrics, ctx);
   const ask = buildAsk(state, derived, strings, metrics, ctx);
   const mirror = derived.mirror;
   const mirrorLinked = Boolean(state.tourLink && mirror && mirror.resultId === state.tourLink.resultId);
@@ -1410,7 +1429,12 @@ function buildMotionsDeck(state: EngineState, derived: EngineDerived, strings: W
   const visibilityEntry: Entry = { id: "visibility", slide: { present: true, title: visibility.title, lines: visibility.lines, notes: [] }, byDefault: true };
   const shared: (Entry & { motion?: Motion })[] = [
     // Sales-assisted alone: its unit economics are its own slide, in its chrome.
-    { id: "unit-economics", slide: { present: unit.present, title: unit.title, lines: unit.lines, notes: [] }, byDefault: true, ...(hybrid ? {} : { motion: "slg" as const }) },
+    {
+      id: "unit-economics",
+      slide: { present: unit.present, title: unit.title, lines: unit.lines, notes: [], ...(unitSlg?.paybackChart ? { paybackChart: unitSlg.paybackChart } : {}) },
+      byDefault: true,
+      ...(hybrid ? {} : { motion: "slg" as const }),
+    },
     {
       id: "mirror",
       slide: {
@@ -1437,9 +1461,11 @@ function buildMotionsDeck(state: EngineState, derived: EngineDerived, strings: W
   const totalEntry: (Entry & { motion?: Motion })[] = hybrid ? [{ id: "total", slide: { present: Boolean(derived.total), title: { key: "total", values: {} }, lines: [], notes: [] }, byDefault: true }] : [];
   // Both motions blind: what we can't see leads, right after the total (§18.8.1).
   const allBlind = (!hybrid || plgBlind) && slgBlind;
-  const entries = allBlind
+  const ordered = allBlind
     ? [...totalEntry, visibilityEntry, ...plgEntries, ...slgEntries, ...shared]
     : [...totalEntry, ...plgEntries, ...slgEntries, visibilityEntry, ...shared];
+  // Sales-assisted alone, a certain loss moves its unit economics right after the first slide (C48). The hybrid: A20.d T4.d.
+  const entries = unitSlg?.loss ? moveToSecond(ordered, (e) => e.id === "unit-economics") : ordered;
 
   let index = 0;
   const slides: DeckSlide[] = entries.map(({ id, slide, byDefault, motion }) => {

@@ -12,7 +12,7 @@ import { SLIDE_ORDER } from "../types";
 import type { EngineState, FindingKind, MetricEntry, SanityId, SlideTitleKey, SourceRef, ToolId } from "../types";
 import { knownIn } from "../values";
 import { CTX_EN, CTX_FR, EN, FR } from "./props";
-import { emptyState, estimated, exampleState, hybridState, measured, missing, ratio, salesAssistedState, tourResult, withEntry, withMonthBefore, withTarget, withoutTargets } from "./fixtures";
+import { emptyState, estimated, exampleState, filmState, hybridState, measured, missing, ratio, salesAssistedState, tourResult, withEntry, withMonthBefore, withTarget, withoutTargets } from "./fixtures";
 
 /**
  * The guard: every sentence the engine can produce, read as a reader would.
@@ -232,6 +232,19 @@ const SCENARIOS: { name: string; build: () => { state: EngineState; result?: Ret
     },
   },
   // The what-if slides: priced gains (whatIfLever, scenario), then losses (whatIfLeverPlain, scenarioPlain).
+  // A20.d T4.c: the unit economics with the money — a certain loss titles it (C48), a long payback warns (C49).
+  { name: "the film's SaaS: each new customer a loss", build: () => ({ state: filmState() }) },
+  {
+    name: "a payback past the 30-month floor, no runway typed",
+    build: () => ({ state: withEntry(withEntry(filmState(), "ret.logo-churn", measured(ratio(8, 400), tool("stripe"))), "acq.cac", measured({ kind: "amount", amount: 2_900 })) }),
+  },
+  {
+    name: "a payback past the runway",
+    build: () => {
+      const state = withEntry(withEntry(filmState(), "ret.logo-churn", measured(ratio(8, 400), tool("stripe"))), "acq.cac", measured({ kind: "amount", amount: 2_900 }));
+      return { state: { ...state, setup: { ...state.setup, runwayMonths: 24 } } };
+    },
+  },
   { name: "what if: two levers, priced", build: () => ({ state: withWhatIf(vowelMonths(exampleState()), { "act.rate": 24, "ret.logo-churn": 1.5 }) }) },
   { name: "what if: every lever", build: () => ({ state: withWhatIf(allDocumented(), { "acq.signup-rate": 4, "ref.referred-share": 20, "act.rate": 24, "rev.paid-conversion": 10, "ret.logo-churn": 1.5, "rev.expansion": 5, "rev.contraction": 0.5, "rev.arpa": 150 }) }) },
   { name: "what if: two levers, both a loss", build: () => ({ state: withWhatIf(exampleState(), { "act.rate": 12, "rev.arpa": 90 }) }) },

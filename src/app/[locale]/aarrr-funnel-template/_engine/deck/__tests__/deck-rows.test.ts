@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { exampleState, hybridState, measured, ratio, salesAssistedState, tourResult, withEntry, withMonthBefore, withTarget } from "@/lib/engine/__tests__/fixtures";
+import { exampleState, filmState, hybridState, measured, ratio, salesAssistedState, tourResult, withEntry, withMonthBefore, withTarget } from "@/lib/engine/__tests__/fixtures";
 import { CTX_EN, CTX_FR, EN, FR } from "@/lib/engine/__tests__/props";
 import { buildDeck } from "@/lib/engine/deck";
 import { deriveEngine } from "@/lib/engine/derive";
@@ -120,7 +120,12 @@ function pipeline(): EngineState {
   return s;
 }
 
-const STATES: Record<string, () => EngineState> = { example: exampleState, linked, filledAsk, teamAsk, margin, whatIf, hybrid, hybridLinked, salesAssisted, series, seriesApart, pipeline };
+/** A payback of 32 months, past the 30-month floor, and no loss (A20.d T4.c): the unit economics write the warning row. */
+function late(): EngineState {
+  return withEntry(withEntry(filmState(), "ret.logo-churn", measured(ratio(8, 400), { kind: "tool", tool: "stripe" })), "acq.cac", measured({ kind: "amount", amount: 2_900 }));
+}
+
+const STATES: Record<string, () => EngineState> = { example: exampleState, linked, filledAsk, teamAsk, margin, whatIf, hybrid, hybridLinked, salesAssisted, series, seriesApart, pipeline, late };
 
 function model(state: EngineState, locale: "fr" | "en"): DeckModel {
   const p = props[locale];

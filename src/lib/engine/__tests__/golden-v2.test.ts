@@ -145,11 +145,11 @@ describe("golden v2 — a v2 engine reads the same after the change", () => {
     const state = openV2(inputs.hybrid!.state);
     const plg = buildScenario(state, {}, CTX_FR);
     const slg = buildSlgScenario(state, {}, CTX_FR);
-    // The two curves exist on the hybrid: the projection has something to drop, ten fields a side (the warning since T1, the spend since T2), today and projected.
+    // The two curves exist on the hybrid: the projection has something to drop, eleven fields a side (the warning since T1, the spend since T2, the monthly margin since T4.c), today and projected.
     expect(plg.today.kpis.mrrPath?.[12]).toEqual(plg.today.kpis.mrr12);
     expect(slg.today.mrrPath?.[12]).toEqual(slg.today.mrr12);
     const copies = [JSON.parse(JSON.stringify(plg)) as unknown, JSON.parse(JSON.stringify(slg)) as unknown];
-    expect(copies.map(asBeforeA20)).toEqual([20, 20]);
+    expect(copies.map(asBeforeA20)).toEqual([22, 22]);
     expect(copies.map(asBeforeA20)).toEqual([0, 0]);
   });
 
@@ -173,6 +173,35 @@ describe("golden v2 — a v2 engine reads the same after the change", () => {
     expect(added(deck).length).toBeGreaterThan(0);
     expect(added(deckBeforeA20(deck))).toEqual([]);
     expect(deckBeforeA20(deck).slides.some((x) => "curve" in x || "leverSum" in x)).toBe(false);
+  });
+
+  it("the unit economics' projection (A20.d T4.c): the golden had GRR and NRR tiles to drop, a build now has the money rows and the picture", () => {
+    type Reading = { deck: { slides: { id: string; lines: Record<string, string>[] }[] }; markdown: string };
+    const golden = outputs["plg-example"] as Record<string, Reading>;
+    const projected = withoutRetiredWhatIfRows(golden) as Record<string, Reading>;
+    const unitRows = (r: Reading) => r.deck.slides.find((x) => x.id === "unit-economics")?.lines.map((l) => l.row) ?? [];
+    for (const locale of ["fr", "en"]) {
+      // Non-vacuity: the v2 build printed GRR and NRR as two tiles, with their markdown lines.
+      expect(unitRows(golden[locale]!)).toEqual(expect.arrayContaining(["grr", "nrr"]));
+      expect(unitRows(projected[locale]!)).not.toContain("grr");
+      expect(unitRows(projected[locale]!)).not.toContain("nrr");
+    }
+    for (const name of ["plg-example", "slg"]) {
+      const state = openV2(inputs[name]!.state);
+      const p = FR;
+      const deck = buildDeck(state, deriveEngine(state, CTX_FR, null, p.bridges, p.strings.units), p.strings, p.metrics, CTX_FR, { derived: p.derived, bridges: p.bridges });
+      const unit = (d: typeof deck) => d.slides.find((x) => x.id === "unit-economics")!;
+      expect(unit(deck).lines.map((l) => l.row)).toEqual(expect.arrayContaining(["after", "cash"]));
+      expect(unit(deck).paybackChart).toBeDefined();
+      const ratio = unit(deck).lines.find((l) => l.row === "ltvCac")!;
+      // The context line only under a known multiple; an unknown one keeps saying what it lacks.
+      if (ratio.value) expect(ratio.note).toMatch(/3\u00a0pour 1|3 pour 1/);
+      else expect(ratio.note).toMatch(/il manque/);
+      const before = unit(deckBeforeA20(deck));
+      expect(before.lines.map((l) => l.row)).not.toEqual(expect.arrayContaining(["after"]));
+      expect(before.lines.some((l) => ["after", "cash", "retention", "warning", "assume"].includes(l.row ?? ""))).toBe(false);
+      expect("paybackChart" in before).toBe(false);
+    }
   });
 
   it("the decided words (A18.d) rewrite the v2 hybrid's slides, and only where the old words were", () => {

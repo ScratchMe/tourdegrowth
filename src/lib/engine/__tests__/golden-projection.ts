@@ -43,7 +43,7 @@ export function asBeforeT3(scenario: unknown, slg: boolean): number {
  * matching to the character, the MRR in twelve months above all: it is now
  * the last point of `mrrPath`, computed with the same operations.
  */
-export const KPIS_ADDED_BY_A20 = ["arr", "arr12", "mrrPath", "ltvCac", "lifetime", "afterPayback", "loss", "spend", "cash", "warning"] as const;
+export const KPIS_ADDED_BY_A20 = ["arr", "arr12", "mrrPath", "ltvCac", "lifetime", "monthlyMargin", "afterPayback", "loss", "spend", "cash", "warning"] as const;
 
 /** The scenario's figures without A20's, in place, on a JSON copy. Self-serve keeps its figures under `kpis`, sales-assisted at the top. Returns how many fields it dropped. */
 export function asBeforeA20(scenario: unknown): number {
@@ -160,14 +160,41 @@ export function withDecidedWords(expected: unknown): unknown {
 export const WHATIF_ROWS_ADDED_BY_A20 = ["arr12", "ltvCac", "cash"] as const;
 export const WHATIF_ROWS_RETIRED_BY_A20 = ["newMrr", "grr"] as const;
 
-type SlideLike = { id: string; lines: Record<string, string>[]; curve?: unknown; leverSum?: unknown };
+type SlideLike = { id: string; lines: Record<string, string>[]; curve?: unknown; leverSum?: unknown; paybackChart?: unknown };
 const isWhatIf = (id: string) => id.startsWith("whatif:") || id === "scenario" || id === "slg:scenario";
 const kpiIn = (ids: readonly string[]) => (line: Record<string, string>) => line.row === "kpi" && ids.includes(line.id ?? "");
 
-/** The deck a build prints now, without what A20.d T4.b adds to its what-if slides. On a JSON copy. */
+/**
+ * The unit-economics slide of design system extension 09 (A20.d T4.c), which
+ * the return of brief 09 redrew and Antoine had ported:
+ *
+ * - ADDED, dropped from the side a build prints now: the picture
+ *   (`paybackChart`, a drawing no text carries), the context line under a
+ *   known LTV:CAC (« repère couramment cité : environ 3 pour 1 »), and five
+ *   rows — the months after payback, the cash tied up, the GRR and NRR in one
+ *   line, the long-payback warning, what the cash assumes;
+ * - RETIRED, dropped from the golden's side: the GRR and NRR tiles, which
+ *   that one line replaced. Their markdown lines go with them.
+ *
+ * The title moves only with a certain loss (C48), and the slide with it, to
+ * nº 2: none of the goldens' engines has one, so every title, every other
+ * row and the slides' order still have to match to the character.
+ */
+export const UNIT_ROWS_ADDED_BY_A20 = ["after", "cash", "retention", "warning", "assume"] as const;
+export const UNIT_ROWS_RETIRED_BY_A20 = ["grr", "nrr"] as const;
+const rowIn = (ids: readonly string[]) => (line: Record<string, string>) => ids.includes(line.row ?? "");
+
+/** The deck a build prints now, without what A20.d T4.b adds to its what-if slides and T4.c to its unit economics. On a JSON copy. */
 export function deckBeforeA20<T>(deck: T): T {
   const copy = JSON.parse(JSON.stringify(deck)) as { slides: SlideLike[] };
   for (const slide of copy.slides) {
+    if (slide.id === "unit-economics") {
+      delete slide.paybackChart;
+      slide.lines = slide.lines
+        .filter((line) => !rowIn(UNIT_ROWS_ADDED_BY_A20)(line))
+        .map((line) => (line.row === "ltvCac" && line.value ? { ...line, note: "", text: line.value } : line));
+      continue;
+    }
     if (!isWhatIf(slide.id)) continue;
     delete slide.curve;
     delete slide.leverSum;
@@ -176,7 +203,7 @@ export function deckBeforeA20<T>(deck: T): T {
   return copy as T;
 }
 
-/** The golden's readings without the two rows the what-if slides retired, in its deck and its markdown. On a JSON copy. */
+/** The golden's readings without the rows the what-if slides and the unit economics retired, in its deck and its markdown. On a JSON copy. */
 export function withoutRetiredWhatIfRows(expected: unknown): unknown {
   // One reading per locale: { fr: { deck, markdown, … }, en: { … } }.
   const copy = JSON.parse(JSON.stringify(expected)) as Record<string, { deck?: { slides: SlideLike[] }; markdown?: string }>;
@@ -184,6 +211,11 @@ export function withoutRetiredWhatIfRows(expected: unknown): unknown {
     if (!out?.deck || typeof out.markdown !== "string") continue;
     const gone = new Set<string>();
     for (const slide of out.deck.slides) {
+      if (slide.id === "unit-economics") {
+        for (const line of slide.lines.filter(rowIn(UNIT_ROWS_RETIRED_BY_A20))) gone.add(`- ${line.label} · ${line.text}`);
+        slide.lines = slide.lines.filter((line) => !rowIn(UNIT_ROWS_RETIRED_BY_A20)(line));
+        continue;
+      }
       if (!isWhatIf(slide.id)) continue;
       for (const line of slide.lines.filter(kpiIn(WHATIF_ROWS_RETIRED_BY_A20))) gone.add(`- ${line.label} · ${line.text}`);
       slide.lines = slide.lines.filter((line) => !kpiIn(WHATIF_ROWS_RETIRED_BY_A20)(line));

@@ -128,6 +128,7 @@ describe("placeholders", () => {
     visibilityAllDocumented: ["N"],
     unitEconomics: ["m", "x"],
     unitEconomicsUnknown: ["input"],
+    unitEconomicsLoss: ["cac", "gap", "ltv"],
     mirror: ["k", "m"],
     ask: ["goal", "what"],
     askPlain: ["what"],
@@ -190,6 +191,7 @@ describe("placeholders", () => {
       r3: "sur 100 nouveaux clients, 55 à 60 sont en production à 90 jours", base: "MQL",
       worth: "3 opportunités de plus pour 100 leads", known: "libre-service", other: "assisté",
       month: "juillet 2026", leak: "\u00a0; l'activation reste la fuite", before: "juillet 2026", now: "août 2026",
+      cac: "1\u00a0900\u00a0€", ltv: "~1\u00a0500\u00a0€", gap: "~400\u00a0€",
     },
     en: {
       activated: "18 reach first value", d30: "9–12 are still active at day 30", paid: "6–9 pay",
@@ -209,6 +211,7 @@ describe("placeholders", () => {
       r3: "out of 100 new customers, 55–60 are live within 90 days", base: "MQLs",
       worth: "3 more opportunities per 100 leads", known: "self-serve", other: "sales-assisted",
       month: "July 2026", leak: "; activation is still the leak", before: "July 2026", now: "August 2026",
+      cac: "€1,900", ltv: "~€1,500", gap: "~€400",
     },
   };
 

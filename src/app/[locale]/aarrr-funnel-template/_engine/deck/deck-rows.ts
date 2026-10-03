@@ -58,9 +58,19 @@ export interface DeckRows {
   payback: { id: string; label: string; value: string; note: string; text: string };
   ltv: { id: string; label: string; value: string; note: string; text: string };
   ltvCac: { id: string; label: string; value: string; note: string; text: string };
-  /** Monthly GRR and NRR (2026-09-26), always approximate — `note` says why, or which input is missing. */
-  grr: { id: string; label: string; value: string; note: string; text: string };
-  nrr: { id: string; label: string; value: string; note: string; text: string };
+  /**
+   * The money (A20.d T4.c): the months after payback (« –4 mois » with « part ~4 mois avant d'avoir remboursé » when
+   * the customer leaves first) and the cash tied up (« ne revient pas toute » with the loss) — `value` "" and `note`
+   * what is missing when they can't be computed.
+   */
+  after: { id: string; label: string; value: string; note: string; text: string };
+  cash: { id: string; label: string; value: string; note: string; text: string };
+  /** Self-serve's monthly GRR and NRR in one line with their approximation — they were two tiles until A20.d T4.c. */
+  retention: { text: string };
+  /** The long-payback warning (C49) in the slide's « nous »; `maybe` "true" when the payback straddles the limit. */
+  warning: { maybe: string; text: string };
+  /** What the cash figure assumes, printed with it. */
+  assume: { text: string };
   /** The 36-month lifetime cap — written only when an LTV exists to be capped. */
   cap: { text: string };
   // Slide 5 — the mirror
@@ -144,8 +154,11 @@ export const ROW_FIELDS: { readonly [K in RowKind]: readonly (keyof DeckRows[K])
   payback: ["id", "label", "value", "note", "text"],
   ltv: ["id", "label", "value", "note", "text"],
   ltvCac: ["id", "label", "value", "note", "text"],
-  grr: ["id", "label", "value", "note", "text"],
-  nrr: ["id", "label", "value", "note", "text"],
+  after: ["id", "label", "value", "note", "text"],
+  cash: ["id", "label", "value", "note", "text"],
+  retention: ["text"],
+  warning: ["maybe", "text"],
+  assume: ["text"],
   cap: ["text"],
   verdictCount: ["id", "value", "label"],
   bridge: ["id", "questionId", "label", "verdict", "tag", "text"],

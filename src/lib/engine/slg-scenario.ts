@@ -298,6 +298,7 @@ export function buildSlgScenario(state: EngineState, targets: Partial<Record<Lev
       mrrPath: path,
       ltvCac: ltv && cac ? div(ltv, cac) : null,
       lifetime,
+      monthlyMargin,
       afterPayback: afterPayback(lifetime, payback),
       loss,
       spend,
