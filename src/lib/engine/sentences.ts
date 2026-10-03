@@ -121,6 +121,10 @@ export function findingText(
       const inputs = finding.metrics.slice(1).filter(isMetricId);
       return fillTemplate(f.unitEcon, { input: unitInputsPhrase(inputs, strings, metrics) });
     }
+    case "unit-econ-loss":
+      return fillTemplate(f.unitEconLoss, finding.values);
+    case "unit-econ-loss-maybe":
+      return fillTemplate(f.unitEconLossMaybe, finding.values);
     case "reconcile-gap":
       return fillTemplate(f[numbered("reconcile", finding.count, locale)], finding.values);
     case "small-cohort":

@@ -320,6 +320,13 @@ export interface EngineSetup {
   tools?: ToolId[];
   /** Sales-assisted pipeline coverage (§19.4, C32 Q8): the quarter's target in ACV, and a team threshold (2.5 = « 2,5× »). */
   pipeline?: { quarterTarget?: number; threshold?: number };
+  /**
+   * The team's runway, in months (§20.8, C49): how long the cash lasts at
+   * today's spending. Optional, never on a slide, never sent anywhere: the
+   * engine only holds the CAC payback against it. Absent, the payback is held
+   * against the 30-month floor (`money.ts#PAYBACK_FLOOR_MONTHS`).
+   */
+  runwayMonths?: number;
 }
 
 /**
@@ -711,6 +718,10 @@ export type FindingKind =
   | "below-comparator"
   | "conflict"
   | "unit-econ-uncomputable"
+  /** §20.4, C48: every reading of the LTV under every reading of the CAC — each new customer costs more than it brings back. */
+  | "unit-econ-loss"
+  /** The same, the two ranges overlapping: a loss possible, not certain. */
+  | "unit-econ-loss-maybe"
   | "reconcile-gap"
   | "small-cohort"
   /** Sales-assisted: a bounded number on fewer than 100 — one more or less moves it by p points (§18.5.1). */

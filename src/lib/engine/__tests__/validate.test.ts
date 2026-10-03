@@ -281,6 +281,17 @@ describe("validateEngine — the v3 fields: the series, the tools, the pipeline,
   });
 });
 
+describe("validateEngine — the team's runway (§20.8, C49, A20 T1)", () => {
+  // Non-vacuity, measured on 2026-10-03: accepting 0 months fails the first refusal; dropping the ceiling fails « 241 ».
+  it("optional, a number of months in ]0, 240]: absent, the payback is held against the 30-month floor", () => {
+    const s = fullState();
+    expect(s.setup.runwayMonths).toBeUndefined();
+    for (const runwayMonths of [9, 0.5, 18, 240]) expect(validateEngine({ ...s, setup: { ...s.setup, runwayMonths } })).toEqual([]);
+    for (const runwayMonths of [0, -3, 241, Number.NaN, "9" as never])
+      expect(validateEngine({ ...s, setup: { ...s.setup, runwayMonths } })).toEqual(["setup.runwayMonths: not a number of months in ]0, 240]"]);
+  });
+});
+
 describe("validateEntry — a status without the fields that make it true is refused", () => {
   it("a bounded ratio can't have more on top than below (the one blocking check, D11)", () => {
     const e = entry({ status: "measured", value: { kind: "ratio", numerator: 120, denominator: 100 }, source: { kind: "tool", tool: "ga4" } });

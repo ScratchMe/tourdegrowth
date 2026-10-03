@@ -2368,6 +2368,20 @@ export const ENGINE_COPY = {
       fr: "Impossible de dire en combien de mois un client rembourse son coût d'acquisition. Il manque {input}.",
       en: "We can't say how many months a customer takes to pay back their acquisition cost. Missing: {input}.",
     },
+    /**
+     * TODO: à relire (convention 6) — neuf le 2026-10-03 (A20 T1, C48, le retour du brief 09) : the loss, said
+     * once, as money (`unit-econ-loss`, rank 1). `{cac}` as typed, `{ltv}` and `{gap}` as estimates (« ~1 500 € »).
+     * Arithmetic on the team's own numbers: it names no stage and asserts no cause.
+     */
+    unitEconLoss: {
+      fr: "Chaque nouveau client coûte {cac} et rapporte {ltv} de marge : tu perds {gap} sur chacun.",
+      en: "Each new customer costs {cac} and brings back {ltv} of margin: you lose {gap} on each one.",
+    },
+    /** TODO: à relire (convention 6) — neuf le 2026-10-03 (A20 T1, C48) : the same, the two ranges overlapping (`unit-econ-loss-maybe`, rank 2). */
+    unitEconLossMaybe: {
+      fr: "Un nouveau client coûte {cac} et rapporte {ltv} de marge : il ne rembourse peut-être pas ce qu'il coûte.",
+      en: "A new customer costs {cac} and brings back {ltv} of margin: it may not pay back what it costs.",
+    },
     reconcile: {
       fr: "Ta chaîne prédit ~{p} nouveaux payants en {month} ; ta facturation en compte {n}. Au moins une définition ne porte pas sur la même population.",
       en: "Your chain predicts ~{p} new paying customers in {month}; your billing counts {n}. At least one definition doesn't cover the same population.",

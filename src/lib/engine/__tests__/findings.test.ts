@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 import { deriveEngine } from "../derive";
 import type { EngineState, Finding, FindingKind, MetricEntry } from "../types";
 import { CTX_FR, FR } from "./props";
-import { exampleState, hybridState, measured, missing, ratio, salesAssistedState, tourResult, withEntry } from "./fixtures";
+import { estimated, exampleState, filmState, hybridState, measured, missing, ratio, salesAssistedState, tourResult, withEntry } from "./fixtures";
+import { findingText } from "../sentences";
 
 // Engine spec §13.1 "findings" — a table case → kinds, and stable ranks.
 // Non-vacuity, measured: raising a chain-break for a column that is only
@@ -165,5 +166,39 @@ describe("findings — the §18.9 hybrid", () => {
       ["plg", ["act.event"]],
       ["slg", ["slg.act.live-event"]],
     ]);
+  });
+});
+
+describe("findings — the loss (§20.4, C48, A20 T1)", () => {
+  // Non-vacuity, measured on 2026-10-03: ranking the certain loss 2 fails « rank 1, before the stage below its
+  // target »; raising a finding on a « none » verdict fails « no loss, no finding ».
+  const loss = (fs: Finding[]) => fs.filter((f) => f.kind === "unit-econ-loss" || f.kind === "unit-econ-loss-maybe");
+
+  it("the film's SaaS: a certain loss, rank 1, the CAC as typed and the LTV and the gap as estimates", () => {
+    const fs = derive(filmState()).findings;
+    expect(loss(fs)).toEqual([
+      { kind: "unit-econ-loss", motion: "plg", rank: 1, metrics: ["rev.ltv", "acq.cac"], values: { cac: "1\u00a0900\u00a0€", ltv: "~1\u00a0500\u00a0€", gap: "~400\u00a0€" } },
+    ]);
+    // Rank 1 sorts it before the stage below its target, whatever the order it was built in.
+    expect(fs.findIndex((f) => f.kind === "unit-econ-loss")).toBeLessThan(fs.findIndex((f) => f.kind === "below-comparator"));
+  });
+
+  it("its sentence: the money, said once, with no cause", () => {
+    const state = filmState();
+    const d = derive(state);
+    const f = loss(d.findings)[0]!;
+    expect(findingText(f, state, FR.strings, [], [], "fr")).toBe("Chaque nouveau client coûte 1\u00a0900\u00a0€ et rapporte ~1\u00a0500\u00a0€ de marge\u00a0: tu perds ~400\u00a0€ sur chacun.");
+  });
+
+  it("churn estimated at 4 to 6 %: the two ranges overlap, a loss only possible, rank 2", () => {
+    const state = withEntry(filmState(), "ret.logo-churn", estimated(4, 6));
+    const [f] = loss(derive(state).findings);
+    expect(f).toMatchObject({ kind: "unit-econ-loss-maybe", rank: 2, metrics: ["rev.ltv", "acq.cac"] });
+    expect(findingText(f!, state, FR.strings, [], [], "fr")).toMatch(/^Un nouveau client coûte 1\u00a0900\u00a0€ et rapporte ~1\u00a0500\u00a0€ à 2\u00a0300\u00a0€ de marge\u00a0: il ne rembourse peut-être pas/);
+  });
+
+  it("no loss, no finding: the film with a 2 % churn, the §6.0 example with no margin", () => {
+    expect(loss(derive(withEntry(filmState(), "ret.logo-churn", measured(ratio(8, 400)))).findings)).toEqual([]);
+    expect(loss(derive(exampleState()).findings)).toEqual([]);
   });
 });

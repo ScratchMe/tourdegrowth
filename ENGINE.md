@@ -95,9 +95,12 @@ slides pour un board ou un investisseur. Le moteur n'en montrait qu'une
 partie. **La spécification est §20, dans
 [`docs/engine/argent.md`](docs/engine/argent.md)** ; son modèle pur est codé
 le même jour (A20.a : `lib/engine/money.ts`, et les champs de `ScenarioKpis`
-et `SlgScenarioKpis`), sans écran. Les écrans attendent le retour du brief 09
-(`CHANTIERS.md` B14) et les décisions C46 à C52, dont l'ouverture du moteur
-(C46) et le déclencheur de l'alerte de payback long (C49, non codée).
+et `SlgScenarioKpis`), sans écran. Le retour du brief 09 est arrivé le même
+jour (`design/ds-extension-09-return/`), et **Antoine a tranché C45 à C55 le
+2026-10-03**, toutes sur la reco, avec deux précisions à C49 : le mot
+« runway », expliqué par un « ? » (« tes mois de trésorerie »), et, sans runway
+saisi, **un plancher : un CAC payback de 30 mois ou plus alerte**. Les réponses
+sont en §20.13 ; l'ouverture du moteur attend le portage (C46).
 
 **Décisions prises par défaut le 2026-09-24 pour que le travail avance** —
 chacune se renverse en une phrase :
@@ -331,7 +334,7 @@ retiré depuis le même jour : la copie vit dans le code.*
 | §0 à §17, et l'annexe des vérifications | [`docs/engine/v1.md`](docs/engine/v1.md) | La spécification d'implémentation de la v1 libre-service, construite du 2026-09-24 au 2026-09-30. Le code fait foi depuis |
 | §18 | [`docs/engine/assiste-et-hybride.md`](docs/engine/assiste-et-hybride.md) | Le B2B assisté et l'hybride (A7.3), validé par C25 et construit par A7.3.c (#233, 2026-10-01). Le code fait foi depuis |
 | §19 | [`docs/engine/moteur-complet.md`](docs/engine/moteur-complet.md) | Le moteur complet pour le SaaS B2B (A14) : la série mensuelle, la rétention J30 et la part recommandée en €, la couverture du pipeline, les outils, le tableau collé, plusieurs moteurs, la fusion, le fond blanc, les rappels, les portes d'entrée. Écrit et validé le 2026-10-01 (C32), construit par A14.c le même jour (T0 à T7, neuf PR de #255 à #266), sauf l'image de partage (T6.2, après B5). Le code fait foi depuis ; l'ouverture du moteur attend aussi T6.2 et le bon à tirer A14.d (le reste dans `CHANTIERS.md` D2) |
-| §20 | [`docs/engine/argent.md`](docs/engine/argent.md) | L'argent du moteur (A20, 2026-10-03) : l'ARR, la courbe du MRR, le LTV:CAC dans « Et si », le constat de perte, le payback face à la durée de vie, la trésorerie immobilisée, les sommes de l'hybride, et l'alerte de payback long (non codée, C49). Le modèle est codé (A20.a) ; les écrans attendent le brief 09 et C46 à C52 |
+| §20 | [`docs/engine/argent.md`](docs/engine/argent.md) | L'argent du moteur (A20, 2026-10-03) : l'ARR, la courbe du MRR, le LTV:CAC dans « Et si », le constat de perte, le payback face à la durée de vie, la trésorerie immobilisée, les sommes de l'hybride, et l'alerte de payback long (le runway de l'équipe, sinon un plancher de 30 mois, C49). Le modèle est codé (A20.a, puis T1) ; C45 à C55 sont tranchées (§20.13) et les écrans se portent (A20.d) |
 | Annexe — Les entretiens | ci-dessous | La trame des entretiens (`CHANTIERS.md` D5) |
 
 ---

@@ -7,7 +7,8 @@ import { SETUP_V2_DEFAULTS, type EngineSetup, type EngineSetupV1, type EngineSta
  * v2 → v3 changes the version and nothing else. Every field v3 adds is
  * optional and means « as before » when absent (`setup.tools`,
  * `setup.pipeline`, `deck.theme`, a month's `closedAt`, `windows`,
- * `pipelineOpen`, an entry's `denominatorSource`), so a v2 engine gives, to
+ * `pipelineOpen`, an entry's `denominatorSource`, and since A20
+ * `setup.runwayMonths`), so a v2 engine gives, to
  * the character, the same board and the same slides —
  * `__tests__/golden-v2.test.ts` holds that promise, as `golden-v1.test.ts`
  * holds the v1 one through both steps.

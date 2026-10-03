@@ -17,6 +17,7 @@ import {
   type ToolId,
   type YearMonth,
 } from "./types";
+import { RUNWAY_MAX_MONTHS } from "./money";
 
 /**
  * validate.ts — the one place the engine's data RULES are applied (engine
@@ -287,6 +288,10 @@ function setupErrors(setup: unknown): string[] {
       if (p.quarterTarget !== undefined && (!isNum(p.quarterTarget) || p.quarterTarget <= 0)) errors.push("setup.pipeline.quarterTarget: not a number > 0");
       if (p.threshold !== undefined && (!isNum(p.threshold) || p.threshold <= 0)) errors.push("setup.pipeline.threshold: not a number > 0");
     }
+  }
+  // §20.8, C49: optional, a number of months; absent, the payback is held against the 30-month floor.
+  if (setup.runwayMonths !== undefined && (!isNum(setup.runwayMonths) || setup.runwayMonths <= 0 || setup.runwayMonths > RUNWAY_MAX_MONTHS)) {
+    errors.push(`setup.runwayMonths: not a number of months in ]0, ${RUNWAY_MAX_MONTHS}]`);
   }
   return errors;
 }

@@ -144,11 +144,11 @@ describe("golden v2 — a v2 engine reads the same after the change", () => {
     const state = openV2(inputs.hybrid!.state);
     const plg = buildScenario(state, {}, CTX_FR);
     const slg = buildSlgScenario(state, {}, CTX_FR);
-    // The two curves exist on the hybrid: the projection has something to drop, eight fields a side, today and projected.
+    // The two curves exist on the hybrid: the projection has something to drop, nine fields a side (the warning since T1), today and projected.
     expect(plg.today.kpis.mrrPath?.[12]).toEqual(plg.today.kpis.mrr12);
     expect(slg.today.mrrPath?.[12]).toEqual(slg.today.mrr12);
     const copies = [JSON.parse(JSON.stringify(plg)) as unknown, JSON.parse(JSON.stringify(slg)) as unknown];
-    expect(copies.map(asBeforeA20)).toEqual([16, 16]);
+    expect(copies.map(asBeforeA20)).toEqual([18, 18]);
     expect(copies.map(asBeforeA20)).toEqual([0, 0]);
   });
 

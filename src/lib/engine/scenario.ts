@@ -1,6 +1,6 @@
 import { LEVER_IDS, shapeOf } from "./catalog-shape";
 import { div, mapBounds, mul, point, scale } from "./interval";
-import { acquisitionSpend, afterPayback, arrOf, cashTiedUp, lossCheck, type MoneyKpis } from "./money";
+import { acquisitionSpend, afterPayback, arrOf, cashTiedUp, lossCheck, paybackLimit, paybackWarning, type MoneyKpis } from "./money";
 import { knownSharedCount } from "./shared-counts";
 import type { EngineCalcContext, EngineState, Interval, LeverId, MetricId } from "./types";
 import { lifetimeMonths, revenueRetention } from "./unit-economics";
@@ -368,6 +368,7 @@ export function buildScenario(state: EngineState, targets: Partial<Record<LeverI
     const spend = acquisitionSpend(payersToday, cacToday);
     // Expansion can only outpace the losses when it was entered (§20.6): a movement nobody entered counts as 0.
     const expansionMayOutpace = Boolean(expansion && retention?.nrr && retention.nrr.hi > 100);
+    const loss = lossCheck(ltv, cac);
     return {
       mrr,
       newMrr,
@@ -383,8 +384,10 @@ export function buildScenario(state: EngineState, targets: Partial<Record<LeverI
       ltvCac: ltv && cac ? div(ltv, cac) : null,
       lifetime,
       afterPayback: afterPayback(lifetime, payback),
-      loss: lossCheck(ltv, cac),
+      loss,
       cash: cashTiedUp(spend, payback, expansionMayOutpace),
+      // C49: against the team's runway, or the 30-month floor when it typed none.
+      warning: paybackWarning(payback, loss, paybackLimit(state.setup.runwayMonths)),
     };
   }
 
