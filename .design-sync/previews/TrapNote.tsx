@@ -17,8 +17,8 @@ import { Button, TrapNote } from "tour-de-growth";
 /**
  * The activation rate's trap, in French (the example): the catalogue's text word for word, and
  * — because this trap tells the person to write their definition down — the one quiet action,
- * « Écrire ta définition », which opens the sheet's folded « Ta définition et une note » and
- * moves the focus to it.
+ * « Écrire ta définition ». On the sheet it opens the folded « Ta définition et une note » and
+ * moves the focus to the definition; alone here, it has no handler.
  */
 export const AsksForADefinition = () => (
   <div style={{ maxWidth: 658 }}>
