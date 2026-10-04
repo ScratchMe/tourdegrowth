@@ -357,7 +357,7 @@ C'est ce dernier réglage qui est appliqué dans `levels/referral.ts`. Le test F
 
 **À savoir pour ACT-2** : `ActivationPhoneCopy` porte déjà les 31 champs du téléphone et `CookiePillCopy` les trois de la pastille, donc `PlannerPhone` et `CookiePill` se typent contre eux ; `ACTIVATION_CONTENT.phone.callsAnswers` est un tableau de trois chaînes ; les clics de la pastille (`1 clic`, `3 clics`) sont écrits en toutes lettres dans `cookies.easy` et `cookies.hidden` (aucun gabarit), et le test C13 côté téléphone les lie aux constantes `REFUSE_CLICKS_*`.
 
-## A24, ACT-2 : le téléphone de Quandi et sa pastille (2026-10-04)
+## A24, ACT-2 : le téléphone de Quandi et sa pastille (2026-10-04, #339)
 
 **Livré** (branche `a24-act-2`, rien n'est branché : `ACTIVATION_SIDE` n'est pas dans `ISLAND_SIDES`, c'est ACT-3 qui l'y met, et aucune page ne rend encore ce téléphone) : le dessin de l'arrivée d'un indépendant sur l'appli de Quandi et la pastille qui compte les clics pour refuser les cookies (`docs/game/activation.md` §18.7 et §18.12, T2 de `docs/game/construire-un-niveau.md` §21.3), menés par un sous-agent Sonnet depuis la seule spécification. Aucun modèle n'a bougé (`levels/activation.ts`, ses tests et `paths-activation.ts` : zéro ligne) et la copie d'ACT-1 non plus.
 - **`src/lib/game/planner-phone.ts`** (pur, comme `shop-phone.ts`) : `PlannerPhoneItem`, `plannerPhoneView`, `REFUSE_CLICKS_EASY`, `REFUSE_CLICKS_HIDDEN` et `cookieRefusal`, recopiés du §18.7 (le type, l'ordre, les trois valeurs de `signup.phone`, `refuse` qui l'emporte sur `banner`).

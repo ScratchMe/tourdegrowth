@@ -503,7 +503,7 @@ est libre. Le jeu reste fermé (C23).
 | A24.spec | Les spécifications, le guide, les modèles en brouillon | **Livré le 2026-10-04** ([#325](https://github.com/ScratchMe/tourdegrowth/pull/325)) ; décisions C75 à C91 appliquées ([#330](https://github.com/ScratchMe/tourdegrowth/pull/330)) ; relu pour des sous-agents Sonnet ([#332](https://github.com/ScratchMe/tourdegrowth/pull/332)) |
 | U0 | Ce qui change à trois niveaux : le bloc « Niveau suivant » (C75), les bandeaux à l'étape (C76), le budget d'URL des statistiques, le gabarit du hub | **Livré le 2026-10-04** ([#335](https://github.com/ScratchMe/tourdegrowth/pull/335)) |
 | ACT-1 | L'activation : la copie | **Livré le 2026-10-04** ([#338](https://github.com/ScratchMe/tourdegrowth/pull/338)) |
-| ACT-2 | L'activation : le téléphone et sa pastille | À faire |
+| ACT-2 | L'activation : le téléphone et sa pastille | **Livré le 2026-10-04** ([#339](https://github.com/ScratchMe/tourdegrowth/pull/339)) |
 | ACT-3 | L'activation : le branchement | À faire |
 | ACT-4 | L'activation : les specs Playwright | À faire |
 | REF-1 | Le referral : la copie | À faire |
@@ -514,7 +514,7 @@ est libre. Le jeu reste fermé (C23).
 | REV-2 | Le revenue : le téléphone et sa pastille | À faire |
 | REV-3 | Le revenue : le branchement | À faire |
 | REV-4 | Le revenue : les specs Playwright | À faire |
-| A24.bat | Le bon à tirer de chaque niveau construit (`/bon-a-tirer`, par Antoine), puis la recette avec les niveaux 1 et 2 (D9) | Après chaque X-4 |
+| A24.bat | Le bon à tirer de chaque niveau construit (`/bon-a-tirer`, par Antoine), puis la recette avec les niveaux 1 et 2 (D9) | Après chaque X-4 ; un bon à tirer qui réécrit une chaîne du téléphone ou de la pastille fait régénérer leurs aperçus `.design-sync` (rien ne le signale) |
 | A24.sync | La re-synchro des composants neufs (`PlannerPhone`, `CookiePill`, `SplitPhone`, `SentPill`, `FitPhone`, `ChargePill`, `NextLevel`) | Après chaque X-3, section B |
 
 ---
