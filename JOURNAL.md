@@ -964,7 +964,7 @@ En anglais à 1 280 : tableau 3 372 → 4 212 (+840, le retour +828). À 390 : t
 
 **Vérifié** : le rendu des 112 cartes (112 sur 112, 0 vide, 0 mince, 0 identique), chaque feuille de capture lue avant sa note, les 21 aperçus du moteur et les six repris type-checkés contre les vrais composants ; après l'envoi, `list_files` (aucun chemin sous `design/`, les 21 dossiers `components/engine/`), l'ancre relue, l'index relu identique au local. Le volet Design System, lui, n'est pas vérifiable d'ici : il montrait encore la copie du 2026-09-11 (B8).
 
-## A21 : les huit défauts vus par les aperçus, et l'export PNG des graphiques (2026-10-04, PR_A21)
+## A21 : les huit défauts vus par les aperçus, et l'export PNG des graphiques (2026-10-04, #326)
 
 **Demandé par Antoine** après le merge de #323 : « lance-toi sur les corrections en A21 ». Les huit défauts possibles notés par la re-synchro sont reproduits un par un avant d'être corrigés. Tous étaient réels ; A21.7 était peut-être voulu, et la règle du composant l'a tranché.
 

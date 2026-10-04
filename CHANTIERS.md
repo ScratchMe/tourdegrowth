@@ -371,7 +371,7 @@ d'origine datait de `9c81844`, avant #302) :
 
 En écrivant les 101 cellules du moteur depuis ses vrais appels, les agents des
 aperçus ont vu huit défauts possibles du produit, aucun dans une cellule. **Les
-huit sont reproduits et corrigés le 2026-10-04** (PR_A21), chacun avec un test qui
+huit sont reproduits et corrigés le 2026-10-04** ([#326](https://github.com/ScratchMe/tourdegrowth/pull/326)), chacun avec un test qui
 rougit sans sa correction ; en les vérifiant à l'écran, un neuvième est apparu
 (A21.9). Deux chaînes réécrites repartent « à relire » (`leavesFirst`, et le
 gabarit de `curveSummaryWhatif`, dont les mots ne changent pas sur le tableau).
