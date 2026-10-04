@@ -33,8 +33,10 @@ sans espaces insécables : l'agent les pose en recopiant (§21.5).*
   préviennent (les signalements). Le contrôle finit en **amende
   administrative** de la CNIL.
 - **Ce qui ne change pas** : tout le reste (section 4).
-- **L'équilibrage est celui du niveau 2**, carte pour carte par rôle : les
-  quatre années de référence gardent la patience validée (51, 42, 46, 73).
+- **L'équilibrage est celui du niveau 2**, carte pour carte par rôle, à un
+  réglage près : les gains et les rampes des cartes honnêtes sont ×0,99 (C86,
+  §19.6). Les quatre années de référence gardent la patience validée (51, 42,
+  46, 73).
 - **Le téléphone** montre l'écran « Inviter des amis », et ce que reçoit
   l'invitée ; **la pastille** compte les messages envoyés au nom de
   l'utilisateur sans qu'il les ait écrits.
@@ -113,19 +115,20 @@ d'affaires annuel de Partix (2,4 M€), pour des manquements qui s'additionnent
 ### 19.4 Les cartes
 
 Règle d'écriture inchangée (§5.5), sans marque réelle (le mot « store » est un
-nom commun). Chiffres du niveau 2 pour le même rôle.
+nom commun). Chiffres du niveau 2 pour le même rôle, sauf les gains et les
+rampes positifs des cartes honnêtes, ×0,99 (C86, §19.6) : 0,05 devient 0,0495.
 
 **Honnêtes** (`honestOrder` : `fairbonus, guests, recap, guestpage, present, chosen, grouplink, nobook, clean`)
 
 | id | Nom FR | Pitch FR | Nom EN | Pitch EN | gain | ramp | trust | radar | autres | rôle |
 |---|---|---|---|---|---|---|---|---|---|---|
-| fairbonus | Parrainage détaillé | 5 € pour chacun, versés dès la première dépense partagée ; les conditions tiennent sur l'écran d'invitation. | Detailed referral | €5 each, paid on the first shared expense; the conditions fit on the invitation screen. | 0,05 | 0,09 | +4 | −2 | perm | pause |
+| fairbonus | Parrainage détaillé | 5 € pour chacun, versés dès la première dépense partagée ; les conditions tiennent sur l'écran d'invitation. | Detailed referral | €5 each, paid on the first shared expense; the conditions fit on the invitation screen. | 0,0495 | 0,0891 | +4 | −2 | perm | pause |
 | guests | Question aux invités | Une question facultative aux invités qui ne s'inscrivent pas : « Qu'est-ce qui t'a retenu ? » | Question for guests | One optional question for guests who don't sign up: "What held you back?" | | | +2 | | `insight` | survey |
-| recap | Récap partageable | Le récap d'un week-end, qui doit quoi à qui, lisible sans installer l'appli. | Shareable recap | A weekend's recap, who owes what to whom, readable without installing the app. | 0 | 0,12 | +3 | | perm | onboard |
-| guestpage | Page de l'invité | L'invité voit le groupe et sa part avant de créer un compte. | Guest page | Guests see the group and their share before creating an account. | 0,03 | 0,08 | +3 | | perm | annual |
+| recap | Récap partageable | Le récap d'un week-end, qui doit quoi à qui, lisible sans installer l'appli. | Shareable recap | A weekend's recap, who owes what to whom, readable without installing the app. | 0 | 0,1188 | +3 | | perm | onboard |
+| guestpage | Page de l'invité | L'invité voit le groupe et sa part avant de créer un compte. | Guest page | Guests see the group and their share before creating an account. | 0,0297 | 0,0792 | +3 | | perm | annual |
 | present | *(niveau 1, par référence)* | | | | | | | | `present` | present |
 | chosen | Invitation choisie | On choisit chaque contact à inviter, et le message se modifie avant l'envoi. | Chosen invitation | You pick each contact to invite, and the message can be edited before sending. | −0,01 | | +8 | −8 | perm | remind |
-| grouplink | Lien de groupe | Un lien d'invitation par groupe, à envoyer où l'on veut. | Group link | One invitation link per group, to send wherever you like. | 0 | 0,08 | +3 | | perm | reco |
+| grouplink | Lien de groupe | Un lien d'invitation par groupe, à envoyer où l'on veut. | Group link | One invitation link per group, to send wherever you like. | 0 | 0,0792 | +3 | | perm | reco |
 | nobook | Carnet facultatif | L'appli marche sans accès aux contacts ; les numéros des non-inscrits ne sont pas gardés. | Optional address book | The app works without access to contacts; non-users' numbers aren't kept. | −0,03 | | +10 | −20 | perm, `temp` | three |
 | clean | *(nom du niveau 1)* | Revenir à l'écran d'invitation, aux messages et au parrainage d'origine. | *(niveau 1)* | Go back to the original invitation screen, messages and referral offer. | | | +6 | −25 | `clean` | clean |
 
@@ -187,7 +190,7 @@ Les années du niveau 2 (§17.6), carte pour carte par rôle, sauf l'année épi
 | Ordre | — | contacts | autoinvite | bigshare |
 
 Fin : `applause`, confiance 83, radar 0. Les utilisateurs passent de 1 000 000
-à 1 112 307, le revenu mensuel de 0,20 à 0,22 M€.
+à 1 112 020, le revenu mensuel de 0,20 à 0,22 M€.
 
 **B** — T1 `fairbonus + guests`, T2 `recap + guestpage`, T3 `grouplink + present`, T4 `nobook + present`
 
@@ -209,7 +212,7 @@ Fin : `applause`, confiance 85, radar 0.
 
 Signalements et fil viral au T2, contrôle au T3 : amende de 75 000 €, six
 astuces retirées, 14 318 utilisateurs qui suppriment leur compte. Fin : `fine`,
-confiance 27, radar 1 ; 881 743 utilisateurs et 0,18 M€ de revenu mensuel en
+confiance 27, radar 1 ; 881 732 utilisateurs et 0,18 M€ de revenu mensuel en
 décembre.
 
 **D** — T1 `guests + chosen`, T2 `present + grouplink`
@@ -230,19 +233,24 @@ pas du niveau 2** : l'année du niveau 2, jouée ici, finit à 0,5959, et la tui
 affiche 0,60, donc des applaudissements. Celle-ci a été trouvée par recherche
 parmi les années honnêtes : `fairbonus + guests`, `recap + present`,
 `guestpage + present`, `present + chosen` (0,56 en décembre, patience 51, 42,
-61, 58).
+61, 57).
 
 **Joué au hasard** (cartes tirées dans la main, graine fixe, le même harnais pour les cinq niveaux) :
 
 | Façon de jouer | Niveau 1 | Niveau 2 | Referral |
 |---|---|---|---|
-| Honnêtes seulement | applaudissements 35 %, viré 34 %, droit dans tes bottes 19 % | 43 %, 27 %, 19 % | **49 %**, 27 %, 13 % |
+| Honnêtes seulement | applaudissements 35 %, viré 34 %, droit dans tes bottes 19 % | 43 %, 27 %, 19 % | 43 %, 27 %, 18 % (49 %, 27 %, 13 % avant C86) |
 | Obéit au DG | labyrinthe 65 %, contrôle 23 % | 65 %, 23 % | 65 %, 23 % |
 | N'importe quoi | labyrinthe 44 %, viré après astuces 44 % | 53 %, 34 % | 53 %, 34 % |
 
-Le joueur honnête qui joue au hasard gagne plus souvent : c'est le demi-centième
-de la tuile (0,595 suffit). Ce n'est pas un joueur ; la recette tranche (§7.3),
-et durcir coûte un réglage (Q5).
+**Durci le 2026-10-04 (C86).** Avant, le joueur honnête qui jouait au hasard
+était applaudi 49 % du temps : la tuile arrondit au centième, donc une année
+finie à 0,595 affiche déjà 0,60 et gagne, une tolérance cinq fois plus large
+qu'au niveau 2. Les gains et les rampes positifs des cartes honnêtes ×0,99
+ramènent le taux à 43 %, comme au niveau 2, sans toucher aux chiffres du board
+ni aux années de référence (mêmes chiffres au centième, même patience). Le test
+F19.C86 de `referral.test.ts` le tient : 2 000 années tirées avec une graine
+fixe, applaudies moins de 45 % du temps, et plus de 45 % sans le réglage.
 
 ### 19.7 Le téléphone : l'invitation, des deux côtés
 
@@ -592,11 +600,11 @@ Les questions communes sont au §21.8.
 
 | # | Question | Reco | Si on se trompe | Réponse |
 |---|---|---|---|---|
-| Q1 | **Le chiffre du board : le coefficient viral, de 0,40 à 0,60** (l'esquisse disait 0,3 à 0,6) ? | **Oui** : le même ×1,5 que le niveau 2, donc l'équilibrage validé. Un ×2 demanderait de tout régler à nouveau. | Changer le chiffre change la tuile, les messages du DG et les tables. | |
-| Q2 | **Le nom : Partix** ? | **Oui**. Repli : Cagnotix. | Un nom propre à remplacer en une passe avant T1. | |
-| Q3 | **Le contrôle : une amende administrative de 75 000 €, rendue publique** ? | **Oui** : environ 3 % du chiffre d'affaires, pour des manquements qui s'additionnent. | Un montant, sans effet sur l'équilibrage. | |
-| Q4 | **Les huit astuces du §19.4** : le partage pour débloquer dans le rôle faible, le gros bouton « Continuer » dans le rôle fort, les rappels d'attente retirés, la demande d'avis ciblée ajoutée ? | **Oui** : huit noms neufs, chacun avec un texte et un cas réels, sauf la zone grise assumée. | Une PR de spécification avant T1. | |
-| Q5 | **Le niveau pardonne un peu plus au hasard** (49 % d'applaudissements pour un joueur honnête qui joue au hasard, contre 43 % au niveau 2), à cause du centième de la tuile ? | **Laisser**, et que la recette tranche, comme pour le niveau 2. Durcir voudrait dire afficher trois décimales, ou régler à nouveau. | Rien de visible pour un vrai joueur avant la recette. | |
+| Q1 | **Le chiffre du board : le coefficient viral, de 0,40 à 0,60** (l'esquisse disait 0,3 à 0,6) ? | **Oui** : le même ×1,5 que le niveau 2, donc l'équilibrage validé. Un ×2 demanderait de tout régler à nouveau. | Changer le chiffre change la tuile, les messages du DG et les tables. | **Oui** (C82, Antoine, 2026-10-04). |
+| Q2 | **Le nom : Partix** ? | **Oui**. Repli : Cagnotix. | Un nom propre à remplacer en une passe avant T1. | **Oui** (C83, Antoine, 2026-10-04). |
+| Q3 | **Le contrôle : une amende administrative de 75 000 €, rendue publique** ? | **Oui** : environ 3 % du chiffre d'affaires, pour des manquements qui s'additionnent. | Un montant, sans effet sur l'équilibrage. | **Oui** (C84, Antoine, 2026-10-04). |
+| Q4 | **Les huit astuces du §19.4** : le partage pour débloquer dans le rôle faible, le gros bouton « Continuer » dans le rôle fort, les rappels d'attente retirés, la demande d'avis ciblée ajoutée ? | **Oui** : huit noms neufs, chacun avec un texte et un cas réels, sauf la zone grise assumée. | Une PR de spécification avant T1. | **Oui** (C85, Antoine, 2026-10-04). |
+| Q5 | **Le niveau pardonne un peu plus au hasard** (49 % d'applaudissements pour un joueur honnête qui joue au hasard, contre 43 % au niveau 2), à cause du centième de la tuile ? | **Laisser**, et que la recette tranche, comme pour le niveau 2. Durcir voudrait dire afficher trois décimales, ou régler à nouveau. | Rien de visible pour un vrai joueur avant la recette. | **Durcir maintenant** (C86, Antoine, 2026-10-04) : les gains et les rampes positifs des cartes honnêtes ×0,99, appliqués dans `levels/referral.ts` ; 43 % au lieu de 49 %, les années de référence inchangées (§19.6, test F19.C86). |
 
 ### 19.11 La copie autour du jeu
 
@@ -606,7 +614,7 @@ Les questions communes sont au §21.8.
 | `meta.ts` | `GAME_META.referral.description` | Joue une année comme PM growth d'une appli de partage de dépenses : un DG qui veut un coefficient viral de 0,60, et huit astuces à reconnaître. | Play a year as the growth PM of an expense-sharing app: a CEO who wants a viral coefficient of 0.60, and eight tricks to learn to spot. |
 | `meta.ts` | `GAME_META.referral.breadcrumb` | Une année chez Partix | A year at Partix |
 | `meta.ts` | `GAME_META.referral.shareImageAlt` | Une année chez Partix : un coefficient viral de 0,40, la confiance et le radar CNIL absents du dashboard. | A year at Partix: a viral coefficient of 0.40, user trust and the regulator's radar missing from the dashboard. |
-| `meta.ts` | `REFERRAL_INTRO.eyebrow` | Le côté obscur · niveau {N} | The dark side · level {N} |
+| `meta.ts` | `REFERRAL_INTRO.eyebrow` | Le côté obscur · referral | The dark side · referral |
 | `meta.ts` | `REFERRAL_INTRO.title` | Une année chez Partix | A year at Partix |
 | `meta.ts` | `REFERRAL_INTRO.lead` | Ton DG dirige maintenant Partix, une appli de partage de dépenses entre amis, et il t'a emmené avec lui comme PM growth. Un million d'utilisateurs, et chaque nouveau en amène 0,40 autre en moyenne par ses invitations : c'est le coefficient viral. Le board veut 0,60 d'ici décembre. Chaque trimestre, le DG t'appelle en visio, puis tu as droit à deux actions, nommées comme on les nomme en réunion. Tu ne sauras ce qu'elles valent qu'une fois le trimestre passé. Le DG, lui, sait déjà ce qu'il veut. | Your CEO now runs Partix, an app for splitting costs with friends, and he brought you along as growth PM. A million users, and each new one brings in 0.40 more on average through their invitations: that's the viral coefficient. The board wants 0.60 by December. Every quarter the CEO calls you on video, then you get two actions, named the way they are named in meetings. You will only learn what they are worth once the quarter is over. The CEO already knows what he wants. |
 | `meta.ts` | `REFERRAL_INTRO.stepsTitle`, `steps`, `glossaryLead` | *(niveau 1, par référence)* | |

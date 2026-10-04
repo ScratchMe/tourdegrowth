@@ -1040,3 +1040,22 @@ En anglais à 1 280 : tableau 3 372 → 4 212 (+840, le retour +828). À 390 : t
 **Vérifié** : `tsc` et `eslint` propres ; **3 275 tests unitaires** (63 de plus : 60 pour les trois modèles, 3 pour les formats), `vitest --coverage` au-dessus de ses seuils (lignes 97,9 %) ; `next build` avec les variables de la CI ; les specs Playwright du jeu sur ce build (`game-level`, `game-level2`, `game-endings`, `game-island`, `game-news`, `game-share-images`) : 72 passées, 3 ignorées par construction. Le reste de la suite Playwright tourne en CI : la PR ne touche aucune page.
 
 **Fusionné deux fois avec `main`**, qui a pris les numéros pendant que la PR attendait : #323 (la re-synchro A20.f) a pris A21, puis #324 (l'app grand public et la place de marché) A22, A23, C56 à C74 et les prompts G et H. L'item du jeu est devenu **A24**, ses questions **C75 à C91**, son prompt le **prompt I**, partout (spécifications, tests, `types.ts`, `CHANTIERS.md`, `CLAUDE.md`). Le signe : la PR était en conflit, et sa CI n'avait jamais démarré, sans que rien ne le dise (`GITHUB.md` §1.8).
+
+## C75 à C91 : les décisions des trois derniers niveaux du jeu, et le referral durci (2026-10-04)
+
+**La séance** : les dix-sept questions d'A24, posées une par une avec leur reco, juste après le merge des spécifications (#325). Quatorze sur la reco, trois non :
+- **C75, le bloc « Niveau suivant »** vise **le premier niveau ouvert que le joueur n'a pas encore fini**, dans l'ordre du Tour à partir du suivant, en bouclant ; si tous les autres sont finis, le suivant dans l'ordre. La reco était le suivant dans l'ordre, toujours. « Fini », c'est une fin enregistrée dans la collection (`endings[slug]`). Le calcul se fait donc dans le navigateur, en décembre. Ça ne coûte rien à l'hydratation : décembre ne se rend jamais sur le serveur. La page passe à l'îlot les liens de tous les niveaux ouverts (`nextLevelLinks`). T0 point 1 est réécrit en conséquence, avec ses tests et deux décembres semés pour la spec de chaque niveau.
+- **C76, le bandeau de l'intro** dit l'étape, sans numéro, sur les cinq niveaux (« Le côté obscur · rétention »). La reco était le rang d'ouverture. Les bandeaux des niveaux 1 et 2 changent en U0, et les dates de leurs pages avec.
+- **C86, le referral durci tout de suite.** La reco était de laisser la recette trancher.
+
+**Comment le referral est durci.** Le harnais des cinq niveaux (deux cartes honnêtes tirées dans la main à chaque trimestre, graine fixe) reproduit l'écart : 48,7 % d'applaudissements contre 42,3 % au niveau 2. Tout l'écart vient des fins « droit dans tes bottes » devenues applaudies : la tuile arrondit au centième, donc 0,595 suffit, une tolérance cinq fois plus large qu'au niveau 2 (2 995 pour 3 000). Huit réglages ont été essayés :
+- monter le seuil de victoire à 0,599 donne exactement la répartition du niveau 2, mais une tuile affichant 0,60 aurait pu perdre ;
+- abaisser le plafond honnête fait basculer l'année A en « droit dans tes bottes » ;
+- renforcer le concurrent du printemps fait licencier plus souvent ;
+- **les gains et les rampes positifs des cartes honnêtes ×0,99** : 42,9 % d'applaudissements, 17,8 % de « droit dans tes bottes », 26,9 % de licenciements (sur 20 000 années). Les années A à D gardent leurs chiffres au centième, leur patience (51, 42, 46, 73 pour A), leur confiance et leurs fins ; seules la patience de décembre de deux années épinglées et les effectifs bougent d'un cheveu.
+
+C'est ce dernier réglage qui est appliqué dans `levels/referral.ts`. Le test F19.C86 le tient : sur 2 000 années à graine fixe, 42,6 % d'applaudissements avec le réglage, 49,9 % sans, et le seuil est à 45 %.
+
+**Corrigé en route** : le commentaire de l'amende dans `levels/referral.ts` citait encore les « 1 à 2 % » des amendes publiées. La spécification les avait retirés à la relecture de copie, faute de source.
+
+**Vérifié** : `tsc` et `eslint` propres ; la suite du jeu et le budget des documents passent. Les tableaux F19 n'ont pas eu à bouger, puisqu'ils sont arrondis au centième.

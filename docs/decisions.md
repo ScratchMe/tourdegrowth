@@ -8,7 +8,7 @@ question tranchée plus tard y gagne sa ligne, dans le même format.*
 C1 à C22 ont été tranchées dans la séance du 2026-09-29. Les questions de
 design y ont été posées avec des captures du vrai écran : un build local avec
 le jeu et le moteur ouverts, et, pour la vue propriétaire, un build jetable
-jamais commité. C23 à C29 l'ont été le 2026-09-30, C30 à C33 le 2026-10-01, C34 à C44 le 2026-10-02, C45 à C55 le 2026-10-03.
+jamais commité. C23 à C29 l'ont été le 2026-09-30, C30 à C33 le 2026-10-01, C34 à C44 le 2026-10-02, C45 à C55 le 2026-10-03, C75 à C91 le 2026-10-04.
 Les questions encore ouvertes sont dans `CHANTIERS.md`, section C.
 
 | # | Sujet | Réponse | Écrit dans | Suite |
@@ -68,3 +68,20 @@ Les questions encore ouvertes sont dans `CHANTIERS.md`, section C.
 | C53 | Les chiffres des titres de slides à l'encre, dans tout le deck (née du retour du brief 09, 2026-10-03) | **Oui** (la reco) : le rouge reste au verdict et au diagnostic | `docs/engine/argent.md` §20.13 | A20.d T4 |
 | C54 | Le tableau réordonné (née du retour du brief 09, 2026-10-03) | **Oui, en bloc** (la reco) : l'argent après le diagnostic, « Et si » remonté, le LTV:CAC hors du tableau, le panneau en tableaux | `docs/engine/argent.md` §20.13 | A20.d T2, T3 |
 | C55 | La copie neuve d'A20 : nº9 ou nº10 ? (née du retour du brief 09, 2026-10-03) | **Un nº10 à part** (la reco) ; la carte de la promesse du nº9 y passe | `docs/engine/argent.md` §20.13 | A20.e |
+| C75 | Le bloc « Niveau suivant », à trois niveaux et plus (2026-10-04) | **Le premier niveau ouvert que le joueur n'a pas encore fini**, dans l'ordre du Tour à partir du suivant, en bouclant ; tous finis : le suivant dans l'ordre. Pas la reco (le suivant dans l'ordre, toujours) : calculé dans le navigateur, en décembre, d'après la collection | `docs/game/construire-un-niveau.md` §21.8, QC1 ; T0 point 1 | A24, U0 |
+| C76 | Le bandeau de l'intro de chaque niveau (2026-10-04) | **L'étape, sans numéro**, sur les cinq niveaux (« Le côté obscur · rétention »). Pas la reco (le rang d'ouverture) : les bandeaux des niveaux 1 et 2 changent | `docs/game/construire-un-niveau.md` §21.8, QC2 ; T0 point 4 | A24, U0 |
+| C77 | Les sanctions de la CNIL citées sans le nom de l'entreprise (2026-10-04) | **Oui** (la reco), sauf quand un tribunal la nomme ou que l'autorité n'est pas la CNIL | `docs/game/construire-un-niveau.md` §21.8, QC3 | A24 |
+| C78 | Activation : le chiffre du board (2026-10-04) | **30 % → 45 %** (la reco) | `docs/game/activation.md` §18.10, Q1 | A24, ACT |
+| C79 | Activation : le nom (2026-10-04) | **Quandi** (la reco) | `docs/game/activation.md` §18.10, Q2 | A24, ACT |
+| C80 | Activation : l'amende (2026-10-04) | **100 000 €, publiée** (la reco) | `docs/game/activation.md` §18.10, Q3 | A24, ACT |
+| C81 | Activation : les huit astuces (2026-10-04) | **La liste du §18.4** (la reco) | `docs/game/activation.md` §18.10, Q4 | A24, ACT |
+| C82 | Referral : le chiffre du board (2026-10-04) | **0,40 → 0,60** (la reco) | `docs/game/referral.md` §19.10, Q1 | A24, REF |
+| C83 | Referral : le nom (2026-10-04) | **Partix** (la reco) | `docs/game/referral.md` §19.10, Q2 | A24, REF |
+| C84 | Referral : l'amende (2026-10-04) | **75 000 €, publiée** (la reco) | `docs/game/referral.md` §19.10, Q3 | A24, REF |
+| C85 | Referral : les huit astuces (2026-10-04) | **La liste du §19.4** (la reco), la pyramide sociale en zone grise assumée | `docs/game/referral.md` §19.10, Q4 | A24, REF |
+| C86 | Referral : un niveau qui pardonnait au hasard (2026-10-04) | **Durcir maintenant.** Pas la reco (laisser à la recette) : les gains et les rampes positifs des cartes honnêtes ×0,99 ; le joueur honnête au hasard est applaudi 43 % du temps au lieu de 49 %, comme au niveau 2, et les années de référence ne bougent pas | `docs/game/referral.md` §19.6 et §19.10, Q5 ; `levels/referral.ts` | Fait dans la PR de ces décisions |
+| C87 | Revenue : le chiffre du board (2026-10-04) | **4,00 € → 6,00 €** (la reco) | `docs/game/revenue.md` §20.10, Q1 | A24, REV |
+| C88 | Revenue : le nom (2026-10-04) | **Gainix** (la reco) | `docs/game/revenue.md` §20.10, Q2 | A24, REV |
+| C89 | Revenue : le contrôle (2026-10-04) | **Une transaction de 300 000 € et une amende administrative de 75 000 €**, tampon « Contrôle · 375 000 € » (la reco) | `docs/game/revenue.md` §20.10, Q3 | A24, REV |
+| C90 | Revenue : les huit astuces (2026-10-04) | **La liste du §20.4** (la reco) | `docs/game/revenue.md` §20.10, Q4 | A24, REV |
+| C91 | Revenue : la bande de l'encart du résultat (2026-10-04) | **« Revenu par utilisateur {metric} »**, remplacée par « ARPU {metric} » si la spec la voit passer à la ligne (la reco) | `docs/game/revenue.md` §20.10, Q5 | A24, REV-3 et REV-4 |
