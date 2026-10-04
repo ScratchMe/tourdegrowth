@@ -1119,7 +1119,7 @@ C'est ce dernier réglage qui est appliqué dans `levels/referral.ts`. Le test F
 
 **Désormais** : chaque synchro refait l'artefact (`CHANTIERS.md`, prompt B, étape 5 ; `.design-sync/NOTES.md`, « The Design System artifact »). D13, le signalement, est sans objet.
 
-## A24 : la relecture « un agent Sonnet peut-il tout exécuter sans décider ? » (2026-10-04)
+## A24 : la relecture « un agent Sonnet peut-il tout exécuter sans décider ? » (2026-10-04, #332)
 
 **La demande d'Antoine**, une fois les questions tranchées : tout relire pour qu'un agent Opus n'ait plus qu'à lancer des sous-agents Sonnet, sans qu'aucun n'ait à réfléchir ni puisse se rater. Quatre relecteurs en lecture seule ont joué chacun le rôle d'un sous-agent : un par niveau, de X-1 à X-4, et un pour le guide et le prompt I. Chacun a vérifié chaque nom cité contre le code, rejoué les chiffres avec le vrai moteur, et lancé tsc et eslint sur des copies dans le scratchpad. Environ cent constats, dont une douzaine de bloquants. J'ai revérifié ceux qu'on recopie tels quels : les listes C6, recalculées avec `CAPITALISED` sur les `cas` ; les expressions C1 du revenue, sur les huit lois ; les contrastes, avec la formule de `color-math.ts` ; les fixtures de `real-results.ts` ; les specs e2e qui casseraient.
 
