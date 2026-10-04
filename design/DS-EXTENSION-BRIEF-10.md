@@ -208,11 +208,11 @@ yet: these are the screens a marketplace will reuse or replace.
 
 | File | What it shows |
 |---|---|
-| `01-start-card-{fr-desktop,en-mobile}` | The start card: the business types it offers today |
+| `01-start-card-{fr-desktop,en-mobile}` | The start card as it is today: how you sell (three choices) and the line saying it is set for a B2B SaaS. It offers no business type yet: they are on the setup card (02) |
 | `02-setup-types-fr-desktop` | The setup card: the type list, « Place de marché » greyed (« Plus tard ») |
 | `03-board-full-{…}` | The board on the public example (self-serve): the money, the diagnosis, the peloton, the list, the lever card |
 | `04-hybrid-board-{…}` | The hybrid: `TotalBand`, the "Engine shown" selector, one engine shown — the pattern the side selector follows |
-| `05-peloton-{…}` | The peloton card: three columns on the same 100 sign-ups, the referred dots, the upstream line |
+| `05-peloton-{…}` | The peloton card: the 100 sign-ups and three stages counted on them, the referred dots, the upstream line |
 | `06-relays-fr-desktop` | Sales-assisted's relays: a funnel that is not a peloton (three bases of 100) |
 | `07-money-{…}` | The money block: MRR, ARR, what one customer is worth, the cash |
 | `08-whatif-panel-{…}` | The full "What if?" panel, two levers moved: the curve, the figures, the compounding |
