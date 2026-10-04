@@ -1,7 +1,7 @@
 import type { Page } from "@playwright/test";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import { fillTemplate } from "@/lib/engine/format";
-import { hybridState, salesAssistedState } from "../src/lib/engine/__tests__/fixtures";
+import { hybridState, salesAssistedState, withEntry } from "../src/lib/engine/__tests__/fixtures";
 import type { EngineState } from "../src/lib/engine/types";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
 import { storedEngineEntry, writeEngineSeed, openNumber } from "./engine-helpers";
@@ -131,6 +131,19 @@ test.describe("the hybrid board (§18.7 E2)", () => {
     // The band's title is the board's heading: one verdict at the top, not two.
     await expect(band.locator("#engine-verdict")).toHaveCount(1);
     await expect(page.locator('[data-testid="engine-board"] > header [data-testid="engine-verdict"]')).toHaveCount(0);
+  });
+
+  test("a part with no MRR: « pas de chiffre » set in the text face, never in the figures' (A21.3)", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await seed(page, withEntry(hybridState(), "slg.rev.arpa", undefined), "fr");
+    const value = (id: string) => page.getByTestId(id).locator("dd");
+    const fontOf = (id: string) => value(id).evaluate((el) => getComputedStyle(el).fontFamily);
+    await expect(value("engine-total-slg")).toHaveText(ENGINE_COPY.slide.noNumber.fr);
+    await expect(value("engine-total-sum")).toHaveText(ENGINE_COPY.slide.noNumber.fr);
+    // Self-serve's MRR keeps the figures' face; the words do not take it.
+    const figureFace = await fontOf("engine-total-plg");
+    expect(await fontOf("engine-total-slg")).not.toBe(figureFace);
+    expect(await fontOf("engine-total-sum")).not.toBe(figureFace);
   });
 
   test("one engine at a time under « Engine shown »: its own verdict, diagnosis and drawing — never two columns", async ({ page }) => {

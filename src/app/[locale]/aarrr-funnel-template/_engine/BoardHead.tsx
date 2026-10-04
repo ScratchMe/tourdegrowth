@@ -223,6 +223,7 @@ export function BoardNextStep({
   actions,
   plan,
   returningFrom,
+  openedAt,
   series,
   past,
   correcting,
@@ -237,6 +238,11 @@ export function BoardNextStep({
   plan: CollectPlan;
   /** The last visit, on a return; null during a first visit. */
   returningFrom: string | null;
+  /**
+   * The day the engine was opened. The last visit is counted to it, never to the view's `ctx.today`: on a past month
+   * that is the day the month was closed, earlier than the visit, and the eyebrow said « aujourd'hui » (A21.1).
+   */
+  openedAt: string;
   series?: SeriesControls;
   past: boolean;
   correcting: boolean;
@@ -399,7 +405,7 @@ export function BoardNextStep({
 
   return (
     <NextStep
-      eyebrow={returningFrom ? fill(n.since, { ago: ago(daysBetween(returningFrom, ctx.today)) }) : n.where}
+      eyebrow={returningFrom ? fill(n.since, { ago: ago(daysBetween(returningFrom, new Date(openedAt))) }) : n.where}
       {...step}
       lines={lines}
       data-testid="engine-next"

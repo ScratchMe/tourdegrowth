@@ -75,6 +75,7 @@ export function Board({
   verdict,
   plan,
   returningFrom,
+  openedAt,
   writeFailed,
   motionView,
   onMotion,
@@ -95,6 +96,8 @@ export function Board({
   verdict: SlideTitle;
   plan: CollectPlan;
   returningFrom: string | null;
+  /** The day the engine was opened (`engine-store`'s `openedAt`): what the last visit is counted to. */
+  openedAt: string;
   writeFailed: boolean;
   /** The hybrid's « Moteur affiché » (§18.7, A18 T5): whose board shows. null: the default — self-serve. */
   motionView: Motion | null;
@@ -268,6 +271,7 @@ export function Board({
         actions={actions}
         plan={plan}
         returningFrom={returningFrom}
+        openedAt={openedAt}
         series={series}
         past={past}
         correcting={Boolean(series?.correcting)}

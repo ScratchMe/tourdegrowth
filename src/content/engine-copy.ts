@@ -1631,8 +1631,12 @@ export const ENGINE_COPY = {
     rowAfter: { fr: "Mois après remboursement", en: "Months after payback" },
     rowSpend: { fr: "Dépensé en acquisition par mois", en: "Spent on acquisition a month" },
     rowCash: { fr: "Trésorerie immobilisée", en: "Cash tied up" },
-    /** Months after payback below zero: the customer leaves before paying their cost back — the loss, said in months. */
-    leavesFirst: { fr: "part avant", en: "leaves first" },
+    /**
+     * Months after payback below zero: the customer leaves before paying their cost back — the loss, said in months.
+     * `{n}`: how many months short (« ~5 mois »). TODO: à relire — réécrite le 2026-10-04 (A21.2) : « part avant » des
+     * deux côtés lisait « stable » quand un levier réduisait le manque sans le combler.
+     */
+    leavesFirst: { fr: "part {n} avant", en: "leaves {n} early" },
     /** A figure the what-ifs did not move. */
     stable: { fr: "stable", en: "unchanged" },
     /** The money's own rules, printed with the scenario's when the table shows the figure. */
