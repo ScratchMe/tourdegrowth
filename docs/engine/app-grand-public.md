@@ -361,13 +361,26 @@ export function isApp(setup: Pick<EngineSetup, "type">): boolean {
   return setup.type === "consumer-app";
 }
 /**
- * The app's monetization, or null for any other type. A stored app always has one (validate.ts requires it); the
- * default only covers a setup built in code before it is validated (the start card's choice in progress).
+ * The app's monetization, or null for any other type. A stored app can carry one that is not (a file opens
+ * with its errors, io.ts, and is stored as it came): the stored value is returned only when it is an object
+ * whose three boxes are booleans with one at least true, and the subscriptions-only default otherwise.
  */
 export function monetizationOf(setup: Pick<EngineSetup, "type" | "monetization">): AppMonetization | null {
-  return setup.type === "consumer-app" ? (setup.monetization ?? DEFAULT_APP_MONETIZATION) : null;
+  if (setup.type !== "consumer-app") return null;
+  const stored: unknown = setup.monetization;
+  if (typeof stored !== "object" || stored === null || Array.isArray(stored)) return DEFAULT_APP_MONETIZATION;
+  const { subscriptions, purchases, ads } = stored as Record<string, unknown>;
+  const threeBooleans = typeof subscriptions === "boolean" && typeof purchases === "boolean" && typeof ads === "boolean";
+  return threeBooleans && (subscriptions || purchases || ads) ? (stored as AppMonetization) : DEFAULT_APP_MONETIZATION;
 }
 ```
+
+*Corrigé après APP-0 (#341, la relecture sécurité)* : le premier texte
+rendait `setup.monetization ?? DEFAULT_APP_MONETIZATION` et affirmait qu'une
+app stockée en a toujours une. Un fichier s'ouvre pourtant avec ses erreurs :
+une monétisation `"x"` serait arrivée typée `AppMonetization` jusqu'aux
+calculs d'APP-1 et d'après. Tout lecteur passe donc par `monetizationOf`,
+jamais par `setup.monetization`.
 
 ```ts
 // APP-0 — src/lib/engine/business-type.ts
@@ -517,6 +530,8 @@ export function openTypesAtBuild(): BusinessType[] {
 
 - `access.ts` importe `BUSINESS_TYPES` et `ALWAYS_OPEN_TYPE` de
   **`setup-type.ts`** (§21.2.2 : jamais de `business-type.ts`).
+- **Les noms se comparent tels quels**, casse comprise, après un `trim()` de
+  chacun : `Consumer-App` n'ouvre rien.
 - **`page.tsx`** passe `openTypes` à `EngineWorkbench` ;
   `EngineWorkbenchProps` gagne `openTypes: BusinessType[]` (obligatoire) ;
   `resolveEngineProps` ne le calcule pas (il ne lit pas l'environnement) : son
@@ -530,7 +545,12 @@ export function openTypesAtBuild(): BusinessType[] {
 - **`engine-boundary.test.ts`** : le test « the flag has one reader »
   (`only lib/engine/access.ts reads ENGINE_ENABLED`) gagne la même assertion
   pour `ENGINE_TYPES` (même expression régulière, le nom changé ; lecteurs :
-  `["lib/engine/access.ts"]`).
+  `["lib/engine/access.ts"]`). Cette expression n'a pas de borne de mot,
+  comme celle d'`ENGINE_ENABLED` : on la garde telle quelle.
+- **`src/__tests__/next-config.test.ts`** gagne « never exposes ENGINE_TYPES
+  itself to the client bundles », à côté du même test pour `ENGINE_ENABLED`
+  (D8 : la variable n'est jamais inlinée dans le client ; ajouté par APP-0
+  après sa relecture sécurité).
 - **Un type fermé** est grisé dans `Setup` (« Plus tard ») et absent de la
   carte de départ. **Un fichier** d'un type fermé s'ouvre quand même : l'import
   ne dépend pas du build.
@@ -1568,11 +1588,12 @@ rendre argent ? { gap: sub.gap, mrr: argent } : sub.gap ? { gap: sub.gap } : {}
   de l'app (ils lisent les listes de `catalog-shape.ts`, APP-1 et APP-4) ; une
   valeur de `whatIf` pour un levier `app.*` suit la règle d'aujourd'hui
   (nombre ≥ 0, ≤ 100 pour un pourcentage borné).
-- **`io.ts#sellsSomehow`** : un réglage de `BUSINESS_TYPES` dont les motions
-  cochées sont dans `motionsAllowed(type)`, au moins une. Elle ne lit pas la
-  monétisation. Les tests qui refusent `"consumer-app"`
-  (`io.test.ts:107-114`) et `"marketplace"` (`validate.test.ts:123`)
-  changent :
+- **`io.ts#sellsSomehow`** : un réglage de `BUSINESS_TYPES` dont **toutes**
+  les motions cochées sont dans `motionsAllowed(type)`, et au moins une. Elle
+  ne lit pas la monétisation. Le test qui refuse `"consumer-app"`
+  (`io.test.ts:107-114`) refuse désormais `"marketplace"` ; celui de
+  `validate.test.ts:123` (« marketplace » inconnu) reste vrai et ne change
+  pas. Les cas suivants s'ajoutent :
   - l'app s'ouvre (`refusal` absent, `errors` vide) ;
   - la place de marché est toujours refusée (`refusal: "unsupported-setup"`) ;
   - une app avec l'assisté coché est refusée (`refusal: "unsupported-setup"`,
@@ -1584,7 +1605,8 @@ rendre argent ? { gap: sub.gap, mrr: argent } : sub.gap ? { gap: sub.gap } : {}
 - **`merge.ts`** : rien pour le type (deux types différents refusent déjà, avec
   `"type"`). Deux apps de monétisations différentes refusent avec `"motions"`
   (la phrase existante dit qu'ils ne vendent pas de la même façon) ; la
-  condition s'ajoute à côté de celle des motions.
+  condition s'ajoute à côté de celle des motions, par une petite fonction
+  `sameMonetization(a, b)` qui compare les trois cases de `monetizationOf`.
 - **`migrate.ts`**, `storage.ts` : rien.
 
 #### 21.6.4 Le tableau (`_engine/Board.tsx`, `money-view.ts`, APP-8)
@@ -2489,7 +2511,7 @@ journal. « Les goldens inchangés » veut dire leurs sorties JSON et
 | `shared-counts.test.ts:138` | l'appel `shapesOf({ type: "b2b-saas", motions: { plg, slg } })` | APP-1 |
 | `golden-v2.test.ts:94` | l'appel `motionShapes(state.setup)` ; la sortie JSON inchangée | APP-1 |
 | `cohort.test.ts:93`, `cohort.ts:110` | **rien** : `defaultMonths` est construit sur `METRIC_SHAPES` et n'a pas de clé `app.*` | — |
-| `validate.test.ts:123`, `io.test.ts:107-114` | l'app s'ouvre avec sa monétisation ; la place de marché reste refusée ; une app avec l'assisté, ou sans monétisation, est refusée | APP-0 |
+| `io.test.ts:107-114` (et des cas neufs dans `validate.test.ts`) | l'app s'ouvre avec sa monétisation ; la place de marché reste refusée ; une app avec l'assisté est refusée ; une app sans monétisation s'ouvre, avec l'erreur `setup.monetization` (§21.6.3). `validate.test.ts:123` ne change pas | APP-0 |
 | `_engine/__tests__/collect.test.ts`, `csv.test.ts`, `next-step.test.ts`, `annex-pages.test.ts:90` | l'appel : `shapesOf` / `motionShapes` reçoivent un réglage ; mêmes résultats | APP-1 |
 | `diagnose.test.ts` (21 lignes), `diagnose-slg.test.ts` (8), `phrases.test.ts` (4), `sentences-guard.test.ts` (1), `deck/__tests__/ask-defaults.test.ts:49` (1) | `positions` devient `Partial` : un `!` là où le test lit une position qu'il sait présente ; mêmes valeurs | APP-5 |
 | `_engine/__tests__/start.test.ts:20-24, 37-41` | `startPlan(setup)` ; `typeOf` ; les comptes du SaaS inchangés ; l'app à 18 (abonnements seuls) | APP-7 |
