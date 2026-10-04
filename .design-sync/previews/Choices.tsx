@@ -21,22 +21,22 @@ function Live<V extends string>(props: { initial: V | null } & Omit<React.Compon
 }
 
 /**
- * The metric sheet's status question (`_engine/MetricSheet.tsx`), on a number
- * nobody has looked at yet: nothing pre-selected. `columns={2}` sets the four
- * short, parallel answers two by two from a 560px group, one below.
+ * A number whose answer is a choice (`_engine/ValueEditor.tsx`, `kind: "choice"`): the referral
+ * mechanism, in English, before anything is picked. The legend is the number's own name and the
+ * three answers are its catalogue's (`ref.mechanism`); nothing is pre-selected. (The sheet's
+ * « where are you with this number » question is no longer a radio list since A18: it is
+ * `AnswerSwitch`.)
  */
 export const Empty = () => (
   <div style={{ maxWidth: 640 }}>
     <Live
       initial={null}
       size="sm"
-      columns={2}
-      legend="Where are you with this number?"
+      legend="Referral mechanism"
       options={[
-        { value: "have", label: "I have it" },
-        { value: "estimate", label: "I can estimate it" },
-        { value: "ask", label: "I'll ask for it" },
-        { value: "cantFind", label: "I can't find it" },
+        { value: "none", label: "None" },
+        { value: "communication", label: "In communication only" },
+        { value: "product", label: "In the product" },
       ]}
     />
   </div>

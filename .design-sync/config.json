@@ -106,7 +106,28 @@
     "Choices": "src/components/core/Choices.tsx",
     "Checkbox": "src/components/core/Checkbox.tsx",
     "FieldRow": "src/components/core/FieldRow.tsx",
-    "FormSummary": "src/components/core/FormSummary.tsx"
+    "FormSummary": "src/components/core/FormSummary.tsx",
+    "AnswerSwitch": "src/components/engine/AnswerSwitch.tsx",
+    "AskList": "src/components/engine/AskList.tsx",
+    "CashWarning": "src/components/engine/CashWarning.tsx",
+    "EngineBar": "src/components/engine/EngineBar.tsx",
+    "EngineLanding": "src/components/engine/EngineLanding.tsx",
+    "EngineProgress": "src/components/engine/EngineProgress.tsx",
+    "EngineStart": "src/components/engine/EngineStart.tsx",
+    "HowItCompares": "src/components/engine/HowItCompares.tsx",
+    "LeverCard": "src/components/engine/LeverCard.tsx",
+    "LeverSum": "src/components/engine/LeverSum.tsx",
+    "MoneyBlock": "src/components/engine/MoneyBlock.tsx",
+    "MrrCurve": "src/components/engine/MrrCurve.tsx",
+    "NextStep": "src/components/engine/NextStep.tsx",
+    "NumberList": "src/components/engine/NumberList.tsx",
+    "NumberSheet": "src/components/engine/NumberSheet.tsx",
+    "PaybackChart": "src/components/engine/PaybackChart.tsx",
+    "TotalBand": "src/components/engine/TotalBand.tsx",
+    "TrapNote": "src/components/engine/TrapNote.tsx",
+    "WhatIfFigures": "src/components/engine/WhatIfFigures.tsx",
+    "WhereToFind": "src/components/engine/WhereToFind.tsx",
+    "WorthBars": "src/components/engine/WorthBars.tsx"
   },
   "extraFonts": [
     "./.design-sync/fonts/brand-fonts.css"
@@ -200,6 +221,63 @@
       "cardMode": "column"
     },
     "ActionCard": {
+      "cardMode": "column"
+    },
+    "MoneyBlock": {
+      "cardMode": "column"
+    },
+    "AnswerSwitch": {
+      "cardMode": "column"
+    },
+    "AskList": {
+      "cardMode": "column"
+    },
+    "EngineBar": {
+      "cardMode": "column"
+    },
+    "EngineLanding": {
+      "cardMode": "column"
+    },
+    "EngineProgress": {
+      "cardMode": "column"
+    },
+    "EngineStart": {
+      "cardMode": "column"
+    },
+    "HowItCompares": {
+      "cardMode": "column"
+    },
+    "LeverCard": {
+      "cardMode": "column"
+    },
+    "LeverSum": {
+      "cardMode": "column"
+    },
+    "MrrCurve": {
+      "cardMode": "column"
+    },
+    "NextStep": {
+      "cardMode": "column"
+    },
+    "NumberList": {
+      "cardMode": "column"
+    },
+    "NumberSheet": {
+      "cardMode": "column"
+    },
+    "PaybackChart": {
+      "cardMode": "column"
+    },
+    "TotalBand": {
+      "cardMode": "column"
+    },
+    "WhatIfFigures": {
+      "cardMode": "column"
+    },
+    "WhereToFind": {
+      "cardMode": "column"
+    },
+    "WorthBars": {
       "cardMode": "column"
     }
   },
