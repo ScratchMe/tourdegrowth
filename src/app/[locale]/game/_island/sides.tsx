@@ -1,11 +1,14 @@
 import type { ReactNode } from "react";
 import { BasketPill } from "@/components/game/BasketPill";
 import { ClickPill } from "@/components/game/ClickPill";
+import { CookiePill } from "@/components/game/CookiePill";
 import { PhoneMock } from "@/components/game/PhoneMock";
+import { PlannerPhone } from "@/components/game/PlannerPhone";
 import { ShopPhone } from "@/components/game/ShopPhone";
-import type { AcquisitionCopy, RetentionCopy } from "@/lib/game/copy";
+import type { AcquisitionCopy, ActivationCopy, RetentionCopy } from "@/lib/game/copy";
 import { fill, formatEur, formatInt } from "@/lib/game/format";
 import { RETENTION_LEVEL, type RetentionCardId } from "@/lib/game/levels/retention";
+import { cookieRefusal, plannerPhoneView } from "@/lib/game/planner-phone";
 import { basketFor, shopPhoneView, type Basket } from "@/lib/game/shop-phone";
 import type { LevelSlug } from "@/lib/game/types";
 import { clicksFor, clicksOverLaw, phoneView } from "@/lib/game/view";
@@ -14,7 +17,8 @@ import type { Locale } from "@/lib/i18n/locale";
 /**
  * What only one level has: its phone, and the pill under it — Flixo's
  * cancellation screen and its clicks, Pédalix's path to the basket and what
- * the basket adds (GAME-BRIEF §5.9, §17.7). The island is the same for every
+ * the basket adds, Quandi's arrival and the clicks to refuse its cookies
+ * (GAME-BRIEF §5.9, §17.7, §18.7). The island is the same for every
  * level (`island-view.ts`); each level brings this, and nothing else of its
  * own but its copy and its formats (CHANTIERS.md A12.d).
  *
@@ -127,6 +131,37 @@ export const ACQUISITION_SIDE: IslandSide<AcquisitionSideCopy> = {
     const was = basketFor(before);
     const now = basketFor(after);
     return now.extra === was.extra && now.fees === was.fees ? null : basketSentence(copy, locale, now);
+  },
+};
+
+// ------------------------------------------------------------ activation ---
+
+type ActivationSideCopy = Pick<ActivationCopy, "phone" | "cookies">;
+
+/** The pill's sentence: the clicks, and the law when the refusal is buried. */
+export function cookieSentence(copy: ActivationSideCopy, r: ReturnType<typeof cookieRefusal>): string {
+  return r.alert ? `${copy.cookies.hidden} · ${copy.cookies.lawSuffix}` : copy.cookies.easy;
+}
+
+/** Quandi's phone and its cookie pill (GAME-BRIEF §18.7). Not in `ISLAND_SIDES` until the level is wired (ACT-3). */
+export const ACTIVATION_SIDE: IslandSide<ActivationSideCopy> = {
+  render: ({ ids, copy }) => {
+    const r = cookieRefusal(ids);
+    return (
+      <>
+        <PlannerPhone items={plannerPhoneView(ids)} labels={copy.phone} />
+        <CookiePill clicks={r.clicks} alert={r.alert} labels={copy.cookies} announce={false} />
+      </>
+    );
+  },
+  pill: ({ ids, copy }) => {
+    const r = cookieRefusal(ids);
+    return { text: r.alert ? copy.cookies.hidden : copy.cookies.easy, alert: r.alert };
+  },
+  announce: ({ before, after, copy }) => {
+    const was = cookieRefusal(before);
+    const now = cookieRefusal(after);
+    return was.clicks === now.clicks ? null : cookieSentence(copy, now);
   },
 };
 
