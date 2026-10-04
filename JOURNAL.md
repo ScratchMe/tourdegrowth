@@ -1086,4 +1086,4 @@ En anglais à 1 280 : tableau 3 372 → 4 212 (+840, le retour +828). À 390 : t
 
 **Arrêté avant d'écrire dans l'artefact** : la génération de ses fichiers a été refusée par le garde de permissions de la session, comme une modification d'une ressource partagée sans accord explicite. Le chemin est prêt, la décision revient à Antoine (`CHANTIERS.md`, B16).
 
-**Vérifié** : `tsc`, `eslint` sur les fichiers touchés, les 3 291 tests unitaires ; côté projet, `list_files` (quatre fichiers et un aperçu par composant), l'index relu identique au local, les contrats de `TotalBand` et `WhatIfFigures` relus, `report_validate` 112/0/0/0.
+**Vérifié** : `tsc`, `eslint` sur les fichiers touchés, les 3 329 tests unitaires après la fusion de `main` ; côté projet, `list_files` (quatre fichiers et un aperçu par composant), l'index relu identique au local, les contrats de `TotalBand` et `WhatIfFigures` relus, `report_validate` 112/0/0/0.
