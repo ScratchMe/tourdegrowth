@@ -695,6 +695,8 @@ Le modèle numérique est le même que celui du niveau 1, avec deux constantes r
 
 ### 11.2 « Comment ils comprennent ce que vous apportez » · l'inscription
 
+*(Spécifié le 2026-10-04 en §18, [`docs/game/activation.md`](docs/game/activation.md), qui fait foi. Ce qui change ici : l'entreprise s'appelle Quandi (« Créneo » est pris) ; trois astuces sortent (la carte bancaire pour l'essai, au niveau revenue ; l'écran de refus et l'inscription en amont, déjà au niveau 1) et trois entrent (le numéro obligatoire, les e-mails suivis, le partage partenaires) ; les amendes de la CNIL sur les cookies datent du 31 décembre 2021 et reposent sur l'article 82 de la loi Informatique et Libertés, pas sur le RGPD.)*
+
 - **Univers.** Le DG dirige maintenant un outil de planification pour indépendants. Dix mille inscriptions par mois, 30 % d'activés (un premier planning publié sous sept jours). Le board veut 45 %. Radar : CNIL.
 - **Écran du téléphone.** L'arrivée sur l'appli : bandeau cookies, inscription, premier écran, demandes de permissions.
 - **Honnêtes.** Essai sans carte bancaire ; Démo avant inscription (on essaie, puis on crée un compte) ; Onboarding en trois étapes ; Import assisté depuis l'ancien outil ; E-mail de bienvenue utile ; Refus des cookies en un clic ; Point données ; Retrait des changements.
@@ -705,6 +707,8 @@ Le modèle numérique est le même que celui du niveau 1, avec deux constantes r
 
 ### 11.3 « S'ils vous recommandent » · l'invitation
 
+*(Spécifié le 2026-10-04 en §19, [`docs/game/referral.md`](docs/game/referral.md), qui fait foi. Ce qui change ici : le coefficient viral va de 0,40 à 0,60, pas de 0,3 à 0,6 ; un seul radar, la CNIL, les avis des stores devenant les signalements ; les rappels d'attente sortent, la demande d'avis ciblée et le gros bouton « Continuer » entrent ; les 800 000 $ de Path visaient la COPPA, pas le carnet d'adresses ; l'accord LinkedIn est une action collective approuvée en 2016.)*
+
 - **Univers.** Le DG pilote une appli de partage de dépenses entre amis. Coefficient viral de 0,3, le board veut 0,6. Radar : CNIL, et la réputation dans les stores.
 - **Écran du téléphone.** L'écran « Inviter des amis » et ce que reçoit l'invité.
 - **Honnêtes.** Parrainage clair (les deux côtés gagnent la même chose, conditions écrites) ; Invitation choisie (on sélectionne un contact, un message éditable) ; Résultat partageable utile (le récapitulatif d'un week-end, pas une pub) ; Page d'accueil de l'invité honnête ; Notifications utiles seulement ; Point données ; Retrait des changements.
@@ -714,6 +718,8 @@ Le modèle numérique est le même que celui du niveau 1, avec deux constantes r
 - **Ce que le joueur repart avec.** Une invitation qu'on n'a pas écrite n'est pas la sienne ; un bonus dont on ne trouve pas les conditions n'existe pas.
 
 ### 11.4 « Comment vous gagnez de l'argent » · le paiement
+
+*(Spécifié le 2026-10-04 en §20, [`docs/game/revenue.md`](docs/game/revenue.md), qui fait foi. Ce qui change ici : la loi Chatel (L215-1) ne prévoit aucune amende ; le prix personnalisé est au 11° du I de L221-5 ; les Pays-Bas n'ont jamais infligé 10 M€ à EA ; les loot boxes ne sont pas interdites en France ; les frais de service et la remise de minuit, déjà au niveau 2, cèdent la place au programme qui cache un abonnement et à l'achat d'un seul appui ; la montée de gamme devient une option payante cochée d'avance.)*
 
 - **Univers.** Le DG dirige une appli de sport avec abonnement et monnaie virtuelle. Revenu moyen par utilisateur de 4 € par mois, le board veut 6 €. Radar : DGCCRF, et l'Autorité de la concurrence en filigrane.
 - **Écran du téléphone.** L'écran d'essai, le paiement, le renouvellement, la boutique de monnaie virtuelle.
@@ -919,3 +925,32 @@ La spécification du niveau 2 vit dans [`docs/game/niveau-2.md`](docs/game/nivea
 depuis le 2026-10-01, déplacée telle quelle : ses numéros (§17.0 à §17.10) n'ont
 pas changé. **Chaque niveau spécifié au-delà du premier a son fichier dans
 `docs/game/`**, et ce brief garde ce qui vaut pour tous.
+
+---
+
+## 18. Le niveau activation — spécification (2026-10-04)
+
+Dans [`docs/game/activation.md`](docs/game/activation.md) : Quandi, un outil de
+planification pour indépendants, le taux d'activation de 30 % à 45 %, le radar
+de la CNIL. Écrite pour être construite par un agent sans rien décider ; le
+modèle est déjà codé en brouillon (`src/lib/game/levels/activation.ts`).
+
+## 19. Le niveau referral — spécification (2026-10-04)
+
+Dans [`docs/game/referral.md`](docs/game/referral.md) : Partix, une appli de
+partage de dépenses entre amis, le coefficient viral de 0,40 à 0,60, le radar
+de la CNIL. Modèle en brouillon : `src/lib/game/levels/referral.ts`.
+
+## 20. Le niveau revenue — spécification (2026-10-04)
+
+Dans [`docs/game/revenue.md`](docs/game/revenue.md) : Gainix, une appli de sport
+avec abonnement et gemmes, le revenu par utilisateur de 4 € à 6 €, le radar de
+la DGCCRF. Modèle en brouillon : `src/lib/game/levels/revenue.ts`.
+
+## 21. Construire un niveau depuis sa spécification (2026-10-04)
+
+Dans [`docs/game/construire-un-niveau.md`](docs/game/construire-un-niveau.md) :
+la règle (l'agent exécute, il ne décide pas), ce qui est déjà fait, les PR dans
+l'ordre, les pièges des niveaux 1 et 2, les vérifications, les questions
+communes aux trois niveaux (§21.8) et l'orchestration par un agent Opus et des
+sous-agents Sonnet, unité par unité (§21.9).
