@@ -26,7 +26,7 @@ export const PATH_B: Path = [["demo", "calls"], ["checklist", "import"], ["welco
 export const PATH_C: Path = [["bundle", "phone"], ["banner", "prechecked"], ["pixels", "partners"], ["demo", "refuse"]];
 /** §18 D — honest with nothing strong: fired in June. */
 export const PATH_D: Path = [["calls", "refuse"], ["present", "welcome"]];
-/** The three endings no reference year reaches — level 2's pinned years, by role — so they stay reachable. */
+/** The four endings no reference year reaches — level 2's pinned years, by role — so they stay reachable. */
 export const PATH_CLEAN_MISS: Path = [["calls", "checklist"], ["welcome", "present"], ["import", "minimal"], ["present", "refuse"]];
 export const PATH_REPENTANT: Path = [["welcome", "prechecked"], ["analysis", "checklist"], ["refuse", "demo"], ["import", "clean"]];
 export const PATH_LABYRINTH: Path = [["calls", "bundle"], ["demo", "import"], ["clean", "phone"], ["banner", "refuse"]];

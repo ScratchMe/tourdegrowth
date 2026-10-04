@@ -26,7 +26,7 @@ export const PATH_B: Path = [["fairbonus", "guests"], ["recap", "guestpage"], ["
 export const PATH_C: Path = [["contacts", "bigshare"], ["autoinvite", "fakeinvite"], ["shadow", "bonus"], ["fairbonus", "chosen"]];
 /** §19 D — honest with nothing strong: fired in June. */
 export const PATH_D: Path = [["guests", "chosen"], ["present", "grouplink"]];
-/** The three endings no reference year reaches, pinned so they stay reachable — level 2's years by role, but for the clean miss:
+/** The four endings no reference year reaches, pinned so they stay reachable — level 2's years by role, but for the clean miss:
  * level 2's, played here, ends at 0,5959 and the tile's 0,60 is a win; this one is found by search (all-honest years). */
 export const PATH_CLEAN_MISS: Path = [["fairbonus", "guests"], ["recap", "present"], ["guestpage", "present"], ["present", "chosen"]];
 export const PATH_REPENTANT: Path = [["grouplink", "fakeinvite"], ["unlock", "recap"], ["chosen", "fairbonus"], ["guestpage", "clean"]];

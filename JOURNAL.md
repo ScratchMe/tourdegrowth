@@ -1118,3 +1118,37 @@ C'est ce dernier réglage qui est appliqué dans `levels/referral.ts`. Le test F
 **Publié** en deux appels (versions 11 et 12). Le premier a été refusé une fois : les `.d.ts` et `.jsx` doivent être déclarés `text/plain`. La liste relue montre un dossier par composant ; `PillarChip` et React 18 sont partis. Les fichiers que la page génère elle-même (`manifest.json`, `api/`, `tokens.css`) restent ceux de septembre jusqu'à son prochain enregistrement : le format interdit de les écrire, et les aperçus n'en dépendent pas, puisque la feuille porte toutes les valeurs.
 
 **Désormais** : chaque synchro refait l'artefact (`CHANTIERS.md`, prompt B, étape 5 ; `.design-sync/NOTES.md`, « The Design System artifact »). D13, le signalement, est sans objet.
+
+## A24 : la relecture « un agent Sonnet peut-il tout exécuter sans décider ? » (2026-10-04, #332)
+
+**La demande d'Antoine**, une fois les questions tranchées : tout relire pour qu'un agent Opus n'ait plus qu'à lancer des sous-agents Sonnet, sans qu'aucun n'ait à réfléchir ni puisse se rater. Quatre relecteurs en lecture seule ont joué chacun le rôle d'un sous-agent : un par niveau, de X-1 à X-4, et un pour le guide et le prompt I. Chacun a vérifié chaque nom cité contre le code, rejoué les chiffres avec le vrai moteur, et lancé tsc et eslint sur des copies dans le scratchpad. Environ cent constats, dont une douzaine de bloquants. J'ai revérifié ceux qu'on recopie tels quels : les listes C6, recalculées avec `CAPITALISED` sur les `cas` ; les expressions C1 du revenue, sur les huit lois ; les contrastes, avec la formule de `color-math.ts` ; les fixtures de `real-results.ts` ; les specs e2e qui casseraient.
+
+**Les bloquants, tous corrigés** :
+- **La liste des clés `boss` était inversée** dans les trois spécifications : « les clés listées au §X.5 » désignait celles que le niveau écrit, pas celles qu'il reprend.
+- **La couleur de marque était un hexadécimal à écrire dans le module CSS**, ce que `game-no-hex.test.ts` refuse. Elle devient un jeton de `game.css` avec sa ligne de contraste. L'orange et le vert d'eau sont foncés pour passer 4,5:1 dans les deux sens : #b04f12 (5,29) et #0b7a73 (5,19). Le violet (5,82) passait déjà.
+- **C13 liait la copie aux constantes du téléphone dans le test de copie (X-1)**, alors que ces constantes naissent en X-2. C13 se coupe en deux temps, comme au niveau 2.
+- **Les listes C6 n'étaient pas exactes.** Le test des entrées périmées exige une liste juste, et « Beer52 », « Facebook's » et « Fortnite's » sortent de `CAPITALISED` sous une autre forme.
+- **Des specs e2e existantes cassaient sans qu'aucune liste ne les nomme.**
+  - « L'autre niveau » dans `game-level2.spec.ts` casse en U0.
+  - Avec C75, ouvrir l'activation fait viser l'activation au décembre de l'acquisition.
+- **Recopiées du niveau 2, des assertions de T4 rougissaient** : les plaintes du T2 nomment la CNIL, et la fin du revenue dit « fine ».
+- **Côté guide** :
+  - les tests de `nextLevelFor` ne compilaient pas en U0 (signature générique, sans défaut) ;
+  - les commandes Playwright n'avaient pas `GAME_ENABLED` (le proxy le lit à chaque requête) ;
+  - une relance « sur la même branche » repartait d'`origin/main` et perdait les commits ;
+  - le prompt interdisait de toucher au modèle, alors que X-3 doit en retoucher l'en-tête ;
+  - `growth-stats.test.ts` manquait à la liste de T3.
+
+**Ce qui laissait l'agent décider, maintenant écrit** :
+- le code du côté de l'îlot pour chaque pastille, ses props, ses identifiants de test, la clé de l'éclair, l'ordre et le style des lignes dans chaque élément du téléphone ;
+- les `win` des fins, et `nextLevel` repris par référence plutôt que recopié ;
+- C4, la nature de chaque cas, la règle du contrôle (`{fine}` retiré, mots entiers) ;
+- les fixtures `result-real` des trois niveaux (identifiants …5e08 à …5e10), le test de la bande du revenue (C91) dans `result-real` plutôt que P23, qui ne montre que la rétention ;
+- les chiffres d'écran des specs ;
+- côté orchestration : le nom des branches, la reprise après une pause, A24 coché sur la branche avant le merge, la PR passée en prête, un `main` qui a bougé, la mesure du poids à X-3, les chiffres de `CLAUDE.md` dans chaque PR et l'archivage du journal.
+
+**Une correction de C76** : le bandeau dit « Le côté obscur · retention », sans accent. Les étapes restent en anglais dans les deux langues, comme partout sur le site (`UI_STRINGS.pillars`, règle du relecteur de copie). La décision ne change pas.
+
+**Corrigé dans le code**, hors des unités : les en-têtes des trois modèles citaient des numéros de fixtures faux (F3, F4, F5 au lieu de F18, F19, F20), et `paths-*.ts` disait « three endings » pour quatre.
+
+**Vérifié** : `tsc` propre ; la suite du jeu et le budget des documents passent (353 tests).

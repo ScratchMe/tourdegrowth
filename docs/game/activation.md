@@ -43,7 +43,7 @@ sans espaces insécables : l'agent les pose en recopiant (§21.5).*
 ### 18.1 Ce qui change depuis l'esquisse du §11.2
 
 L'esquisse du 2026-09 tient pour l'univers, le chiffre du board, le radar et la
-leçon. Trois écarts, tous à valider (§18.10) :
+leçon. Trois écarts, validés par Antoine (C81) :
 
 | Esquisse §11.2 | Ici | Pourquoi |
 |---|---|---|
@@ -113,8 +113,8 @@ manquements de Quandi (refus des cookies plus long que l'accord, consentement
 en bloc ou par case cochée, finalité détournée, pistage des ouvertures)
 relèvent de l'article 82 de la loi Informatique et Libertés et du RGPD, que la
 CNIL sanctionne par des amendes administratives prononcées par sa formation
-restreinte. **Proposé : 100 000 €**, fixe quel que soit le radar (C14), à valider
-(§18.10, Q3) : environ 3 % du chiffre d'affaires annuel de Quandi (3,6 M€),
+restreinte. **100 000 €**, fixe quel que soit le radar (C14), validé par Antoine
+(C80) : environ 3 % du chiffre d'affaires annuel de Quandi (3,6 M€),
 du même ordre que l'amende publiée d'un courtier en données de neuf salariés
 (80 000 €, mai 2025, le cas de `partners` au §18.9). Une sanction rendue publique
 suppose la procédure ordinaire : la procédure simplifiée plafonne à 20 000 € et
@@ -139,7 +139,7 @@ donne la carte du niveau 1 dont chacune tient le rôle.
 | present | *(niveau 1, par référence)* | | | | | | | | `present` | present |
 | refuse | Refus en un clic | Sur le bandeau des cookies, « Tout refuser » à côté de « Tout accepter », de la même taille. | One-click refusal | On the cookie banner, "Reject all" next to "Accept all", the same size. | −0,01 | | +8 | −8 | perm | remind |
 | welcome | E-mail de bienvenue | Un seul e-mail, le lendemain de l'inscription : le planning en cours et un modèle adapté au métier. | Welcome email | A single email, the day after sign-up: the schedule in progress and a template for the trade. | 0 | 0,08 | +3 | | perm | reco |
-| minimal | Inscription minimale | L'inscription ne demande que l'e-mail ; le numéro, le métier et l'agenda deviennent facultatifs. | Minimal sign-up | Sign-up asks only for an email; the phone number, the trade and the calendar become optional. | −0,03 | | +10 | −20 | perm, `temp` | three |
+| minimal | Inscription minimale | L'inscription ne demande que l'e-mail, avec un lien de connexion ; le métier attend, et le numéro devient facultatif. | Minimal sign-up | Sign-up asks only for an email, with a sign-in link; the trade can wait, and the phone number becomes optional. | −0,03 | | +10 | −20 | perm, `temp` | three |
 | clean | *(nom du niveau 1)* | Revenir à l'inscription, au bandeau et aux demandes d'autorisation d'origine. | *(niveau 1)* | Go back to the original sign-up, banner and permission requests. | | | +6 | −25 | `clean` | clean |
 
 Le gain négatif de « Refus en un clic » est le consentement aux cookies qui
@@ -269,13 +269,22 @@ Au niveau 2, le téléphone montrait le chemin d'un visiteur jusqu'au panier.
 Ici, il montre ce que voit un indépendant qui arrive sur l'appli de Quandi, du
 premier lancement au premier écran, et reflète l'union des cartes en
 production et des cartes cochées. Une figure de texte, sans faux boutons (E9).
-Couleur de marque : un violet, `--phone-brand: #6A4BD8` (à vérifier au contraste
-sur son fond réel, convention 7).
+**Couleur de marque** : un violet, en jeton (§21.3 T2, jamais d'hexadécimal dans le
+module) : `--planner-brand: #6a4bd8; /* 5.82 as text on white, and white on it */`
+dans `src/styles/tokens/game.css` (bloc `:root`, juste après `--shop-brand`) ;
+dans les `PAIRS` de `src/__tests__/game-token-contrast.test.ts`, juste après la
+ligne de `shop-brand` :
+`{ fg: "planner-brand", bg: "app-bg", stated: 5.82, role: "text", why: "Quandi's violet as text, and under white on its buttons" }`.
+`PlannerPhone.module.css` pose `.planner { --phone-brand: var(--planner-brand); }`.
+Le violet passe 4,5:1 sur blanc dans les deux sens : il peut servir de texte et
+de fond de bouton sous du blanc (`--app-on-brand`).
 
 **Le type et l'ordre** (`src/lib/game/planner-phone.ts`, nom du composant
 `PlannerPhone`) :
 
 ```ts
+import type { ActivationCardId } from "./levels/activation";
+
 export type PlannerPhoneItem =
   | { kind: "appBar" }
   /** `bundle`: one sheet asking for everything, one button. */
@@ -363,6 +372,43 @@ téléphone ; les « boutons » sont des `<span>` stylés) :
 minuscules, comme les niveaux 1 et 2 citent les leurs.
 `tour` n'a ni « Passer » ni croix : c'est ce que la carte met en production.
 
+**Le dessin, élément par élément** (chaque chaîne s'affiche d'un bloc : le
+composant ne coupe jamais sur « · ») :
+- `appBar` : `appName` et `time`, comme la barre de `ShopPhone`.
+- `permissions` : la phrase, puis `permissionsAllow` en bouton plein (fond de
+  marque, texte `--app-on-brand`).
+- `banner` : le texte (`bannerText` pour `plain` et `equal`, `bannerTextNudged`
+  pour `nudged`), puis : `plain`, `bannerAccept` et `bannerContinue`, même
+  taille, même style ; `nudged`, `bannerAcceptAll` en bouton plein et
+  `bannerCustomise` en lien ; `equal`, `bannerRejectAll` et `bannerAcceptAll`
+  côte à côte, même taille et même style, puis `bannerCustomise` en lien.
+- `demo` : la ligne, en lien.
+- `signup` : `signupTitle` (le titre de l'écran), `fields` ou `fieldsMinimal`,
+  `phoneRequired` ou `phoneOptional` (rien si `phone: "none"`), `prechecked`,
+  `submit` en bouton plein, puis `partners` en petit sous le bouton.
+  `signupTitle` et `submit` disent tous deux « Créer mon compte » : c'est voulu
+  (le titre de l'écran et son bouton).
+- `analysis` : la ligne, avec sa barre.
+- `home` : `homeEmpty`, `homeCreate` en bouton, l'info-bulle `tour` qui pointe
+  `homeCreate`, la liste `checklist` avec `checklistClose`, puis `importer` en
+  lien.
+- `push`, `welcome`, `calls` : une ligne chacun ; `callsAnswers`, les trois
+  réponses en puces, comme `originAnswers` au niveau 2.
+
+**Les identifiants de test et l'éclair** : `<figure data-testid="game-phone">` ;
+chaque élément sauf `appBar` porte `data-testid="game-planner-<kind>"` ; le
+bandeau porte `data-style` (`plain`, `nudged`, `equal`), l'inscription
+`data-phone` (`none`, `required`, `optional`). La clé de l'éclair, exportée,
+sur le modèle de `shopItemKey` : `plannerItemKey(item)` rend
+`banner:${style}`, `signup:${minimal}:${phone}:${prechecked}:${partners}`,
+`home:${checklist}:${importer}:${tour}`, sinon `kind`.
+
+**Ce qui ne se voit pas** : seules `present` et `clean` ne changent rien au
+téléphone. Avec toutes les cartes cochées, `phoneRequired` (remplacé par
+`phoneOptional`, `minimal` étant là), `fields` (remplacé par `fieldsMinimal`),
+`bannerTextNudged`, `bannerAccept` et `bannerContinue` (le bandeau est `equal`,
+`refuse` étant là) n'apparaissent pas.
+
 **La pastille, sous le téléphone** : les clics qu'il faut pour refuser les
 cookies. Un fait mesurable que la CNIL encadre (refuser doit être aussi simple
 qu'accepter, §18.9), jamais un jugement — le « N clics pour résilier » du
@@ -390,9 +436,51 @@ clic » / "Refusing cookies: 1 click" ; `hidden` « Refuser les cookies : 3
 clics » / "Refusing cookies: 3 clicks" ; `lawSuffix` « le refus doit être aussi
 simple que l'accord » / "refusing must be as easy as agreeing". Le côté de
 l'îlot (`ACTIVATION_SIDE`) compose `hidden · lawSuffix` comme `ACQUISITION_SIDE`
-compose `basket.extra · feesSuffix`. **Test C13 du niveau** : le « 1 » et le
-« 3 » des chaînes, dans les deux langues, sont `REFUSE_CLICKS_EASY` et
-`REFUSE_CLICKS_HIDDEN`.
+compose `basket.extra · feesSuffix`. **Test C13 du niveau, en ACT-2**
+(`src/__tests__/game-planner-phone.test.ts`, pas le test de copie : ces
+constantes n'existent qu'en T2) : dans les deux langues, `cookies.easy` contient
+`REFUSE_CLICKS_EASY` suivi de « clic » / "click", et `cookies.hidden`
+`REFUSE_CLICKS_HIDDEN` suivi de « clics » / "clicks".
+
+**La pastille** (`src/components/game/CookiePill.tsx`, qui importe
+`ClickPill.module.css` comme `BasketPill`, sans feuille à elle) :
+`CookiePill({ clicks, alert, labels, size, announce, className }: { clicks: 1 | 3; alert: boolean; labels: CookiePillCopy; size?: "md" | "sm"; announce?: boolean; className?: string })`,
+rendue `<p data-testid="game-cookies" data-clicks={clicks} data-alert={alert}>` :
+`easy`, ou `hidden` suivi de `<span> · {lawSuffix}</span>` quand `alert` ;
+corail (`styles.over`) quand `alert` ; `aria-live="polite"` sauf avec
+`announce={false}`. Elle n'importe `lib/game` qu'en `import type`.
+
+**Le côté de l'îlot** (`sides.tsx`), à recopier :
+
+```tsx
+type ActivationSideCopy = Pick<ActivationCopy, "phone" | "cookies">;
+
+/** The pill's sentence: the clicks, and the law when the refusal is buried. */
+export function cookieSentence(copy: ActivationSideCopy, r: ReturnType<typeof cookieRefusal>): string {
+  return r.alert ? `${copy.cookies.hidden} · ${copy.cookies.lawSuffix}` : copy.cookies.easy;
+}
+
+export const ACTIVATION_SIDE: IslandSide<ActivationSideCopy> = {
+  render: ({ ids, copy }) => {
+    const r = cookieRefusal(ids);
+    return (
+      <>
+        <PlannerPhone items={plannerPhoneView(ids)} labels={copy.phone} />
+        <CookiePill clicks={r.clicks} alert={r.alert} labels={copy.cookies} announce={false} />
+      </>
+    );
+  },
+  pill: ({ ids, copy }) => {
+    const r = cookieRefusal(ids);
+    return { text: r.alert ? copy.cookies.hidden : copy.cookies.easy, alert: r.alert };
+  },
+  announce: ({ before, after, copy }) => {
+    const was = cookieRefusal(before);
+    const now = cookieRefusal(after);
+    return was.clicks === now.clicks ? null : cookieSentence(copy, now);
+  },
+};
+```
 
 ### 18.8 La copie, clé par clé
 
@@ -402,7 +490,8 @@ compose `basket.extra · feesSuffix`. **Test C13 du niveau** : le « 1 » et le
 `dashboard.revenue`, `dashboard.revenueDelta`, `dashboard.patience`,
 `dashboard.patienceLow`, `dashboard.notOnDashboard`, `dashboard.hiddenValue`,
 `dashboard.revealed`, `dashboard.delta`, `visio` (sauf `tag`), les clés de
-`boss` listées au §18.5, `hand` (sauf `unlocked` et `productionEmpty`),
+`boss` que le §18.5 n'écrit pas (`t2Hit`, `t3Hit`, `t3Miss`, `orderWrap`,
+`yearEnd`, `fired`), `hand` (sauf `unlocked` et `productionEmpty`),
 `cards.present`, `cards.clean.name`, `report` (sauf les clés écrites
 ci-dessous), `journal`, `effects.insight`, `effects.present`, `effects.none`,
 `events.midMailMoving`, `events.midMailStalled`, `events.present`,
@@ -417,7 +506,8 @@ des fins sauf `cleanMiss` et `labyrinth`, `december.cells.outOf`,
 `december.table.trust`, `playbook`, `catalogue` (sauf `hiddenEffect`),
 `share.replay`, `share.copy`, `share.copied`, `tourLoop`, `resume.title`,
 `resume.resume`, `resume.restart`, `resume.review`, `footer`, `a11y.handLabel`,
-`a11y.resumed`.
+`a11y.resumed`, et `nextLevel` (après U0 : `eyebrow` « Niveau suivant »,
+`status` « jouable » ; `nextLevel: L1.nextLevel`).
 
 **Écrit pour le niveau** (en plus des cartes §18.4, des ordres et messages
 §18.5, du téléphone et de la pastille §18.7, du catalogue §18.9) :
@@ -468,15 +558,14 @@ des fins sauf `cleanMiss` et `labyrinth`, `december.cells.outOf`,
 | december.table.metric | Activation | Activation |
 | catalogue.hiddenEffect | Confiance {trust}, radar {radar}, une seule fois, le jour où elle entre en production. Les inscrits qu'elle fait publier baissent de 30 % après trois mois. | Trust {trust}, radar {radar}, once, on the day it goes into production. The sign-ups it gets publishing drop by 30% after three months. |
 | share.text | Une année chez Quandi : {title} Activation à {metric}, confiance à {trust}. Et toi, tu tiendrais ? {url} | A year at Quandi: {title} Activation at {metric}, trust at {trust}. Would you hold out? {url} |
-| nextLevel.eyebrow | Niveau suivant | Next level |
-| nextLevel.status | jouable | playable |
 | resume.previously | Précédemment chez Quandi | Previously at Quandi |
 | resume.quarterLine | Trimestre {q} : {cards}. Activation à {metric}. | Quarter {q}: {cards}. Activation at {metric}. |
 | resume.finished | Ta dernière année chez Quandi s'est terminée ainsi : « {title} » | Your last year at Quandi ended like this: "{title}" |
 | a11y.quarterEnd | Fin du trimestre {q} : activation {metric}, objectif {target} {status}, patience {patience}. | End of quarter {q}: activation {metric}, target {target} {status}, patience {patience}. |
 
-**Les fins** (`endings`) : `win`, `eyebrow` et les titres non listés viennent du
-niveau 1 ; `{metric}` arrive formaté (« 45,0 % »).
+**Les fins** (`endings`) : `win` est un littéral, `true` pour `applause` et
+`cleanMiss`, `false` pour les cinq autres, comme dans `acquisition.ts` ;
+`eyebrow` et les titres non listés viennent du niveau 1 ; `{metric}` arrive formaté (« 45,0 % »).
 
 | id | Titre (si écrit) | Texte FR | Texte EN |
 |---|---|---|---|
@@ -586,7 +675,7 @@ sanction.
 - cas EN : In April 2026, the CNIL published its recommendation on tracking pixels in emails: measuring openings to optimise mailings requires agreement. It is not a sanction; it is the rule as the CNIL reads it.
 - tell FR : Savoir quand tu ouvres un e-mail, c'est un traceur : il faut ton accord.
 - tell EN : Knowing when you open an email is tracking: it needs your agreement.
-- Sources : recommandation de la CNIL relative aux pixels de suivi dans les courriels, adoptée le 12 mars 2026, publiée le 14 avril 2026 (lue) : elle range les e-mails de bienvenue parmi les courriels transactionnels, d'où le pitch « pour caler les relances » (une mesure de performance, pas de délivrabilité). Du droit souple, pas une sanction.
+- Sources : recommandation de la CNIL relative aux pixels de suivi dans les courriels, adoptée le 12 mars 2026, publiée le 14 avril 2026 (lue) : elle range les e-mails de bienvenue parmi les courriels transactionnels, d'où les relances « à cette heure-là » du pitch (une mesure de performance, pas de délivrabilité). Du droit souple, pas une sanction.
 
 **partners**
 - law FR : Un consentement n'est pas libre quand un service est subordonné à un traitement dont il n'a pas besoin (RGPD, article 7). Transmettre des coordonnées à des partenaires demande un accord à part, qu'on peut refuser sans perdre son compte.
@@ -609,7 +698,21 @@ sanction.
 **Liste blanche des marques** (série C6) : Google, Twitter. Tout autre nom propre
 d'un `cas` est un nom d'institution (CNIL, FTC, Conseil d'État, Cour de justice
 de l'Union européenne, OCDE, Harvard Business School) ou un mot ordinaire, que
-le test liste.
+le test liste. Pour le test (§21.3 T1), exactement, calculés avec `CAPITALISED`
+sur les seize `cas` de ce §18.9 :
+- `BRANDS = ["Google", "Twitter"]` ; `BRAND_WORDS = new Set(BRANDS)` ;
+- `NOT_BRANDS = new Set(["En", "In", "Le", "Les", "Ce", "It", "Aux", "CNIL", "FTC", "OECD", "Conseil", "Council", "State", "France's", "États-Unis", "United", "States", "Cour", "Court", "Justice", "European", "Union", "Harvard", "Business", "School", "Progress", "December", "April", "May"])` ;
+- aucun domaine.
+
+« OCDE », « Conseil d'État » ou « Cour de justice de l'Union européenne » ne
+sont jamais des jetons entiers : `CAPITALISED` ignore un mot précédé d'une
+apostrophe.
+
+**La nature de chaque cas** (C6, comme le dernier test C6 du niveau 2) :
+`patterns.phone.cas` contient « pour clore des poursuites » / "to settle
+charges" ; `patterns.pixels.cas` « n'est pas une sanction » / "is not a
+sanction" ; `patterns.prechecked.cas` « a jugé » / "ruled" ; aucun des trois
+ne contient `/amende/` / `/\bfined?\b/`.
 
 **Le nom de l'entreprise** : « Créneo » (pris : creneo.fr, creneo.app),
 « Slotix » (slotix.io), « Planibo », « Agendix », « Rendezo » et « Créneau+ »
@@ -658,7 +761,7 @@ Ce que les autres pages disent du niveau (§21.3, T3), à recopier :
 | `entry.ts` | `…opening`, `meta`, `band.trust`, `band.notOnDashboard` | *(les constantes partagées du fichier)* | |
 | `hub.ts` | `zones.activation.company` | Quandi, un outil de planification pour indépendants | Quandi, a scheduling tool for freelancers |
 | `hub.ts` | `ENDINGS_BY_LEVEL.activation` | *(aucune entrée : « le contrôle et l'amende » du niveau 1 est juste)* | |
-| `hub.ts` | `LEVEL_TEASERS.activation` (T0) | « Comment ils comprennent ce que vous apportez » : le refus des cookies au bout du parcours, la case cochée d'avance, le numéro demandé pour la sécurité | "How they understand what you bring": the cookie refusal at the end of the path, the box ticked in advance, the number asked for security |
+| `hub.ts` | `LEVEL_TEASERS.activation` (ACT-3, quand `activation` entre dans `LevelSlug` ; le mécanisme est celui de T0) | « Comment ils comprennent ce que vous apportez » : le refus des cookies au bout du parcours, la case cochée d'avance, le numéro demandé pour la sécurité | "How they understand what you bring": the cookie refusal at the end of the path, the box ticked in advance, the number asked for security |
 | `page.tsx` | les deux mots du glossaire | `["activation", "aha-moment"]` | |
 
 ### 18.12 Plan d'exécution
@@ -666,36 +769,93 @@ Ce que les autres pages disent du niveau (§21.3, T3), à recopier :
 Les PR T1 à T4 du §21.3, avec ce qui est propre au niveau. Le découpage en
 unités pour les sous-agents est au §21.9 (unités ACT-1 à ACT-4).
 
-- **T1, la copie** : `ActivationCopy`, `ActivationOrderId` (`bundle`, `banner`,
+- **T1, la copie (ACT-1)** : `ActivationCopy`, `ActivationOrderId` (`bundle`, `banner`,
   `phone`, `prechecked`, `partners`), `ActivationPhoneCopy` (§18.7, un champ par
-  ligne du tableau, `callsAnswers: readonly string[]`) et `CookiePillCopy`
-  (`easy`, `hidden`, `lawSuffix`), la pastille sous la clé `cookies`, dans
+  ligne du tableau, la colonne « Montré par » servant de doc-comment, en
+  anglais ; `callsAnswers: readonly string[]`) et `CookiePillCopy` (`easy`,
+  `hidden`, `lawSuffix`), la pastille sous la clé `cookies`, dans
   `src/lib/game/copy.ts` ; aucun gabarit propre au niveau
   (`ACTIVATION_COPY_TEMPLATES = { ...LEVEL_COPY_TEMPLATES }`, déclaré quand même,
   comme `ACQUISITION_COPY_TEMPLATES`, pour que le test vérifie les gabarits
   communs). `src/content/game/activation.ts`, `ACTIVATION_INTRO` et
-  `GAME_META.activation` dans `meta.ts`. Le test
-  `src/content/__tests__/game-activation.test.ts` : C1 exige dans chaque `law`
-  l'un de « loi Informatique et Libertés », « RGPD », « Code de la
-  consommation », « règlement européen sur les services numériques » (et leurs
-  équivalents anglais « Data Protection Act », « GDPR », « Consumer Code »,
-  « Digital Services Act ») ; la règle du contrôle remplace C14 : l'événement
-  `control` dit « amende » et « CNIL » (EN « fine » et « CNIL ») ; le tampon,
-  repris du niveau 1, dit « Amende » (EN « Fined ») ; la fin `fine` dit
-  « amende » (EN « fine ») ; aucune chaîne du niveau ne dit « transaction »
-  (EN « settlement ») ;
-  C6 avec la liste blanche Google, Twitter ; C13 tient les « 1 » et « 3 » de la
-  pastille.
-- **T2, le téléphone** : `src/lib/game/planner-phone.ts` (`plannerPhoneView`,
-  `cookieRefusal`, `REFUSE_CLICKS_EASY`, `REFUSE_CLICKS_HIDDEN`, recopiés du
-  §18.7), `src/components/game/PlannerPhone.tsx` et `CookiePill.tsx`, leurs
-  `.module.css`, `ACTIVATION_SIDE` dans `sides.tsx`, les aperçus
-  `.design-sync/previews/PlannerPhone.tsx` et `CookiePill.tsx`, et
-  `src/__tests__/game-planner-phone.test.ts` (chaque ligne de la table de la
+  `GAME_META.activation` dans `meta.ts`. Ce qui reste fictif, pour l'en-tête
+  « What stays fictional » : Quandi, @independant_et_fier /
+  @freelance_and_proud, La Lettre des indépendants, Indépendants Magazine, La
+  Lettre du logiciel ; les vraies marques n'apparaissent que dans les `cas`
+  (Google, Twitter). Le test `src/content/__tests__/game-activation.test.ts` :
+  - **C1** (une sous-chaîne, pas la regex du niveau 2) : chaque `law.fr`
+    contient l'un de « loi Informatique et Libertés », « RGPD », « Code de la
+    consommation », « règlement européen sur les services numériques » ;
+    chaque `law.en` l'un de « Data Protection Act », « GDPR », « Consumer
+    Code », « Digital Services Act » ;
+  - **la règle du contrôle**, qui remplace C14 (après
+    `text.replace(/\{fine\}/g, "")`) : `events.control` correspond à
+    `/amende/` et contient « CNIL » (EN `/\bfine\b/` et « CNIL ») ;
+    `news.stamps.fine`, repris du niveau 1, à `/Amende/` (EN `/Fined/`) ;
+    `endings.fine.text` à `/amende/` (EN `/\bfine\b/`) ; aucune feuille du
+    niveau ne correspond à `/transaction/i` en français ni à
+    `/\bsettlement\b/i` en anglais (le « to settle charges » du cas `phone`
+    est voulu). Non-vacuité : la règle attrape
+    `ACQUISITION_CONTENT.events.control` ;
+  - **C4** : `targets[0]` vaut 0.323, `targets[3]` vaut 0.45, `metric0` vaut
+    0.3 ; `boss.t1` contient « 32,3 % » / "32.3%" et « 45 % » / "45%" ;
+    `boss.t2Miss` contient « au lieu de 32,3 %. » / "instead of 32.3%." ;
+    « 45 % » / "45%" dans `boss.t4Hit`, `boss.t4Miss`,
+    `endings.cleanMiss.title`, `ACTIVATION_INTRO.lead` et
+    `GAME_META.activation.description` ; « 30 % » / "30%" dans
+    `ACTIVATION_INTRO.lead` (U+00A0 avant « % » en français) ;
+  - **C6** : les listes et la nature des cas du §18.9 ;
+  - **C13** : pas dans ce test (ses constantes naissent en T2) ;
+  - `endings.*.win` et `nextLevel` comme le §18.8 le dit ;
+  - `src/content/__tests__/game-hub.test.ts` étendu à `GAME_META.activation`
+    et `ACTIVATION_INTRO` (§21.3 T1).
+- **T2, le téléphone (ACT-2)** : `src/lib/game/planner-phone.ts`
+  (`plannerPhoneView`, `plannerItemKey`, `cookieRefusal`, `REFUSE_CLICKS_EASY`,
+  `REFUSE_CLICKS_HIDDEN`, recopiés du §18.7 ; ce sont les noms du gabarit `<téléphone>-phone.ts` du §21.3 T2, comme `shop-phone.ts` au niveau 2),
+  `src/components/game/PlannerPhone.tsx` et son `.module.css`,
+  `CookiePill.tsx` (qui importe `ClickPill.module.css`), le jeton
+  `--planner-brand` et sa ligne de contraste (§18.7), `ACTIVATION_SIDE` dans
+  `sides.tsx` (le code du §18.7), les aperçus
+  `.design-sync/previews/PlannerPhone.tsx` et `CookiePill.tsx`, l'inscription
+  de `PlannerPhone` et `CookiePill` dans `.design-sync/config.json`
+  (`componentSrcMap`, et `PlannerPhone` dans `dtsPropsFor`), et
+  `src/__tests__/game-planner-phone.test.ts` : chaque ligne de la table de la
   pastille, l'ordre des éléments pour aucune carte, pour toutes, et pour
-  `banner` avec et sans `refuse`).
-- **T3, le branchement** : la table du §21.3 ; la page
+  `banner` avec et sans `refuse`, ce qui ne se voit pas (§18.7), et C13.
+- **T3, le branchement (ACT-3)** : la table du §21.3 ; la page
   `src/app/[locale]/game/activation/page.tsx` ; le niveau prend sa place entre
-  l'acquisition et la rétention dans `GAME_LEVELS_BY_PILLAR`.
-- **T4, les specs** : `e2e/game-activation.spec.ts`, d'après le §18.6 ; le
-  taux s'affiche au dixième de point avec « % », jamais « clients ».
+  l'acquisition et la rétention dans `GAME_LEVELS_BY_PILLAR`. L'en-tête de
+  `levels/activation.ts` : « in DRAFT (`DraftLevelSlug`): no page, no copy, no
+  save yet. » devient « wired on <date> (A24, ACT-3): its copy is
+  `content/game/activation.ts`, its page `app/[locale]/game/activation/`. ».
+  Et :
+  - `e2e/game-level2.spec.ts` : le décembre de l'année A de l'acquisition
+    renvoie désormais à l'activation (`href`
+    `/fr/game/activation?from=other_level`, titre `LEVEL_TEASERS.activation`) ;
+    celui de la rétention ne change pas (il boucle sur l'acquisition) ;
+  - `e2e/real-results.ts` : `activationClear: { id: "7d3c9e2a-0b1f-4c5d-8e6f-1a2b3c4d5e08", tone: "neutral", locale: "en", answers: answersFor({ acquisition: 0, activation: 2, retention: 1, referral: 1, revenue: 0 }), total: 54 }`
+    (l'activation seule à 0/20 : un goulot `clear`) ; `e2e/result-real.spec.ts`
+    attend `game-entry-cta` vers `/en/game/activation?from=result`, la bande
+    `game-entry-band` « Activation 30.0% », sur une ligne (hauteur ≤ 44 px à
+    1 280 px) ;
+  - `e2e/game-helpers.ts` : `ACTIVATION_PATH` (§21.3 T3).
+- **T4, les specs (ACT-4)** : `e2e/game-activation.spec.ts`, d'après le §18.6 ;
+  le taux s'affiche au dixième de point avec « % », jamais « clients ». Et :
+  - **P5 (T1, en français)** : cocher `bundle` ajoute `game-planner-permissions` ;
+    cocher `refuse` passe le bandeau à `data-style="equal"`, et la pastille
+    reste « Refuser les cookies : 1 clic » (`data-alert="false"`). `banner`
+    n'est pas dans la main du T1 (`darkFirstQuarter`) : l'état corail se
+    vérifie dans l'année C (en anglais), au T2, `banner` coché : « Refusing
+    cookies: 3 clicks · refusing must be as easy as agreeing »,
+    `data-alert="true"` ;
+  - **année C** : le contrôle se lit dans `game-report-3` par « administrative
+    fine » ; `game-report-1` et `game-report-2` ne contiennent pas
+    « administrative fine ». Ne jamais tester l'absence de « CNIL » au T2 : les
+    plaintes la nomment ;
+  - **le bloc « Niveau suivant »** (C75), avec l'acquisition, l'activation et la
+    rétention ouvertes : décembre de l'année A sans collection,
+    `game-next-level-link` a pour `href` `/fr/game/retention?from=other_level`
+    et pour titre `LEVEL_TEASERS.retention` ; avec la fin de la rétention
+    semée (§21.3 T4), `/fr/game/acquisition?from=other_level`. Si d'autres
+    niveaux sont ouverts au moment d'ACT-4, les `href` se recalculent avec
+    `nextLevelFor` (§21.3 T4).

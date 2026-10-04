@@ -32,8 +32,8 @@ sans espaces insécables : l'agent les pose en recopiant (§21.5).*
   pour les pratiques trompeuses, et une amende administrative pour les
   informations manquantes.
 - **Ce qui ne change pas** : tout le reste (section 4).
-- **L'équilibrage est celui du niveau 2**, carte pour carte par rôle : les
-  quatre années de référence gardent la patience validée (51, 42, 46, 73).
+- **L'équilibrage est celui du niveau 2**, carte pour carte par rôle : l'année
+  honnête de référence (A) garde la patience validée (51, 42, 46, 73).
 - **Le téléphone** montre l'écran des offres, le paiement et la boutique de
   gemmes ; **la pastille** dit ce qui sera prélevé à la fin de l'essai.
 
@@ -105,9 +105,9 @@ monnaie qui obscurcit les prix), un délit que la DGCCRF règle par une
 **transaction pénale** avec l'accord du parquet (L132-2, L523-1) ; et des
 **manquements aux obligations d'information** (le prix personnalisé non
 signalé, le bouton qui fait payer sans le dire), punis d'une **amende
-administrative** de 75 000 € au plus pour une société (L242-10). **Proposé :
-une transaction de 300 000 € et une amende de 75 000 €, soit 375 000 €**, fixe
-(C14), à valider (§20.10, Q3) : environ 4 % du chiffre d'affaires annuel de
+administrative** de 75 000 € au plus pour une société (L242-10). **Une
+transaction de 300 000 € et une amende de 75 000 €, soit 375 000 €**, fixe
+(C14), validé par Antoine (C89) : environ 4 % du chiffre d'affaires annuel de
 Gainix (9,6 M€). La reconduction sans e-mail n'a pas d'amende (L215-1) ;
 l'option cochée d'avance a la sienne, une amende administrative de 15 000 € au
 plus (L132-22), que le jeu compte dans les 75 000 € pour rester simple. Le jeu dit « {fine} au total ».
@@ -242,13 +242,22 @@ par rôle : `cleanMiss` (`checkout + downgrade`, `roundpacks + present`,
 ### 20.7 Le téléphone : l'abonnement et la boutique
 
 Ce que voit un utilisateur de l'appli de Gainix, de l'écran des offres à la
-boutique de gemmes et à son compte. Figure de texte, sans faux boutons. Couleur
-de marque : un vert d'eau, `--phone-brand: #12A39A` (contraste à vérifier sur
-son fond réel).
+boutique de gemmes et à son compte. Figure de texte, sans faux boutons.
+
+**Couleur de marque** : un vert d'eau profond, en jeton (§21.3 T2, jamais
+d'hexadécimal dans le module) : `--fit-brand: #0b7a73; /* 5.19 as text on white, and white on it */`
+dans `src/styles/tokens/game.css` (bloc `:root`, après `--shop-brand`) ; dans les
+`PAIRS` de `src/__tests__/game-token-contrast.test.ts`, après la ligne de
+`shop-brand` :
+`{ fg: "fit-brand", bg: "app-bg", stated: 5.19, role: "text", why: "Gainix's teal as text, and under white on its buttons" }`.
+`FitPhone.module.css` pose `.fit { --phone-brand: var(--fit-brand); }`. Le vert
+passe 4,5:1 sur blanc dans les deux sens.
 
 **Le type et l'ordre** (`src/lib/game/fit-phone.ts`, composant `FitPhone`) :
 
 ```ts
+import type { RevenueCardId } from "./levels/revenue";
+
 export type FitPhoneItem =
   | { kind: "appBar" }
   /** The trial offer: `trial` (14 days, card, the yearly price in small print) or the base 7-day trial; `fullPrice` adds the yearly total first. */
@@ -325,6 +334,31 @@ export function fitPhoneView(ids: readonly string[]): FitPhoneItem[] {
 | checkoutQuestion | `checkoutQuestion` | Paiement interrompu ? Dis-nous ce qui t'a arrêté. Facultatif. | Stopped at checkout? Tell us what held you back. Optional. |
 | checkoutAnswers | `checkoutQuestion` | Trop cher pour ce que c'est · Essayer un programme d'abord · Autre | Too expensive for what it is · Try a programme first · Other |
 
+**Le dessin, élément par élément** :
+- `offer` : `fullPrice` en premier quand il y est, puis `offerBase` ; ou,
+  avec `trial`, `offerTrial` puis `offerTrialSmall` en petit.
+- `plans` : `plansTitle`, `monthly` ou `monthlyPersonal`, puis `addon` quand il
+  y est.
+- `shop` : `shopTitle`, `shopItem`, `packsRound` ou `packsOdd`, puis `euros`
+  quand il y est. Sans `gems`, la boutique montre déjà les packs ronds :
+  `roundpacks` n'ajoute que la ligne `euros`.
+- `programme` : la ligne, puis `programmeSmall` en petit.
+- `renewal` : une seule des trois lignes ; `checkoutQuestion` et ses trois
+  `checkoutAnswers` en puces, comme `originAnswers` au niveau 2.
+- Les lignes « en petit » prennent le style `.meta` de `ShopPhone`.
+  `trialReminder`, `renewalNotice` et `euros` sont en vert « ok »
+  (`--app-ok-text`). Rien en alerte sur le téléphone : la pastille porte le
+  problème.
+
+**Les identifiants de test et l'éclair** : `<figure data-testid="game-phone">` ;
+chaque élément sauf `appBar` porte `data-testid="game-fit-<kind>"`. La clé de
+l'éclair, exportée : `fitItemKey(item)` rend `offer:${trial}:${fullPrice}`,
+`plans:${personal}:${addon}`, `shop:${odd}:${euros}`, `renewal:${style}`,
+sinon `kind`.
+
+**Ce qui ne se voit pas** : seules `present` et `clean` ne changent rien au
+téléphone.
+
 `checkoutAnswers` est un tableau de trois chaînes ; `events.surveyAnswers` (§20.8)
 cite ses deux premières mot pour mot, en minuscules, comme les niveaux 1 et 2.
 
@@ -347,15 +381,17 @@ export function trialCharge(ids: readonly string[]): TrialCharge {
 }
 ```
 
-| Cartes en production ou cochées | Pastille FR | Corail |
-|---|---|---|
-| aucune | Prélevé à la fin de l'essai : 7,99 € | non |
-| `pricing` | Prélevé à la fin de l'essai : 8,49 € | non |
-| `trial` | Prélevé à la fin de l'essai : 59,99 € · sans rappel avant le prélèvement | oui |
-| `trial` + `trialmail` | Prélevé à la fin de l'essai : 59,99 € | non |
-| `addon` | Prélevé à la fin de l'essai : 10,98 € · dont une option cochée d'avance | oui |
-| `pricing` + `addon` | Prélevé à la fin de l'essai : 11,48 € · dont une option cochée d'avance | oui |
-| `trial` + `addon` | Prélevé à la fin de l'essai : 62,98 € · sans rappel avant le prélèvement · dont une option cochée d'avance | oui |
+| Cartes en production ou cochées | Pastille FR | Pastille EN | Corail |
+|---|---|---|---|
+| aucune | Prélevé à la fin de l'essai : 7,99 € | Charged when the trial ends: €7.99 | non |
+| `pricing` | Prélevé à la fin de l'essai : 8,49 € | Charged when the trial ends: €8.49 | non |
+| `trial` | Prélevé à la fin de l'essai : 59,99 € · sans rappel avant le prélèvement | Charged when the trial ends: €59.99 · with no reminder before the charge | oui |
+| `trial` + `pricing` | Prélevé à la fin de l'essai : 59,99 € · sans rappel avant le prélèvement (`pricing` ignoré) | Charged when the trial ends: €59.99 · with no reminder before the charge | oui |
+| `trial` + `trialmail` | Prélevé à la fin de l'essai : 59,99 € | Charged when the trial ends: €59.99 | non |
+| `addon` | Prélevé à la fin de l'essai : 10,98 € · dont une option cochée d'avance | Charged when the trial ends: €10.98 · including an add-on ticked in advance | oui |
+| `pricing` + `addon` | Prélevé à la fin de l'essai : 11,48 € · dont une option cochée d'avance | Charged when the trial ends: €11.48 · including an add-on ticked in advance | oui |
+| `trial` + `addon` | Prélevé à la fin de l'essai : 62,98 € · sans rappel avant le prélèvement · dont une option cochée d'avance | Charged when the trial ends: €62.98 · with no reminder before the charge · including an add-on ticked in advance | oui |
+| `trial` + `trialmail` + `addon` | Prélevé à la fin de l'essai : 62,98 € · dont une option cochée d'avance | Charged when the trial ends: €62.98 · including an add-on ticked in advance | oui |
 
 Chaînes (`ChargePillCopy`, sous la clé `charge`) : `amount` « Prélevé à la fin
 de l'essai : {amount} » / "Charged when the trial ends: {amount}" (`{amount}`
@@ -364,10 +400,77 @@ prélèvement » / "with no reminder before the charge" ; `addonSuffix` « dont 
 option cochée d'avance » / "including an add-on ticked in advance".
 Composition : `amount`, puis ` · silentSuffix` si `silent`, puis
 ` · addonSuffix` si `addon` ; corail si l'un des deux. Gabarit déclaré :
-`REVENUE_COPY_TEMPLATES = { ...LEVEL_COPY_TEMPLATES, "charge.amount": ["amount"] }`. **Test C13 du
-niveau** : 7,99, 8,49, 59,99 et 2,99 des chaînes sont les constantes ; 800 est
-dans `packsRound` et pas dans `packsOdd` ; 59,99 / 12 arrondi au centime donne
-le « 5,00 € » de `fullPrice`.
+`REVENUE_COPY_TEMPLATES = { ...LEVEL_COPY_TEMPLATES, "charge.amount": ["amount"] }`.
+
+**C13, en deux temps.** En REV-1 (`game-revenue.test.ts`, la copie seule, sans
+importer `fit-phone.ts`), avec un lecteur de montants : FR
+`/(\d+(?:[\u00a0 ]\d{3})*),(\d{2})[\u00a0 ]€/g`, EN `/€(\d+(?:,\d{3})*)\.(\d{2})/g` :
+- mêmes montants en français et en anglais pour `offerBase`,
+  `offerTrialSmall`, `fullPrice`, `monthly`, `monthlyPersonal`, `addon`,
+  `programme`, `programmeSmall`, `coaching`, `downgrade`, `euros`,
+  `renewalSilent` ;
+- 59,99 identique dans `offerTrialSmall`, `fullPrice` (1er montant),
+  `renewalSilent` et `cards.trial.pitch` ; 7,99 dans `offerBase`, `monthly` et
+  `hand.productionEmpty` ; 9,99 dans `programme`, `programmeSmall`,
+  `cards.hiddensub.pitch` et `orders.hiddensub` ; 2,99 dans `phone.addon` et
+  `cards.addon.pitch` ;
+- le 2e montant de `fullPrice` vaut `Math.round(1er / 12 × 100) / 100`
+  (5,00) ;
+- les 800 gemmes de `shopItem` sont un pack de `packsRound` et pas de
+  `packsOdd` ; les packs de `cards.gems.pitch` sont ceux de `packsOdd` ; 300
+  dans `chest` et dans `cards.lootbox.pitch`.
+
+En REV-2 (`game-fit-phone.test.ts`), dans les deux langues : `offerBase` et
+`monthly` contiennent `formatEuros(locale, MONTHLY_EUR)`, `monthlyPersonal`
+`MONTHLY_PERSONAL_EUR`, `offerTrialSmall`, `fullPrice` et `renewalSilent`
+`YEARLY_EUR`, `addon` `ADDON_EUR`. `euros` (le prix de la tenue) n'est lié à
+aucune constante.
+
+**La pastille** (`src/components/game/ChargePill.tsx`, qui importe
+`ClickPill.module.css` comme `BasketPill`) :
+`ChargePill({ amount, silent, addon, labels, size, announce, className }: { amount: string; silent: boolean; addon: boolean; labels: ChargePillCopy; size?: "md" | "sm"; announce?: boolean; className?: string })`,
+rendue `<p data-testid="game-charge" data-silent={silent} data-addon={addon}>` :
+`charge.amount` rempli avec `amount` (déjà formaté), puis
+`<span> · {silentSuffix}</span>` si `silent`, puis `<span> · {addonSuffix}</span>`
+si `addon` ; corail (`styles.over`) si l'un des deux ; `aria-live="polite"` sauf
+avec `announce={false}`. Elle n'importe `lib/game` qu'en `import type`. À
+390 px, la forme courte de la barre d'action est en capitales : si la capture
+la montre sur deux lignes, s'arrêter et le dire.
+
+**Le côté de l'îlot** (`sides.tsx`), à recopier :
+
+```tsx
+type RevenueSideCopy = Pick<RevenueCopy, "phone" | "charge">;
+
+/** The pill's sentence: what the trial's end charges, and why it is a problem. */
+export function chargeSentence(copy: RevenueSideCopy, locale: Locale, c: TrialCharge): string {
+  let text = fill(copy.charge.amount, { amount: formatEuros(locale, c.amount) });
+  if (c.silent) text += ` · ${copy.charge.silentSuffix}`;
+  if (c.addon) text += ` · ${copy.charge.addonSuffix}`;
+  return text;
+}
+
+export const REVENUE_SIDE: IslandSide<RevenueSideCopy> = {
+  render: ({ ids, copy, locale }) => {
+    const c = trialCharge(ids);
+    return (
+      <>
+        <FitPhone items={fitPhoneView(ids)} labels={copy.phone} />
+        <ChargePill amount={formatEuros(locale, c.amount)} silent={c.silent} addon={c.addon} labels={copy.charge} announce={false} />
+      </>
+    );
+  },
+  pill: ({ ids, copy, locale }) => {
+    const c = trialCharge(ids);
+    return { text: fill(copy.charge.amount, { amount: formatEuros(locale, c.amount) }), alert: c.silent || c.addon };
+  },
+  announce: ({ before, after, copy, locale }) => {
+    const was = trialCharge(before);
+    const now = trialCharge(after);
+    return was.amount === now.amount && was.silent === now.silent && was.addon === now.addon ? null : chargeSentence(copy, locale, now);
+  },
+};
+```
 
 ### 20.8 La copie, clé par clé
 
@@ -377,7 +480,8 @@ le « 5,00 € » de `fullPrice`.
 `dashboard.revenue`, `dashboard.revenueDelta`, `dashboard.patience`,
 `dashboard.patienceLow`, `dashboard.notOnDashboard`, `dashboard.hiddenValue`,
 `dashboard.revealed`, `dashboard.delta`, `visio` (sauf `tag`), les clés de
-`boss` listées au §20.5, `hand` (sauf `unlocked` et `productionEmpty`),
+`boss` que le §20.5 n'écrit pas (`t2Hit`, `t3Hit`, `t3Miss`, `orderWrap`,
+`yearEnd`, `fired`), `hand` (sauf `unlocked` et `productionEmpty`),
 `cards.present`, `cards.clean.name`, `report` (sauf les clés écrites
 ci-dessous), `journal`, `effects.insight`, `effects.present`, `effects.none`,
 `events.midMailMoving`, `events.midMailStalled`, `events.present`,
@@ -391,7 +495,8 @@ des fins sauf `cleanMiss` et `labyrinth`, `december.cells.outOf`,
 `december.table.trust`, `playbook`, `catalogue` (sauf `hiddenEffect`),
 `share.replay`, `share.copy`, `share.copied`, `tourLoop`, `resume.title`,
 `resume.resume`, `resume.restart`, `resume.review`, `footer`, `a11y.handLabel`,
-`a11y.resumed`.
+`a11y.resumed`, et `nextLevel` (après U0 : `eyebrow` « Niveau suivant »,
+`status` « jouable » ; `nextLevel: L1.nextLevel`).
 
 **Et en plus, parce que l'autorité est la DGCCRF comme au niveau 1** :
 `dashboard.radar`, `december.cells.radar`, `events.reports`,
@@ -440,14 +545,14 @@ des fins sauf `cleanMiss` et `labyrinth`, `december.cells.outOf`,
 | december.table.metric | Revenu par utilisateur | Revenue per user |
 | catalogue.hiddenEffect | Confiance {trust}, radar {radar}, une seule fois, le jour où elle entre en production. Le revenu qu'elle rapporte baisse de 30 % après trois mois. | Trust {trust}, radar {radar}, once, on the day it goes into production. The revenue it brings in drops by 30% after three months. |
 | share.text | Une année chez Gainix : {title} Revenu par utilisateur à {metric}, confiance à {trust}. Et toi, tu tiendrais ? {url} | A year at Gainix: {title} Revenue per user at {metric}, trust at {trust}. Would you hold out? {url} |
-| nextLevel.eyebrow | Niveau suivant | Next level |
-| nextLevel.status | jouable | playable |
 | resume.previously | Précédemment chez Gainix | Previously at Gainix |
 | resume.quarterLine | Trimestre {q} : {cards}. Revenu par utilisateur à {metric}. | Quarter {q}: {cards}. Revenue per user at {metric}. |
 | resume.finished | Ta dernière année chez Gainix s'est terminée ainsi : « {title} » | Your last year at Gainix ended like this: "{title}" |
 | a11y.quarterEnd | Fin du trimestre {q} : revenu par utilisateur {metric}, objectif {target} {status}, patience {patience}. | End of quarter {q}: revenue per user {metric}, target {target} {status}, patience {patience}. |
 
-**Les fins** (`{metric}` arrive formaté : « 6,01 € ») :
+**Les fins** (`{metric}` arrive formaté : « 6,01 € ») : `win` est un littéral,
+`true` pour `applause` et `cleanMiss`, `false` pour les cinq autres, comme dans
+`acquisition.ts` ; `eyebrow` et les titres non listés viennent du niveau 1.
 
 | id | Titre (si écrit) | Texte FR | Texte EN |
 |---|---|---|---|
@@ -559,7 +664,23 @@ relire par Antoine avant l'ouverture (D9). Deux cas sont déjà pris ailleurs et
 **Liste blanche des marques** (série C6) : ebookers.com, Genshin Impact, SFAM,
 Tinder, Instacart, Epic Games, Fortnite, ABCmouse, Star Stable. Les
 institutions (Cour de justice de l'Union européenne, FTC, DGCCRF, Commission
-européenne…) sont des mots ordinaires du test.
+européenne…) sont des mots ordinaires du test. Pour le test (§21.3 T1),
+exactement, calculés avec `CAPITALISED` sur les seize `cas` de ce §20.9 :
+- `BRANDS = ["ebookers.com", "Genshin Impact", "SFAM", "Tinder", "Instacart", "Epic Games", "Fortnite", "ABCmouse", "Star Stable"]` ;
+- `BRAND_WORDS = new Set(BRANDS.flatMap((b) => b.split(" ")).flatMap((w) => [w, `${w}'s`]))`
+  (le cas anglais d'`express` dit « Fortnite's ») ;
+- `NOT_BRANDS = new Set(["En", "Cour", "In", "Court", "Justice", "European", "Union", "FTC", "L'accord", "January", "FTC's", "The", "DGCCRF", "Paris", "France's", "Commission", "Ce", "March", "These", "Aux", "États-Unis", "United", "States", "December", "C'est", "It"])` ;
+- un seul domaine, `ebookers.com`, admis par `BRANDS`.
+
+**La nature de chaque cas** (C6) : `pricing` contient « s'est engagé » / /committed/ ;
+`pricing` et `gems` contiennent « pas une sanction » / "not a sanction", et
+`gems` « procédure » / "procedure" ; `hiddensub` « transaction » /
+"settlement" ; `lootbox`, `trial` et `renewal` « pour clore » / "to settle" ;
+`express` « ordonnance » / "order" ; `addon` « a jugé » / "ruled" ; aucun `cas`
+ne correspond à `/amende|condamn/` (EN `/\bfine[ds]?\b|convicted/`).
+
+Les lignes « Sources » de ce §20.9 ne sont pas de la copie : elles vont en
+commentaire au-dessus de `patterns`, comme dans `acquisition.ts`.
 
 **Le nom de l'entreprise** : « Sportix » (une appli et une marque existent),
 « Cardiox » (une plateforme pour équipes sportives), « Fitéo », « Foulix »,
@@ -582,7 +703,7 @@ Les questions communes sont au §21.8.
 | Q2 | **Le nom : Gainix** ? | **Oui**, pour le double sens. Repli : Muscléo. | Un nom propre à remplacer en une passe avant T1. | **Oui** (C88, Antoine, 2026-10-04). |
 | Q3 | **Le contrôle : une transaction de 300 000 € et une amende administrative de 75 000 €, 375 000 € au total** ? | **Oui** : c'est la procédure réelle pour ce mélange de pratiques, environ 4 % du chiffre d'affaires. Écarté : 300 000 € en quatre amendes administratives cumulées, plus simple à dire mais qui oublie le délit. Le tampon de la coupure dit « Contrôle · 375 000 € » : « Sanctions » rangerait la transaction parmi les sanctions (§21.5), et « Transaction et amende » ne tient pas sur une ligne à 390 px. | Un montant et une phrase d'événement, sans effet sur l'équilibrage. | **Oui** (C89, Antoine, 2026-10-04). |
 | Q4 | **Les huit astuces du §20.4**, dont deux remplacées (frais cachés et fausse urgence, déjà au niveau 2) et une reformulée (l'option cochée d'avance) ? | **Oui** : huit noms neufs, chacun avec un texte relu et un cas réel. | Une PR de spécification avant T1. | **Oui** (C90, Antoine, 2026-10-04). |
-| Q5 | **Le bandeau de l'encart du résultat** : « Revenu par utilisateur 4,00 € » tient-il sur sa ligne de 44 px ? | **Le garder**, et si la spec P23 voit la bande passer à la ligne à 1 280 px, le remplacer par « ARPU {metric} » (le mot du glossaire), dans les deux langues, sans redemander. | Une bande sur deux lignes, vue par la spec. | **Oui** (C91, Antoine, 2026-10-04). |
+| Q5 | **Le bandeau de l'encart du résultat** : « Revenu par utilisateur 4,00 € » tient-il sur sa ligne de 44 px ? | **Le garder**, et si la spec P23 voit la bande passer à la ligne à 1 280 px, le remplacer par « ARPU {metric} » (le mot du glossaire), dans les deux langues, sans redemander. | Une bande sur deux lignes, vue par la spec. | **Oui** (C91, Antoine, 2026-10-04). Vérifié par `result-real` (fixture `revenueClear`, §20.12 T3), pas par P23, qui ne montre que la rétention. |
 
 ### 20.11 La copie autour du jeu
 
@@ -603,7 +724,7 @@ Les questions communes sont au §21.8.
 | `entry.ts` | `…opening`, `meta`, `band.trust`, `band.notOnDashboard` | *(les constantes partagées du fichier)* | |
 | `hub.ts` | `zones.revenue.company` | Gainix, une appli de sport avec abonnement | Gainix, a fitness app with a subscription |
 | `hub.ts` | `ENDINGS_BY_LEVEL.revenue` | `{ fine: « le contrôle, la transaction et l'amende » }` | `{ fine: "the inspection, the settlement and the fine" }` |
-| `hub.ts` | `LEVEL_TEASERS.revenue` (T0) | « Comment vous gagnez de l'argent » : l'essai qui se change en abonnement, l'option cochée d'avance, le coffre au hasard | "How you make money": the trial that turns into a subscription, the pre-ticked add-on, the random chest |
+| `hub.ts` | `LEVEL_TEASERS.revenue` (REV-3, quand `revenue` entre dans `LevelSlug` ; le mécanisme est celui de T0) | « Comment vous gagnez de l'argent » : l'essai qui se change en abonnement, l'option cochée d'avance, le coffre au hasard | "How you make money": the trial that turns into a subscription, the pre-ticked add-on, the random chest |
 | `page.tsx` | les deux mots du glossaire | `["revenue", "arpu"]` | |
 
 ### 20.12 Plan d'exécution
@@ -611,25 +732,90 @@ Les questions communes sont au §21.8.
 Les PR T1 à T4 du §21.3, avec ce qui est propre au niveau (unités REV-1 à
 REV-4 du §21.9).
 
-- **T1, la copie** : `RevenueCopy`, `RevenueOrderId` (`addon`, `trial`,
-  `lootbox`, `hiddensub`, `renewal`), `RevenuePhoneCopy` (§20.7,
-  `checkoutAnswers: readonly string[]`) et `ChargePillCopy` (`amount`,
-  `silentSuffix`, `addonSuffix`), la pastille sous la clé `charge` ;
+- **T1, la copie (REV-1)** : `RevenueCopy`, `RevenueOrderId` (`addon`, `trial`,
+  `lootbox`, `hiddensub`, `renewal`), `RevenuePhoneCopy` (§20.7, un champ par
+  ligne du tableau, la colonne « Montré par » servant de doc-comment, en
+  anglais ; `checkoutAnswers: readonly string[]`) et `ChargePillCopy`
+  (`amount`, `silentSuffix`, `addonSuffix`), la pastille sous la clé `charge` ;
   `REVENUE_COPY_TEMPLATES = { ...LEVEL_COPY_TEMPLATES, "charge.amount": ["amount"] }`.
-  `src/content/game/revenue.ts`, `REVENUE_INTRO` et `GAME_META.revenue`. Le test
-  `src/content/__tests__/game-revenue.test.ts` : C1 exige dans chaque `law`
-  « Code de la consommation » ou « Code de la sécurité intérieure » (anglais :
-  « Consumer Code », « Internal Security Code ») ; la règle du contrôle :
-  l'événement dit « transaction » et « amende administrative » (EN
-  « settlement » et « administrative fine »), le tampon dit « Contrôle » (EN
-  « Inspection »), et la fin `fine` dit les deux ; C6 avec la liste blanche du
-  §20.9 ; C13 tient les montants du §20.7.
-- **T2, le téléphone** : `src/lib/game/fit-phone.ts` (`fitPhoneView`,
-  `trialCharge` et ses constantes), `src/components/game/FitPhone.tsx` et
-  `ChargePill.tsx`, `REVENUE_SIDE`, les aperçus, et
+  `src/content/game/revenue.ts`, `REVENUE_INTRO` et `GAME_META.revenue`. Ce
+  qui reste fictif, pour l'en-tête « What stays fictional » : Gainix, Coach+,
+  la tenue Marathon, le coffre Sprint, @cardio_du_dimanche / @sunday_runner,
+  Le Mag du sport, La Lettre du fitness ; les vraies marques n'apparaissent
+  que dans les `cas`. Le test `src/content/__tests__/game-revenue.test.ts` :
+  - **C1**, avec ces expressions, vérifiées sur les huit `law` (pluriels
+    « articles L… et L… » et « of the French … Code » compris) : FR
+    `/articles? L\d+-\d+(?:-\d+)?(?: et L\d+-\d+(?:-\d+)?)? du Code (?:de la consommation|de la sécurité intérieure)/`,
+    EN `/articles? L\d+-\d+(?:-\d+)?(?: and L\d+-\d+(?:-\d+)?)? of the (?:French )?(?:Consumer|Internal Security) Code/` ;
+  - **la règle du contrôle**, qui remplace C14 (après
+    `text.replace(/\{fine\}/g, "")`) : `events.control` correspond à
+    `/transaction pénale/`, `/amende administrative/` et contient « parquet »
+    (EN `/settlement/`, `/administrative fine/` et « prosecutor ») ;
+    `news.stamps.fine` contient « Contrôle » (EN « Inspection ») ;
+    `endings.fine.text` correspond à `/transaction/` et `/amende/` (EN
+    `/settlement/` et `/\bfine\b/`) ;
+  - **C4** : `targets[0]` vaut 4.3, `targets[3]` vaut 6, `metric0` vaut 4,
+    objectifs strictement croissants ; `boss.t1` contient « 4,30 € » et
+    « 6 € » (EN « €4.30 », « €6 ») ; `boss.t2Miss` contient « au lieu de
+    4,30 €. » (EN « instead of €4.30. ») ; `boss.t4Hit`, `boss.t4Miss`,
+    `REVENUE_INTRO.lead` et `endings.cleanMiss.title` contiennent « 6 € » (EN
+    « €6 ») ; le chapeau contient aussi « 4 € » et « 200 000 » (EN « €4 »,
+    « 200,000 ») ; `GAME_META.revenue.shareImageAlt` contient « 4,00 € » (EN
+    « €4.00 ») (U+00A0 avant « € » en français) ;
+  - **C6** : les listes et la nature des cas du §20.9 ;
+  - **C13** : la partie copie du §20.7 ;
+  - `endings.*.win` et `nextLevel` comme le §20.8 le dit ;
+  - `src/content/__tests__/game-hub.test.ts` étendu à `GAME_META.revenue` et
+    `REVENUE_INTRO` (§21.3 T1).
+- **T2, le téléphone (REV-2)** : `src/lib/game/fit-phone.ts` (`fitPhoneView`,
+  `fitItemKey`, `trialCharge` et ses constantes ; ce sont les noms du gabarit `<téléphone>-phone.ts` du §21.3 T2, comme `shop-phone.ts` au niveau 2),
+  `src/components/game/FitPhone.tsx` et son `.module.css`, `ChargePill.tsx`
+  (qui importe `ClickPill.module.css`), le jeton `--fit-brand` et sa ligne de
+  contraste (§20.7), `REVENUE_SIDE` (le code du §20.7), les aperçus,
+  l'inscription de `FitPhone` et `ChargePill` dans `.design-sync/config.json`
+  (`componentSrcMap`, et `FitPhone` dans `dtsPropsFor`), et
   `src/__tests__/game-fit-phone.test.ts` (chaque ligne de la table de la
-  pastille ; `roundpacks` l'emporte sur `gems` ; `renewmail` sur `renewal`).
-- **T3, le branchement** : la table du §21.3 ; le niveau prend la dernière place
-  de `GAME_LEVELS_BY_PILLAR`. `ENDINGS_BY_LEVEL.revenue` reçoit sa fin `fine`.
-- **T4, les specs** : `e2e/game-revenue.spec.ts`, d'après le §20.6 ; le chiffre
-  s'affiche en euros au centime, jamais « % ».
+  pastille ; `roundpacks` l'emporte sur `gems` ; `renewmail` sur `renewal` ;
+  la partie téléphone de C13).
+- **T3, le branchement (REV-3)** : la table du §21.3 ; le niveau prend la
+  dernière place de `GAME_LEVELS_BY_PILLAR`. `ENDINGS_BY_LEVEL.revenue` reçoit
+  sa fin `fine`. L'en-tête de `levels/revenue.ts` : « in DRAFT
+  (`DraftLevelSlug`): no page, no copy, no save yet. » devient « wired on
+  <date> (A24, REV-3): its copy is `content/game/revenue.ts`, its page
+  `app/[locale]/game/revenue/`. ». Et :
+  - `e2e/real-results.ts` : `revenueClear: { id: "7d3c9e2a-0b1f-4c5d-8e6f-1a2b3c4d5e10", tone: "neutral", locale: "fr", answers: answersFor({ acquisition: 1, activation: 0, retention: 1, referral: 0, revenue: 2 }), total: 54 }`
+    (le revenue seul à 0/20 : un goulot `clear`) ; dans
+    `e2e/result-real.spec.ts`, à 1 280 px en `?lang=fr`, `game-entry-cta` vers
+    `/fr/game/revenue?from=result`, et `game-entry-band` contient « Revenu par
+    utilisateur 4,00 € » avec une hauteur ≤ 44 px. **Si ce test rougit sur la
+    hauteur** (C91) : `band.metric` devient « ARPU {metric} » dans les deux
+    langues, l'assertion devient « ARPU 4,00 € », et le compte rendu le dit ;
+    sans redemander ;
+  - `e2e/game-helpers.ts` : `REVENUE_PATH = { en: "/en/game/revenue", fr: "/fr/game/revenue" }` ;
+  - les liens de décembre des niveaux déjà construits, recalculés (§21.3 T3 :
+    ouvrir le revenue fait viser le revenue au décembre du referral, s'il est
+    ouvert).
+- **T4, les specs (REV-4)** : `e2e/game-revenue.spec.ts`, d'après le §20.6 ;
+  le chiffre s'affiche en euros au centime, jamais « % » ni « pt » sur la
+  tuile, la frise, le premier chiffre du bilan, la cellule et la courbe de
+  décembre (les lignes d'effet en ont). Et :
+  - **P1 (fr)** : « 4,00 € » ; « 200 000 » ; « 55 » ; la pastille à 7,99 €,
+    sans alerte ;
+  - **P5 (T1, fr)** : cocher `addon` affiche « ☑ Coach+ · 2,99 € par mois », et
+    la pastille « Prélevé à la fin de l'essai : 10,98 € · dont une option cochée
+    d'avance », en alerte ; cocher aussi `pricing` affiche « Mensuel : 8,49 €
+    par mois » et 11,48 € ; tout décocher, puis cocher `trialmail` affiche
+    « Rappel envoyé 3 jours avant la fin de l'essai », la pastille à 7,99 €,
+    sans alerte (`trial` n'est pas dans la main du T1) ;
+  - **année C (en)** : « €4.62 », « €4.82 », « €4.64 », « €1.93 » ; au T2, une
+    fois `trial` et `hiddensub` cochées, la pastille a `data-silent="true"` et
+    contient « €62.98 », « with no reminder before the charge » et « including
+    an add-on ticked in advance » ; le catalogue des astuces utilisées
+    contient six cartes retirées : addon, lootbox, trial, hiddensub, express,
+    renewal ; la fin contient « Here is what you did. », « settlement » **et**
+    « fine » (ne pas recopier le « jamais fine » du niveau 2) ;
+  - **P17 (en)** : la barre d'action contient « Charged when the trial ends » ;
+  - **le bloc « Niveau suivant »** (C75) : les deux décembres semés du §21.3
+    T4 ; le revenue est le dernier de l'ordre du Tour, donc sans collection on
+    boucle sur l'acquisition (`/fr/game/acquisition?from=other_level`) ; les
+    `href` se calculent avec `nextLevelFor`.
