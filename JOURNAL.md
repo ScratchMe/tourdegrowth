@@ -1223,7 +1223,7 @@ C'est ce dernier réglage qui est appliqué dans `levels/referral.ts`. Le test F
 
 **Vérifié** : `src/__tests__/claude-md-budget.test.ts` passe. Documentation seulement : ni build ni Playwright.
 
-## A24, ACT-1 : la copie du niveau activation (2026-10-04)
+## A24, ACT-1 : la copie du niveau activation (2026-10-04, #338)
 
 **Livré** (branche `a24-act-1`, sans route : aucune page n'importe encore cette copie, le joueur ne voit rien de neuf) : tout le texte du niveau « Comment ils comprennent ce que vous apportez » (`docs/game/activation.md`, §18), de T1 (`docs/game/construire-un-niveau.md` §21.3), menée par un sous-agent Sonnet depuis la seule spécification. Aucun modèle n'a bougé (`levels/activation.ts`, ses tests et `paths-activation.ts` : zéro ligne ; les 20 tests du modèle passent avant et après).
 - **`src/lib/game/copy.ts`** : `ActivationOrderId` (les cinq ordres), `ActivationPhoneCopy` (un champ par ligne du tableau du §18.7, une doc-comment d'une ligne en anglais par champ d'après la colonne « Montré par » ; `callsAnswers: readonly string[]`), `CookiePillCopy` (`easy`, `hidden`, `lawSuffix`), `ActivationCopy` (la pastille sous la clé `cookies`) et `ACTIVATION_COPY_TEMPLATES = { ...LEVEL_COPY_TEMPLATES }`, déclaré sans gabarit propre pour que le test vérifie les gabarits communs.
