@@ -78,6 +78,19 @@ describe("TotalBand", () => {
     expect(css).toMatch(/@media \(max-width: 760px\)[\s\S]*\.totals \{[^}]*grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/);
   });
 
+  it("a part with no figure is words: its value set in the text face, muted — never in the figures' face (A21.3)", () => {
+    const markup = band({
+      engines: [
+        { id: "plg", label: "MRR libre-service", value: "48 000 €" },
+        { id: "slg", label: "MRR assisté", value: "pas de chiffre", missing: true },
+      ],
+      total: { label: "MRR total", value: "pas de chiffre", missing: true },
+    });
+    expect(markup.match(/<dd class="[^"]*missing[^"]*"/g)).toHaveLength(2);
+    expect(band()).not.toMatch(/missing/);
+    expect(css).toMatch(/\.total \.value\.missing \{[^}]*font: var\(--body-md\)/);
+  });
+
   it("says the link last, and only when there is one", () => {
     expect(band().indexOf("opportunités assistées")).toBeGreaterThan(band().indexOf("</dl>"));
     expect(band({ link: undefined })).not.toContain("opportunités");

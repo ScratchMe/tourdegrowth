@@ -71,7 +71,7 @@ export interface PaybackChartGeometry {
   /** Loss: where the « would pay back » label hangs — the payback's tick, or the plot's right end past 36 months. */
   wouldPayBack: { x: number; beyond: boolean } | null;
   /** Loss: the bracket that measures how short, beside the line's end. */
-  short: { path: string; labelX: number; labelY: number } | null;
+  short: { path: string; labelX: number; labelY: number; /** A label fits inside the bracket. */ fits: boolean } | null;
   /** Pays back: the crossing, and the bracket of the months after it, under the cost line. */
   crossing: { x: number; y: number } | null;
   after: { path: string; x1: number; x2: number; width: number; labelX: number; labelY: number } | null;
@@ -140,6 +140,9 @@ export function paybackChartGeometry({ story, monthlyMargin, cac, lifetime, payb
   if (leavesFirst) {
     const bx = x(lifeLo) - 12;
     const beyond = pb > PAYBACK_MONTHS;
+    // The loss's words sit inside its bracket, between the cost line and the line's end, when a label fits there
+    // (`fits`); `shortLabelY` decides where they go when it doesn't.
+    const fits = y(endLo) - costY >= SHORT_LABEL_ROOM;
     return {
       ...base,
       story: "loss",
@@ -148,7 +151,7 @@ export function paybackChartGeometry({ story, monthlyMargin, cac, lifetime, payb
       leaves,
       thread: beyond ? null : { x1: x(lifeLo), y1: y(endLo), x2: x(pb), y2: costY, tickX: x(pb) },
       wouldPayBack: { x: x(pb), beyond },
-      short: { path: `M ${bx + 8} ${costY} H ${bx} V ${y(endLo)} H ${bx + 8}`, labelX: bx - 8, labelY: (costY + y(endLo)) / 2 + 6 },
+      short: { path: `M ${bx + 8} ${costY} H ${bx} V ${y(endLo)} H ${bx + 8}`, labelX: bx - 8, labelY: (costY + y(endLo)) / 2 + 6, fits },
       crossing: null,
       after: null,
       unknown: null,
@@ -183,9 +186,27 @@ export function paybackChartGeometry({ story, monthlyMargin, cac, lifetime, payb
   };
 }
 
+/** The height a loss's label needs inside its bracket (an 18px label and its air); less, it goes above the cost line. */
+export const SHORT_LABEL_ROOM = 28;
+
 /** A label's width on the slide's canvas, from its characters: 0.6em each, the widest of the slide's faces (its mono). */
 export function estimateLabelWidth(chars: number, px = 18): number {
   return chars * px * 0.6;
+}
+
+/**
+ * The loss's words (« il manque ~400 € »): inside its bracket when they fit there. A small loss — the compact
+ * chart's 150px above all — left them across the cost line (A21.5); they go above it, ending where they would
+ * have, when nothing is drawn there: always on the compact chart (no cost label), at full size only clear of
+ * « ce que coûte un nouveau client ». Otherwise they stay inside, the halo keeping them legible.
+ */
+export function shortLabelY(g: PaybackChartGeometry, chars: { short: number; cost: number }, compact: boolean, px = 18): number | null {
+  if (!g.short) return null;
+  if (g.short.fits) return g.short.labelY;
+  const above = g.cost.y - 10;
+  if (compact) return above;
+  const clearOfCost = g.short.labelX - estimateLabelWidth(chars.short, px) >= g.cost.labelX + estimateLabelWidth(chars.cost, px) + 16;
+  return clearOfCost ? above : g.short.labelY;
 }
 
 /** The months-after bracket's width, in px, from which its label is centred under it: shorter, it ends at its right end. */
@@ -209,14 +230,30 @@ export interface PaysBackLabels {
  * since a label's width is only known once drawn: `estimateLabelWidth` errs
  * wide.
  */
-export function paysBackLabels(g: PaybackChartGeometry, chars: { paysBack: number; cost: number; time: number | null }, px = 18): PaysBackLabels {
+export function paysBackLabels(g: PaybackChartGeometry, chars: { paysBack: number; cost: number; time: number | null; after?: number }, px = 18): PaysBackLabels {
   if (g.story !== "pays-back") return { crossing: null, after: null };
-  const bracket = (text: "after" | "time", width: number) => {
+  type Placed = { text: "after" | "time"; x: number; y: number; anchor: "middle" | "end" };
+  // Under the cost line, left of the crossing, the margin line still climbs: a label wider than the bracket ran into
+  // it (a late payback's « ~4 mois de marge après », A21.5). Lowered until its top clears the line — the line is
+  // further left the lower it is — and kept above the axis; with no room, it stays where it was.
+  const clearOfLine = (l: Placed, width: number): Placed => {
+    const m = g.margin;
+    if (!m || m.y1 === m.y2 || width <= 0) return l;
+    const left = l.anchor === "end" ? l.x - width : l.x - width / 2;
+    const ascent = px * 0.8;
+    const lineX = (y: number) => m.x1 + ((m.y1 - y) / (m.y1 - m.y2)) * (m.x2 - m.x1);
+    if (lineX(l.y - ascent) <= left - 8) return l;
+    const top = m.y1 - ((left - 8 - m.x1) / (m.x2 - m.x1)) * (m.y1 - m.y2);
+    const y = Math.ceil(top + ascent);
+    return y <= g.axis.y - 8 ? { ...l, y } : l;
+  };
+  const bracket = (text: "after" | "time", width: number): Placed => {
     const a = g.after!;
-    if (text === "after") return a.width < AFTER_CENTRED_FROM ? { text, x: a.x2, y: a.labelY + 6, anchor: "end" as const } : { text, x: a.labelX, y: a.labelY + 6, anchor: "middle" as const };
+    if (text === "after")
+      return clearOfLine(a.width < AFTER_CENTRED_FROM ? { text, x: a.x2, y: a.labelY + 6, anchor: "end" } : { text, x: a.labelX, y: a.labelY + 6, anchor: "middle" }, width);
     // Centred under the bracket, kept right of the crossing and inside the plot; wider than that room, it ends at the plot's end.
-    if (width > g.axis.x2 - a.x1) return { text, x: g.axis.x2, y: a.labelY + 6, anchor: "end" as const };
-    return { text, x: Math.min(Math.max(a.labelX, a.x1 + width / 2), g.axis.x2 - width / 2), y: a.labelY + 6, anchor: "middle" as const };
+    if (width > g.axis.x2 - a.x1) return clearOfLine({ text, x: g.axis.x2, y: a.labelY + 6, anchor: "end" }, width);
+    return clearOfLine({ text, x: Math.min(Math.max(a.labelX, a.x1 + width / 2), g.axis.x2 - width / 2), y: a.labelY + 6, anchor: "middle" }, width);
   };
   const crossingFits =
     g.crossing !== null && g.crossing.x - 12 - estimateLabelWidth(chars.paysBack, px) >= g.cost.labelX + estimateLabelWidth(chars.cost, px) + 16;
@@ -225,6 +262,6 @@ export function paysBackLabels(g: PaybackChartGeometry, chars: { paysBack: numbe
   }
   return {
     crossing: g.crossing ? { x: g.crossing.x - 12, y: g.crossing.y - 14 } : null,
-    after: g.after ? bracket("after", 0) : null,
+    after: g.after ? bracket("after", chars.after === undefined ? 0 : estimateLabelWidth(chars.after, px)) : null,
   };
 }

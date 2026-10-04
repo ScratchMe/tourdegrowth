@@ -67,7 +67,7 @@ export const OneLever = () => (
 /**
  * The film's SaaS (`filmState()`), in English, with the film's three levers (`FILM_LEVERS`:
  * churn 6% → 4%, expansion 2% → 3%, activation 18% → 24%): its new customer leaves before
- * paying back today (« leaves first ») and stays ~9 months after payback with the what-ifs;
+ * paying back today (« leaves ~4 months early ») and stays ~9 months after payback with the what-ifs;
  * « Per new customer » goes from « ~€400 short » to « ~€830 more ».
  */
 export const ThreeLevers = () => (
@@ -92,7 +92,7 @@ export const ThreeLevers = () => (
             { id: "ltvCac", label: "LTV:CAC", today: "0.79×", whatif: "1.6×", change: "+0.79 · better" },
             { id: "gap", label: "Per new customer", today: "~€400 short", whatif: "~€830 more", change: "+€1,200 · better" },
             { id: "payback", label: "CAC payback", today: "21 months", whatif: "16 months", change: "−5 months · better" },
-            { id: "after", label: "Months after payback", today: "leaves first", whatif: "~9 months", change: "+14 months · better" },
+            { id: "after", label: "Months after payback", today: "leaves ~4 months early", whatif: "~9 months", change: "+14 months · better" },
           ],
         },
         {
@@ -113,8 +113,8 @@ export const ThreeLevers = () => (
 
 /**
  * The film's SaaS in French with nothing moved: one value column, today's figures, as the
- * panel opens. The customer is a loss (« il manque ~400 € ») and « part avant »: below zero,
- * the months after payback say that the customer leaves first.
+ * panel opens. The customer is a loss (« il manque ~400 € ») and « part ~4 mois avant »: below
+ * zero, the months after payback say by how many months the customer leaves first (A21.2).
  */
 export const Untouched = () => (
   <div style={{ maxWidth: 610 }}>
@@ -138,7 +138,7 @@ export const Untouched = () => (
             { id: "ltvCac", label: "LTV:CAC", today: "0,79 fois" },
             { id: "gap", label: "Par nouveau client", today: "il manque ~400 €" },
             { id: "payback", label: "CAC payback", today: "21 mois" },
-            { id: "after", label: "Mois après remboursement", today: "part avant" },
+            { id: "after", label: "Mois après remboursement", today: "part ~4 mois avant" },
           ],
         },
         {
@@ -254,7 +254,7 @@ export const SalesAssisted = () => (
  * The film's SaaS in French, the activation rate moved from 18 % to 24 %, at a phone's width
  * (358px): under 520px the component's own container query folds the « Aujourd'hui » column
  * into the what-if cell as a second line (« aujourd'hui ~5 900 € »), so three columns hold
- * without a horizontal scroll. The customer stops leaving first: « part avant » → ~1 mois.
+ * without a horizontal scroll. The customer stops leaving first: « part ~4 mois avant » → ~1 mois.
  */
 export const Phone = () => (
   <div style={{ maxWidth: 358 }}>
@@ -278,7 +278,7 @@ export const Phone = () => (
             { id: "ltvCac", label: "LTV:CAC", today: "0,79 fois", whatif: "1,1 fois", change: "+0,26 · mieux" },
             { id: "gap", label: "Par nouveau client", today: "il manque ~400 €", whatif: "~75 € de plus", change: "+480 € · mieux" },
             { id: "payback", label: "CAC payback", today: "21 mois", whatif: "16 mois", change: "−5 mois · mieux" },
-            { id: "after", label: "Mois après remboursement", today: "part avant", whatif: "~1 mois", change: "+5 mois · mieux" },
+            { id: "after", label: "Mois après remboursement", today: "part ~4 mois avant", whatif: "~1 mois", change: "+5 mois · mieux" },
           ],
         },
         {

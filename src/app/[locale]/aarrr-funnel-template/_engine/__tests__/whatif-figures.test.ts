@@ -31,7 +31,7 @@ describe("whatIfFigureGroups", () => {
     expect(g.moved).toBe(false);
     expect(rowOf(g, "ltvCac").today).toBe(nb("0,79^fois"));
     expect(rowOf(g, "gap").today).toBe(nb("il manque ~400^€"));
-    expect(rowOf(g, "after").today).toBe("part avant");
+    expect(rowOf(g, "after").today).toBe(nb("part ~4^mois avant"));
     expect(rowOf(g, "spend").today).toBe(nb("93^480^€"));
     expect(rowOf(g, "cash").today).toBe(nb("~990^000^€"));
     for (const r of g.groups.flatMap((x) => x.rows)) expect([r.whatif, r.change]).toEqual([null, null]);
@@ -53,6 +53,18 @@ describe("whatIfFigureGroups", () => {
     expect(rowOf(g, "gap").whatif).toBe(nb("~350^€ de plus"));
   });
 
+  it("a lever that shrinks the loss without closing it: each side says by how many months, never « stable » (A21.2)", () => {
+    // Churn 6 → 5 %: the customer still leaves before paying back, a month short instead of four. Both cells read
+    // « part avant » until A21.2, and the change, computed from two identical texts, said « stable ».
+    expect(rowOf(groups(filmState(), { "ret.logo-churn": 5 }), "after")).toMatchObject({
+      today: nb("part ~4^mois avant"),
+      whatif: nb("part ~1^mois avant"),
+      change: nb("+3^mois ·^mieux"),
+    });
+    // Churn 6 → 4 %: it now pays back, ~4 months of margin after — and the change adds up to what the cells say.
+    expect(rowOf(groups(filmState(), { "ret.logo-churn": 4 }), "after")).toMatchObject({ whatif: nb("~4^mois"), change: nb("+8^mois ·^mieux") });
+  });
+
   it("no margin (the §6.0 example): « ? » and what is missing on every row it stops, never 0; the spend still known", () => {
     const g = groups(noMarginState());
     for (const id of ["ltv", "ltvCac", "gap", "payback", "after", "cash"]) expect(rowOf(g, id)).toMatchObject({ today: "?", missing: "il manque la marge brute" });
@@ -66,7 +78,7 @@ describe("whatIfFigureGroups", () => {
   it("in English", () => {
     const g = whatIfFigureGroups({ state: filmState(), ctx: CTX_EN, strings: EN.strings, metrics: EN.metrics }, "plg", FILM_LEVERS);
     expect(g.groups.map((x) => x.title)).toEqual(["Growth", "One new customer", "Cash"]);
-    expect(rowOf(g, "after").today).toBe("leaves first");
+    expect(rowOf(g, "after").today).toBe("leaves ~4 months early");
     expect(rowOf(g, "spend").change).toBe("unchanged");
   });
 });

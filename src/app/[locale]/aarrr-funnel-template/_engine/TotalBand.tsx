@@ -53,9 +53,10 @@ export function TotalBand({ view, verdict }: { view: EngineView; verdict: SlideT
         id: b.motion,
         label: b.motion === "plg" ? t.ssMrr : t.saMrr,
         value: <span data-testid={`engine-total-mrr-${b.motion}`}>{b.mrr || strings.slide.noNumber}</span>,
+        missing: !b.mrr,
         "data-testid": `engine-total-${b.motion}`,
       }))}
-      total={{ label: t.sumMrr, value: sum ? sum.total : strings.slide.noNumber, "data-testid": "engine-total-sum" }}
+      total={{ label: t.sumMrr, value: sum ? sum.total : strings.slide.noNumber, missing: !sum, "data-testid": "engine-total-sum" }}
       totals={totals}
       link={
         link ? (
