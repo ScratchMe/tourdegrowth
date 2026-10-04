@@ -90,6 +90,16 @@ branche de la PR, avant le merge (§21.9).
 
 ### T0 — Ce qui change quand le jeu passe de deux à trois niveaux (une seule fois)
 
+**Fait le 2026-10-04** (U0, [#335](https://github.com/ScratchMe/tourdegrowth/pull/335)) : ce qui
+suit décrit ce qui existe. Les choix d'exécution d'U0 dont les unités
+suivantes héritent : `nextLevels` est une prop obligatoire de `GameIsland` ;
+`nextLevelFor` part du haut du Tour pour un slug absent de la table ; la route
+d'image du hub lève si `GAME_OPEN_COUNT_WORDS` n'a pas de mot pour le nombre de
+niveaux ouverts ; `game-hub.test.ts` lit le texte rempli par
+`generateImageMetadata`, la vraie route ; `LEVEL_TEASERS.acquisition` en
+français est la ligne du prototype, gardée par son nom dans
+`game-retention.test.ts` (C11).
+
 À faire une seule fois, avant le premier X-1 (l'unité U0, §21.9). Les décisions qu'elle
 applique sont les questions communes QC1 et QC2 (§21.8), tranchées une fois
 pour les trois niveaux (C75 et C76, le 2026-10-04, ni l'une ni l'autre sur la
@@ -337,7 +347,11 @@ reco).
   dans chacun des états de la table de vérité, à 390 px, en français et en
   anglais, sur une page de développement jetable **jamais commitée**
   (`git status` propre avant le commit, comme A12.e), capturée par
-  Playwright. Le compte rendu donne le chemin des PNG. Rien ne déborde ; si
+  Playwright. Pour atteindre un trimestre ou décembre, une spec jetable hors
+  du dépôt pose la sauvegarde avec `e2e/game-helpers.ts` et les années de
+  `src/lib/game/__tests__/paths-<niveau>.ts`, comme le fait
+  `e2e/game-level2.spec.ts` (U0 l'a fait ainsi). Le compte rendu donne le
+  chemin des PNG. Rien ne déborde ; si
   quelque chose déborde, s'arrêter et le dire.
 
 ### T3 — Le branchement : le niveau jouable (modèle : A12.f.1, PR #247)
@@ -363,7 +377,7 @@ nouveau niveau aussi :
 | `src/app/(app)/r/[id]/game-entry.ts` | `LEVEL_MODELS.<niveau>: <NIVEAU>_LEVEL` (le chiffre de la bande) ; le détail `${from}/${slug}` compile une fois `GAME_ENTRY_DETAILS` complété (`events.ts`). Jamais de cast |
 | `e2e/game-helpers.ts` | `MODEL_VERSIONS.<niveau>` (tsc l'exige) et `<NIVEAU>_PATH = { en: "/en/game/<niveau>", fr: "/fr/game/<niveau>" }`, comme `LEVEL2_PATH` |
 | `src/lib/game/types.ts` | au dernier X-3, `DraftLevelSlug` devient `never`, comme l'a fait #247 |
-| `src/content/updated-at.ts` | la date des pages touchées, comme A12.f.1 |
+| `src/content/updated-at.ts` | la date des pages touchées, comme A12.f.1, dont `/game` (sa zone devient jouable, et le texte de son image dit un niveau ouvert de plus) |
 
 Puis les tests que le niveau 2 a dû toucher, à étendre au nouveau niveau :
 `src/__tests__/content-fan-in.test.ts` (un plafond par page, chacun avec sa
@@ -374,6 +388,10 @@ qu'il couvre le nouveau), `src/__tests__/game-entry-wiring.test.ts`,
 `src/lib/game/__tests__/{levels,events,storage,build-flag}.test.ts`,
 `src/lib/analytics/__tests__/goatcounter-api.test.ts` (les chemins du niveau),
 `src/lib/og/fonts.test.ts`, `src/app/(app)/admin/stats/__tests__/game.test.ts`,
+`src/content/__tests__/game-hub.test.ts` (le test « reads « deux » / « two »
+while two levels are open » tombe à l'ouverture du troisième niveau, voulu : il
+devient « trois » / « three », la phrase entière écrite en dur dans les deux
+langues, puis « quatre » et « cinq » aux X-3 suivants),
 `src/app/(app)/r/[id]/__tests__/game-entry.test.ts`,
 `src/lib/submissions/__tests__/growth-stats.test.ts` (l'étape qui gagne son
 niveau entre dans le compte : ouvrir l'activation fait passer le cas
@@ -500,7 +518,29 @@ Tous vécus sur les niveaux 1 et 2 ; chacun a coûté au moins une relecture.
   explicite sur tout élément qui a un `display`.
 - **Le marqueur « à relire »** : `TODO: à relire`, avec une espace ordinaire
   après « TODO » (un `TODO : à relire` avec insécable échappe au grep de
-  `/bon-a-tirer`).
+  `/bon-a-tirer`). Sa forme : `// TODO: à relire — <date du commit> (<unité>) :
+  <ce qui est neuf>`, sur sa propre ligne, au-dessus d'une JSDoc s'il y en a
+  une.
+- **Recopier par script, jamais retaper** (U0) : les fichiers de copie
+  contiennent déjà des U+00A0 invisibles ; une chaîne existante retapée à la
+  main n'est plus la même, et un remplacement qui la cherche échoue ou, pire,
+  la change. Lire la chaîne dans le fichier (ou `git show origin/main:…`) et la
+  recopier par script.
+- **Une chaîne du prototype qui change de fichier garde sa garde** (U0) : C11
+  (`game-retention.test.ts`) ne parcourt que `RETENTION_CONTENT` et ce qu'il
+  nomme. Une ligne validée déplacée ailleurs se vérifie par son nom, et le
+  commentaire de son nouveau fichier dit son état (validée, ou « à relire »).
+- **Une chaîne visible déjà relue qui change** (au niveau 1, au niveau 2 ou
+  au hub, que montre la page du bon à tirer nº7) s'inscrit à la ligne A12.h de
+  `CHANTIERS.md`, en une phrase, comme U0 pour ses bandeaux : ce bon à tirer
+  la relira. À X-3, la zone du niveau qui devient jouable au hub en est une.
+- **Les commentaires que ton changement rend faux** (doc-comments, en-têtes,
+  commentaires de test) se corrigent dans les fichiers que tu touches, et
+  seulement là.
+- **`pkill -f` tue ton propre shell** quand son motif figure dans sa propre
+  ligne de commande (U0, et l'orchestrateur avant lui) : `pgrep -f
+  'next[-]server'` (ou `firestore`), puis `kill <PID>`, dans une commande à
+  part.
 - **Les années de référence se jouent à l'interface** dans les specs e2e, en
   cliquant ce que la table dit, carte par carte : le moteur est déjà tenu par
   les tests unitaires, les specs tiennent l'écran.
@@ -525,6 +565,21 @@ son téléphone et la pastille dans la barre d'action, une année C jusqu'à la
 sanction, le bloc de décembre, le hub ; à 1 280 et 390 px, en français et en
 anglais ; aucun défilement horizontal.
 
+Les fichiers de travail (captures, specs et pages jetables, journaux, le jar
+de l'émulateur Firestore que `TESTING.md` §5 fait télécharger) vont **hors du
+dépôt**, dans un dossier temporaire ; `git status` ne montre que les fichiers
+de l'unité.
+
+**Juste avant de pousser** : `git fetch origin && git merge origin/main`. Les
+autres sessions mergent souvent dans la journée, et **une PR en conflit ne
+lance pas sa CI** (U0 : « Types, tests, build » n'apparaissait pas). Sur un
+conflit dans `JOURNAL.md`, les deux entrées se gardent entières, la tienne en
+dernier ; ailleurs, s'arrêter et rendre compte. Puis `tsc` et `vitest` une
+dernière fois.
+
+Une relance de correction qui ne touche que des commentaires, des tests
+unitaires ou des documents saute le build et Playwright, et le dit.
+
 Avant d'écrire « vérifié » quelque part : `TESTING.md`. Avant d'annoncer un
 merge livré : `git show --stat <sha>` (convention 1).
 
@@ -537,9 +592,9 @@ merge livré : `git show --stat <sha>` (convention 1).
   niveau suivant ouvert.
 - Toute chaîne neuve porte « à relire » ; l'item du bon à tirer existe dans
   `CHANTIERS.md` A24, celui de la re-synchro dans la section B.
-- L'entrée du journal de chaque PR, et, dans la même PR, les deux nombres
-  des chiffres de référence de `CLAUDE.md` (tests unitaires, specs
-  Playwright). L'état du jeu dans `CLAUDE.md` change à X-3 et à X-4.
+- L'entrée du journal de chaque PR, et, dans la même PR, ceux des deux
+  nombres des chiffres de référence de `CLAUDE.md` qui ont changé (tests
+  unitaires, specs Playwright). L'état du jeu dans `CLAUDE.md` change à X-3 et à X-4.
 
 ## 21.8 Questions communes aux trois niveaux
 
@@ -605,8 +660,11 @@ l'unité, `git fetch --prune origin`, puis la liste des PR ouvertes et des
 branches `a24-*`. Une unité poussée mais pas mergée se reprend (relance de
 correction), jamais ne se recrée.
 
-**Si `main` a bougé** (`mergeable_state` autre que `clean`) : relance de
-correction avec `git fetch origin && git merge origin/main`, en gardant les
+**Si `main` a bougé** (`mergeable_state` autre que `clean`) : **une PR en
+conflit (`dirty`) ne lance pas sa CI**, et la seule trace en est l'absence de
+« Types, tests, build » dans ses checks (U0, le 2026-10-04 : deux merges
+d'une autre session pendant l'unité). Relance de correction avec
+`git fetch origin && git merge origin/main`, en gardant les
 deux entrées de `JOURNAL.md` (la nôtre en dernier), puis les vérifications du
 §21.6 et un `push` ordinaire. Un numéro de PR décalé par Dependabot se relit
 sur GitHub (convention 8).
@@ -617,14 +675,17 @@ question à Antoine avant le merge.
 
 ### Le prompt d'une unité
 
-L'orchestrateur remplit les champs entre chevrons et le passe tel quel. Pour
-U0, `<SPÉCIFICATION>` vaut « aucune : §21.3 T0 et §21.8 ».
+L'orchestrateur remplit les champs entre chevrons et le passe tel quel
+(`<DOSSIER>` : le clone, `/home/user/tourdegrowth` en session cloud ;
+`<ATTRIBUTION>` : les deux lignes de fin de commit que sa session donne, avec
+le nom du modèle du sous-agent). Pour U0, `<SPÉCIFICATION>` valait « aucune :
+§21.3 T0 et §21.8 ».
 
 ```text
 Tu construis une unité du jeu « Le côté obscur » de Tour de Growth : <UNITÉ>
 (par exemple « ACT-2, le téléphone du niveau activation »). Tu exécutes une
 spécification déjà tranchée : tu ne décides rien de ce qui touche au produit,
-au droit ou à la copie.
+au droit ou à la copie. Le dépôt est cloné dans <DOSSIER> : travaille là.
 
 Lis d'abord, en entier : CLAUDE.md ; docs/game/construire-un-niveau.md (§21.0,
 §21.1, §21.2, la section de ton unité au §21.3, §21.5, §21.6) ; puis
@@ -635,7 +696,8 @@ Mode : <MODE> (« nouvelle unité » ou « relance de correction »). Fais d'abo
 git fetch --prune origin. Nouvelle unité : git checkout -B <BRANCHE>
 origin/main avant toute écriture. Relance de correction : git checkout -B
 <BRANCHE> origin/<BRANCHE>, et tu ne corriges que ceci : <À CORRIGER>. Jamais
-de push --force. Fais exactement
+de push --force. Une relance qui ne touche que des commentaires, des tests
+unitaires ou des documents saute le build et Playwright, et le dit. Fais exactement
 ce que la section de ton unité demande, avec les chaînes et les chiffres de la
 spécification, recopiés tels quels, espaces insécables posées selon le §21.5.
 Ne touche pas aux fichiers d'autres unités, ni au modèle
@@ -650,12 +712,23 @@ contrat de copie manque dans la spécification ; la spécification contredit le
 code ou un test ; un test du modèle (src/lib/game/__tests__/<niveau>.test.ts)
 rougit ; tu as besoin d'une décision.
 
+Tes fichiers de travail (captures, specs jetables, journaux, le jar de
+l'émulateur) vont hors du dépôt, dans un dossier temporaire.
+
 Avant de pousser, fais passer les vérifications du §21.6 qui concernent ton
 unité, ajoute l'entrée de ton unité à la fin de JOURNAL.md (ce qui est livré,
 les choix d'exécution, ce qui est vérifié, avec les chiffres réels des
-commandes), remplace dans CLAUDE.md les deux nombres des chiffres de référence
-(tests unitaires, specs Playwright) sans ajouter de phrase (il reste moins de
-1 200 caractères de marge), puis commit et pousse ta branche. Si
+commandes), remplace dans CLAUDE.md ceux des deux nombres des chiffres de
+référence (tests unitaires, specs Playwright) qui ont changé, sans ajouter de
+phrase (il reste moins de 1 200 caractères de marge). Juste avant de pousser,
+git fetch origin && git merge origin/main (§21.6 : un conflit dans JOURNAL.md
+garde les deux entrées, la tienne en dernier ; ailleurs, arrête-toi), puis tsc
+et vitest une dernière fois. Commit et pousse ta branche (git push -u origin
+<BRANCHE> ; sur une erreur réseau seulement, jusqu'à quatre reprises après 2,
+4, 8 et 16 s). Tes messages de commit se terminent par ces lignes :
+<ATTRIBUTION>. N'écris aucun identifiant de modèle ailleurs (code,
+commentaires, journal). Ne coche rien dans CHANTIERS.md : l'orchestrateur le
+fait avec le numéro de PR. Si
 src/__tests__/claude-md-budget.test.ts rougit sur JOURNAL.md, archive selon
 l'en-tête de JOURNAL.md (les entrées les plus anciennes, entières, dans un
 nouveau volume de docs/journal/, avec sa ligne de table). N'ouvre pas de PR et
@@ -665,12 +738,19 @@ Ton compte rendu, en français : ce qui est fait, fichier par fichier ; la sorti
 résumée de chaque commande (tests passés sur total) ; les captures d'écran
 prises et leur chemin ; tout écart à la spécification et pourquoi ; les
 questions ouvertes. N'écris « vérifié » que pour ce que tu as fait tourner.
+Termine par une section « Ce que j'ai dû deviner » : chaque endroit où la
+spécification ou le guide ne suffisait pas et où tu as dû interpréter, même
+légèrement, avec ce que tu as choisi.
 ```
 
 ### Ce que l'orchestrateur vérifie avant de merger
 
 1. Le compte rendu cite des commandes réellement lancées, et leurs sorties
-   sont vertes ; la CI de la PR est verte.
+   sont vertes ; la CI de la PR est verte. Juste après l'ouverture de la PR,
+   son `mergeable_state` : `dirty` veut dire que la CI ne tournera pas.
+   **La section « Ce que j'ai dû deviner »** du compte rendu se lit : ce qui
+   y relève du guide ou d'une spécification s'y corrige (une PR de
+   documentation) avant l'unité suivante.
 2. Les relecteurs n'ont rien de bloquant, ou leurs remarques sont corrigées par
    un sous-agent relancé sur la même branche.
 3. Pour X-2 et X-3, il lit lui-même (outil Read) deux des PNG dont le compte
