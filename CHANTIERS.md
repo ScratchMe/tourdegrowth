@@ -519,6 +519,23 @@ est libre. Le jeu reste fermé (C23).
 | A24.bat | Le bon à tirer de chaque niveau construit (`/bon-a-tirer`, par Antoine), puis la recette avec les niveaux 1 et 2 (D9) | Après chaque X-4 ; un bon à tirer qui réécrit une chaîne du téléphone ou de la pastille fait régénérer leurs aperçus `.design-sync` (rien ne le signale) |
 | A24.sync | La re-synchro des composants neufs (`PlannerPhone`, `CookiePill`, `SplitPhone`, `SentPill`, `FitPhone`, `ChargePill`, `NextLevel`) | Après chaque X-3, section B |
 
+### A25 — Un fichier sans mois casse le moteur (trouvé le 2026-10-04)
+
+Trouvé par la relecture sécurité d'APP-0 (#341), **lu dans le code, pas
+reproduit**. `parseEngineFile` (`io.ts`) ouvre un fichier avec ses erreurs :
+`validateEngine` signale `snapshots: empty`, mais ne refuse pas. Un fichier
+`"snapshots": []` passe donc l'import sans aperçu, donc sans ses
+avertissements (`ImportPanel.tsx`), puis il s'ouvre et se stocke.
+`currentSnapshot` (`values.ts`) lève alors une exception, à chaque visite sur
+cet appareil. Le commentaire de `values.ts` dit pourtant que le validateur
+refuse un état vide. Un fichier `"snapshots": [{}]` casse l'aperçu
+(`coverage.ts` lit des `metrics` absents). Rien ne quitte le navigateur, et
+seul l'appareil qui importe est touché.
+
+| # | Quoi | Qui | État |
+|---|---|---|---|
+| A25.a | Reproduire par un test (l'import de `[]`, puis de `[{}]`). Puis faire refuser par `parseEngineFile` un état sans mois, ou dont un mois n'a pas `metrics` et `targets` objets, avec le refus `not-engine` existant (aucune copie neuve) | Session | À faire, avant l'ouverture du moteur |
+
 ---
 
 ## B. Design sync

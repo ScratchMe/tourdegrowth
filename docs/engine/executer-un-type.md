@@ -26,7 +26,10 @@ décisions d'Antoine. Trois règles en découlent :
    sous-agent recopie, ou applique le lexique sans rien ajouter ni retrancher
    au sens, typographie posée (§23.8). S'il manque une chaîne qu'un type ou un
    test exige, ou si une feuille ne se réécrit pas par le lexique sans changer
-   de sens, il s'arrête et le dit : il ne l'écrit pas.
+   de sens, il s'arrête et le dit : il ne l'écrit pas. **Les commentaires de
+   code ne sont pas de la copie** : ceux qu'une fiche ne donne pas (un
+   en-tête, une doc de prop, un commentaire de workflow) s'écrivent en
+   anglais, à la densité de leurs voisins, sans s'arrêter (le pilote APP-0).
 2. **Aucun chiffre recalculé à la main.** Les chiffres d'une spécification
    sortent des modèles purs déjà codés (§23.2) et de leurs tests, ou d'un
    script de référence que la spécification cite. Si un test d'un modèle pur
@@ -179,8 +182,10 @@ Playwright) qui ont changé, sans ajouter de phrase, et coche ton unité dans le
 tableau de <LOT> de CHANTIERS.md (sans numéro de PR : l'orchestrateur
 l'ajoute). Juste avant de pousser : git fetch origin && git merge origin/main
 (un conflit dans JOURNAL.md garde les deux entrées entières, la tienne en
-dernier ; ailleurs, arrête-toi et rends compte), puis tsc et vitest une
-dernière fois. Commit et pousse ta branche (git push -u origin <BRANCHE> ; sur
+dernier ; un conflit sur la ligne des chiffres de référence de CLAUDE.md
+prend la ligne d'origin/main et y pose le nombre de tests que vitest rend
+sur l'arbre fusionné ; ailleurs, arrête-toi et rends compte), puis tsc et
+vitest une dernière fois. Commit et pousse ta branche (git push -u origin <BRANCHE> ; sur
 une erreur réseau seulement, jusqu'à quatre reprises après 2, 4, 8 et 16 s).
 Tes messages de commit se terminent par ces lignes : <ATTRIBUTION>. N'écris
 aucun identifiant de modèle ailleurs (code, commentaires, journal). N'ouvre
@@ -245,10 +250,10 @@ légèrement, avec ce que tu as choisi (« rien » si rien).
 npx tsc --noEmit
 npx eslint .
 npx vitest run
-# build comme la CI (ci.yml, bloc env) :
-GAME_ENABLED=true ENGINE_TYPES=consumer-app,marketplace NEXT_PUBLIC_GOATCOUNTER_CODE=e2e-stub ADMIN_DASHBOARD_PASSWORD=e2e-admin npm run build
+# build comme la CI (ci.yml, bloc env) ; ENGINE_TYPES=consumer-app,marketplace depuis MKT-10 :
+GAME_ENABLED=true ENGINE_TYPES=consumer-app NEXT_PUBLIC_GOATCOUNTER_CODE=e2e-stub ADMIN_DASHBOARD_PASSWORD=e2e-admin npm run build
 # Playwright contre ce build ; tuer avant un `next start` resté d'avant (`/livrer` §2)
-CI=1 GAME_ENABLED=true ENGINE_TYPES=consumer-app,marketplace NEXT_PUBLIC_GOATCOUNTER_CODE=e2e-stub ADMIN_DASHBOARD_PASSWORD=e2e-admin npx playwright test e2e/engine-<fichier>.spec.ts
+CI=1 GAME_ENABLED=true ENGINE_TYPES=consumer-app NEXT_PUBLIC_GOATCOUNTER_CODE=e2e-stub ADMIN_DASHBOARD_PASSWORD=e2e-admin npx playwright test e2e/engine-<fichier>.spec.ts
 ```
 
 Ces commandes reprennent le bloc `env:` de `ci.yml` **tel qu'il est sur la
@@ -305,7 +310,10 @@ Les pièges déjà rencontrés sur ce moteur, chacun au moins une relecture :
   `kill <PID>`, dans une commande à part.
 - **Les fichiers de travail hors du dépôt** : captures, specs et scripts
   jetables, journaux, le jar de l'émulateur Firestore (`TESTING.md` §5) ;
-  `git status` ne montre que les fichiers de l'unité.
+  `git status` ne montre que les fichiers de l'unité. Le reporter JSON de
+  Vitest écrit par défaut un dossier `.vitest/` à la racine (le pilote
+  APP-0) : `--outputFile.json=` vers le dossier de travail ; `.gitignore`
+  le connaît depuis.
 
 ## 23.9 Définition de terminé, pour un type
 
