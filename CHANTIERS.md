@@ -460,7 +460,7 @@ est libre. Le jeu reste fermé (C23).
 | Unité | Quoi | État |
 |---|---|---|
 | A24.spec | Les spécifications, le guide, les modèles en brouillon | **Livré le 2026-10-04** ([#325](https://github.com/ScratchMe/tourdegrowth/pull/325)) ; décisions C75 à C91 appliquées ([#330](https://github.com/ScratchMe/tourdegrowth/pull/330)) ; relu pour des sous-agents Sonnet ([#332](https://github.com/ScratchMe/tourdegrowth/pull/332)) |
-| U0 | Ce qui change à trois niveaux : le bloc « Niveau suivant » (C75), les bandeaux à l'étape (C76), le budget d'URL des statistiques, le gabarit du hub | À faire, avant le premier niveau |
+| U0 | Ce qui change à trois niveaux : le bloc « Niveau suivant » (C75), les bandeaux à l'étape (C76), le budget d'URL des statistiques, le gabarit du hub | **Livré le 2026-10-04** ([#335](https://github.com/ScratchMe/tourdegrowth/pull/335)) |
 | ACT-1 | L'activation : la copie | À faire |
 | ACT-2 | L'activation : le téléphone et sa pastille | À faire |
 | ACT-3 | L'activation : le branchement | À faire |
