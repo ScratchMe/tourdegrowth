@@ -8,10 +8,14 @@ import { Choices } from "tour-de-growth";
  * a tap; Choices waits for a save. Nothing is chosen for the person.
  *
  * Every story is one of the growth engine's radio lists, with its props:
- * `sm` in the metric sheet and the slides' form, `md` only on the setup card.
- * Strings from `src/content/engine-copy.ts`, resolved the way the page
- * resolves them; the chosen values are the filled-in example's
- * (`lib/engine/example.ts`).
+ * `sm` on a number's screen and in the slides' form, `md` (the default) for
+ * the engine's first questions — the settings card's type of company, and
+ * the start screen's « how do you sell » inside `EngineStart`. The props are
+ * captured from the call sites (paths under
+ * `src/app/[locale]/aarrr-funnel-template/`) run on the engine's fixtures
+ * (`src/lib/engine/__tests__/fixtures.ts`) with the copy of
+ * `src/content/engine-copy.ts` and the catalogue, resolved the way the page
+ * resolves them.
  */
 
 function Live<V extends string>(props: { initial: V | null } & Omit<React.ComponentProps<typeof Choices<V>>, "value" | "onChange">) {
@@ -21,18 +25,18 @@ function Live<V extends string>(props: { initial: V | null } & Omit<React.Compon
 }
 
 /**
- * A number whose answer is a choice (`_engine/ValueEditor.tsx`, `kind: "choice"`): the referral
- * mechanism, in English, before anything is picked. The legend is the number's own name and the
- * three answers are its catalogue's (`ref.mechanism`); nothing is pre-selected. (The sheet's
- * « where are you with this number » question is no longer a radio list since A18: it is
- * `AnswerSwitch`.)
+ * A number whose answer is a choice (`_engine/ValueEditor.tsx`, `kind: "choice"`): the
+ * referral mechanism, in English, before anything is picked (`emptyState()`). The legend is
+ * the number's own name and the 3 answers are its catalogue's (`ref.mechanism`); nothing is
+ * pre-selected. (The sheet's « where are you with this number » question is no longer a radio
+ * list since A18: it is `AnswerSwitch`.)
  */
 export const Empty = () => (
   <div style={{ maxWidth: 640 }}>
     <Live
       initial={null}
       size="sm"
-      legend="Referral mechanism"
+      legend={"Referral mechanism"}
       options={[
         { value: "none", label: "None" },
         { value: "communication", label: "In communication only" },
@@ -43,12 +47,13 @@ export const Empty = () => (
 );
 
 /**
- * « Je ne le trouve pas », on the example's gross margin
- * (`_engine/MissingTriage.tsx`): « Pourquoi ? » answered « no access », one
- * option per row because the answers are sentences, then the repair cost the
- * answer proposes (`proposedRepair`: a meeting), two by two. Five answers here:
- * « ça ne s'applique pas » is only offered where the catalogue has a reason
- * for it, and the gross margin has none.
+ * « Je ne le trouve pas », on the gross margin of the example without its margin
+ * (`noMarginState()`: missing, no access, a meeting to fix — the page's example has had an
+ * estimated margin since C50), in French (`_engine/MissingTriage.tsx`): « Pourquoi ? »
+ * answered « no access », one option per row because the answers are sentences, then the
+ * repair cost the answer proposes (`proposedRepair`: a meeting), two by two. 5 answers here:
+ * « ça ne s'applique pas à nous » is only offered where the catalogue has a reason for it, and
+ * the gross margin has none.
  */
 export const Chosen = () => (
   <div style={{ display: "grid", gap: 26, maxWidth: 640 }}>
@@ -68,7 +73,7 @@ export const Chosen = () => (
       initial="meeting"
       size="sm"
       columns={2}
-      legend="Le réparer prendrait"
+      legend={"Le réparer prendrait"}
       options={[
         { value: "meeting", label: "une réunion" },
         { value: "afternoon", label: "une après-midi" },
@@ -80,10 +85,10 @@ export const Chosen = () => (
 );
 
 /**
- * « I can estimate it », saved without its basis (`MetricSheet.tsx`,
- * `error={need("basis")}`): the message names what the save still needs, in
- * the words of the legend, under the group — the edge of no option turns.
- * Only after a save was tried.
+ * « I can estimate it », bounds typed and saved without a basis (`MetricSheet.tsx`,
+ * `error={need("basis")}`), on the paid conversion of an empty engine: the message names what
+ * the save still needs, in the words of the legend, under the group — the edge of no option
+ * turns. Only after a save was tried.
  */
 export const Invalid = () => (
   <div style={{ maxWidth: 640 }}>
@@ -91,8 +96,8 @@ export const Invalid = () => (
       initial={null}
       size="sm"
       columns={2}
-      legend="What is the estimate based on?"
-      error="To save, still missing: What is the estimate based on?"
+      legend={"What is the estimate based on?"}
+      error={"To save, still missing: What is the estimate based on?"}
       options={[
         { value: "team-hunch", label: "Team hunch" },
         { value: "old-number", label: "An old number" },
@@ -104,19 +109,19 @@ export const Invalid = () => (
 );
 
 /**
- * The setup card's type of company (`_engine/Setup.tsx`, since A7.3.c), `md`
- * — the one Choices at that size. B2B SaaS is the only type open; the two
- * others are shown, not hidden, so a consumer app learns why the numbers
- * below won't fit it yet: dashed, their reason (`disabledNote`) at full
- * contrast, never faded. « Later », never « Coming soon » (C25 Q16). How the
- * company sells — self-serve, sales-assisted, or both — is no longer a
- * choice here: it is two checkboxes under this list (Checkbox, `LastMotion`).
+ * The settings card's type of company (`_engine/Setup.tsx`, since A7.3.c), at the default `md`
+ * — the size of the engine's first questions (the start screen's « How do you sell? », inside
+ * `EngineStart`, is the other). B2B SaaS is the only type open; the two others are shown, not
+ * hidden, so a consumer app learns why the numbers below won't fit it yet: dashed, their
+ * reason (`disabledNote`) at full contrast, never faded. « Later », never « Coming soon » (C25
+ * Q16). How the company sells — self-serve, sales-assisted, or both — is not a choice here: it
+ * is two checkboxes under this list (Checkbox, `LastMotion`).
  */
 export const DisabledWithAReason = () => (
   <div style={{ maxWidth: 496 }}>
     <Live
       initial="b2b-saas"
-      legend="Your type of company"
+      legend={"Your type of company"}
       options={[
         { value: "b2b-saas", label: "B2B SaaS" },
         { value: "consumer-app", label: "Consumer app", disabled: true, disabledNote: "Later: their funnel has a different shape." },
@@ -127,17 +132,17 @@ export const DisabledWithAReason = () => (
 );
 
 /**
- * The slides' « what it costs » (`_engine/deck/AskForm.tsx`), as the form opens:
- * « not priced yet ». Three options, and still Choices rather than a
- * Segmented: in French the three measured 367px in one track, inside a 342px
- * card at 390px — rows of radios stay in their column at every width.
+ * The slides' « what it costs » (`_engine/deck/AskForm.tsx`), in French, as the form opens on
+ * the example: « pas encore chiffré ». Three options, and still Choices rather than a
+ * Segmented: in French the three measured 367px in one track, inside a 342px card at 390px —
+ * rows of radios stay in their column at every width.
  */
 export const InsteadOfASegmented = () => (
   <div style={{ maxWidth: 480 }}>
     <Live
       initial="none"
       size="sm"
-      legend="Ce que ça coûte"
+      legend={"Ce que ça coûte"}
       options={[
         { value: "none", label: "Pas encore chiffré" },
         { value: "money", label: "Un montant" },
