@@ -911,7 +911,7 @@ En anglais à 1 280 : tableau 3 372 → 4 212 (+840, le retour +828). À 390 : t
 
 **Vérifié** : le rendu dans Chromium à 1 280 et 390 px (22 cartes, 140 blocs, `scrollWidth === clientWidth` aux deux largeurs, aucune erreur), puis la base des décisions lue une fois après publication (`cards/`, vide).
 
-## A20.g : les films remis d'accord avec le moteur porté (2026-10-03)
+## A20.g : les films remis d'accord avec le moteur porté (2026-10-03, #321)
 
 **Ce qui change** (`marketing/motion/`, rien sous `src/`) : le film « Le moteur » et la partie moteur du film d'ensemble partagent leurs dessins, et les deux reprennent maintenant les écrans du moteur porté.
 - **L'argent** (`moneyCard`, à la place de l'ancien `ueCard`) : le bloc du tableau tel quel, MRR et ARR, ce que vaut un nouveau client avec l'étiquette « Perte » à l'encre, les deux barres et le crochet de ce qui manque, les mois, puis la trésorerie (93 480 € dépensés, ~990 000 € immobilisés, « et elle ne revient pas toute »). Le hachuré rouge et le tampon rouge « −400 € » disparaissent (C48). Dans le film d'ensemble, la carte réduite ne garde que la valeur d'un client, et son minutage est accéléré (`o.sp`) pour tenir dans ses deux secondes à l'écran.
@@ -927,4 +927,4 @@ En anglais à 1 280 : tableau 3 372 → 4 212 (+840, le retour +828). À 390 : t
 - un assistant de style (`eyebrow()`) qui finissait sans point-virgule collait la déclaration d'animation suivante à la sienne et la rendait invalide : les étiquettes des étapes intermédiaires de la courbe ne s'effaçaient jamais. Vu sur une image, puis lu dans le style calculé. L'assistant ajoute maintenant le point-virgule.
 - en remplaçant d'un bloc la section des dessins, `numbersCard`, qui s'y trouvait aussi, était parti ; le film d'ensemble ne se construisait plus (`ReferenceError`). Il est rétabli depuis git, tel quel.
 
-**Vérifié** : des images clés de chaque scène touchée, regardées en 16:9, 4:5 et 9:16, en français et en anglais (le bloc d'argent, la courbe à chaque étape, le grand ARR, les trois slides, l'éventail, la partie moteur du film d'ensemble), puis les douze MP4 des deux films réexportés. La page publiée était identique à la source du dépôt avant d'être republiée.
+**Vérifié** : des images clés de chaque scène touchée, regardées en 16:9, 4:5 et 9:16, en français et en anglais (le bloc d'argent, la courbe à chaque étape, le grand ARR, les trois slides, l'éventail, la partie moteur du film d'ensemble), puis les douze MP4 des deux films réexportés (durée, format, et une image tirée de deux d'entre eux). La page publiée était identique à la source du dépôt avant d'être republiée. Les douze MP4 sont envoyés dans sa réserve, `DL_FILES` pointe sur leurs nouveaux identifiants, et la page est republiée à la même adresse (version 10) ; les anciens fichiers des deux films restent dans la réserve, plus référencés.
