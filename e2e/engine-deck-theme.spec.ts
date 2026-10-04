@@ -68,10 +68,15 @@ for (const locale of ["en", "fr"] as const) {
     expect(paper).toMatchObject({ color: "rgb(231, 225, 210)", theme: "paper" });
     expect(paper.image).not.toBe("none");
 
+    // A chart's label halo is its ground's: the paper here, white below (A21.4 — it stayed paper, a beige box on white).
+    const halo = () => page.getByTestId("slide-unit-economics").getByTestId("slide-payback-chart-time").evaluate((el) => getComputedStyle(el).stroke);
+    expect(await halo()).toBe("rgb(231, 225, 210)");
+
     await page.getByLabel(ENGINE_COPY.deck.whiteTheme[locale]).check();
     await expect(page.getByTestId("deck-white-theme")).toBeChecked();
     const white = await ground(page, "peloton");
     expect(white).toEqual({ color: "rgb(255, 255, 255)", image: "none", theme: "white" });
+    expect(await halo()).toBe("rgb(255, 255, 255)");
     // Every slide follows, the appendix and the ask included.
     for (const id of ["leak", "ask", "annex"]) expect((await ground(page, id)).color).toBe("rgb(255, 255, 255)");
     expect((await storedEngineEntry(page))?.state.deck.theme).toBe("white");
@@ -92,6 +97,30 @@ for (const locale of ["en", "fr"] as const) {
     expect([g, b]).not.toEqual([255, 255]);
   });
 }
+
+/*
+ * A chart in the PNG (A21.9): html-to-image copies an <svg> whole without walking it, so its lines and curves lost
+ * their classes' strokes in the image — no cost line, no margin line, the MRR curve filled black. The export writes
+ * each SVG child's computed style inline for its duration: the pixel under the cost line is ink, not the paper.
+ */
+test("the PNG keeps a chart's lines: under the unit economics' cost line, ink (A21.9)", async ({ page }) => {
+  await openDeck(page, "fr");
+  const slide = page.getByTestId("slide-unit-economics");
+  const cost = slide.locator('[data-testid="slide-payback-chart"] svg line[class*="cost"]');
+  await expect(cost).toHaveCount(1);
+  // The cost line's middle, in the 1 920-pixel slide's own coordinates (the slide on screen is scaled down).
+  const at = await slide.evaluate((el) => {
+    const box = el.getBoundingClientRect();
+    const line = el.querySelector('[data-testid="slide-payback-chart"] svg line[class*="cost"]')!.getBoundingClientRect();
+    const k = 1920 / box.width;
+    return { x: Math.round((line.left + line.width / 2 - box.left) * k), y: Math.round((line.top + line.height / 2 - box.top) * k) };
+  });
+  const download = page.waitForEvent("download");
+  await page.getByTestId("deck-png-unit-economics").click();
+  const [r, g, b] = await pngPixel(page, (await (await download).path())!, at.x, at.y);
+  // Ink is dark; the paper around it is rgb(231, 225, 210).
+  expect(Math.max(r, g, b)).toBeLessThan(120);
+});
 
 /*
  * The PDF is the browser's print of the deck (§10.2): no file to read a pixel

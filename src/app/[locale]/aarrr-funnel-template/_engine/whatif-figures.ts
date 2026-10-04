@@ -30,7 +30,7 @@ import {
  *   « stable »;
  * - the month's spend never moves (the same spend with the what-ifs): it is
  *   a fact, to the unit;
- * - months after payback below zero: « part avant », the loss in months.
+ * - months after payback below zero: « part ~5 mois avant », the loss in months.
  */
 
 export interface FigureRow {
@@ -134,8 +134,10 @@ export function whatIfFigureGroups(input: Input, motion: Motion, targets: Partia
       ? fillTemplate(strings.money.short, { gap: money(abs(loss.gap), extra) })
       : fillTemplate(strings.money.more, { gap: money(loss.gap, extra) });
   };
-  // Months after payback: below zero the customer leaves first.
-  const afterText = (i: Interval) => (i.hi < 0 ? w.leavesFirst : fillTemplate(u.approx, { n: months(i.lo < 0 ? { lo: 0, hi: i.hi } : i) }));
+  // Months after payback: below zero the customer leaves first, and by how many months — so two losses of different
+  // sizes never print alike (and read « stable »), and the change adds up to what the two cells say (A21.2).
+  const afterText = (i: Interval) =>
+    i.hi < 0 ? fillTemplate(w.leavesFirst, { n: fillTemplate(u.approx, { n: months(abs(i)) }) }) : fillTemplate(u.approx, { n: months(i.lo < 0 ? { lo: 0, hi: i.hi } : i) });
 
   const ltvIds = inputs.ltv ?? [];
   const cacIds = inputs.cac ?? [];

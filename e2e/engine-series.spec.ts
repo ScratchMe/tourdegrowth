@@ -106,8 +106,8 @@ async function openBoard(page: Page, locale: "fr" | "en", state: EngineState, at
 }
 
 const SCREENS = {
-  fr: { september: "septembre 2026", august: "août 2026", july: "juillet 2026", start: "Démarrer septembre 2026", delta: "+3 points depuis juillet 2026, vers ta cible" },
-  en: { september: "September 2026", august: "August 2026", july: "July 2026", start: "Start September 2026", delta: "+3 points since July 2026, toward your target" },
+  fr: { september: "septembre 2026", august: "août 2026", july: "juillet 2026", start: "Démarrer septembre 2026", delta: "+3 points depuis juillet 2026, vers ta cible", lastVisit: "Dernière visite · il y a 4 jours" },
+  en: { september: "September 2026", august: "August 2026", july: "July 2026", start: "Start September 2026", delta: "+3 points since July 2026, toward your target", lastVisit: "Last visit · 4 days ago" },
 } as const;
 
 for (const locale of ["fr", "en"] as const) {
@@ -144,6 +144,17 @@ for (const locale of ["fr", "en"] as const) {
     await page.getByTestId("engine-month-back").click();
     await expect(past).toHaveCount(0);
     await expect(page.getByTestId("engine-open-deck")).toBeVisible();
+  });
+
+  test(`${locale}: on a past month, the last visit is still counted to today`, async ({ page }) => {
+    // Last saved on 20 September, opened on the 24th. July was closed on 3 August: counted to that day, the visit
+    // (later) came out at 0 days and the eyebrow said « aujourd'hui » (A21.1).
+    await openBoard(page, locale, { ...twoMonths(), updatedAt: "2026-09-20T09:00:00.000Z" }, new Date(2026, 8, 24, 12));
+    await expect(page.locator("#engine-next")).toHaveText(t.lastVisit);
+    await openEngineMenu(page);
+    await page.getByTestId("engine-month-select").selectOption({ label: t.july });
+    await expect(nextStep(page, "back-to-current")).toContainText(t.july);
+    await expect(page.locator("#engine-next")).toHaveText(t.lastVisit);
   });
 
   test(`${locale}: each number says how far it moved; a past month corrected recomputes the next month's change`, async ({ page }) => {

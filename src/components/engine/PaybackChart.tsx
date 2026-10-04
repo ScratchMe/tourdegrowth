@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { PAYBACK_CHART_PX, paybackChartGeometry, paysBackLabels, type PaybackStory, type Range } from "@/lib/viz/payback-chart";
+import { PAYBACK_CHART_PX, paybackChartGeometry, paysBackLabels, shortLabelY, type PaybackStory, type Range } from "@/lib/viz/payback-chart";
 import styles from "./PaybackChart.module.css";
 
 export interface PaybackChartProps {
@@ -98,7 +98,8 @@ export function PaybackChart({
   const compact = size === "sm";
   const g = paybackChartGeometry({ story, monthlyMargin, cac, lifetime, payback, width, height, reference });
   const chars = (node: ReactNode) => (typeof node === "string" ? node.length : 0);
-  const placed = paysBackLabels(g, { paysBack: chars(labels.paysBack), cost: chars(labels.cost), time: typeof labels.time === "string" ? labels.time.length : null });
+  const shortY = shortLabelY(g, { short: chars(labels.short), cost: chars(labels.cost) }, compact);
+  const placed = paysBackLabels(g, { paysBack: chars(labels.paysBack), cost: chars(labels.cost), time: typeof labels.time === "string" ? labels.time.length : null, after: chars(labels.after) });
   const hatch = `${id}-hatch`;
   const plotClip = `${id}-plot`;
   return (
@@ -185,7 +186,7 @@ export function PaybackChart({
               {labels.paysBack}
             </text>}
             <path d={g.short.path} className={styles.bracket} />
-            <text x={g.short.labelX} y={g.short.labelY} className={`${styles.label} ${styles.strong} ${styles.halo}`} textAnchor="end" data-testid={testId ? `${testId}-short` : undefined}>
+            <text x={g.short.labelX} y={shortY ?? g.short.labelY} className={`${styles.label} ${styles.strong} ${styles.halo}`} textAnchor="end" data-testid={testId ? `${testId}-short` : undefined}>
               {labels.short}
             </text>
             {/* Under the line's end: right of it (crossing only the dashed tick), or ending at it near the plot's end. */}

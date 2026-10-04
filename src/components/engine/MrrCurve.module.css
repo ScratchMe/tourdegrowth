@@ -128,11 +128,13 @@
   fill: var(--text-body);
 }
 
-/* Labels keep a paper halo where they cross a line, so they keep their
- * contrast (constraint 6). */
+/* Labels keep a halo of their ground where they cross a line, so they keep
+ * their contrast (constraint 6). The ground is the page's unless the parent
+ * says otherwise (`--chart-halo`: a slide's card, the deck's white theme —
+ * A21.4, where the paper halo drew a beige box). */
 .halo {
   paint-order: stroke;
-  stroke: var(--surface-page);
+  stroke: var(--chart-halo, var(--surface-page));
   stroke-width: var(--border-width-stamp);
   stroke-linejoin: round;
 }

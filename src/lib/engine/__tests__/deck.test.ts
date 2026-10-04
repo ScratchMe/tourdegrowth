@@ -615,11 +615,15 @@ describe("the what-if slides, extension 09 (A20.d T4.b)", () => {
     expect(s.curve!.whatif![12]![0]).toBeCloseTo(93_556, 0);
     expect(s.curve!.keys).toEqual({ today: "au rythme d'aujourd'hui", whatif: nb("avec cet «^Et si^»") });
     expect(s.curve!.start).toBe(nb("48^000^€ aujourd'hui"));
+    // Said in words with the slide's own key: one what-if, no « tu » (A21.6 — it said « avec tes « Et si » »).
+    expect(s.curve!.summary).toMatch(new RegExp(`${nb("avec cet «^Et si^»")}\\.$`));
+    expect(s.curve!.summary).not.toContain("tes");
   });
 
   it("« together » draws the film's three levers: each alone, added up, together (the return's figures)", () => {
     const s = slide(film(FILM_LEVERS), "scenario");
     expect(s.curve!.keys.whatif).toBe(nb("avec les 3 «^Et si^»"));
+    expect(s.curve!.summary).toMatch(new RegExp(`${nb("avec les 3 «^Et si^»")}\\.$`));
     expect(s.leverSum!.rows.map((r) => r.value)).toEqual([nb("+18^000^€"), nb("+13^000^€"), nb("+6^400^€")]);
     expect(s.leverSum!.sum).toMatchObject({ label: "Chacun seul, additionnés", value: nb("~38^000^€") });
     expect(s.leverSum!.together).toMatchObject({ label: "Ensemble", value: nb("+42^000^€") });

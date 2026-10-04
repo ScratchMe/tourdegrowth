@@ -276,7 +276,7 @@ export function leverMoneyView(
       start: fillTemplate(l.curveStart, { mrr: money(t.mrr) }),
       xLabels: [formatMonth(ref, ctx.locale), formatMonth(monthsAfter(ref, 6), ctx.locale), formatMonth(monthsAfter(ref, 12), ctx.locale)],
       summary: whatif12
-        ? fillTemplate(l.curveSummaryWhatif, { start: money(t.mrr), today: today12 ?? "", whatif: whatif12 })
+        ? fillTemplate(l.curveSummaryWhatif, { start: money(t.mrr), today: today12 ?? "", whatif: whatif12, key: l.curveWhatif })
         : fillTemplate(l.curveSummary, { start: money(t.mrr), today: today12 ?? "" }),
     };
   }

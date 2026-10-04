@@ -120,6 +120,10 @@ describe("« Et si ? »: the card's money (A20.d T3.a)", () => {
     );
   const nb = (s: string) => s.replace(/\^/g, N);
 
+  it("moved: the curve in words ends with the board's own key, the sentence it always said (A21.6)", () => {
+    expect(card(filmState(), { "ret.logo-churn": 4 }, "ret.logo-churn").curve!.summary).toMatch(new RegExp(`dans 12${N}mois au rythme actuel, ~[^,]+ ${nb("avec tes «^Et si^»")}\\.$`));
+  });
+
   it("untouched: today's pace alone, from the MRR to the MRR in twelve months; the ARR in twelve months; nothing on one customer", () => {
     const m = card(filmState(), {}, "ret.logo-churn");
     expect(m.curve!.today).toHaveLength(13);
