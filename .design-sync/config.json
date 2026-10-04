@@ -236,7 +236,8 @@
       "cardMode": "column"
     },
     "EngineLanding": {
-      "cardMode": "column"
+      "cardMode": "column",
+      "viewport": "1200x700"
     },
     "EngineProgress": {
       "cardMode": "column"

@@ -141,7 +141,7 @@ Target 390px. Nothing may scroll horizontally at 360px.
   The offer to play the game (`GameEntry`) is not a third: a flat paper card
   with one secondary button per level it offers, each under its stage's name
   when there are several, and a thin band of night across its top.
-- The `game` group is presentation only. Every string arrives resolved, and
+- The `game` group is presentation only (the `engine` group too, below). Every string arrives resolved, and
   every number arrives formatted — a game component never computes a score,
   a date or a sentence. They are drawn inside a `NightSurface` except the
   ones that are paper on purpose (`EventClipping`, `GameEntry`'s body).
@@ -325,6 +325,41 @@ itself (`TextArea`, `Empty`).
   system's ink ring on every control (the red `--focus-ring-invert` is for
   ink- or red-filled surfaces only); a chosen option is the inverse fill.
   Disabled is dashed in muted ink that passes, never faded by opacity.
+
+## The engine: its money, its numbers (the `engine` group)
+
+The growth engine's components are presentation, like the game's: every
+string arrives resolved and every figure formatted — a fact to the unit
+(« 1 900 € »), an estimate or a projection as a range with « ~ » at two
+significant digits (« ~1 500 € », « ~€3,000–€3,500 », « 5–6 months »). An
+engine component never computes a payback, a range or a sentence.
+
+- **A number nobody has is « ? », never 0.** `WorthBars` takes
+  `brings.amount: null` and draws the hatched « ? » box with what is
+  `unknown`; `MoneyBlock`'s facts take `value: null` with what is `missing`.
+  No LTV, no payback, no cash figure without a margin.
+- **A projection is never red.** The MRR in 12 months, `MrrCurve` (today's
+  pace in grey, the what-ifs in ink, the band between them filled), what the
+  levers add (`LeverSum`, `WhatIfFigures`) are ink. **A loss is ink too**:
+  `MoneyBlock`'s `worth.tag`, solid when today's numbers say so, dashed
+  (`maybe`) when the ranges only may cross. Red stays the diagnosis of the
+  stage that holds the engine back, and only a team's target names that
+  stage: `HowItCompares` sets a published reference to situate a figure,
+  never to designate one.
+- **A long payback is advice, not a loss**: `CashWarning`, on the dashed
+  advice edge, measured against the team's runway or 30 months; never shown
+  beside a certain loss, which speaks alone.
+- **A word the engine teaches carries its « ? »** where it is first
+  needed — the system's `DefinitionTrigger`, after « ARR », « trésorerie
+  immobilisée », « mois après remboursement ».
+- **The pieces.** The board is `EngineBar`, `NextStep`, `MoneyBlock` (with
+  `WorthBars`, `CashWarning`), `LeverCard` (with its `MrrCurve`) and
+  `NumberList` (with `EngineProgress`); the hybrid adds `TotalBand`, the sums
+  of the two engines and nothing of either alone. One number at a time is a
+  `NumberSheet` holding `AnswerSwitch`, `WhereToFind`, `TrapNote` and
+  `HowItCompares`. The requests to send are `AskList`; the page opens on
+  `EngineLanding` and `EngineStart`. On a slide, `MrrCurve` and `LeverSum`
+  take `medium="slide"`; the hybrid's slide draws `PaybackChart size="sm"`.
 
 ## What is not in here
 

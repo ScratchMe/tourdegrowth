@@ -22,8 +22,9 @@ import { EngineLanding, Stopwatch } from "tour-de-growth";
  * at hero size, the lede and the positioning, then the privacy promise as the one raised card
  * — solid ultramarine on its own shadow, BEFORE the call to action and never folded — then
  * « Entre tes chiffres → », drawn secondary (the page's one primary is the start card's,
- * below), with its note. The page passes its Stopwatch as `aside`: it stands beside the intro
- * on a window 1100px wide or more, and is hidden on a narrower one, as at this card's 900px.
+ * below), with its note. The page passes its Stopwatch as `aside`: at this card's 1200px
+ * window it stands beside the intro, in its 280px column, as on any window 1100px wide or
+ * more.
  */
 export const FirstVisit = () => (
   <EngineLanding
@@ -69,7 +70,7 @@ export const Returning = () => (
 /**
  * The first visit in English, the page's own words: « Your growth engine », the promise
  * « Nothing you enter leaves this page », the call to action « Enter your numbers → ». Same
- * composition as the French; the stopwatch is hidden at this card's width.
+ * composition as the French, the stopwatch beside the intro.
  */
 export const FirstVisitEnglish = () => (
   <EngineLanding
