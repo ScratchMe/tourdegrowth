@@ -2230,7 +2230,8 @@ l'orchestrateur vérifie avant de merger sont dans
 en commun :
 - **Prérequis commun** : A22 fini (§21 : `business-type.ts`, le drapeau
   `ENGINE_TYPES`, `mergeStrings` et le calque de l'app, `scenario-of.ts`,
-  `retentions`), sauf MKT-B.
+  `retentions`), **puis la relecture à blanc de §22 traitée** (ci-dessous,
+  « MKT-R »), sauf MKT-B.
 - **Acceptation commune** : `npx tsc --noEmit`, `npx eslint .`, `npx vitest
   run` verts ; les goldens v1, v2 et de l'app inchangés **sans** toucher à
   `golden-projection.ts` ; l'entrée de l'unité à la fin de `JOURNAL.md` (avec,
@@ -2244,17 +2245,21 @@ en commun :
 #### Le graphe
 
 ```text
-MKT-B (dès maintenant) ─────────────────► [retour du brief 10 → PR de documentation : fiches MKT-7, MKT-8] ─┐
-MKT-0 ─► MKT-1 ─┬─► MKT-2 ─► MKT-3 ─► MKT-4 ─┐                                                            │
-                ├─► MKT-5 ─┬─────────────────┴─► MKT-6 ─────────────────────────────────────────────────────┤
-                │          └─► MKT-S ───────────────────────────────────────────────────────────────────────┴─► MKT-7 ─► MKT-8 ─► MKT-9 ─► MKT-10
-                └─► MKT-G
+MKT-B (dès maintenant) ──────────► [retour du brief 10 → PR de documentation : fiches MKT-7, MKT-8] ──────────────┐
+                                                                                                                 │
+A22 ─► MKT-R [relecture à blanc → PR de documentation]                                                           │
+         │                                                                                                       │
+         └─► MKT-0 ─► MKT-1 ─┬─► MKT-2 ─► MKT-3 ─► MKT-4 ─┐                                                      │
+                             ├─► MKT-5 ─┬─────────────────┴─► MKT-6 ─────────────────────────────────────────────┤
+                             │          └─► MKT-S ───────────────────────────────────────────────────────────────┴─► MKT-7 ─► MKT-8 ─► MKT-9 ─► MKT-10
+                             └─► MKT-G
 ```
 
-Avec une branche imposée, dans l'ordre MKT-0, MKT-1, MKT-2, MKT-3, MKT-4,
+Avec une branche imposée, dans l'ordre MKT-R, MKT-0, MKT-1, MKT-2, MKT-3, MKT-4,
 MKT-5, MKT-S, MKT-G, MKT-6, puis MKT-7 à MKT-10 une fois le retour porté dans les
 fiches. **MKT-B ne dépend de rien** : elle part pendant qu'A22 se code (C74).
-**Points d'arrêt naturels** : après MKT-1 (les chiffres existent), après MKT-4
+**Points d'arrêt naturels** : après MKT-R (§22 remise d'accord avec le code
+d'après A22), après MKT-1 (les chiffres existent), après MKT-4
 (le modèle est complet, rien d'affiché), après MKT-6 (on crée une place de
 marché ; le tableau attend le brief), après MKT-8 (les écrans et les slides
 sont là), après MKT-10 (fini, reste le bon à tirer).
@@ -2262,7 +2267,8 @@ sont là), après MKT-10 (fini, reste le bon à tirer).
 | Unité | Ce qu'elle livre | Prérequis | Relecteurs | Jours-agent |
 |---|---|---|---|---|
 | MKT-B | les captures du brief 10, rangées ; la ligne de `design/README.md` | — | — | 0,5 |
-| MKT-0 | le contrat, le type, `EngineMotion`, la validation, les fenêtres | A22 | sécurité (le fichier importé) | 2,5 |
+| MKT-R | la relecture à blanc de §22 contre le code d'après A22, et la PR de documentation qui la traite (l'orchestrateur, pas une unité de code) | A22 | — | 0,5 |
+| MKT-0 | le contrat, le type, `EngineMotion`, la validation, les fenêtres | MKT-R | sécurité (le fichier importé) | 2,5 |
 | MKT-1 | les 19 chiffres et les 6 calculés : formes, listes, comptes partagés, prose ; les ponts | MKT-0 | copie | 2,5 |
 | MKT-2 | les grandeurs de base, les deux funnels, l'économie de chaque côté | MKT-1 | — | 2 |
 | MKT-3 | les deux scénarios et le total | MKT-2 | copie (hypothèses) | 2,5 |
@@ -2276,11 +2282,78 @@ sont là), après MKT-10 (fini, reste le bon à tirer).
 | MKT-9 | l'exemple et le golden | MKT-8 | copie | 1 |
 | MKT-10 | la garde à l'écran, les e2e, `ci.yml`, la documentation | MKT-9 | copie, sécurité | 2 |
 
-Total ≈ **31 jours-agent**, plus l'aller-retour du brief 10 (le temps de
+Total ≈ **31 jours-agent**, plus la demi-journée de MKT-R et l'aller-retour du brief 10 (le temps de
 Claude Design et d'Antoine). Puis **A23.d**, le bon à tirer de toute la copie
 neuve (`/bon-a-tirer`, depuis `grep -rn "TODO: à relire" src/`, en
 « produits » et en « services »), puis l'ouverture par Antoine
 (`ENGINE_TYPES=consumer-app,marketplace` dans Vercel, puis redéployer).
+
+---
+
+#### MKT-R — La relecture à blanc, avant MKT-0 (l'orchestrateur, prompt H)
+
+- **Pourquoi** : §22 a été écrite, puis relue à blanc, contre le code d'avant
+  A22 (le 2026-10-04). A22 déplace des lignes et a pu choisir, dans ses
+  « choix d'exécution », autre chose que ce que §21 prévoit. Les renvois
+  `fichier:ligne` de §22.2.5 et les pièces d'A22 que §22 suppose se
+  revérifient donc avant que la première unité parte, sur le code réel.
+- **Prérequis** : A22 fini (APP-11 mergée). MKT-B ne l'attend pas.
+- **Qui** : un sous-agent Sonnet **en lecture seule** (outil Agent, model
+  `"sonnet"`, subagent_type `"general-purpose"`, au premier plan), avec le
+  prompt ci-dessous ; puis l'orchestrateur, qui corrige §22 de ce qu'il trouve
+  dans une PR de documentation, mergée avant MKT-0. Un constat qui demande une
+  décision (produit, copie, architecture) se pose à Antoine au format de
+  `CHANTIERS.md` C, avec la reco ; il ne se tranche pas dans la PR.
+- **Ce qu'elle revérifie** :
+  1. **Les pièces d'A22 dont §22 dépend**, sous le nom et la signature que §22
+     écrit : `setup-type.ts` (module feuille, imports de types seulement :
+     `isApp`, `monetizationOf`, `DEFAULT_APP_MONETIZATION`) ;
+     `business-type.ts` (`BUSINESS_TYPES`, `motionsAllowed`) ;
+     `access.ts#openTypesWith` ; `catalog-shape.ts` (`shapesOf(setup)`,
+     `SetupShapes`, `UNIT_INPUT_IDS`, `displayShapeOf`, `DISPLAY_OVERRIDES`) ;
+     `strings.ts#mergeStrings` ; `DeepPartialTranslatable` dans
+     `lib/i18n/translatable.ts` ; `engine-props.ts` (`typeStrings`,
+     `typeCatalogs`) ; `_engine/view.ts#metricsFor` ; `scenario-of.ts`
+     (`scenarioOf`, `candidatesFor`, `leverIdsOf`) ; `MotionRules.retentions` ;
+     `tools.ts#toolFamiliesFor` ; `phrases.ts#isCandidate` ; la phrase « il
+     manque » du SaaS.
+  2. **Les renvois des tables de §22.2.5**, retrouvés par la fonction ou
+     l'expression qu'ils citent, et les comparaisons `=== "plg"` /
+     `=== "slg"` et boucles `["plg", "slg"]` qu'A22 a ajoutées sans qu'aucune
+     table ne les liste.
+  3. **Les mesures** : les erreurs de `tsc` après les types de MKT-0, de
+     MKT-1, puis de MKT-3 et MKT-4 (5, 28 puis 35 le 2026-10-04, avant A22) ;
+     les feuilles que la règle de §22.8.3 désigne sur l'`ENGINE_COPY`
+     d'après A22 (environ 125 pour les deux côtés, 25 pour l'offre seule, avant
+     A22) ; les caractères de `JOURNAL.md` et de `CLAUDE.md` (§23.7, point 6).
+  4. **MKT-0 à MKT-6, MKT-S et MKT-G jouées à blanc**, chacune depuis l'état
+     que laisse la précédente.
+- **Le prompt du sous-agent** (l'orchestrateur remplit `<DOSSIER>`, le clone,
+  et `<SCRATCH>`, un dossier temporaire hors du dépôt) :
+
+```text
+Tu relis une spécification d'exécution AVANT qu'on l'implémente, à la place du sous-agent Sonnet qui l'exécutera ensuite unité par unité sans pouvoir rien décider du produit, de la copie ni de l'architecture. Ton travail : trouver chaque endroit où tu serais bloqué, où tu devrais deviner, ou où la spécification contredit le code réel. Ne modifie AUCUN fichier de <DOSSIER> et ne lance aucune commande git qui change quelque chose (ni checkout, ni commit, ni stash, ni worktree).
+
+Lis, dans l'ordre : CLAUDE.md ; docs/engine/executer-un-type.md (§23) ; docs/engine/place-de-marche.md (§22) : §22.0, §22.1, les fiches de §22.12 (dont MKT-R, qui dit ce que tu revérifies), puis chaque section qu'elles citent ; les entrées du journal d'A22 (grep -n "APP-" JOURNAL.md docs/journal/), surtout leurs choix d'exécution ; puis le code que les fiches citent.
+
+§22 a été écrite et relue contre le code d'avant l'app grand public (A22), qui est maintenant mergée. Fais, dans l'ordre :
+1. Pour chaque pièce d'A22 de la liste « Ce qu'elle revérifie », point 1, de la fiche MKT-R : existe-t-elle sous le nom et la signature que §22 écrit ? Sinon, qu'est-ce qui existe à la place, et quelles phrases de §22 sont à reprendre ?
+2. Pour chaque ligne des tables de §22.2.5 : retrouve l'endroit par la fonction ou l'expression citée et donne son fichier:ligne actuel. Cherche les comparaisons === "plg" / === "slg" et les boucles ["plg", "slg"] que le code d'A22 a ajoutées et qu'aucune table ne liste.
+3. Mesure, dans une copie jetable : mkdir -p <SCRATCH>/dryrun22, copie-y src, tsconfig.json, next-env.d.ts et package.json, fais un lien symbolique vers <DOSSIER>/node_modules, puis npx tsc --noEmit -p . après les types de MKT-0, de MKT-1, puis de MKT-3 et MKT-4 (§22.2.1). Par un script dans cette copie, compte les feuilles d'ENGINE_COPY que la règle de §22.8.3 désigne (les deux côtés, l'offre seule), et liste toute feuille désignée qu'aucune exclusion n'écarte et que le lexique de §22.8.2 ne sait pas réécrire sans changer le sens. Supprime ce seul dossier à la fin.
+4. Joue à blanc MKT-0, MKT-1, MKT-2, MKT-3, MKT-4, MKT-5, MKT-S, MKT-6 et MKT-G, chacune depuis l'état que laisse la précédente : chaque étape de sa fiche contre le code réel, comme si tu allais la taper. Les fichiers de sa rubrique « Fichiers » couvrent-ils tout ce que ses étapes obligent à toucher (tests qui rougiront, specs e2e, goldens) ?
+
+Ton compte rendu, en français : une liste numérotée de constats, rangés par unité ; pour chacun, l'endroit de la spécification (section, courte citation), l'endroit du code (fichier:ligne), ce qui manque ou contredit, et l'information exacte qui débloquerait l'exécutant (un nom, une signature, une valeur, une règle, le texte exact) ; chacun classé BLOQUANT (l'exécutant devrait deviner, ou casserait quelque chose), LACUNE (il s'en sortirait mais pourrait se tromper) ou DÉTAIL. Puis la table des renvois de §22.2.5 à jour (ancien renvoi, nouveau). Puis tes mesures. Puis ce que tu as vérifié et trouvé juste. Pas de compliment, pas de résumé de la spécification.
+```
+
+- **Acceptation** : la PR de documentation mergée, qui met à jour les renvois
+  de §22.2.5 et les mesures, et traite dans le texte chaque constat BLOQUANT
+  et LACUNE (ou le pose à Antoine) ; son entrée au journal (les constats, ce
+  qui a changé) ; la ligne MKT-R cochée dans le tableau d'A23.
+- **Arrêt** : plus de 40 fichiers signalés par `tsc` à une étape (le découpage
+  de MKT-0 et MKT-1 est alors à revoir avec Antoine, pas à forcer) ; une pièce
+  d'A22 absente dont §22 a besoin et dont le remplacement change une décision
+  de §22.14.
+- **Pause** : rien ne change dans le code ; §22 est remise d'accord avec lui.
 
 ---
 
@@ -2325,7 +2398,7 @@ neuve (`/bon-a-tirer`, depuis `grep -rn "TODO: à relire" src/`, en
 - **But** : une place de marché se valide, s'importe, se stocke et dérive sa
   motion ; `EngineMotion` existe et le compilateur est vert. Rien d'affiché
   ne change.
-- **Prérequis** : A22.
+- **Prérequis** : MKT-R (et donc A22).
 - **À lire** : §22.1 (D1, D9, D10, D11), §22.2.1 (le bloc MKT-0), §22.2.2,
   §22.2.5, §22.3 ; le code : `types.ts`, `setup-type.ts`, `business-type.ts`,
   `validate.ts`, `io.ts`, `merge.ts`, `cohort.ts`, `diagnose.ts`
@@ -2721,7 +2794,7 @@ neuve (`/bon-a-tirer`, depuis `grep -rn "TODO: à relire" src/`, en
   garde y trouve une feuille (§22.11.3), `page.tsx` et
   `content/engine-copy.ts` (la phrase de la FAQ, §22.8.5 h),
   `ENGINE.md` (la ligne §22 de la table, l'état), `CLAUDE.md` (l'état du
-  moteur, les chiffres de référence), `CHANTIERS.md` (A23 : les quatorze cases,
+  moteur, les chiffres de référence), `CHANTIERS.md` (A23 : toutes les cases,
   A23.d le bon à tirer).
 - **Étapes** : `ci.yml` ; la phrase de la FAQ (§22.8.5 h) ; la garde ; les
   e2e (dont : la FAQ sans JavaScript contient `faqTypeNote.both` quand les
