@@ -90,6 +90,10 @@ l'unité nomme et spécifie, avec son test.
   sa PR, l'orchestrateur relance **un nouveau sous-agent** sur la même branche,
   avec le journal de la job en entrée (jamais un « relancer la job » comme
   diagnostic, `/livrer` §5).
+- **Un seul clone pour les deux** (le pilote U0 du jeu, 2026-10-04) : tant
+  que le sous-agent travaille, l'orchestrateur ne change pas de branche et
+  n'écrit rien dans le clone ; il peut lire. Les modifications non commitées
+  qu'il y voit sont celles du sous-agent.
 
 ## 23.4 Le format d'une fiche d'unité
 
@@ -129,7 +133,10 @@ au journal, ses tests et sa case.
 
 ## 23.6 Le prompt d'une unité
 
-L'orchestrateur remplit les champs entre chevrons et le passe tel quel :
+L'orchestrateur remplit les champs entre chevrons et le passe tel quel
+(`<DOSSIER>` : le clone, `/home/user/tourdegrowth` en session cloud ;
+`<ATTRIBUTION>` : les deux lignes de fin de commit que sa session donne, avec
+le nom du modèle du sous-agent) :
 
 ```text
 Tu exécutes une unité du moteur de growth de Tour de Growth : <UNITÉ>
@@ -143,10 +150,15 @@ ou docs/engine/place-de-marche.md), la section 0, la section des décisions de
 conception, et la fiche de ton unité. Lis ensuite exactement ce que la rubrique
 « À lire » de la fiche cite, et rien d'autre n'est nécessaire.
 
-Travaille sur la branche <BRANCHE>, partie de origin/main avant toute écriture
-(git fetch origin main && git checkout -B <BRANCHE> origin/main). Fais
+Le dépôt est cloné dans <DOSSIER> : travaille là, sur la branche <BRANCHE>,
+partie de origin/main avant toute écriture (git fetch origin main && git
+checkout -B <BRANCHE> origin/main). Tes fichiers de travail (captures, specs
+et scripts jetables, journaux, le jar de l'émulateur) vont hors du dépôt, dans
+un dossier temporaire : git status ne montre que les fichiers de l'unité. Fais
 exactement les étapes de la fiche, avec les chaînes et les chiffres de la
-spécification recopiés tels quels, espaces insécables posées selon §23.8.
+spécification recopiés tels quels, espaces insécables posées selon §23.8 ; une
+chaîne qui existe déjà dans le code se recopie par script, jamais retapée
+(§23.8).
 Ne touche pas aux fichiers hors de la rubrique « Fichiers », sauf ce que le
 compilateur exige (dis-le). Ne modifie pas src/lib/engine/stream.ts,
 app-model.ts ni mkt-model.ts : importe-les.
@@ -162,20 +174,38 @@ sortie d'un golden du moteur bouge ; tu as besoin d'une décision.
 Avant de pousser, fais passer les commandes de la rubrique « Acceptation »,
 ajoute l'entrée de ton unité à la fin de JOURNAL.md (ce qui est livré, les
 choix d'exécution, ce qui est vérifié, avec les chiffres réels des commandes),
-coche ton unité dans le tableau de <LOT> de CHANTIERS.md (sans numéro de PR :
-l'orchestrateur l'ajoute), puis commit et pousse ta branche. N'ouvre pas de PR
-et ne merge pas.
+remplace dans CLAUDE.md ceux des chiffres de référence (tests unitaires, specs
+Playwright) qui ont changé, sans ajouter de phrase, et coche ton unité dans le
+tableau de <LOT> de CHANTIERS.md (sans numéro de PR : l'orchestrateur
+l'ajoute). Juste avant de pousser : git fetch origin && git merge origin/main
+(un conflit dans JOURNAL.md garde les deux entrées entières, la tienne en
+dernier ; ailleurs, arrête-toi et rends compte), puis tsc et vitest une
+dernière fois. Commit et pousse ta branche (git push -u origin <BRANCHE> ; sur
+une erreur réseau seulement, jusqu'à quatre reprises après 2, 4, 8 et 16 s).
+Tes messages de commit se terminent par ces lignes : <ATTRIBUTION>. N'écris
+aucun identifiant de modèle ailleurs (code, commentaires, journal). N'ouvre
+pas de PR et ne merge pas. Une relance de correction qui ne touche que des
+commentaires, des tests unitaires ou des documents saute le build et
+Playwright, et le dit.
 
 Ton compte rendu, en français : ce qui est fait, fichier par fichier ; la
 sortie résumée de chaque commande (tests passés sur total) ; les captures
 prises et leur chemin ; tout écart à la spécification et pourquoi ; les
 questions ouvertes. N'écris « vérifié » que pour ce que tu as fait tourner.
+Termine par une section « Ce que j'ai dû deviner » : chaque endroit où la
+spécification ou ce guide ne suffisait pas et où tu as dû interpréter, même
+légèrement, avec ce que tu as choisi (« rien » si rien).
 ```
 
 ## 23.7 Ce que l'orchestrateur vérifie avant de merger
 
 1. Le compte rendu cite des commandes réellement lancées, et leurs sorties
    sont vertes ; la CI de la PR (`Types, tests, build`) est verte sur la tête.
+   **Juste après l'ouverture de la PR**, son `mergeable_state` : `dirty` veut
+   dire que la CI ne tournera pas, et la seule trace en est l'absence de
+   « Types, tests, build » dans ses checks (le pilote U0 du jeu : deux merges
+   d'une autre session pendant l'unité). Relance alors un sous-agent sur la
+   même branche avec `git fetch origin && git merge origin/main`.
 2. Les relecteurs n'ont rien de bloquant, ou leurs remarques sont corrigées par
    un sous-agent relancé sur la même branche.
 3. Les goldens v1 et v2 du moteur n'ont pas bougé : `git diff origin/main --stat
@@ -190,18 +220,24 @@ questions ouvertes. N'écris « vérifié » que pour ce que tu as fait tourner.
    (convention 8), dans la PR suivante si elle est déjà mergée.
 6. **Les deux budgets que la CI tient** (`src/__tests__/claude-md-budget.test.ts`) :
    - **`JOURNAL.md` sous 200 000 caractères.** Chaque unité y ajoute son
-     entrée, et les 26 unités d'A22 et A23 dépassent ce qui reste (173 000 le
-     2026-10-04). **Avant de lancer une unité**, l'orchestrateur compte
+     entrée (2 000 à 5 000 caractères), et d'autres lots en ajoutent en même
+     temps (72 000 le 2026-10-04, juste après l'archivage du douzième volume).
+     **Avant de lancer une unité**, l'orchestrateur compte
      (`node -e 'console.log(require("fs").readFileSync("JOURNAL.md","utf8").length)'`) ;
      au-delà de 185 000, il archive d'abord, comme l'en-tête du journal le dit
      (les entrées les plus anciennes, entières et sans rien réécrire, dans un
      volume de plus de `docs/journal/`, et la ligne de la table), dans une PR
      de documentation à part, mergée avant l'unité ;
-   - **`CLAUDE.md` sous 40 000 caractères** (38 441 le 2026-10-04). Les deux
-     unités qui le touchent (APP-11 et MKT-10 : l'état du moteur, les
-     chiffres de référence) **remplacent** une phrase, elles n'en ajoutent
-     pas ; le test vert est un critère de leur acceptation, et un texte qui
-     ne tient pas va au journal, pas dans `CLAUDE.md`.
+   - **`CLAUDE.md` sous 40 000 caractères** (38 441 le 2026-10-04). Chaque
+     unité y **remplace** les chiffres de référence qui ont changé (tests
+     unitaires, specs Playwright, §23.6), sans ajouter de phrase ; APP-11 et
+     MKT-10 remplacent aussi la phrase de l'état du moteur. Le test vert est
+     un critère de leur acceptation, et un texte qui ne tient pas va au
+     journal, pas dans `CLAUDE.md`.
+7. **La section « Ce que j'ai dû deviner »** du compte rendu se lit : ce qui y
+   relève de ce guide ou d'une spécification s'y corrige, dans une PR de
+   documentation, avant l'unité suivante. Une devinette laissée là revient à
+   l'unité d'après.
 
 ## 23.8 Vérifier avant de pousser, et les pièges connus
 
@@ -222,6 +258,17 @@ avec ses e2e). Avant MKT-10, les e2e se lancent avec `ENGINE_TYPES=consumer-app`
 comme la CI, et seules les captures d'une unité de la place de marché se
 prennent sur un build `consumer-app,marketplace`. Une unité sans écran saute le
 build et Playwright, et le dit.
+
+**Les captures** (leçon nº 1 de `CLAUDE.md`) : une spec Playwright jetable,
+**hors du dépôt**, sur le modèle de `scripts/engine-density.capture.ts` (ses
+tests « brief 09 », et son en-tête pour les commandes), qui pose l'état par
+`engineSeed` d'`e2e/engine-helpers.ts` et les fixtures de
+`src/lib/engine/__tests__/fixtures.ts` (`consumerState()`…), contre un build
+local **ouvert à l'exécution** :
+`ENGINE_ENABLED=true GAME_ENABLED=true ENGINE_TYPES=<les types de la CI>
+npm run build`, puis `next start` avec les mêmes variables. FR à 1 280 px,
+EN à 390 px. Le compte rendu donne le chemin des PNG ; l'orchestrateur les
+ouvre (§23.7, point 4).
 
 Les pièges déjà rencontrés sur ce moteur, chacun au moins une relecture :
 
@@ -245,6 +292,20 @@ Les pièges déjà rencontrés sur ce moteur, chacun au moins une relecture :
   le SaaS B2B ne doit pas changer.
 - **Un compteur d'une liste fermée** (les événements GoatCounter, les ids de
   slides) : l'ajouter à la liste ET à son test, jamais l'un sans l'autre.
+- **Recopier par script, jamais retaper** (le pilote U0 du jeu) : les
+  fichiers de copie contiennent déjà des U+00A0 invisibles ; une chaîne
+  existante retapée à la main n'est plus la même, et un remplacement qui la
+  cherche échoue ou, pire, la change. Lire la chaîne dans le fichier (ou
+  `git show origin/main:…`) et la recopier par script.
+- **Les commentaires que ton changement rend faux** (doc-comments, en-têtes,
+  commentaires de test) se corrigent dans les fichiers que tu touches, et
+  seulement là.
+- **`pkill -f` tue ton propre shell** quand son motif figure dans sa propre
+  ligne de commande : `pgrep -f 'next[-]server'` (ou `firestore`), puis
+  `kill <PID>`, dans une commande à part.
+- **Les fichiers de travail hors du dépôt** : captures, specs et scripts
+  jetables, journaux, le jar de l'émulateur Firestore (`TESTING.md` §5) ;
+  `git status` ne montre que les fichiers de l'unité.
 
 ## 23.9 Définition de terminé, pour un type
 

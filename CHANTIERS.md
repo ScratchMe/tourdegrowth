@@ -449,13 +449,15 @@ vendeurs (une case du réglage) ; un total les additionne. Deux vocabulaires,
 calques ; **les écrans et les slides attendent le retour du brief 10** à
 Claude Design (C71), que MKT-B dépose dès maintenant.
 
-Points d'arrêt naturels : après MKT-1, MKT-4, MKT-6 (le tableau attend le
-brief), MKT-8 et MKT-10.
+Points d'arrêt naturels : après MKT-R (§22 remise d'accord avec le code
+d'après A22), MKT-1, MKT-4, MKT-6 (le tableau attend le brief), MKT-8 et
+MKT-10.
 
 | Unité | Ce qu'elle livre (fiche en §22.12) | Prérequis | Fait |
 |---|---|---|---|
 | MKT-B | les captures du brief 10, déposées (puis Antoine lance le brief) | — | ☐ |
-| MKT-0 | le contrat, le type, `EngineMotion`, la validation, les fenêtres | A22 | ☐ |
+| MKT-R | **la relecture à blanc de §22** contre le code d'après A22, et la PR de documentation qui la traite (l'orchestrateur, prompt H, étape 0) | A22 | ☐ |
+| MKT-0 | le contrat, le type, `EngineMotion`, la validation, les fenêtres | MKT-R | ☐ |
 | MKT-1 | les 19 chiffres et les 6 calculés, leur prose, les ponts | MKT-0 | ☐ |
 | MKT-2 | les grandeurs, les deux funnels, l'économie de chaque côté | MKT-1 | ☐ |
 | MKT-3 | les deux scénarios et le total | MKT-2 | ☐ |
@@ -1015,10 +1017,10 @@ Tu orchestres l'exécution du lot A22 de CHANTIERS.md : l'app grand public du mo
 
 1. Lis CLAUDE.md, docs/engine/executer-un-type.md en entier (§23), puis dans la spécification §21.0, §21.1 et §21.11 (le graphe et les douze fiches). Lis le tableau d'A22 dans CHANTIERS.md sur origin/main à jour, et les PR ouvertes du dépôt : une unité en cours se finit avant d'en commencer une autre (§23.5).
 2. Choisis l'unité suivante : la première non cochée dont les prérequis sont cochés (avec une branche imposée, dans l'ordre de §21.11).
-3. Lance un sous-agent avec l'outil Agent, model "sonnet", subagent_type "general-purpose", au premier plan, avec le prompt de §23.6 rempli (unité, spécification, branche, lot A22).
-4. À son retour, lis son compte rendu. S'il s'est arrêté sur une question, pose-la-moi au format de CHANTIERS.md C (aujourd'hui, ta reco, ce qui casse si on se trompe) et attends ma réponse ; une réponse qui change la spécification passe d'abord par une PR de documentation. Sinon : lance les relecteurs que la fiche demande, ouvre la PR en brouillon, abonne-toi à son activité ; si la CI ou un relecteur trouve quelque chose, relance un sous-agent sur la même branche avec ce qu'il faut corriger. Pour une unité qui touche un écran ou une slide, ouvre toi-même deux captures (FR 1 280, EN 390).
+3. Lance un sous-agent avec l'outil Agent, model "sonnet", subagent_type "general-purpose", au premier plan, avec le prompt de §23.6 rempli (unité, spécification, branche, lot A22, dossier, attribution). Tant qu'il travaille, ne change pas de branche et n'écris rien dans le clone (§23.3).
+4. À son retour, lis son compte rendu, et d'abord sa section « Ce que j'ai dû deviner » : ce qui y relève de §23 ou de la spécification s'y corrige, dans une PR de documentation, avant l'unité suivante. S'il s'est arrêté sur une question, pose-la-moi au format de CHANTIERS.md C (aujourd'hui, ta reco, ce qui casse si on se trompe) et attends ma réponse ; une réponse qui change la spécification passe d'abord par une PR de documentation. Sinon : lance les relecteurs que la fiche demande, ouvre la PR en brouillon, abonne-toi à son activité, et lis tout de suite son mergeable_state (« dirty » : la CI ne tournera pas, §23.7) ; si la CI ou un relecteur trouve quelque chose, relance un sous-agent sur la même branche avec ce qu'il faut corriger. Pour une unité qui touche un écran ou une slide, ouvre toi-même deux captures (FR 1 280, EN 390).
 5. Quand la PR est verte et relue : les vérifications de §23.7, puis le merge en suivant /livrer (lu, pas appelé), sauf si sa barrière §0 dit de me demander. Vérifie le squash (git show --stat), et que l'unité est cochée dans A22 avec le numéro de PR lu sur GitHub.
-6. Puis dis-moi en deux lignes ce qui est livré et quelle est l'unité suivante, et attends que je dise « continue », sauf si je t'ai demandé d'enchaîner un nombre d'unités ou d'aller jusqu'à un point d'arrêt de §21.11.
+6. Puis dis-moi en deux lignes ce qui est livré et quelle est l'unité suivante, et attends que je dise « continue », sauf si je t'ai demandé d'enchaîner un nombre d'unités ou d'aller jusqu'à un point d'arrêt de §21.11. **APP-0 est le pilote** : après elle, arrête-toi quoi que je t'aie demandé, dis-moi ce que le sous-agent a dû deviner et ce que tu as corrigé dans le guide ou la spécification, et attends mon « continue ».
 7. Après APP-11 : vérifie la définition de terminé de §23.9, et dis-moi que le bon à tirer A22.d peut se construire.
 
 Réponds-moi en français, court.
@@ -1028,15 +1030,20 @@ Réponds-moi en français, court.
 
 Réécrit le 2026-10-04 avec la spécification. **MKT-B se lance tout de suite**
 (elle ne dépend de rien) ; le reste **après A22.c**. Même mode que le prompt
-G, avec deux étapes qui reviennent à l'orchestrateur, pas à un sous-agent :
+G, avec trois étapes qui reviennent à l'orchestrateur, pas à un sous-agent :
+**la relecture à blanc de §22 contre le code d'après A22 (MKT-R, l'étape 0)**,
 le texte des trois termes de glossaire (MKT-G) et le retour du brief 10.
+L'étape 0 existe parce que §22 a été écrite et relue contre le code d'avant
+A22 : ses renvois de lignes et ce qu'elle suppose d'A22 se revérifient avant
+MKT-0, quand le code est là.
 
 ```text
 Tu orchestres l'exécution du lot A23 de CHANTIERS.md : la place de marché du moteur de growth de Tour de Growth. Tu ne codes pas toi-même : tu lances des sous-agents Sonnet, une unité à la fois. Tu ne tranches rien : la spécification, docs/engine/place-de-marche.md (§22), applique déjà les décisions C64 à C74 et C93.
 
-1. Lis CLAUDE.md, docs/engine/executer-un-type.md en entier (§23), puis dans la spécification §22.0, §22.1, §22.7 et §22.12 (le graphe et les quatorze fiches). Lis le tableau d'A23 dans CHANTIERS.md sur origin/main à jour, et les PR ouvertes du dépôt (§23.5). Si A22 n'est pas fini, seule MKT-B peut partir.
+1. Lis CLAUDE.md, docs/engine/executer-un-type.md en entier (§23), puis dans la spécification §22.0, §22.1, §22.7 et §22.12 (le graphe et les fiches, MKT-R comprise). Lis le tableau d'A23 dans CHANTIERS.md sur origin/main à jour, et les PR ouvertes du dépôt (§23.5). Si A22 n'est pas fini, seule MKT-B peut partir.
 2. Choisis l'unité suivante : la première non cochée dont les prérequis sont cochés (avec une branche imposée, dans l'ordre de §22.12), et lance-la comme le prompt G le fait (étapes 3 à 6 : sous-agent Sonnet avec le prompt de §23.6, relecteurs, PR en brouillon suivie, vérifications de §23.7, merge selon /livrer, case cochée avec le numéro de PR lu sur GitHub, puis deux lignes et tu attends mon « continue »).
-3. Deux étapes sont à toi, pas à un sous-agent :
+3. Trois étapes sont à toi, pas à un sous-agent :
+   - étape 0, MKT-R, dès qu'A22 est fini et avant MKT-0 : lance la relecture à blanc de §22 décrite par la fiche MKT-R de §22.12 (un sous-agent Sonnet en lecture seule, au premier plan, avec le prompt de la fiche rempli) ; puis corrige §22 de ce qu'il trouve dans une PR de documentation (les renvois de §22.2.5 et les mesures à jour, chaque constat bloquant ou lacune traité dans le texte), mergée avant MKT-0, avec son entrée au journal et la ligne MKT-R cochée. Un constat qui demande une décision, pose-le-moi au format de la section C, avec ta reco, et attends ma réponse ;
    - avant MKT-G : écris le texte des trois termes de glossaire dans docs/engine/glossaire-mkt.md, à partir des seules définitions sourcées de l'annexe de §22, sur le modèle des quatre termes d'A7.3.e, chaque chaîne « à relire », dans une PR de documentation ; puis lance MKT-G ;
    - après MKT-B, quand je te dis que le retour du brief 10 est dans le projet Claude Design : recopie-le dans design/ds-extension-10-return/ comme pour les retours 07 et 09, compare-le au brief, pose-moi les décisions qu'il demande en section C de CHANTIERS.md, avec ta reco, une par une ; puis, une fois tranchées, complète les fiches MKT-7 et MKT-8 (§22.12) au format de §23.4, avec chaque chaîne neuve écrite en français et en anglais, dans une PR de documentation. MKT-7 ne part pas avant.
 4. Après MKT-10 : vérifie la définition de terminé de §23.9, et dis-moi que le bon à tirer A23.d peut se construire, en « produits » et en « services ».

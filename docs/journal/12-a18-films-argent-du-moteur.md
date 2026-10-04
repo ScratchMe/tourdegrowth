@@ -1,8 +1,8 @@
-# Journal de Tour de Growth — 12. A18 de T3.d à T7, les films et A20
+# Journal de Tour de Growth — 12. A18 achevé, les films et l'argent du moteur
 
-*Volume archivé : les entrées du 2026-10-03. On y trouve la fin du portage du retour 07 (A18 de T3.d à T7) et son bon à tirer nº9, construit puis appliqué, la fin des aperçus Vercel hors `main`, les quatre films de motion design (C45), A20 (la spécification de l'argent du moteur, le brief 09 et son retour, C45 à C55, le portage de T1 à T7, le bon à tirer nº10 construit) et les films remis d'accord (A20.g).*
+*Volume archivé : les entrées du 2026-10-03. On y trouve A18 de T3.d à T7 (les Réglages, la page courte au retour, l'hybride, les mots, l'intégration) et son bon à tirer nº9, construit puis ses six décisions appliquées ; la fin des aperçus Vercel ; les quatre films de motion design (C45) et leurs retouches ; et A20, l'argent du moteur : la spécification, le brief 09 et son retour, C46 à C55, le portage de T1 à T7, le bon à tirer nº10 construit et les films remis d'accord.*
 
-*Le texte est celui du journal, déplacé tel quel le 2026-10-04 : rien n'y a été réécrit, sauf deux liens relatifs (`docs/engine/argent.md` et `design/DS-EXTENSION-BRIEF-09.md`), recalculés depuis `docs/journal/`. Un « plus haut » ou un « voir l'entrée du… » peut donc désigner une entrée d'un autre volume. Le volume courant et la table des volumes sont dans [`JOURNAL.md`](../../JOURNAL.md), et `grep -rn "<motif>" JOURNAL.md docs/journal/` cherche partout.*
+*Le texte est celui du journal, déplacé tel quel le 2026-10-04 : rien n'y a été réécrit, sinon la cible de deux liens relatifs, recalée sur ce dossier. Un « plus haut » ou un « voir l'entrée du… » peut donc désigner une entrée d'un autre volume. Le volume courant et la table des volumes sont dans [`JOURNAL.md`](../../JOURNAL.md), et `grep -rn "<motif>" JOURNAL.md docs/journal/` cherche partout.*
 
 ---
 ## A18 T3.d : les cibles et les nombres partagés dans les Réglages (2026-10-03, #297)
