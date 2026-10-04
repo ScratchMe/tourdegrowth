@@ -7,10 +7,13 @@ export interface TotalBandProps {
   eyebrow: ReactNode;
   /** The hybrid's own title: the first slide's, from the engine's own function. */
   title: ReactNode;
-  /** Self-serve, then sales-assisted: always this order, whatever the values. */
-  engines: readonly { id: string; label: ReactNode; value: ReactNode; "data-testid"?: string }[];
-  /** « MRR total ». */
-  total: { label: ReactNode; value: ReactNode; "data-testid"?: string };
+  /**
+   * Self-serve, then sales-assisted: always this order, whatever the values. `missing`: the value is words
+   * (« pas de chiffre »), not a figure — set in the text face, muted, never in the figures' face.
+   */
+  engines: readonly { id: string; label: ReactNode; value: ReactNode; missing?: boolean; "data-testid"?: string }[];
+  /** « MRR total ». `missing` as for an engine. */
+  total: { label: ReactNode; value: ReactNode; missing?: boolean; "data-testid"?: string };
   /**
    * Extension 09: what adds up across the two engines, and only that — the ARR, the MRR in twelve months at today's
    * pace, the cash tied up. The LTV, the payback and the loss never add: each engine's money block carries its own.
@@ -39,6 +42,8 @@ export interface TotalBandProps {
  * The link is its last line. Text only, and a definition list: a screen
  * reader hears each label with its figure.
  */
+const valueClass = (missing?: boolean) => (missing ? `${styles.value} ${styles.missing}` : styles.value);
+
 export function TotalBand({ eyebrow, title, engines, total, totals, link, headingId = "engine-total-title", "data-testid": testId }: TotalBandProps) {
   return (
     <section className={styles.root} aria-labelledby={headingId} data-testid={testId}>
@@ -53,12 +58,12 @@ export function TotalBand({ eyebrow, title, engines, total, totals, link, headin
         {engines.map((engine) => (
           <div key={engine.id} className={styles.term} data-testid={engine["data-testid"]}>
             <dt className={styles.label}>{engine.label}</dt>
-            <dd className={styles.value}>{engine.value}</dd>
+            <dd className={valueClass(engine.missing)}>{engine.value}</dd>
           </div>
         ))}
         <div className={`${styles.term} ${styles.total}`} data-testid={total["data-testid"]}>
           <dt className={styles.label}>{total.label}</dt>
-          <dd className={styles.value}>{total.value}</dd>
+          <dd className={valueClass(total.missing)}>{total.value}</dd>
         </div>
       </dl>
       {totals && totals.length > 0 ? (

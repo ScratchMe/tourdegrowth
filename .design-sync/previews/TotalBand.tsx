@@ -89,8 +89,8 @@ export const Example = () => (
  * The §18.9 hybrid (`hybridState()`) with the sales-assisted MRR not typed, in French: no
  * total. The title is the slide's « on ne peut pas encore additionner » sentence naming the
  * missing part — red on the slide, plain here: at the band's size the red would not read at AA
- * — the sales-assisted engine and the total read « pas de chiffre », and the line of what adds
- * up is gone. The link still prints: it does not need the MRR.
+ * — the sales-assisted engine and the total read « pas de chiffre » (`missing`: in the text face,
+ * muted, never the figures' face), and the line of what adds up is gone. The link still prints: it does not need the MRR.
  */
 export const TotalUnknown = () => (
   <div style={{ maxWidth: 760 }}>
@@ -100,9 +100,9 @@ export const TotalUnknown = () => (
       headingId="total-unknown"
       engines={[
         { id: "plg", label: "MRR libre-service", value: "48 000 €" },
-        { id: "slg", label: "MRR assisté", value: "pas de chiffre" },
+        { id: "slg", label: "MRR assisté", value: "pas de chiffre", missing: true },
       ]}
-      total={{ label: "MRR total", value: "pas de chiffre" }}
+      total={{ label: "MRR total", value: "pas de chiffre", missing: true }}
       link={
         <div>
           <p>{"31 opportunités sont venues du libre-service (juin à août 2026)."}</p>

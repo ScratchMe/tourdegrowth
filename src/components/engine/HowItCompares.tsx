@@ -17,7 +17,7 @@ export interface HowItComparesProps {
   target?: number | null;
   /** The chart in words: value, reference and target. */
   chartLabel: string;
-  /** One line under the chart, each mark drawn as the chart draws it. */
+  /** One line under the chart, each mark drawn as the chart draws it: with no `value`, the « value » line has no swatch. */
   legend?: { kind: "value" | "band" | "target"; label: ReactNode }[];
   /** The reference's caveat, word for word, or « Pas de repère publiable : … ». */
   caveat?: ReactNode;
@@ -81,7 +81,8 @@ export function HowItCompares({
         <ul className={styles.legend}>
           {legend.map((l) => (
             <li key={l.kind} className={[styles.key, styles[l.kind]].join(" ")}>
-              <span className={styles.swatch} aria-hidden="true" />
+              {/* Each mark as the chart draws it: no bar (an estimate), no bar's swatch — the label says the range (A21.7). */}
+              {l.kind === "value" && value === null ? null : <span className={styles.swatch} aria-hidden="true" />}
               {l.label}
             </li>
           ))}

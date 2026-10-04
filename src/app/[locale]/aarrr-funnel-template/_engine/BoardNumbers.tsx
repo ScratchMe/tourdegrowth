@@ -46,9 +46,9 @@ function rowValue(shape: MetricShape, view: EngineView): { text: string; kind: "
 }
 
 /** « 6 à faire », « Plus qu'un », « Plus rien à faire ». */
-export function remainingText(progress: ListProgress, view: EngineView): string {
+export function remainingText(remaining: number, view: EngineView): string {
   const l = view.strings.list;
-  return progress.remaining === 0 ? l.noneToGo : progress.remaining === 1 ? l.lastOne : fill(l.toGo, { n: progress.remaining });
+  return remaining === 0 ? l.noneToGo : remaining === 1 ? l.lastOne : fill(l.toGo, { n: remaining });
 }
 
 /** « 7 trouvés · 2 estimés · 1 demandé · 3 introuvables », the zeros left out. */
@@ -74,11 +74,18 @@ export function numberPosition(id: MetricId, view: EngineView): string {
   return fill(strings.list.position, { stage: stageName(shape.stage), i: inStage.findIndex((s) => s.id === id) + 1, n: inStage.length });
 }
 
-/** What remains in a number's own engine, for its screen's header (« 6 à faire »). */
+/**
+ * What remains, for a number's screen's header (« 6 à faire »): in its own engine — and in the hybrid, in both,
+ * since « Enregistre et continue » walks from one engine's numbers to the other's. Counted in the number's engine
+ * alone, the hybrid's margin sheet said « Plus rien à faire » over a button that led on to a sales-assisted number
+ * (A21.8).
+ */
 export function numberRemaining(id: MetricId, view: EngineView): string {
-  const motion = motionOfMetric(id);
   const snapshot = view.state.snapshots[view.state.snapshots.length - 1]!;
-  return remainingText(listProgress(listStages(snapshot, diagnosisOf(view, motion), motion)), view);
+  const { plg, slg } = view.state.setup.motions;
+  const motions: Motion[] = plg && slg ? ["plg", "slg"] : [motionOfMetric(id)];
+  const remaining = motions.reduce((n, motion) => n + listProgress(listStages(snapshot, diagnosisOf(view, motion), motion)).remaining, 0);
+  return remainingText(remaining, view);
 }
 
 /**
@@ -137,7 +144,7 @@ export function BoardNumbers({
       title={l.title}
       progress={
         <EngineProgress
-          remaining={remainingText(progress, view)}
+          remaining={remainingText(progress.remaining, view)}
           counts={countsText(progress, view) || undefined}
           groups={stages.map((s) => ({
             id: s.stage,

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { PAYBACK_CHART_PX, PAYBACK_MONTHS, estimateLabelWidth, paybackChartGeometry, paysBackLabels, type PaybackChartInput } from "../payback-chart";
+import { PAYBACK_CHART_PX, PAYBACK_MONTHS, SHORT_LABEL_ROOM, estimateLabelWidth, paybackChartGeometry, paysBackLabels, shortLabelY, type PaybackChartInput } from "../payback-chart";
 
 // `PaybackChart` (design system extension 09, Q12, A20.d T4.c): one customer, month by month. The rules that make the
 // picture honest are geometry, so they are tested here rather than eyeballed — the loss and its months are one picture.
@@ -109,6 +109,40 @@ describe("paybackChartGeometry", () => {
 
 // A20.d T6 (C50): the example pays back in 5 to 6 months. Non-vacuity, measured: always giving the crossing its own
 // label fails « an early crossing », and always moving the words to the bracket fails « a late crossing ».
+describe("shortLabelY — the loss's words, inside their bracket or above the cost line (A21.5)", () => {
+  const fr = { short: "il manque ~400 €".length, cost: "ce que coûte un nouveau client".length };
+  /** The hybrid's compact chart: 780 × 150, the same loss — its bracket is too short for a label. */
+  const compact: PaybackChartInput = { ...film, width: 780, height: 150 };
+
+  it("a loss with room: inside the bracket, at both sizes", () => {
+    const g = paybackChartGeometry(film);
+    expect(g.short!.fits).toBe(true);
+    expect(shortLabelY(g, fr, false)).toBe(g.short!.labelY);
+    expect(shortLabelY(g, fr, true)).toBe(g.short!.labelY);
+  });
+
+  it("the compact chart's small loss: above the cost line, never across it", () => {
+    const g = paybackChartGeometry(compact);
+    expect(g.margin!.y2 - g.cost.y).toBeLessThan(SHORT_LABEL_ROOM);
+    expect(g.short!.fits).toBe(false);
+    expect(shortLabelY(g, fr, true)).toBe(g.cost.y - 10);
+  });
+
+  it("at full size, above the line only clear of the cost's words; otherwise inside, as before", () => {
+    // A small loss at full size: the line's end just under the cost line, 30 months counted (clear of the cost label).
+    const small: PaybackChartInput = { ...film, monthlyMargin: [60, 60], lifetime: [30, 30], payback: [31.7, 31.7] };
+    const g = paybackChartGeometry(small);
+    expect(g.short!.fits).toBe(false);
+    expect(shortLabelY(g, fr, false)).toBe(g.cost.y - 10);
+    // Ending too far left, it would run into « ce que coûte un nouveau client »: it stays inside.
+    expect(shortLabelY(g, { ...fr, short: 60 }, false)).toBe(g.short!.labelY);
+  });
+
+  it("no loss, no words", () => {
+    expect(shortLabelY(paybackChartGeometry(late), fr, false)).toBeNull();
+  });
+});
+
 describe("paysBackLabels — where the pays-back story's words go at full size", () => {
   // The example's self-serve: 90 € a month (75 % of 120 €, the middle of 70 to 80 %), a CAC of 500 €, 36 months counted.
   const example: PaybackChartInput = { ...film, story: "pays-back", monthlyMargin: [84, 96], cac: [500, 500], lifetime: [36, 36], payback: [5.21, 5.95] };
@@ -131,6 +165,21 @@ describe("paysBackLabels — where the pays-back story's words go at full size",
     expect(placed.crossing!.x - estimateLabelWidth("remboursé : 32 mois".length)).toBeGreaterThan(g.cost.labelX + estimateLabelWidth(fr.cost));
     // A short bracket: its label ends at its right end.
     expect(placed.after).toEqual({ text: "after", x: g.after!.x2, y: g.after!.labelY + 6, anchor: "end" });
+  });
+
+  it("a late crossing's months, wider than their bracket, go down until the climbing line clears them, above the axis (A21.5)", () => {
+    const g = paybackChartGeometry(late);
+    const after = "~4 months of margin after".length;
+    const placed = paysBackLabels(g, { paysBack: "paid back: 32 months".length, cost: "what a new customer costs".length, time: null, after })!.after!;
+    expect(placed).toMatchObject({ text: "after", x: g.after!.x2, anchor: "end" });
+    // At its old row the line ran through it; now its top is right of the line, with air.
+    const m = g.margin!;
+    const lineX = (y: number) => m.x1 + ((m.y1 - y) / (m.y1 - m.y2)) * (m.x2 - m.x1);
+    const left = placed.x - estimateLabelWidth(after);
+    expect(lineX(g.after!.labelY + 6 - 18 * 0.8)).toBeGreaterThan(left - 8);
+    expect(lineX(placed.y - 18 * 0.8)).toBeLessThanOrEqual(left - 8);
+    expect(placed.y).toBeGreaterThan(g.after!.labelY + 6);
+    expect(placed.y).toBeLessThanOrEqual(g.axis.y - 8);
   });
 
   it("a time line wider than the room right of the crossing ends at the plot's end; no time line, the crossing keeps its label", () => {

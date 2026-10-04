@@ -489,9 +489,16 @@ export const ENGINE_COPY = {
       fr: "Le MRR mois par mois, de {start} aujourd'hui à {today} dans 12 mois au rythme actuel.",
       en: "The MRR month by month, from {start} today to {today} in 12 months at today's pace.",
     },
+    /**
+     * `{key}`: the curve's own key for the what-if line — `curveWhatif` on the board (« avec tes « Et si » », the same
+     * sentence as before), `slide.curveWhatifOne` or `curveWhatifAll` on a slide. Until A21.6 (2026-10-04) the words
+     * were fixed here, and a one-lever slide said « avec tes « Et si » » in a board's « tu », in the plural.
+     * TODO: à relire — retouchée le 2026-10-04 (A21.6) : `{key}` remplace « avec tes « Et si » » ; le tableau dit la même
+     * phrase, les slides deux phrases neuves (« … avec cet « Et si » », « … avec les 3 « Et si » »).
+     */
     curveSummaryWhatif: {
-      fr: "Le MRR mois par mois, depuis {start} aujourd'hui : {today} dans 12 mois au rythme actuel, {whatif} avec tes « Et si ».",
-      en: "The MRR month by month, from {start} today: {today} in 12 months at today's pace, {whatif} with your what-ifs.",
+      fr: "Le MRR mois par mois, depuis {start} aujourd'hui : {today} dans 12 mois au rythme actuel, {whatif} {key}.",
+      en: "The MRR month by month, from {start} today: {today} in 12 months at today's pace, {whatif} {key}.",
     },
     /** Sales-assisted with annual contracts: why its line is straight. */
     curveStraight: {
@@ -1631,8 +1638,12 @@ export const ENGINE_COPY = {
     rowAfter: { fr: "Mois après remboursement", en: "Months after payback" },
     rowSpend: { fr: "Dépensé en acquisition par mois", en: "Spent on acquisition a month" },
     rowCash: { fr: "Trésorerie immobilisée", en: "Cash tied up" },
-    /** Months after payback below zero: the customer leaves before paying their cost back — the loss, said in months. */
-    leavesFirst: { fr: "part avant", en: "leaves first" },
+    /**
+     * Months after payback below zero: the customer leaves before paying their cost back — the loss, said in months.
+     * `{n}`: how many months short (« ~5 mois »). TODO: à relire — réécrite le 2026-10-04 (A21.2) : « part avant » des
+     * deux côtés lisait « stable » quand un levier réduisait le manque sans le combler.
+     */
+    leavesFirst: { fr: "part {n} avant", en: "leaves {n} early" },
     /** A figure the what-ifs did not move. */
     stable: { fr: "stable", en: "unchanged" },
     /** The money's own rules, printed with the scenario's when the table shows the figure. */

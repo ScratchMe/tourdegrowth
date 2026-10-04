@@ -53,6 +53,8 @@
 .slide[data-theme="white"] {
   background-color: var(--surface-white);
   background-image: none;
+  /* The charts' label halo is their ground's (MrrCurve, PaybackChart — A21.4). */
+  --chart-halo: var(--surface-white);
 }
 
 .slideTop {
@@ -666,6 +668,7 @@
   border: var(--border-solid);
   border-radius: var(--radius-card);
   background: var(--surface-card);
+  --chart-halo: var(--surface-card);
 }
 
 /* A table inside the curve's card: its eyebrow and rows, no card of its own. */

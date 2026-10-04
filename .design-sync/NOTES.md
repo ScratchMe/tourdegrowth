@@ -909,7 +909,7 @@ Two presentation traps, fixed in the previews:
   promised « {mois} · lecture seule » (no call site), `TrapNote` promised a
   second usage (none), `StatTile`'s `neutral` named the engine (no caller since
   #313; its `dtsPropsFor` line too), `Sheet.module.css` cited a removed class.
-- **Seen in the product, left to `CHANTIERS.md`** (none is in a cell): the
+- **Seen in the product, left to `CHANTIERS.md`** (none is in a cell; all fixed the same day by A21, #326 — with a ninth found on the way: a slide's PNG lost its charts' styles, since html-to-image copies an `<svg>` without walking it; the journal's A21 entry): the
   « Dernière visite » eyebrow says « aujourd'hui » on a past month
   (`BoardHead.tsx`, `daysBetween` against the month's close); the « Mois après
   remboursement » row reads « part avant | part avant | stable » when a lever

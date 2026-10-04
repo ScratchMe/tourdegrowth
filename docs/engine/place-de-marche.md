@@ -33,11 +33,11 @@ puis bon à tirer. La typographie finale se pose dans `src/content/`.*
 
 ---
 
-> **État au 2026-10-04, à lire avant tout le reste.** C64 à C74 et C76 sont
+> **État au 2026-10-04, à lire avant tout le reste.** C64 à C74 et C93 sont
 > tranchées (§22.15). Quatre réponses vont contre la recommandation (C64 : les
 > abonnements des vendeurs sont modélisés ; C65 : un réglage « produits ou
 > services » ; C70 : deux diagnostics, un par côté ; C71 : un brief 10 à Claude
-> Design avant les écrans), et C76 fixe le modèle des abonnements des vendeurs,
+> Design avant les écrans), et C93 fixe le modèle des abonnements des vendeurs,
 > avec une marge par flux. **Les sections §22.0 à §22.14 ci-dessous décrivent
 > encore la version d'avant ces réponses : elles se réécrivent (`CHANTIERS.md`
 > A23.b). Ne rien exécuter de ce document avant cette réécriture.**
@@ -1414,7 +1414,7 @@ rouge réservé à la fuite.
 | C72 | **Trois termes de glossaire** (GMV, take rate, liquidité) dans une PR à part, M8 ? | **Oui**, en parallèle de M2 : ils donnent aux chiffres un lien juste et trois pages de plus aux deux langues | Sans termes : les liens restent sur les termes voisins (`activation`, `revenue`) | **2026-10-04 : oui, la reco.** Les trois termes (GMV, take rate, liquidité) dans une PR à part, en parallèle du modèle pur |
 | C73 | **Aucun repère publié** pour la place de marché ? | **Oui** (D10) : aucun n'est dans le glossaire approuvé | Des repères sourcés, ajoutés d'abord au glossaire (M8), puis aux formes, toujours sans désigner (C1) | **2026-10-04 : oui, la reco.** Aucun repère en v1 |
 | C74 | **L'ordre** : l'app grand public (§21) d'abord, la place de marché ensuite ? | **Oui** : §21 est plus petit, plus demandé, et crée le drapeau et les calques dont §22 se sert | La place de marché d'abord : M0 crée ces pièces (le chapeau de ce document le dit) | **2026-10-04 : oui, la reco.** L'app d'abord ; le brief 10 de la place de marché (C71) peut partir pendant que l'app se code |
-| C76 | **Le modèle des abonnements des vendeurs** (question de suivi de C64, posée le 2026-10-04). Un flux récurrent côté offre, projeté par la boucle du MRR : il garde (1 – churn des vendeurs abonnés) et les nouveaux abonnés (vendeurs inscrits du mois × conversion en abonné) ajoutent le leur. Quatre chiffres de plus côté offre : le taux d'inscription des vendeurs, la conversion en abonné (cohorte, fenêtre de la première vente), le revenu mensuel par vendeur abonné, le churn mensuel des vendeurs abonnés. Les unit economics de l'offre (coût d'un vendeur contre ce que rapporte un vendeur abonné). Le total = commissions + abonnements vendeurs, comme l'hybride | **Oui**, avec une seule marge pour les deux flux | Une marge par flux (un chiffre de plus) ; ou sans taux d'inscription des vendeurs | **2026-10-04 : la proposition, avec une marge par flux.** Cinq chiffres de plus côté offre : les quatre proposés et la marge des abonnements vendeurs (`mkt.rev.gross-margin` reste celle des commissions). §22 se réécrit sur ce modèle |
+| C93 | **Le modèle des abonnements des vendeurs** (question de suivi de C64, posée le 2026-10-04). Un flux récurrent côté offre, projeté par la boucle du MRR : il garde (1 – churn des vendeurs abonnés) et les nouveaux abonnés (vendeurs inscrits du mois × conversion en abonné) ajoutent le leur. Quatre chiffres de plus côté offre : le taux d'inscription des vendeurs, la conversion en abonné (cohorte, fenêtre de la première vente), le revenu mensuel par vendeur abonné, le churn mensuel des vendeurs abonnés. Les unit economics de l'offre (coût d'un vendeur contre ce que rapporte un vendeur abonné). Le total = commissions + abonnements vendeurs, comme l'hybride | **Oui**, avec une seule marge pour les deux flux | Une marge par flux (un chiffre de plus) ; ou sans taux d'inscription des vendeurs | **2026-10-04 : la proposition, avec une marge par flux.** Cinq chiffres de plus côté offre : les quatre proposés et la marge des abonnements vendeurs (`mkt.rev.gross-margin` reste celle des commissions). §22 se réécrit sur ce modèle |
 
 ---
 

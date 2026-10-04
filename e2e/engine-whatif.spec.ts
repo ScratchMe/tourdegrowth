@@ -277,7 +277,8 @@ for (const [locale, width] of [
     await expect(figures.locator("table")).toHaveCount(3);
     await expect(figures.locator("caption")).toHaveText([W.figuresGrowth[locale], W.figuresCustomer[locale], W.figuresCash[locale]]);
     await expect(page.getByTestId("whatif-figures-row-spend")).toContainText(W.stable[locale]);
-    await expect(page.getByTestId("whatif-figures-row-after")).toContainText(W.leavesFirst[locale]);
+    // The film's customer leaves ~4 months before paying back (A21.2: the months are said, so two losses never read alike).
+    await expect(page.getByTestId("whatif-figures-row-after")).toContainText(locale === "fr" ? "part ~4 mois avant" : "leaves ~4 months early");
     // « Today » is a column on a desktop; on a phone it is the what-if cell's second line.
     const todayHeader = figures.locator("thead th").nth(1);
     if (width === 1280) await expect(todayHeader).toBeVisible();

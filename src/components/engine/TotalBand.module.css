@@ -57,6 +57,13 @@
   font: var(--engine-figure-lg);
 }
 
+/* No figure: the words (« pas de chiffre ») in the text face, muted — never in the figures' face (A21.3). */
+.value.missing,
+.total .value.missing {
+  font: var(--body-md);
+  color: var(--text-muted);
+}
+
 .link {
   display: flex;
   flex-direction: column;

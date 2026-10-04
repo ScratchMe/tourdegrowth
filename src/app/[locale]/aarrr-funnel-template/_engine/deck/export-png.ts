@@ -40,13 +40,74 @@ export async function renderSlidePng(node: HTMLElement, { hd }: PngOptions): Pro
     pixelRatio: hd ? 2 : 1,
     cacheBust: false,
   };
-  // The first render is thrown away: Safari's first pass can come out
-  // without the embedded fonts (a known html-to-image behaviour, spec R7);
-  // the second is the one that ships.
-  await toBlob(node, options);
-  const blob = await toBlob(node, options);
-  if (!blob) throw new Error("html-to-image returned no image");
-  return blob;
+  const restore = inlineSvgStyles(node);
+  try {
+    // The first render is thrown away: Safari's first pass can come out
+    // without the embedded fonts (a known html-to-image behaviour, spec R7);
+    // the second is the one that ships.
+    await toBlob(node, options);
+    const blob = await toBlob(node, options);
+    if (!blob) throw new Error("html-to-image returned no image");
+    return blob;
+  } finally {
+    restore();
+  }
+}
+
+/** What an SVG child takes from its classes, written inline for the export (`inlineSvgStyles`). */
+export const SVG_EXPORT_PROPERTIES = [
+  "fill",
+  "fill-opacity",
+  "fill-rule",
+  "stroke",
+  "stroke-width",
+  "stroke-dasharray",
+  "stroke-dashoffset",
+  "stroke-linecap",
+  "stroke-linejoin",
+  "stroke-miterlimit",
+  "stroke-opacity",
+  "paint-order",
+  "opacity",
+  "visibility",
+  "display",
+  "font-family",
+  "font-size",
+  "font-weight",
+  "font-style",
+  "font-variant-numeric",
+  "letter-spacing",
+  "word-spacing",
+  "dominant-baseline",
+  "vector-effect",
+  "shape-rendering",
+] as const;
+
+/**
+ * html-to-image copies an `<svg>` whole, with `cloneNode(true)`, and never walks its children: they reach the image
+ * with their attributes only, outside the page's stylesheets. A chart styled by classes (`MrrCurve`, `PaybackChart`,
+ * A20.d T4) came out with no lines, its curve filled black and its labels in the default face (A21.9). Each child's
+ * computed style is written inline for the time of the export — the same values, so the screen does not move — and
+ * the attribute put back after.
+ */
+export function inlineSvgStyles(root: HTMLElement): () => void {
+  const touched: { el: SVGElement; style: string | null }[] = [];
+  for (const svg of Array.from(root.querySelectorAll("svg"))) {
+    for (const el of Array.from(svg.querySelectorAll<SVGElement>("*"))) {
+      const computed = getComputedStyle(el);
+      touched.push({ el, style: el.getAttribute("style") });
+      for (const property of SVG_EXPORT_PROPERTIES) {
+        const value = computed.getPropertyValue(property);
+        if (value) el.style.setProperty(property, value);
+      }
+    }
+  }
+  return () => {
+    for (const { el, style } of touched) {
+      if (style === null) el.removeAttribute("style");
+      else el.setAttribute("style", style);
+    }
+  };
 }
 
 /**

@@ -782,6 +782,7 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
       series={series}
       plan={plan}
       returningFrom={snap.returningFrom}
+      openedAt={snap.openedAt}
       motionView={motionView}
       onMotion={setMotionView}
       writeFailed={writeFailed}

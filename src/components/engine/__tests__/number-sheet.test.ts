@@ -175,4 +175,15 @@ describe("HowItCompares (C1: only a team target earns a verdict)", () => {
     expect(markup).toContain('role="img"');
     expect(markup).not.toMatch(/style="width:/);
   });
+
+  it("an estimate draws no bar, so its legend line has no bar's swatch — the words say the range (A21.7)", () => {
+    const legend = [
+      { kind: "value" as const, label: "Ton chiffre 70 à 80 %" },
+      { kind: "band" as const, label: "Repère publié" },
+    ];
+    const swatches = (markup: string) => markup.match(/aria-hidden="true"><\/span>/g)?.length ?? 0;
+    expect(swatches(compare({ value: null, band: [2, 5], legend }))).toBe(1);
+    expect(swatches(compare({ value: 3, band: [2, 5], legend }))).toBe(2);
+    expect(compare({ value: null, band: [2, 5], legend })).toContain("Ton chiffre 70 à 80 %");
+  });
 });
