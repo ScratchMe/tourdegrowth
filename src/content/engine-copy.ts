@@ -88,11 +88,11 @@ export const ENGINE_COPY = {
       fr: "Ton Tour dit si tu mesures. Le moteur montre ce que disent tes chiffres.",
       en: "Your Tour tells you whether you measure. The engine shows what your numbers say.",
     },
-    // TODO: à relire — réécrit le 2026-09-28 (audit du design kit) : le moteur collecte dix-sept
+    // Validé au bon à tirer nº10 (2026-10-04, la chaîne entière : C55) — réécrit le 2026-09-28 (audit du design kit) : le moteur collecte dix-sept
     // chiffres depuis le 2026-09-26 (expansion et rétrogradation), la page disait encore quinze.
-    // TODO: à relire (convention 6) — réécrit le 2026-09-30 (A7.1, C1 : aucun repère ne désigne).
-    // TODO: à relire (convention 6) — réécrit le 2026-10-01 (A7.3.c S3) : les chiffres de l'assisté.
-    // TODO: à relire (convention 6) — réécrit le 2026-10-03 (A20.d T6, C52, le retour 09, design/ds-extension-09-return/COPY.md) :
+    // Validé au bon à tirer nº10 (2026-10-04, la chaîne entière : C55) — réécrit le 2026-09-30 (A7.1, C1 : aucun repère ne désigne).
+    // Validé au bon à tirer nº10 (2026-10-04, la chaîne entière, à la place du nº9 : C55) — réécrit le 2026-10-01 (A7.3.c S3) : les chiffres de l'assisté.
+    // Validé au bon à tirer nº10 (2026-10-04) — réécrit le 2026-10-03 (A20.d T6, C52, le retour 09, design/ds-extension-09-return/COPY.md) :
     // ce que rapporte chaque nouveau client, le board ou les investisseurs à côté du CODIR, et « prêtes » / « ready » retirés comme
     // dans le retour. La suite est inchangée.
     promise: {
@@ -475,7 +475,7 @@ export const ENGINE_COPY = {
     movedWithOthers: { fr: "Et si : {lever}, {to} au lieu de {from}, avec tes autres leviers", en: "What if: {lever}, {to} instead of {from}, with your other levers" },
     label: { fr: "{lever} ({today})", en: "{lever} ({today})" },
     /**
-     * TODO: à relire (convention 6) — neuf le 2026-10-03 (A20.d T3.a, le retour du brief 09, `COPY.md`) : the card's
+     * Validé au bon à tirer nº10 (2026-10-04) — neuf le 2026-10-03 (A20.d T3.a, le retour du brief 09, `COPY.md`) : the card's
      * second figure, beside « MRR dans 12 mois » — was the month's new paying customers, which stay in the panel's
      * funnel. Then the curve (`MrrCurve`), sales-assisted's straight line (`curveStraight`), one line on one new
      * customer when the board shows a loss, and the hybrid's total (`totalBoth`): from `arr12` to `totalBoth`. `{ltv}`,
@@ -543,7 +543,7 @@ export const ENGINE_COPY = {
   },
 
   /**
-   * TODO: à relire (convention 6) — neuf le 2026-10-03 (A20.d T2, le retour du brief 09, `COPY.md`) : the money on
+   * Validé au bon à tirer nº10 (2026-10-04), sauf les quatre `warn*`, réécrites et marquées plus bas — neuf le 2026-10-03 (A20.d T2, le retour du brief 09, `COPY.md`) : the money on
    * the board (`MoneyBlock`, `WorthBars`, `CashWarning`). Figures arrive in their placeholders already formatted:
    * facts to the unit, estimates and projections at two significant digits with « ~ ». No sentence asserts a cause,
    * none names a stage, and none compares with a published reference (C1).
@@ -637,26 +637,28 @@ export const ENGINE_COPY = {
       fr: "La dépense de chaque mois revient régulièrement sur la durée du payback, la moitié est donc dehors à tout moment. La NRR sur 12 mois peut dépasser 100 % : elle raccourcit le retour, et ce chiffre n'est plus un plancher. Facturation mensuelle supposée : une année payée d'avance revient plus tôt.",
       en: "Each month's spend comes back evenly over the payback, so half of it is out at any time. The 12-month NRR may exceed 100%: it shortens the return, and this figure is no longer a floor. Monthly billing assumed: a year paid up front comes back sooner.",
     },
+    // TODO: à relire (convention 6) — réécrit le 2026-10-04 (bon à tirer nº10, carte `d-warn-gain`, Antoine : on ne
+    // rembourse pas le client) : les quatre `warn*` disent « un client met {payback} à rembourser son coût ».
     /**
      * C49: the team's runway, typed in Settings. `{n}`: a duration with its unit, in its grammatical number (« 24 mois »,
      * "1 month") — since A20.d T5, when a runway can be typed (it was « {n} mois », and « 1 months » in English).
      */
     warnRunway: {
-      fr: "Rembourser un client prend {payback}, plus que ton runway ({n}) : tu gagnes de l'argent, mais peut-être après la fin de ta trésorerie.",
-      en: "Paying back a customer takes {payback}, longer than your runway ({n}): you make money, but maybe after your cash runs out.",
+      fr: "Un client met {payback} à rembourser son coût, plus que ton runway ({n}) : tu gagnes de l'argent, mais peut-être après la fin de ta trésorerie.",
+      en: "A customer takes {payback} to pay back its cost, longer than your runway ({n}): you make money, but maybe after your cash runs out.",
     },
     warnRunwayMaybe: {
-      fr: "Rembourser un client prend {payback} : peut-être plus que ton runway ({n}).",
-      en: "Paying back a customer takes {payback}: maybe longer than your runway ({n}).",
+      fr: "Un client met {payback} à rembourser son coût : peut-être plus que ton runway ({n}).",
+      en: "A customer takes {payback} to pay back its cost: maybe longer than your runway ({n}).",
     },
     /** C49, Antoine: with no runway typed, a payback of 30 months or more warns. */
     warnFloor: {
-      fr: "Rembourser un client prend {payback} : {n} ou plus. Tu gagnes de l'argent, mais tard. Saisis ton runway dans les Réglages pour y comparer ton payback.",
-      en: "Paying back a customer takes {payback}: {n} or more. You make money, but late. Type your runway in Settings to hold your payback against it.",
+      fr: "Un client met {payback} à rembourser son coût : {n} ou plus. Tu gagnes de l'argent, mais tard. Saisis ton runway dans les Réglages pour y comparer ton payback.",
+      en: "A customer takes {payback} to pay back its cost: {n} or more. You make money, but late. Type your runway in Settings to hold your payback against it.",
     },
     warnFloorMaybe: {
-      fr: "Rembourser un client prend {payback} : peut-être {n} ou plus. Saisis ton runway dans les Réglages pour y comparer ton payback.",
-      en: "Paying back a customer takes {payback}: maybe {n} or more. Type your runway in Settings to hold your payback against it.",
+      fr: "Un client met {payback} à rembourser son coût : peut-être {n} ou plus. Saisis ton runway dans les Réglages pour y comparer ton payback.",
+      en: "A customer takes {payback} to pay back its cost: maybe {n} or more. Type your runway in Settings to hold your payback against it.",
     },
   },
 
@@ -1247,7 +1249,7 @@ export const ENGINE_COPY = {
     saMrr: { fr: "MRR assisté", en: "Sales-assisted MRR" },
     sumMrr: { fr: "MRR total", en: "Total MRR" },
     /**
-     * TODO: à relire (convention 6) — neuf le 2026-10-03 (A20.d T3.b, le retour du brief 09, `total.arr`, `total.mrr12`,
+     * Validé au bon à tirer nº10 (2026-10-04) — neuf le 2026-10-03 (A20.d T3.b, le retour du brief 09, `total.arr`, `total.mrr12`,
      * `total.cash`) : the band's line of what adds up across the two engines, and only that. The LTV, the payback and the
      * loss never add: each engine's money block carries its own.
      */
@@ -1613,7 +1615,7 @@ export const ENGINE_COPY = {
     kpiLtv: { fr: "LTV", en: "LTV" },
     kpiPayback: { fr: "CAC payback", en: "CAC payback" },
     /**
-     * TODO: à relire (convention 6) — neuf le 2026-10-03 (A20.d T3.b, le retour du brief 09, `panel.*` et `row.*`) : the
+     * Validé au bon à tirer nº10 (2026-10-04) — neuf le 2026-10-03 (A20.d T3.b, le retour du brief 09, `panel.*` et `row.*`) : the
      * panel's three tables (`WhatIfFigures`), replacing its seven tiles — their groups, their columns, the rows the money
      * adds, and how a change that did not happen, or a customer who leaves before paying back, is said.
      */
@@ -1643,7 +1645,7 @@ export const ENGINE_COPY = {
       en: "Cash tied up: the month's acquisition spend × the payback ÷ 2. Each month's spend comes back evenly over the payback; churn and contraction, which slow it, are not counted (a floor), unless expansion outpaces them. Monthly billing. The same spend with the what-ifs: more payers make each one cheaper.",
     },
     /**
-     * TODO: à relire (convention 6) — neuf le 2026-10-03 (A20.d T3.b), écrit par la session, absent du retour 09 :
+     * Validé au bon à tirer nº10 (2026-10-04) — neuf le 2026-10-03 (A20.d T3.b), écrit par la session, absent du retour 09 :
      * `assumeLtvSlg`, `assumeCashSlg` — sales-assisted's two, in its own words (renewals, the ACV).
      */
     assumeLtvSlg: {
@@ -1660,7 +1662,7 @@ export const ENGINE_COPY = {
     together: { fr: "Ensemble : {total}, soit {extra} de plus que la somme des leviers pris seuls : c'est l'effet composé.", en: "Together: {total}, {extra} more than the sum of the levers taken alone: that's the compounding." },
     togetherNoExtra: { fr: "Ensemble : {total}.", en: "Together: {total}." },
     /**
-     * TODO: à relire (convention 6) — neuf le 2026-10-03 (A20.d T3.b, le retour du brief 09, `sum.oneByOne`, `sum.together`,
+     * Validé au bon à tirer nº10 (2026-10-04) — neuf le 2026-10-03 (A20.d T3.b, le retour du brief 09, `sum.oneByOne`, `sum.together`,
      * `sum.extra`) : the panel's compounding, drawn (`LeverSum`): its two bars' labels, and the sentence that says what the
      * bracket measures. The slides keep `together` until T4 draws them the same way.
      */
@@ -1855,7 +1857,19 @@ export const ENGINE_COPY = {
         en: "A count several numbers use, like the month's sign-ups. Typed once: change it in one number and it changes in the others, except one it would make impossible: that one keeps its own base, and its screen says so.",
       },
     },
-    /** TODO: à relire (convention 6) — neuf le 2026-10-03 (A20.d T2, le retour du brief 09) : the cash a pace of acquisition keeps out of the bank (§20.6). */
+    /**
+     * TODO: à relire (convention 6) — neuf le 2026-10-04 (bon à tirer nº10, carte `money-head`, Antoine : « Rajouter un ?
+     * sur l'ARR […] revenu annuel extrapolé à partir du revenu mensuel ») : l'ARR du bloc d'argent n'est pas un revenu
+     * acquis. La durée des contrats n'est pas demandée (laissée de côté le même jour, `CHANTIERS.md` E).
+     */
+    arr: {
+      term: { fr: "ARR", en: "ARR" },
+      definition: {
+        fr: "Ton revenu annuel, extrapolé de ton revenu mensuel : le MRR × 12, comme si rien ne changeait pendant un an. Ce n'est pas un revenu acquis : avec des contrats au mois, des résiliations le font baisser dès le mois suivant.",
+        en: "Your annual revenue, extrapolated from your monthly revenue: the MRR × 12, as if nothing changed for a year. It isn't guaranteed revenue: on monthly contracts, cancellations bring it down the very next month.",
+      },
+    },
+    /** Validé au bon à tirer nº10 (2026-10-04) — neuf le 2026-10-03 (A20.d T2, le retour du brief 09) : the cash a pace of acquisition keeps out of the bank (§20.6). */
     cashTied: {
       term: { fr: "trésorerie immobilisée", en: "cash tied up" },
       definition: {
@@ -1863,7 +1877,7 @@ export const ENGINE_COPY = {
         en: "What your acquisition keeps out of the bank at any time. Each month you spend to win new customers; each of them pays that back over the payback. At a steady pace, half a payback's worth of spend is out. A floor: churn and contraction slow the return.",
       },
     },
-    /** TODO: à relire (convention 6) — neuf le 2026-10-03 (A20.d T2) : the customer's lifetime minus the payback (§20.5). */
+    /** Validé au bon à tirer nº10 (2026-10-04) — neuf le 2026-10-03 (A20.d T2) : the customer's lifetime minus the payback (§20.5). */
     afterPayback: {
       term: { fr: "mois après remboursement", en: "months after payback" },
       definition: {
@@ -1872,7 +1886,7 @@ export const ENGINE_COPY = {
       },
     },
     /**
-     * TODO: à relire (convention 6) — neuf le 2026-10-03 (A20.d T5, C49) : le « ? » du runway dans les Réglages. La
+     * Validé au bon à tirer nº10 (2026-10-04) — neuf le 2026-10-03 (A20.d T5, C49) : le « ? » du runway dans les Réglages. La
      * définition est celle du retour du brief 09 (`term.runway`), ouverte par « Tes mois de trésorerie » à la demande
      * d'Antoine.
      */
@@ -2154,7 +2168,7 @@ export const ENGINE_COPY = {
     unitCap: { fr: "durée de vie plafonnée à 36 mois", en: "lifetime capped at 36 months" },
     unitReference: { fr: "repère couramment cité", en: "commonly cited reference" },
     /**
-     * TODO: à relire (convention 6) — neuf le 2026-10-03 (A20.d T4.c, retour du brief 09, Q12) : la slide d'unit
+     * Validé au bon à tirer nº10 (2026-10-04), sauf les quatre `unitWarn*`, réécrites et marquées plus bas — neuf le 2026-10-03 (A20.d T4.c, retour du brief 09, Q12) : la slide d'unit
      * economics avec l'argent. Ses deux tuiles neuves (les mois après remboursement, la trésorerie immobilisée), leurs
      * notes, la ligne de rétention qui remplace les tuiles GRR et NRR, l'alerte de payback long au « nous » d'une
      * slide (C49), ce que suppose la trésorerie, et les mots du graphique (`PaybackChart`).
@@ -2184,22 +2198,24 @@ export const ENGINE_COPY = {
     },
     unitRetentionMissing: { fr: "Il manque {input}.", en: "Missing: {input}." },
     unitRetentionUnknown: { fr: "GRR et NRR incalculables : il manque {input}.", en: "GRR and NRR can't be computed. Missing: {input}." },
+    // TODO: à relire (convention 6) — réécrit le 2026-10-04 (bon à tirer nº10, carte `d-warn-gain`) : les quatre
+    // `unitWarn*` disent « un client met {payback} à rembourser son coût ».
     /** C49, on a slide: « nous », and no « saisis ton runway » — a slide gives the room no orders. `{n}`: « 24 mois », « 30 mois », a duration with its unit. */
     unitWarnRunway: {
-      fr: "Rembourser un client prend {payback}, plus que notre runway ({n}) : nous gagnons de l'argent, mais peut-être après la fin de notre trésorerie.",
-      en: "Paying back a customer takes {payback}, longer than our runway ({n}): we make money, but maybe after our cash runs out.",
+      fr: "Un client met {payback} à rembourser son coût, plus que notre runway ({n}) : nous gagnons de l'argent, mais peut-être après la fin de notre trésorerie.",
+      en: "A customer takes {payback} to pay back its cost, longer than our runway ({n}): we make money, but maybe after our cash runs out.",
     },
     unitWarnRunwayMaybe: {
-      fr: "Rembourser un client prend {payback} : peut-être plus que notre runway ({n}).",
-      en: "Paying back a customer takes {payback}: maybe longer than our runway ({n}).",
+      fr: "Un client met {payback} à rembourser son coût : peut-être plus que notre runway ({n}).",
+      en: "A customer takes {payback} to pay back its cost: maybe longer than our runway ({n}).",
     },
     unitWarnFloor: {
-      fr: "Rembourser un client prend {payback} : {n} ou plus. Nous gagnons de l'argent, mais tard.",
-      en: "Paying back a customer takes {payback}: {n} or more. We make money, but late.",
+      fr: "Un client met {payback} à rembourser son coût : {n} ou plus. Nous gagnons de l'argent, mais tard.",
+      en: "A customer takes {payback} to pay back its cost: {n} or more. We make money, but late.",
     },
     unitWarnFloorMaybe: {
-      fr: "Rembourser un client prend {payback} : peut-être {n} ou plus.",
-      en: "Paying back a customer takes {payback}: maybe {n} or more.",
+      fr: "Un client met {payback} à rembourser son coût : peut-être {n} ou plus.",
+      en: "A customer takes {payback} to pay back its cost: maybe {n} or more.",
     },
     /** What the cash tile assumes, printed with it, as every « Et si » assumption is. */
     unitAssume: {
@@ -2242,7 +2258,7 @@ export const ENGINE_COPY = {
       en: "One customer, month by month: its cost is known ({cac}), what it brings back is not. Missing: {input}.",
     },
     /**
-     * TODO: à relire (convention 6) — neuf le 2026-10-03 (A20.d T4.d, retour du brief 09, Q12) : l'unit economics de
+     * Validé au bon à tirer nº10 (2026-10-04) — neuf le 2026-10-03 (A20.d T4.d, retour du brief 09, Q12) : l'unit economics de
      * l'hybride, les deux moteurs côte à côte, de `chartTimeLoss` à `unitBothReference`. La ligne des mois du graphique
      * en petit, ce que dit chaque côté du titre quand une perte est certaine, et la note commune sous les deux colonnes.
      * Provenance : du retour (COPY.md) `chartTimeLoss`, `chartTimeHealthy` (`slide.chart.time*`), `unitSideLoss` et
@@ -2335,7 +2351,7 @@ export const ENGINE_COPY = {
      */
     whatIfLeverRow: { fr: "à {to} (aujourd'hui : {from}) · {gain}", en: "from {from} to {to} · {gain}" },
     /**
-     * TODO: à relire (convention 6) — neuf le 2026-10-03 (A20.d T4.b, le retour du brief 09, `curve.whatifSlide`,
+     * Validé au bon à tirer nº10 (2026-10-04) — neuf le 2026-10-03 (A20.d T4.b, le retour du brief 09, `curve.whatifSlide`,
      * `curve.togetherSlide`) : the what-if slides' curve, its line's name — « this » what-if on a lever's slide, « the
      * {n} » on the one that adds them up — and the line that replaces a funnel (or a quarter) the lever leaves as it is.
      */
@@ -2343,7 +2359,7 @@ export const ENGINE_COPY = {
     curveWhatifAll: { fr: "avec les {n} « Et si »", en: "with the {n} what-ifs" },
     funnelUnmoved: { fr: "Ce levier laisse le funnel du mois tel quel.", en: "This lever leaves the month's funnel as it is." },
     /**
-     * TODO: à relire (convention 6) — neuf le 2026-10-03 (A20.d T4.b), écrit par la session, absent du retour :
+     * Validé au bon à tirer nº10 (2026-10-04) — neuf le 2026-10-03 (A20.d T4.b), écrit par la session, absent du retour :
      * sales-assisted's, whose second table holds the quarter's opportunities and deals — not « the quarter », which
      * would read as its MRR, which the curve beside it shows moving.
      */
@@ -2515,7 +2531,7 @@ export const ENGINE_COPY = {
       en: "**We can't yet say what a customer is worth.** Missing: {input}.",
     },
     /**
-     * TODO: à relire (convention 6) — neuf le 2026-10-03 (A20.d T4.c, C48) : la perte certaine titre la slide, qui monte
+     * Validé au bon à tirer nº10 (2026-10-04) — neuf le 2026-10-03 (A20.d T4.c, C48) : la perte certaine titre la slide, qui monte
      * en nº 2. Son accent porte la perte, à l'encre, jamais en rouge (C53). `{cac}`: au chiffre saisi ; `{ltv}`, `{gap}`: « ~1 500 € ».
      */
     unitEconomicsLoss: {
@@ -2635,7 +2651,7 @@ export const ENGINE_COPY = {
       en: "**We can't yet say what a customer is worth**: gross margin isn't measured for either engine.",
     },
     /**
-     * TODO: à relire (convention 6) — neuf le 2026-10-03 (A20.d T4.d, C48, retour du brief 09 : `slide.unit.titleBoth`,
+     * Validé au bon à tirer nº10 (2026-10-04) — neuf le 2026-10-03 (A20.d T4.d, C48, retour du brief 09 : `slide.unit.titleBoth`,
      * découpé) : l'hybride quand une perte est certaine
      * d'un côté au moins. `{plg}`, `{slg}`: `slide.unitSide*` (« on perd ~400 € par nouveau client », « remboursé en
      * 19 mois », « on ne peut pas encore dire ce que rapporte un client »). Sans accent : à l'encre, comme toute perte (C53).
@@ -2772,7 +2788,7 @@ export const ENGINE_COPY = {
       en: "We can't say how many months a customer takes to pay back their acquisition cost. Missing: {input}.",
     },
     /**
-     * TODO: à relire (convention 6) — neuf le 2026-10-03 (A20 T1, C48, le retour du brief 09) : the loss, said
+     * Validé au bon à tirer nº10 (2026-10-04) — neuf le 2026-10-03 (A20 T1, C48, le retour du brief 09) : the loss, said
      * once, as money (`unit-econ-loss`, rank 1). `{cac}` as typed, `{ltv}` and `{gap}` as estimates (« ~1 500 € »).
      * Arithmetic on the team's own numbers: it names no stage and asserts no cause.
      */
@@ -2780,7 +2796,7 @@ export const ENGINE_COPY = {
       fr: "Chaque nouveau client coûte {cac} et rapporte {ltv} de marge : tu perds {gap} sur chacun.",
       en: "Each new customer costs {cac} and brings back {ltv} of margin: you lose {gap} on each one.",
     },
-    /** TODO: à relire (convention 6) — neuf le 2026-10-03 (A20 T1, C48) : the same, the two ranges overlapping (`unit-econ-loss-maybe`, rank 2). */
+    /** Validé au bon à tirer nº10 (2026-10-04) — neuf le 2026-10-03 (A20 T1, C48) : the same, the two ranges overlapping (`unit-econ-loss-maybe`, rank 2). */
     unitEconLossMaybe: {
       fr: "Un nouveau client coûte {cac} et rapporte {ltv} de marge : il ne rembourse peut-être pas ce qu'il coûte.",
       en: "A new customer costs {cac} and brings back {ltv} of margin: it may not pay back what it costs.",
@@ -2969,7 +2985,7 @@ export const ENGINE_COPY = {
     windowHint: { fr: "La fenêtre : le nombre de jours qu'a un inscrit pour que ça compte.", en: "The window: how many days a sign-up has for it to count." },
     wholeCount: { fr: "Un nombre entier plus grand que zéro.", en: "A whole number above zero." },
     /**
-     * TODO: à relire (convention 6) — neuf le 2026-10-03 (A20.d T5, C49, le retour du brief 09 : `settings.cash`,
+     * Validé au bon à tirer nº10 (2026-10-04), sauf `runwayHint`, réécrite et marquée plus bas — neuf le 2026-10-03 (A20.d T5, C49, le retour du brief 09 : `settings.cash`,
      * `settings.runway`, `settings.runwayHint`, `settings.months`) : le runway, facultatif, dans les Réglages. Le mot
      * reste « runway » avec son « ? » (Antoine : « ça correspond à tes mois de trésorerie », `terms.runway`).
      * `runwayMonths` est `settings.months` du retour ; `runwayMonth`, son singulier, et `runwayRange`, la garde de
@@ -2978,9 +2994,11 @@ export const ENGINE_COPY = {
      */
     cash: { fr: "Trésorerie", en: "Cash" },
     runway: { fr: "Runway, en mois", en: "Runway, in months" },
+    // TODO: à relire (convention 6) — réécrit le 2026-10-04 (bon à tirer nº10, carte `d-warn-gain`) : « un client met
+    // plus longtemps à rembourser son coût ».
     runwayHint: {
-      fr: "Sert seulement à te prévenir quand rembourser un client prend plus longtemps.",
-      en: "Only used to warn you when paying back a customer takes longer.",
+      fr: "Sert seulement à te prévenir quand un client met plus longtemps à rembourser son coût.",
+      en: "Only used to warn you when a customer takes longer to pay back its cost.",
     },
     /** The box's unit, in the typed number's grammatical number (`wordUnit`): « 1 mois », "1 month", "24 months". */
     runwayMonth: { fr: "mois", en: "month" },

@@ -13,7 +13,8 @@ import type { EngineView } from "./view";
  * the diagnosis, one flat ruled block — the MRR and its ARR, what one new
  * customer is worth, the cash it ties up and, past the team's runway or 30
  * months, the warning. The words it teaches carry the engine's « ? »
- * (`EngineTerm`): « trésorerie immobilisée », « mois après remboursement ».
+ * (`EngineTerm`): « ARR » (bon à tirer nº10, 2026-10-04), « trésorerie immobilisée », « mois après
+ * remboursement ».
  */
 export function BoardMoney({ view, motion, hybrid }: { view: EngineView; motion: Motion; hybrid: boolean }) {
   const m = moneyView(view, motion, hybrid);
@@ -22,7 +23,21 @@ export function BoardMoney({ view, motion, hybrid }: { view: EngineView; motion:
     <MoneyBlock
       eyebrow={m.eyebrow}
       headingId={`engine-money-title-${motion}`}
-      figures={m.figures}
+      figures={
+        m.figures?.map((f) =>
+          f.key === "arr"
+            ? {
+                ...f,
+                label: (
+                  <>
+                    {f.label}
+                    <EngineTerm id="arr" strings={strings} />
+                  </>
+                ),
+              }
+            : f,
+        ) ?? null
+      }
       worth={{
         title: m.worth.title,
         tag: m.worth.tag ?? undefined,

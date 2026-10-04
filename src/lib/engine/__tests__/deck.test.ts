@@ -695,7 +695,7 @@ describe("A20.d T4.c — the unit economics with the money", () => {
     const model = deck(late());
     expect(unit(model).title.key).toBe("unitEconomics");
     expect(order(model).indexOf("unit-economics")).toBe(3);
-    expect(row(model, "warning")!.text).toBe("Rembourser un client prend 32 mois : 30 mois ou plus. Nous gagnons de l'argent, mais tard.");
+    expect(row(model, "warning")!.text).toBe("Un client met 32 mois à rembourser son coût : 30 mois ou plus. Nous gagnons de l'argent, mais tard.");
     expect(row(model, "after")).toMatchObject({ value: "~4 mois", note: "" });
     const chart = unit(model).paybackChart!;
     expect(chart.story).toBe("pays-back");
@@ -707,7 +707,7 @@ describe("A20.d T4.c — the unit economics with the money", () => {
     const state = late();
     state.setup = { ...state.setup, runwayMonths: 24 };
     expect(row(deck(state, "en"), "warning")!.text).toBe(
-      "Paying back a customer takes 32 months, longer than our runway (24 months): we make money, but maybe after our cash runs out.",
+      "A customer takes 32 months to pay back its cost, longer than our runway (24 months): we make money, but maybe after our cash runs out.",
     );
   });
 

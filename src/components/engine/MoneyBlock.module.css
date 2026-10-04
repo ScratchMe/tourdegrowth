@@ -98,6 +98,7 @@
 
 /* The "?" of a word it teaches sits in a label: its definition reads as
  * body text, not as the label's capitals. */
+.figureLabel :global([role="dialog"]),
 .factLabel :global([role="dialog"]) {
   text-transform: none;
   letter-spacing: normal;

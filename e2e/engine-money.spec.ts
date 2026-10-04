@@ -72,6 +72,23 @@ test("the §6.0 example has its money in ranges (C50): an estimated margin, heal
   await expect(page.getByTestId("engine-money-warning")).toHaveCount(0);
 });
 
+test("the ARR's « ? » says it is the MRR × 12, extrapolated, not revenue in the bank (bon à tirer nº10)", async ({ page }) => {
+  for (const locale of ["fr", "en"] as const) {
+    await page.setViewportSize({ width: locale === "fr" ? 390 : 1280, height: 900 });
+    await open(page, exampleState(), locale);
+    const figure = page.getByTestId("engine-money-plg-figure-arr");
+    await expect(figure).toContainText(M.arr[locale]);
+    const term = figure.getByTestId("engine-term-arr");
+    await expect(term).toHaveAttribute("aria-label", T.label[locale].replace("{term}", T.arr.term[locale]));
+    await term.click();
+    await expect(page.getByRole("dialog")).toContainText(T.arr.definition[locale]);
+    // Read as body text, not in the label's capitals.
+    expect(await page.getByRole("dialog").evaluate((el) => getComputedStyle(el).textTransform)).toBe("none");
+    // The MRR, the typed fact, has none.
+    await expect(page.getByTestId("engine-money-plg-figure-mrr").getByTestId(/^engine-term-/)).toHaveCount(0);
+  }
+});
+
 test("without a margin: « ? », what is missing, and the « ? » of « cash tied up » teaches the word", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   // The example as it was before C50 gave it a margin.
