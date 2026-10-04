@@ -15,8 +15,13 @@
  *
  * THIS module is the only one that reads `process.env.ENGINE_ENABLED`
  * (`engine-boundary.test.ts` holds that): the proxy asks
- * `engineEnvFlag()`, the page asks `isEngineOpenAtBuild()`.
+ * `engineEnvFlag()`, the page asks `isEngineOpenAtBuild()`. The same goes for
+ * `ENGINE_TYPES`, the business types open in a build (§21.3): `engineTypesFlag()`
+ * and `openTypesAtBuild()`.
  */
+
+import { ALWAYS_OPEN_TYPE, BUSINESS_TYPES } from "./setup-type";
+import type { BusinessType } from "./types";
 
 export type EngineAccess = "open" | "closed";
 
@@ -77,4 +82,24 @@ export function engineOpenWith(env: string | undefined): boolean {
  */
 export function isEngineOpenAtBuild(): boolean {
   return engineOpenWith(engineEnvFlag());
+}
+
+/** The raw ENGINE_TYPES value: a comma-separated list of extra business types (§21.3). */
+export function engineTypesFlag(): string | undefined {
+  return process.env.ENGINE_TYPES;
+}
+
+/**
+ * The business types open in THIS build: always b2b-saas, plus each known
+ * type listed in ENGINE_TYPES (comma-separated, spaces ignored, unknown names
+ * ignored, duplicates once), in BUSINESS_TYPES order. Pure on its input.
+ */
+export function openTypesWith(env: string | undefined): BusinessType[] {
+  const listed = new Set((env ?? "").split(",").map((name) => name.trim()));
+  return BUSINESS_TYPES.filter((type) => type === ALWAYS_OPEN_TYPE || listed.has(type));
+}
+
+/** Read at build by the page, never by the island: the page is static (●). */
+export function openTypesAtBuild(): BusinessType[] {
+  return openTypesWith(engineTypesFlag());
 }

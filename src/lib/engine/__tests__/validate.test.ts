@@ -292,6 +292,64 @@ describe("validateEngine — the team's runway (§20.8, C49, A20 T1)", () => {
   });
 });
 
+describe("validateEngine — the consumer app's setup (engine spec §21.6.3, A22 APP-0)", () => {
+  // Non-vacuity, measured on 2026-10-04 (each sabotage alone, the six test files of this unit run): comparing the
+  // type with the single literal `"b2b-saas"` instead of `BUSINESS_TYPES` falls five (three here, two in `io.test.ts`);
+  // dropping the `errors.push` of the monetization check falls « without its monetization » here and the one of
+  // `io.test.ts` that reads its message; dropping the « only for a consumer app » branch falls « nothing else carries »
+  // alone; dropping the « sells self-serve only » branch falls the motions case alone.
+  const app = (extra: Partial<EngineState["setup"]> = {}): EngineState => {
+    const s = fullState();
+    return { ...s, setup: { ...s.setup, type: "consumer-app", monetization: { subscriptions: true, purchases: false, ads: false }, ...extra } };
+  };
+  const NO_MONETIZATION = "setup.monetization: not three booleans, one at least true";
+
+  it("an app is valid with the three boxes saying what it earns from, one at least ticked", () => {
+    expect(validateEngine(app())).toEqual([]);
+    for (const [subscriptions, purchases, ads] of [
+      [true, false, false],
+      [false, true, false],
+      [false, false, true],
+      [true, true, false],
+      [true, false, true],
+      [false, true, true],
+      [true, true, true],
+    ] as const) {
+      expect(validateEngine(app({ monetization: { subscriptions, purchases, ads } })), `${subscriptions} ${purchases} ${ads}`).toEqual([]);
+    }
+  });
+
+  it("an app without its monetization, with no box ticked, or with something else than three booleans, is refused", () => {
+    const noField = app();
+    delete (noField.setup as { monetization?: unknown }).monetization;
+    expect(validateEngine(noField)).toEqual([NO_MONETIZATION]);
+    expect(validateEngine(app({ monetization: { subscriptions: false, purchases: false, ads: false } }))).toEqual([NO_MONETIZATION]);
+    for (const monetization of [{ subscriptions: true, purchases: false } as never, { subscriptions: "yes", purchases: false, ads: false } as never, [] as never, null as never]) {
+      expect(validateEngine(app({ monetization })), JSON.stringify(monetization)).toEqual([NO_MONETIZATION]);
+    }
+  });
+
+  it("an app sells self-serve only: the sales-assisted box, alone or with the other, is refused — and no box ticked says only that", () => {
+    const refused = ["setup.motions: a consumer app sells self-serve only"];
+    expect(validateEngine(app({ motions: { plg: true, slg: true } }))).toEqual(refused);
+    expect(validateEngine(app({ motions: { plg: false, slg: true } }))).toEqual(refused);
+    expect(validateEngine(app({ motions: { plg: false, slg: false } }))).toEqual(["setup.motions: none ticked"]);
+    expect(validateEngine(app({ motions: { plg: true } as never }))).toEqual(["setup.motions: not two booleans (plg, slg)"]);
+  });
+
+  it("nothing else carries a monetization: a B2B SaaS with one is refused, an unknown type with one gets both messages", () => {
+    const s = fullState();
+    const monetization = { subscriptions: true, purchases: false, ads: false };
+    expect(validateEngine({ ...s, setup: { ...s.setup, monetization } })).toEqual(["setup.monetization: only for a consumer app"]);
+    expect(validateEngine({ ...s, setup: { ...s.setup, type: "marketplace" as never, monetization } })).toEqual([
+      "setup.type: unknown type",
+      "setup.monetization: only for a consumer app",
+    ]);
+    // The place of the marketplace is still « unknown »: it comes with §22, never with the app.
+    expect(validateEngine({ ...s, setup: { ...s.setup, type: "marketplace" as never } })).toEqual(["setup.type: unknown type"]);
+  });
+});
+
 describe("validateEntry — a status without the fields that make it true is refused", () => {
   it("a bounded ratio can't have more on top than below (the one blocking check, D11)", () => {
     const e = entry({ status: "measured", value: { kind: "ratio", numerator: 120, denominator: 100 }, source: { kind: "tool", tool: "ga4" } });

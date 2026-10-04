@@ -19,8 +19,11 @@ import type { EngineWorkbenchProps } from "./EngineWorkbench";
  * the link), so the prose and the shape always line up index by index as
  * well as by id. All of it travels whatever the setup: the motions are the
  * user's, read in the browser, and the island filters with `shapesOf`.
+ *
+ * Not the `openTypes` prop (§21.3): it comes from the build's environment, which
+ * this function does not read — the page adds it (`openTypesAtBuild()`).
  */
-export function resolveEngineProps(locale: Locale): EngineWorkbenchProps {
+export function resolveEngineProps(locale: Locale): Omit<EngineWorkbenchProps, "openTypes"> {
   const metrics: ResolvedMetric[] = ALL_METRIC_SHAPES.map((shape) => ({
     id: shape.id,
     ...resolveTree(ENGINE_CATALOG[shape.id], locale),

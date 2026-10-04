@@ -1,6 +1,8 @@
+import { motionsAllowed } from "./business-type";
 import { migrateToV3 } from "./migrate";
+import { BUSINESS_TYPES } from "./setup-type";
 import type { EngineStrings } from "./strings";
-import { ENGINE_SCHEMA_VERSION, YEAR_MONTH_PATTERN, type EngineState } from "./types";
+import { ENGINE_SCHEMA_VERSION, MOTIONS, YEAR_MONTH_PATTERN, type BusinessType, type EngineState } from "./types";
 import { validateEngine } from "./validate";
 
 /**
@@ -90,15 +92,21 @@ export function parseEngineFile(text: string): ParsedEngineFile {
 const READABLE_VERSIONS: readonly number[] = [1, 2, ENGINE_SCHEMA_VERSION];
 
 /**
- * A setup the board can show at all (§18.3.2): a known type, and at least one
- * way of selling ticked. Refused rather than opened with errors — there
- * would be nothing to draw, and « Remplacer » would replace an engine with
- * an empty one.
+ * A setup the board can show at all (§18.3.2, §21.6.3): a known type, and at
+ * least one way of selling ticked, every ticked one being one the type
+ * allows (a consumer app sells self-serve only). Refused rather than opened
+ * with errors — there would be nothing to draw, and « Remplacer » would
+ * replace an engine with an empty one. The app's monetization is not read
+ * here: an app without one opens, and the validator says so.
  */
 function sellsSomehow(state: EngineState): boolean {
   const setup = state.setup as unknown as Record<string, unknown>;
   const motions = setup.motions as Record<string, unknown> | undefined;
-  return setup.type === "b2b-saas" && typeof motions === "object" && motions !== null && (motions.plg === true || motions.slg === true);
+  if (typeof setup.type !== "string" || !(BUSINESS_TYPES as readonly string[]).includes(setup.type)) return false;
+  if (typeof motions !== "object" || motions === null) return false;
+  const allowed = motionsAllowed(setup.type as BusinessType);
+  const ticked = MOTIONS.filter((motion) => motions[motion] === true);
+  return ticked.length > 0 && ticked.every((motion) => allowed.includes(motion));
 }
 
 /**
