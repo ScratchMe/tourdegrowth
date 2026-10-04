@@ -1,5 +1,6 @@
 import { ALL_LEVER_IDS, ALL_METRIC_SHAPES, TEXT_LIMITS, shapeOf, type MetricShape } from "./catalog-shape";
 import { SHARED_COUNT_IDS, WHOLE_SHARED_COUNTS } from "./shared-counts";
+import { BUSINESS_TYPES } from "./setup-type";
 import { BASIS_KEY, CAUSE_KEY, REPAIR_KEY, ROLE_KEY, STATUS_KEY } from "./strings";
 import {
   DECK_THEMES,
@@ -260,10 +261,18 @@ function setupErrors(setup: unknown): string[] {
   if (!isObj(setup)) return ["setup: missing"];
   const errors: string[] = [];
   // Decision 3 (§18.1): the type, then how it sells — at least one motion, the hybrid being both.
-  if (setup.type !== "b2b-saas") errors.push("setup.type: unknown type");
+  if (!oneOf(BUSINESS_TYPES, setup.type)) errors.push("setup.type: unknown type");
   const motions = setup.motions;
   if (!isObj(motions) || !isBool(motions.plg) || !isBool(motions.slg)) errors.push("setup.motions: not two booleans (plg, slg)");
   else if (!motions.plg && !motions.slg) errors.push("setup.motions: none ticked");
+  else if (setup.type === "consumer-app" && (!motions.plg || motions.slg)) errors.push("setup.motions: a consumer app sells self-serve only");
+  // §21 (C56, C92): a consumer app says what it earns from, three booleans with one at least true; nothing else has the field.
+  if (setup.type === "consumer-app") {
+    const m = setup.monetization;
+    if (!isObj(m) || !isBool(m.subscriptions) || !isBool(m.purchases) || !isBool(m.ads) || !(m.subscriptions || m.purchases || m.ads)) {
+      errors.push("setup.monetization: not three booleans, one at least true");
+    }
+  } else if (setup.monetization !== undefined) errors.push("setup.monetization: only for a consumer app");
   if (!oneOf(CURRENCIES, setup.currency)) errors.push("setup.currency: unknown currency");
   if (![7, 14, 30].includes(setup.activationWindowDays as number)) errors.push("setup.activationWindowDays: not 7, 14 or 30");
   if (![30, 60, 90].includes(setup.paidWindowDays as number)) errors.push("setup.paidWindowDays: not 30, 60 or 90");

@@ -43,6 +43,12 @@ env:
   # the unit tests of the resolver, the proxy and the build flag — the same
   # split the /admin gate uses.
   GAME_ENABLED: "true"
+  # The consumer app type (engine spec §21.3, A22): the build opens it, so its
+  # start card and its screens are exercised end to end from the unit that
+  # draws them (APP-7). It is a list read at build by the engine's page and
+  # nowhere else, independent of ENGINE_ENABLED: nothing changes for the
+  # B2B SaaS, which every build opens.
+  ENGINE_TYPES: "consumer-app"
 
 jobs:
   check:

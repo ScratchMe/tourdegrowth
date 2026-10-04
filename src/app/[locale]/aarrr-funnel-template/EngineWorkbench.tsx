@@ -7,7 +7,7 @@ import { EngineStart, type StartMotion } from "@/components/engine/EngineStart";
 import { EngineTermScope } from "./_engine/EngineTerm";
 import { motionOfMetric, motionShapes, shapeOf } from "@/lib/engine/catalog-shape";
 import type { EngineStrings, ResolvedBridge, ResolvedDerived, ResolvedMetric } from "@/lib/engine/strings";
-import { MAX_ENGINES, type EngineCalcContext, type EngineDerived, type EngineSetup, type EngineState, type LeverId, type MetricEntry, type MetricId, type Motion, type MotionDerived, type RoleId, type SlideTitle, type Snapshot, type YearMonth } from "@/lib/engine/types";
+import { MAX_ENGINES, type BusinessType, type EngineCalcContext, type EngineDerived, type EngineSetup, type EngineState, type LeverId, type MetricEntry, type MetricId, type Motion, type MotionDerived, type RoleId, type SlideTitle, type Snapshot, type YearMonth } from "@/lib/engine/types";
 import type { Locale } from "@/lib/i18n/locale";
 import { Board } from "./_engine/Board";
 import type { SeriesControls } from "./_engine/BoardHead";
@@ -63,6 +63,11 @@ export interface EngineWorkbenchProps {
   derived: ResolvedDerived[];
   /** The eight Tour bridges, question text and options in the Tour's order (§6.11). */
   bridges: ResolvedBridge[];
+  /**
+   * The business types this build opens (§21.3, `ENGINE_TYPES`): b2b-saas always, then the ones the variable lists.
+   * Read by the page at build, never by the island. Read by no screen yet: the start card's choice does, from APP-7.
+   */
+  openTypes: BusinessType[];
 }
 
 /**

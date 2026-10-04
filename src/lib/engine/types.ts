@@ -22,6 +22,8 @@
  * in the engine's currency, never converted. Durations keep their own unit.
  */
 
+import type { AppMonetization } from "./app-model";
+
 /**
  * Several engines per device (engine spec §19.1.4, A14 T0): an index under
  * `ENGINE_INDEX_KEY`, and each engine under its own key, `ENGINE_ENTRY_PREFIX`
@@ -48,11 +50,12 @@ export const LEGACY_STORAGE_KEY_V1 = "tdg.engine.v1";
 export const ENGINE_SCHEMA_VERSION = 3 as const;
 
 /**
- * Decision 3 (2026-09-29, `CHANTIERS.md` C4): the setup separates the TYPE of
- * business from how it SELLS, two axes the v1 profile mixed. One type is
- * open; the consumer app and the marketplace come later (shown, disabled).
+ * Decision 3 (C4), then §21 (C56-C63, C92): the TYPE of business. The consumer
+ * app sells self-serve: the self-serve engine carries its subscriptions, an
+ * app layer its in-app purchases, ads and per-install economics (`app.ts`).
+ * The marketplace comes later (shown, disabled).
  */
-export type BusinessType = "b2b-saas"; // later: | "consumer-app" | "marketplace"
+export type BusinessType = "b2b-saas" | "consumer-app"; // later: | "marketplace"
 /** Self-serve (PLG) and sales-assisted (SLG). Both ticked is the hybrid: derived, never stored (§18.2, S1). */
 export type Motion = "plg" | "slg";
 /** The canonical order, the only one: screens, slides, lists. Never sorted by a value (§18.6.4). */
@@ -327,6 +330,11 @@ export interface EngineSetup {
    * against the 30-month floor (`money.ts#PAYBACK_FLOOR_MONTHS`).
    */
   runwayMonths?: number;
+  /**
+   * Consumer app only (C56, C92): what it earns from, at least one ticked.
+   * Required when `type` is "consumer-app", absent otherwise (validate.ts).
+   */
+  monetization?: AppMonetization;
 }
 
 /**

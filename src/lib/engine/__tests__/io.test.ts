@@ -106,11 +106,36 @@ describe("a v1 file and the v2 setup (engine spec §18.3.2)", () => {
 
   it("a setup that says nothing of how the company sells is refused, not opened empty", () => {
     const noMotion = { ...fullState(), setup: { ...fullState().setup, motions: { plg: false, slg: false } } };
-    const unknownType = { ...fullState(), setup: { ...fullState().setup, type: "consumer-app" } };
+    // The consumer app opens since A22 APP-0 (below); the marketplace is the type no build knows yet.
+    const unknownType = { ...fullState(), setup: { ...fullState().setup, type: "marketplace" } };
     const v1Other = { ...toV1(fullState()), setup: { ...(toV1(fullState()).setup as object), profile: "sales-led" } };
     for (const file of [noMotion, unknownType, v1Other]) {
       expect(parseEngineFile(JSON.stringify(file))).toMatchObject({ state: null, refusal: "unsupported-setup" });
     }
+  });
+
+  it("a consumer app opens with its monetization, and round-trips (§21.6.3, A22 APP-0)", () => {
+    const app: EngineState = { ...fullState(), setup: { ...fullState().setup, type: "consumer-app", monetization: { subscriptions: true, purchases: true, ads: false } } };
+    const parsed = parseEngineFile(serializeEngine(app));
+    expect(parsed.refusal).toBeUndefined();
+    expect(parsed.migratedFrom).toBeUndefined();
+    expect(parsed).toEqual({ state: app, errors: [] });
+  });
+
+  it("a consumer app that also ticks the sales-assisted box is refused, whatever else is in the file", () => {
+    const monetization = { subscriptions: true, purchases: false, ads: false };
+    for (const motions of [{ plg: true, slg: true }, { plg: false, slg: true }]) {
+      const app = { ...fullState(), setup: { ...fullState().setup, type: "consumer-app", monetization, motions } };
+      expect(parseEngineFile(JSON.stringify(app)), JSON.stringify(motions)).toMatchObject({ state: null, refusal: "unsupported-setup" });
+    }
+  });
+
+  it("a consumer app without its monetization is opened, not refused: the validator says what is missing", () => {
+    const app = { ...fullState(), setup: { ...fullState().setup, type: "consumer-app" } };
+    const parsed = parseEngineFile(JSON.stringify(app));
+    expect(parsed.refusal).toBeUndefined();
+    expect(parsed.state).not.toBeNull();
+    expect(parsed.errors).toEqual(["setup.monetization: not three booleans, one at least true"]);
   });
 
   it("a sales-assisted engine opens without a word about migration", () => {

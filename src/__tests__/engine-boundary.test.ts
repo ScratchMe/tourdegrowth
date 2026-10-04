@@ -510,4 +510,15 @@ describe("growth engine boundary (engine spec §11.4)", () => {
     ).map((f) => f.path);
     expect(readers).toEqual(["lib/engine/access.ts"]);
   });
+
+  // §21.3, A22 APP-0: the build's list of open business types has the same single reader. Same expression, the name
+  // changed. Non-vacuity, measured on 2026-10-04: reading `process.env.ENGINE_TYPES` in the engine's page too fails it
+  // (two readers); renaming the read in `access.ts` to `ENGINE_TYPE` fails it (no reader). Like the rule above, the
+  // expression has no word boundary: a read of `ENGINE_TYPES_X` would still count, and a longer name is not caught.
+  it("the types flag has one reader: only lib/engine/access.ts reads ENGINE_TYPES", () => {
+    const readers = FILES.filter(
+      (f) => !f.path.includes("__tests__/") && /process\.env\.ENGINE_TYPES|process\.env\[["']ENGINE_TYPES["']\]/.test(f.source),
+    ).map((f) => f.path);
+    expect(readers).toEqual(["lib/engine/access.ts"]);
+  });
 });

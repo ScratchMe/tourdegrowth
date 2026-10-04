@@ -9,7 +9,7 @@ import { Callout } from "@/components/core/Callout";
 import { Disclosure } from "@/components/core/Disclosure";
 import { EngineLanding } from "@/components/engine/EngineLanding";
 import { ENGINE_COPY } from "@/content/engine-copy";
-import { isEngineOpenAtBuild } from "@/lib/engine/access";
+import { isEngineOpenAtBuild, openTypesAtBuild } from "@/lib/engine/access";
 import { formatInterval } from "@/lib/engine/format";
 import { engineKnownScript } from "@/lib/engine/known-script";
 import { staticCatalogueValues } from "@/lib/engine/phrases";
@@ -262,7 +262,9 @@ export default async function EnginePage({ params }: PageProps) {
           <p className={styles.reserve} data-testid="engine-reserve">
             {t.reserve}
           </p>
-          <EngineWorkbench {...props} />
+          {/* The types this BUILD opens (§21.3, ENGINE_TYPES): read here, on the server, and handed down as a prop —
+              the island never reads the environment. Nothing reads it yet: the start card does, from APP-7. */}
+          <EngineWorkbench {...props} openTypes={openTypesAtBuild()} />
         </section>
 
         {/* How long it takes, under the tool since A18 T4 (the return: the start card says the same counts in one
