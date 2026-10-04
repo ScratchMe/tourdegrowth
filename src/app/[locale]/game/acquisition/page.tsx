@@ -7,7 +7,7 @@ import { isLocale, type Locale } from "@/lib/i18n/locale";
 import { gameMetadata } from "../game-metadata";
 import { GameIsland } from "../_island/GameIsland";
 import type { IslandCopies } from "../_island/sides";
-import { LevelPage, levelPath, otherLevelHref } from "../_level/LevelPage";
+import { LevelPage, levelPath, nextLevelLinks } from "../_level/LevelPage";
 
 const SLUG = "acquisition" as const;
 
@@ -31,7 +31,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
  * `/{locale}/game/acquisition` — level 2, « Comment les gens vous trouvent »
  * (GAME-BRIEF §17, `docs/game/niveau-2.md`), wired on 2026-10-01 (A12.f).
  * Pédalix's year, on the same page as Flixo's (`LevelPage`); its December
- * closes on level 1, « jouable » (C31): the two levels point at each other.
+ * closes on the next level the player has not finished (C75): the page hands
+ * the island every open level, the island chooses.
  */
 export default async function AcquisitionLevelPage({ params }: PageProps) {
   const locale = (await params).locale as Locale;
@@ -49,7 +50,7 @@ export default async function AcquisitionLevelPage({ params }: PageProps) {
           slug={SLUG}
           copy={islandCopy(copy)}
           locale={locale}
-          nextLevelHref={otherLevelHref(locale, "retention")}
+          nextLevels={nextLevelLinks(locale, SLUG)}
         />
       }
     />

@@ -7,7 +7,7 @@ import { isLocale, type Locale } from "@/lib/i18n/locale";
 import { gameMetadata } from "../game-metadata";
 import { GameIsland } from "../_island/GameIsland";
 import type { IslandCopies } from "../_island/sides";
-import { LevelPage, levelPath, otherLevelHref } from "../_level/LevelPage";
+import { LevelPage, levelPath, nextLevelLinks } from "../_level/LevelPage";
 
 const SLUG = "retention" as const;
 
@@ -33,7 +33,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 /**
  * `/{locale}/game/retention` — level 1, « S'ils reviennent » (`LevelPage`).
- * Its December closes on level 2, « jouable » since 2026-10-01 (C31).
+ * Its December closes on the next level the player has not finished (C75): the
+ * page hands the island every open level, the island chooses.
  */
 export default async function RetentionLevelPage({ params }: PageProps) {
   const locale = (await params).locale as Locale;
@@ -51,7 +52,7 @@ export default async function RetentionLevelPage({ params }: PageProps) {
           slug={SLUG}
           copy={islandCopy(copy)}
           locale={locale}
-          nextLevelHref={otherLevelHref(locale, "acquisition")}
+          nextLevels={nextLevelLinks(locale, SLUG)}
         />
       }
     />

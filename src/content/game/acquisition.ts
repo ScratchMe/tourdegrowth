@@ -638,16 +638,10 @@ export const ACQUISITION_CONTENT: DeepTranslatable<AcquisitionCopy> = {
     ),
   },
 
-  // Antoine, 2026-10-01: the two levels point at each other, each « jouable »
-  // — the only next level that exists (docs/decisions.md C31).
-  nextLevel: {
-    eyebrow: t("L'autre niveau", "The other level"),
-    title: t(
-      "« S'ils reviennent » : la pause mise en avant, le bouton enterré, la résiliation par téléphone",
-      '"If they come back": the pause pushed up front, the buried button, cancelling by phone',
-    ),
-    status: t("jouable", "playable"),
-  },
+  // Level 1's, by reference (C75, A24.T0): « Niveau suivant » / « jouable » says
+  // as much at two levels as at five, and the title comes from the level the
+  // block points at (`LEVEL_TEASERS`, content/game/hub.ts).
+  nextLevel: L1.nextLevel,
 
   tourLoop: L1.tourLoop,
 

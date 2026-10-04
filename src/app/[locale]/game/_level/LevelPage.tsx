@@ -4,7 +4,7 @@ import { MetaLabel } from "@/components/brand/MetaLabel";
 import { ProsePage, ProseSection, ProseText } from "@/components/brand/ProsePage";
 import { ZoneNav } from "@/components/game/ZoneNav";
 import { REPO_URL } from "@/content/about";
-import { GAME_HUB } from "@/content/game/hub";
+import { GAME_HUB, LEVEL_TEASERS } from "@/content/game/hub";
 import { GAME_META } from "@/content/game/meta";
 import { GLOSSARY_TERMS, type GlossaryTermId } from "@/content/glossary-terms";
 import { GAME_LEVELS_BY_PILLAR } from "@/lib/game/levels";
@@ -43,6 +43,30 @@ export function levelPath(slug: LevelSlug): string {
 export function otherLevelHref(locale: Locale, slug: LevelSlug): string | undefined {
   const open = Object.values(GAME_LEVELS_BY_PILLAR).some((level) => level?.slug === slug && level.enabled);
   return open ? `${localePath(locale, levelPath(slug))}?from=other_level` : undefined;
+}
+
+/** What the block that closes December needs to point at a level: its page, and the line that announces it. */
+export interface NextLevelLink {
+  href: string;
+  title: string;
+}
+
+/**
+ * Every level the block that closes December may point at, from `slug`'s page
+ * (C75): one entry per open level other than `slug`. The island picks one in
+ * the browser, from what the player has finished, so the page hands it all of
+ * them, in the page's language — the choice cannot be made here without
+ * reading the save, and December is never rendered on the server.
+ */
+export function nextLevelLinks(locale: Locale, slug: LevelSlug): Partial<Record<LevelSlug, NextLevelLink>> {
+  const links: Partial<Record<LevelSlug, NextLevelLink>> = {};
+  for (const level of Object.values(GAME_LEVELS_BY_PILLAR)) {
+    if (!level?.enabled || level.slug === slug) continue;
+    const s = level.slug;
+    const href = otherLevelHref(locale, s);
+    if (href) links[s] = { href, title: tc(LEVEL_TEASERS[s], locale) };
+  }
+  return links;
 }
 
 export interface LevelPageProps {

@@ -13,6 +13,7 @@
  */
 import type { Pillar } from "@/lib/scoring/pillars";
 import type { Sharpness } from "@/lib/scoring/bottleneck";
+import { PILLARS } from "../scoring/pillars";
 import type { GameAccess } from "./access";
 import type { LevelSlug } from "./types";
 
@@ -85,4 +86,39 @@ export function enabledLevelSlugs(levels: GameLevelTable = GAME_LEVELS_BY_PILLAR
   return Object.values(levels)
     .filter((level): level is GameLevelEntry => level?.enabled === true)
     .map((level) => level.slug);
+}
+
+/**
+ * The level that closes a December — « Niveau suivant » (C31, then C75,
+ * Antoine, 2026-10-04): the first open level the player has not finished yet,
+ * in the Tour's order (acquisition, activation, retention, referral, revenue)
+ * from the stage after this level's own, wrapping round. When every other open
+ * level is finished it is simply the next one in that order; when this level
+ * is the only one open there is none, and the block is not drawn.
+ *
+ * Pure, and generic over the slug so a table of all five levels can be
+ * tested before the three last ones are playable (`LevelSlug` names two;
+ * the others are `ModelSlug`s until each one's wiring). No default for the
+ * table: a default typed `GameLevelTable` would not assign to the generic
+ * parameter. « Finished » is whatever the caller says it is — the island
+ * passes the endings in the collection (`finishedLevels`), written by
+ * December itself, whichever ending the year reached.
+ *
+ * With two levels open, each one points at the other, finished or not — C31
+ * still holds.
+ */
+export function nextLevelFor<S extends string>(
+  slug: S,
+  finished: ReadonlySet<string>,
+  levels: Partial<Record<Pillar, { slug: S; enabled: boolean }>>,
+): S | null {
+  const own = PILLARS.findIndex((pillar) => levels[pillar]?.slug === slug);
+  const others: S[] = [];
+  // From the stage after the level's own, once round: the level itself comes
+  // last and is left out. A slug the table does not name starts from the top.
+  for (let step = 1; step <= PILLARS.length; step++) {
+    const level = levels[PILLARS[(own + step) % PILLARS.length]!];
+    if (level?.enabled && level.slug !== slug) others.push(level.slug);
+  }
+  return others.find((other) => !finished.has(other)) ?? others[0] ?? null;
 }

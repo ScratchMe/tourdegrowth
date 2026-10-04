@@ -889,12 +889,11 @@ export const RETENTION_CONTENT: DeepTranslatable<RetentionCopy> = {
     ),
   },
 
+  // The title is the target level's teaser, not this level's (`LEVEL_TEASERS`,
+  // content/game/hub.ts; C75, A24.T0): this block now closes any level on the
+  // next one the player has not finished.
   nextLevel: {
     eyebrow: t("Niveau suivant", "Next level"),
-    title: t(
-      "« Comment les gens vous trouvent » : le compte à rebours, le prix qui gonfle, le faux stock",
-      '"How people find you": the countdown timer, the creeping price, the fake stock',
-    ),
     // TODO: à relire — R15 : « verrouillé · prototype » devient un simple « bientôt », puis
     // « jouable » le 2026-10-01 quand le niveau 2 s'ouvre (C31) : le bloc devient un lien.
     status: t("jouable", "playable"),

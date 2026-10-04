@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import { RETENTION_COPY_TEMPLATES, resolveLevelCopy, type RetentionCopy } from "@/lib/game/copy";
 import * as retentionLevel from "@/lib/game/levels/retention";
 import { RETENTION_DARK_IDS, RETENTION_HONEST_IDS } from "@/lib/game/levels/retention";
+import { LEVEL_TEASERS } from "../game/hub";
 import { RETENTION_INTRO } from "../game/meta";
 import { RETENTION_CONTENT } from "../game/retention";
 import {
@@ -504,6 +505,14 @@ describe("C11 · the prototype's French, word for word", () => {
     // The one prototype string that lives outside this module since review
     // R8: the walk below does not reach it, so it is checked by name.
     expect(missingClauses(RETENTION_INTRO.lead.fr)).toEqual([]);
+  });
+
+  it("keeps the line that announces the acquisition level — moved to hub.ts — as the prototype wrote it", () => {
+    // The prototype's « Niveau suivant » block announced « Comment les gens vous
+    // trouvent » in this line, which was `RETENTION_CONTENT.nextLevel.title`, so
+    // the walk below checked it. A24.T0 moved it to `LEVEL_TEASERS`, outside the
+    // module the walk covers: checked by name, or nothing would watch it any more.
+    expect(missingClauses(LEVEL_TEASERS.acquisition.fr)).toEqual([]);
   });
 
   it("keeps the months exactly", () => {

@@ -242,6 +242,15 @@ export function loadCollection(): GameCollection {
 }
 
 /**
+ * The levels the player has finished: those with an ending in the collection.
+ * `recordYearEnd` writes one in December whichever ending the year reached, so
+ * a level is « finished » from its first December on (C75, `nextLevelFor`).
+ */
+export function finishedLevels(collection: GameCollection): Set<LevelSlug> {
+  return new Set(Object.keys(collection.endings) as LevelSlug[]);
+}
+
+/**
  * December's write (§3.7). Patterns accumulate across years — replaying never
  * makes the player « unknow » a pattern — while the ending is replaced by the
  * latest one. Ids the level does not know are dropped, so a caller mistake

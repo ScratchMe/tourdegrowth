@@ -325,7 +325,13 @@ export interface LevelCopy<CardId extends string = string, DarkId extends CardId
     copied: string;
     text: string;
   };
-  nextLevel: { eyebrow: string; title: string; status: string };
+  /**
+   * The block that closes December. Its title is the TARGET level's teaser
+   * (`LEVEL_TEASERS`, content/game/hub.ts), not this level's: the level it
+   * announces is chosen in the browser (C75), so only the eyebrow and the
+   * status are level copy.
+   */
+  nextLevel: { eyebrow: string; status: string };
   /** Back to the Tour, for readers who arrive through the game (brief 13.3 D). */
   tourLoop: { question: string; cta: string };
   resume: {

@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { RETENTION_DARK_IDS, RETENTION_HONEST_IDS, type RetentionCardId } from "../levels/retention";
 import {
   clearGame,
+  finishedLevels,
   isGameState,
   loadCollection,
   loadGame,
@@ -209,6 +210,28 @@ describe("collection (X14)", () => {
       JSON.stringify({ patterns: { retention: { seen: "nope", used: [] } }, endings: { retention: { id: "fine", at: "t" } } }),
     );
     expect(loadCollection()).toEqual({ patterns: {}, endings: { retention: { id: "fine", at: "t" } } });
+  });
+});
+
+describe("finishedLevels (C75, A24.T0)", () => {
+  it("is empty until a year ends", () => {
+    expect([...finishedLevels(loadCollection())]).toEqual([]);
+  });
+
+  it("holds the levels with an ending in the collection, whichever ending it is", () => {
+    recordYearEnd(LEVEL, { seen: ["pdef"], used: ["pdef"], ending: "firedDark" });
+    expect([...finishedLevels(loadCollection())]).toEqual(["retention"]);
+    const second = { ...LEVEL, slug: "acquisition" } as unknown as LevelDefinition<RetentionCardId>;
+    recordYearEnd(second, { seen: [], used: [], ending: "applause" });
+    expect([...finishedLevels(loadCollection())].sort()).toEqual(["acquisition", "retention"]);
+  });
+
+  it("reads only endings: patterns seen on a level that never ended do not finish it", () => {
+    storage.setItem(
+      GAME_COLLECTION_KEY,
+      JSON.stringify({ patterns: { acquisition: { seen: ["pdef"], used: [] } }, endings: { retention: { id: "fine", at: "t" } } }),
+    );
+    expect([...finishedLevels(loadCollection())]).toEqual(["retention"]);
   });
 });
 
