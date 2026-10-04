@@ -1,6 +1,6 @@
 # GAME-BRIEF.md, niveau activation — « Comment ils comprennent ce que vous apportez » (§18)
 
-*Écrite le 2026-10-04 (`CHANTIERS.md` A21), pour qu'un agent construise ce
+*Écrite le 2026-10-04 (`CHANTIERS.md` A22), pour qu'un agent construise ce
 niveau sans rien avoir à décider : chaque chaîne est écrite en français et en
 anglais, chaque chiffre est celui que produit le modèle déjà codé
 (`src/lib/game/levels/activation.ts`, épinglé par

@@ -18,7 +18,7 @@ export type LevelSlug = "acquisition" | "retention";
  * decisions for a level nobody can play. Wiring a level is moving its slug
  * from here to there, and letting the compiler list what it needs — level 2
  * (« acquisition ») made that move on 2026-10-01 (`CHANTIERS.md` A12.f).
- * The three left since 2026-10-04 (`CHANTIERS.md` A21): activation, referral
+ * The three left since 2026-10-04 (`CHANTIERS.md` A22): activation, referral
  * and revenue, each specified in `docs/game/` and modelled in `levels/`.
  */
 export type DraftLevelSlug = "activation" | "referral" | "revenue";

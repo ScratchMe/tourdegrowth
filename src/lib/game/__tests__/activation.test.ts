@@ -21,7 +21,7 @@ import {
 
 // GAME-BRIEF §18 (`docs/game/activation.md`): the activation level « Comment ils comprennent ce que vous apportez », a DRAFT
 // model the spec quotes number for number — written on 2026-10-04 so an
-// agent can wire the level without re-deriving it (CHANTIERS.md A21). Its
+// agent can wire the level without re-deriving it (CHANTIERS.md A22). Its
 // four reference years are level 2's, card for card by role. A rebalancing
 // that moves one regenerates the table and the spec, it does not loosen
 // the tolerance (half a tenth of a point, what the tile rounds to).

@@ -74,8 +74,10 @@ export const Term = () => (
  * the eyebrow in the night's amber, the five zones drawn in `note` as a
  * mountain (the third, retention, the one open). The column below stays on
  * paper — here the hub's way back to the Tour. Only the game's hub wears it.
- * At this card's width the game's band is in its under-900px form: the legs'
- * names go to screen readers.
+ * A page of a space sets its header and footer on the app shell's 1040px
+ * column, not the reading one (2026-10-02), so the band is as wide as the
+ * engine's. At this card's width it is still in its under-900px form: the
+ * legs' names go to screen readers.
  */
 export const NightIntro = () => (
   <ProsePage
