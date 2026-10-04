@@ -8,7 +8,7 @@ question tranchée plus tard y gagne sa ligne, dans le même format.*
 C1 à C22 ont été tranchées dans la séance du 2026-09-29. Les questions de
 design y ont été posées avec des captures du vrai écran : un build local avec
 le jeu et le moteur ouverts, et, pour la vue propriétaire, un build jetable
-jamais commité. C23 à C29 l'ont été le 2026-09-30, C30 à C33 le 2026-10-01, C34 à C44 le 2026-10-02, C45 à C55 le 2026-10-03.
+jamais commité. C23 à C29 l'ont été le 2026-09-30, C30 à C33 le 2026-10-01, C34 à C44 le 2026-10-02, C45 à C55 le 2026-10-03, C56 à C76 le 2026-10-04 (l'app grand public et la place de marché, dont deux questions de suivi, C75 et C76).
 Les questions encore ouvertes sont dans `CHANTIERS.md`, section C.
 
 | # | Sujet | Réponse | Écrit dans | Suite |
@@ -68,3 +68,24 @@ Les questions encore ouvertes sont dans `CHANTIERS.md`, section C.
 | C53 | Les chiffres des titres de slides à l'encre, dans tout le deck (née du retour du brief 09, 2026-10-03) | **Oui** (la reco) : le rouge reste au verdict et au diagnostic | `docs/engine/argent.md` §20.13 | A20.d T4 |
 | C54 | Le tableau réordonné (née du retour du brief 09, 2026-10-03) | **Oui, en bloc** (la reco) : l'argent après le diagnostic, « Et si » remonté, le LTV:CAC hors du tableau, le panneau en tableaux | `docs/engine/argent.md` §20.13 | A20.d T2, T3 |
 | C55 | La copie neuve d'A20 : nº9 ou nº10 ? (née du retour du brief 09, 2026-10-03) | **Un nº10 à part** (la reco) ; la carte de la promesse du nº9 y passe | `docs/engine/argent.md` §20.13 | A20.e |
+| C56 | L'app grand public : le périmètre de la v1 | **Contre la reco : les achats intégrés et la publicité entrent dans la v1**, avec les abonnements | `docs/engine/app-grand-public.md` §21.13 | A22 : le modèle de revenu (C75), puis la réécriture de §21 |
+| C57 | L'app : la base du funnel | **100 installations**, les visiteurs de la fiche du store (la reco) | `docs/engine/app-grand-public.md` §21.13 | A22 |
+| C58 | L'app : iOS et Android | **Un moteur, les deux stores additionnés** (la reco) ; un moteur par store pour qui veut les séparer | `docs/engine/app-grand-public.md` §21.13 | A22 |
+| C59 | L'app : la commission des stores | **Contre la reco : un chiffre à part, « commission moyenne »**, une marge hors commission et un levier « Et si » ; jamais sur la publicité | `docs/engine/app-grand-public.md` §21.13 | A22, réécriture de §21 |
+| C60 | L'app : les repères | **Le seul repère de J30** (20 à 30 %), les repères SaaS retirés (la reco) | `docs/engine/app-grand-public.md` §21.13 | A22 |
+| C61 | Le type d'entreprise après la création | **Figé à la création**, grisé dans les Réglages (la reco) | `docs/engine/app-grand-public.md` §21.13 | A22 |
+| C62 | L'ouverture des nouveaux types | **`ENGINE_TYPES` à part** ; le moteur SaaS ouvre d'abord, sans attendre A22 ni A23 (la reco) | `docs/engine/app-grand-public.md` §21.13 | D2 inchangée |
+| C63 | La page publique du moteur | **Contre la reco : une phrase** dans une réponse existante de la FAQ (le compte reste à six), visible une fois un type ouvert ; ni section ni glossaire pour l'app | `docs/engine/app-grand-public.md` §21.13 | A22, réécriture de §21 |
+| C64 | La place de marché : son revenu | **Contre la reco : les abonnements des vendeurs sont modélisés**, en second flux récurrent ; annonces payantes et publicité hors v1 | `docs/engine/place-de-marche.md` §22.15 | A23 : le modèle (C76), puis la réécriture de §22 |
+| C65 | La place de marché : le vocabulaire | **Contre la reco : un réglage « produits ou services »**, deux jeux de mots, par le mécanisme de calque de §21.6 | `docs/engine/place-de-marche.md` §22.15 | A23, réécriture de §22 |
+| C66 | La place de marché : l'argent des commissions | **GMV × commission, acheteurs actifs sur 12 mois, la boucle du MRR** (la reco) | `docs/engine/place-de-marche.md` §22.15 | A23 |
+| C67 | La place de marché : le chiffrage de l'offre | **Jamais par les commissions ; par les abonnements des vendeurs quand le chiffre les touche** (la reco revue avec C64) | `docs/engine/place-de-marche.md` §22.15 | A23 |
+| C68 | La place de marché : le taux de service | **Chiffré sur les seuls nouveaux acheteurs**, « c'est un minimum » (la reco) | `docs/engine/place-de-marche.md` §22.15 | A23 |
+| C69 | La place de marché : les leviers d'argent | **Sur tous les acheteurs dès le mois suivant** (la reco) | `docs/engine/place-de-marche.md` §22.15 | A23 |
+| C70 | La place de marché : une fuite ou deux | **Contre la reco : deux diagnostics, un par côté**, comme l'hybride, avec un total et un sélecteur de côté ; jamais comparés | `docs/engine/place-de-marche.md` §22.15 | A23, réécriture de §22 |
+| C71 | La place de marché : le design | **Contre la reco : un brief 10 à Claude Design avant les écrans** ; le modèle pur et le réglage avancent sans lui | `docs/engine/place-de-marche.md` §22.15 | A23 et une entrée B (le brief 10) |
+| C72 | La place de marché : le glossaire | **Trois termes, GMV, take rate, liquidité**, dans une PR à part (la reco) | `docs/engine/place-de-marche.md` §22.15 | A23 M8 |
+| C73 | La place de marché : les repères | **Aucun repère en v1** (la reco) | `docs/engine/place-de-marche.md` §22.15 | A23 |
+| C74 | L'ordre des deux lots | **L'app d'abord, puis la place de marché** (la reco) ; le brief 10 peut partir pendant l'app | `docs/engine/place-de-marche.md` §22.15 | A22, puis A23 |
+| C75 | L'app : le modèle de revenu (suivi de C56) | **Deux flux** : les abonnements (MRR) et les achats et la pub sur les actifs du mois, chacun par la boucle du MRR ; unit economics par installation ; un réglage de monétisation (la reco) | `docs/engine/app-grand-public.md` §21.13 | A22, réécriture de §21 |
+| C76 | La place de marché : les abonnements des vendeurs (suivi de C64) | **La proposition, avec une marge par flux** : cinq chiffres de plus côté offre, un flux récurrent, les unit economics de l'offre, le total commissions + abonnements | `docs/engine/place-de-marche.md` §22.15 | A23, réécriture de §22 |

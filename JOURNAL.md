@@ -982,3 +982,13 @@ En anglais à 1 280 : tableau 3 372 → 4 212 (+840, le retour +828). À 390 : t
 **Les estimations** sont en jours-agent, l'unité du dépôt, avec leur calibrage écrit : A7.3 (estimé à ~12) s'est fait en deux jours de calendrier, A14 (16,5) en un. Ce qui fixe le calendrier, ce sont les réponses d'Antoine, les captures à relire et les bons à tirer.
 
 **Vérifié** : les chemins, types et fonctions cités relus dans le code de `main` (`5d98683`) par deux cartographies et des lectures directes ; `CLAUDE.md` sous son budget ; aucun fichier de `src/` modifié (doc seule).
+
+## C56 à C76 : les décisions de l'app grand public et de la place de marché (2026-10-04)
+
+**La séance** : Antoine a tranché les dix-neuf questions de §21.13 et §22.15 une par une (le prompt C, avec `AskUserQuestion`), puis les deux questions de suivi que deux de ses réponses ont fait naître. Chaque réponse est consignée, datée, dans la colonne « Réponse d'Antoine » de sa spécification, et indexée dans `docs/decisions.md`.
+
+**Huit réponses vont contre la recommandation**, et elles changent les deux modèles :
+- **l'app grand public** (A22) : les achats intégrés et la publicité entrent dans la v1 (C56) ; la commission des stores devient un chiffre à part, avec un levier « Et si » (C59) ; une phrase sur la page, dans une réponse de la FAQ (C63). La question de suivi **C75** fixe le modèle de revenu : deux flux, les abonnements (MRR) et les achats et la pub sur les utilisateurs actifs du mois, chacun projeté par la boucle du MRR, et des unit economics par installation ;
+- **la place de marché** (A23) : les abonnements des vendeurs sont modélisés (C64) ; un réglage « produits ou services » et deux vocabulaires (C65) ; deux diagnostics, un par côté, comme l'hybride (C70) ; un brief 10 à Claude Design avant les écrans (C71). La question de suivi **C76** fixe les abonnements des vendeurs : un flux récurrent, quatre chiffres de plus côté offre, et une marge par flux (une précision d'Antoine sur la proposition).
+
+**Ce qui en découle** : §21 et §22 décrivent encore la version d'avant ces réponses. Un bandeau en tête de chacune le dit, et interdit d'exécuter avant leur réécriture (A22.b, A23.b). Antoine a aussi fixé la forme de l'exécution : un agent qui orchestre et lance des sous-agents autonomes, un travail qui avance par petites étapes et peut s'arrêter régulièrement. La réécriture en tient compte : une fiche autonome par PR, un graphe de dépendances, un tableau d'avancement, une procédure de reprise et des points d'arrêt.
