@@ -11,8 +11,14 @@ function jsonResponse(body: unknown, ok = true, status = 200): Response {
   } as Response;
 }
 
-/** The longest funnel request allowed: half the ~8 KB at which proxies start refusing a GET (see the game's test). */
-const MAX_URL = 4_000;
+/**
+ * The longest funnel request allowed: three quarters of the ~8 KB at which
+ * proxies start refusing a GET (see the game's test). 4 000 until A24 (half
+ * the limit); 6 000 since, because the request lists each level's 14 `game_*`
+ * paths and it was 3 604 characters at two levels, about 520 more per level:
+ * 5 160 expected with all five, still under this.
+ */
+const MAX_URL = 6_000;
 
 describe("fetchFunnelWindow (GoatCounter API — /admin/stats funnel section)", () => {
   const originalToken = process.env.GOATCOUNTER_API_TOKEN;
@@ -260,9 +266,12 @@ describe("fetchFunnelWindow (GoatCounter API — /admin/stats funnel section)", 
       expect(paths).toContain(path);
     }
     expect(Number(requested.searchParams.get("limit"))).toBeGreaterThan(paths.length);
-    // A GET URL well under the ~8 KB proxies start refusing. The plan budgeted
+    // A GET URL under the ~8 KB proxies start refusing. The plan budgeted
     // 3 KB; level 2 (A12.f, 2026-10-01) took it to 3 118 characters, with its
-    // starts and each level's endings counted apart: 4 KB, still half the limit.
+    // starts and each level's endings counted apart, and the engine to 3 604
+    // by 2026-10-04: the limit moved to 6 KB (A24.T0, three quarters of the
+    // proxies' limit) so the three last levels fit — about 520 characters
+    // each, 5 160 expected at five levels.
     expect(requested.toString().length).toBeLessThan(MAX_URL);
   });
 

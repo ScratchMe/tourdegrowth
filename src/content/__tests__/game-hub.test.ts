@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { GAME_HUB } from "../game/hub";
-import { ACQUISITION_INTRO, GAME_META, RETENTION_INTRO } from "../game/meta";
+import { generateImageMetadata } from "@/app/[locale]/game/opengraph-image";
+import { enabledLevelSlugs } from "@/lib/game/levels";
+import { GAME_HUB, LEVEL_TEASERS } from "../game/hub";
+import { ACQUISITION_INTRO, GAME_META, GAME_OPEN_COUNT_WORDS, RETENTION_INTRO } from "../game/meta";
 import { LOCALES } from "@/lib/i18n/locale";
 import { PILLARS } from "@/lib/scoring/pillars";
 
@@ -25,6 +27,8 @@ const ALL = (() => {
   const out: { path: string; fr: unknown; en: unknown }[] = [];
   translatables(GAME_HUB, "GAME_HUB", out);
   translatables(GAME_META, "GAME_META", out);
+  translatables(GAME_OPEN_COUNT_WORDS, "GAME_OPEN_COUNT_WORDS", out);
+  translatables(LEVEL_TEASERS, "LEVEL_TEASERS", out);
   translatables(RETENTION_INTRO, "RETENTION_INTRO", out);
   translatables(ACQUISITION_INTRO, "ACQUISITION_INTRO", out);
   return out;
@@ -81,5 +85,50 @@ describe("game hub and metadata copy", () => {
         expect(description.length, `${description} is ${description.length}`).toBeLessThanOrEqual(160);
       }
     }
+  });
+});
+
+/**
+ * A24.T0: how many stages are open is no longer typed into the hub image's
+ * alt text. The template is filled where it is read — the image route's
+ * `generateImageMetadata` — so this reads THAT text, filled: the Playwright
+ * spec (`game-share-images.spec.ts`) only checks `/.+/`, and an `{open}` left
+ * unfilled would pass it.
+ */
+describe("the hub image's alt text (A24.T0)", () => {
+  const altOf = async (locale: string) => {
+    const [image] = await generateImageMetadata({ params: Promise.resolve({ locale }) });
+    return image!.alt;
+  };
+
+  it("says the number of open levels in words, in both languages, with no placeholder left", async () => {
+    const open = enabledLevelSlugs().length as keyof typeof GAME_OPEN_COUNT_WORDS;
+    expect(GAME_OPEN_COUNT_WORDS[open], `no word for ${open} open levels`).toBeDefined();
+    for (const locale of LOCALES) {
+      const alt = await altOf(locale);
+      expect(alt).not.toMatch(/[{}]/);
+      expect(alt).toContain(GAME_OPEN_COUNT_WORDS[open][locale]);
+    }
+  });
+
+  it("reads « deux » / « two » while two levels are open — the sentence as it stood before it was a template", async () => {
+    expect(enabledLevelSlugs()).toHaveLength(2);
+    expect(await altOf("fr")).toBe("Le côté obscur de Tour de Growth\u00a0: les cinq étapes du Tour, dont deux sont ouvertes.");
+    expect(await altOf("en")).toBe("The dark side of Tour de Growth: the five stages of the Tour, two of them open.");
+  });
+
+  it("has a word for every count from two to five, and a template that takes exactly one placeholder", () => {
+    expect(Object.keys(GAME_OPEN_COUNT_WORDS)).toEqual(["2", "3", "4", "5"]);
+    for (const locale of LOCALES) expect(GAME_META.hub.shareImageAlt[locale].match(/\{open\}/g)).toHaveLength(1);
+  });
+});
+
+describe("LEVEL_TEASERS (C75, A24.T0)", () => {
+  it("announces each level once, by the line its December neighbour used to carry", () => {
+    expect(Object.keys(LEVEL_TEASERS).sort()).toEqual(["acquisition", "retention"]);
+    expect(LEVEL_TEASERS.acquisition.fr).toContain("Comment les gens vous trouvent");
+    expect(LEVEL_TEASERS.retention.fr).toContain("S'ils reviennent");
+    expect(LEVEL_TEASERS.acquisition.en).toContain("How people find you");
+    expect(LEVEL_TEASERS.retention.en).toContain("If they come back");
   });
 });

@@ -3,9 +3,9 @@ import { Tag } from "@/components/core/Tag";
 import styles from "./NextLevel.module.css";
 
 export interface NextLevelProps {
-  /** `nextLevel.eyebrow`: « Niveau suivant », or « L'autre niveau » from level 2. */
+  /** `nextLevel.eyebrow`: « Niveau suivant » on every level (C75). */
   eyebrow: string;
-  /** `nextLevel.title` — the level and what it teaches. */
+  /** The announced level's teaser (`LEVEL_TEASERS`) — the level and what it teaches. */
   title: string;
   /** `nextLevel.status`: « jouable », or « bientôt » for a level not built yet. */
   status: string;
@@ -18,7 +18,8 @@ export interface NextLevelProps {
 
 /**
  * The block that closes December on another level — GAME-BRIEF §5.11 point
- * 7, §11.5, and C31 (2026-10-01): the two levels point at each other.
+ * 7, §11.5, C31 (2026-10-01) and C75 (2026-10-04): the first open level the
+ * player has not finished, whichever level they are closing.
  *
  * With no `href`, dashed: in this system a dashed edge is something pending,
  * not yet there (the locked priority move, an empty chart), and there is no

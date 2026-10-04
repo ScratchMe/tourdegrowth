@@ -38,6 +38,26 @@ const ENDINGS_BY_LEVEL: Partial<Record<LevelSlug, Partial<Record<EndingId, Trans
   acquisition: { fine: t("le contrôle et la transaction", "the inspection and the settlement") },
 };
 
+/**
+ * The line that announces each level where another level's December points at
+ * it (`NextLevel`'s title, C75, A24.T0): the level and what it teaches. Keyed
+ * by the level it ANNOUNCES, not the one that shows it, because the block
+ * closes a December on whichever level the player has not finished yet
+ * (`nextLevelFor`), chosen in the browser. Each level's own December copy
+ * used to carry the other's line; these two are those lines, moved as they
+ * stood. A level adds its own at the step that makes it a `LevelSlug`.
+ */
+export const LEVEL_TEASERS: Record<LevelSlug, Translatable> = {
+  acquisition: t(
+    "« Comment les gens vous trouvent » : le compte à rebours, le prix qui gonfle, le faux stock",
+    '"How people find you": the countdown timer, the creeping price, the fake stock',
+  ),
+  retention: t(
+    "« S'ils reviennent » : la pause mise en avant, le bouton enterré, la résiliation par téléphone",
+    '"If they come back": the pause pushed up front, the buried button, cancelling by phone',
+  ),
+};
+
 export const GAME_HUB = {
   eyebrow: t("Tour de Growth · le jeu", "Tour de Growth · the game"),
   title: t("Le côté obscur", "The dark side"),

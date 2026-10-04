@@ -4,8 +4,9 @@ import { NextLevel } from "tour-de-growth";
  * The block that closes December on another level: an eyebrow, the level's
  * title with the dark patterns it covers, and a status word. The status is a
  * word, never only a greyed card. With an `href` the level is open: a solid
- * edge, and the title is the link to it — the two levels point at each other
- * (C31). Without one, dashed: a level not built yet, kept for the next ones.
+ * edge, and the title is the link to it — the first open level the player
+ * has not finished (C31, C75). Without one, dashed: a level not built yet,
+ * kept for the next ones.
  */
 
 const box = { padding: 24, maxWidth: 720 } as const;
@@ -22,11 +23,11 @@ export const Playable = () => (
   </div>
 );
 
-/** Level 2's December, in French: « L'autre niveau » leads back to Flixo's year. */
+/** Level 2's December, in French: « Niveau suivant » leads to Flixo's year, the first level its player has not finished (C75). */
 export const PlayableFrench = () => (
   <div style={box}>
     <NextLevel
-      eyebrow="L'autre niveau"
+      eyebrow="Niveau suivant"
       title="« S'ils reviennent » : la pause mise en avant, le bouton enterré, la résiliation par téléphone"
       status="jouable"
       href="/fr/game/retention?from=other_level"

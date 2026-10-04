@@ -157,9 +157,9 @@ test.describe("a whole year of level 2 through the interface", () => {
     await expect(page.getByTestId("game-chart-metric")).not.toContainText("%");
     // An honest year used no trick.
     await expect(page.getByTestId("game-catalogue").locator("[data-group='used']")).toHaveCount(0);
-    // C31 — the block that closes December leads to level 1, « jouable ».
+    // C31, C75 — the block that closes December leads to level 1, « jouable ».
     const next = page.getByTestId("game-next-level");
-    await expect(next).toContainText("L'autre niveau");
+    await expect(next).toContainText("Niveau suivant");
     await expect(next).toContainText("jouable");
     await expect(page.getByTestId("game-next-level-link")).toHaveAttribute("href", "/fr/game/retention?from=other_level");
 

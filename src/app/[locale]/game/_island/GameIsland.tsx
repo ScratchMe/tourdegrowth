@@ -38,14 +38,17 @@ import { RevealCells } from "@/components/game/RevealCells";
 import { ShareRow } from "@/components/game/ShareRow";
 import { TourLoop } from "@/components/game/TourLoop";
 import { VideoCall } from "@/components/game/VideoCall";
+import { GAME_LEVELS_BY_PILLAR, nextLevelFor } from "@/lib/game/levels";
 import { ACQUISITION_LEVEL } from "@/lib/game/levels/acquisition";
 import { RETENTION_LEVEL } from "@/lib/game/levels/retention";
 import { moodNow } from "@/lib/game/model";
 import { actionBarVisible, callViewFor, handHint, handVisible } from "@/lib/game/phases";
+import { finishedLevels, loadCollection } from "@/lib/game/storage";
 import { TYPE_CHARS_PER_TICK, TYPE_TICK_MS, VOICES_WAIT_MS } from "@/lib/game/ui-timing";
 import type { LevelDefinition, LevelSlug } from "@/lib/game/types";
 import { phoneIds, voiceLang, voiceParams } from "@/lib/game/view";
 import type { Locale } from "@/lib/i18n/locale";
+import type { NextLevelLink } from "../_level/LevelPage";
 import {
   bossMessage,
   dashboardProps,
@@ -83,13 +86,15 @@ export interface GameIslandProps<S extends LevelSlug> {
   copy: IslandCopies[S];
   locale: Locale;
   /**
-   * The other level's page, when it is open (`otherLevelHref`, computed by the
-   * page on the server): December's last block links to it (C31).
+   * Every other open level, with its page and the line that announces it
+   * (`nextLevelLinks`, computed by the page on the server). December's last
+   * block links to the one `nextLevelFor` picks from what the player has
+   * finished — read in the browser, so the server cannot choose (C75).
    */
-  nextLevelHref?: string;
+  nextLevels: Partial<Record<LevelSlug, NextLevelLink>>;
 }
 
-export function GameIsland<S extends LevelSlug>({ slug, copy, locale, nextLevelHref }: GameIslandProps<S>) {
+export function GameIsland<S extends LevelSlug>({ slug, copy, locale, nextLevels }: GameIslandProps<S>) {
   const L = LEVELS[slug];
   const side = ISLAND_SIDES[slug];
   const ctx = useMemo(() => islandContext(L, copy, locale), [L, copy, locale]);
@@ -179,6 +184,16 @@ export function GameIsland<S extends LevelSlug>({ slug, copy, locale, nextLevelH
   const december = phase.kind === "december" && game.over && game.ending ? decemberContent(ctx, game) : null;
   const reveal = december ? (g.enteredDecember ? "revealing" : "shown") : "hidden";
   const closed = phase.kind === "december" && game.over ? yearClosedView(ctx, game) : null;
+  // The level the closing block announces: the first open one the player has not
+  // finished (C75). Read from the save, in the browser, in December only —
+  // December is never prerendered (the island arrives after a click, or after a
+  // resume read from localStorage once mounted), so hydration never sees it.
+  const inDecember = december !== null;
+  const nextSlug = useMemo(
+    () => (inDecember ? nextLevelFor(slug, finishedLevels(loadCollection()), GAME_LEVELS_BY_PILLAR) : null),
+    [inDecember, slug],
+  );
+  const next = nextSlug ? nextLevels[nextSlug] : undefined;
   // December is only ever drawn after mount — the prerendered page is the
   // first call — so the address is the browser's, in the page's language.
   const shareUrl = typeof window === "undefined" ? "" : `${window.location.origin}${window.location.pathname}`;
@@ -334,12 +349,14 @@ export function GameIsland<S extends LevelSlug>({ slug, copy, locale, nextLevelH
               shareText={shareText(ctx, game, shareUrl)}
               onShare={g.share}
             />
-            <NextLevel
-              eyebrow={copy.nextLevel.eyebrow}
-              title={copy.nextLevel.title}
-              status={copy.nextLevel.status}
-              href={nextLevelHref}
-            />
+            {next ? (
+              <NextLevel
+                eyebrow={copy.nextLevel.eyebrow}
+                title={next.title}
+                status={copy.nextLevel.status}
+                href={next.href}
+              />
+            ) : null}
             <TourLoop question={copy.tourLoop.question} cta={copy.tourLoop.cta} onClick={g.tourLoop} />
           </div>
         </div>

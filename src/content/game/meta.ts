@@ -30,10 +30,11 @@ export const GAME_META = {
       "Five stages of the Tour, five companies, one CEO who wants the number. A free game to spot dark patterns before you ever ship one.",
     ),
     breadcrumb: t("Le jeu", "The game"),
-    // TODO: à relire — retouché (2026-10-01, A12.f) : « dont deux sont ouvertes ».
+    // TODO: à relire — 2026-10-04 (A24.T0) : le nombre de niveaux ouverts devient un gabarit, {open}, rempli
+    // par l'image du hub avec GAME_OPEN_COUNT_WORDS (le texte, lui, ne change pas tant que deux niveaux sont ouverts).
     shareImageAlt: t(
-      "Le côté obscur de Tour de Growth : les cinq étapes du Tour, dont deux sont ouvertes.",
-      "The dark side of Tour de Growth: the five stages of the Tour, two of them open.",
+      "Le côté obscur de Tour de Growth : les cinq étapes du Tour, dont {open} sont ouvertes.",
+      "The dark side of Tour de Growth: the five stages of the Tour, {open} of them open.",
     ),
   },
   retention: {
@@ -63,9 +64,23 @@ export const GAME_META = {
   },
 } as const satisfies Record<string, Record<string, Translatable>>;
 
+/**
+ * The number of open levels, in words — what `{open}` becomes in
+ * `GAME_META.hub.shareImageAlt` (filled by the hub's image, which counts
+ * `enabledLevelSlugs()`). From two, the fewest the hub has shown, to all five.
+ */
+// TODO: à relire — 2026-10-04 (A24.T0) : les nombres en lettres du gabarit ; « deux » / "two" existait déjà dans la phrase.
+export const GAME_OPEN_COUNT_WORDS: Record<2 | 3 | 4 | 5, Translatable> = {
+  2: t("deux", "two"),
+  3: t("trois", "three"),
+  4: t("quatre", "four"),
+  5: t("cinq", "five"),
+};
+
 /** The level page's paper-world intro — the part of the page that is read before anything is played. */
 export const RETENTION_INTRO = {
-  eyebrow: t("Le côté obscur · niveau 1", "The dark side · level 1"),
+  // TODO: à relire — 2026-10-04 (A24.T0) : le bandeau dit l'étape, sans numéro, comme sur les cinq niveaux (C76).
+  eyebrow: t("Le côté obscur · retention", "The dark side · retention"),
   title: t("Une année chez Flixo", "A year at Flixo"),
   lead: t(
     "Tu es le PM growth de Flixo, une appli de streaming à 12,99 € par mois. Cent mille abonnés, et 6 % d'entre eux résilient chaque mois. Le board veut 4 % d'ici décembre. Chaque trimestre, le DG t'appelle en visio, puis tu as droit à deux actions, nommées comme on les nomme en réunion. Tu ne sauras ce qu'elles valent qu'une fois le trimestre passé. Le DG, lui, sait déjà ce qu'il veut.",
@@ -107,7 +122,8 @@ export const RETENTION_INTRO = {
  * TODO: à relire — nouveau (2026-10-01, CHANTIERS.md A12.c) : le bandeau, le titre et le chapeau.
  */
 export const ACQUISITION_INTRO = {
-  eyebrow: t("Le côté obscur · niveau 2", "The dark side · level 2"),
+  // TODO: à relire — 2026-10-04 (A24.T0) : le bandeau dit l'étape, sans numéro, comme sur les cinq niveaux (C76).
+  eyebrow: t("Le côté obscur · acquisition", "The dark side · acquisition"),
   title: t("Une année chez Pédalix", "A year at Pédalix"),
   lead: t(
     "Ton DG a quitté Flixo, une appli de streaming, pour diriger Pédalix, une boutique en ligne de vélos, et il t'a emmené avec lui comme PM growth. 2 000 nouveaux clients par mois, et le board en veut 3 000 d'ici décembre. Chaque trimestre, le DG t'appelle en visio, puis tu as droit à deux actions, nommées comme on les nomme en réunion. Tu ne sauras ce qu'elles valent qu'une fois le trimestre passé. Le DG, lui, sait déjà ce qu'il veut.",

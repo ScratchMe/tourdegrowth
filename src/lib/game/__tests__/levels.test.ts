@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { resolveBottleneck } from "@/lib/scoring/bottleneck";
 import { PILLARS, type Pillar } from "@/lib/scoring/pillars";
-import { enabledLevelSlugs, GAME_LEVELS_BY_PILLAR, gameEntriesFor, type GameLevelTable } from "../levels";
+import { enabledLevelSlugs, GAME_LEVELS_BY_PILLAR, gameEntriesFor, nextLevelFor, type GameLevelTable } from "../levels";
+import type { ModelSlug } from "../types";
 
 function board(scores: Record<Pillar, number>) {
   return resolveBottleneck(PILLARS.map((pillar) => ({ pillar, score: scores[pillar] })));
@@ -104,5 +105,76 @@ describe("gameEntriesFor, shared bottleneck (X16)", () => {
     const shared = board({ acquisition: 16, activation: 16, retention: 7, referral: 5, revenue: 20 });
     expect(shared.pillars.map((p) => p.pillar)).toEqual(["referral", "retention"]);
     expect(gameEntriesFor({ bottleneck: shared, access: "open", levels })).toEqual([{ pillar: "referral", slug: "retention" }]);
+  });
+});
+
+// The block that closes December (C31, then C75, A24.T0): the first open level
+// the player has not finished, in the Tour's order, wrapping round.
+describe("nextLevelFor (C75)", () => {
+  /** `LevelSlug` names two levels until the first X-3: the five-level tables are declared on the model slugs. */
+  type FiveLevels = Partial<Record<Pillar, { slug: ModelSlug; enabled: boolean }>>;
+  const open = (slug: ModelSlug) => ({ slug, enabled: true });
+  const FIVE: FiveLevels = {
+    acquisition: open("acquisition"),
+    activation: open("activation"),
+    retention: open("retention"),
+    referral: open("referral"),
+    revenue: open("revenue"),
+  };
+  const done = (...slugs: ModelSlug[]): ReadonlySet<string> => new Set(slugs);
+
+  it("with two levels open, each one points at the other, finished or not (C31 holds)", () => {
+    for (const finished of [done(), done("acquisition"), done("retention"), done("acquisition", "retention")]) {
+      expect(nextLevelFor("acquisition", finished, GAME_LEVELS_BY_PILLAR)).toBe("retention");
+      expect(nextLevelFor("retention", finished, GAME_LEVELS_BY_PILLAR)).toBe("acquisition");
+    }
+  });
+
+  it("with five levels open and nothing finished, the next one in the Tour's order, wrapping round", () => {
+    expect(nextLevelFor("acquisition", done(), FIVE)).toBe("activation");
+    expect(nextLevelFor("activation", done(), FIVE)).toBe("retention");
+    expect(nextLevelFor("retention", done(), FIVE)).toBe("referral");
+    expect(nextLevelFor("referral", done(), FIVE)).toBe("revenue");
+    expect(nextLevelFor("revenue", done(), FIVE)).toBe("acquisition");
+  });
+
+  it("skips a level the player has finished: retention done, activation leads to referral", () => {
+    expect(nextLevelFor("activation", done("retention"), FIVE)).toBe("referral");
+  });
+
+  it("goes on past several finished levels, and round the end of the Tour", () => {
+    expect(nextLevelFor("acquisition", done("activation", "retention"), FIVE)).toBe("referral");
+    expect(nextLevelFor("referral", done("revenue", "acquisition"), FIVE)).toBe("activation");
+  });
+
+  it("when every other level is finished, falls back to the next one in the order", () => {
+    const all = done("acquisition", "activation", "retention", "referral", "revenue");
+    expect(nextLevelFor("acquisition", all, FIVE)).toBe("activation");
+    expect(nextLevelFor("retention", all, FIVE)).toBe("referral");
+    expect(nextLevelFor("revenue", all, FIVE)).toBe("acquisition");
+  });
+
+  it("ignores the level's own ending: finishing a level never sends the player back to it", () => {
+    expect(nextLevelFor("retention", done("retention"), FIVE)).toBe("referral");
+  });
+
+  it("skips a closed level, finished or not", () => {
+    const closed: FiveLevels = { ...FIVE, referral: { slug: "referral", enabled: false } };
+    expect(nextLevelFor("retention", done(), closed)).toBe("revenue");
+    expect(nextLevelFor("activation", done("retention"), closed)).toBe("revenue");
+    // Only closed levels left besides this one: nothing to point at.
+    const lone: FiveLevels = { activation: open("activation"), revenue: { slug: "revenue", enabled: false } };
+    expect(nextLevelFor("activation", done(), lone)).toBeNull();
+  });
+
+  it("returns null when the level is the only one open, and when nothing is open", () => {
+    expect(nextLevelFor("retention", done(), { retention: open("retention") })).toBeNull();
+    expect(nextLevelFor("retention", done("retention"), { retention: open("retention") })).toBeNull();
+    expect(nextLevelFor("retention", done(), {})).toBeNull();
+  });
+
+  it("a level named by two stages is still one level: finished, it is only the fallback", () => {
+    const twice: FiveLevels = { acquisition: open("acquisition"), activation: open("retention"), retention: open("retention") };
+    expect(nextLevelFor("acquisition", done("retention"), twice)).toBe("retention");
   });
 });
