@@ -28,7 +28,7 @@ sans espaces insécables : l'agent les pose en recopiant (§21.5).*
 - **Le chiffre du board** : le revenu mensuel par utilisateur actif. Des euros
   au centime, qui doivent **monter**.
 - **Le radar est celui de la DGCCRF**, comme aux niveaux 1 et 2. Le contrôle
-  finit en **deux sanctions** : une transaction pénale avec l'accord du parquet
+  finit en **deux procédures** : une transaction pénale avec l'accord du parquet
   pour les pratiques trompeuses, et une amende administrative pour les
   informations manquantes.
 - **Ce qui ne change pas** : tout le reste (section 4).
@@ -98,7 +98,7 @@ Déjà codé (`levels/revenue.ts`) : **l'agent n'y touche pas** (§21.2).
 | Presse | ×1,05 sur le chiffre | identique | — |
 | Courbe de décembre | 1 000 à 4 000 | 2 à 8 €, graduée à 2, 4, 6, 8 | — |
 
-**Le contrôle : deux sanctions de la DGCCRF, 375 000 € au total.** Ce que fait
+**Le contrôle : deux procédures de la DGCCRF, 375 000 € au total.** Ce que fait
 Gainix mêle deux régimes (§20.9) : des **pratiques commerciales trompeuses**
 (l'essai qui se change en abonnement, le programme qui cache un abonnement, la
 monnaie qui obscurcit les prix), un délit que la DGCCRF règle par une
@@ -108,9 +108,9 @@ signalé, le bouton qui fait payer sans le dire), punis d'une **amende
 administrative** de 75 000 € au plus pour une société (L242-10). **Proposé :
 une transaction de 300 000 € et une amende de 75 000 €, soit 375 000 €**, fixe
 (C14), à valider (§20.10, Q3) : environ 4 % du chiffre d'affaires annuel de
-Gainix (9,6 M€). La reconduction sans courriel n'a pas d'amende (L215-1) ;
-l'option cochée d'avance en a une, de 15 000 € au plus (L132-22), comprise dans
-la transaction pour rester simple. Le jeu dit « {fine} au total ».
+Gainix (9,6 M€). La reconduction sans e-mail n'a pas d'amende (L215-1) ;
+l'option cochée d'avance a la sienne, une amende administrative de 15 000 € au
+plus (L132-22), que le jeu compte dans les 75 000 € pour rester simple. Le jeu dit « {fine} au total ».
 
 ### 20.4 Les cartes
 
@@ -128,7 +128,7 @@ pour le même rôle.
 | present | *(niveau 1, par référence)* | | | | | | | | `present` | present |
 | trialmail | Rappel de fin d'essai | Un e-mail et une notification trois jours avant la fin de l'essai, avec le prix et un lien pour arrêter. | Trial-end reminder | An email and a notification three days before the trial ends, with the price and a link to stop. | −0,01 | | +8 | −8 | perm | remind |
 | roundpacks | Packs au compte rond | Les packs de gemmes correspondent exactement aux prix des tenues, et chaque tenue dit son prix en euros. | Round packs | Gem packs match the outfit prices exactly, and every outfit shows its price in euros. | 0 | 0,08 | +3 | | perm | reco |
-| renewmail | Renouvellement annoncé | Un courriel un mois avant chaque échéance annuelle, avec la date limite pour arrêter. | Renewal notice | An email a month before each yearly renewal, with the deadline to stop it. | −0,03 | | +10 | −20 | perm, `temp` | three |
+| renewmail | Renouvellement annoncé | Un e-mail un mois avant chaque échéance annuelle, avec la date limite pour arrêter. | Renewal notice | An email a month before each yearly renewal, with the deadline to stop it. | −0,03 | | +10 | −20 | perm, `temp` | three |
 | clean | *(nom du niveau 1)* | Revenir aux offres, au paiement et à la boutique d'origine. | *(niveau 1)* | Go back to the original plans, checkout and shop. | | | +6 | −25 | `clean` | clean |
 
 Le gain négatif du « Rappel de fin d'essai » est l'essai qu'on arrête parce
@@ -146,7 +146,7 @@ rester (`temp`).
 | pricing | Prix ajusté | Le prix de l'abonnement affiché varie selon le modèle de téléphone et l'historique d'achat. | Adjusted price | The subscription price shown varies with the phone model and the purchase history. | 0,03 | −2 | +3 | shame |
 | trial | Essai converti | Essai gratuit de 14 jours, carte demandée à l'entrée ; il devient un abonnement annuel à 59,99 €, sans rappel. | Converting trial | A 14-day free trial, card required upfront; it becomes a €59.99 yearly subscription, with no reminder. | 0,18 | −10 | +25 | call |
 | express | Achat express | Un seul appui achète une tenue, sur le bouton où l'on appuie pour la voir en aperçu. | Express purchase | A single tap buys an outfit, on the button you press to preview it. | 0,04 | −5 | +12 | social |
-| renewal | Reconduction automatique | L'abonnement annuel se renouvelle sans courriel avant l'échéance. | Automatic renewal | The yearly subscription renews with no email before the renewal date. | 0,04 | −5 | +12 | notice (`revenueMult` 1,02) |
+| renewal | Reconduction automatique | L'abonnement annuel se renouvelle sans e-mail avant l'échéance. | Automatic renewal | The yearly subscription renews with no email before the renewal date. | 0,04 | −5 | +12 | notice (`revenueMult` 1,02) |
 | gems | Packs de gemmes | Les gemmes se vendent par 500, 1 200 ou 2 600 ; la tenue Marathon coûte 800 gemmes. | Gem packs | Gems come in packs of 500, 1,200 or 2,600; the Marathon outfit costs 800 gems. | 0,05 | −4 | +4 | streak |
 
 ### 20.5 Le DG
@@ -162,13 +162,13 @@ plus ni `trial` ni `lootbox`.
 | trial | l'essai passe à quatorze jours, avec la carte à l'entrée, et il bascule sur l'annuel. Pas de rappel : un rappel, c'est une résiliation. | the trial goes to fourteen days, card upfront, and it switches to the yearly plan. No reminder: a reminder is a cancellation. |
 | lootbox | des coffres à gemmes, au contenu au hasard. Tous les jeux le font, et les gens adorent ouvrir. | gem chests, with random contents. Every game does it, and people love opening them. |
 | hiddensub | le programme 8 semaines, on l'affiche à 9,99 €. Le mensuel, c'est écrit sous le bouton. | the 8-week programme, we show it at €9.99. The monthly part is written under the button. |
-| renewal | l'annuel se renouvelle tout seul. Pas de courriel avant : ça réveille les gens. | the yearly plan renews on its own. No email beforehand: it wakes people up. |
+| renewal | l'annuel se renouvelle tout seul. Pas d'e-mail avant : ça réveille les gens. | the yearly plan renews on its own. No email beforehand: it wakes people up. |
 
 **Messages de visio** écrits pour le niveau (les autres, niveau 1) :
 
 | Clé | FR | EN |
 |---|---|---|
-| t1 | Bonjour. Nouvelle boîte, même promesse : le board veut 6 € de revenu par utilisateur en décembre, et je leur ai promis. Fin mars, je veux voir 4,30 €. Pas 4,20. Tu as deux chantiers ce trimestre. Je ne veux pas savoir comment, je veux le chiffre. | Morning. New company, same promise: the board wants €6 of revenue per user by December, and I promised them. By the end of March I want to see €4.30. Not €4.20. You have two projects this quarter. I don't want to know how. I want the number. |
+| t1 | Bonjour. Nouvelle boîte, même promesse : le board veut 6 € de revenu par utilisateur en décembre, et je leur ai promis. Fin mars, je veux voir 4,30 €. Pas 4,20 €. Tu as deux chantiers ce trimestre. Je ne veux pas savoir comment, je veux le chiffre. | Morning. New company, same promise: the board wants €6 of revenue per user by December, and I promised them. By the end of March I want to see €4.30. Not €4.20. You have two projects this quarter. I don't want to know how. I want the number. |
 | t2Miss | Tu m'as fait mentir en comité. {metric} au lieu de 4,30 €. Ça n'arrivera pas deux fois. Fin juin, {target}. | You made me look like a liar in front of the committee. {metric} instead of €4.30. It won't happen twice. End of June, {target}. |
 | t4Hit | Dernière ligne droite. 6 € fin décembre et on fête ça. | Home stretch. €6 by the end of December and we celebrate. |
 | t4Miss | C'est ton dernier trimestre, tu le sais. 6 € en décembre, ou je présente quelqu'un d'autre au board en janvier. | This is your last quarter, and you know it. €6 in December, or I introduce someone else to the board in January. |
@@ -209,7 +209,7 @@ Fin : `applause`, confiance 85, radar 0.
 | Humeur à l'ouverture | firm | calm | firm | angry |
 | Ordre | — | trial | renewal | addon |
 
-Signalements et fil viral au T2, contrôle au T3 : 375 000 € de sanctions, six
+Signalements et fil viral au T2, contrôle au T3 : 375 000 € au total, six
 astuces retirées, 2 738 utilisateurs qui ferment leur compte. Fin : `fine`,
 confiance 27, radar 1 ; 171 141 utilisateurs actifs et 0,33 M€ de revenu
 mensuel en décembre, moins de la moitié de janvier.
@@ -303,13 +303,13 @@ export function fitPhoneView(ids: readonly string[]): FitPhoneItem[] {
 | offerTrial | `offer.trial` | 14 jours gratuits · carte bancaire demandée | 14 days free · card required |
 | offerTrialSmall | `offer.trial`, en petit | puis 59,99 € par an | then €59.99 a year |
 | fullPrice | `offer.fullPrice`, en premier | Annuel : 59,99 € par an, soit 5,00 € par mois | Yearly: €59.99 a year, that's €5.00 a month |
-| plansTitle | `plans` | Ton offre | Your plan |
+| plansTitle | `plans` | Les formules | Plans |
 | monthly | `plans`, sans `personal` | Mensuel : 7,99 € par mois | Monthly: €7.99 a month |
 | monthlyPersonal | `plans.personal` | Mensuel : 8,49 € par mois | Monthly: €8.49 a month |
 | addon | `plans.addon` | ☑ Coach+ · 2,99 € par mois | ☑ Coach+ · €2.99 a month |
 | trialReminder | `trialReminder` | Rappel envoyé 3 jours avant la fin de l'essai | Reminder sent 3 days before the trial ends |
 | programme | `programme` | Programme 8 semaines · 9,99 € | 8-week programme · €9.99 |
-| programmeSmall | `programme`, en petit | puis 9,99 € par mois, sans engagement | then €9.99 a month, cancel anytime |
+| programmeSmall | `programme`, en petit | puis 9,99 € par mois, sans engagement | then €9.99 a month, cancel at any time |
 | coaching | `coaching` | Programmes de coachs · 14,99 € l'unité | Coach programmes · €14.99 each |
 | downgrade | `downgrade` | Tu t'entraînes moins ? Passe au plan Essentiel à 3,99 € | Training less? Switch to the Essential plan at €3.99 |
 | shopTitle | `shop` | Boutique de gemmes | Gem shop |
@@ -321,11 +321,12 @@ export function fitPhoneView(ids: readonly string[]): FitPhoneItem[] {
 | express | `express` | Achat en un appui : toucher une tenue l'achète | One-tap buying: touching an outfit buys it |
 | renewalPlain | `renewal` plain | Abonnement annuel · prochaine échéance le 3 mars | Yearly subscription · next renewal on 3 March |
 | renewalSilent | `renewal` silent | Renouvelé automatiquement le 3 mars · 59,99 € prélevés | Renewed automatically on 3 March · €59.99 charged |
-| renewalNotice | `renewal` notice | Courriel du 3 février : renouvellement le 3 mars, date limite pour arrêter le 2 mars | Email of 3 February: renews on 3 March, deadline to stop on 2 March |
+| renewalNotice | `renewal` notice | E-mail du 3 février : renouvellement le 3 mars, date limite pour arrêter le 2 mars | Email of 3 February: renews on 3 March, deadline to stop on 2 March |
 | checkoutQuestion | `checkoutQuestion` | Paiement interrompu ? Dis-nous ce qui t'a arrêté. Facultatif. | Stopped at checkout? Tell us what held you back. Optional. |
-| checkoutAnswers | `checkoutQuestion` | Trop cher · Je veux d'abord essayer · Autre | Too expensive · I want to try first · Other |
+| checkoutAnswers | `checkoutQuestion` | Trop cher pour ce que c'est · Essayer un programme d'abord · Autre | Too expensive for what it is · Try a programme first · Other |
 
-`checkoutAnswers` est un tableau de trois chaînes.
+`checkoutAnswers` est un tableau de trois chaînes ; `events.surveyAnswers` (§20.8)
+cite ses deux premières mot pour mot, en minuscules, comme les niveaux 1 et 2.
 
 **La pastille** : ce qui sera prélevé à la fin de l'essai, sans que rien ne
 l'annonce. Un fait mesurable ; le corail dit le problème, jamais une loi qui
@@ -352,18 +353,18 @@ export function trialCharge(ids: readonly string[]): TrialCharge {
 | `pricing` | Prélevé à la fin de l'essai : 8,49 € | non |
 | `trial` | Prélevé à la fin de l'essai : 59,99 € · sans rappel avant le prélèvement | oui |
 | `trial` + `trialmail` | Prélevé à la fin de l'essai : 59,99 € | non |
-| `addon` | Prélevé à la fin de l'essai : 10,98 € · dont une option que tu n'as pas cochée | oui |
-| `pricing` + `addon` | Prélevé à la fin de l'essai : 11,48 € · dont une option que tu n'as pas cochée | oui |
-| `trial` + `addon` | Prélevé à la fin de l'essai : 62,98 € · sans rappel avant le prélèvement · dont une option que tu n'as pas cochée | oui |
+| `addon` | Prélevé à la fin de l'essai : 10,98 € · dont une option cochée d'avance | oui |
+| `pricing` + `addon` | Prélevé à la fin de l'essai : 11,48 € · dont une option cochée d'avance | oui |
+| `trial` + `addon` | Prélevé à la fin de l'essai : 62,98 € · sans rappel avant le prélèvement · dont une option cochée d'avance | oui |
 
 Chaînes (`ChargePillCopy`, sous la clé `charge`) : `amount` « Prélevé à la fin
 de l'essai : {amount} » / "Charged when the trial ends: {amount}" (`{amount}`
 formaté par `formatEuros`) ; `silentSuffix` « sans rappel avant le
 prélèvement » / "with no reminder before the charge" ; `addonSuffix` « dont une
-option que tu n'as pas cochée » / "including an add-on you didn't tick".
+option cochée d'avance » / "including an add-on ticked in advance".
 Composition : `amount`, puis ` · silentSuffix` si `silent`, puis
 ` · addonSuffix` si `addon` ; corail si l'un des deux. Gabarit déclaré :
-`REVENUE_COPY_TEMPLATES = { "charge.amount": ["amount"] }`. **Test C13 du
+`REVENUE_COPY_TEMPLATES = { ...LEVEL_COPY_TEMPLATES, "charge.amount": ["amount"] }`. **Test C13 du
 niveau** : 7,99, 8,49, 59,99 et 2,99 des chaînes sont les constantes ; 800 est
 dans `packsRound` et pas dans `packsOdd` ; 59,99 / 12 arrondi au centime donne
 le « 5,00 € » de `fullPrice`.
@@ -416,7 +417,7 @@ des fins sauf `cleanMiss` et `labyrinth`, `december.cells.outOf`,
 | effects.gain | +{pct} % de revenu par utilisateur ce trimestre | +{pct}% revenue per user this quarter |
 | effects.gainRising | +{pct} % de revenu par utilisateur ce trimestre, l'effet monte encore | +{pct}% revenue per user this quarter, and the effect is still growing |
 | effects.loss | −{pct} % de revenu par utilisateur ce trimestre, des paiements que les gens ont voulus | −{pct}% revenue per user this quarter, payments people actually meant |
-| events.surveyAnswers | Les réponses sont arrivées : 4 personnes sur 10 qui quittent le paiement trouvent l'offre « trop chère pour ce que c'est », 3 sur 10 voulaient « essayer un programme d'abord ». Tes prochains chantiers viseront plus juste, et tu as enfin de quoi montrer au DG : « Point données avec le DG » est débloqué. | The answers are in: 4 in 10 people who leave the checkout find the offer "too expensive for what it is", 3 in 10 wanted "to try a programme first". Your next projects will aim better, and you finally have something to show the CEO: "Data review with the CEO" is unlocked. |
+| events.surveyAnswers | Les réponses sont arrivées : 4 personnes sur 10 qui quittent le paiement répondent « trop cher pour ce que c'est », 3 sur 10 veulent « essayer un programme d'abord ». Tes prochains chantiers viseront plus juste, et tu as enfin de quoi montrer au DG : « Point données avec le DG » est débloqué. | The answers are in: 4 in 10 people who leave the checkout answer "too expensive for what it is", 3 in 10 want to "try a programme first". Your next projects will aim better, and you finally have something to show the CEO: "Data review with the CEO" is unlocked. |
 | events.control | Contrôle de la DGCCRF, article dans la presse : une transaction pénale proposée avec l'accord du parquet, et une amende administrative, {fine} au total. Le DG te demande de tout retirer avant vendredi. {leavers} utilisateurs ferment leur compte. | An inspection by the DGCCRF, France's consumer protection authority, and an article in the press: a criminal settlement offered with the prosecutor's agreement, and an administrative fine, {fine} in all. The CEO asks you to take everything down by Friday. {leavers} users close their accounts. |
 | events.viral | Un fil viral : « Gainix, j'ai supprimé ma carte de l'appli, voici pourquoi. » Les utilisateurs n'achètent plus rien. | A viral thread: "Gainix, I removed my card from the app, here's why." Users stop buying anything. |
 | events.press | Un magazine de sport cite Gainix en exemple d'une appli qui ne force pas la main. Les utilisateurs paient plus volontiers ce qu'ils ont choisi. | A sports magazine cites Gainix as an app that doesn't push people around. Users pay more willingly for what they chose. |
@@ -428,7 +429,7 @@ des fins sauf `cleanMiss` et `labyrinth`, `december.cells.outOf`,
 | clippings.press.headline | Gainix, l'appli qui ne force pas la main | Gainix, the app that doesn't push |
 | clippings.competitor.masthead | La Lettre du fitness | The Fitness Letter |
 | clippings.competitor.headline | L'abonnement à moitié prix gagne le sport | Half-price subscriptions hit fitness apps |
-| news.stamps.fine | Sanctions · {fine} | Penalties · {fine} |
+| news.stamps.fine | Contrôle · {fine} | Inspection · {fine} |
 | december.cells.metric | Revenu par utilisateur en {month} | Revenue per user in {month} |
 | december.cells.trust | Confiance des utilisateurs | User trust |
 | december.metricChart.title | Revenu par utilisateur, par mois | Revenue per user, per month |
@@ -439,7 +440,7 @@ des fins sauf `cleanMiss` et `labyrinth`, `december.cells.outOf`,
 | december.table.metric | Revenu par utilisateur | Revenue per user |
 | catalogue.hiddenEffect | Confiance {trust}, radar {radar}, une seule fois, le jour où elle entre en production. Le revenu qu'elle rapporte baisse de 30 % après trois mois. | Trust {trust}, radar {radar}, once, on the day it goes into production. The revenue it brings in drops by 30% after three months. |
 | share.text | Une année chez Gainix : {title} Revenu par utilisateur à {metric}, confiance à {trust}. Et toi, tu tiendrais ? {url} | A year at Gainix: {title} Revenue per user at {metric}, trust at {trust}. Would you hold out? {url} |
-| nextLevel.eyebrow | Niveau suivant *(T0)* | Next level |
+| nextLevel.eyebrow | Niveau suivant | Next level |
 | nextLevel.status | jouable | playable |
 | resume.previously | Précédemment chez Gainix | Previously at Gainix |
 | resume.quarterLine | Trimestre {q} : {cards}. Revenu par utilisateur à {metric}. | Quarter {q}: {cards}. Revenue per user at {metric}. |
@@ -454,8 +455,8 @@ des fins sauf `cleanMiss` et `labyrinth`, `december.cells.outOf`,
 | cleanMiss | Pas encore 6 €. Mais tout est propre. / Not €6 yet. But everything is clean. | Revenu par utilisateur à {metric}, confiance à {trust}. La courbe monte encore, parce que les effets lents ne s'arrêtent pas en décembre. Le board voulait un chiffre, tu as construit une pente. Regarde la confiance : c'est elle qui fera les 6 € au printemps. | Revenue per user at {metric}, trust at {trust}. The curve is still climbing, because slow effects don't stop in December. The board wanted a number; you built a slope. Look at trust: that's what will deliver the €6 in the spring. |
 | firedClean | — | La patience du DG est tombée à {patience} avant que tes effets lents n'arrivent. Confiance à {trust}. L'année suivante, ton remplaçant a fait payer les essais sans prévenir. Le jeu ne récompense pas toujours ceux qui ont raison trop tôt. La vraie vie non plus. Rejoue, et présente tes données plus tôt. | The CEO's patience fell to {patience} before your slow effects could arrive. Trust at {trust}. The next year, your replacement charged for trials without warning. The game doesn't always reward people who are right too early. Neither does real life. Play again, and show your data sooner. |
 | firedDark | — | Tu as pris des astuces, et la patience du DG est quand même tombée à {patience}. Confiance à {trust}, radar à {radar}. Ce que le DG voulait, c'était le chiffre, tout de suite, et il ne se souvient pas de ce qu'il a demandé. | You used tricks, and the CEO's patience still fell to {patience}. Trust at {trust}, radar at {radar}. What the CEO wanted was the number, right now, and he doesn't remember what he asked for. |
-| fine | — | Le radar est monté jusqu'au contrôle, la transaction a été signée et l'amende est tombée, la presse a écrit. Revenu par utilisateur à {metric} en décembre, confiance à {trust}. Ceux qui avaient payé sans le vouloir ont demandé à être remboursés, et ils l'ont raconté. Ce que tu as mis en production a des noms. Ils sont en dessous. | The radar climbed all the way to an inspection, the settlement was signed and the fine landed, the press wrote about it. Revenue per user at {metric} in December, trust at {trust}. The people who had paid without meaning to asked for their money back, and told everyone why. What you put into production has names. They are below. |
-| labyrinth | La caisse tient. Regarde ce qu'elle coûte. / The till holds. Look at what it costs. | Pas de contrôle cette année. Revenu par utilisateur à {metric}, et une confiance à {trust} que ton dashboard ne t'a jamais montrée. Les utilisateurs que tu as fait payer sans qu'ils le veuillent partent plus vite qu'ils ne sont venus. Le radar est à {radar}. Il ne redescend pas tout seul. | No inspection this year. Revenue per user at {metric}, and trust at {trust} that your dashboard never showed you. The users you charged without their meaning to leave faster than they came. The radar is at {radar}. It doesn't come down on its own. |
+| fine | — | Le radar est monté jusqu'au contrôle, la transaction a été signée et l'amende est tombée, la presse a écrit. Revenu par utilisateur à {metric} en décembre, confiance à {trust}. Ceux qui avaient payé plus qu'ils ne le voulaient ont demandé à être remboursés, et ils l'ont raconté. Ce que tu as mis en production a des noms. Ils sont en dessous. | The radar climbed all the way to an inspection, the settlement was signed and the fine landed, the press wrote about it. Revenue per user at {metric} in December, trust at {trust}. The people who had paid more than they meant to asked for their money back, and told everyone why. What you put into production has names. They are below. |
+| labyrinth | La caisse tient. Regarde ce qu'elle coûte. / The till holds. Look at what it costs. | Pas de contrôle cette année. Revenu par utilisateur à {metric}, et une confiance à {trust} que ton dashboard ne t'a jamais montrée. Les utilisateurs que tu as pressés partent plus vite qu'ils ne sont venus. Le radar est à {radar}. Il ne redescend pas tout seul. | No inspection this year. Revenue per user at {metric}, and trust at {trust} that your dashboard never showed you. The users you pushed leave faster than they came. The radar is at {radar}. It doesn't come down on its own. |
 | repentant | — | Tu as mis des astuces en production, puis tu les as retirées. Revenu par utilisateur à {metric}, confiance à {trust}, radar à {radar}. La confiance remonte plus lentement qu'elle ne tombe. C'est la seule règle du jeu qui est aussi celle de la vraie vie. | You put tricks into production, then took them out. Revenue per user at {metric}, trust at {trust}, radar at {radar}. Trust climbs back more slowly than it falls. It's the one rule of the game that is also a rule of real life. |
 
 ### 20.9 Le catalogue : les huit astuces, vérifiées
@@ -504,8 +505,8 @@ relire par Antoine avant l'ouverture (D9). Deux cas sont déjà pris ailleurs et
 **hiddensub**
 - law FR : Présenter un abonnement comme un achat unique trompe sur la nature et le prix du service : c'est une pratique commerciale trompeuse, un délit (articles L121-2 et L121-3 du Code de la consommation). Et juste avant la commande, le prix et la durée doivent être rappelés de façon lisible (article L221-14).
 - law EN : Presenting a subscription as a one-off purchase misleads about the nature and price of the service: it is a misleading commercial practice, a criminal offence under French law (articles L121-2 and L121-3 of the Consumer Code). And just before the order, the price and duration must be restated legibly (article L221-14).
-- cas FR : En 2019, la SFAM a accepté une amende transactionnelle proposée par la DGCCRF avec l'accord du parquet de Paris : sous couvert d'une offre de remboursement, des clients avaient souscrit, sans toujours le savoir, une assurance payante.
-- cas EN : In 2019, SFAM accepted a settlement fine offered by the DGCCRF, France's consumer protection authority, with the agreement of the Paris prosecutor: under cover of a refund offer, customers had signed up, not always knowingly, for a paid insurance policy.
+- cas FR : En 2019, la SFAM a accepté une transaction proposée par la DGCCRF avec l'accord du parquet de Paris : sous couvert d'une offre de remboursement, des clients avaient souscrit, sans toujours le savoir, une assurance payante.
+- cas EN : In 2019, SFAM accepted a settlement offered by the DGCCRF, France's consumer protection authority, with the agreement of the Paris prosecutor: under cover of a refund offer, customers had signed up, not always knowingly, for a paid insurance policy.
 - tell FR : Un prix sans « par mois » peut cacher un abonnement : lis sous le bouton.
 - tell EN : A price without "a month" can hide a subscription: read under the button.
 - Sources : communiqué de la DGCCRF du 14 juin 2019, lu dans sa reprise (lemondedudroit.fr) : la page de la DGCCRF était bloquée, à relire ; la DGCCRF n'a pas publié le montant (le chiffre de la presse n'est pas à citer). Ne pas nommer l'enseigne qui distribuait l'offre : elle n'était pas mise en cause.
@@ -542,7 +543,7 @@ relire par Antoine avant l'ouverture (D9). Deux cas sont déjà pris ailleurs et
 - law EN : For a fixed-term subscription that renews on its own, the provider must warn in writing, between three months and one month before the renewal date, with the deadline to stop, under French law (article L215-1 of the Consumer Code, the Chatel law). Otherwise the subscriber can cancel free of charge at any time, and gets refunded. No fine: the subscriber is the one who imposes the penalty.
 - cas FR : Aux États-Unis, l'éditeur d'ABCmouse a accepté en 2020 de payer 10 millions de dollars pour clore les accusations de la FTC : ses formules à prix réduit de douze mois se renouvelaient indéfiniment sans que les clients en soient prévenus.
 - cas EN : In the United States, the publisher of ABCmouse agreed in 2020 to pay $10 million to settle FTC charges: its discounted twelve-month plans renewed indefinitely without customers being told.
-- tell FR : Pas de courriel avant la reconduction annuelle ? Tu peux résilier quand tu veux.
+- tell FR : Pas d'e-mail avant la reconduction annuelle ? Tu peux résilier quand tu veux.
 - tell EN : No email before the yearly renewal? You can cancel whenever you like.
 - Sources : C. consom. L215-1 et L241-3 (relus : aucune amende, des intérêts au taux légal) ; FTC, communiqué du 2 septembre 2020 (lu). Repli sans paiement : les engagements de Microsoft auprès de la CMA sur les abonnements Xbox (26 janvier 2022), « not an admission ».
 
@@ -579,7 +580,7 @@ Les questions communes sont au §21.8.
 |---|---|---|---|---|
 | Q1 | **Le chiffre du board : le revenu par utilisateur actif, de 4,00 € à 6,00 €** ? | **Oui** : le même ×1,5 que le niveau 2, donc l'équilibrage validé, et l'esquisse le disait. | Un autre chiffre change la tuile, les messages du DG et les tables. | |
 | Q2 | **Le nom : Gainix** ? | **Oui**, pour le double sens. Repli : Muscléo. | Un nom propre à remplacer en une passe avant T1. | |
-| Q3 | **Le contrôle : une transaction de 300 000 € et une amende administrative de 75 000 €, 375 000 € au total** ? | **Oui** : c'est la procédure réelle pour ce mélange de pratiques, environ 4 % du chiffre d'affaires. Écarté : 300 000 € en quatre amendes administratives cumulées, plus simple à dire mais qui oublie le délit. | Un montant et une phrase d'événement, sans effet sur l'équilibrage. | |
+| Q3 | **Le contrôle : une transaction de 300 000 € et une amende administrative de 75 000 €, 375 000 € au total** ? | **Oui** : c'est la procédure réelle pour ce mélange de pratiques, environ 4 % du chiffre d'affaires. Écarté : 300 000 € en quatre amendes administratives cumulées, plus simple à dire mais qui oublie le délit. Le tampon de la coupure dit « Contrôle · 375 000 € » : « Sanctions » rangerait la transaction parmi les sanctions (§21.5), et « Transaction et amende » ne tient pas sur une ligne à 390 px. | Un montant et une phrase d'événement, sans effet sur l'équilibrage. | |
 | Q4 | **Les huit astuces du §20.4**, dont deux remplacées (frais cachés et fausse urgence, déjà au niveau 2) et une reformulée (l'option cochée d'avance) ? | **Oui** : huit noms neufs, chacun avec un texte relu et un cas réel. | Une PR de spécification avant T1. | |
 | Q5 | **Le bandeau de l'encart du résultat** : « Revenu par utilisateur 4,00 € » tient-il sur sa ligne de 44 px ? | **Le garder**, et si la spec P23 voit la bande passer à la ligne à 1 280 px, le remplacer par « ARPU {metric} » (le mot du glossaire), dans les deux langues, sans redemander. | Une bande sur deux lignes, vue par la spec. | |
 
@@ -587,7 +588,7 @@ Les questions communes sont au §21.8.
 
 | Où | Clé | FR | EN |
 |---|---|---|---|
-| `meta.ts` | `GAME_META.revenue.title` | Gainix : le jeu du revenu — Tour de Growth | Gainix: the revenue game — Tour de Growth |
+| `meta.ts` | `GAME_META.revenue.title` | Gainix : le jeu du revenue — Tour de Growth | Gainix: the revenue game — Tour de Growth |
 | `meta.ts` | `GAME_META.revenue.description` | Joue une année comme PM growth d'une appli de sport : un DG qui veut 6 € de revenu par utilisateur, et huit astuces à reconnaître. | Play a year as the growth PM of a fitness app: a CEO who wants €6 of revenue per user, and eight tricks to learn to spot. |
 | `meta.ts` | `GAME_META.revenue.breadcrumb` | Une année chez Gainix | A year at Gainix |
 | `meta.ts` | `GAME_META.revenue.shareImageAlt` | Une année chez Gainix : 4,00 € de revenu par utilisateur, la confiance et le radar DGCCRF absents du dashboard. | A year at Gainix: €4.00 of revenue per user, user trust and the regulator's radar missing from the dashboard. |
@@ -595,12 +596,13 @@ Les questions communes sont au §21.8.
 | `meta.ts` | `REVENUE_INTRO.title` | Une année chez Gainix | A year at Gainix |
 | `meta.ts` | `REVENUE_INTRO.lead` | Ton DG dirige maintenant Gainix, une appli de sport avec abonnement et monnaie virtuelle, et il t'a emmené avec lui comme PM growth. 200 000 utilisateurs actifs, qui rapportent 4 € chacun par mois. Le board veut 6 € d'ici décembre. Chaque trimestre, le DG t'appelle en visio, puis tu as droit à deux actions, nommées comme on les nomme en réunion. Tu ne sauras ce qu'elles valent qu'une fois le trimestre passé. Le DG, lui, sait déjà ce qu'il veut. | Your CEO now runs Gainix, a fitness app with a subscription and a virtual currency, and he brought you along as growth PM. 200,000 active users, who bring in €4 each a month. The board wants €6 by December. Every quarter the CEO calls you on video, then you get two actions, named the way they are named in meetings. You will only learn what they are worth once the quarter is over. The CEO already knows what he wants. |
 | `meta.ts` | `REVENUE_INTRO.stepsTitle`, `steps`, `glossaryLead` | *(niveau 1, par référence)* | |
-| `entry.ts` | `GAME_ENTRY_COPY.revenue.title` | Le côté obscur du revenu | The dark side of revenue |
+| `entry.ts` | `GAME_ENTRY_COPY.revenue.title` | Le côté obscur du revenue | The dark side of revenue |
 | `entry.ts` | `…body` | Voici ce qu'il ne faut pas faire : joue une année comme PM growth d'une appli de sport, un DG qui veut du revenu par utilisateur, et huit astuces que tu reconnaîtras ensuite partout. | Here is what not to do: play a year as the growth PM of a fitness app, with a CEO who wants revenue per user, and eight tricks you will recognise everywhere afterwards. |
 | `entry.ts` | `…cta` | Jouer le niveau « Comment vous gagnez de l'argent » | Play the level "How you make money" |
-| `entry.ts` | `…band.metric` | Revenu par utilisateur {metric} *(repli « ARPU {metric} », Q5)* | Revenue per user {metric} *(fallback "ARPU {metric}")* |
+| `entry.ts` | `…band.metric` | Revenu par utilisateur {metric} | Revenue per user {metric} |
+| `entry.ts` | `…opening`, `meta`, `band.trust`, `band.notOnDashboard` | *(les constantes partagées du fichier)* | |
 | `hub.ts` | `zones.revenue.company` | Gainix, une appli de sport avec abonnement | Gainix, a fitness app with a subscription |
-| `hub.ts` | `ENDINGS_BY_LEVEL.revenue` | `{ fine: « le contrôle et les sanctions » }` | `{ fine: "the inspection and the penalties" }` |
+| `hub.ts` | `ENDINGS_BY_LEVEL.revenue` | `{ fine: « le contrôle, la transaction et l'amende » }` | `{ fine: "the inspection, the settlement and the fine" }` |
 | `hub.ts` | `LEVEL_TEASERS.revenue` (T0) | « Comment vous gagnez de l'argent » : l'essai qui se change en abonnement, l'option cochée d'avance, le coffre au hasard | "How you make money": the trial that turns into a subscription, the pre-ticked add-on, the random chest |
 | `page.tsx` | les deux mots du glossaire | `["revenue", "arpu"]` | |
 
@@ -613,13 +615,14 @@ REV-4 du §21.9).
   `lootbox`, `hiddensub`, `renewal`), `RevenuePhoneCopy` (§20.7,
   `checkoutAnswers: readonly string[]`) et `ChargePillCopy` (`amount`,
   `silentSuffix`, `addonSuffix`), la pastille sous la clé `charge` ;
-  `REVENUE_COPY_TEMPLATES = { "charge.amount": ["amount"] }`.
+  `REVENUE_COPY_TEMPLATES = { ...LEVEL_COPY_TEMPLATES, "charge.amount": ["amount"] }`.
   `src/content/game/revenue.ts`, `REVENUE_INTRO` et `GAME_META.revenue`. Le test
   `src/content/__tests__/game-revenue.test.ts` : C1 exige dans chaque `law`
   « Code de la consommation » ou « Code de la sécurité intérieure » (anglais :
   « Consumer Code », « Internal Security Code ») ; la règle du contrôle :
-  l'événement dit « transaction » et « amende administrative », le tampon dit
-  « Sanctions », et la fin `fine` dit les deux ; C6 avec la liste blanche du
+  l'événement dit « transaction » et « amende administrative » (EN
+  « settlement » et « administrative fine »), le tampon dit « Contrôle » (EN
+  « Inspection »), et la fin `fine` dit les deux ; C6 avec la liste blanche du
   §20.9 ; C13 tient les montants du §20.7.
 - **T2, le téléphone** : `src/lib/game/fit-phone.ts` (`fitPhoneView`,
   `trialCharge` et ses constantes), `src/components/game/FitPhone.tsx` et

@@ -154,9 +154,11 @@ pour les trois niveaux.
   plus `<Niveau>OrderId` (les cinq ordres de la spécification) et les deux
   interfaces du téléphone et de la pastille, **champ pour champ comme la
   spécification les liste** (« Le téléphone », tableau des chaînes), avec la
-  même doc-comment d'une ligne par champ. Ajouter les gabarits propres au
-  niveau à un `<NIVEAU>_COPY_TEMPLATES` si la pastille en a (comme
-  `ACQUISITION_COPY_TEMPLATES`).
+  même doc-comment d'une ligne par champ. Déclarer `<NIVEAU>_COPY_TEMPLATES`
+  sur le modèle d'`ACQUISITION_COPY_TEMPLATES` : toujours
+  `{ ...LEVEL_COPY_TEMPLATES, … }`, puis les gabarits de la pastille s'il y en a,
+  sous la clé que la spécification donne à la pastille (sans le spread, le test
+  ne vérifie plus les gabarits communs).
 - **`src/content/game/<niveau>.ts`** : l'objet `<NIVEAU>_CONTENT: DeepTranslatable<<Niveau>Copy>`,
   construit comme `acquisition.ts` : ce que le niveau 1 dit de toute année est
   **repris par référence** (`L1.months`, `L1.boss.t2Hit`…), jamais recopié ;
@@ -316,8 +318,10 @@ Tous vécus sur les niveaux 1 et 2 ; chacun a coûté au moins une relecture.
 - **Un événement ne nomme jamais une carte** : les événements (contrôle,
   signalements, fil viral, presse) se déclenchent sur des seuils de radar et
   de confiance, pas sur ce qui a été joué. Une fin non plus : l'année D, virée,
-  n'a joué presque aucune carte. Les spécifications respectent cette règle ;
-  l'agent ne « précise » rien.
+  n'a joué presque aucune carte. Deux exceptions, voulues et déjà écrites :
+  `applause` nomme des astuces que l'année n'a pas jouées, et `firedClean`
+  celle que le remplaçant met en production l'année suivante. Les
+  spécifications respectent cette règle ; l'agent ne « précise » rien.
 - **Un engagement, un accord transactionnel ou une procédure en cours n'est
   jamais une sanction**, dans la copie comme dans les tests (C6). Chaque cas du
   catalogue dit sa nature exacte ; ne pas la reformuler.

@@ -115,11 +115,11 @@ relèvent de l'article 82 de la loi Informatique et Libertés et du RGPD, que la
 CNIL sanctionne par des amendes administratives prononcées par sa formation
 restreinte. **Proposé : 100 000 €**, fixe quel que soit le radar (C14), à valider
 (§18.10, Q3) : environ 3 % du chiffre d'affaires annuel de Quandi (3,6 M€),
-entre les amendes publiées de très petites sociétés (75 000 et 80 000 €) et
-celle d'une société de 43 salariés (150 000 €). Une sanction rendue publique
+du même ordre que l'amende publiée d'un courtier en données de neuf salariés
+(80 000 €, mai 2025, le cas de `partners` au §18.9). Une sanction rendue publique
 suppose la procédure ordinaire : la procédure simplifiée plafonne à 20 000 € et
-n'est jamais publiée, ce qui rendrait faux « article dans la presse ». Détail et
-comparables au §18.9.
+n'est jamais publiée, ce qui rendrait faux « article dans la presse ». Les cas sont
+au §18.9.
 
 ### 18.4 Les cartes
 
@@ -156,7 +156,7 @@ choisissent de le donner (`temp` : trois mois).
 | prechecked | Cases préremplies | À l'inscription, « Recevoir nos conseils et offres » est déjà cochée. | Pre-filled boxes | At sign-up, "Receive our tips and offers" is already ticked. | 0,08 | −3 | +8 | cascade |
 | analysis | Écran d'analyse | Après l'inscription, une barre de progression de douze secondes : « Nous préparons votre planning sur mesure… » | Analysis screen | After sign-up, a twelve-second progress bar: "We're preparing your tailored schedule…" | 0,03 | −2 | +3 | shame |
 | banner | Bandeau optimisé | « Tout accepter » en bouton, « Personnaliser » en lien ; le refus est sur le deuxième écran. | Optimised banner | "Accept all" as a button, "Customise" as a link; refusing is on the second screen. | 0,18 | −10 | +25 | call |
-| pixels | E-mails suivis | Chaque e-mail porte un pixel qui enregistre qui l'ouvre et à quelle heure, pour caler les relances. | Tracked emails | Every email carries a pixel that records who opens it and at what time, to time the follow-ups. | 0,04 | −5 | +12 | social |
+| pixels | E-mails suivis | Chaque e-mail porte un pixel qui enregistre qui l'ouvre et à quelle heure ; les relances partent à cette heure-là. | Tracked emails | Every email carries a pixel that records who opens it and at what time; the follow-ups go out at that hour. | 0,04 | −5 | +12 | social |
 | partners | Partage partenaires | Sous « Créer mon compte » : « En créant mon compte, j'accepte que mes coordonnées soient transmises à nos partenaires. » | Partner sharing | Under "Create my account": "By creating my account, I agree that my details may be passed on to our partners." | 0,04 | −5 | +12 | notice (`revenueMult` 1,02 : chaque contact transmis est payé par le partenaire) |
 | tour | Visite guidée | Des info-bulles guident le premier planning ; elles restent tant qu'il n'est pas publié. | Guided tour | Tooltips guide the first schedule; they stay until it is published. | 0,05 | −4 | +4 | streak |
 
@@ -353,12 +353,14 @@ téléphone ; les « boutons » sont des `<span>` stylés) :
 | checklistClose | `home.checklist` | Fermer | Close |
 | importer | `home.importer` | Reprendre votre ancien agenda | Bring over your old calendar |
 | tour | `home.tour` | Étape 1 sur 7 · Créez votre premier créneau · Suivant | Step 1 of 7 · Create your first slot · Next |
-| push | `push` | Vous n'avez pas encore ouvert notre e-mail d'hier. Il contient votre planning. | You haven't opened yesterday's email yet. It has your schedule in it. |
+| push | `push` | Vous n'avez pas encore ouvert notre e-mail. Il contient votre planning. | You haven't opened our email yet. It has your schedule in it. |
 | welcome | `welcome` | E-mail de demain : votre planning en cours et un modèle pour votre métier | Tomorrow's email: your schedule in progress and a template for your trade |
 | calls | `calls` | Vingt minutes au téléphone ? Dites-nous ce qui vous a arrêté. Facultatif. | Twenty minutes on the phone? Tell us what stopped you. Optional. |
-| callsAnswers | `calls` | Pas le temps · Trop compliqué · Autre | No time · Too complicated · Other |
+| callsAnswers | `calls` | Pas su par où commencer · Un agenda à reprendre · Autre | Didn't know where to start · A calendar to bring over · Other |
 
 `callsAnswers` est un tableau de trois chaînes, comme `originAnswers` au niveau 2.
+`events.surveyAnswers` (§18.8) cite ses deux premières mot pour mot, en
+minuscules, comme les niveaux 1 et 2 citent les leurs.
 `tour` n'a ni « Passer » ni croix : c'est ce que la carte met en production.
 
 **La pastille, sous le téléphone** : les clics qu'il faut pour refuser les
@@ -383,7 +385,7 @@ export function cookieRefusal(ids: readonly string[]): { clicks: 1 | 3; alert: b
 | `refuse` | Refuser les cookies : 1 clic | non |
 | `banner` + `refuse` | Refuser les cookies : 1 clic | non |
 
-Chaînes de la pastille (`CookiePillCopy`) : `easy` « Refuser les cookies : 1
+Chaînes de la pastille (`CookiePillCopy`, sous la clé `cookies`) : `easy` « Refuser les cookies : 1
 clic » / "Refusing cookies: 1 click" ; `hidden` « Refuser les cookies : 3
 clics » / "Refusing cookies: 3 clicks" ; `lawSuffix` « le refus doit être aussi
 simple que l'accord » / "refusing must be as easy as agreeing". Le côté de
@@ -439,7 +441,7 @@ des fins sauf `cleanMiss` et `labyrinth`, `december.cells.outOf`,
 | effects.gain | +{pct} % d'inscrits activés ce trimestre | +{pct}% activated sign-ups this quarter |
 | effects.gainRising | +{pct} % d'inscrits activés ce trimestre, l'effet monte encore | +{pct}% activated sign-ups this quarter, and the effect is still growing |
 | effects.loss | −{pct} % d'inscrits activés ce trimestre, des inscrits qui choisissent ce qu'ils donnent | −{pct}% activated sign-ups this quarter, sign-ups who choose what they give |
-| events.surveyAnswers | Les appels sont faits : 4 inscrits sur 10 « ne voyaient pas par où commencer », 3 sur 10 attendaient « de pouvoir reprendre leur agenda ». Tes prochains chantiers viseront plus juste, et tu as enfin de quoi montrer au DG : « Point données avec le DG » est débloqué. | The calls are done: 4 sign-ups in 10 "couldn't see where to start", 3 in 10 were waiting "to be able to bring over their calendar". Your next projects will aim better, and you finally have something to show the CEO: "Data review with the CEO" is unlocked. |
+| events.surveyAnswers | Les appels sont faits : 4 inscrits sur 10 n'ont « pas su par où commencer », 3 sur 10 avaient « un agenda à reprendre ». Tes prochains chantiers viseront plus juste, et tu as enfin de quoi montrer au DG : « Point données avec le DG » est débloqué. | The calls are done: 4 sign-ups in 10 "didn't know where to start", 3 in 10 had "a calendar to bring over". Your next projects will aim better, and you finally have something to show the CEO: "Data review with the CEO" is unlocked. |
 | events.control | Contrôle de la CNIL, article dans la presse, amende administrative de {fine} prononcée par sa formation restreinte. Le DG te demande de tout retirer avant vendredi. {leavers} utilisateurs suppriment leur compte. | An inspection by the CNIL, France's data protection authority, an article in the press, and an administrative fine of {fine} imposed by its sanctions committee. The CEO asks you to take everything down by Friday. {leavers} users delete their accounts. |
 | events.reports | Des dizaines de plaintes déposées auprès de la CNIL. Un journaliste pose des questions au service presse. | Dozens of complaints filed with the CNIL. A journalist is asking the press office questions. |
 | events.viral | Un fil viral dans un groupe d'indépendants : « Quandi, je ne leur confie plus rien, voici pourquoi. » Les inscrits repartent sans rien publier. | A viral thread in a freelancers' group: "Quandi, I don't trust them with anything any more, here's why." Sign-ups leave without publishing anything. |
@@ -453,7 +455,7 @@ des fins sauf `cleanMiss` et `labyrinth`, `december.cells.outOf`,
 | clippings.press.headline | Quandi, l'outil qui ne force pas la main | Quandi, the tool that doesn't push |
 | clippings.competitor.masthead | La Lettre du logiciel | The Software Letter |
 | clippings.competitor.headline | Le gratuit à vie arrive dans la planification | Free for life comes to scheduling tools |
-| clippings.why.controlRadar | Chaque astuce mise en production a fait monter le radar CNIL, la tuile masquée de ton tableau de bord. Ce trimestre, il a franchi le seuil du contrôle. | *(niveau 1, même texte : il ne nomme pas l'autorité)* Every trick you put into production pushed up the regulator radar, the hidden tile on your dashboard. This quarter it crossed the inspection threshold. |
+| clippings.why.controlRadar | Chaque astuce mise en production a fait monter le radar CNIL, la tuile masquée de ton tableau de bord. Ce trimestre, il a franchi le seuil du contrôle. | Every trick you put into production pushed up the regulator radar, the hidden tile on your dashboard. This quarter it crossed the inspection threshold. |
 | clippings.why.reports | Les plaintes arrivent à la CNIL : ton radar CNIL, la tuile masquée de ton tableau de bord, approche du seuil du contrôle. Chaque nouvelle astuce l'en rapproche. | Complaints are reaching the CNIL: your regulator radar, the hidden tile on your dashboard, is nearing the inspection threshold. Every new trick brings it closer. |
 | december.cells.metric | Activation en {month} | Activation in {month} |
 | december.cells.trust | Confiance des utilisateurs | User trust |
@@ -466,7 +468,7 @@ des fins sauf `cleanMiss` et `labyrinth`, `december.cells.outOf`,
 | december.table.metric | Activation | Activation |
 | catalogue.hiddenEffect | Confiance {trust}, radar {radar}, une seule fois, le jour où elle entre en production. Les inscrits qu'elle fait publier baissent de 30 % après trois mois. | Trust {trust}, radar {radar}, once, on the day it goes into production. The sign-ups it gets publishing drop by 30% after three months. |
 | share.text | Une année chez Quandi : {title} Activation à {metric}, confiance à {trust}. Et toi, tu tiendrais ? {url} | A year at Quandi: {title} Activation at {metric}, trust at {trust}. Would you hold out? {url} |
-| nextLevel.eyebrow | Niveau suivant *(T0)* | Next level |
+| nextLevel.eyebrow | Niveau suivant | Next level |
 | nextLevel.status | jouable | playable |
 | resume.previously | Précédemment chez Quandi | Previously at Quandi |
 | resume.quarterLine | Trimestre {q} : {cards}. Activation à {metric}. | Quarter {q}: {cards}. Activation at {metric}. |
@@ -482,15 +484,17 @@ niveau 1 ; `{metric}` arrive formaté (« 45,0 % »).
 | cleanMiss | Pas encore 45 %. Mais tout est propre. / Not 45% yet. But everything is clean. | Activation à {metric}, confiance à {trust}. La courbe monte encore, parce que les effets lents ne s'arrêtent pas en décembre. Le board voulait un chiffre, tu as construit une pente. Regarde la confiance : c'est elle qui fera les 45 % au printemps. | Activation at {metric}, trust at {trust}. The curve is still climbing, because slow effects don't stop in December. The board wanted a number; you built a slope. Look at trust: that's what will deliver the 45% in the spring. |
 | firedClean | — | La patience du DG est tombée à {patience} avant que tes effets lents n'arrivent. Confiance à {trust}. L'année suivante, ton remplaçant a caché le refus des cookies. Le jeu ne récompense pas toujours ceux qui ont raison trop tôt. La vraie vie non plus. Rejoue, et présente tes données plus tôt. | The CEO's patience fell to {patience} before your slow effects could arrive. Trust at {trust}. The next year, your replacement hid the cookie refusal. The game doesn't always reward people who are right too early. Neither does real life. Play again, and show your data sooner. |
 | firedDark | — | Tu as pris des astuces, et la patience du DG est quand même tombée à {patience}. Confiance à {trust}, radar à {radar}. Ce que le DG voulait, c'était le chiffre, tout de suite, et il ne se souvient pas de ce qu'il a demandé. | You used tricks, and the CEO's patience still fell to {patience}. Trust at {trust}, radar at {radar}. What the CEO wanted was the number, right now, and he doesn't remember what he asked for. |
-| fine | — | Le radar est monté jusqu'au contrôle, l'amende est tombée, la presse a écrit. Activation à {metric} en décembre, confiance à {trust}. Les inscrits pressés au printemps ont fermé leur compte, et ils l'ont raconté. Ce que tu as mis en production a des noms. Ils sont en dessous. | The radar climbed all the way to an inspection, the fine landed, the press wrote about it. Activation at {metric} in December, trust at {trust}. The sign-ups you pushed in the spring closed their accounts, and told everyone why. What you put into production has names. They are below. |
+| fine | — | Le radar est monté jusqu'au contrôle, l'amende est tombée, la presse a écrit. Activation à {metric} en décembre, confiance à {trust}. Les inscrits que tu as pressés ont fermé leur compte, et ils l'ont raconté. Ce que tu as mis en production a des noms. Ils sont en dessous. | The radar climbed all the way to an inspection, the fine landed, the press wrote about it. Activation at {metric} in December, trust at {trust}. The sign-ups you pushed closed their accounts, and told everyone why. What you put into production has names. They are below. |
 | labyrinth | L'inscription tient. Regarde ce qu'elle coûte. / The sign-up holds. Look at what it costs. | Pas de contrôle cette année. Activation à {metric}, et une confiance à {trust} que ton dashboard ne t'a jamais montrée. Les utilisateurs que tu as pressés partent plus vite qu'ils ne sont venus. Le radar est à {radar}. Il ne redescend pas tout seul. | No inspection this year. Activation at {metric}, and trust at {trust} that your dashboard never showed you. The users you pushed leave faster than they came. The radar is at {radar}. It doesn't come down on its own. |
 | repentant | — | Tu as mis des astuces en production, puis tu les as retirées. Activation à {metric}, confiance à {trust}, radar à {radar}. La confiance remonte plus lentement qu'elle ne tombe. C'est la seule règle du jeu qui est aussi celle de la vraie vie. | You put tricks into production, then took them out. Activation at {metric}, trust at {trust}, radar at {radar}. Trust climbs back more slowly than it falls. It's the one rule of the game that is also a rule of real life. |
 
 Chaque texte dit ce que fait le modèle (E11) : les inscrits qui arrivent avec
 la confiance du moment, les actifs qui partent plus vite quand elle baisse, les
 rampes qui continuent, le radar qui ne baisse que sans astuce en production.
-Aucun événement ne nomme une carte (§21.5) ; `applause` nomme deux astuces
-parce qu'il est la fin d'une année qui n'en a joué aucune.
+Aucun événement ne nomme une carte (§21.5). Deux fins nomment une astuce sans
+la dire jouée : `applause`, la fin d'une année qui n'en a joué aucune, et
+`firedClean`, où c'est le remplaçant qui la met en production, l'année
+suivante.
 
 ### 18.9 Le catalogue : les huit astuces, vérifiées
 
@@ -523,7 +527,7 @@ sanction.
 | bundle | Consentement en bloc / Bundled consent | CEPD, lignes directrices 05/2020 sur le consentement, §42-44 |
 | phone | Chantage à la sécurité / Safety blackmail | CNIL, « La forme des choix » (Cahier IP nº 6, 2019), p. 28 |
 | prechecked | Réglage intrusif par défaut / Deceptive snugness | typologie de la CNIL (LINC, 2026) ; CEPD 03/2022 |
-| analysis | Illusion de travail / Labor illusion | Buell et Norton, *Management Science*, 2011 (lu en source secondaire) |
+| analysis | Illusion de travail / Labor illusion | Buell et Norton, *Management Science*, 2011 (lu en source secondaire) ; « Labor » est l'orthographe de l'article, gardée telle quelle |
 | pixels | Pixel espion / Tracking pixel | CNIL, recommandation sur les pixels de suivi (2026) |
 | partners | Consentement de dernière minute / Last-minute consent | CNIL, Cahier IP nº 6 (2019) |
 | tour | Harcèlement d'interface / Nagging | OCDE (2022) ; le seul nom déjà porté par une carte du niveau 1 (`cascade`) |
@@ -578,7 +582,7 @@ sanction.
 **pixels**
 - law FR : Un pixel qui enregistre qui ouvre un e-mail, et quand, est un traceur : il demande l'accord du destinataire (article 82 de la loi Informatique et Libertés). Seule une mesure réduite, la date de la dernière ouverture, peut s'en passer, pour vérifier que les e-mails arrivent.
 - law EN : A pixel that records who opens an email, and when, is a tracker: it needs the recipient's agreement (article 82 of the French Data Protection Act). Only a reduced measure, the date of the last opening, can do without it, to check that emails are getting through.
-- cas FR : En avril 2026, la CNIL a publié sa recommandation sur les pixels de suivi dans les courriels : mesurer les ouvertures pour optimiser les envois demande un accord. Ce n'est pas une sanction, c'est la règle telle que la CNIL la lit.
+- cas FR : En avril 2026, la CNIL a publié sa recommandation sur les pixels de suivi dans les e-mails : mesurer les ouvertures pour optimiser les envois demande un accord. Ce n'est pas une sanction, c'est la règle telle que la CNIL la lit.
 - cas EN : In April 2026, the CNIL published its recommendation on tracking pixels in emails: measuring openings to optimise mailings requires agreement. It is not a sanction; it is the rule as the CNIL reads it.
 - tell FR : Savoir quand tu ouvres un e-mail, c'est un traceur : il faut ton accord.
 - tell EN : Knowing when you open an email is tracking: it needs your agreement.
@@ -596,8 +600,8 @@ sanction.
 **tour**
 - law FR : Aucune loi ne l'interdit à un outil comme Quandi. Le règlement européen sur les services numériques interdit de redemander un choix déjà fait, mais il ne vise que les plateformes en ligne, et pas les petites.
 - law EN : No law forbids it for a tool like Quandi. The EU's Digital Services Act bans asking again for a choice already made, but it only covers online platforms, and not small ones.
-- cas FR : L'OCDE la range dans sa classification des dark patterns de 2022 : des demandes répétées de faire ce que l'entreprise préfère.
-- cas EN : The OECD lists it in its 2022 classification of dark patterns: repeated requests to do what the company prefers.
+- cas FR : En 2022, l'OCDE l'a rangée dans sa classification des dark patterns : des demandes répétées de faire ce que l'entreprise préfère.
+- cas EN : In 2022, the OECD listed it in its classification of dark patterns: repeated requests to do what the company prefers.
 - tell FR : Une aide qu'on ne peut pas fermer n'aide plus : elle pousse.
 - tell EN : Help you can't close isn't helping any more: it's pushing.
 - Sources : règlement (UE) 2022/2065, articles 19 et 25 (lus au JO de l'UE) ; OCDE, *Dark Commercial Patterns*, 2022.
@@ -630,7 +634,7 @@ change avant le code (§21.1).
 |---|---|---|---|---|
 | Q1 | **Le chiffre du board : le taux d'activation, de 30 % à 45 %**, objectifs 32,3 · 35,3 · 39,0 · 45,0 % ? | **Oui** : c'est la définition de l'activation dans le Tour, et l'équilibrage du niveau 2 s'y reprend tel quel. | Un autre chiffre change la tuile, les messages du DG et les tables, pas les cartes. | |
 | Q2 | **Le nom : Quandi** ? | **Oui** : rien ne le porte dans le secteur. Écartés : Créneo (pris), Plannea (trop proche de Planity). | Un nom propre dans toute la copie, remplaçable en une passe avant T1. | |
-| Q3 | **Le contrôle : une amende administrative de 100 000 €, rendue publique** ? | **Oui** : environ 3 % du chiffre d'affaires, entre les amendes publiées des petites sociétés. Écartés : 20 000 € (la procédure simplifiée, jamais publiée, donc pas d'article de presse) et 150 000 € (une société de 43 salariés). | Un montant dans `levels/activation.ts`, sans effet sur l'équilibrage. | |
+| Q3 | **Le contrôle : une amende administrative de 100 000 €, rendue publique** ? | **Oui** : environ 3 % du chiffre d'affaires, du même ordre que l'amende publiée d'un courtier en données de neuf salariés (80 000 €). Écarté : 20 000 € (la procédure simplifiée, jamais publiée, donc pas d'article de presse). | Un montant dans `levels/activation.ts`, sans effet sur l'équilibrage. | |
 | Q4 | **Les huit astuces du §18.4**, dont trois retirées de l'esquisse et trois ajoutées (§18.1) ? | **Oui** : sept noms neufs sur huit, au lieu de trois. | Changer une astuce change sa carte, sa ligne de téléphone et son catalogue : une PR de spécification avant T1. | |
 
 ### 18.11 La copie autour du jeu
@@ -665,16 +669,21 @@ unités pour les sous-agents est au §21.9 (unités ACT-1 à ACT-4).
 - **T1, la copie** : `ActivationCopy`, `ActivationOrderId` (`bundle`, `banner`,
   `phone`, `prechecked`, `partners`), `ActivationPhoneCopy` (§18.7, un champ par
   ligne du tableau, `callsAnswers: readonly string[]`) et `CookiePillCopy`
-  (`easy`, `hidden`, `lawSuffix`) dans `src/lib/game/copy.ts` ; aucun gabarit
-  propre au niveau (`ACTIVATION_COPY_TEMPLATES = {}`, déclaré quand même pour
-  la symétrie). `src/content/game/activation.ts`, `ACTIVATION_INTRO` et
+  (`easy`, `hidden`, `lawSuffix`), la pastille sous la clé `cookies`, dans
+  `src/lib/game/copy.ts` ; aucun gabarit propre au niveau
+  (`ACTIVATION_COPY_TEMPLATES = { ...LEVEL_COPY_TEMPLATES }`, déclaré quand même,
+  comme `ACQUISITION_COPY_TEMPLATES`, pour que le test vérifie les gabarits
+  communs). `src/content/game/activation.ts`, `ACTIVATION_INTRO` et
   `GAME_META.activation` dans `meta.ts`. Le test
   `src/content/__tests__/game-activation.test.ts` : C1 exige dans chaque `law`
   l'un de « loi Informatique et Libertés », « RGPD », « Code de la
   consommation », « règlement européen sur les services numériques » (et leurs
   équivalents anglais « Data Protection Act », « GDPR », « Consumer Code »,
   « Digital Services Act ») ; la règle du contrôle remplace C14 : l'événement
-  `control` et le tampon disent « amende » et « CNIL », jamais « transaction » ;
+  `control` dit « amende » et « CNIL » (EN « fine » et « CNIL ») ; le tampon,
+  repris du niveau 1, dit « Amende » (EN « Fined ») ; la fin `fine` dit
+  « amende » (EN « fine ») ; aucune chaîne du niveau ne dit « transaction »
+  (EN « settlement ») ;
   C6 avec la liste blanche Google, Twitter ; C13 tient les « 1 » et « 3 » de la
   pastille.
 - **T2, le téléphone** : `src/lib/game/planner-phone.ts` (`plannerPhoneView`,

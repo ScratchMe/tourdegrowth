@@ -107,10 +107,8 @@ Déjà codé (`levels/referral.ts`) : **l'agent n'y touche pas** (§21.2).
 des données de tiers collectées sans base légale, de la prospection par
 messages sans consentement et des personnes non informées. **Proposé :
 75 000 €**, fixe (C14), à valider (§19.10, Q3) : environ 3 % du chiffre
-d'affaires annuel de Partix (2,4 M€). Les amendes publiées pour un seul
-manquement de consentement tournent autour de 1 à 2 % du chiffre d'affaires,
-et ceux de Partix s'additionnent (articles 6 et 14 du RGPD, minimisation,
-prospection). Détail et comparables au §19.9.
+d'affaires annuel de Partix (2,4 M€), pour des manquements qui s'additionnent
+(articles 6 et 14 du RGPD, minimisation, prospection). Les cas sont au §19.9.
 
 ### 19.4 Les cartes
 
@@ -121,7 +119,7 @@ nom commun). Chiffres du niveau 2 pour le même rôle.
 
 | id | Nom FR | Pitch FR | Nom EN | Pitch EN | gain | ramp | trust | radar | autres | rôle |
 |---|---|---|---|---|---|---|---|---|---|---|
-| fairbonus | Parrainage clair | 5 € pour chacun, versés dès la première dépense partagée ; les conditions tiennent sur l'écran d'invitation. | Clear referral | €5 each, paid on the first shared expense; the conditions fit on the invitation screen. | 0,05 | 0,09 | +4 | −2 | perm | pause |
+| fairbonus | Parrainage détaillé | 5 € pour chacun, versés dès la première dépense partagée ; les conditions tiennent sur l'écran d'invitation. | Detailed referral | €5 each, paid on the first shared expense; the conditions fit on the invitation screen. | 0,05 | 0,09 | +4 | −2 | perm | pause |
 | guests | Question aux invités | Une question facultative aux invités qui ne s'inscrivent pas : « Qu'est-ce qui t'a retenu ? » | Question for guests | One optional question for guests who don't sign up: "What held you back?" | | | +2 | | `insight` | survey |
 | recap | Récap partageable | Le récap d'un week-end, qui doit quoi à qui, lisible sans installer l'appli. | Shareable recap | A weekend's recap, who owes what to whom, readable without installing the app. | 0 | 0,12 | +3 | | perm | onboard |
 | guestpage | Page de l'invité | L'invité voit le groupe et sa part avant de créer un compte. | Guest page | Guests see the group and their share before creating an account. | 0,03 | 0,08 | +3 | | perm | annual |
@@ -145,7 +143,7 @@ d'amis qui disparaissent le temps que les utilisateurs invitent autrement
 | fakeinvite | Invitation personnalisée | Quand quelqu'un s'inscrit, ses contacts reçoivent « Thomas t'attend sur Partix ». | Personalised invitation | When someone signs up, their contacts receive "Thomas is waiting for you on Partix". | 0,08 | −3 | +8 | cascade |
 | unlock | Fonctions à débloquer | L'export du récap et les rappels de remboursement se débloquent à trois amis invités. | Unlockable features | Exporting the recap and repayment reminders unlock at three friends invited. | 0,03 | −2 | +3 | shame |
 | autoinvite | Invitations automatiques | À l'inscription, une invitation part vers chaque contact au nom de l'utilisateur, avec deux relances. | Automatic invitations | At sign-up, an invitation goes out to every contact in the user's name, with two follow-ups. | 0,18 | −10 | +25 | call |
-| shadow | Suggestions d'amis | Les numéros des contacts non inscrits sont gardés, pour suggérer qui inviter et leur proposer de rejoindre. | Friend suggestions | Non-users' numbers from the address books are kept, to suggest who to invite and to ask them to join. | 0,04 | −5 | +12 | social |
+| shadow | Suggestions d'amis | Les numéros des contacts non inscrits sont gardés ; l'appli suggère qui inviter et leur propose de rejoindre. | Friend suggestions | Non-users' numbers from the address books are kept; the app suggests who to invite and asks them to join. | 0,04 | −5 | +12 | social |
 | bonus | Bonus de parrainage | « 10 € pour toi, 10 € pour ton ami » en tête de l'écran ; les conditions sont dans l'aide. | Referral bonus | "€10 for you, €10 for your friend" at the top of the screen; the conditions are in the help pages. | 0,04 | −5 | +12 | notice (`revenueMult` 1,02 : les bonus promis sont rarement versés) |
 | reviewgate | Demande d'avis ciblée | « Tu aimes Partix ? » : « Oui » mène à la note dans le store, « Pas vraiment » à un formulaire interne. | Targeted review prompt | "Enjoying Partix?": "Yes" leads to the store rating, "Not really" to an internal form. | 0,05 | −4 | +4 | streak |
 
@@ -284,8 +282,8 @@ export type SplitPhoneItem =
   | { kind: "guestPage" }
   /** `guests`: the question to guests who don't join. */
   | { kind: "guestQuestion" }
-  /** `nobook`: the promise at the bottom. */
-  | { kind: "noBook" };
+  /** `nobook`: the promise at the bottom; its second sentence only without `shadow`, which keeps the numbers. */
+  | { kind: "noBook"; numbers: boolean };
 
 export function splitPhoneView(ids: readonly string[]): SplitPhoneItem[] {
   const has = (id: ReferralCardId) => ids.includes(id);
@@ -302,7 +300,7 @@ export function splitPhoneView(ids: readonly string[]): SplitPhoneItem[] {
   if (has("shadow")) items.push({ kind: "guestShadow" });
   if (has("guestpage")) items.push({ kind: "guestPage" });
   if (has("guests")) items.push({ kind: "guestQuestion" });
-  if (has("nobook")) items.push({ kind: "noBook" });
+  if (has("nobook")) items.push({ kind: "noBook", numbers: !has("shadow") });
   return items;
 }
 ```
@@ -340,10 +338,14 @@ export function splitPhoneView(ids: readonly string[]): SplitPhoneItem[] {
 | guestShadow | `guestShadow` | 4 de tes contacts utilisent Partix. Rejoins-les. | 4 of your contacts use Partix. Join them. |
 | guestPage | `guestPage` | Voir le groupe et ta part sans installer l'appli | See the group and your share without installing the app |
 | guestQuestion | `guestQuestion` | Pas encore inscrite ? Qu'est-ce qui t'a retenue ? Facultatif. | Not signed up yet? What held you back? Optional. |
-| guestAnswers | `guestQuestion` | Pas besoin · Trop de notifications · Autre | No need · Too many notifications · Other |
-| noBook | `noBook` | Partix marche sans tes contacts. Les numéros des non-inscrits ne sont pas gardés. | Partix works without your contacts. Non-users' numbers aren't kept. |
+| guestAnswers | `guestQuestion` | Pas besoin d'une appli de plus · Voir le groupe d'abord · Autre | No need for one more app · See the group first · Other |
+| noBook | `noBook` | Partix marche sans tes contacts. | Partix works without your contacts. |
+| noBookNumbers | `noBook.numbers` | Les numéros des non-inscrits ne sont pas gardés. | Non-users' numbers aren't kept. |
 
-`guestAnswers` est un tableau de trois chaînes. Léa est au féminin dans
+`guestAnswers` est un tableau de trois chaînes ; `events.surveyAnswers` (§19.8)
+cite ses deux premières mot pour mot, en minuscules, comme les niveaux 1 et 2.
+`noBookNumbers` suit `noBook` sur la même ligne quand `numbers` est vrai : avec
+`shadow` en production, les deux phrases se contrediraient. Léa est au féminin dans
 `guestQuestion` (« inscrite », « retenue ») : c'est elle qui lit.
 
 **La pastille** : les messages envoyés au nom de Thomas, qu'il n'a pas écrits.
@@ -362,20 +364,20 @@ export function sentInYourName(ids: readonly string[]): { messages: number; aler
 
 | Cartes en production ou cochées | Pastille FR | Corail |
 |---|---|---|
-| ni `autoinvite` ni `fakeinvite` | 0 message envoyé en ton nom | non |
-| `fakeinvite` | 214 messages envoyés en ton nom · des messages que tu n'as pas écrits | oui |
-| `autoinvite` | 642 messages envoyés en ton nom · des messages que tu n'as pas écrits | oui |
-| les deux | 856 messages envoyés en ton nom · des messages que tu n'as pas écrits | oui |
+| ni `autoinvite` ni `fakeinvite` | 0 message envoyé au nom de Thomas | non |
+| `fakeinvite` | 214 messages envoyés au nom de Thomas · des messages qu'il n'a pas écrits | oui |
+| `autoinvite` | 642 messages envoyés au nom de Thomas · des messages qu'il n'a pas écrits | oui |
+| les deux | 856 messages envoyés au nom de Thomas · des messages qu'il n'a pas écrits | oui |
 
 `continueFine` est écrit en petit sous le gros bouton, `continueSkip` en lien
 gris : c'est ce que la carte met en production. `chosen` et `nobook` ne
 changent pas la pastille : un écran honnête ne coupe
-pas une automatisation, seul `clean` la retire. Chaînes (`SentPillCopy`) :
-`none` « 0 message envoyé en ton nom » / "0 messages sent in your name" ;
-`some` « {n} messages envoyés en ton nom » / "{n} messages sent in your name"
-(`{n}` formaté par `formatInt`) ; `suffix` « des messages que tu n'as pas
-écrits » / "messages you didn't write". Gabarit déclaré :
-`REFERRAL_COPY_TEMPLATES = { "pill.some": ["n"] }`. **Test C13 du niveau** :
+pas une automatisation, seul `clean` la retire. Chaînes (`SentPillCopy`, sous la clé `sent`) :
+`none` « 0 message envoyé au nom de Thomas » / "0 messages sent in Thomas's name" ;
+`some` « {n} messages envoyés au nom de Thomas » / "{n} messages sent in Thomas's name"
+(`{n}` formaté par `formatInt`) ; `suffix` « des messages qu'il n'a pas
+écrits » / "messages he didn't write". Gabarit déclaré :
+`REFERRAL_COPY_TEMPLATES = { ...LEVEL_COPY_TEMPLATES, "sent.some": ["n"] }`. **Test C13 du niveau** :
 214 dans `invitePreselected` et `autoSent` est `CONTACTS` ; les « 2 relances »
 d'`autoSent` sont `MESSAGES_PER_CONTACT − 1` ; 642 et 856 n'apparaissent dans
 aucune chaîne (ils sont calculés).
@@ -426,7 +428,7 @@ des fins sauf `cleanMiss` et `labyrinth`, `december.cells.outOf`,
 | effects.gain | +{pct} % d'invitations acceptées ce trimestre | +{pct}% accepted invitations this quarter |
 | effects.gainRising | +{pct} % d'invitations acceptées ce trimestre, l'effet monte encore | +{pct}% accepted invitations this quarter, and the effect is still growing |
 | effects.loss | −{pct} % d'invitations acceptées ce trimestre, des invitations que les gens ont choisies | −{pct}% accepted invitations this quarter, invitations people actually chose |
-| events.surveyAnswers | Les réponses des invités sont arrivées : 4 sur 10 « n'avaient pas besoin d'une appli de plus », 3 sur 10 voulaient « voir le groupe avant de s'inscrire ». Tes prochains chantiers viseront plus juste, et tu as enfin de quoi montrer au DG : « Point données avec le DG » est débloqué. | The guests' answers are in: 4 in 10 "didn't need one more app", 3 in 10 wanted "to see the group before signing up". Your next projects will aim better, and you finally have something to show the CEO: "Data review with the CEO" is unlocked. |
+| events.surveyAnswers | Les réponses des invités sont arrivées : 4 sur 10 n'avaient « pas besoin d'une appli de plus », 3 sur 10 voulaient « voir le groupe d'abord ». Tes prochains chantiers viseront plus juste, et tu as enfin de quoi montrer au DG : « Point données avec le DG » est débloqué. | The guests' answers are in: 4 in 10 had "no need for one more app", 3 in 10 wanted to "see the group first". Your next projects will aim better, and you finally have something to show the CEO: "Data review with the CEO" is unlocked. |
 | events.control | Contrôle de la CNIL, article dans la presse, amende administrative de {fine} prononcée par sa formation restreinte. Le DG te demande de tout retirer avant vendredi. {leavers} utilisateurs suppriment leur compte. | An inspection by the CNIL, France's data protection authority, an article in the press, and an administrative fine of {fine} imposed by its sanctions committee. The CEO asks you to take everything down by Friday. {leavers} users delete their accounts. |
 | events.reports | Des centaines d'avis à une étoile dans les stores, et des plaintes déposées auprès de la CNIL. Un journaliste pose des questions au service presse. | Hundreds of one-star reviews in the app stores, and complaints filed with the CNIL. A journalist is asking the press office questions. |
 | events.viral | Un fil viral : « Partix, j'ai désinstallé, voici pourquoi. » Les invités ne s'inscrivent plus. | A viral thread: "Partix, I uninstalled it, here's why." Guests stop signing up. |
@@ -440,7 +442,7 @@ des fins sauf `cleanMiss` et `labyrinth`, `december.cells.outOf`,
 | clippings.press.headline | Partix, l'appli qui ne force pas la main | Partix, the app that doesn't push |
 | clippings.competitor.masthead | La Lettre des applis | The App Letter |
 | clippings.competitor.headline | Les parrainages à 5 € se multiplient | €5 referrals are everywhere |
-| clippings.why.controlRadar | Chaque astuce mise en production a fait monter le radar CNIL, la tuile masquée de ton tableau de bord. Ce trimestre, il a franchi le seuil du contrôle. | *(niveau 1, même texte : il ne nomme pas l'autorité)* Every trick you put into production pushed up the regulator radar, the hidden tile on your dashboard. This quarter it crossed the inspection threshold. |
+| clippings.why.controlRadar | Chaque astuce mise en production a fait monter le radar CNIL, la tuile masquée de ton tableau de bord. Ce trimestre, il a franchi le seuil du contrôle. | Every trick you put into production pushed up the regulator radar, the hidden tile on your dashboard. This quarter it crossed the inspection threshold. |
 | clippings.why.reports | Les avis des stores et les plaintes arrivent à la CNIL : ton radar CNIL, la tuile masquée de ton tableau de bord, approche du seuil du contrôle. Chaque nouvelle astuce l'en rapproche. | Store reviews and complaints are reaching the CNIL: your regulator radar, the hidden tile on your dashboard, is nearing the inspection threshold. Every new trick brings it closer. |
 | december.cells.metric | Coefficient viral en {month} | Viral coefficient in {month} |
 | december.cells.trust | Confiance des utilisateurs | User trust |
@@ -453,7 +455,7 @@ des fins sauf `cleanMiss` et `labyrinth`, `december.cells.outOf`,
 | december.table.metric | Coefficient viral | Viral coefficient |
 | catalogue.hiddenEffect | Confiance {trust}, radar {radar}, une seule fois, le jour où elle entre en production. Les invitations qu'elle fait accepter baissent de 30 % après trois mois. | Trust {trust}, radar {radar}, once, on the day it goes into production. The invitations it gets accepted drop by 30% after three months. |
 | share.text | Une année chez Partix : {title} Coefficient viral à {metric}, confiance à {trust}. Et toi, tu tiendrais ? {url} | A year at Partix: {title} Viral coefficient at {metric}, trust at {trust}. Would you hold out? {url} |
-| nextLevel.eyebrow | Niveau suivant *(T0)* | Next level |
+| nextLevel.eyebrow | Niveau suivant | Next level |
 | nextLevel.status | jouable | playable |
 | resume.previously | Précédemment chez Partix | Previously at Partix |
 | resume.quarterLine | Trimestre {q} : {cards}. Coefficient viral à {metric}. | Quarter {q}: {cards}. Viral coefficient at {metric}. |
@@ -468,7 +470,7 @@ des fins sauf `cleanMiss` et `labyrinth`, `december.cells.outOf`,
 | cleanMiss | Pas encore 0,60. Mais tout est propre. / Not 0.60 yet. But everything is clean. | Coefficient viral à {metric}, confiance à {trust}. La courbe monte encore, parce que les effets lents ne s'arrêtent pas en décembre. Le board voulait un chiffre, tu as construit une pente. Regarde la confiance : c'est elle qui fera le 0,60 au printemps. | Viral coefficient at {metric}, trust at {trust}. The curve is still climbing, because slow effects don't stop in December. The board wanted a number; you built a slope. Look at trust: that's what will deliver the 0.60 in the spring. |
 | firedClean | — | La patience du DG est tombée à {patience} avant que tes effets lents n'arrivent. Confiance à {trust}. L'année suivante, ton remplaçant a fait écrire à tous les contacts sans demander. Le jeu ne récompense pas toujours ceux qui ont raison trop tôt. La vraie vie non plus. Rejoue, et présente tes données plus tôt. | The CEO's patience fell to {patience} before your slow effects could arrive. Trust at {trust}. The next year, your replacement had every contact messaged without asking. The game doesn't always reward people who are right too early. Neither does real life. Play again, and show your data sooner. |
 | firedDark | — | Tu as pris des astuces, et la patience du DG est quand même tombée à {patience}. Confiance à {trust}, radar à {radar}. Ce que le DG voulait, c'était le chiffre, tout de suite, et il ne se souvient pas de ce qu'il a demandé. | You used tricks, and the CEO's patience still fell to {patience}. Trust at {trust}, radar at {radar}. What the CEO wanted was the number, right now, and he doesn't remember what he asked for. |
-| fine | — | Le radar est monté jusqu'au contrôle, l'amende est tombée, la presse a écrit. Coefficient viral à {metric} en décembre, confiance à {trust}. Les amis invités de force au printemps ont désinstallé, et ils l'ont raconté. Ce que tu as mis en production a des noms. Ils sont en dessous. | The radar climbed all the way to an inspection, the fine landed, the press wrote about it. Viral coefficient at {metric} in December, trust at {trust}. The friends invited by force in the spring uninstalled, and told everyone why. What you put into production has names. They are below. |
+| fine | — | Le radar est monté jusqu'au contrôle, l'amende est tombée, la presse a écrit. Coefficient viral à {metric} en décembre, confiance à {trust}. Les amis invités de force ont désinstallé, et ils l'ont raconté. Ce que tu as mis en production a des noms. Ils sont en dessous. | The radar climbed all the way to an inspection, the fine landed, the press wrote about it. Viral coefficient at {metric} in December, trust at {trust}. The friends invited by force uninstalled, and told everyone why. What you put into production has names. They are below. |
 | labyrinth | Les invitations tiennent. Regarde ce qu'elles coûtent. / The invitations hold. Look at what they cost. | Pas de contrôle cette année. Coefficient viral à {metric}, et une confiance à {trust} que ton dashboard ne t'a jamais montrée. Les utilisateurs que tu as pressés partent plus vite qu'ils ne sont venus. Le radar est à {radar}. Il ne redescend pas tout seul. | No inspection this year. Viral coefficient at {metric}, and trust at {trust} that your dashboard never showed you. The users you pushed leave faster than they came. The radar is at {radar}. It doesn't come down on its own. |
 | repentant | — | Tu as mis des astuces en production, puis tu les as retirées. Coefficient viral à {metric}, confiance à {trust}, radar à {radar}. La confiance remonte plus lentement qu'elle ne tombe. C'est la seule règle du jeu qui est aussi celle de la vraie vie. | You put tricks into production, then took them out. Viral coefficient at {metric}, trust at {trust}, radar at {radar}. Trust climbs back more slowly than it falls. It's the one rule of the game that is also a rule of real life. |
 
@@ -600,7 +602,7 @@ Les questions communes sont au §21.8.
 
 | Où | Clé | FR | EN |
 |---|---|---|---|
-| `meta.ts` | `GAME_META.referral.title` | Partix : le jeu de la recommandation — Tour de Growth | Partix: the referral game — Tour de Growth |
+| `meta.ts` | `GAME_META.referral.title` | Partix : le jeu du referral — Tour de Growth | Partix: the referral game — Tour de Growth |
 | `meta.ts` | `GAME_META.referral.description` | Joue une année comme PM growth d'une appli de partage de dépenses : un DG qui veut un coefficient viral de 0,60, et huit astuces à reconnaître. | Play a year as the growth PM of an expense-sharing app: a CEO who wants a viral coefficient of 0.60, and eight tricks to learn to spot. |
 | `meta.ts` | `GAME_META.referral.breadcrumb` | Une année chez Partix | A year at Partix |
 | `meta.ts` | `GAME_META.referral.shareImageAlt` | Une année chez Partix : un coefficient viral de 0,40, la confiance et le radar CNIL absents du dashboard. | A year at Partix: a viral coefficient of 0.40, user trust and the regulator's radar missing from the dashboard. |
@@ -608,10 +610,11 @@ Les questions communes sont au §21.8.
 | `meta.ts` | `REFERRAL_INTRO.title` | Une année chez Partix | A year at Partix |
 | `meta.ts` | `REFERRAL_INTRO.lead` | Ton DG dirige maintenant Partix, une appli de partage de dépenses entre amis, et il t'a emmené avec lui comme PM growth. Un million d'utilisateurs, et chaque nouveau en amène 0,40 autre en moyenne par ses invitations : c'est le coefficient viral. Le board veut 0,60 d'ici décembre. Chaque trimestre, le DG t'appelle en visio, puis tu as droit à deux actions, nommées comme on les nomme en réunion. Tu ne sauras ce qu'elles valent qu'une fois le trimestre passé. Le DG, lui, sait déjà ce qu'il veut. | Your CEO now runs Partix, an app for splitting costs with friends, and he brought you along as growth PM. A million users, and each new one brings in 0.40 more on average through their invitations: that's the viral coefficient. The board wants 0.60 by December. Every quarter the CEO calls you on video, then you get two actions, named the way they are named in meetings. You will only learn what they are worth once the quarter is over. The CEO already knows what he wants. |
 | `meta.ts` | `REFERRAL_INTRO.stepsTitle`, `steps`, `glossaryLead` | *(niveau 1, par référence)* | |
-| `entry.ts` | `GAME_ENTRY_COPY.referral.title` | Le côté obscur de la recommandation | The dark side of referral |
+| `entry.ts` | `GAME_ENTRY_COPY.referral.title` | Le côté obscur du referral | The dark side of referral |
 | `entry.ts` | `…body` | Voici ce qu'il ne faut pas faire : joue une année comme PM growth d'une appli de partage de dépenses, un DG qui veut que chaque utilisateur en amène d'autres, et huit astuces que tu reconnaîtras ensuite partout. | Here is what not to do: play a year as the growth PM of an expense-sharing app, with a CEO who wants every user to bring in more, and eight tricks you will recognise everywhere afterwards. |
 | `entry.ts` | `…cta` | Jouer le niveau « S'ils vous recommandent » | Play the level "If they recommend you" |
 | `entry.ts` | `…band.metric` | Coefficient viral {metric} | Viral coefficient {metric} |
+| `entry.ts` | `…opening`, `meta`, `band.trust`, `band.notOnDashboard` | *(les constantes partagées du fichier)* | |
 | `hub.ts` | `zones.referral.company` | Partix, une appli de partage de dépenses entre amis | Partix, an app for splitting costs with friends |
 | `hub.ts` | `ENDINGS_BY_LEVEL.referral` | *(aucune entrée : « le contrôle et l'amende » du niveau 1 est juste)* | |
 | `hub.ts` | `LEVEL_TEASERS.referral` (T0) | « S'ils vous recommandent » : les invitations envoyées pour toi, le carnet aspiré, le bonus aux conditions introuvables | "If they recommend you": invitations sent for you, the scraped address book, the bonus with conditions nowhere to be found |
@@ -626,13 +629,15 @@ REF-4 du §21.9).
   `autoinvite`, `bigshare`, `fakeinvite`, `bonus`), `ReferralPhoneCopy` (§19.7,
   `guestAnswers: readonly string[]`) et `SentPillCopy` (`none`, `some`,
   `suffix`), la pastille sous la clé `sent` ; `REFERRAL_COPY_TEMPLATES =
-  { "sent.some": ["n"] }`. `src/content/game/referral.ts`, `REFERRAL_INTRO` et
+  { ...LEVEL_COPY_TEMPLATES, "sent.some": ["n"] }`. `src/content/game/referral.ts`, `REFERRAL_INTRO` et
   `GAME_META.referral`. Le test `src/content/__tests__/game-referral.test.ts` :
   C1 exige dans chaque `law` l'un de « RGPD », « Code de la consommation »,
   « Code des postes et des communications électroniques », « App Store »
   (anglais : « GDPR », « Consumer Code », « Postal and Electronic Communications
-  Code », « App Store ») ; la règle du contrôle : l'événement et le tampon disent
-  « amende » et « CNIL », jamais « transaction » ; C6 avec la liste blanche du
+  Code », « App Store ») ; la règle du contrôle : l'événement `control` dit
+  « amende » et « CNIL » (EN « fine » et « CNIL ») ; le tampon, repris du
+  niveau 1, dit « Amende » (EN « Fined ») ; la fin `fine` dit « amende » (EN
+  « fine ») ; aucune chaîne du niveau ne dit « transaction » (EN « settlement ») ; C6 avec la liste blanche du
   §19.9 ; C13 tient 214, les deux relances et l'absence de 642 et 856 dans les
   chaînes.
 - **T2, le téléphone** : `src/lib/game/split-phone.ts` (`splitPhoneView`,
@@ -640,7 +645,7 @@ REF-4 du §21.9).
   `src/components/game/SplitPhone.tsx` et `SentPill.tsx`, `REFERRAL_SIDE`, les
   aperçus, et `src/__tests__/game-split-phone.test.ts` (chaque ligne de la
   table de la pastille ; `fairbonus` l'emporte sur `bonus` ; `chosen` annule la
-  présélection de `contacts`).
+  présélection de `contacts` ; `shadow` retire la seconde phrase de `nobook`).
 - **T3, le branchement** : la table du §21.3 ; le niveau prend sa place entre la
   rétention et le revenue dans `GAME_LEVELS_BY_PILLAR`.
 - **T4, les specs** : `e2e/game-referral.spec.ts`, d'après le §19.6 ; le

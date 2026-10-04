@@ -1009,6 +1009,13 @@ En anglais à 1 280 : tableau 3 372 → 4 212 (+840, le retour +828). À 390 : t
 - **L'année « droit dans tes bottes » du niveau 2, jouée au referral, finit applaudie** (0,5959, que la tuile affiche 0,60) : le referral a sa propre année épinglée, trouvée par recherche. Le niveau pardonne aussi un peu plus au hasard (49 % d'applaudissements pour un joueur honnête qui tire au hasard, contre 43 %) : C86.
 - **Un piège d'outil** : le rapporteur par défaut de Vitest n'affiche pas la sortie d'un test qui passe. Une sonde jetable se lance avec `--reporter=verbose`, sinon son silence se lit comme « rien trouvé ».
 
+**Relu par `relecteur-copie`** avant le merge, et corrigé :
+- **Deux bloquants.** Le premier : la règle du contrôle exigeait « CNIL » d'un tampon repris du niveau 1, qui ne le dit pas, et le test écrit d'après elle aurait rougi. Le second : le gabarit de la pastille du referral était déclaré sous deux clés différentes.
+- **Des écarts qu'un agent aurait recopiés.** Les gabarits n'avaient pas `...LEVEL_COPY_TEMPLATES`, et la clé de la pastille de l'activation n'était pas nommée (c'est `cookies`). Les réponses du questionnaire ne citaient pas les options du téléphone. Trois téléphones se contredisaient quand deux cartes étaient posées ensemble. Deux pastilles tutoyaient l'utilisateur de l'appli. On trouvait encore « courriel », « au printemps » dans deux fins, et des comparables d'amende jamais vérifiés, retirés.
+- **Le tampon du revenue devient « Contrôle · {fine} ».** « Sanctions » rangeait la transaction pénale parmi les sanctions, contre la règle du §21.5, et « Transaction et amende » ne tient pas sur une ligne à 390 px. C'est écrit dans C89.
+- **Les titres gardent « referral » et « revenue » en anglais**, comme le glossaire du site.
+- **Gardés tels quels** : « Achat express », le nom qu'on lui donne en réunion, et « Labor illusion », l'orthographe de l'article source.
+
 **Vérifié au bit près** : avant de toucher au moteur, 3 000 années jouées au hasard sur chacun des niveaux 1 et 2 ont été enregistrées en entier (états, tableaux de bord, rapports, décembres) ; rejouées après, le JSON est identique, octet pour octet (46 Mo).
 
 **Vérifié** : `tsc` et `eslint` propres ; **3 275 tests unitaires** (63 de plus : 60 pour les trois modèles, 3 pour les formats), `vitest --coverage` au-dessus de ses seuils (lignes 97,9 %) ; `next build` avec les variables de la CI ; les specs Playwright du jeu sur ce build (`game-level`, `game-level2`, `game-endings`, `game-island`, `game-news`, `game-share-images`) : 72 passées, 3 ignorées par construction. Le reste de la suite Playwright tourne en CI : la PR ne touche aucune page.
