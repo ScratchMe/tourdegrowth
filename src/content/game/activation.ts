@@ -34,7 +34,8 @@ import { RETENTION_CONTENT } from "./retention";
  * is "France's data protection authority"), euro amounts stay in euros, the
  * one American case stays in dollars. The CNIL's fines are told without the
  * name of the firm (C77): « un moteur de recherche », « un courtier en
- * données de neuf salariés ». An administrative fine is a fine, imposed by
+ * données de neuf salariés », except when a court names it (Google, by the
+ * Conseil d'État in 2020). An administrative fine is a fine, imposed by
  * the CNIL's sanctions committee; the FTC's agreement with Twitter is a
  * settlement, never a fine.
  *
@@ -274,7 +275,8 @@ export const ACTIVATION_CONTENT: DeepTranslatable<ActivationCopy> = {
   // tracking pixels, the EDPB guidelines). The legal review of the catalogue
   // stays Antoine's (CHANTIERS.md D9). A commitment, a settlement, a
   // recommendation or a ruling of interpretation is never told as a sanction;
-  // the CNIL's fines are told without the firm's name (C77).
+  // the CNIL's fines are told without the firm's name (C77), except when a
+  // court names it (Google, by the Conseil d'État in 2020).
   patterns: {
     bundle: {
       official: t("Consentement en bloc", "Bundled consent"),
