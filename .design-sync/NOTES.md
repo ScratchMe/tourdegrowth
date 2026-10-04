@@ -986,9 +986,8 @@ Two presentation traps, fixed in the previews:
   "2026-09-16T21:51:38Z"}`, and it holds the 34 components compiled then
   (`PillarChip` included; no engine, game or viz), in its own files under
   `project/`. Every sync since wrote to the project, which that page never
-  reads: **that is B8**. Bringing the page up to date means rewriting the
-  artifact's files from the bundle (`CHANTIERS.md`, B16), which waits on
-  Antoine's go.
+  reads: **that is B8**. Rewritten the same evening on Antoine's go (B16,
+  below).
 
 ## `_ds_manifest.json` — Claude Design never rebuilt it, and writing it was not enough
 
@@ -1069,7 +1068,42 @@ file the sync can write restarts it. It is a Claude Design defect to report
 34 cards compiled on 2026-09-11, and the page has read that artifact's own
 files ever since. Nothing restarts because nothing is broken: the project
 and the artifact are two copies, and the sync writes to the first. The fix
-is to write the second (`CHANTIERS.md`, B16).
+is to write the second: done on 2026-10-04 (B16, the next section), and
+part of every sync since.
+
+## The Design System artifact — the page Antoine opens (B16)
+
+`https://claude.ai/artifact/UYbV6SsEQP95kVFG7jr5Lq`, an Artifact of type
+"Design System" whose content is its own files under `project/`. The type's
+rules live in the artifact itself (`SKILL.md`, `artifact-type/reference/format.md`,
+read with the Artifact tool's `read`): files only under `project/`, the index
+`project/design-system.json` written last and read again just before,
+generated files (`manifest.json`, `api/`, `tokens.css`) never written.
+
+**Rebuilt by `.design-sync/build-ds-artifact.mjs`** from `ds-bundle`, the same
+aliasing Claude Design used once in September: one `preview.html` per
+component (marker kept, `viewport="900x700"` → `width=900`, the frame's own
+tags dropped, `_preview/<Name>.js` inlined), `README.md` from the
+`.prompt.md`, the `.d.ts`, the `.jsx` stub under `components/src/`, the bundle
+and its stylesheet, React 19.3 as `components/lib/`, `tokens.json` rebuilt
+from the bundle's :root (lists only; 60 a family, so the lengths split in
+three; 80 type styles, the deck's last ones left out; composite values such
+as `pad-card: 26px 30px` dropped), the README, current copies under `docs/`.
+It writes `plan.json` (what to send, what to remove: a component gone from
+the bundle loses its folder).
+
+**Publishing**: the Artifact tool, `url` the artifact, `root` the output
+folder, at most 255 paths a call, `.d.ts` and `.jsx` as
+`{"from": …, "contentType": "text/plain"}` (refused otherwise), removals as
+`null`, the index in the last call. First run, 2026-10-04: two calls,
+versions 11 and 12; 112 component folders, `PillarChip` and React 18 gone.
+
+**Before publishing, render**: the page's frame preloads tokens.css,
+bundle.css, the libraries and bundle.js; a preview carries none of them.
+Inject those tags into a copy of each `preview.html` and render it headless
+(the B16 run: 112 previews, 408 cells, none empty; `ErrorScreen` logs the
+errors it displays on purpose, `GlossaryTerm` a React dev warning the
+project's cards share).
 
 ## Re-sync risks
 

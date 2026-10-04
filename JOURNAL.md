@@ -1087,3 +1087,15 @@ En anglais à 1 280 : tableau 3 372 → 4 212 (+840, le retour +828). À 390 : t
 **Arrêté avant d'écrire dans l'artefact** : la génération de ses fichiers a été refusée par le garde de permissions de la session, comme une modification d'une ressource partagée sans accord explicite. Le chemin est prêt, la décision revient à Antoine (`CHANTIERS.md`, B16).
 
 **Vérifié** : `tsc`, `eslint` sur les fichiers touchés, les 3 329 tests unitaires après la fusion de `main` ; côté projet, `list_files` (quatre fichiers et un aperçu par composant), l'index relu identique au local, les contrats de `TotalBand` et `WhatIfFigures` relus, `report_validate` 112/0/0/0.
+
+## B16 : la page d'aperçu remise à jour, les 112 composants (2026-10-04, #331)
+
+**Le feu vert d'Antoine** : « mets l'artefact à jour ». L'artefact « Design System » [UYbV6SsEQP95kVFG7jr5Lq](https://claude.ai/artifact/UYbV6SsEQP95kVFG7jr5Lq), la page qu'il ouvre, avait les 34 composants du 2026-09-16.
+
+**Comment** : `.design-sync/build-ds-artifact.mjs` refait depuis `ds-bundle` la conversion que Claude Design avait faite une fois en septembre, dans la même forme. Un `preview.html` par composant, avec le module d'aperçu en ligne et sans les balises que le cadre de la page fournit déjà. Une fiche tirée du `.prompt.md`, les types, le bundle et sa feuille, React 19.3 au lieu de 18.3. Un `tokens.json` refait depuis les 430 jetons, au format de listes du type : 161 couleurs, les longueurs réparties en trois familles pour tenir sous 60, 80 styles de texte. Quinze valeurs composées tombent, la feuille les garde. L'index est relu juste avant d'être réécrit : seuls `libraries` et `lastChange` changent. Le reste vient des règles que porte l'artefact lui-même (`SKILL.md`, `format.md`).
+
+**Vérifié avant de publier** : les 112 aperçus rendus en local dans un cadre qui imite celui de la page (jetons, polices, feuille, React, bundle) donnent 408 cellules, aucune vide, avec un coup d'œil sur `TotalBand`, `NightSurface` et `MrrCurve`. Deux signalements ne viennent pas de la conversion : `ErrorScreen` journalise exprès les erreurs qu'il montre, et `GlossaryTerm` produit un avertissement de développement de React que les cartes du projet ont déjà.
+
+**Publié** en deux appels (versions 11 et 12). Le premier a été refusé une fois : les `.d.ts` et `.jsx` doivent être déclarés `text/plain`. La liste relue montre un dossier par composant ; `PillarChip` et React 18 sont partis. Les fichiers que la page génère elle-même (`manifest.json`, `api/`, `tokens.css`) restent ceux de septembre jusqu'à son prochain enregistrement : le format interdit de les écrire, et les aperçus n'en dépendent pas, puisque la feuille porte toutes les valeurs.
+
+**Désormais** : chaque synchro refait l'artefact (`CHANTIERS.md`, prompt B, étape 5 ; `.design-sync/NOTES.md`, « The Design System artifact »). D13, le signalement, est sans objet.
