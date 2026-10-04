@@ -1041,6 +1041,12 @@ En anglais à 1 280 : tableau 3 372 → 4 212 (+840, le retour +828). À 390 : t
 
 **Fusionné deux fois avec `main`**, qui a pris les numéros pendant que la PR attendait : #323 (la re-synchro A20.f) a pris A21, puis #324 (l'app grand public et la place de marché) A22, A23, C56 à C74 et les prompts G et H. L'item du jeu est devenu **A24**, ses questions **C75 à C91**, son prompt le **prompt I**, partout (spécifications, tests, `types.ts`, `CHANTIERS.md`, `CLAUDE.md`). Le signe : la PR était en conflit, et sa CI n'avait jamais démarré, sans que rien ne le dise (`GITHUB.md` §1.8).
 
+## A21.2, l'anglais tranché : « before paying back » (2026-10-04, #327)
+
+**Décidé par Antoine** après #326 : dans le panneau « Et si », la perte en mois se dit en anglais « leaves ~4 months before paying back », plus clair que « leaves ~4 months early », et la même tournure que la slide d'unit economics (`unitLeavesBefore`). Le français ne bouge pas (« part ~4 mois avant », l'en-tête de la ligne dit déjà « Mois après remboursement »). `leavesFirst` reste « à relire » pour son français ; son marqueur dit que l'anglais est tranché.
+
+**Vérifié** : les tests du panneau et de la copie, les 18 specs « Et si », et la ligne regardée en anglais à 1 280 et à 390 px : plus longue, elle tient sur trois puis quatre lignes, sans rien couper ni faire défiler de côté. L'aperçu `WhatIfFigures` est repris.
+
 ## C56 à C74, C92 et C93 : les décisions de l'app grand public et de la place de marché (2026-10-04)
 
 **La séance** : Antoine a tranché les dix-neuf questions de §21.13 et §22.15 une par une (le prompt C, avec `AskUserQuestion`), puis les deux questions de suivi que deux de ses réponses ont fait naître. Chaque réponse est consignée, datée, dans la colonne « Réponse d'Antoine » de sa spécification, et indexée dans `docs/decisions.md`.

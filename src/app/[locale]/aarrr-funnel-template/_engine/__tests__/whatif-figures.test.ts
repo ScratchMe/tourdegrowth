@@ -78,7 +78,7 @@ describe("whatIfFigureGroups", () => {
   it("in English", () => {
     const g = whatIfFigureGroups({ state: filmState(), ctx: CTX_EN, strings: EN.strings, metrics: EN.metrics }, "plg", FILM_LEVERS);
     expect(g.groups.map((x) => x.title)).toEqual(["Growth", "One new customer", "Cash"]);
-    expect(rowOf(g, "after").today).toBe("leaves ~4 months early");
+    expect(rowOf(g, "after").today).toBe("leaves ~4 months before paying back");
     expect(rowOf(g, "spend").change).toBe("unchanged");
   });
 });
