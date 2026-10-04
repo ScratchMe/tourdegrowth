@@ -491,6 +491,13 @@ Design returned it under `design/ds-extension-09-return/` the same evening),
 each with its PNGs and its return, decided by Antoine. The project holds no
 `design/` folder any more; the next brief starts it again.
 
+**Brief 10 started it again, on 2026-10-04** (the marketplace, A23 MKT-B):
+`design/DS-EXTENSION-BRIEF-10.md` and the 23 files under
+`design/ds-extension-10/` (22 PNGs and their `README.md`), 24 files under
+their own plan, no delete, bundle and `_ds_sync.json` untouched; `list_files`
+before it showed no path under `design/`. Its return is expected under
+`design/ds-extension-10-return/`.
+
 **A19 (2026-10-02) added two exports that are not cards.** `SpaceRace` (the
 race, out of `SpaceBand`, that the band renders and the compact header
 reuses) only makes sense inside a header, and `SiteHeaderCompactor` (the
