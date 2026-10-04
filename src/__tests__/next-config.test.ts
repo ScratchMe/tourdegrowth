@@ -125,4 +125,8 @@ describe("next.config.mjs inlines the engine's build flag with the same rule as 
   it("never exposes ENGINE_ENABLED itself to the client bundles", () => {
     expect(Object.keys(nextConfig.env ?? {})).not.toContain("ENGINE_ENABLED");
   });
+
+  it("never exposes ENGINE_TYPES itself to the client bundles", () => {
+    expect(Object.keys(nextConfig.env ?? {})).not.toContain("ENGINE_TYPES");
+  });
 });

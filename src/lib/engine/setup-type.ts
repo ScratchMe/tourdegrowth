@@ -20,9 +20,20 @@ export function isApp(setup: Pick<EngineSetup, "type">): boolean {
   return setup.type === "consumer-app";
 }
 /**
- * The app's monetization, or null for any other type. A stored app always has one (validate.ts requires it); the
- * default only covers a setup built in code before it is validated (the start card's choice in progress).
+ * The app's monetization, or null for any other type. A stored app can carry a monetization that is not one: a file
+ * opens with its errors (`parseEngineFile`, io.ts) and the state is stored as it came, so `"x"`, `[]`, `0`, a box
+ * that is not a boolean or three unticked boxes can all sit where the type says `AppMonetization`. The function
+ * does not trust the type: it returns the stored value only when it is an object (not an array) whose
+ * `subscriptions`, `purchases` and `ads` are three booleans with at least one true, and the subscriptions-only
+ * default otherwise (the same default covers an app built in code before it is validated, the start card's choice
+ * in progress). The validator reports such an app on its own (validate.ts); this function only normalizes it to the
+ * default, so no caller reads an invalid value. The check is written here, not imported: this module stays a leaf.
  */
 export function monetizationOf(setup: Pick<EngineSetup, "type" | "monetization">): AppMonetization | null {
-  return setup.type === "consumer-app" ? (setup.monetization ?? DEFAULT_APP_MONETIZATION) : null;
+  if (setup.type !== "consumer-app") return null;
+  const stored: unknown = setup.monetization;
+  if (typeof stored !== "object" || stored === null || Array.isArray(stored)) return DEFAULT_APP_MONETIZATION;
+  const { subscriptions, purchases, ads } = stored as Record<string, unknown>;
+  const threeBooleans = typeof subscriptions === "boolean" && typeof purchases === "boolean" && typeof ads === "boolean";
+  return threeBooleans && (subscriptions || purchases || ads) ? (stored as AppMonetization) : DEFAULT_APP_MONETIZATION;
 }
