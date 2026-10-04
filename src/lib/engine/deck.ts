@@ -902,7 +902,7 @@ export function slideCurve(
     keys: { today: l.curveToday, whatif: whatifKey },
     summary:
       projected.mrr12 && projected.mrrPath
-        ? fillTemplate(l.curveSummaryWhatif, { start: fact(today.mrr), today: approx(today.mrr12), whatif: approx(projected.mrr12) })
+        ? fillTemplate(l.curveSummaryWhatif, { start: fact(today.mrr), today: approx(today.mrr12), whatif: approx(projected.mrr12), key: whatifKey })
         : fillTemplate(l.curveSummary, { start: fact(today.mrr), today: approx(today.mrr12) }),
   };
 }

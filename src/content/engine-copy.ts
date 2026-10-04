@@ -489,9 +489,14 @@ export const ENGINE_COPY = {
       fr: "Le MRR mois par mois, de {start} aujourd'hui à {today} dans 12 mois au rythme actuel.",
       en: "The MRR month by month, from {start} today to {today} in 12 months at today's pace.",
     },
+    /**
+     * `{key}`: the curve's own key for the what-if line — `curveWhatif` on the board (« avec tes « Et si » », the same
+     * sentence as before), `slide.curveWhatifOne` or `curveWhatifAll` on a slide. Until A21.6 (2026-10-04) the words
+     * were fixed here, and a one-lever slide said « avec tes « Et si » » in a board's « tu », in the plural.
+     */
     curveSummaryWhatif: {
-      fr: "Le MRR mois par mois, depuis {start} aujourd'hui : {today} dans 12 mois au rythme actuel, {whatif} avec tes « Et si ».",
-      en: "The MRR month by month, from {start} today: {today} in 12 months at today's pace, {whatif} with your what-ifs.",
+      fr: "Le MRR mois par mois, depuis {start} aujourd'hui : {today} dans 12 mois au rythme actuel, {whatif} {key}.",
+      en: "The MRR month by month, from {start} today: {today} in 12 months at today's pace, {whatif} {key}.",
     },
     /** Sales-assisted with annual contracts: why its line is straight. */
     curveStraight: {
