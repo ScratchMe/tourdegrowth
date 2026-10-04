@@ -1,6 +1,6 @@
 # GAME-BRIEF.md, §21 — Construire un niveau depuis sa spécification
 
-*Écrit le 2026-10-04 (`CHANTIERS.md` A22), en même temps que les spécifications
+*Écrit le 2026-10-04 (`CHANTIERS.md` A24), en même temps que les spécifications
 des trois derniers niveaux : [`activation.md`](activation.md) (§18),
 [`referral.md`](referral.md) (§19) et [`revenue.md`](revenue.md) (§20). Ce guide
 vaut pour les trois : la spécification d'un niveau dit **quoi**, ce guide dit
@@ -54,7 +54,7 @@ dans sa section « Questions pour Antoine ». Trois règles en découlent :
 
 ## 21.2 Ce qui est déjà fait
 
-Le 2026-10-04, pour les trois niveaux à la fois (journal, « A22 ») :
+Le 2026-10-04, pour les trois niveaux à la fois (journal, « A24 ») :
 
 - **Le moteur sait faire tourner les trois.** Trois économies nouvelles
   (`Economy` dans `src/lib/game/types.ts` : `activation`, `viral`, `arpu`), la
@@ -85,7 +85,7 @@ Chaque PR suit la cadence de `CLAUDE.md` : relecteurs avant la PR
 (`relecteur-copie` sur toute copie neuve, `relecteur-securite` dès qu'une route,
 le proxy ou un payload vers le client bouge), CI verte, puis merge par la
 session selon `/livrer` (lu, pas appelé). Chaque PR ajoute son entrée à la fin
-de `JOURNAL.md` et met à jour `CHANTIERS.md` A22.
+de `JOURNAL.md` et met à jour `CHANTIERS.md` A24.
 
 ### T0 — Ce qui change quand le jeu passe de deux à trois niveaux (une seule fois)
 
@@ -145,7 +145,7 @@ pour les trois niveaux.
    4 », etc. La spécification écrit `niveau {N}` : l'agent y met le rang.
 5. **Copie neuve « à relire »** (convention 6) : les trois `eyebrow` changés,
    le gabarit de `shareImageAlt` et ses nombres en lettres. Chaque chaîne porte
-   son marqueur daté (`// TODO: à relire — <date> (A22.T0) : …`).
+   son marqueur daté (`// TODO: à relire — <date> (A24.T0) : …`).
 
 ### T1 — La copie du niveau (modèle : A12.c, PR #242)
 
@@ -273,7 +273,7 @@ sur décembre (P21) et l'analytique par niveau (P20).
   un item de la section B de `CHANTIERS.md`, à créer par la PR T3, mené dans
   une session de design sync (`.design-sync/NOTES.md`).
 - **Le bon à tirer** de la copie neuve : `/bon-a-tirer`, appelé par Antoine
-  seul. La PR T3 crée l'item dans `CHANTIERS.md` A22 ; la session ne construit
+  seul. La PR T3 crée l'item dans `CHANTIERS.md` A24 ; la session ne construit
   pas le bon à tirer d'elle-même.
 - **La relecture juridique et la recherche INPI du nom** : à Antoine (D9).
 - **L'ouverture** : le niveau est jouable derrière le drapeau du jeu, comme le
@@ -368,7 +368,7 @@ merge livré : `git show --stat <sha>` (convention 1).
   l'encart du résultat quand son étape freine, et son décembre renvoie au
   niveau suivant ouvert.
 - Toute chaîne neuve porte « à relire » ; l'item du bon à tirer existe dans
-  `CHANTIERS.md` A22, celui de la re-synchro dans la section B.
+  `CHANTIERS.md` A24, celui de la re-synchro dans la section B.
 - L'entrée du journal de chaque PR, et `CLAUDE.md` mis à jour (l'état du jeu,
   les chiffres de référence).
 
@@ -388,16 +388,16 @@ une autre réponse change ce guide et les spécifications avant le code.
 Le travail se découpe en **treize unités**, chacune menée par **un sous-agent
 Sonnet** et livrée en **une PR**. Entre deux unités, tout est mergé et noté :
 on peut s'arrêter après n'importe laquelle et reprendre plus tard, dans une
-autre session, sans rien relire d'autre que l'état d'A22.
+autre session, sans rien relire d'autre que l'état d'A24.
 
 ### Les rôles
 
-- **L'orchestrateur** (Opus, la session principale) : il lit l'état d'A22 dans
+- **L'orchestrateur** (Opus, la session principale) : il lit l'état d'A24 dans
   `CHANTIERS.md`, choisit l'unité suivante, lance un sous-agent avec le prompt
   ci-dessous, lit son compte rendu, lance les relecteurs du dépôt
   (`relecteur-copie` sur toute copie neuve, `relecteur-securite` dès qu'une
   route, le proxy ou un payload bouge), ouvre la PR en brouillon, suit la CI,
-  merge selon `/livrer` (lu, pas appelé), coche l'unité dans A22 avec le numéro
+  merge selon `/livrer` (lu, pas appelé), coche l'unité dans A24 avec le numéro
   de PR, et s'arrête si on le lui a demandé. Il ne code pas lui-même, sauf une
   correction d'une ligne trouvée en relisant.
 - **Le sous-agent** (Sonnet, `model: "sonnet"` dans l'outil Agent) : une unité,
@@ -472,4 +472,4 @@ questions ouvertes. N'écris « vérifié » que pour ce que tu as fait tourner.
 3. Pour X-2 et X-3, il ouvre lui-même deux captures (390 px, une en français,
    une en anglais) : leçon nº 1 de `CLAUDE.md`.
 4. `git show --stat` du squash après le merge (convention 1), puis la case de
-   l'unité dans A22, avec le numéro de PR lu sur GitHub (convention 8).
+   l'unité dans A24, avec le numéro de PR lu sur GitHub (convention 8).

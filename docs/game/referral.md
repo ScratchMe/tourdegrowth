@@ -1,6 +1,6 @@
 # GAME-BRIEF.md, niveau referral — « S'ils vous recommandent » (§19)
 
-*Écrite le 2026-10-04 (`CHANTIERS.md` A22), pour qu'un agent construise ce
+*Écrite le 2026-10-04 (`CHANTIERS.md` A24), pour qu'un agent construise ce
 niveau sans rien avoir à décider : chaque chaîne est écrite en français et en
 anglais, chaque chiffre est celui que produit le modèle déjà codé
 (`src/lib/game/levels/referral.ts`, épinglé par
