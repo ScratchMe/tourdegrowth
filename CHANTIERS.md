@@ -429,7 +429,7 @@ APP-6, APP-9 et APP-11.
 
 | # | Quoi | Qui | État |
 |---|---|---|---|
-| A22.a | **La spécification**, puis les décisions C56 à C63 et C92, puis **sa réécriture** en guide d'exécution | Session, Antoine | **Fait le 2026-10-04** |
+| A22.a | **La spécification**, puis les décisions C56 à C63 et C92, puis **sa réécriture** en guide d'exécution | Session, Antoine | **Fait le 2026-10-04** ([#333](https://github.com/ScratchMe/tourdegrowth/pull/333)) |
 | A22.b | **Le modèle pur** (`stream.ts`, `app-model.ts`, leurs tests) | Session | **Livré le 2026-10-04** ([#329](https://github.com/ScratchMe/tourdegrowth/pull/329)) |
 | A22.c | **Le code** : les douze unités ci-dessus, une PR chacune, le type fermé | Orchestrateur et sous-agents (prompt G) | Prêt. ~19 jours-agent |
 | A22.d | **Le bon à tirer** de la copie neuve (`/bon-a-tirer`) | Agent des bons à tirer, puis Antoine | Après APP-11 |
@@ -472,7 +472,7 @@ brief), MKT-8 et MKT-10.
 
 | # | Quoi | Qui | État |
 |---|---|---|---|
-| A23.a | **La spécification**, puis les décisions C64 à C74 et C93, puis **sa réécriture** en guide d'exécution, et le brief 10 écrit (`design/DS-EXTENSION-BRIEF-10.md`) | Session, Antoine | **Fait le 2026-10-04** |
+| A23.a | **La spécification**, puis les décisions C64 à C74 et C93, puis **sa réécriture** en guide d'exécution, et le brief 10 écrit (`design/DS-EXTENSION-BRIEF-10.md`) | Session, Antoine | **Fait le 2026-10-04** ([#333](https://github.com/ScratchMe/tourdegrowth/pull/333)) |
 | A23.b | **Le modèle pur** (`mkt-model.ts`, ses tests) | Session | **Livré le 2026-10-04** ([#329](https://github.com/ScratchMe/tourdegrowth/pull/329)) |
 | A23.c | **Le code** : les quatorze unités ci-dessus, une PR chacune, le type fermé | Orchestrateur et sous-agents (prompt H) | MKT-B prête tout de suite ; le reste après A22.c. ~31 jours-agent, plus l'aller-retour du brief 10 |
 | A23.d | **Le bon à tirer** de la copie neuve, en « produits » et en « services » | Agent des bons à tirer, puis Antoine | Après MKT-10 |

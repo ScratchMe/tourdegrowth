@@ -1152,7 +1152,7 @@ C'est ce dernier réglage qui est appliqué dans `levels/referral.ts`. Le test F
 
 **Vérifié** : `tsc` propre ; la suite du jeu et le budget des documents passent (353 tests).
 
-## A22.a et A23.a : les deux spécifications réécrites en guides d'exécution, et le brief 10 (2026-10-04)
+## A22.a et A23.a : les deux spécifications réécrites en guides d'exécution, et le brief 10 (2026-10-04, #333)
 
 **La demande** d'Antoine : qu'une session Opus n'ait plus qu'à orchestrer des sous-agents Sonnet, unité par unité, « sans avoir à réfléchir et sans risque de se rater », et que le travail puisse s'arrêter et reprendre à tout moment.
 
