@@ -68,10 +68,15 @@ for (const locale of ["en", "fr"] as const) {
     expect(paper).toMatchObject({ color: "rgb(231, 225, 210)", theme: "paper" });
     expect(paper.image).not.toBe("none");
 
+    // A chart's label halo is its ground's: the paper here, white below (A21.4 — it stayed paper, a beige box on white).
+    const halo = () => page.getByTestId("slide-unit-economics").getByTestId("slide-payback-chart-time").evaluate((el) => getComputedStyle(el).stroke);
+    expect(await halo()).toBe("rgb(231, 225, 210)");
+
     await page.getByLabel(ENGINE_COPY.deck.whiteTheme[locale]).check();
     await expect(page.getByTestId("deck-white-theme")).toBeChecked();
     const white = await ground(page, "peloton");
     expect(white).toEqual({ color: "rgb(255, 255, 255)", image: "none", theme: "white" });
+    expect(await halo()).toBe("rgb(255, 255, 255)");
     // Every slide follows, the appendix and the ask included.
     for (const id of ["leak", "ask", "annex"]) expect((await ground(page, id)).color).toBe("rgb(255, 255, 255)");
     expect((await storedEngineEntry(page))?.state.deck.theme).toBe("white");

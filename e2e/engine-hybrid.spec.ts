@@ -292,6 +292,15 @@ test.describe("a sales-assisted sheet", () => {
     await expect(margin.getByTestId("engine-company-wide")).toContainText(ENGINE_COPY.sheet.companyWideHint.fr);
     await expect(margin.getByTestId("engine-estimate")).toBeVisible();
   });
+
+  test("a number's screen counts what remains in both engines: the self-serve margin, one sales-assisted number left (A21.8)", async ({ page }) => {
+    // Every self-serve number is in, sales-assisted's time to go live is not: « Enregistre et continue » leads there, so
+    // the header cannot say « Plus rien à faire » (it did, counting the margin's engine alone).
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await seed(page, hybridState(), "fr");
+    await openNumber(page, "rev-gross-margin");
+    await expect(page.getByTestId("engine-number-progress")).toHaveText(ENGINE_COPY.list.lastOne.fr);
+  });
 });
 
 test.describe("the settings: a motion unticked is hidden, never erased (§18.1.3)", () => {
