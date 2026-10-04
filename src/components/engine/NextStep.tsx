@@ -14,7 +14,10 @@ export interface NextStepLine {
 }
 
 export interface NextStepProps {
-  /** « Dernière visite · il y a 12 jours » on a return; « Où tu en es » otherwise; « {mois} · lecture seule » on a past month. A string: it also names the lines. */
+  /**
+   * « Dernière visite · il y a 12 jours » on a return; « Où tu en es » otherwise. A string: it also names the lines.
+   * A past month's read-only state is said by `EngineBar`'s line, not here.
+   */
   eyebrow: string;
   /** Why the primary is the primary, in one sentence. */
   lead?: ReactNode;
