@@ -105,18 +105,25 @@ sont en §20.13 ; l'ouverture du moteur attend le portage (C46).
 **L'app grand public et la place de marché (A22, A23, spécifiées le
 2026-10-04)** : les deux types que la décision 3 laissait « plus tard ». Ce ne
 sont pas des motions : le **type** est l'autre axe du réglage. Les deux
-spécifications sont écrites pour une session d'exécution qui ne tranche rien
-(noms de fichiers, de types et de fonctions fixés, exemples chiffrés,
-critères d'acceptation par PR) :
+spécifications ont été tranchées par Antoine (C56 à C74, C92, C93), puis
+réécrites le même jour **en guides d'exécution** : un orchestrateur lance un
+sous-agent par unité, une PR par unité, avec des points d'arrêt, selon
+**§23, [`docs/engine/executer-un-type.md`](docs/engine/executer-un-type.md)**.
+Leurs modèles purs sont codés et testés (A22.b, A23.b, #329) ; des scripts de
+référence (`docs/engine/reference/`) refont leurs exemples sans le code du
+moteur.
 - **§21, [`docs/engine/app-grand-public.md`](docs/engine/app-grand-public.md)** :
-  une app par abonnement réutilise le libre-service tel quel (mêmes ids, mêmes
-  formules), avec ses mots, ses sources et ses repères ; ~10 jours-agent ;
+  une app grand public gagne par abonnements, achats intégrés ou publicité
+  (deux flux), paie une commission aux stores, se lit par installation
+  (un graphique de remboursement en courbe) ; douze unités, ~19,5 jours-agent ;
 - **§22, [`docs/engine/place-de-marche.md`](docs/engine/place-de-marche.md)** :
-  une troisième motion, `"mkt"`, exclusive, avec son catalogue de quatorze
-  chiffres, l'offre et la liquidité à côté du funnel des acheteurs, l'argent
-  en revenu net ; ~23 jours-agent, après §21.
-Elles attendent C56 à C74 (`CHANTIERS.md` C) ; les types s'ouvrent par
-`ENGINE_TYPES`, et **l'ouverture du moteur ne les attend pas** (C62, reco).
+  deux côtés, chacun son diagnostic, jamais comparés : la demande gagne une
+  commission (le revenu net), l'offre des abonnements de vendeurs (une case) ;
+  un total ; deux vocabulaires, « produits » et « services » ; ses écrans
+  passent d'abord par Claude Design (le brief 10) ; quatorze unités, ~31
+  jours-agent, après §21.
+Les types s'ouvrent par `ENGINE_TYPES`, et **l'ouverture du moteur ne les
+attend pas** (C62).
 
 **Décisions prises par défaut le 2026-09-24 pour que le travail avance** —
 chacune se renverse en une phrase :
@@ -351,8 +358,9 @@ retiré depuis le même jour : la copie vit dans le code.*
 | §18 | [`docs/engine/assiste-et-hybride.md`](docs/engine/assiste-et-hybride.md) | Le B2B assisté et l'hybride (A7.3), validé par C25 et construit par A7.3.c (#233, 2026-10-01). Le code fait foi depuis |
 | §19 | [`docs/engine/moteur-complet.md`](docs/engine/moteur-complet.md) | Le moteur complet pour le SaaS B2B (A14) : la série mensuelle, la rétention J30 et la part recommandée en €, la couverture du pipeline, les outils, le tableau collé, plusieurs moteurs, la fusion, le fond blanc, les rappels, les portes d'entrée. Écrit et validé le 2026-10-01 (C32), construit par A14.c le même jour (T0 à T7, neuf PR de #255 à #266), sauf l'image de partage (T6.2, après B5). Le code fait foi depuis ; l'ouverture du moteur attend aussi T6.2 et le bon à tirer A14.d (le reste dans `CHANTIERS.md` D2) |
 | §20 | [`docs/engine/argent.md`](docs/engine/argent.md) | L'argent du moteur (A20, 2026-10-03) : l'ARR, la courbe du MRR, le LTV:CAC dans « Et si », le constat de perte, le payback face à la durée de vie, la trésorerie immobilisée, les sommes de l'hybride, et l'alerte de payback long (le runway de l'équipe, sinon un plancher de 30 mois, C49). Le modèle est codé (A20.a, puis T1) ; C45 à C55 sont tranchées (§20.13) et les écrans se portent (A20.d) |
-| §21 | [`docs/engine/app-grand-public.md`](docs/engine/app-grand-public.md) | L'app grand public (A22, 2026-10-04) : un deuxième type, vendu en libre-service par abonnement, qui réutilise tout le moteur du libre-service avec ses mots (installations, abonnés), ses sources (stores, RevenueCat) et ses repères ; le drapeau `ENGINE_TYPES`, les calques de copie par type. Spécification d'exécution, à valider (C56 à C63) |
-| §22 | [`docs/engine/place-de-marche.md`](docs/engine/place-de-marche.md) | La place de marché (A23, 2026-10-04) : une troisième motion, `"mkt"`, ses quatorze chiffres (acheteurs, vendeurs, liquidité, commission), son funnel, une seule fuite pour les deux côtés, l'argent en revenu net (GMV × commission), ses « Et si », son deck, un modèle de référence. Spécification d'exécution, à valider (C64 à C74), après §21 |
+| §21 | [`docs/engine/app-grand-public.md`](docs/engine/app-grand-public.md) | L'app grand public (A22, 2026-10-04) : un deuxième type, en libre-service ; abonnements, achats intégrés et publicité en deux flux, la commission des stores, l'économie d'une installation ; ses mots, ses sources et son seul repère (J30) ; le drapeau `ENGINE_TYPES`, le calque de copie par type. Tranchée (C56 à C63, C92) ; guide d'exécution en douze unités (APP-0 à APP-11), prompt G |
+| §22 | [`docs/engine/place-de-marche.md`](docs/engine/place-de-marche.md) | La place de marché (A23, 2026-10-04) : une motion dérivée, `"mkt"` ; deux côtés (la demande et ses commissions, l'offre et ses abonnements), chacun son diagnostic, jamais comparés, et un total ; deux vocabulaires ; le brief 10 à Claude Design pour ses écrans. Tranchée (C64 à C74, C93) ; guide d'exécution en quatorze unités (MKT-B, MKT-0 à MKT-10, MKT-S, MKT-G), prompt H, après §21 |
+| §23 | [`docs/engine/executer-un-type.md`](docs/engine/executer-un-type.md) | Exécuter un type depuis sa spécification (2026-10-04) : l'orchestrateur et ses sous-agents, le format d'une fiche, le tableau d'avancement dans `CHANTIERS.md`, le prompt d'une unité, ce qui se vérifie avant de merger, et comment reprendre après une pause |
 | Annexe — Les entretiens | ci-dessous | La trame des entretiens (`CHANTIERS.md` D5) |
 
 ---

@@ -23,7 +23,7 @@ en fin de document). `CLAUDE.md` garde l'état courant, `JOURNAL.md` l'histoire.
 
 | Groupe | Qui | Où | Quand |
 |---|---|---|---|
-| **A. Le travail autonome**, en quatre lots | Une session seule, une PR par lot (A7 : une PR par item) | Session cloud | A1 à A6 livrés le 2026-09-29, A7 et A8 le 2026-09-30. **Reste d'A7** : A7.3.d (le bon à tirer de la copie neuve), A7.4 après A7.3, et A7.12.c à l'ouverture. **A7.3.c est livré le 2026-10-01**, les textes de lancement de la ligne « Hors code » d'A7.3 le même jour (S0 à S5, PR d'intégration [#233](https://github.com/ScratchMe/tourdegrowth/pull/233), drapeau fermé). A10 (S-15), A11 et A7.3.e (les quatre termes du glossaire) livrés le 2026-09-30. **A12, le niveau 2 du jeu** : spécifié et chiffré le 2026-09-30, **validé le 2026-10-01 (C30)**, sa copie, l'îlot partagé, le téléphone de Pédalix et le branchement faits le même jour (A12.c à A12.f.2)  et ses specs (A12.g) : reste A12.h (le bon à tirer, puis la recette) et A12.i (le `?ref=` de la boucle inverse, trouvé par B6). **A14, le moteur complet** : spécifié et validé le 2026-10-01 (C32) ; **A14.c est livré le même jour**, T0 à T7 (neuf PR de #255 à #266, drapeau fermé), puis T6.2, l'image de partage, au retour de B5 le même soir ([#272](https://github.com/ScratchMe/tourdegrowth/pull/272)) ; reste A14.d, son bon à tirer. **A13** (trois alertes de dépendances, dont une critique sur `next`) livré le 2026-10-01. **A15**, la finition UI et UX d'après les reels et les lois de l'UX, ouvert le 2026-10-01 : tout livré le même jour : deux PR, puis A15.18 une fois C33 tranchée ; A15.19 est porté le 2026-10-02 par **A16** (la feuille de score) : A15 est clos. **A17** (le halo grisé des images de partage de contenu, trouvé par T6.2) est livré le 2026-10-02 ([#274](https://github.com/ScratchMe/tourdegrowth/pull/274)). **A18, le moteur simplifié** (le portage du retour 07, C38 et C40 à C42) : ouvert le 2026-10-02, T0 à T7 puis un bon à tirer unique, A18.d, qui absorbe A7.3.d et A14.d ; **T0, T1, T2, T3.a, T3.b et T3.c livrés le même jour** ([#283](https://github.com/ScratchMe/tourdegrowth/pull/283), [#285](https://github.com/ScratchMe/tourdegrowth/pull/285), [#290](https://github.com/ScratchMe/tourdegrowth/pull/290), [#291](https://github.com/ScratchMe/tourdegrowth/pull/291), [#293](https://github.com/ScratchMe/tourdegrowth/pull/293), [#294](https://github.com/ScratchMe/tourdegrowth/pull/294), [#295](https://github.com/ScratchMe/tourdegrowth/pull/295)), **T3.d, T4, T5, T6 et T7 le 2026-10-03** ([#297](https://github.com/ScratchMe/tourdegrowth/pull/297), [#298](https://github.com/ScratchMe/tourdegrowth/pull/298), [#299](https://github.com/ScratchMe/tourdegrowth/pull/299), [#300](https://github.com/ScratchMe/tourdegrowth/pull/300), [#301](https://github.com/ScratchMe/tourdegrowth/pull/301)) : **le code d'A18 est entier**, reste A18.d. **A19, l'en-tête compact** (le portage du retour 08, B11) est livré le 2026-10-02 ([#284](https://github.com/ScratchMe/tourdegrowth/pull/284)). **A20** (le moteur à la hauteur de son film) est ouvert le 2026-10-03 : sa spécification (`ENGINE.md` §20) et son modèle pur (A20.a) sont livrés le même jour, et le brief 09 est déposé (B14) ; **son retour est arrivé et recopié le même jour** (prompt F) : le portage attend C46 à C55. **A22** (l'app grand public) et **A23** (la place de marché) sont **spécifiés le 2026-10-04** pour une session d'exécution (`docs/engine/app-grand-public.md`, `docs/engine/place-de-marche.md`) : C56 à C74, puis C92 et C93 (deux questions de suivi), sont tranchées le même jour, et §21 et §22 se réécrivent sur les réponses avant les prompts G et H. **A21** (ce que la re-synchro du 2026-10-04 a vu dans le moteur, et l'export PNG des graphiques des slides) est livré le même jour ([#326](https://github.com/ScratchMe/tourdegrowth/pull/326)). **A24, les trois derniers niveaux du jeu** (activation, referral, revenue) : spécifiés le 2026-10-04 pour être construits par des sous-agents, leurs modèles codés en brouillon ; C75 à C91 tranchées le même jour (trois sans la reco, déjà appliquées à la spécification) : la construction peut partir, avec le prompt I. |
+| **A. Le travail autonome**, en quatre lots | Une session seule, une PR par lot (A7 : une PR par item) | Session cloud | A1 à A6 livrés le 2026-09-29, A7 et A8 le 2026-09-30. **Reste d'A7** : A7.3.d (le bon à tirer de la copie neuve), A7.4 après A7.3, et A7.12.c à l'ouverture. **A7.3.c est livré le 2026-10-01**, les textes de lancement de la ligne « Hors code » d'A7.3 le même jour (S0 à S5, PR d'intégration [#233](https://github.com/ScratchMe/tourdegrowth/pull/233), drapeau fermé). A10 (S-15), A11 et A7.3.e (les quatre termes du glossaire) livrés le 2026-09-30. **A12, le niveau 2 du jeu** : spécifié et chiffré le 2026-09-30, **validé le 2026-10-01 (C30)**, sa copie, l'îlot partagé, le téléphone de Pédalix et le branchement faits le même jour (A12.c à A12.f.2)  et ses specs (A12.g) : reste A12.h (le bon à tirer, puis la recette) et A12.i (le `?ref=` de la boucle inverse, trouvé par B6). **A14, le moteur complet** : spécifié et validé le 2026-10-01 (C32) ; **A14.c est livré le même jour**, T0 à T7 (neuf PR de #255 à #266, drapeau fermé), puis T6.2, l'image de partage, au retour de B5 le même soir ([#272](https://github.com/ScratchMe/tourdegrowth/pull/272)) ; reste A14.d, son bon à tirer. **A13** (trois alertes de dépendances, dont une critique sur `next`) livré le 2026-10-01. **A15**, la finition UI et UX d'après les reels et les lois de l'UX, ouvert le 2026-10-01 : tout livré le même jour : deux PR, puis A15.18 une fois C33 tranchée ; A15.19 est porté le 2026-10-02 par **A16** (la feuille de score) : A15 est clos. **A17** (le halo grisé des images de partage de contenu, trouvé par T6.2) est livré le 2026-10-02 ([#274](https://github.com/ScratchMe/tourdegrowth/pull/274)). **A18, le moteur simplifié** (le portage du retour 07, C38 et C40 à C42) : ouvert le 2026-10-02, T0 à T7 puis un bon à tirer unique, A18.d, qui absorbe A7.3.d et A14.d ; **T0, T1, T2, T3.a, T3.b et T3.c livrés le même jour** ([#283](https://github.com/ScratchMe/tourdegrowth/pull/283), [#285](https://github.com/ScratchMe/tourdegrowth/pull/285), [#290](https://github.com/ScratchMe/tourdegrowth/pull/290), [#291](https://github.com/ScratchMe/tourdegrowth/pull/291), [#293](https://github.com/ScratchMe/tourdegrowth/pull/293), [#294](https://github.com/ScratchMe/tourdegrowth/pull/294), [#295](https://github.com/ScratchMe/tourdegrowth/pull/295)), **T3.d, T4, T5, T6 et T7 le 2026-10-03** ([#297](https://github.com/ScratchMe/tourdegrowth/pull/297), [#298](https://github.com/ScratchMe/tourdegrowth/pull/298), [#299](https://github.com/ScratchMe/tourdegrowth/pull/299), [#300](https://github.com/ScratchMe/tourdegrowth/pull/300), [#301](https://github.com/ScratchMe/tourdegrowth/pull/301)) : **le code d'A18 est entier**, reste A18.d. **A19, l'en-tête compact** (le portage du retour 08, B11) est livré le 2026-10-02 ([#284](https://github.com/ScratchMe/tourdegrowth/pull/284)). **A20** (le moteur à la hauteur de son film) est ouvert le 2026-10-03 : sa spécification (`ENGINE.md` §20) et son modèle pur (A20.a) sont livrés le même jour, et le brief 09 est déposé (B14) ; **son retour est arrivé et recopié le même jour** (prompt F) : le portage attend C46 à C55. **A22** (l'app grand public) et **A23** (la place de marché) sont **spécifiés le 2026-10-04** (`docs/engine/app-grand-public.md`, `docs/engine/place-de-marche.md`) : C56 à C74, puis C92 et C93, tranchées le même jour ; leurs modèles purs codés (#329) ; puis §21 et §22 réécrits en guides d'exécution, unité par unité, pour un orchestrateur et des sous-agents (`docs/engine/executer-un-type.md`, prompts G et H) ; le brief 10 (les écrans de la place de marché) est écrit, à déposer par MKT-B. **A21** (ce que la re-synchro du 2026-10-04 a vu dans le moteur, et l'export PNG des graphiques des slides) est livré le même jour ([#326](https://github.com/ScratchMe/tourdegrowth/pull/326)). **A24, les trois derniers niveaux du jeu** (activation, referral, revenue) : spécifiés le 2026-10-04 pour être construits par des sous-agents, leurs modèles codés en brouillon ; C75 à C91 tranchées le même jour (trois sans la reco, déjà appliquées à la spécification) : la construction peut partir, avec le prompt I. |
 | **B. Design sync** | Une session, cloud ou locale | N'importe où : une session cloud pousse vers Claude Design depuis le 2026-09-29 | **À jour le 2026-10-04, après A18 et A20** (B13 et A20.f, une seule synchro : 112 composants, 408 cellules, 112 aperçus sur 112 rendus ; les 21 composants du moteur entrent dans Claude Design ; les briefs 07 et 09 et leurs retours retirés du projet, décision d'Antoine : il n'y reste plus rien sous `design/`). Avant : B9 et B12, le 2026-10-02 (91 composants, 308 cellules), B3 et la re-synchro d'A11, le 2026-09-30. Ouverts le 2026-10-01 : **B4** (la re-synchro du niveau 2 du jeu, faite le même jour), **B5** (l'image de partage du moteur, C32 Q17 : brief 06 écrit et déposé le même jour, retour reçu et porté en T6.2 le même soir), **B6** (la re-synchro d'A15 et de C33, faite le même jour : 90 composants, 303 cellules, les douze aperçus du jeu laissés par B4 régénérés) et **B7** (les puces d'étape, A15.19 : le retour 05 est recopié et porté le 2026-10-02, A16 ; la re-synchro qui l'emporte est **B9**, ouverte et close le même jour). **B8** (ouvert le 2026-10-01 au soir) : le volet Design System montre une copie compilée le 2026-09-11, 34 cartes, alors que les fichiers et l'agent sont à jour ; Claude Design ne rafraîchit plus ce projet à l'ouverture ; laissé en l'état par Antoine le même soir (signalement prêt en D13). **B10** (le 2026-10-02) : le brief 07, le moteur plus simple sans perdre son expertise, déposé, lancé et revenu le même jour ; le retour est recopié et son portage est A18. **B11** (le 2026-10-02) : l'en-tête collant, compact une fois la page défilée en paysage ; brief 08 déposé, lancé et revenu le même jour, recopié et porté (A19) : clos ; la re-synchro qui l'emporte est **B12**, ouverte et close le même jour. **B13** (le 2026-10-02) : la re-synchro d'A18, **faite le 2026-10-04 avec A20.f** : clos. **B14** (le 2026-10-03) : le brief 09, l'argent du moteur (A20), déposé, lancé et revenu le même jour, porté (A20.d) et re-synchronisé (A20.f, le 2026-10-04) : clos. **B15** (le 2026-10-04) : la re-synchro d'A21, faite le soir même, complète (les 112 composants) : clos. **B16** (le même soir) : la page d'aperçu est l'artefact « Design System » tiré du projet le 2026-09-16, que la synchro n'écrivait pas — la cause de B8 ; remise à jour le même soir (112 composants) et refaite à chaque synchro : clos |
 | **C. Tes décisions**, une par une | Toi, guidé, avec une recommandation par question | N'importe quelle session | **Tranchées le 2026-09-29** (C18 close à part, par la session D). C23 à C29 tranchées le 2026-09-30, C26 à C29 livrées le même jour, **C25** (la spécification de A7.3, `ENGINE.md` §18) dans sa propre session. **C30** (le niveau 2 du jeu, `GAME-BRIEF.md` §17) le 2026-10-01. **C31** (le bloc « Niveau suivant » du jeu) et **C32** (le moteur complet, `docs/engine/moteur-complet.md` §19.15) le 2026-10-01. **C33** (la carte du jeu sous les chiffres du lecteur, A15.18) ouverte et tranchée le 2026-10-01. **C34** et **C35** (le rouge des ex aequo, le nouveau « ? », nées du retour 05) tranchées le 2026-10-02, puis **C36** (la PR Dependabot #244 : React 19.3 seul, `firebase-admin` ≥ 14.4 mis en attente pour son poids) puis **C37** et **C39** (`next` 16.3.7, les types React 19.3 et `eslint-config-next` 16.3.7, mergés par #277 et #278) le même jour. **C38** (les bons à tirer du moteur attendent le portage du retour 07) et **C40 à C42** (le pas à pas fondu dans le tableau avec un écran Cibles gardé, la liste à la place des onglets, les renommages), nées du brief 07, tranchées le 2026-10-02, puis **C43** et **C44** (la course compacte comptée à part, la langue à 88 px partout), nées du retour 08, le même jour. **C45** (les films de motion design), **C46 à C52** (l'argent du moteur, A20) et **C53 à C55** (nées du retour du brief 09) ouvertes et **tranchées le 2026-10-03**, toutes sur la reco, avec, à C49, le mot « runway » et un plancher de 30 mois sans runway saisi. **C56 à C74 tranchées le 2026-10-04**, avec C92 et C93, deux questions de suivi (l'app grand public et la place de marché, A22 et A23, dont huit contre la reco), puis **C75 à C91**, les questions des trois derniers niveaux du jeu (A24), ouvertes et **tranchées le même jour**, quatorze sur la reco ; C75 (le bloc « Niveau suivant » vise le premier niveau pas encore fini), C76 (le bandeau dit l'étape, sans numéro) et C86 (le referral durci tout de suite) ne la suivent pas |
 | **D. Tes actions**, pas à pas | Toi, accompagné | Session cloud | Selon ce qui est prêt. D10 (l'indexation) est prêt tout de suite. D2 attend les bons à tirer nº7 et nº9 (A18.d, qui remplace le nº8), la recette (D9) et, pour le moteur, le lot A18 (le moteur simplifié) et son bon à tirer unique A18.d, qui absorbe ceux d'A7.3 et d'A14 (C38) |
@@ -393,49 +393,90 @@ Les composants changés (`TotalBand`, `HowItCompares`, `PaybackChart`,
 `MrrCurve`) et l'aperçu de `WhatIfFigures` sont dans Claude Design depuis B15
 (le 2026-10-04 au soir).
 
-### A22 — L'app grand public (spécifiée le 2026-10-04)
+### A22 — L'app grand public (spécifiée le 2026-10-04, prête à exécuter)
 
-Antoine a demandé le 2026-10-04 les spécifications des deux types restants,
-« pour qu'on puisse lancer l'implémentation plus tard » dans une session qui
-n'a plus qu'à exécuter. **La spécification est `ENGINE.md` §21, dans
-[`docs/engine/app-grand-public.md`](docs/engine/app-grand-public.md)** : une
-app grand public par abonnement réutilise tout le moteur du libre-service
-(mêmes ids, mêmes formules) avec ses mots (« installations », « abonnés »),
-ses sources (App Store Connect, Google Play Console, RevenueCat, AppsFlyer,
-Adjust) et ses repères ; elle s'ouvre par une variable à part,
-`ENGINE_TYPES`. **Rien n'attend ce lot pour ouvrir le moteur** (C62, sur la
-reco).
+**La spécification est `ENGINE.md` §21, dans
+[`docs/engine/app-grand-public.md`](docs/engine/app-grand-public.md)**,
+réécrite le 2026-10-04 sur les réponses d'Antoine (C56 à C63 et C92) pour
+être exécutée par un orchestrateur et des sous-agents (prompt G), selon
+[`docs/engine/executer-un-type.md`](docs/engine/executer-un-type.md) (§23).
+Une app grand public a deux flux d'argent (les abonnements ; les achats
+intégrés et la publicité sur les actifs), une commission des stores à part,
+une économie lue par installation, et ses mots (« installations »,
+« abonnés »). Son modèle pur est codé et testé (A22.b, #329). Elle s'ouvre par
+une variable à part, `ENGINE_TYPES`. **Rien n'attend ce lot pour ouvrir le
+moteur** (C62).
+
+**Le tableau d'avancement** (la seule source de vérité pour reprendre,
+§23.5) : l'orchestrateur coche une unité, avec le numéro de PR lu sur GitHub
+et la date, dans la PR de l'unité. Points d'arrêt naturels : après APP-1,
+APP-6, APP-9 et APP-11.
+
+| Unité | Ce qu'elle livre (fiche en §21.11) | Prérequis | Fait |
+|---|---|---|---|
+| APP-0 | le type, le drapeau `ENGINE_TYPES`, le fichier | — | ☐ |
+| APP-1 | les chiffres de l'app : formes, listes, `shapesOf(setup)`, comptes partagés, prose | APP-0 | ☐ |
+| APP-2 | la forme affichée et la prose des quinze, les outils | APP-1 | ☐ |
+| APP-3 | le calque de copie | APP-2 | ☐ |
+| APP-4 | le scénario de l'app et la couture | APP-1 | ☐ |
+| APP-5 | le diagnostic de l'app | APP-4 | ☐ |
+| APP-6 | la dérivation, les constats, les contrôles, le peloton | APP-5 | ☐ |
+| APP-7 | la carte de départ, le réglage, les Réglages, l'événement | APP-3, APP-6 | ☐ |
+| APP-8 | les écrans de l'argent, la bande des deux flux, la courbe de remboursement | APP-7 | ☐ |
+| APP-9 | les slides | APP-8 | ☐ |
+| APP-10 | l'exemple et le golden | APP-9 | ☐ |
+| APP-11 | la phrase de la page, les e2e, la documentation | APP-10 | ☐ |
 
 | # | Quoi | Qui | État |
 |---|---|---|---|
-| A22.a | **La spécification** (§21.0 à §21.13), avec l'exemple chiffré calculé par le vrai moteur | Session | **Écrite le 2026-10-04** |
-| A22.b | **Les décisions** C56 à C63 et C92, puis **la réécriture de §21** sur les réponses (C56, C59 et C63 contre la reco ; C92, le modèle de revenu à deux flux), pour l'exécution par un orchestrateur et des sous-agents, avec des pauses | Antoine, puis la session | **Décisions tranchées le 2026-10-04** ; la réécriture est en cours |
-| A22.c | **Le code**, U0 à U6 (§21.11), une PR chacune, mergée verte, le type fermé tant qu'`ENGINE_TYPES` ne le liste pas | Session d'exécution (prompt G) | Attend A22.b. ~10 jours-agent |
-| A22.d | **Le bon à tirer** de la copie neuve (`/bon-a-tirer`) | Agent des bons à tirer, puis Antoine | Après A22.c |
+| A22.a | **La spécification**, puis les décisions C56 à C63 et C92, puis **sa réécriture** en guide d'exécution | Session, Antoine | **Fait le 2026-10-04** |
+| A22.b | **Le modèle pur** (`stream.ts`, `app-model.ts`, leurs tests) | Session | **Livré le 2026-10-04** ([#329](https://github.com/ScratchMe/tourdegrowth/pull/329)) |
+| A22.c | **Le code** : les douze unités ci-dessus, une PR chacune, le type fermé | Orchestrateur et sous-agents (prompt G) | Prêt. ~19 jours-agent |
+| A22.d | **Le bon à tirer** de la copie neuve (`/bon-a-tirer`) | Agent des bons à tirer, puis Antoine | Après APP-11 |
 | A22.e | **L'ouverture** : `ENGINE_TYPES=consumer-app` dans Vercel, puis redéployer | Antoine (D2) | Après A22.d |
 
-### A23 — La place de marché (spécifiée le 2026-10-04)
+### A23 — La place de marché (spécifiée le 2026-10-04, prête à exécuter)
 
 **La spécification est `ENGINE.md` §22, dans
-[`docs/engine/place-de-marche.md`](docs/engine/place-de-marche.md)** : une
-troisième motion, `"mkt"`, exclusive, avec son catalogue de quatorze chiffres
-(acheteurs, vendeurs, liquidité, commission), son funnel « pour 100
-inscrits », l'offre et le taux de service à côté, une seule fuite pour les deux
-côtés, l'argent en revenu net (GMV × commission, projeté comme le MRR), huit
-leviers « Et si ». Un modèle de référence et un exemple chiffré servent
-d'oracle aux tests. **Après A22** (C74), dont il réutilise le drapeau et les
-calques de copie.
+[`docs/engine/place-de-marche.md`](docs/engine/place-de-marche.md)**,
+réécrite le 2026-10-04 sur les réponses d'Antoine (C64 à C74 et C93), pour le
+même mode d'exécution (prompt H, §23). Deux côtés, chacun avec son diagnostic,
+son « Et si » et son économie unitaire, jamais comparés : la demande gagne une
+commission (le revenu net, GMV × commission), l'offre des abonnements de
+vendeurs (une case du réglage) ; un total les additionne. Deux vocabulaires,
+« produits » et « services ». Son modèle pur est codé et testé (A23.b, #329).
+**Après A22** (C74), dont il réutilise le drapeau et le mécanisme des
+calques ; **les écrans et les slides attendent le retour du brief 10** à
+Claude Design (C71), que MKT-B dépose dès maintenant.
+
+Points d'arrêt naturels : après MKT-1, MKT-4, MKT-6 (le tableau attend le
+brief), MKT-8 et MKT-10.
+
+| Unité | Ce qu'elle livre (fiche en §22.12) | Prérequis | Fait |
+|---|---|---|---|
+| MKT-B | les captures du brief 10, déposées (puis Antoine lance le brief) | — | ☐ |
+| MKT-0 | le contrat, le type, `EngineMotion`, la validation, les fenêtres | A22 | ☐ |
+| MKT-1 | les 19 chiffres et les 6 calculés, leur prose, les ponts | MKT-0 | ☐ |
+| MKT-2 | les grandeurs, les deux funnels, l'économie de chaque côté | MKT-1 | ☐ |
+| MKT-3 | les deux scénarios et le total | MKT-2 | ☐ |
+| MKT-4 | les fuites, les deux diagnostics, la dérivation | MKT-3 | ☐ |
+| MKT-5 | la copie « produits » : `mkt.*`, les calques des deux côtés | MKT-1 | ☐ |
+| MKT-S | les mots « services » : trois calques et le catalogue | MKT-5 | ☐ |
+| MKT-G | trois termes de glossaire (texte écrit d'abord par l'orchestrateur, `docs/engine/glossaire-mkt.md`) | MKT-1 | ☐ |
+| MKT-6 | la carte de départ, le réglage, les cibles, les Réglages, l'analytique | MKT-4, MKT-5 | ☐ |
+| — | **le retour du brief 10**, recopié, ses questions posées et tranchées, puis les fiches MKT-7 et MKT-8 complétées (PR de documentation) | MKT-B, Antoine | ☐ |
+| MKT-7 | le tableau des deux côtés et le total | MKT-6, MKT-S, le retour | ☐ |
+| MKT-8 | les slides | MKT-7 | ☐ |
+| MKT-9 | l'exemple et le golden | MKT-8 | ☐ |
+| MKT-10 | la garde à l'écran, les e2e, `ci.yml`, la documentation | MKT-9 | ☐ |
 
 | # | Quoi | Qui | État |
 |---|---|---|---|
-| A23.a | **La spécification** (§22.0 à §22.15) | Session | **Écrite le 2026-10-04** |
-| A23.b | **Les décisions** C64 à C74 et C93, puis **la réécriture de §22** sur les réponses (C64, C65, C70 et C71 contre la reco ; C93, les abonnements des vendeurs), pour l'exécution par un orchestrateur et des sous-agents, avec des pauses | Antoine, puis la session | **Décisions tranchées le 2026-10-04** ; la réécriture suit celle de §21 |
-| A23.c | **Le code**, M0 à M7 (§22.13), une PR chacune ; M8 (trois termes du glossaire) en parallèle de M2 si C72 le retient | Session d'exécution (prompt H) | Attend A23.b et A22.c. ~23 jours-agent |
-| A23.d | **Les captures** de M4 (les deux composants neufs, `MktPeloton` et `SupplyBand`), relues avant M5 (C71) | Antoine | Pendant A23.c |
-| A23.e | **Le bon à tirer** de la copie neuve | Agent des bons à tirer, puis Antoine | Après A23.c |
-| A23.f | **L'ouverture** (`ENGINE_TYPES` complété) puis la re-synchro avec Claude Design (`/design-sync`), qui emporte les composants neufs | Antoine (D2, prompt B) | Après A23.e |
-
----
+| A23.a | **La spécification**, puis les décisions C64 à C74 et C93, puis **sa réécriture** en guide d'exécution, et le brief 10 écrit (`design/DS-EXTENSION-BRIEF-10.md`) | Session, Antoine | **Fait le 2026-10-04** |
+| A23.b | **Le modèle pur** (`mkt-model.ts`, ses tests) | Session | **Livré le 2026-10-04** ([#329](https://github.com/ScratchMe/tourdegrowth/pull/329)) |
+| A23.c | **Le code** : les quatorze unités ci-dessus, une PR chacune, le type fermé | Orchestrateur et sous-agents (prompt H) | MKT-B prête tout de suite ; le reste après A22.c. ~31 jours-agent, plus l'aller-retour du brief 10 |
+| A23.d | **Le bon à tirer** de la copie neuve, en « produits » et en « services » | Agent des bons à tirer, puis Antoine | Après MKT-10 |
+| A23.e | **L'ouverture** (`ENGINE_TYPES=consumer-app,marketplace`) puis la re-synchro avec Claude Design (`/design-sync`), qui emporte les composants neufs | Antoine (D2, prompt B) | Après A23.d |
 
 ### A24 — Les trois derniers niveaux du jeu (ouvert le 2026-10-04)
 
@@ -770,9 +811,9 @@ question, et leur index (sujet, réponse, où c'est écrit, suite) est dans
 C92 et C93 sont deux questions de suivi) sont **tranchées le 2026-10-04** : huit contre
 la reco (C56, C59, C63, C64, C65, C70, C71, et C93 précisée d'une marge par
 flux). Les réponses vivent dans `docs/engine/app-grand-public.md` §21.13 et
-`docs/engine/place-de-marche.md` §22.15, l'index dans `docs/decisions.md`.
-Elles changent assez les deux modèles pour que §21 et §22 se réécrivent avant
-toute exécution (A22.b et A23.b).
+`docs/engine/place-de-marche.md` §22.14, l'index dans `docs/decisions.md`.
+§21 et §22 sont réécrits sur elles le même jour, en guides d'exécution (A22.a,
+A23.a) : rien de ces deux lots n'attend plus de décision.
 
 **C75 à C91** (les trois derniers niveaux du jeu, A24) sont tranchées le même
 jour : quatorze sur la reco, trois non (C75, C76 et C86), déjà appliquées aux
@@ -963,40 +1004,44 @@ Une fois que je les ai tranchées, porte-le (le lot A20, une PR par étape, ENGI
 Réponds-moi en français, court.
 ```
 
-### Prompt G — exécuter l'app grand public (A22)
+### Prompt G — exécuter l'app grand public, par sous-agents (A22)
 
-Écrit le 2026-10-04 avec la spécification. **À lancer une fois C56 à C63
-tranchées.** C'est une session d'exécution : tout est décidé dans
-`docs/engine/app-grand-public.md`, et un modèle plus léger suffit.
+Réécrit le 2026-10-04 avec la spécification. Prêt à lancer, dans une session
+Opus ; elle peut s'arrêter après n'importe quelle unité, et une session
+suivante reprend avec le même prompt.
 
 ```text
-Tu exécutes le lot A22 de CHANTIERS.md, l'app grand public du moteur de growth. Tu ne tranches rien : la spécification est docs/engine/app-grand-public.md (§21), et les décisions C56 à C63 sont prises (lis-les dans docs/decisions.md ; si l'une a renversé la recommandation, sa ligne en §21.13 dit quelles sections corriger : corrige-les d'abord, dans une PR de doc à part).
+Tu orchestres l'exécution du lot A22 de CHANTIERS.md : l'app grand public du moteur de growth de Tour de Growth. Tu ne codes pas toi-même : tu lances des sous-agents Sonnet, une unité à la fois. Tu ne tranches rien : la spécification, docs/engine/app-grand-public.md (§21), applique déjà les décisions C56 à C63 et C92.
 
-1. Lis CLAUDE.md, puis la spécification en entier, puis les fichiers d'outil que ses déclencheurs demandent (TESTING.md, GITHUB.md avant de toucher .github/workflows/ci.yml, NEXTJS.md avant de toucher la page).
-2. Exécute U0 à U6 dans l'ordre de §21.11. Une branche et une PR par étape, depuis origin/main à jour ; chacune se merge quand elle est verte, en suivant /livrer (lu, pas appelé). Chaque PR : son critère d'acceptation tenu, les goldens v1 et v2 verts sans toucher à golden-projection.ts, la copie neuve en « TODO: à relire », son entrée à la fin de JOURNAL.md.
-3. Avant d'annoncer une étape vérifiée, lis TESTING.md et fais ce que §21.10 demande : tests, e2e sur un build de production, captures FR 1 280 et EN 390 regardées.
-4. Arrête-toi et pose-moi la question dans les cas de §21.12, et seulement ceux-là. Ne contourne jamais un test qui rougit.
-5. À la fin : la non-vacuité de §21.10.4 mesurée et écrite au journal, A22.c retiré de CHANTIERS.md, l'état d'ENGINE.md mis à jour, et le bon à tirer A22.d prêt à construire.
+1. Lis CLAUDE.md, docs/engine/executer-un-type.md en entier (§23), puis dans la spécification §21.0, §21.1 et §21.11 (le graphe et les douze fiches). Lis le tableau d'A22 dans CHANTIERS.md sur origin/main à jour, et les PR ouvertes du dépôt : une unité en cours se finit avant d'en commencer une autre (§23.5).
+2. Choisis l'unité suivante : la première non cochée dont les prérequis sont cochés (avec une branche imposée, dans l'ordre de §21.11).
+3. Lance un sous-agent avec l'outil Agent, model "sonnet", subagent_type "general-purpose", au premier plan, avec le prompt de §23.6 rempli (unité, spécification, branche, lot A22).
+4. À son retour, lis son compte rendu. S'il s'est arrêté sur une question, pose-la-moi au format de CHANTIERS.md C (aujourd'hui, ta reco, ce qui casse si on se trompe) et attends ma réponse ; une réponse qui change la spécification passe d'abord par une PR de documentation. Sinon : lance les relecteurs que la fiche demande, ouvre la PR en brouillon, abonne-toi à son activité ; si la CI ou un relecteur trouve quelque chose, relance un sous-agent sur la même branche avec ce qu'il faut corriger. Pour une unité qui touche un écran ou une slide, ouvre toi-même deux captures (FR 1 280, EN 390).
+5. Quand la PR est verte et relue : les vérifications de §23.7, puis le merge en suivant /livrer (lu, pas appelé), sauf si sa barrière §0 dit de me demander. Vérifie le squash (git show --stat), et que l'unité est cochée dans A22 avec le numéro de PR lu sur GitHub.
+6. Puis dis-moi en deux lignes ce qui est livré et quelle est l'unité suivante, et attends que je dise « continue », sauf si je t'ai demandé d'enchaîner un nombre d'unités ou d'aller jusqu'à un point d'arrêt de §21.11.
+7. Après APP-11 : vérifie la définition de terminé de §23.9, et dis-moi que le bon à tirer A22.d peut se construire.
 
-Réponds-moi en français, court : ce qui est livré (numéros de PR vérifiés), ce qui est vérifié et comment, et ce qui m'attend.
+Réponds-moi en français, court.
 ```
 
-### Prompt H — exécuter la place de marché (A23)
+### Prompt H — exécuter la place de marché, par sous-agents (A23)
 
-Écrit le 2026-10-04 avec la spécification. **À lancer une fois C64 à C74
-tranchées et A22.c livré** (C74).
+Réécrit le 2026-10-04 avec la spécification. **MKT-B se lance tout de suite**
+(elle ne dépend de rien) ; le reste **après A22.c**. Même mode que le prompt
+G, avec deux étapes qui reviennent à l'orchestrateur, pas à un sous-agent :
+le texte des trois termes de glossaire (MKT-G) et le retour du brief 10.
 
 ```text
-Tu exécutes le lot A23 de CHANTIERS.md, la place de marché du moteur de growth. Tu ne tranches rien : la spécification est docs/engine/place-de-marche.md (§22), et les décisions C64 à C74 sont prises (lis-les dans docs/decisions.md ; si l'une a renversé la recommandation, sa ligne en §22.15 dit quelles sections corriger : corrige-les d'abord, dans une PR de doc à part).
+Tu orchestres l'exécution du lot A23 de CHANTIERS.md : la place de marché du moteur de growth de Tour de Growth. Tu ne codes pas toi-même : tu lances des sous-agents Sonnet, une unité à la fois. Tu ne tranches rien : la spécification, docs/engine/place-de-marche.md (§22), applique déjà les décisions C64 à C74 et C93.
 
-1. Lis CLAUDE.md, la spécification en entier, docs/engine/app-grand-public.md §21.2 à §21.6 (le drapeau et les calques que tu réutilises), puis les fichiers d'outil que leurs déclencheurs demandent.
-2. Exécute M0 à M7 dans l'ordre de §22.13, et M8 en parallèle de M2 si C72 l'a retenu. Une branche et une PR par étape, depuis origin/main à jour, mergée verte en suivant /livrer (lu, pas appelé). Chaque PR : son critère d'acceptation tenu, les goldens v1, v2 et de l'app verts sans toucher à golden-projection.ts, la copie neuve en « TODO: à relire », son entrée à la fin de JOURNAL.md.
-3. M2 retrouve chaque nombre de §22.10.2 avec le code de production ; le modèle de référence de §22.11 est l'oracle, pas du code à recopier. Si un nombre ne tombe pas juste, arrête-toi : ne corrige ni le test ni la spécification pour qu'il tombe juste.
-4. À M4, envoie-moi les captures des deux composants neufs (FR 1 280, EN 390) et attends ma réponse avant M5 (C71).
-5. Arrête-toi dans les cas de §22.14, et seulement ceux-là.
-6. À la fin : la non-vacuité de §22.12.5 mesurée et écrite au journal, A23.c retiré de CHANTIERS.md, l'état d'ENGINE.md mis à jour.
+1. Lis CLAUDE.md, docs/engine/executer-un-type.md en entier (§23), puis dans la spécification §22.0, §22.1, §22.7 et §22.12 (le graphe et les quatorze fiches). Lis le tableau d'A23 dans CHANTIERS.md sur origin/main à jour, et les PR ouvertes du dépôt (§23.5). Si A22 n'est pas fini, seule MKT-B peut partir.
+2. Choisis l'unité suivante : la première non cochée dont les prérequis sont cochés (avec une branche imposée, dans l'ordre de §22.12), et lance-la comme le prompt G le fait (étapes 3 à 6 : sous-agent Sonnet avec le prompt de §23.6, relecteurs, PR en brouillon suivie, vérifications de §23.7, merge selon /livrer, case cochée avec le numéro de PR lu sur GitHub, puis deux lignes et tu attends mon « continue »).
+3. Deux étapes sont à toi, pas à un sous-agent :
+   - avant MKT-G : écris le texte des trois termes de glossaire dans docs/engine/glossaire-mkt.md, à partir des seules définitions sourcées de l'annexe de §22, sur le modèle des quatre termes d'A7.3.e, chaque chaîne « à relire », dans une PR de documentation ; puis lance MKT-G ;
+   - après MKT-B, quand je te dis que le retour du brief 10 est dans le projet Claude Design : recopie-le dans design/ds-extension-10-return/ comme pour les retours 07 et 09, compare-le au brief, pose-moi les décisions qu'il demande en section C de CHANTIERS.md, avec ta reco, une par une ; puis, une fois tranchées, complète les fiches MKT-7 et MKT-8 (§22.12) au format de §23.4, avec chaque chaîne neuve écrite en français et en anglais, dans une PR de documentation. MKT-7 ne part pas avant.
+4. Après MKT-10 : vérifie la définition de terminé de §23.9, et dis-moi que le bon à tirer A23.d peut se construire, en « produits » et en « services ».
 
-Réponds-moi en français, court : ce qui est livré (numéros de PR vérifiés), ce qui est vérifié et comment, et ce qui m'attend.
+Réponds-moi en français, court.
 ```
 
 ### Prompt I — les trois derniers niveaux du jeu, par sous-agents (A24)
