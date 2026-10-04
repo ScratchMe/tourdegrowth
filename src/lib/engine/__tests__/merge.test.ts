@@ -250,6 +250,21 @@ describe("mergeRefusal — two engines that would not measure the same thing", (
     expect(mergeEngines(device, { ...file, setup: { ...file.setup, paidWindowDays: 60 } })).toEqual({ kind: "refused", reason: "windows" });
   });
 
+  it("two apps that do not earn the same way are refused with the motions' reason; two that do merge (§21.6.3, A22 APP-0)", () => {
+    const app = (monetization: { subscriptions: boolean; purchases: boolean; ads: boolean }): EngineState => {
+      const s = exampleState();
+      return { ...s, setup: { ...s.setup, type: "consumer-app", monetization } };
+    };
+    const subscriptions = { subscriptions: true, purchases: false, ads: false };
+    expect(mergeRefusal(app(subscriptions), app({ ...subscriptions }))).toBeNull();
+    expect(mergeRefusal(app(subscriptions), app({ ...subscriptions, purchases: true }))).toBe("motions");
+    expect(mergeRefusal(app(subscriptions), app({ subscriptions: false, purchases: false, ads: true }))).toBe("motions");
+    expect(mergeEngines(app(subscriptions), app({ ...subscriptions, ads: true }))).toEqual({ kind: "refused", reason: "motions" });
+    // The type is judged first: an app and a B2B SaaS are « another type », whatever they tick.
+    expect(mergeRefusal(app(subscriptions), exampleState())).toBe("type");
+    expect(mergeRefusal(exampleState(), app(subscriptions))).toBe("type");
+  });
+
   it("an unticked motion's windows are never read, so they never refuse", () => {
     const { device, file } = twoCopies();
     expect(device.setup.motions.slg).toBe(false);

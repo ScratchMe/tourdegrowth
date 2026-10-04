@@ -1,6 +1,7 @@
 import { ALL_METRIC_SHAPES, shapeOf } from "./catalog-shape";
 import { windowsOf } from "./series";
 import { knownSharedCount, SHARED_COUNT_IDS } from "./shared-counts";
+import { monetizationOf } from "./setup-type";
 import { MAX_MONTHS, type EngineState, type MetricEntry, type MetricId, type SharedCount, type Snapshot, type YearMonth } from "./types";
 
 /**
@@ -12,7 +13,8 @@ import { MAX_MONTHS, type EngineState, type MetricEntry, type MetricId, type Sha
  * anything is written (« Jamais rien de silencieux »), then writes `state`.
  *
  * Refused, with its reason, when the two engines would not measure the same
- * thing: another type, other motions, another currency, or other windows for
+ * thing: another type, other motions (two apps that do not earn the same way
+ * count here too, §21.6.3), another currency, or other windows for
  * a ticked motion — a window is part of a number's definition. Also refused
  * when the months together exceed `MAX_MONTHS`: a merge never drops a month.
  *
@@ -54,12 +56,21 @@ export type MergeChange =
 
 export type MergeResult = { kind: "refused"; reason: MergeRefusal } | { kind: "ok"; state: EngineState; changes: MergeChange[] };
 
+/** Two apps earn the same way when they tick the same three boxes; any other type has none, so two of them always agree. */
+function sameMonetization(a: EngineState["setup"], b: EngineState["setup"]): boolean {
+  const ma = monetizationOf(a);
+  const mb = monetizationOf(b);
+  if (!ma || !mb) return ma === mb;
+  return ma.subscriptions === mb.subscriptions && ma.purchases === mb.purchases && ma.ads === mb.ads;
+}
+
 /** Why the two engines cannot be merged, or null when they can. What the import screen greys the choice with. */
 export function mergeRefusal(into: EngineState, from: EngineState): MergeRefusal | null {
   const a = into.setup;
   const b = from.setup;
   if (a.type !== b.type) return "type";
-  if (a.motions.plg !== b.motions.plg || a.motions.slg !== b.motions.slg) return "motions";
+  // Two apps that do not earn the same way (§21.6.3) do not sell the same way: the same reason as the motions.
+  if (a.motions.plg !== b.motions.plg || a.motions.slg !== b.motions.slg || !sameMonetization(a, b)) return "motions";
   if (a.currency !== b.currency) return "currency";
   // Only the windows a ticked motion reads: an unticked motion's are kept, never used (§18.1.2).
   if (a.motions.plg && (a.activationWindowDays !== b.activationWindowDays || a.paidWindowDays !== b.paidWindowDays)) return "windows";
