@@ -67,7 +67,7 @@ export const OneLever = () => (
 /**
  * The film's SaaS (`filmState()`), in English, with the film's three levers (`FILM_LEVERS`:
  * churn 6% → 4%, expansion 2% → 3%, activation 18% → 24%): its new customer leaves before
- * paying back today (« leaves ~4 months early ») and stays ~9 months after payback with the what-ifs;
+ * paying back today (« leaves ~4 months before paying back ») and stays ~9 months after payback with the what-ifs;
  * « Per new customer » goes from « ~€400 short » to « ~€830 more ».
  */
 export const ThreeLevers = () => (
@@ -92,7 +92,7 @@ export const ThreeLevers = () => (
             { id: "ltvCac", label: "LTV:CAC", today: "0.79×", whatif: "1.6×", change: "+0.79 · better" },
             { id: "gap", label: "Per new customer", today: "~€400 short", whatif: "~€830 more", change: "+€1,200 · better" },
             { id: "payback", label: "CAC payback", today: "21 months", whatif: "16 months", change: "−5 months · better" },
-            { id: "after", label: "Months after payback", today: "leaves ~4 months early", whatif: "~9 months", change: "+14 months · better" },
+            { id: "after", label: "Months after payback", today: "leaves ~4 months before paying back", whatif: "~9 months", change: "+14 months · better" },
           ],
         },
         {

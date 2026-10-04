@@ -1641,9 +1641,10 @@ export const ENGINE_COPY = {
     /**
      * Months after payback below zero: the customer leaves before paying their cost back — the loss, said in months.
      * `{n}`: how many months short (« ~5 mois »). TODO: à relire — réécrite le 2026-10-04 (A21.2) : « part avant » des
-     * deux côtés lisait « stable » quand un levier réduisait le manque sans le combler.
+     * deux côtés lisait « stable » quand un levier réduisait le manque sans le combler. L'anglais est tranché par Antoine
+     * le même jour : « before paying back », plus clair que « early », et la tournure de la slide (`unitLeavesBefore`).
      */
-    leavesFirst: { fr: "part {n} avant", en: "leaves {n} early" },
+    leavesFirst: { fr: "part {n} avant", en: "leaves {n} before paying back" },
     /** A figure the what-ifs did not move. */
     stable: { fr: "stable", en: "unchanged" },
     /** The money's own rules, printed with the scenario's when the table shows the figure. */
