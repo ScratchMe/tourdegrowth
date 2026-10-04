@@ -181,6 +181,7 @@ body.export .screen { border: 0; border-radius: 0; box-shadow: none; max-width: 
 .stampbox { z-index: 5; border: 3px solid var(--red); color: var(--redD); background: rgba(251,249,242,.9); border-radius: 4px; padding: 8px 14px 6px; font-family: var(--f-display); font-weight: 700; text-transform: uppercase; letter-spacing: .03em; line-height: 1; white-space: nowrap; }
 .stampbox.n { color: var(--nbad); border-color: var(--nbad); background: rgba(20,17,13,.88); }
 .stampbox.g { color: var(--good); border-color: var(--good); }
+.stampbox.i { color: var(--ink); border-color: var(--ink); }
 .chip { display: flex; align-items: center; gap: 14px; }
 .chip .k { font: 600 14px/1.2 var(--f-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--ink1); }
 .chip .t { font: 700 34px/1 var(--f-display); text-transform: uppercase; letter-spacing: .02em; margin-top: 4px; }
@@ -421,6 +422,8 @@ function fmtv(fmt, v) {
     case "pad2": return String(Math.round(v)).padStart(2, "0");
     case "eur": return fr ? grp(v) + N + "€" : "€" + grp(v);
     case "keur": return fr ? grp(v / 1000) + N + "k€" : "€" + grp(v / 1000) + "k";
+    // A projected amount as the engine prints it (format.ts, two significant figures and « ~ »): « ~120 000 € ».
+    case "aeur": { const r = v ? Math.round(v / 10 ** (Math.floor(Math.log10(Math.abs(v))) - 1)) * 10 ** (Math.floor(Math.log10(Math.abs(v))) - 1) : 0; return fr ? "~" + grp(r) + N + "€" : "~€" + grp(r); }
     case "dec2": return dec(v, 2);
     case "clock": { const s = Math.floor(v); return "00:" + String(s).padStart(2, "0"); }
     default: return String(Math.round(v));
@@ -467,9 +470,9 @@ function sup(text, t0, t1, o = {}) {
 function ctext(html, top, anim, st = "", cls = "") {
   return `<div class="a ${cls}" style="left:0;right:0;top:${pick(top)}px;text-align:center;padding:0 ${FMT === "h" ? 64 : 48}px;${st}${anim}">${html}</div>`;
 }
-function stampEl(text, X, Y, t, { r = -5, size = 30, night = false, good = false, t1 = null } = {}) {
+function stampEl(text, X, Y, t, { r = -5, size = 30, night = false, good = false, ink = false, t1 = null } = {}) {
   const ex = t1 != null ? [["xin", t1, 0.3]] : [];
-  return `<div class="a stampbox ${night ? "n" : ""} ${good ? "g" : ""}" style="${px(X, Y)}font-size:${size}px;--r:${r}deg;${an(["stamp", t, 0.3, "s"], ...ex)}">${text}</div>`;
+  return `<div class="a stampbox ${night ? "n" : ""} ${good ? "g" : ""} ${ink ? "i" : ""}" style="${px(X, Y)}font-size:${size}px;--r:${r}deg;${an(["stamp", t, 0.3, "s"], ...ex)}">${text}</div>`;
 }
 const stampW = (text, size) => Math.round(String(text).length * size * 0.66 + 34);
 function cursor(path, t1) {
@@ -639,23 +642,73 @@ const ENG = (() => {
   return { base: run(6, 2, 18), churn: run(4, 2, 18), churnExp: run(4, 3, 18), all: run(4, 3, 24) };
 })();
 
-/* « Ce que rapporte un client »: the CAC against the lifetime margin (unit-economics.ts). */
-function ueCard(L, w, hh, t, o = {}) {
-  const big = o.big !== false, sp = o.sp || 1;
-  const lab = 32, barX = big ? 120 : 92, valW = big ? 190 : 140, barMax = w - barX - valW - 20;
-  const sc = barMax / 2400, cacW = 1900 * sc, ltvW = 1500 * sc;
-  const rowY = big ? [100, 168] : [74, 124], bh = big ? 32 : 24;
-  const stS = big ? (w < 700 ? 24 : 30) : 20;
-  const stTxt = L.lossStamp, sw = stampW(stTxt, stS);
-  return `
-    <div class="a st" style="left:${lab}px;top:${big ? 28 : 20}px;font-size:${big ? 30 : 22}px">${L.ueTitle}</div>
-    ${[["CAC", cacW, 1900], ["LTV", ltvW, 1500]].map(([n, bw, v], i) => `
-      <div class="a mo" style="left:${lab}px;top:${rowY[i] + (bh - 20) / 2}px;font-size:${big ? 18 : 15}px">${n}</div>
-      <div class="a" style="left:${barX}px;top:${rowY[i]}px;width:${barMax}px;height:${bh}px;border-radius:6px;background:#ded6c2;overflow:hidden"><div style="position:absolute;left:0;top:0;bottom:0;width:${bw.toFixed(1)}px;background:#211c15;transform-origin:0 50%;${an(["grow", t + i * 0.7 * sp, 0.7 * sp, "io"])}"></div></div>
-      <div class="a" style="right:${lab}px;top:${rowY[i] - 2}px;font:700 ${big ? 32 : 24}px/1.1 var(--f-ui);font-variant-numeric:tabular-nums">${count(0, v, t + i * 0.7 * sp, 0.7 * sp, "eur")}</div>`).join("")}
-    <div class="a" style="left:${(barX + ltvW).toFixed(1)}px;top:${rowY[1]}px;width:${(cacW - ltvW).toFixed(1)}px;height:${bh}px;background:repeating-linear-gradient(115deg,#d2402c 0 4px,transparent 4px 9px);border:2px solid #d2402c;border-left:0;border-radius:0 6px 6px 0;${an(["wipe", t + 1.6 * sp, 0.35])}"></div>
-    <div class="a mo" style="left:${lab}px;right:${lab}px;top:${rowY[1] + bh + (big ? 30 : 22)}px;font-size:${big ? 15 : 12.5}px;color:#5b5346;text-transform:none;letter-spacing:.02em;${an(["in", t + 2.0 * sp, 0.4])}">${L.ueFacts}</div>
-    ${stampEl(stTxt, Math.max(16, w - sw - 28), hh - (big ? 70 : 56), t + 2.4 * sp, { r: -4, size: stS })}`;
+/* A small mono label, the engine's eyebrow (uppercase, tracked, muted). */
+const eyebrow = (size, extra = "") => `font-family:var(--f-mono);font-weight:600;font-size:${size}px;letter-spacing:.12em;text-transform:uppercase;color:#5b5346;${extra}${extra && !extra.endsWith(";") ? ";" : ""}`;
+
+/*
+ * « L'argent » — the board's money block (MoneyBlock, A20.d T2), as the engine draws it for the film's SaaS
+ * (lib/engine/__tests__/fixtures.ts#filmState): the MRR and the ARR, what one new customer is worth (the loss, in ink,
+ * with its « Perte » tag: never red, C48), the two bars and what is short, the months, then the cash the acquisition
+ * keeps out of the bank, which does not all come back. Every word and figure is the engine's own output (C, p: 1).
+ * `o.compact`: the worth alone, for the Tour film's half-width card.
+ */
+function moneyCard(L, w, hh, t, o = {}) {
+  // `o.sp` scales the card's own timing: the Tour film gives it two seconds, the engine film seven.
+  const sp = o.sp || 1, d = (k) => t + k * sp;
+  const compact = !!o.compact, wide = !compact && w >= 1000, pad = compact ? 24 : 32;
+  const colW = wide ? 590 : w - pad * 2;
+  let h = "", y = compact ? 22 : 24;
+  if (!compact) {
+    h += `<div class="a" style="${px(pad, y)}${eyebrow(13)}${an(["in", d(0), 0.3])}">${L.moneyEyebrow}</div>`;
+    y += 30;
+    const figs = [[L.moneyMrr, F("eur", 48000)], [L.moneyArr, F("eur", 576000)]];
+    figs.forEach(([lab, val], i) => {
+      h += `<div class="a" style="${px(pad + i * (wide ? 210 : Math.round(colW * 0.44)), y)}${an(["up", d(0.1 + i * 0.12), 0.35])}"><div style="${eyebrow(12)}">${lab}</div>
+        <div class="st" style="font-size:${wide ? 40 : 36}px;margin-top:6px;font-variant-numeric:tabular-nums;text-transform:none">${val}</div></div>`;
+    });
+    y += wide ? 82 : 78;
+  }
+  // What one new customer is worth: the title, the ink tag and the sentence.
+  h += `<div class="a" style="${px(pad, y, colW)}font:600 ${compact ? 20 : 22}px/1.2 var(--f-ui);${an(["up", d(0.3), 0.35])}">${L.worthTitle}</div>`;
+  y += compact ? 34 : 38;
+  const fs = compact ? 15 : 17;
+  h += `<div class="a" style="${px(pad, y, colW)}font:500 ${fs}px/1.45 var(--f-ui);${an(["up", d(0.5), 0.35])}"><span style="display:inline-block;background:#211c15;color:#fbf9f2;border-radius:999px;padding:3px 12px 2px;margin-right:10px;${eyebrow(compact ? 11 : 12, "color:#fbf9f2;letter-spacing:.14em")}vertical-align:2px">${L.tagLoss}</span>${L.worthLoss}</div>`;
+  y += Math.ceil((L.worthLoss.length + 8) * fs * 0.5 / colW) * fs * 1.45 + 14;
+  // The two bars, to one scale: the cost, then what the customer brings back; the bracket measures what is short.
+  const labW = compact ? 88 : 104, valW = compact ? 96 : 116, barX = pad + labW, barW = colW - labW - valW - 12;
+  const sc = barW / 1900, bh = compact ? 16 : 18, rowGap = compact ? 34 : 40;
+  [[L.costs, 1900, F("eur", 1900)], [L.brings, 1500, x(`~1${N}500${N}€`, "~€1,500")]].forEach(([lab, v, val], i) => {
+    const ry = y + i * rowGap;
+    h += `<div class="a" style="${px(pad, ry - 2)}font:600 ${compact ? 14 : 15}px/1.4 var(--f-ui)">${lab}</div>
+      <div class="a" style="${px(barX, ry, (v * sc).toFixed(1), bh)}background:#211c15;border-radius:6px;transform-origin:0 50%;${an(["grow", d(0.9 + i * 0.5), 0.6, "io"])}"></div>
+      <div class="a" style="${px(pad + colW - valW, ry - 4, valW)}text-align:right;font:700 ${compact ? 17 : 20}px/1.3 var(--f-mono);font-variant-numeric:tabular-nums;${an(["in", d(1.2 + i * 0.5), 0.3])}">${val}</div>`;
+  });
+  const endX = barX + 1900 * sc, shortX = barX + 1500 * sc, by = y + rowGap + bh + 8;
+  h += `<div class="a" style="${px(endX.toFixed(1), y - 6, 0, rowGap + bh + 14)}border-left:2px dashed #5b5346;${an(["in", d(1.9), 0.3])}"></div>
+    <div class="a" style="${px(shortX.toFixed(1), by - 6, (endX - shortX).toFixed(1), 8)}border:2px solid #5b5346;border-top:0;border-radius:0 0 4px 4px;${an(["in", d(2.0), 0.3])}"></div>
+    <div class="a" style="${px(pad, by + 6, colW)}text-align:right;font:600 ${compact ? 12.5 : 14}px/1.3 var(--f-mono);${an(["in", d(2.1), 0.3])}">${x(`il manque ~400${N}€`, "~€400 short")}</div>`;
+  cue("drop", d(2.0));
+  y = by + (compact ? 30 : 34);
+  // The same loss, in months.
+  h += `<div class="a" style="${px(pad, y, colW)}font:500 ${compact ? 14 : 16}px/1.45 var(--f-ui);${an(["in", d(2.4), 0.4])}">${L.monthsLoss}</div>`;
+  if (compact) return h;
+  // The cash: spent this month, tied up at this pace, and the line that says it does not all come back.
+  const cx = wide ? pad + colW + 56 : pad, cw = wide ? w - cx - pad : colW;
+  let cy = wide ? 136 : y + Math.ceil((L.monthsLoss.length * 16 * 0.5) / colW) * 23 + 50;
+  const ta = o.cashAt != null ? o.cashAt : d(3.2);
+  if (wide) h += `<div class="a" style="${px(cx - 28, 132, 0, hh - 160)}border-left:2px dashed rgba(33,28,21,.22);${an(["in", ta, 0.3])}"></div>`;
+  else h += `<div class="a" style="${px(pad, cy - 22, colW, 0)}border-top:2px dashed rgba(33,28,21,.22);${an(["in", ta, 0.3])}"></div>`;
+  h += `<div class="a" style="${px(cx, cy, cw)}font:600 22px/1.2 var(--f-ui);${an(["up", ta, 0.35])}">${L.cashTitle}</div>`;
+  cy += 42;
+  const two = [[L.spend, F("eur", 93480)], [L.tied, x(`~990${N}000${N}€`, "~€990,000")]];
+  two.forEach(([lab, val], i) => {
+    const fx = wide ? cx : cx + i * Math.round(cw * 0.52), fy = wide ? cy + i * 74 : cy;
+    h += `<div class="a" style="${px(fx, fy, wide ? cw : Math.round(cw * 0.48))}${an(["up", ta + 0.2 + i * 0.25, 0.35])}"><div style="${eyebrow(11.5)}">${lab}</div>
+      <div style="font:700 ${wide ? 28 : 26}px/1.2 var(--f-mono);margin-top:6px;font-variant-numeric:tabular-nums">${val}</div></div>`;
+  });
+  cy += wide ? 152 : 80;
+  h += `<div class="a" style="${px(cx, cy, cw)}font:600 ${wide ? 17 : 16}px/1.45 var(--f-ui);${an(["in", ta + 0.8, 0.4])}">${L.cashLoss}</div>`;
+  return h;
 }
 
 /* « Tes chiffres »: one row per stage. Wide rows on a landscape card, two-line rows on a narrow one. */
@@ -693,12 +746,21 @@ function numbersCard(L, rows, w, hh, t, o = {}) {
   return h;
 }
 
-/* « Et si ? »: levers on the left (or on top), the MRR month by month, MRR in 12 months and its ARR. */
+/*
+ * « Et si ? » — the engine's what-if card (LeverCard with its MrrCurve, A20.d T3): the levers move one after the other,
+ * the MRR month by month rises from the line at today's pace (muted) to the one with the what-ifs (ink), the band
+ * between them filled, never red (a projection is never red, design audit S-5). Under it, the MRR and the ARR in
+ * twelve months, rounded as the engine rounds a projection (two significant figures, « ~120 000 € »), with today's
+ * beside them, then what one new customer is worth now. The steps are drawn whole and cross-faded: the curve rises in
+ * steps, as it does when each lever settles.
+ */
 function whatIfCard(L, o) {
   const { w, hh } = o, tall = !!o.tall, levers = o.levers, nL = levers.length, mid = !tall && w < 1000;
   const lv = tall ? { x: 28, y0: 84, dy: 92, sw: w - 56 } : { x: 32, y0: nL === 1 ? 104 : 92, dy: 100, sw: mid ? 360 : 500 };
-  const ch = tall ? { x: 28, y: 84 + nL * 92 + 18, w: w - 56, h: o.chH || 190 } : mid ? { x: 432, y: 100, w: 400, h: nL === 1 ? 190 : 240 } : { x: 600, y: 92, w: 520, h: nL === 1 ? 190 : 240 };
-  const fig = { x: ch.x, y: ch.y + ch.h + 36 };
+  // The plot: right of the levers (its two names right of its end on a landscape card, above it otherwise), under them in a column.
+  const inside = tall || mid;
+  const ch = tall ? { x: 28, y: 84 + nL * 92 + 34, w: w - 56, h: o.chH || 140 } : mid ? { x: 432, y: 110, w: w - 432 - 28, h: nL === 1 ? 150 : 200 } : { x: 560, y: 104, w: 360, h: nL === 1 ? 160 : 220 };
+  const fig = { x: tall ? 28 : ch.x, y: ch.y + ch.h + (tall ? 64 : 58) + (inside ? 26 : 0) };
   let h = `<div class="a st" style="left:${lv.x}px;top:24px;font-size:34px">${L.whatIf}</div>
     <div class="a mo" style="right:28px;top:30px;font-size:12px;color:#5b5346">${L.exampleTag}</div>`;
   levers.forEach((l, i) => {
@@ -710,59 +772,87 @@ function whatIfCard(L, o) {
       <div class="a mo" style="${px(lv.x, y + 66)}font-size:12px;color:#5b5346;text-transform:none;letter-spacing:.02em">${L.today}${x(N + ":", ":")} ${F(l.fmt, l.from)}</div>`;
     cue("zip", l.at, l.dur);
   });
-  // MRR month by month: ink bars today, red what the levers add
-  const series = o.series, base = series[0], fin = series[series.length - 1];
-  const maxV = Math.max(...fin) * 1.06, pitch = ch.w / 13, bw = pitch * 0.62;
-  let bars = "";
-  for (let m = 0; m <= 12; m++) {
-    const bx = ch.x + m * pitch + (pitch - bw) / 2, bh0 = base[m] / maxV * ch.h, ext = (fin[m] - base[m]) / maxV * ch.h;
-    bars += `<div class="a" style="${px(bx.toFixed(1), (ch.y + ch.h - bh0).toFixed(1), bw.toFixed(1), bh0.toFixed(1))}background:#211c15;border-radius:3px 3px 0 0;transform-origin:50% 100%;${an(["growY", o.t0 + 0.3 + m * 0.04, 0.4])}"></div>`;
-    if (ext > 0.5) {
-      const steps = series.slice(1).map((s) => (s[m] - base[m]) / (fin[m] - base[m]));
-      const vars = steps.map((v, k) => `--t${k + 1}:scaleY(${Math.max(0, v).toFixed(4)});`).join("");
-      const moves = steps.map((v, k) => [`mv${k + 1}`, o.stepAt[k] + m * 0.025, o.stepDur[k], "io"]);
-      bars += `<div class="a" style="${px(bx.toFixed(1), (ch.y + ch.h - bh0 - ext).toFixed(1), bw.toFixed(1), ext.toFixed(1))}background:#d2402c;border-radius:3px 3px 0 0;transform-origin:50% 100%;transform:scaleY(0);--f1:scaleY(0);${vars}${an(...moves)}"></div>`;
+  // The MRR month by month: today's pace, then each step with the what-ifs, one scale from today's MRR (the axis) up.
+  const series = o.series, base = series[0], last = series[series.length - 1];
+  const y0v = base[0], top = Math.max(...last) - y0v || 1;
+  const X = (m) => (m / 12) * ch.w, Y = (v) => ch.h - ((v - y0v) / top) * (ch.h - 8);
+  const pts = (s) => s.map((v, m) => `${X(m).toFixed(1)},${Y(v).toFixed(1)}`);
+  const line = (s) => pts(s).join(" ");
+  const band = (s) => pts(s).concat(pts(base).reverse()).join(" ");
+  let svg = `<line x1="0" y1="${ch.h}" x2="${ch.w}" y2="${ch.h}" stroke="#cfc7b4" stroke-width="2"/>`;
+  for (let k = 1; k < series.length; k++) {
+    const s = series[k], at = o.stepAt[k - 1], out = k < series.length - 1 ? [["xin", o.stepAt[k], o.stepDur[k] * 0.6]] : [];
+    svg += `<g style="${an(["in", at + 0.1, o.stepDur[k - 1] * 0.8], ...out)}"><polygon points="${band(s)}" fill="#c9bfae" fill-opacity=".75"/>
+      <polyline points="${line(s)}" fill="none" stroke="#211c15" stroke-width="4" stroke-linejoin="round"/><circle cx="${X(12).toFixed(1)}" cy="${Y(s[12]).toFixed(1)}" r="6" fill="#211c15"/></g>`;
+  }
+  svg += `<polyline points="${line(base)}" fill="none" stroke="#5b5346" stroke-width="2.5" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" style="${an(["draw", o.t0 + 0.3, 0.7])}"/>
+    <circle cx="0" cy="${ch.h}" r="5" fill="#211c15"/><circle cx="${X(12).toFixed(1)}" cy="${Y(base[12]).toFixed(1)}" r="5" fill="#5b5346" style="${an(["in", o.t0 + 0.9, 0.2])}"/>`;
+  h += `<svg class="a" style="${px(ch.x, ch.y, ch.w, ch.h + 2)}overflow:visible" width="${ch.w}" height="${ch.h + 2}" aria-hidden="true">${svg}</svg>`;
+  // The two lines' names at their ends (right of the plot; above its end in a column), the start, the months.
+  const lab = (txt, yy, st, anim) => inside
+    ? `<div class="a" style="right:${w - ch.x - ch.w}px;top:${(ch.y + yy - 26).toFixed(1)}px;${eyebrow(12, st + "text-transform:none;letter-spacing:.04em")}${anim}">${txt}</div>`
+    : `<div class="a" style="${px((ch.x + ch.w + 14).toFixed(1), (ch.y + yy - 9).toFixed(1))}white-space:nowrap;${eyebrow(13, st + "text-transform:none;letter-spacing:.04em")}${anim}">${txt}</div>`;
+  if (inside) {
+    // A legend under the months, as the deck's compact curve has it: the end labels would sit on the lines here.
+    const dash = (c, wpx) => `<span style="display:inline-block;width:18px;height:${wpx}px;background:${c};vertical-align:middle;margin-right:8px"></span>`;
+    h += `<div class="a" style="${px(ch.x, ch.y + ch.h + 56, ch.w)}display:flex;gap:22px;${eyebrow(12, "text-transform:none;letter-spacing:.03em")}">
+      <span style="color:#211c15;font-weight:700;${an(["in", o.stepAt[0] + 0.2, 0.3])}">${dash("#211c15", 4)}${L.curveWhatif}</span>
+      <span style="${an(["in", o.t0 + 0.9, 0.3])}">${dash("#5b5346", 2.5)}${L.curveToday}</span></div>`;
+  } else {
+    h += lab(L.curveToday, Y(base[12]), "", an(["in", o.t0 + 0.9, 0.3]));
+    for (let k = 1; k < series.length; k++) {
+      const out = k < series.length - 1 ? [["xin", o.stepAt[k], o.stepDur[k] * 0.6]] : [];
+      h += lab(L.curveWhatif, Y(series[k][12]), "color:#211c15;font-weight:700;", an(["in", o.stepAt[k - 1] + 0.2, 0.3], ...out));
     }
   }
-  h += bars;
-  h += `<div class="a" style="${px(ch.x, ch.y + ch.h, ch.w, 2)}background:#5b5346"></div>
-    <div class="a mo" style="${px(ch.x, ch.y + ch.h + 8)}font-size:11.5px;color:#5b5346">${x("AUJ.", "NOW")}</div>
-    <div class="a mo" style="right:${w - ch.x - ch.w}px;top:${ch.y + ch.h + 8}px;font-size:11.5px;color:#5b5346">${x("M+12", "M+12")}</div>
-    <div class="a mo" style="left:${ch.x}px;top:${ch.y - 26}px;font-size:12px;color:#5b5346">${L.mrrMonthly}</div>`;
-  // MRR in 12 months and its ARR
-  const segs = (vals) => vals.slice(1).map((v, k) => [vals[k], v, o.stepAt[k], o.stepDur[k]]);
-  h += `<div class="a" style="${px(fig.x, fig.y)}"><div class="mo" style="font-size:12.5px;color:#5b5346">${L.mrr12}</div>
-      <div style="font:700 ${tall ? 40 : mid ? 38 : 44}px/1.1 var(--f-ui);font-variant-numeric:tabular-nums;margin-top:4px">${countSeq("eur", segs(o.mrr12), true)}</div></div>
-    <div class="a" style="${px(fig.x + (tall ? (w - 56) * 0.56 : mid ? 236 : 300), fig.y)}"><div class="mo" style="font-size:12.5px;color:#5b5346">${L.arrLabel}</div>
-      <div style="font:700 ${tall ? 30 : mid ? 28 : 32}px/1.1 var(--f-ui);font-variant-numeric:tabular-nums;margin-top:8px;color:#a32e1f">${countSeq("keur", segs(o.mrr12.map((v) => v * 12)))}</div></div>`;
-  // LTV:CAC and payback
-  const chipY = tall ? fig.y + 92 : (nL === 1 ? lv.y0 + 120 : lv.y0 + nL * lv.dy + 4);
-  const chips = [[L.ltvcac, o.ltvcac], [L.payback, o.payback]];
-  chips.forEach(([label, items], i) => {
-    const cx = (tall ? 28 : lv.x) + i * (tall ? (w - 56) * 0.56 : mid ? 190 : 250);
-    h += `<div class="a" style="${px(cx, chipY, 230, 64)}"><div class="mo" style="font-size:12px;color:#5b5346">${label}</div>
-      <div class="a" style="left:0;top:22px;width:230px;height:36px">${swap(items.map(([txt, at, good]) => [txt, at, `font:700 28px/1.2 var(--f-ui);color:${good ? "#1f6b3f" : "#a32e1f"};`]))}</div></div>`;
+  h += `<div class="a" style="${px(ch.x + 12, ch.y + ch.h + 8)}font:600 14px/1.2 var(--f-mono);${an(["in", o.t0 + 0.5, 0.3])}">${L.curveStart}</div>
+    <div class="a" style="${px(ch.x, ch.y + ch.h + 32, ch.w)}display:flex;justify-content:space-between;${eyebrow(11.5, "text-transform:none;letter-spacing:.02em")}${an(["in", o.t0 + 0.5, 0.3])}">${L.months.map((m) => `<span>${m}</span>`).join("")}</div>`;
+  // The MRR and the ARR in twelve months, as the engine rounds them; today's figure under each once a lever moved.
+  // Side by side on a landscape card and in a column; one under the other on the 4:5 card, where the plot is narrow.
+  const at = (i) => tall ? [28 + i * Math.round((w - 56) * 0.5), fig.y] : mid ? [ch.x, fig.y + i * 92] : [ch.x + i * 300, fig.y];
+  const figW = tall ? Math.round((w - 56) * 0.48) : mid ? ch.w : 284;
+  const swapBig = (vals, size) => swap(vals.map((v, k) => [v, k === 0 ? 0 : o.stepAt[k - 1] + 0.3, `font:700 ${size}px/1.1 var(--f-display);font-variant-numeric:tabular-nums;`]));
+  [[L.mrr12, o.mrr12, o.mrr12[0]], [L.arrBig, o.arr12, o.arr12[0]]].forEach(([label, vals, today], i) => {
+    const [fx, fy] = at(i), size = tall ? 34 : mid ? 32 : 36;
+    h += `<div class="a" style="${px(fx, fy, figW, 92)}"><div style="${eyebrow(12.5)}">${label}</div>
+      <div class="a" style="left:0;top:22px;width:100%;height:${size + 8}px">${swapBig(vals, size)}</div>
+      <div class="a" style="left:0;top:${size + 34}px;${eyebrow(12, "text-transform:none;letter-spacing:.02em")}${an(["in", o.stepAt[0] + 0.4, 0.3])}">${L.today} ${today}</div></div>`;
   });
-  if (o.compound && !tall) h += `<div class="a" style="${px(32, hh - 52, w - 64)}font:600 15px/1.4 var(--f-ui);color:#a32e1f;${an(["up", o.compound.at, 0.4])}">${o.compound.text}</div>`;
+  cue("ticks", o.stepAt[0], 0.4);
+  // What one new customer is worth now, the card's own line (leverMoneyView).
+  if (o.worth) {
+    const wy = tall ? fig.y + 104 : (nL === 1 ? lv.y0 + 120 : lv.y0 + nL * lv.dy + 4), ww = tall ? w - 56 : lv.sw;
+    h += `<div class="a" style="${px(tall ? 28 : lv.x, wy, ww, 66)}">${swap(o.worth.map(([txt, t1]) => [txt, t1, `white-space:normal;width:${ww}px;font:600 16px/1.4 var(--f-ui);`]))}</div>`;
+  }
+  // The compounding, under the levers on a landscape card (a caption below the card otherwise, in buildEngine).
+  if (o.compound && !inside) h += `<div class="a" style="${px(32, hh - 66, lv.sw)}font:600 15px/1.4 var(--f-ui);${an(["up", o.compound.at, 0.4])}">${o.compound.text}</div>`;
   return h;
 }
 
-/* A slide of the engine's deck, drawn at 720×405 (the small fan is the same slide at half size). */
+/*
+ * A slide of the engine's deck, drawn at 720×405 (the small fan is the same slide at half size), as the deck draws it:
+ * its kicker, its title in ink with the bold run in ink too (C53; the verdict alone keeps its red clause), and its body —
+ * the peloton's four numbers, the six unit-economics tiles (the loss titles that slide, C48), or the curve of the MRR
+ * with the what-ifs, in ink. « Chiffres d'exemple » sits in each slide's corner, as on every engine screen of the films.
+ */
 function slide(L, kind, o = {}) {
   const foot = `<div class="foot">tourdegrowth.com</div>`;
-  if (kind === "verdict") return `<div class="mo" style="font-size:15px;color:#5b5346">${L.slideHead}</div>
-    <div class="st" style="font-size:54px;margin-top:26px;color:#a32e1f">${L.slideVerdict}</div>
-    <div style="font:500 26px/1.35 var(--f-ui);margin-top:18px;max-width:600px">${L.slideVerdictText}</div>${foot}`;
-  if (kind === "unit") return `<div class="mo" style="font-size:15px;color:#5b5346">${L.slideUnit}</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px 40px;margin-top:26px">
-      ${[["CAC", F("eur", 1900), ""], ["LTV", F("eur", 1500), ""], [L.ltvcac, F("dec2", 0.79), "color:#a32e1f"], [L.payback, x(`21${N}mois`, "21 months"), ""]].map(([l, v, st]) => `<div><div class="mo" style="font-size:14px;color:#5b5346">${l}</div><div style="font:700 44px/1.1 var(--f-ui);margin-top:4px;${st}">${v}</div></div>`).join("")}
+  const head = `<div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px"><div class="mo" style="font-size:12.5px;color:#5b5346;letter-spacing:.1em">${L.kicker}</div><div class="mo" style="font-size:11px;color:#5b5346;white-space:nowrap">${L.exampleTag}</div></div>`;
+  // A title as the deck writes it: the run in **…** is bold; red only for the verdict.
+  const title = (txt, size, red) => `<div style="font:500 ${size}px/1.22 var(--f-display);margin-top:14px;max-width:650px;text-wrap:balance;letter-spacing:.01em">${txt.replace(/\*\*(.+?)\*\*/g, (_, s) => `<b style="font-weight:700;${red ? "color:#a32e1f" : ""}">${s}</b>`)}</div>`;
+  if (kind === "verdict") return `${head}${title(L.slideVerdict, 25, true)}
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:22px">${[["100", L.pSignups], ["18", L.pActivated], ["?", L.pD30], ["6", L.pPaying]].map(([v, l]) => `<div><div style="font:700 46px/1 var(--f-display);${v === "?" ? "color:#8a8172" : ""}">${v}</div><div class="mo" style="font-size:11.5px;color:#5b5346;margin-top:6px">${l}</div></div>`).join("")}</div>${foot}`;
+  if (kind === "unit") return `${head}${title(L.slideUnit, 22, false)}
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px">
+      ${L.unitTiles.map(([l, v]) => `<div style="border:1.5px solid #211c15;border-radius:8px;padding:8px 10px"><div class="mo" style="font-size:10.5px;color:#5b5346;letter-spacing:.08em">${l}</div><div style="font:700 21px/1.15 var(--f-display);margin-top:4px;font-variant-numeric:tabular-nums">${v}</div></div>`).join("")}
     </div>${foot}`;
-  // what if
-  const s = o.series || [ENG.base, ENG.all], b = s[0], f = s[s.length - 1], mx = Math.max(...f) * 1.05;
-  return `<div class="mo" style="font-size:15px;color:#5b5346">${L.whatIf}</div>
-    <div style="font:700 30px/1.25 var(--f-ui);margin-top:16px;max-width:640px">${o.title}</div>
-    <svg class="a" style="left:36px;bottom:56px" width="420" height="130" aria-hidden="true">${b.map((v, m) => { const bh = v / mx * 126, eh = (f[m] - v) / mx * 126; return `<rect x="${m * 32}" y="${(128 - bh).toFixed(1)}" width="20" height="${bh.toFixed(1)}" fill="#211c15"/><rect x="${m * 32}" y="${(128 - bh - eh).toFixed(1)}" width="20" height="${eh.toFixed(1)}" fill="#d2402c"/>`; }).join("")}</svg>
-    <div class="mo" style="position:absolute;left:480px;bottom:60px;width:200px;font-size:13px;color:#5b5346;text-transform:none;letter-spacing:.02em">${o.note}</div>${foot}`;
+  // what if: the MRR month by month, today's pace (muted) and with the what-ifs (ink), the band between them filled.
+  const s = o.series || [ENG.base, ENG.all], b = s[0], f = s[s.length - 1], y0v = b[0], tp = Math.max(...f) - y0v, cw = 420, chh = 120;
+  const pa = (arr) => arr.map((v, m) => `${(m / 12 * cw).toFixed(1)},${(chh - (v - y0v) / tp * (chh - 6)).toFixed(1)}`);
+  const pts = (arr) => pa(arr).join(" ");
+  return `${head}${title(o.title, 22, false)}
+    <svg class="a" style="left:36px;bottom:58px;overflow:visible" width="${cw}" height="${chh + 2}" aria-hidden="true"><polygon points="${pa(f).concat(pa(b).reverse()).join(" ")}" fill="#c9bfae" fill-opacity=".75"/><line x1="0" y1="${chh}" x2="${cw}" y2="${chh}" stroke="#cfc7b4" stroke-width="2"/><polyline points="${pts(b)}" fill="none" stroke="#5b5346" stroke-width="2.5"/><polyline points="${pts(f)}" fill="none" stroke="#211c15" stroke-width="4"/></svg>
+    <div class="mo" style="position:absolute;left:480px;bottom:62px;width:200px;font-size:12.5px;color:#5b5346;text-transform:none;letter-spacing:.02em">${o.note}</div>${foot}`;
 }
 
 /* ================================================================== */
@@ -820,28 +910,45 @@ const C = {
   whatIf: { p: 1, fr: `Et si${N}?`, en: `What if?` },
   today: { p: 1, fr: `aujourd'hui`, en: `today` },
   mrr12: { p: 1, fr: `MRR dans 12 mois`, en: `MRR in 12 months` },
-  arrLabel: { p: 0, fr: `soit un ARR de`, en: `that is an ARR of` },
   mrrMonthly: { p: 0, fr: `Ton MRR, mois par mois`, en: `Your MRR, month by month` },
   ltvcac: { p: 1, fr: `LTV:CAC`, en: `LTV:CAC` },
   payback: { p: 1, fr: `CAC payback`, en: `CAC payback` },
   exampleTag: { p: 0, fr: `Chiffres d'exemple`, en: `Example figures` },
-  ueTitle: { p: 0, fr: `Ce que rapporte un client`, en: `What one customer is worth` },
-  ueFacts: { p: 0, fr: `LTV:CAC 0,79 · CAC payback 21${N}mois · un client reste environ 17${N}mois`, en: `LTV:CAC 0.79 · CAC payback 21 months · a customer stays about 17 months` },
-  lossStamp: { p: 0, fr: `−400${N}€ par nouveau client`, en: `−€400 per new customer` },
   lev1: { p: 1, fr: `Churn logo mensuel`, en: `Monthly logo churn` },
   lev2: { p: 1, fr: `Expansion mensuelle`, en: `Monthly expansion` },
   lev3: { p: 1, fr: `Taux d'activation`, en: `Activation rate` },
-  slideHead: { p: 0, fr: `Où en est notre growth · septembre 2026`, en: `Where our growth stands · September 2026` },
-  slideVerdict: { p: 0, fr: `La retention freine`, en: `Retention holds us back` },
-  slideVerdictText: { p: 0, fr: `Churn de 6${N}% par mois pour une cible de 4${N}%, et un client qui coûte plus qu'il ne rapporte.`, en: `6% monthly churn for a 4% target, and a customer who costs more than they bring in.` },
-  slideUnit: { p: 0, fr: `Unit economics`, en: `Unit economics` },
+  // The engine's own words and figures for the film's SaaS (A20.d, read off the ported engine: moneyView, leverMoneyView, buildDeck).
+  moneyEyebrow: { p: 1, fr: `L'argent · août 2026`, en: `The money · August 2026` },
+  moneyMrr: { p: 1, fr: `MRR`, en: `MRR` },
+  moneyArr: { p: 1, fr: `ARR, le MRR × 12`, en: `ARR, the MRR × 12` },
+  worthTitle: { p: 1, fr: `Ce que vaut un nouveau client`, en: `What one new customer is worth` },
+  tagLoss: { p: 1, fr: `Perte`, en: `Loss` },
+  worthLoss: { p: 1, fr: `Chaque nouveau client coûte 1${N}900${N}€ et rapporte ~1${N}500${N}€ de marge${N}: tu perds ~400${N}€ sur chacun.`, en: `Each new customer costs €1,900 and brings back ~€1,500 of margin: you lose ~€400 on each one.` },
+  costs: { p: 1, fr: `Coûte`, en: `Costs` },
+  brings: { p: 1, fr: `Rapporte`, en: `Brings back` },
+  monthsLoss: { p: 1, fr: `Un client reste ~17${N}mois${N}; rembourser son coût en prendrait 21${N}mois${N}: il part avant.`, en: `A customer stays ~17 months; paying back its cost would take 21 months: it leaves before.` },
+  cashTitle: { p: 1, fr: `Trésorerie`, en: `Cash` },
+  spend: { p: 1, fr: `Dépensé en acquisition ce mois-ci`, en: `Spent on acquisition this month` },
+  tied: { p: 1, fr: `Immobilisé à ce rythme`, en: `Tied up at this pace` },
+  cashLoss: { p: 1, fr: `Et elle ne revient pas toute${N}: les clients partent avant d'avoir remboursé.`, en: `And it does not all come back: customers leave before they pay back.` },
+  curveToday: { p: 1, fr: `au rythme d'aujourd'hui`, en: `at today's pace` },
+  curveWhatif: { p: 1, fr: `avec tes «${N}Et si${N}»`, en: `with your what-ifs` },
+  curveStart: { p: 1, fr: `48${N}000${N}€ aujourd'hui`, en: `€48,000 today` },
+  months: { p: 1, fr: [`août 2026`, `février 2027`, `août 2027`], en: [`August 2026`, `February 2027`, `August 2027`] },
+  worthNoLoss: { p: 1, fr: `Un nouveau client${N}: plus de perte. Il rapporte ~2${N}300${N}€ pour 1${N}900${N}€${N}: ~350${N}€ de plus.`, en: `One new customer: no longer a loss. It brings back ~€2,300 for €1,900: ~€350 more.` },
+  worthNoLossAll: { p: 1, fr: `Un nouveau client${N}: plus de perte. Il rapporte ~2${N}300${N}€ pour ~1${N}400${N}€${N}: ~830${N}€ de plus.`, en: `One new customer: no longer a loss. It brings back ~€2,300 for ~€1,400: ~€830 more.` },
+  kicker: { p: 1, fr: `Moteur de growth · août 2026 · données internes`, en: `Growth engine · August 2026 · internal data` },
+  slideVerdict: { p: 1, fr: `Sur 100 inscrits, 18 atteignent la première valeur et 6 paient. **Entre les deux, on ne voit rien${N}: la rétention à J30 n'est pas mesurée.**`, en: `Out of 100 sign-ups, 18 reach first value and 6 pay. **In between, we see nothing: day-30 retention isn't measured.**` },
+  pSignups: { p: 1, fr: `Inscrits`, en: `Sign-ups` }, pActivated: { p: 1, fr: `Activés`, en: `Activated` }, pD30: { p: 1, fr: `Actifs à J30`, en: `Active at day 30` }, pPaying: { p: 1, fr: `Payants à J30`, en: `Paying by day 30` },
+  slideUnit: { p: 1, fr: `Chaque nouveau client nous coûte 1${N}900${N}€ et en rapporte ~1${N}500${N}€${N}: **on perd ~400${N}€ sur chacun**.`, en: `Each new customer costs us €1,900 and brings back ~€1,500: **we lose ~€400 on each one**.` },
+  unitTiles: { p: 1, fr: [[`CAC`, `1${N}900${N}€`], [`LTV`, `~1${N}500${N}€`], [`LTV:CAC`, `0,79${N}fois`], [`CAC payback`, `21${N}mois`], [`Mois après remboursement`, `–4${N}mois`], [`Trésorerie immobilisée`, `~990${N}000${N}€`]], en: [[`CAC`, `€1,900`], [`LTV`, `~€1,500`], [`LTV:CAC`, `0.79×`], [`CAC payback`, `21 months`], [`Months after payback`, `–4 months`], [`Cash tied up`, `~€990,000`]] },
 };
 const C_TOUR_E = {
   rows: () => [["ACQUISITION", C.m1, count(0, 3.2, 22.5, 0.4, "p1"), `820 / 26${N}000`], ["ACTIVATION", C.m2, count(0, 18, 22.65, 0.4, "p0"), `144 / 800`], ["RETENTION", C.m3, count(0, 6, 22.8, 0.4, "p0"), x(`cible${N}: 4${N}%`, `target: 4%`), true], ["REVENUE", C.m5, count(0, 120, 22.95, 0.4, "eur"), x(`MRR${N}: 48${N}000${N}€`, `MRR: €48,000`)]],
 };
 const C1 = {
   lever1: { p: 0, fr: `Et si${N}: churn logo mensuel, 4${N}% au lieu de 6${N}%`, en: `What if: monthly logo churn, 4% instead of 6%` },
-  slideIf1: { p: 0, fr: `MRR dans 12 mois${N}: 80${N}212${N}€ → 93${N}556${N}€`, en: `MRR in 12 months: €80,212 → €93,556` },
+  slideIf1: { p: 1, fr: `Si le churn logo passait à 4${N}% (aujourd'hui${N}: 6${N}%), le MRR dans 12 mois gagnerait **~13${N}000${N}€**.`, en: `If logo churn went from 6% to 4%, MRR in 12 months would gain **~€13,000**.` },
   noteIf1: { p: 0, fr: `Un levier${N}: le churn, de 6 à 4${N}%.`, en: `One lever: churn, from 6 to 4%.` },
   live: { p: 0, fr: `En direct`, en: `Live` },
   dgLine: { p: 1, fr: `Je ne veux pas savoir comment, je veux le chiffre.`, en: `I don't want to know how. I want the number.` },
@@ -868,17 +975,17 @@ const C1 = {
 };
 const C3 = {
   title: { p: 0, fr: `Ton moteur de growth`, en: `Your growth engine` },
-  mrrLabel: { p: 0, fr: `MRR · septembre`, en: `MRR · September` },
+  mrrLabel: { p: 0, fr: `MRR · août 2026`, en: `MRR · August 2026` },
   hook1: { p: 0, fr: `Ton MRR monte.`, en: `Your MRR is going up.` },
   hook2: { p: 0, fr: `Mais ta growth fonctionne-t-elle vraiment${N}?`, en: `But is your growth actually working?` },
   truth1: { p: 0, fr: `Chaque nouveau client te coûte plus qu'il ne te rapporte.`, en: `Every new customer costs you more than they bring in.` },
   truth2: { p: 0, fr: `Plus tu grandis, plus tu creuses.`, en: `The more you grow, the deeper the hole.` },
   where: { p: 0, fr: `Où investir${N}? Ton moteur te montre l'étape qui freine, chiffres à l'appui.`, en: `Where to invest? Your engine shows the stage holding you back, with the numbers to prove it.` },
-  compound: { p: 0, fr: `Ensemble${N}: +42${N}190${N}€, soit environ 4${N}390${N}€ de plus que la somme des leviers pris seuls${N}: c'est l'effet composé.`, en: `Together: +€42,190, about €4,390 more than the sum of the levers taken alone: that's the compounding.` },
-  arrBig: { p: 0, fr: `ARR dans 12 mois`, en: `ARR in 12 months` },
-  arrUp: { p: 0, fr: `+506${N}k€`, en: `+€506k` },
+  compound: { p: 1, fr: `Ensemble${N}: +42${N}000${N}€, soit ~4${N}400${N}€ de plus que la somme des leviers pris seuls${N}: c'est l'effet composé.`, en: `Together: +€42,000, ~€4,400 more than the sum of the levers taken alone: that's the compounding.` },
+  arrBig: { p: 1, fr: `ARR dans 12 mois`, en: `ARR in 12 months` },
+  arrUp: { p: 1, fr: `+510${N}000${N}€`, en: `+€510,000` },
   leverSup: { p: 0, fr: `Bouge un levier. Regarde ton ARR bouger.`, en: `Move a lever. Watch your ARR move.` },
-  slideIf: { p: 0, fr: `MRR dans 12 mois${N}: 80${N}212${N}€ → 122${N}402${N}€`, en: `MRR in 12 months: €80,212 → €122,402` },
+  slideIf: { p: 1, fr: `Avec les 3 «${N}Et si${N}» ensemble, le MRR dans 12 mois gagnerait **~42${N}000${N}€**.`, en: `With the 3 what-ifs together, MRR in 12 months would gain **~€42,000**.` },
   noteIf: { p: 0, fr: `Trois leviers${N}: churn, expansion, activation.`, en: `Three levers: churn, expansion, activation.` },
   boardSup: { p: 0, fr: `Ta growth, lisible en trois slides.`, en: `Your growth, readable in three slides.` },
   whoSup: { p: 0, fr: `Fondateur${N}: où investir. Investisseur${N}: faut-il investir${N}?`, en: `Founders: where to invest. Investors: whether to invest.` },
@@ -1034,11 +1141,11 @@ function buildTour(L) {
   h += blk({ h: [64, 148, 1], s: [48, 180, 1], v: [80, 200, 1] }, 560, 300,
     numbersCard(L, C_TOUR_E.rows().map((r) => [r[0], r[1][LANG], r[2], r[3], r[4]]), 560, 300, 22.4, { step: 0.15, y0: 74, dy: 54, dyT: 54, titleSize: 26, redAt: 23.2, stampRow: 2, stampAt: 23.35 }),
     an(["up", 22.3, 0.45], ["xL", 24.85, 0.3]), "card");
-  h += blk({ h: [664, 148, 1], s: [360, 520, 1], v: [84, 530, 1] }, 552, 300, ueCard(L, 552, 300, 22.8, { big: false, sp: 0.55 }),
+  h += blk({ h: [664, 148, 1], s: [360, 520, 1], v: [84, 530, 1] }, 552, 300, moneyCard(L, 552, 300, 22.8, { compact: true, sp: 0.5 }) + `<div class="a mo" style="right:24px;top:26px;font-size:11px;color:#5b5346">${L.exampleTag}</div>`,
     an(["up", 22.6, 0.45], ["xR", 24.85, 0.3]), "card");
   cue("impact", 25.0);
   const wide1 = FMT !== "v";
-  const if1 = { t0: 25.0, levers: [{ label: L.lev1, from: 6, to: 4, fmt: "p0", range: [0, 10], at: 25.7, dur: 1.1 }], series: [ENG.base, ENG.churn], stepAt: [25.8], stepDur: [1.0], mrr12: [ENG.base[12], ENG.churn[12]], ltvcac: [[F("dec2", 0.79), 0, false], [F("dec2", 1.18), 26.8, true]], payback: [[x(`21${N}mois`, "21 months"), 0, false]] };
+  const if1 = { t0: 25.0, levers: [{ label: L.lev1, from: 6, to: 4, fmt: "p0", range: [0, 10], at: 25.7, dur: 1.1 }], series: [ENG.base, ENG.churn], stepAt: [25.8], stepDur: [1.0], mrr12: [ENG.base[12], ENG.churn[12]].map((v) => F("aeur", v)), arr12: [ENG.base[12], ENG.churn[12]].map((v) => F("aeur", v * 12)), worth: [[L.worthNoLoss, 26.8]] };
   h += FMT === "s" ? blk([48, 320, 1], 864, 440, whatIfCard(L, { ...if1, w: 864, hh: 440 }), an(["up", 25.0, 0.45], ["xup", 27.95, 0.3]), "card")
     : wide1 ? blk([64, 130, 1], 1152, 440, whatIfCard(L, { ...if1, w: 1152, hh: 440 }), an(["up", 25.0, 0.45], ["xup", 27.95, 0.3]), "card")
     : blk([48, 150, 1], 624, 640, whatIfCard(L, { ...if1, w: 624, hh: 640, tall: true }), an(["up", 25.0, 0.45], ["xup", 27.95, 0.3]), "card");
@@ -1240,14 +1347,14 @@ function buildEngine(L) {
     { h: 300, s: 600, v: 530 }, an(["up", 0.2, 0.4], ["xup", 3.9, 0.3]));
   h += ctext(L.hook1, { h: 478, s: 840, v: 710 }, an(["up", 1.5, 0.4], ["xup", 3.9, 0.3]), `font:700 ${pick({ h: 44, s: 42, v: 40 })}px/1.2 var(--f-ui);letter-spacing:-.02em;`);
   h += ctext(`<span class="rd">${L.hook2}</span>`, { h: 536, s: 912, v: 772 }, an(["up", 2.5, 0.4], ["xup", 3.9, 0.3]), `font:700 ${pick({ h: 44, s: 42, v: 40 })}px/1.2 var(--f-ui);letter-spacing:-.02em;`);
-  h += `<div class="a mo" style="right:${pick({ h: 32, s: 28, v: 28 })}px;top:${pick({ h: 26, s: 30, v: 70 })}px;font-size:12px;color:#5b5346;${an(["in", 4.2, 0.3], ["xin", 29.8, 0.3])}">${L.exampleTag}</div>`;
+  h += `<div class="a mo" style="right:${pick({ h: 32, s: 28, v: 28 })}px;top:${pick({ h: 26, s: 30, v: 70 })}px;font-size:12px;color:#5b5346;${an(["in", 0.2, 0.3], ["xin", 29.8, 0.3])}">${L.exampleTag}</div>`;
 
-  /* 2 · the truth: what a customer is worth (4 – 11) */
-  const ueW = pick({ h: 1088, s: 864, v: 624 }), ueH = pick({ h: 330, s: 340, v: 420 });
-  h += blk({ h: [96, 70, 1], s: [48, 290, 1], v: [48, 170, 1] }, ueW, ueH, ueCard(L, ueW, ueH, 4.4), an(["up", 4.1, 0.45], ["xup", 10.9, 0.35]), "card");
-  cue("drop", 6.8);
-  h += sup(L.truth1, 7.8, 10.9, { y: { h: 440, s: 780, v: 630 }, size: { h: 38, s: 38, v: 36 } });
-  h += sup(`<span class="r">${L.truth2}</span>`, 9.2, 10.9, { y: { h: 530, s: 890, v: 780 }, size: { h: 46, s: 44, v: 42 } });
+  /* 2 · the truth: the money, as the board shows it — what a customer is worth, the cash (4 – 11) */
+  const ueW = pick({ h: 1088, s: 864, v: 624 }), ueH = pick({ h: 390, s: 580, v: 610 });
+  h += blk({ h: [96, 56, 1], s: [48, 150, 1], v: [48, 120, 1] }, ueW, ueH, moneyCard(L, ueW, ueH, 4.4, { cashAt: 7.4 }), an(["up", 4.1, 0.45], ["xup", 10.9, 0.35]), "card");
+  // Ink, never red: the loss is arithmetic on the team's own numbers (C48).
+  h += sup(L.truth1, 7.8, 10.9, { y: { h: 486, s: 838, v: 852 }, size: { h: 34, s: 34, v: 32 } });
+  h += sup(L.truth2, 9.2, 10.9, { y: { h: 566, s: 930, v: 950 }, size: { h: 42, s: 40, v: 38 } });
 
   /* 3 · where to invest (11 – 16) */
   const nW = pick({ h: 1088, s: 864, v: 624 }), nH = pick({ h: 420, s: 420, v: 560 });
@@ -1261,22 +1368,22 @@ function buildEngine(L) {
     t0: 16.8,
     levers: [{ label: L.lev1, from: 6, to: 4, fmt: "p0", range: [0, 10], at: 17.7, dur: 1.2 }, { label: L.lev2, from: 2, to: 3, fmt: "p0", range: [0, 6], at: 19.9, dur: 1.0 }, { label: L.lev3, from: 18, to: 24, fmt: "p0", range: [0, 40], at: 22.0, dur: 1.2 }],
     series: [ENG.base, ENG.churn, ENG.churnExp, ENG.all], stepAt: [17.8, 20.0, 22.1], stepDur: [1.1, 1.0, 1.2],
-    mrr12: [ENG.base[12], ENG.churn[12], ENG.churnExp[12], ENG.all[12]],
-    ltvcac: [[F("dec2", 0.79), 0, false], [F("dec2", 1.18), 18.9, true], [F("dec2", 1.58), 23.3, true]],
-    payback: [[x(`21${N}mois`, "21 months"), 0, false], [x(`16${N}mois`, "16 months"), 23.3, true]],
+    mrr12: [ENG.base[12], ENG.churn[12], ENG.churnExp[12], ENG.all[12]].map((v) => F("aeur", v)),
+    arr12: [ENG.base[12], ENG.churn[12], ENG.churnExp[12], ENG.all[12]].map((v) => F("aeur", v * 12)),
+    worth: [[L.worthNoLoss, 18.9], [L.worthNoLossAll, 23.3]],
     compound: { at: 24.0, text: L.compound },
   };
   const ifAnim = an(["up", 16.8, 0.45], ["dimX", 25.4, 0.35], ["xin", 29.8, 0.3]);
-  h += FMT === "s" ? blk([48, 280, 1], 864, 580, whatIfCard(L, { ...if3, w: 864, hh: 580 }), ifAnim, "card")
+  h += FMT === "s" ? blk([48, 270, 1], 864, 600, whatIfCard(L, { ...if3, w: 864, hh: 600 }), ifAnim, "card")
     : FMT === "h" ? blk([64, 80, 1], 1152, 520, whatIfCard(L, { ...if3, w: 1152, hh: 520 }), ifAnim, "card")
     : blk([48, 110, 1], 624, 800, whatIfCard(L, { ...if3, w: 624, hh: 800, tall: true }), ifAnim, "card");
-  if (FMT === "v") h += sup(L.compound, 24.0, 25.5, { y: 930, size: 24 });
+  if (FMT !== "h") h += sup(L.compound, 24.0, 25.5, { y: { s: 910, v: 930 }, size: 24 });
   cue("riser", 24.4, 1.2);
-  h += ctext(`<div class="mo" style="font-size:${pick({ h: 18, s: 18, v: 18 })}px;color:#5b5346">${L.arrBig}</div><div class="st" style="font-size:${pick({ h: 150, s: 124, v: 100 })}px;margin-top:10px;font-variant-numeric:tabular-nums;text-transform:none">${count(ENG.base[12] * 12, ENG.all[12] * 12, 25.9, 0.8, "keur", true)}</div>`,
+  h += ctext(`<div class="mo" style="font-size:${pick({ h: 18, s: 18, v: 18 })}px;color:#5b5346">${L.arrBig}</div><div class="st" style="font-size:${pick({ h: 140, s: 104, v: 76 })}px;margin-top:10px;font-variant-numeric:tabular-nums;text-transform:none">${count(ENG.base[12] * 12, ENG.all[12] * 12, 25.9, 0.8, "aeur", true)}</div>`,
     { h: 150, s: 312, v: 360 }, an(["pop", 25.6, 0.4, "s"], ["xin", 29.8, 0.3]));
-  h += ctext(`<span class="mo" style="font-size:18px;color:#5b5346;text-transform:none">${x("au lieu de", "instead of")} ${F("keur", ENG.base[12] * 12)}</span>`, { h: 360, s: 538, v: 500 }, an(["in", 26.4, 0.3], ["xin", 29.8, 0.3]));
+  h += ctext(`<span class="mo" style="font-size:18px;color:#5b5346;text-transform:none">${L.today} ${F("aeur", ENG.base[12] * 12)}</span>`, { h: 360, s: 538, v: 500 }, an(["in", 26.4, 0.3], ["xin", 29.8, 0.3]));
   const up = L.arrUp, upS = pick({ h: 54, s: 48, v: 44 });
-  h += `<div class="a" style="left:0;right:0;top:${pick({ h: 404, s: 600, v: 550 })}px;display:flex;justify-content:center">${stampEl(up, 0, 0, 26.7, { r: -4, size: upS, t1: 29.8 }).replace('class="a stampbox', 'class="stampbox').replace("left:0px;top:0px;", "position:relative;text-transform:none;")}</div>`;
+  h += `<div class="a" style="left:0;right:0;top:${pick({ h: 404, s: 600, v: 550 })}px;display:flex;justify-content:center">${stampEl(up, 0, 0, 26.7, { r: -4, size: upS, ink: true, t1: 29.8 }).replace('class="a stampbox', 'class="stampbox').replace("left:0px;top:0px;", "position:relative;text-transform:none;")}</div>`;
   cue("impact", 26.7);
   h += sup(L.leverSup, 27.0, 29.8, { y: { h: 540, s: 850, v: 760 }, align: "center", size: { h: 40, s: 40, v: 38 } });
 
@@ -1476,7 +1583,7 @@ const FILMS = {
       { t: 4.2, title: "Cinq étapes, une qui cale", img: "Cinq dossards tombent sur la route. Quatre se cochent. Les deux voisins glissent devant Retention et la cachent, puis s'écartent : elle passe au rouge, le tampon tombe.", txt: ["claim", "proof", "holds"], son: "Le groove démarre ; un impact par dossard, le tampon." },
       { t: 10.5, title: "Le road book", img: "Le profil d'étape se trace : une plaine, un contre-la-montre, une montagne. La caméra plonge dans la plaine.", txt: ["race", "k1", "k2", "k3"], son: "Le groove s'arrête, arpège seul ; un souffle pour la plongée." },
       { t: 13.6, title: "1/3 · Plaine : le diagnostic", img: "Une vraie question de l'étape Retention ; une réponse s'enfonce. Les questions défilent jusqu'à 15/15, le ton passe sur « Roast me ». Le score 74 se compte puis se tamponne, Retention passe au rouge. Un mini road book suit la course.", txt: ["q", "toneTitle", "holds", "p1"], son: "Groove complet, clics de réponse, compteur qui monte, tampon du score." },
-      { t: 21.4, title: "2/3 · Contre-la-montre : le moteur", img: "Le chrono part. Le churn à 6 % pour une cible de 4 % prend « Freine ici ». À côté, ce que rapporte un client : 1 900 € de CAC, 1 500 € de LTV, « −400 € par nouveau client ». « Et si ? » : le levier ramène le churn à 4 %, les barres du MRR montent en rouge, le MRR dans 12 mois passe de 80 212 € à 93 556 € et le LTV:CAC de 0,79 à 1,18. Trois slides tombent.", txt: ["freine", "ueTitle", "lossStamp", "lev1", "mrr12", "p2"], son: "Le chrono bat ; un impact sur « Et si ? », la montée, le levier qui siffle, le compteur qui grimpe." },
+      { t: 21.4, title: "2/3 · Contre-la-montre : le moteur", img: "Le chrono part. Le churn à 6 % pour une cible de 4 % prend « Freine ici ». À côté, ce que vaut un nouveau client, comme le tableau du moteur le dit : l'étiquette « Perte » à l'encre, « tu perds ~400 € sur chacun », les deux barres et ce qui manque. « Et si ? » : le levier ramène le churn à 4 %, la courbe du MRR monte au-dessus du rythme d'aujourd'hui, à l'encre ; le MRR dans 12 mois passe de ~80 000 € à ~94 000 €, l'ARR de ~960 000 € à ~1 100 000 €, et un nouveau client n'est plus une perte. Trois slides tombent, avec « Chiffres d'exemple ».", txt: ["freine", "worthTitle", "tagLoss", "worthLoss", "lev1", "mrr12", "worthNoLoss", "p2"], son: "Le chrono bat ; un impact sur « Et si ? », la montée, le levier qui siffle, le compteur qui grimpe." },
       { t: 30.4, title: "3/3 · Montagne : le jeu, annoncé", img: "La route monte et la nuit tombe. LE CÔTÉ OBSCUR au pochoir, et ce qu'on y fait : un jeu pour apprendre ce qu'il ne faut pas faire.", txt: ["n3", "gameIntro"], son: "Un souffle, le groove qui se pose." },
       { t: 32.4, title: "Le côté obscur, joué", img: "Le DG de Flixo en visio. « Alléger la page abonnement » se choisit ; le bouton devient un lien gris et la pastille passe à 5 clics. Le churn baisse, le DG dit « Bien joué. ». Décembre : la confiance et le radar se défloutent, « Obstruction » tombe.", txt: ["dgLine", "card1", "clicks5", "hit", "december", "obstruction", "p3"], son: "Sonnerie de visio, demi-tempo en la mineur, frappe des sous-titres, notification ; montée puis chute de basse en décembre." },
       { t: 42.4, title: "Ce qui marche", img: "Le jour revient. « Et ce qui marche, sans tricher. » Trois actions honnêtes du même niveau tombent : Offre de pause, Rappel avant prélèvement, Résiliation en trois clics.", txt: ["worksSup", "honestTag", "card2", "card4", "card7"], son: "Montée en majeur, une sélection par carte." },
@@ -1505,15 +1612,15 @@ const FILMS = {
     music: [[0, 4, "groove", "A"], [4, 11, "half", "DARK"], [11, 16, "drive", "A"], [16, 25.4, "build", "BUILD"], [25.4, 26.7, "none"], [26.7, 30, "full", "OUT"], [30, 37, "groove", "A"], [37, 40.5, "break", "A"], [40.5, 44, "outro", "OUT"]],
     brief: {
       title: "Le moteur, refait",
-      intent: "Le film répond aux deux questions qu'un fondateur, un board ou un investisseur se pose : est-ce que ma growth fonctionne, et où investir ? Il ouvre sur un MRR qui monte, puis montre ce que le tableau de bord ne dit pas : chaque nouveau client coûte 1 900 € et rapporte 1 500 € de marge. Le moteur désigne l'étape qui freine, puis « Et si ? » fait bouger trois leviers : le MRR dans 12 mois passe de 80 212 € à 122 402 €, soit un ARR de 963 k€ à 1 469 k€, et l'effet composé s'affiche. Le tout tient en trois slides pour le board, en une demi-journée de recherche.",
-      facts: [["Durée", "44 s ; une coupe de 20 s possible (scènes 1, 2, 4 et 7)"], ["Formats", "16:9, 4:5 et 9:16. En vertical, la carte « Et si » passe en colonne (leviers, puis barres, puis MRR et ARR) et l'effet composé devient un super"], ["Chiffres", "Un SaaS d'exemple, calculé avec les formules du moteur : MRR 48 000 €, ARPA 120 €, marge 75 %, churn 6 %, contraction 1 %, expansion 2 %, 820 inscrits et 6 % qui paient, CAC 1 900 €. LTV plafonnée à 36 mois, MRR dans 12 mois = MRR × NRR + nouveau MRR, douze fois"], ["Pour", "La page du moteur, la campagne de lancement du moteur, les messages aux investisseurs et aux boards"], ["Quand", "À l'ouverture du moteur, après le bon à tirer nº9"], ["Musique", "Une ouverture qui tape, un demi-tempo grave quand la vérité tombe, le chrono pour « où investir », puis une longue montée sous « Et si ? » (un sifflement par levier, des tics qui grimpent avec le compteur), un silence, et le drop sur l'ARR"]],
+      intent: "Le film répond aux deux questions qu'un fondateur, un board ou un investisseur se pose : est-ce que ma growth fonctionne, et où investir ? Il ouvre sur un MRR qui monte, puis montre ce que le tableau de bord ne dit pas, comme le moteur le montre depuis A20 : chaque nouveau client coûte 1 900 € et rapporte ~1 500 € de marge, et la trésorerie qu'immobilise l'acquisition ne revient pas toute. Le moteur désigne l'étape qui freine, puis « Et si ? » fait bouger trois leviers : le MRR dans 12 mois passe de ~80 000 € à ~120 000 €, l'ARR de ~960 000 € à ~1 500 000 €, et l'effet composé s'affiche. Rien de projeté n'est rouge, la perte non plus : le rouge reste au verdict et à l'étape qui freine. Le tout tient en trois slides pour le board, en une demi-journée de recherche.",
+      facts: [["Durée", "44 s ; une coupe de 20 s possible (scènes 1, 2, 4 et 7)"], ["Formats", "16:9, 4:5 et 9:16. En vertical, la carte « Et si » passe en colonne (leviers, puis la courbe et sa légende, puis MRR et ARR) et l'effet composé devient un super, comme en 4:5"], ["Chiffres", "Un SaaS d'exemple, calculé avec les formules du moteur : MRR 48 000 €, ARPA 120 €, marge 75 %, churn 6 %, contraction 1 %, expansion 2 %, 820 inscrits et 6 % qui paient, CAC 1 900 €. LTV plafonnée à 36 mois, MRR dans 12 mois = MRR × NRR + nouveau MRR, douze fois. Chaque texte et chaque chiffre des écrans du moteur est celui du moteur porté (A20.d), arrondi comme il arrondit une projection (deux chiffres significatifs)"], ["Pour", "La page du moteur, la campagne de lancement du moteur, les messages aux investisseurs et aux boards"], ["Quand", "À l'ouverture du moteur, après les bons à tirer nº9 et nº10"], ["Musique", "Une ouverture qui tape, un demi-tempo grave quand la vérité tombe, le chrono pour « où investir », puis une longue montée sous « Et si ? » (un sifflement par levier, des tics qui grimpent avec le compteur), un silence, et le drop sur l'ARR"]],
     },
     scenes: [
       { t: 0, title: "Le MRR monte", img: "Des barres montent, le MRR se compte jusqu'à 48 000 € avec une flèche verte. Puis la question, en rouge.", txt: ["mrrLabel", "hook1", "hook2"], son: "Le groove frappe d'entrée, des tics suivent le compteur." },
-      { t: 4, title: "Ce que rapporte un client", img: "Deux barres : le CAC pousse jusqu'à 1 900 €, le LTV s'arrête à 1 500 €. L'écart se hachure en rouge, le tampon « −400 € par nouveau client » tombe. Dessous : LTV:CAC 0,79, CAC payback 21 mois, un client reste environ 17 mois.", txt: ["ueTitle", "lossStamp", "ueFacts", "truth1", "truth2"], son: "Demi-tempo grave, chute de basse sur le tampon." },
+      { t: 4, title: "L'argent", img: "Le bloc d'argent du tableau du moteur, tel quel : le MRR et l'ARR, puis ce que vaut un nouveau client, l'étiquette « Perte » à l'encre, « tu perds ~400 € sur chacun », les deux barres (coûte 1 900 €, rapporte ~1 500 €) et le crochet de ce qui manque, les mois (« il part avant »). Puis la trésorerie : 93 480 € dépensés ce mois-ci, ~990 000 € immobilisés à ce rythme, « et elle ne revient pas toute ». Rien de rouge : la perte est de l'arithmétique sur les chiffres de l'équipe (C48).", txt: ["moneyEyebrow", "worthTitle", "tagLoss", "worthLoss", "monthsLoss", "cashTitle", "cashLoss", "truth1", "truth2"], son: "Demi-tempo grave, chute de basse sous le crochet." },
       { t: 11, title: "Où investir", img: "Tes chiffres, étape par étape, tapés en rafale. Le churn à 6 % pour une cible de 4 % passe au rouge : « Freine ici ».", txt: ["yourNumbers", "freine", "where"], son: "Le chrono bat sur toute la scène." },
-      { t: 16, title: "Et si ?", img: "« ET SI ? » s'écrase plein écran. Trois leviers glissent l'un après l'autre : churn de 6 à 4 %, expansion de 2 à 3 %, activation de 18 à 24 %. À chaque levier, les barres du MRR montent en rouge, le MRR dans 12 mois et l'ARR se recomptent, le LTV:CAC passe de 0,79 à 1,18 puis 1,58, le payback de 21 à 16 mois. Puis l'effet composé. Tout s'efface devant l'ARR : 963 k€ → 1 469 k€, tampon « +506 k€ ».", txt: ["whatIf", "lev1", "lev2", "lev3", "mrr12", "arrLabel", "compound", "arrBig", "arrUp", "leverSup"], son: "Impact, longue montée en quatre temps, un sifflement par levier, silence d'une seconde, le drop sur l'ARR." },
-      { t: 30, title: "Pour le board, pour l'investisseur", img: "Trois slides défilent comme au clicker : le verdict, les unit economics, le « Et si ? » avec ses barres. Puis elles s'étalent. Le crédit tourdegrowth.com en pied, comme dans l'export.", txt: ["slideVerdict", "slideUnit", "slideIf", "boardSup", "whoSup"], son: "Un déclic par slide, le groove reprend." },
+      { t: 16, title: "Et si ?", img: "« ET SI ? » s'écrase plein écran. Trois leviers glissent l'un après l'autre : churn de 6 à 4 %, expansion de 2 à 3 %, activation de 18 à 24 %. À chaque levier, la courbe du MRR avec tes « Et si » monte d'un cran au-dessus de celle du rythme d'aujourd'hui, à l'encre, la bande entre les deux remplie ; le MRR et l'ARR dans 12 mois se réécrivent (~94 000 €, ~100 000 €, ~120 000 € ; ~1 100 000 €, ~1 200 000 €, ~1 500 000 €), et un nouveau client n'est plus une perte. Puis l'effet composé. Tout s'efface devant l'ARR : ~1 500 000 €, aujourd'hui ~960 000 €, tampon à l'encre « +510 000 € ».", txt: ["whatIf", "lev1", "lev2", "lev3", "curveWhatif", "curveToday", "mrr12", "arrBig", "worthNoLoss", "worthNoLossAll", "compound", "arrUp", "leverSup"], son: "Impact, longue montée en quatre temps, un sifflement par levier, silence d'une seconde, le drop sur l'ARR." },
+      { t: 30, title: "Pour le board, pour l'investisseur", img: "Trois slides du deck du moteur défilent comme au clicker, chacune avec son kicker et « Chiffres d'exemple » : le verdict (sa clause rouge, la seule), l'unit economics titrée par la perte, à l'encre, avec ses six tuiles, et le « Et si ? » avec sa courbe. Puis elles s'étalent. Le crédit tourdegrowth.com en pied, comme dans l'export.", txt: ["slideVerdict", "slideUnit", "slideIf", "boardSup", "whoSup"], son: "Un déclic par slide, le groove reprend." },
       { t: 37, title: "L'effort", img: "Le chrono fait deux tours. « 17 chiffres. Une demi-journée. » Dix-sept cases se remplissent. Puis la contrepartie.", txt: ["eff1", "eff2", "eff3"], son: "Arpège léger, des tics qui remplissent les cases." },
       { t: 40.5, title: "L'appel", img: "Le chrono, le nom au pochoir, la phrase, le bouton, la gratuité et l'adresse de la page.", txt: ["name", "endLine", "ctaE", "local"], son: "Retour en majeur, un dernier coup." },
     ],
@@ -1857,27 +1964,27 @@ window.__tdg = {
    then hands it to the viewer through the downloads capability. Off claude.ai the section stays hidden.
    After a new export: re-upload the MP4s as assets and replace this list. */
 const DL_FILES = [
-  ["fr/16x9/tour-de-growth-1-le-tour-16x9-fr.mp4", "/_blob/acc4c960c1e1aafaf4a459416247ba23"],
-  ["fr/4x5/tour-de-growth-1-le-tour-4x5-fr.mp4", "/_blob/5d2fc9ff99b388119d0a96a8edf19ddc"],
-  ["fr/9x16/tour-de-growth-1-le-tour-9x16-fr.mp4", "/_blob/bf2e43117dc561efe8e2f972c214ddb3"],
+  ["fr/16x9/tour-de-growth-1-le-tour-16x9-fr.mp4", "/_blob/be10ce8207418c3a2c5a9c21ee763a1c"],
+  ["fr/4x5/tour-de-growth-1-le-tour-4x5-fr.mp4", "/_blob/61aa8fbfef71aeeb7c89b23c054606d0"],
+  ["fr/9x16/tour-de-growth-1-le-tour-9x16-fr.mp4", "/_blob/c84118ad1ed934eb192f4887ea592d47"],
   ["fr/16x9/tour-de-growth-2-le-diagnostic-16x9-fr.mp4", "/_blob/f4bf83d4fc884be3dfa3f0d0149606e7"],
   ["fr/4x5/tour-de-growth-2-le-diagnostic-4x5-fr.mp4", "/_blob/0fa6d82904220d5af7fa1e39ab62c8c8"],
   ["fr/9x16/tour-de-growth-2-le-diagnostic-9x16-fr.mp4", "/_blob/2e5b9ae7f56f25570add26b8be2a4c9c"],
-  ["fr/16x9/tour-de-growth-3-le-moteur-16x9-fr.mp4", "/_blob/5647942310a9f20c8166cee56240cb32"],
-  ["fr/4x5/tour-de-growth-3-le-moteur-4x5-fr.mp4", "/_blob/5086136b320bde71763d1c35e828d281"],
-  ["fr/9x16/tour-de-growth-3-le-moteur-9x16-fr.mp4", "/_blob/5ebc065cde751c6ef5bc8890021a0797"],
+  ["fr/16x9/tour-de-growth-3-le-moteur-16x9-fr.mp4", "/_blob/9f4a688982eaab39963c86f4e5c567fe"],
+  ["fr/4x5/tour-de-growth-3-le-moteur-4x5-fr.mp4", "/_blob/3dc855293fbbdd050f1b92515f2365fb"],
+  ["fr/9x16/tour-de-growth-3-le-moteur-9x16-fr.mp4", "/_blob/654b2b0dab07c91c2f993b2fabba1849"],
   ["fr/16x9/tour-de-growth-4-le-cote-obscur-16x9-fr.mp4", "/_blob/3b0f25c43d8903562f9bcc1de40d9c59"],
   ["fr/4x5/tour-de-growth-4-le-cote-obscur-4x5-fr.mp4", "/_blob/794687df6b1114d7dec7ee7763d324c3"],
   ["fr/9x16/tour-de-growth-4-le-cote-obscur-9x16-fr.mp4", "/_blob/0124c0a2aecd35f3eeb673c6dd3c90db"],
-  ["en/16x9/tour-de-growth-1-le-tour-16x9-en.mp4", "/_blob/4d9b4a80fb1886d73d9312ea0c251e89"],
-  ["en/4x5/tour-de-growth-1-le-tour-4x5-en.mp4", "/_blob/f61bd453e5708c26985d9f929aeabff4"],
-  ["en/9x16/tour-de-growth-1-le-tour-9x16-en.mp4", "/_blob/7050ffdcaeda2aece41d47ab9a2c5007"],
+  ["en/16x9/tour-de-growth-1-le-tour-16x9-en.mp4", "/_blob/f21de1130988f67ae1c61cabdbe6a9bc"],
+  ["en/4x5/tour-de-growth-1-le-tour-4x5-en.mp4", "/_blob/3319d9ae0d53e33b52513f0173149e08"],
+  ["en/9x16/tour-de-growth-1-le-tour-9x16-en.mp4", "/_blob/cc597ab4d363df88062d28e7415e08f3"],
   ["en/16x9/tour-de-growth-2-le-diagnostic-16x9-en.mp4", "/_blob/9fb7871ee18cdd1ffeb9af9d28503b53"],
   ["en/4x5/tour-de-growth-2-le-diagnostic-4x5-en.mp4", "/_blob/6a71693ffe0f0a5dc9d1a5ebea0de1d3"],
   ["en/9x16/tour-de-growth-2-le-diagnostic-9x16-en.mp4", "/_blob/40db84dfa384b9e0fa4882add5ff5165"],
-  ["en/16x9/tour-de-growth-3-le-moteur-16x9-en.mp4", "/_blob/493e8e9aeb3fbe114d9956abf2cb6d4a"],
-  ["en/4x5/tour-de-growth-3-le-moteur-4x5-en.mp4", "/_blob/518d4f7f820b8c0c6b6e83f0865c6474"],
-  ["en/9x16/tour-de-growth-3-le-moteur-9x16-en.mp4", "/_blob/32f8c8dcf0c7b4ff8e4b89247addcc34"],
+  ["en/16x9/tour-de-growth-3-le-moteur-16x9-en.mp4", "/_blob/580305ec05daa66ea7aa7258c8f5f8a3"],
+  ["en/4x5/tour-de-growth-3-le-moteur-4x5-en.mp4", "/_blob/bf709ad1ca2f87e9ec4199774f9c5075"],
+  ["en/9x16/tour-de-growth-3-le-moteur-9x16-en.mp4", "/_blob/4212cda085ed20a328e3d296987590fe"],
   ["en/16x9/tour-de-growth-4-le-cote-obscur-16x9-en.mp4", "/_blob/b90a8011a1c3064ed0a319f60f14958f"],
   ["en/4x5/tour-de-growth-4-le-cote-obscur-4x5-en.mp4", "/_blob/aca5e9dc15d46ca82fde3ce59d175a0e"],
   ["en/9x16/tour-de-growth-4-le-cote-obscur-9x16-en.mp4", "/_blob/adaa4041bfc0439de8d0c01ef3b11ec5"],

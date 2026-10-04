@@ -23,7 +23,7 @@ format, de langue et de son, et le storyboard de chaque film dessous.
 |---|---|---|---|
 | Le Tour, en entier | 52 s | Le problème (une étape cale, les quatre autres la cachent), puis le road book : plaine, contre-la-montre, montagne. Une étape traverse le film, Retention : le diagnostic la nomme, le moteur la chiffre, le jeu, annoncé comme un jeu, apprend ce qu'il ne faut pas faire puis montre ce qui marche. Dernière ligne : « Maintenant, tu sais quoi faire. C'est parti ! » | À l'ouverture du moteur. Si le jeu ouvre plus tard, sa partie porte « bientôt » |
 | Le diagnostic | 29 s | De l'accueil au partage : la vraie question de rétention, le ton, le résultat d'exemple 74/100, l'action, le lien qui lance d'autres Tours | La page d'accueil et les annuaires maintenant : il ne montre que ce qui est ouvert. Les réseaux attendent l'ouverture du moteur, comme tout le lancement (C19, C20) |
-| Le moteur | 44 s | Le MRR monte, mais un client coûte 1 900 € et rapporte 1 500 € de marge ; « Freine ici » ; « Et si ? » fait passer le MRR dans 12 mois de 80 212 € à 122 402 € et l'ARR de 963 k€ à 1 469 k€ ; trois slides pour le board ; « 17 chiffres, une demi-journée » | À l'ouverture du moteur, **après A20** : le film montre des choses que le moteur n'affiche pas encore (voir plus bas) |
+| Le moteur | 44 s | Le MRR monte, mais le bloc d'argent du moteur dit qu'un client coûte 1 900 € et rapporte ~1 500 € de marge, et que la trésorerie immobilisée ne revient pas toute ; « Freine ici » ; « Et si ? » fait monter la courbe du MRR : ~80 000 € → ~120 000 € dans 12 mois, ARR ~960 000 € → ~1 500 000 € ; trois slides du deck pour le board ; « 17 chiffres, une demi-journée » | À l'ouverture du moteur : **remis d'accord avec le moteur porté le 2026-10-03** (A20.g) |
 | Le côté obscur | 42 s | Annoncé comme un jeu dès le premier plan (« un jeu pour apprendre ce qu'il ne faut pas faire »). Le DG de Flixo, deux astuces qui font baisser les résiliations, décembre qui défloute la confiance et le radar, le catalogue. Puis l'année rejouée sans tricher, la confiance qui monte, et la fin sur fond clair : « Maintenant, tu sais quoi faire. À toi de jouer. » | À l'ouverture du jeu |
 
 ## Ouvrir, exporter
@@ -119,15 +119,23 @@ autour, comme le fait `films.mjs page`.
   et « ÉTAPE 5 SUR 5 ».
 - **« Produit » ne veut pas dire approuvé.** Plusieurs entrées `p: 1`
   reprennent des chaînes encore « à relire » dans `src/` : le bandeau et la
-  bande de l'accueil, « Moteur de growth », la copie du moteur (bon à tirer
-  nº9) et celle du jeu (nº7). Quand ces bons à tirer changent une chaîne, le
+  bande de l'accueil, « Moteur de growth », la copie du moteur (bons à tirer
+  nº9 et nº10, l'argent) et celle du jeu (nº7). Quand ces bons à tirer changent une chaîne, le
   film se remet d'accord avec elle.
-- **Les chiffres du moteur viennent de ses formules** : `scenario.ts#twelveMonths`
-  pour le MRR dans 12 mois, `unit-economics.ts` pour le LTV et le payback.
-  Ils portent l'étiquette « Chiffres d'exemple » sur les écrans du moteur,
-  mais pas encore partout (voir « Ce qui reste à reprendre »). Le SaaS
-  d'exemple n'est pas celui d'`example.ts` : ce dernier n'a pas de marge, donc
-  ni LTV ni payback.
+- **Les écrans du moteur sont ceux du moteur porté** (A20.d, remis d'accord le
+  2026-10-03, A20.g) : le bloc d'argent du tableau (`MoneyBlock`), la carte
+  « Et si » avec sa courbe (`LeverCard`, `MrrCurve`), les slides du deck
+  (verdict, unit economics titrée par la perte, « Et si » avec sa courbe).
+  Leurs textes et leurs chiffres sont ceux que le moteur affiche pour ce SaaS
+  (`filmState()` dans `lib/engine/__tests__/fixtures.ts`), lus sur ses vues
+  (`moneyView`, `leverMoneyView`, `kpiRows`, `buildDeck`) et recopiés dans `C`
+  avec `p: 1`. Une projection s'arrondit comme le moteur l'arrondit, à deux
+  chiffres significatifs (le format `aeur` du film : « ~120 000 € »).
+  **Rien de projeté n'est rouge, la perte non plus** (audit S-5, C48) : le
+  rouge reste au verdict de la première slide et à « Freine ici ». Chaque
+  écran du moteur porte « Chiffres d'exemple », du premier plan à la dernière
+  slide. Le SaaS du film n'est pas l'exemple intégré d'`example.ts`, qui a
+  une marge estimée depuis C50 et montre son argent en fourchettes.
 
   | Hypothèse | Valeur |
   |---|---|
@@ -138,18 +146,28 @@ autour, comme le fait `films.mjs page`.
   | Inscrits par mois, conversion en payant | 820, 6 % |
   | CAC | 1 900 € |
 
-  | Résultat | Aujourd'hui | Avec les trois leviers |
+  | Ce que le moteur affiche | Aujourd'hui | Avec les trois leviers |
   |---|---|---|
-  | LTV (plafonnée à 36 mois) | 1 500 € | 2 250 € |
-  | LTV:CAC | 0,79 | 1,58 |
+  | LTV (plafonnée à 36 mois) | ~1 500 € | ~2 300 € |
+  | LTV:CAC | 0,79 fois | 1,6 fois |
   | CAC payback | 21 mois | 16 mois |
-  | MRR dans 12 mois | 80 212 € | 122 402 € |
-  | ARR (MRR × 12) | 963 k€ | 1 469 k€ |
+  | MRR dans 12 mois | ~80 000 € | ~120 000 € |
+  | ARR dans 12 mois | ~960 000 € | ~1 500 000 € |
+  | Trésorerie immobilisée | ~990 000 € | ~740 000 € |
 
   Les trois leviers sont : churn de 6 à 4 %, expansion de 2 à 3 %,
-  activation de 18 à 24 % (à dépense égale, le CAC tombe à 1 425 €). Pris
-  seuls, ils ajoutent 13 344 €, 6 362 € et 18 091 € de MRR dans 12 mois.
-  Ensemble, ils ajoutent 42 190 €, soit 4 393 € d'effet composé.
+  activation de 18 à 24 % (à dépense égale, le CAC tombe à ~1 400 €). Pris
+  seuls, ils ajoutent ~13 000 €, ~6 400 € et ~18 000 € de MRR dans 12 mois.
+  Ensemble, ~42 000 €, soit ~4 400 € d'effet composé. Les étapes du film :
+  ~94 000 € puis ~100 000 € de MRR dans 12 mois, ~1 100 000 € puis
+  ~1 200 000 € d'ARR.
+
+  **L'alerte de trésorerie (C49) n'apparaît pas, et c'est voulu** : ce SaaS
+  perd de l'argent sur chaque client, et le moteur n'affiche alors pas
+  l'alerte de payback long (la perte parle seule). Le film montre ce qu'il
+  affiche à la place, dans la même trésorerie : ~990 000 € immobilisés, « et
+  elle ne revient pas toute ». Avec les trois leviers, le payback tombe à
+  16 mois, sous le plancher de 30 : pas d'alerte non plus.
 - **Aucun nom, aucun LinkedIn pour l'instant**, comme dans le reste de `marketing/` (C22, une question de calendrier).
 - **Le résultat du diagnostic est l'échantillon du site** (74/100, Retention
   à 08/20), étiqueté « Résultat d'exemple ».
@@ -158,21 +176,13 @@ autour, comme le fait `films.mjs page`.
 
 ## Ce qui reste à reprendre
 
-- **Le rouge des projections.** Le film du moteur et la partie moteur du film
-  d'ensemble colorent en rouge ce que les « Et si » ajoutent (les barres du
-  MRR) et l'ARR projeté. Le design system l'interdit : une projection n'est
-  jamais rouge, le rouge est réservé à la fuite (audit S-5). Les films se
-  remettent d'accord avec le moteur porté à la fin d'A20 (prompt F de
-  `CHANTIERS.md`).
-- **Ce que le film du moteur montre et que le moteur n'affiche pas encore** :
-  l'ARR, la trajectoire du MRR mois par mois, le LTV:CAC dans « Et si », le
-  constat « chaque nouveau client coûte plus qu'il ne rapporte ». Tout cela
-  est le lot A20, qui ajoute aussi l'alerte de trésorerie quand le CAC
-  payback est long.
-- **Des chiffres sans leur étiquette.** « Chiffres d'exemple » manque sur la
-  partie moteur du film d'ensemble (de 22,3 à 24,9 s, et ses slides), au
-  début du film du moteur (0 à 4,2 s) et sur ses slides (30 à 37 s) ;
-  « Résultat d'exemple » manque sur la carte de partage du diagnostic. À
-  poser avant toute diffusion.
-- **Les MP4 en anglais** ne sont pas exportés : `--lang en`.
+- **Remis d'accord le 2026-10-03 (A20.g)** : le rouge des projections et de
+  la perte (les barres du MRR, l'ARR projeté, le hachuré et le tampon de la
+  perte) ; les écrans que le moteur n'affichait pas encore et qu'il affiche
+  maintenant (l'argent, la courbe, l'ARR, les slides) ; « Chiffres
+  d'exemple » sur la partie moteur du film d'ensemble, au début du film du
+  moteur et sur toutes les slides. Les MP4 du film d'ensemble et du film du
+  moteur sont réexportés dans les deux langues.
+- **« Résultat d'exemple »** manque encore sur la carte de partage du
+  diagnostic. À poser avant toute diffusion.
 - **La copie neuve** passe à un bon à tirer à part (C45, direction validée le 2026-10-03).
