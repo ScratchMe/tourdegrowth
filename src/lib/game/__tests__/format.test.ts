@@ -8,10 +8,12 @@ import {
   fill,
   formatDelta,
   formatEur,
+  formatEuros,
   formatInt,
   formatMillions,
   formatPct,
   formatPoints,
+  formatRatio,
   formatSigned,
   MINUS,
   NBSP,
@@ -114,7 +116,7 @@ describe("deltas", () => {
   });
 
   it("deltaSign always agrees with the sign formatDelta prints", () => {
-    const kinds: DeltaKind[] = ["rate", "int", "millions"];
+    const kinds: DeltaKind[] = ["rate", "int", "millions", "hundredths", "cents"];
     const values = [-2_000_000, -5_000, -0.0006, -0.0004, -0.4, 0, 0.4, 0.0005, 0.0004, 4_999, 5_000, 2_000_000];
     for (const kind of kinds) {
       for (const b of values) {
@@ -123,6 +125,29 @@ describe("deltas", () => {
         expect(deltaSign(kind, 0, b), `${kind} ${b} → ${printed}`).toBe(expected);
       }
     }
+  });
+});
+
+describe("the draft levels' numbers — a coefficient to the hundredth, euros to the cent (docs/game/)", () => {
+  it("a bare ratio, with the locale's decimal mark and no unit", () => {
+    expect(formatRatio("fr", 0.4)).toBe("0,40");
+    expect(formatRatio("en", 0.595)).toBe("0.60");
+    expect(formatRatio("fr", 0.43, 1)).toBe("0,4");
+  });
+
+  it("euros to the cent: after the number in French, before it in English", () => {
+    expect(formatEuros("fr", 4.3)).toBe(`4,30${NBSP}€`);
+    expect(formatEuros("en", 4.3)).toBe("€4.30");
+    expect(formatEuros("fr", 6, 0)).toBe(`6${NBSP}€`);
+  });
+
+  it("their deltas carry a sign, and a change that rounds to nothing carries none", () => {
+    expect(formatDelta("fr", "hundredths", 0.4, 0.43)).toBe("+0,03");
+    expect(formatDelta("en", "hundredths", 0.43, 0.4)).toBe(`${MINUS}0.03`);
+    expect(formatDelta("fr", "cents", 4, 4.12)).toBe(`+0,12${NBSP}€`);
+    expect(formatDelta("en", "cents", 4.12, 4)).toBe(`${MINUS}€0.12`);
+    expect(formatDelta("fr", "hundredths", 0.4, 0.404)).toBe("0,00");
+    expect(deltaSign("hundredths", 0.4, 0.404)).toBe(0);
   });
 });
 

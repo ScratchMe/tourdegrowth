@@ -18,9 +18,10 @@ export type LevelSlug = "acquisition" | "retention";
  * decisions for a level nobody can play. Wiring a level is moving its slug
  * from here to there, and letting the compiler list what it needs — level 2
  * (« acquisition ») made that move on 2026-10-01 (`CHANTIERS.md` A12.f).
- * None today.
+ * The three left since 2026-10-04 (`CHANTIERS.md` A21): activation, referral
+ * and revenue, each specified in `docs/game/` and modelled in `levels/`.
  */
-export type DraftLevelSlug = never;
+export type DraftLevelSlug = "activation" | "referral" | "revenue";
 /** Any level the engine can run: published or still a draft. */
 export type ModelSlug = LevelSlug | DraftLevelSlug;
 export type CardKind = "h" | "d";
@@ -67,6 +68,14 @@ export interface CardDef<Id extends string = string> {
  * is the customers who COME, and the ones already won buy again at a rate
  * trust bends. Two shapes of business, not two tunings of one — hence a
  * union rather than optional fields.
+ *
+ * The three draft levels (2026-10-04, `docs/game/`) add three more, each the
+ * same pattern: people arrive at a rate the CURRENT trust bends, active ones
+ * stop at a rate the QUARTER's trust bends (`trustMult(lagTrust)`, like
+ * level 1's churn), and the level's number sits where its business puts it.
+ * An activation level turns sign-ups into active users at its rate; a
+ * referral level multiplies outside arrivals by three waves of invitations
+ * (1 + k + k²); a revenue level's number IS the revenue per active user.
  */
 export type Economy =
   | {
@@ -85,6 +94,37 @@ export type Economy =
       customers0: number;
       /** Share of past customers who order again in a month, at trust 60. */
       repeatRate: number;
+    }
+  | {
+      kind: "activation";
+      /** Active users on January 1st. */
+      customers0: number;
+      /** Sign-ups a month at trust 60; the level's rate turns them into active users. */
+      signups0: number;
+      /** Share of active users who stop in a month, at trust 60. */
+      leaveRate: number;
+      /** Monthly revenue an active user brings, in euros. */
+      price: number;
+    }
+  | {
+      kind: "viral";
+      /** Users on January 1st. */
+      customers0: number;
+      /** Users a month who arrive from outside (search, stores), at trust 60. */
+      organic0: number;
+      /** Share of users who stop in a month, at trust 60. */
+      leaveRate: number;
+      /** Monthly revenue a user brings, in euros (premium and partners, averaged). */
+      arpu: number;
+    }
+  | {
+      kind: "arpu";
+      /** Active users on January 1st. */
+      customers0: number;
+      /** New active users a month at trust 60. */
+      acq0: number;
+      /** Share of active users who stop in a month, at trust 60. */
+      leaveRate: number;
     };
 
 export interface ModelConstants {
@@ -108,7 +148,10 @@ export interface ModelConstants {
              radarAfter: number; trustHit: number; patienceHit: number; spike: number };
   reports: { radar: number; patienceHit: number; trustHit: number };
   viral: { trust: number; spike: number; patienceHit: number };
-  /** `boost`: the good press multiplies the month's inflow — new subscribers, or new customers. */
+  /**
+   * `boost`: the good press multiplies the month's inflow — new subscribers on
+   * level 1; on every other level, the level's number itself (model.ts).
+   */
   press: { trust: number; months: number; patienceBoost: number; boost: number };
   patience: { hit: number; missPerPoint: number; missCap: number; obeyed: number; refused: number;
               present: number; fireBelow: number; lowLine: number };
@@ -129,8 +172,12 @@ export interface ScaleSpec {
 
 /** How the level's number reads — still numbers only; the island picks the formatter. */
 export interface MetricDisplay {
-  /** A rate shown in percent to one decimal (churn), or a count of people (new customers). */
-  kind: "rate" | "count";
+  /**
+   * A rate shown in percent to one decimal (churn, activation), a count of
+   * people (new customers), a bare ratio to the hundredth (the viral
+   * coefficient, « 0,43 »), or euros to the cent (revenue per user, « 4,30 € »).
+   */
+  kind: "rate" | "count" | "ratio" | "money";
   /** The step the tiles round to and the report's drivers add up at: a tenth of a point, one customer. */
   step: number;
   /** A quarter missed by more than this reads as a bad miss (red), less as a near one. */

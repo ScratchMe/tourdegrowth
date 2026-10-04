@@ -23,9 +23,9 @@ en fin de document). `CLAUDE.md` garde l'état courant, `JOURNAL.md` l'histoire.
 
 | Groupe | Qui | Où | Quand |
 |---|---|---|---|
-| **A. Le travail autonome**, en quatre lots | Une session seule, une PR par lot (A7 : une PR par item) | Session cloud | A1 à A6 livrés le 2026-09-29, A7 et A8 le 2026-09-30. **Reste d'A7** : A7.3.d (le bon à tirer de la copie neuve), A7.4 après A7.3, et A7.12.c à l'ouverture. **A7.3.c est livré le 2026-10-01**, les textes de lancement de la ligne « Hors code » d'A7.3 le même jour (S0 à S5, PR d'intégration [#233](https://github.com/ScratchMe/tourdegrowth/pull/233), drapeau fermé). A10 (S-15), A11 et A7.3.e (les quatre termes du glossaire) livrés le 2026-09-30. **A12, le niveau 2 du jeu** : spécifié et chiffré le 2026-09-30, **validé le 2026-10-01 (C30)**, sa copie, l'îlot partagé, le téléphone de Pédalix et le branchement faits le même jour (A12.c à A12.f.2)  et ses specs (A12.g) : reste A12.h (le bon à tirer, puis la recette) et A12.i (le `?ref=` de la boucle inverse, trouvé par B6). **A14, le moteur complet** : spécifié et validé le 2026-10-01 (C32) ; **A14.c est livré le même jour**, T0 à T7 (neuf PR de #255 à #266, drapeau fermé), puis T6.2, l'image de partage, au retour de B5 le même soir ([#272](https://github.com/ScratchMe/tourdegrowth/pull/272)) ; reste A14.d, son bon à tirer. **A13** (trois alertes de dépendances, dont une critique sur `next`) livré le 2026-10-01. **A15**, la finition UI et UX d'après les reels et les lois de l'UX, ouvert le 2026-10-01 : tout livré le même jour : deux PR, puis A15.18 une fois C33 tranchée ; A15.19 est porté le 2026-10-02 par **A16** (la feuille de score) : A15 est clos. **A17** (le halo grisé des images de partage de contenu, trouvé par T6.2) est livré le 2026-10-02 ([#274](https://github.com/ScratchMe/tourdegrowth/pull/274)). **A18, le moteur simplifié** (le portage du retour 07, C38 et C40 à C42) : ouvert le 2026-10-02, T0 à T7 puis un bon à tirer unique, A18.d, qui absorbe A7.3.d et A14.d ; **T0, T1, T2, T3.a, T3.b et T3.c livrés le même jour** ([#283](https://github.com/ScratchMe/tourdegrowth/pull/283), [#285](https://github.com/ScratchMe/tourdegrowth/pull/285), [#290](https://github.com/ScratchMe/tourdegrowth/pull/290), [#291](https://github.com/ScratchMe/tourdegrowth/pull/291), [#293](https://github.com/ScratchMe/tourdegrowth/pull/293), [#294](https://github.com/ScratchMe/tourdegrowth/pull/294), [#295](https://github.com/ScratchMe/tourdegrowth/pull/295)), **T3.d, T4, T5, T6 et T7 le 2026-10-03** ([#297](https://github.com/ScratchMe/tourdegrowth/pull/297), [#298](https://github.com/ScratchMe/tourdegrowth/pull/298), [#299](https://github.com/ScratchMe/tourdegrowth/pull/299), [#300](https://github.com/ScratchMe/tourdegrowth/pull/300), [#301](https://github.com/ScratchMe/tourdegrowth/pull/301)) : **le code d'A18 est entier**, reste A18.d. **A19, l'en-tête compact** (le portage du retour 08, B11) est livré le 2026-10-02 ([#284](https://github.com/ScratchMe/tourdegrowth/pull/284)). **A20** (le moteur à la hauteur de son film) est ouvert le 2026-10-03 : sa spécification (`ENGINE.md` §20) et son modèle pur (A20.a) sont livrés le même jour, et le brief 09 est déposé (B14) ; **son retour est arrivé et recopié le même jour** (prompt F) : le portage attend C46 à C55. |
+| **A. Le travail autonome**, en quatre lots | Une session seule, une PR par lot (A7 : une PR par item) | Session cloud | A1 à A6 livrés le 2026-09-29, A7 et A8 le 2026-09-30. **Reste d'A7** : A7.3.d (le bon à tirer de la copie neuve), A7.4 après A7.3, et A7.12.c à l'ouverture. **A7.3.c est livré le 2026-10-01**, les textes de lancement de la ligne « Hors code » d'A7.3 le même jour (S0 à S5, PR d'intégration [#233](https://github.com/ScratchMe/tourdegrowth/pull/233), drapeau fermé). A10 (S-15), A11 et A7.3.e (les quatre termes du glossaire) livrés le 2026-09-30. **A12, le niveau 2 du jeu** : spécifié et chiffré le 2026-09-30, **validé le 2026-10-01 (C30)**, sa copie, l'îlot partagé, le téléphone de Pédalix et le branchement faits le même jour (A12.c à A12.f.2)  et ses specs (A12.g) : reste A12.h (le bon à tirer, puis la recette) et A12.i (le `?ref=` de la boucle inverse, trouvé par B6). **A14, le moteur complet** : spécifié et validé le 2026-10-01 (C32) ; **A14.c est livré le même jour**, T0 à T7 (neuf PR de #255 à #266, drapeau fermé), puis T6.2, l'image de partage, au retour de B5 le même soir ([#272](https://github.com/ScratchMe/tourdegrowth/pull/272)) ; reste A14.d, son bon à tirer. **A13** (trois alertes de dépendances, dont une critique sur `next`) livré le 2026-10-01. **A15**, la finition UI et UX d'après les reels et les lois de l'UX, ouvert le 2026-10-01 : tout livré le même jour : deux PR, puis A15.18 une fois C33 tranchée ; A15.19 est porté le 2026-10-02 par **A16** (la feuille de score) : A15 est clos. **A17** (le halo grisé des images de partage de contenu, trouvé par T6.2) est livré le 2026-10-02 ([#274](https://github.com/ScratchMe/tourdegrowth/pull/274)). **A18, le moteur simplifié** (le portage du retour 07, C38 et C40 à C42) : ouvert le 2026-10-02, T0 à T7 puis un bon à tirer unique, A18.d, qui absorbe A7.3.d et A14.d ; **T0, T1, T2, T3.a, T3.b et T3.c livrés le même jour** ([#283](https://github.com/ScratchMe/tourdegrowth/pull/283), [#285](https://github.com/ScratchMe/tourdegrowth/pull/285), [#290](https://github.com/ScratchMe/tourdegrowth/pull/290), [#291](https://github.com/ScratchMe/tourdegrowth/pull/291), [#293](https://github.com/ScratchMe/tourdegrowth/pull/293), [#294](https://github.com/ScratchMe/tourdegrowth/pull/294), [#295](https://github.com/ScratchMe/tourdegrowth/pull/295)), **T3.d, T4, T5, T6 et T7 le 2026-10-03** ([#297](https://github.com/ScratchMe/tourdegrowth/pull/297), [#298](https://github.com/ScratchMe/tourdegrowth/pull/298), [#299](https://github.com/ScratchMe/tourdegrowth/pull/299), [#300](https://github.com/ScratchMe/tourdegrowth/pull/300), [#301](https://github.com/ScratchMe/tourdegrowth/pull/301)) : **le code d'A18 est entier**, reste A18.d. **A19, l'en-tête compact** (le portage du retour 08, B11) est livré le 2026-10-02 ([#284](https://github.com/ScratchMe/tourdegrowth/pull/284)). **A20** (le moteur à la hauteur de son film) est ouvert le 2026-10-03 : sa spécification (`ENGINE.md` §20) et son modèle pur (A20.a) sont livrés le même jour, et le brief 09 est déposé (B14) ; **son retour est arrivé et recopié le même jour** (prompt F) : le portage attend C46 à C55. **A21, les trois derniers niveaux du jeu** (activation, referral, revenue) : spécifiés le 2026-10-04 pour être construits par des sous-agents, leurs modèles codés en brouillon ; la construction attend C56 à C72, puis le prompt G. |
 | **B. Design sync** | Une session, cloud ou locale | N'importe où : une session cloud pousse vers Claude Design depuis le 2026-09-29 | **À jour le 2026-10-02, après A16 et A19** (B9 et B12, une seule synchro : 91 composants, 308 cellules, 91 aperçus sur 91 rendus ; les briefs 04, 05, 06 et 08 et leurs retours retirés du projet, décision d'Antoine). Avant : B3 et la re-synchro d'A11, le 2026-09-30. Ouverts le 2026-10-01 : **B4** (la re-synchro du niveau 2 du jeu, faite le même jour), **B5** (l'image de partage du moteur, C32 Q17 : brief 06 écrit et déposé le même jour, retour reçu et porté en T6.2 le même soir), **B6** (la re-synchro d'A15 et de C33, faite le même jour : 90 composants, 303 cellules, les douze aperçus du jeu laissés par B4 régénérés) et **B7** (les puces d'étape, A15.19 : le retour 05 est recopié et porté le 2026-10-02, A16 ; la re-synchro qui l'emporte est **B9**, ouverte et close le même jour). **B8** (ouvert le 2026-10-01 au soir) : le volet Design System montre une copie compilée le 2026-09-11, 34 cartes, alors que les fichiers et l'agent sont à jour ; Claude Design ne rafraîchit plus ce projet à l'ouverture ; laissé en l'état par Antoine le même soir (signalement prêt en D13). **B10** (le 2026-10-02) : le brief 07, le moteur plus simple sans perdre son expertise, déposé, lancé et revenu le même jour ; le retour est recopié et son portage est A18. **B11** (le 2026-10-02) : l'en-tête collant, compact une fois la page défilée en paysage ; brief 08 déposé, lancé et revenu le même jour, recopié et porté (A19) : clos ; la re-synchro qui l'emporte est **B12**, ouverte et close le même jour. **B13** (le 2026-10-02) : la re-synchro d'A18, prête depuis T7 (le 2026-10-03), à lancer après A18.d (quatorze composants neufs, trois aperçus à reprendre). **B14** (le 2026-10-03) : le brief 09, l'argent du moteur (A20), déposé, lancé et revenu le même jour ; le retour est recopié et son portage est A20.d, sa re-synchro A20.f. Hors d'eux, rien à lancer tant qu'un composant, ou une copie qu'un aperçu reprend, ne change pas |
-| **C. Tes décisions**, une par une | Toi, guidé, avec une recommandation par question | N'importe quelle session | **Tranchées le 2026-09-29** (C18 close à part, par la session D). C23 à C29 tranchées le 2026-09-30, C26 à C29 livrées le même jour, **C25** (la spécification de A7.3, `ENGINE.md` §18) dans sa propre session. **C30** (le niveau 2 du jeu, `GAME-BRIEF.md` §17) le 2026-10-01. **C31** (le bloc « Niveau suivant » du jeu) et **C32** (le moteur complet, `docs/engine/moteur-complet.md` §19.15) le 2026-10-01. **C33** (la carte du jeu sous les chiffres du lecteur, A15.18) ouverte et tranchée le 2026-10-01. **C34** et **C35** (le rouge des ex aequo, le nouveau « ? », nées du retour 05) tranchées le 2026-10-02, puis **C36** (la PR Dependabot #244 : React 19.3 seul, `firebase-admin` ≥ 14.4 mis en attente pour son poids) puis **C37** et **C39** (`next` 16.3.7, les types React 19.3 et `eslint-config-next` 16.3.7, mergés par #277 et #278) le même jour. **C38** (les bons à tirer du moteur attendent le portage du retour 07) et **C40 à C42** (le pas à pas fondu dans le tableau avec un écran Cibles gardé, la liste à la place des onglets, les renommages), nées du brief 07, tranchées le 2026-10-02, puis **C43** et **C44** (la course compacte comptée à part, la langue à 88 px partout), nées du retour 08, le même jour. **C45** (les films de motion design), **C46 à C52** (l'argent du moteur, A20) et **C53 à C55** (nées du retour du brief 09) ouvertes et **tranchées le 2026-10-03**, toutes sur la reco, avec, à C49, le mot « runway » et un plancher de 30 mois sans runway saisi. Rien n'est ouvert |
+| **C. Tes décisions**, une par une | Toi, guidé, avec une recommandation par question | N'importe quelle session | **Tranchées le 2026-09-29** (C18 close à part, par la session D). C23 à C29 tranchées le 2026-09-30, C26 à C29 livrées le même jour, **C25** (la spécification de A7.3, `ENGINE.md` §18) dans sa propre session. **C30** (le niveau 2 du jeu, `GAME-BRIEF.md` §17) le 2026-10-01. **C31** (le bloc « Niveau suivant » du jeu) et **C32** (le moteur complet, `docs/engine/moteur-complet.md` §19.15) le 2026-10-01. **C33** (la carte du jeu sous les chiffres du lecteur, A15.18) ouverte et tranchée le 2026-10-01. **C34** et **C35** (le rouge des ex aequo, le nouveau « ? », nées du retour 05) tranchées le 2026-10-02, puis **C36** (la PR Dependabot #244 : React 19.3 seul, `firebase-admin` ≥ 14.4 mis en attente pour son poids) puis **C37** et **C39** (`next` 16.3.7, les types React 19.3 et `eslint-config-next` 16.3.7, mergés par #277 et #278) le même jour. **C38** (les bons à tirer du moteur attendent le portage du retour 07) et **C40 à C42** (le pas à pas fondu dans le tableau avec un écran Cibles gardé, la liste à la place des onglets, les renommages), nées du brief 07, tranchées le 2026-10-02, puis **C43** et **C44** (la course compacte comptée à part, la langue à 88 px partout), nées du retour 08, le même jour. **C45** (les films de motion design), **C46 à C52** (l'argent du moteur, A20) et **C53 à C55** (nées du retour du brief 09) ouvertes et **tranchées le 2026-10-03**, toutes sur la reco, avec, à C49, le mot « runway » et un plancher de 30 mois sans runway saisi. **Ouvertes le 2026-10-04 : C56 à C72**, les questions des trois derniers niveaux du jeu (A21), une par une, chacune avec sa reco |
 | **D. Tes actions**, pas à pas | Toi, accompagné | Session cloud | Selon ce qui est prêt. D10 (l'indexation) est prêt tout de suite. D2 attend les bons à tirer nº7 et nº9 (A18.d, qui remplace le nº8), la recette (D9) et, pour le moteur, le lot A18 (le moteur simplifié) et son bon à tirer unique A18.d, qui absorbe ceux d'A7.3 et d'A14 (C38) |
 | **E. La veille** | Personne | — | Rien à lancer avant un déclencheur |
 
@@ -37,7 +37,7 @@ tirer unique A18.d (`/bon-a-tirer`), qui absorbe A7.3.d et A14.d (C38), A7.4, pu
 parallèle : il ne touche pas les mêmes fichiers. Le moteur ouvre avant le jeu (C23). A14.c
 (le moteur complet) est livré le 2026-10-01, T6.2 compris ; son bon à tirer
 passe dans A18.d, et le moteur n'ouvre qu'après A18 (C32 Q1, C38).
-La section C est vide : C45 à C55 sont tranchées le 2026-10-03, C34 à C44 le 2026-10-02. **A20** (le moteur à la hauteur de son film) a sa spécification et son modèle depuis le 2026-10-03 (prompt E), son retour de Claude Design et ses décisions le même jour (prompt F) : **le portage A20.d est livré**, son bon à tirer nº10 (A20.e) tranché et appliqué le 2026-10-04, et les films remis d'accord (A20.g) validés le même jour. Reste la re-synchro (A20.f), qu'Antoine lance.
+La section C attend C56 à C72 (A21, ouvertes le 2026-10-04) ; C45 à C55 sont tranchées le 2026-10-03, C34 à C44 le 2026-10-02. **A20** (le moteur à la hauteur de son film) a sa spécification et son modèle depuis le 2026-10-03 (prompt E), son retour de Claude Design et ses décisions le même jour (prompt F) : **le portage A20.d est livré**, son bon à tirer nº10 (A20.e) tranché et appliqué le 2026-10-04, et les films remis d'accord (A20.g) validés le même jour. Reste la re-synchro (A20.f), qu'Antoine lance. **A21** (les trois derniers niveaux du jeu) se construit par sous-agents, unité par unité (prompt G), une fois C56 à C72 tranchées ; il ne touche ni le moteur ni ses fichiers.
 
 **Deux sessions en parallèle** écrivent toutes deux à la fin de `JOURNAL.md`
 et dans ce fichier. La seconde à merger fusionne `main` dans sa branche avant
@@ -368,6 +368,37 @@ d'origine datait de `9c81844`, avant #302) :
 
 ---
 
+### A21 — Les trois derniers niveaux du jeu (ouvert le 2026-10-04)
+
+**Spécifiés le 2026-10-04**, à la demande d'Antoine, pour qu'un agent Opus les
+fasse construire par des sous-agents Sonnet, unité par unité, avec des pauses
+possibles entre deux unités. Les spécifications sont
+[`docs/game/activation.md`](docs/game/activation.md) (§18, Quandi),
+[`docs/game/referral.md`](docs/game/referral.md) (§19, Partix) et
+[`docs/game/revenue.md`](docs/game/revenue.md) (§20, Gainix) ; le comment, les
+questions communes et l'orchestration sont dans
+[`docs/game/construire-un-niveau.md`](docs/game/construire-un-niveau.md) (§21).
+Déjà fait : le moteur sert les trois (trois économies, deux formats de chiffre),
+et chaque niveau a son modèle en brouillon, ses années de référence et ses
+tests (`src/lib/game/levels/`, `src/lib/game/__tests__/`).
+
+**Avant la première unité** : C56 à C72 tranchées (section C). **Ensuite**, le
+prompt G, une unité par sous-agent, cochée ici avec son numéro de PR. Un
+niveau se construit d'un bout à l'autre avant le suivant ; l'ordre des niveaux
+est libre. Le jeu reste fermé (C23).
+
+| Unité | Quoi | État |
+|---|---|---|
+| A21.spec | Les spécifications, le guide, les modèles en brouillon | **Livré le 2026-10-04** (cette PR, numéro au journal) |
+| U0 | Ce qui change à trois niveaux : le bloc « Niveau suivant » (QC1), le budget d'URL des statistiques, le gabarit du hub | À faire, avant le premier niveau |
+| ACT-1 · ACT-2 · ACT-3 · ACT-4 | L'activation : copie, téléphone, branchement, specs | À faire |
+| REF-1 · REF-2 · REF-3 · REF-4 | Le referral : copie, téléphone, branchement, specs | À faire |
+| REV-1 · REV-2 · REV-3 · REV-4 | Le revenue : copie, téléphone, branchement, specs | À faire |
+| A21.bat | Le bon à tirer de chaque niveau construit (`/bon-a-tirer`, par Antoine), puis la recette avec les niveaux 1 et 2 (D9) | Après chaque X-4 |
+| A21.sync | La re-synchro des composants neufs (`PlannerPhone`, `CookiePill`, `SplitPhone`, `SentPill`, `FitPhone`, `ChargePill`, `NextLevel`) | Après chaque X-3, section B |
+
+---
+
 ## B. Design sync
 
 **Une session cloud suffit** depuis le 2026-09-29 : l'outil `DesignSync` y
@@ -625,9 +656,35 @@ Les vingt-deux questions de la séance du 2026-09-29, puis C23 à C29 le
 question, et leur index (sujet, réponse, où c'est écrit, suite) est dans
 `docs/decisions.md`, où une question tranchée gagne sa ligne.
 
-### Encore ouvert
+### Encore ouvert : C56 à C72 (A21, les trois derniers niveaux du jeu)
 
-Rien.
+Ouvertes le 2026-10-04 avec les spécifications. Chacune est écrite, avec son
+« aujourd'hui », sa reco et ce qui casse si on se trompe, dans le tableau de
+questions de sa source ; chaque spécification est déjà écrite selon la reco.
+À poser une par une (prompt C), dans cet ordre :
+
+| # | Sujet | Source | Reco |
+|---|---|---|---|
+| C56 | Le bloc « Niveau suivant » à trois niveaux et plus | `docs/game/construire-un-niveau.md` §21.8, QC1 | Le suivant dans l'ordre du Tour, parmi les ouverts, en bouclant |
+| C57 | Le bandeau « niveau N » de l'intro | §21.8, QC2 | N au rang d'ouverture |
+| C58 | Les sanctions de la CNIL citées sans le nom de l'entreprise | §21.8, QC3 | Oui, sauf quand un tribunal la nomme |
+| C59 | Activation : le chiffre du board (30 % → 45 %) | `docs/game/activation.md` §18.10, Q1 | Oui |
+| C60 | Activation : le nom, Quandi | §18.10, Q2 | Oui |
+| C61 | Activation : l'amende de la CNIL, 100 000 € | §18.10, Q3 | Oui |
+| C62 | Activation : les huit astuces | §18.10, Q4 | Oui |
+| C63 | Referral : le chiffre du board (0,40 → 0,60) | `docs/game/referral.md` §19.10, Q1 | Oui |
+| C64 | Referral : le nom, Partix | §19.10, Q2 | Oui |
+| C65 | Referral : l'amende de la CNIL, 75 000 € | §19.10, Q3 | Oui |
+| C66 | Referral : les huit astuces | §19.10, Q4 | Oui |
+| C67 | Referral : un niveau qui pardonne un peu plus au hasard | §19.10, Q5 | Laisser, la recette tranche |
+| C68 | Revenue : le chiffre du board (4 € → 6 €) | `docs/game/revenue.md` §20.10, Q1 | Oui |
+| C69 | Revenue : le nom, Gainix | §20.10, Q2 | Oui |
+| C70 | Revenue : la transaction et l'amende, 375 000 € | §20.10, Q3 | Oui |
+| C71 | Revenue : les huit astuces | §20.10, Q4 | Oui |
+| C72 | Revenue : le bandeau de l'encart, et son repli « ARPU » | §20.10, Q5 | Le garder, repli automatique si la spec le voit passer à la ligne |
+
+La réponse s'écrit dans la colonne « Réponse » de la source ; une réponse qui
+n'est pas la reco change la spécification avant toute unité (§21.1).
 
 ---
 
@@ -808,6 +865,25 @@ Une fois que je les ai tranchées, porte-le (le lot A20, une PR par étape, ENGI
 - toute copie neuve en « TODO: à relire », ajoutée au bon à tirer que j'aurai choisi (le nº9 ou un nº10) ;
 - puis la re-synchro (prompt B) ;
 - et le film « Le moteur » remis d'accord avec le moteur porté (marketing/motion/, son README dit comment republier la page et réexporter les MP4) : les vrais écrans, aucune projection en rouge, et l'alerte de trésorerie si tu l'as retenue.
+
+Réponds-moi en français, court.
+```
+
+### Prompt G — les trois derniers niveaux du jeu, par sous-agents (A21)
+
+Écrit le 2026-10-04 avec les spécifications. À lancer une fois C56 à C72
+tranchées, dans une session Opus ; elle peut s'arrêter après n'importe quelle
+unité, et une session suivante reprend avec le même prompt.
+
+```text
+Tu orchestres la construction des trois derniers niveaux du jeu « Le côté obscur » de Tour de Growth : le lot A21 de CHANTIERS.md. Tu ne codes pas toi-même : tu lances des sous-agents Sonnet, une unité à la fois.
+
+1. Lis CLAUDE.md, l'item A21 de CHANTIERS.md (le tableau des unités dit ce qui est fait), et docs/game/construire-un-niveau.md en entier, surtout §21.9. Vérifie que C56 à C72 ont leur réponse dans les tableaux de questions des spécifications ; s'il en manque une, arrête-toi et dis-le-moi.
+2. Choisis l'unité suivante : U0 si elle n'est pas faite, sinon la suivante du niveau en cours, sinon le premier niveau pas commencé, dans l'ordre que je te donne (par défaut : activation, referral, revenue).
+3. Lance un sous-agent avec l'outil Agent, model "sonnet", le prompt du §21.9 rempli (unité, spécification, branche), au premier plan.
+4. À son retour : lis son compte rendu, lance les relecteurs que le §21.9 demande pour l'unité, ouvre la PR en brouillon, abonne-toi à son activité, et si la CI ou un relecteur trouve quelque chose, relance un sous-agent sur la même branche avec ce qu'il faut corriger. Pour X-2 et X-3, ouvre toi-même deux captures.
+5. Quand la PR est verte et relue : merge-la en suivant /livrer (lu, pas appelé), sauf si sa barrière §0 dit de me demander. Vérifie le squash (git show --stat), coche l'unité dans A21 avec le numéro de PR lu sur GitHub, mets à jour CLAUDE.md si l'état du jeu change.
+6. Puis dis-moi en deux lignes ce qui est livré et quelle est l'unité suivante, et attends que je dise « continue » avant de la lancer, sauf si je t'ai demandé d'enchaîner un nombre d'unités.
 
 Réponds-moi en français, court.
 ```
