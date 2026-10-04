@@ -36,20 +36,22 @@ const ltvB = mul(mB, lifetime(buyerChurn));
 const paybackB = div(buyerCac, mB);
 console.log("Demande : a", show(a), "; revenu net dans 12 mois", show(demand[12]), "; courbe", demand.map((p) => Math.round(p.lo)).join(" · "));
 console.log("  un acheteur : marge", show(mB), "LTV", show(ltvB), "payback", show(paybackB), "LTV:CAC", show(div(ltvB, buyerCac)));
-console.log("  classement : taux de service", show(mul(mul(N, I(12 / 9 - 1)), a)), "; première commande", show(mul(mul(N, I(25 / 20 - 1)), a)));
-const fN = (12 / 9) * (25 / 20), fA = 13 / 12;
+// The what-if's targets: fill rate 12 % (today `fill`), first order 25 % (today `firstOrder`), take rate 13 %.
+const fFill = 12 / fill.lo, fFirst = 25 / firstOrder.lo;
+console.log("  classement : taux de service", show(mul(mul(N, I(fFill - 1)), a)), "; première commande", show(mul(mul(N, I(fFirst - 1)), a)));
+const fN = fFill * fFirst, fA = 13 / 12;
 const whatIfD = path(R0, scale(R0, fA), mul(scale(N, fN), scale(a, fA)), keep(buyerChurn));
 console.log("  « Et si » (service 12 %, première commande 25 %, commission 13 %)", show(whatIfD[12]), "gain", r2(whatIfD[12].lo - demand[12].lo));
 console.log("  courbe de l'« Et si »", whatIfD.map((p) => Math.round(p.lo)).join(" · "));
 const lifeB = lifetime(buyerChurn), spendB = mul(N, buyerCac);
 console.log("  argent : R annualisé", show(scale(R0, 12)), "; GMV", show(div(R0, scale(take, 1 / 100))), "annualisé", show(scale(div(R0, scale(take, 1 / 100)), 12)), "; nouveau revenu net", show(mul(N, a)), "; dans 12 mois annualisé", show(scale(demand[12], 12)));
 console.log("  durée", show(lifeB), "; après le remboursement", show(I(lifeB.lo - paybackB.hi, lifeB.hi - paybackB.lo)), "; dépense", show(spendB), "; trésorerie", show(scale(mul(spendB, paybackB), 1 / 2)));
-console.log("  chaîne du taux de service : 600 →", r2(600 * 12 / 9), "; +", r2(600 * 12 / 9 - 600), "; ×", show(a), "=", r2((600 * 12 / 9 - 600) * a.lo), "; annuel ×", r2(tmf(4)), "=", r2((600 * 12 / 9 - 600) * a.lo * tmf(4)));
+console.log("  chaîne du taux de service : 600 →", r2(600 * fFill), "; +", r2(600 * fFill - 600), "; ×", show(a), "=", r2((600 * fFill - 600) * a.lo), "; annuel ×", r2(tmf(4)), "=", r2((600 * fFill - 600) * a.lo * tmf(4)));
 const aW = scale(a, fA), cacW = scale(buyerCac, 1 / fN), mBW = mul(aW, scale(margin, 1 / 100)), ltvBW = mul(mBW, lifeB), paybackBW = div(cacW, mBW);
 console.log("  « Et si » : N'", r2(600 * fN), "; a'", show(aW), "; nouveau revenu net", show(mul(scale(N, fN), aW)), "; annualisé", show(scale(whatIfD[12], 12)), "; CAC", show(cacW), "; LTV", show(ltvBW), "; payback", show(paybackBW), "; LTV:CAC", show(div(ltvBW, cacW)));
 const aloneD = (fNa, fAa) => r2(path(R0, scale(R0, fAa), mul(scale(N, fNa), scale(a, fAa)), keep(buyerChurn))[12].lo - demand[12].lo);
-const sD = aloneD(12 / 9, 1) + aloneD(25 / 20, 1) + aloneD(1, 13 / 12);
-console.log("  seuls : service", aloneD(12 / 9, 1), "; première commande", aloneD(25 / 20, 1), "; commission", aloneD(1, 13 / 12), "; somme", r2(sD), "; effet composé", r2(whatIfD[12].lo - demand[12].lo - sD));
+const sD = aloneD(fFill, 1) + aloneD(fFirst, 1) + aloneD(1, 13 / 12);
+console.log("  seuls : service", aloneD(fFill, 1), "; première commande", aloneD(fFirst, 1), "; commission", aloneD(1, 13 / 12), "; somme", r2(sD), "; effet composé", r2(whatIfD[12].lo - demand[12].lo - sD));
 
 // --- Supply: the sellers' subscriptions (C64, C93) ---
 const sellerSignups = I(400), paidConversion = I(15), price = I(29), paidChurn = I(3), sellerMargin = I(85);
