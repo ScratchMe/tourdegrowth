@@ -102,12 +102,28 @@ export function reachesBoard(c: ModelConstants, value: number): boolean {
 /**
  * Revenue on January 1st, before any month has run: a subscriber pays the
  * price; a shop's month is its new customers plus the past ones ordering
- * again, at the average basket.
+ * again, at the average basket; an active user of the draft levels brings
+ * their level's price, average or — on the revenue level — the number itself.
  */
 function openingRevenue(c: ModelConstants): number {
   const e = c.economy;
-  if (e.kind === "subscription") return e.customers0 * e.price;
-  return (c.metric0 + e.customers0 * e.repeatRate) * e.basket;
+  switch (e.kind) {
+    case "subscription":
+      return e.customers0 * e.price;
+    case "shop":
+      return (c.metric0 + e.customers0 * e.repeatRate) * e.basket;
+    case "activation":
+      return e.customers0 * e.price;
+    case "viral":
+      return e.customers0 * e.arpu;
+    case "arpu":
+      return e.customers0 * c.metric0;
+  }
+}
+
+/** Arrivals a month at the trust of the moment, around a base set at trust 60 (§5.7.7). */
+function arrivals(base: number, trust: number): number {
+  return base * (1 + (trust - TRUST_PIVOT) / ACQ_TRUST_DIVISOR);
 }
 
 /** The first of January: the CEO's first call is open, nothing is in production. */
@@ -391,9 +407,10 @@ function mutStepMonth<Id extends string>(level: Level<Id>, s: State<Id>): void {
   s.month += 1;
   const { hr, dr, revenueMult, extra } = monthlyGains(level, s);
   let metric = core(c, hr, dr, s.lagTrust);
-  // A shop's good press brings customers — the level's number itself; a
-  // subscription's brings subscribers, below, and leaves churn alone.
-  if (e.kind === "shop" && s.press > 0) metric *= c.press.boost;
+  // A shop's good press brings customers — the level's number itself, and so
+  // on every level after it; a subscription's brings subscribers, below, and
+  // leaves churn alone.
+  if (e.kind !== "subscription" && s.press > 0) metric *= c.press.boost;
   metric += against(c, s.spike);
   metric += seasonAt(c, s.month);
   s.spike = Math.max(0, s.spike - c.spikeDecay);
@@ -403,12 +420,29 @@ function mutStepMonth<Id extends string>(level: Level<Id>, s: State<Id>): void {
     const acq = e.acq0 * (1 + (s.trust - TRUST_PIVOT) / ACQ_TRUST_DIVISOR) * (s.press > 0 ? c.press.boost : 1);
     s.customers = s.customers - cancels + acq;
     s.revenue = s.customers * e.price * revenueMult + (extra ? cancels * e.price : 0);
-  } else {
+  } else if (e.kind === "shop") {
     // Past customers order again at a rate the trust of the quarter bends,
     // like churn on level 1: a shop that pushed them buys less from them later.
     const repeat = s.customers * e.repeatRate * trustFactor("up", s.lagTrust);
     s.customers = s.customers + metric;
     s.revenue = (metric + repeat) * e.basket * revenueMult;
+  } else {
+    // The draft levels (types.ts `Economy`): who stops reads the quarter's
+    // trust, like churn; who arrives reads the trust of the moment, like
+    // level 1's new subscribers. What the level's number does sits between.
+    const leaving = s.customers * e.leaveRate * trustMult(s.lagTrust);
+    if (e.kind === "activation") {
+      s.customers = s.customers - leaving + arrivals(e.signups0, s.trust) * metric;
+      s.revenue = s.customers * e.price * revenueMult;
+    } else if (e.kind === "viral") {
+      // Three waves of invitations a month: the outside arrivals invite, the
+      // ones they bring invite in turn, and so on twice.
+      s.customers = s.customers - leaving + arrivals(e.organic0, s.trust) * (1 + metric + metric * metric);
+      s.revenue = s.customers * e.arpu * revenueMult;
+    } else {
+      s.customers = s.customers - leaving + arrivals(e.acq0, s.trust);
+      s.revenue = s.customers * metric * revenueMult;
+    }
   }
   s.press = Math.max(0, s.press - 1);
   s.metric = metric;

@@ -112,6 +112,18 @@ export function formatPoints(locale: Locale, x: number, decimals = 1): string {
   return `${sign(d, false)}${d.body}${NBSP}${UNITS[locale].points}`;
 }
 
+/** A bare ratio to `decimals` places, the viral coefficient: 0,4 → « 0,40 » / « 0.40 ». */
+export function formatRatio(locale: Locale, x: number, decimals = 2): string {
+  const d = digits(locale, x, decimals, decimals);
+  return `${sign(d, false)}${d.body}`;
+}
+
+/** Euros to `decimals` places, revenue per user: 4,3 → « 4,30 € » / « €4.30 ». */
+export function formatEuros(locale: Locale, x: number, decimals = 2): string {
+  const d = digits(locale, x, decimals, decimals);
+  return locale === "fr" ? `${sign(d, false)}${d.body}${NBSP}€` : `${sign(d, false)}€${d.body}`;
+}
+
 /** A whole signed number, for hidden effects on the playbook: « +4 », « −2 », « 0 ». */
 export function formatSigned(locale: Locale, n: number): string {
   const d = digits(locale, n, 0, 0);
@@ -120,13 +132,15 @@ export function formatSigned(locale: Locale, n: number): string {
 
 /**
  * `rate`: a share in percentage points (churn) ; `int`: a count ; `tens`: a
- * count shown to the ten (level 2's new customers) ; `millions`: euros in M€.
+ * count shown to the ten (level 2's new customers) ; `millions`: euros in M€ ;
+ * `hundredths`: a bare ratio to the hundredth (the viral coefficient) ;
+ * `cents`: euros to the cent (revenue per user).
  */
-export type DeltaKind = "rate" | "int" | "tens" | "millions";
+export type DeltaKind = "rate" | "int" | "tens" | "millions" | "hundredths" | "cents";
 
 // The power of ten each delta is rounded at — shared by `formatDelta` and
 // `deltaSign`, so the two cannot round differently.
-const DELTA_SCALE: Record<DeltaKind, number> = { rate: 3, int: 0, tens: -1, millions: -4 };
+const DELTA_SCALE: Record<DeltaKind, number> = { rate: 3, int: 0, tens: -1, millions: -4, hundredths: 2, cents: 2 };
 
 /**
  * The change between two readings of a tile, with its sign: a rate in points,
@@ -144,6 +158,14 @@ export function formatDelta(locale: Locale, kind: DeltaKind, a: number, b: numbe
     const d = digits(locale, diff, DELTA_SCALE.millions, 2);
     const u = UNITS[locale];
     return locale === "fr" ? `${sign(d, true)}${d.body}${NBSP}${u.millions}` : `${sign(d, true)}${u.euro}${d.body}${u.millions}`;
+  }
+  if (kind === "hundredths") {
+    const d = digits(locale, diff, DELTA_SCALE.hundredths, 2);
+    return `${sign(d, true)}${d.body}`;
+  }
+  if (kind === "cents") {
+    const d = digits(locale, diff, DELTA_SCALE.cents, 2);
+    return locale === "fr" ? `${sign(d, true)}${d.body}${NBSP}€` : `${sign(d, true)}€${d.body}`;
   }
   if (kind === "tens") {
     // Rounded to the ten, then printed as the whole number it stands for.
@@ -190,9 +212,11 @@ export interface MetricFormat {
   tick(locale: Locale, v: number): string;
 }
 
-/** The kind a change of a level's number is printed as: points of a rate, a count to its step. */
+/** The kind a change of a level's number is printed as: points of a rate, a count to its step, hundredths, cents. */
 export function metricDeltaKind(display: Pick<MetricDisplay, "kind" | "step">): DeltaKind {
   if (display.kind === "rate") return "rate";
+  if (display.kind === "ratio") return "hundredths";
+  if (display.kind === "money") return "cents";
   return display.step === 10 ? "tens" : "int";
 }
 
@@ -204,6 +228,22 @@ export function metricFormat(display: MetricDisplay): MetricFormat {
       gap: (locale, x) => formatPoints(locale, Math.max(step, x)),
       delta: metricDeltaKind(display),
       tick: (locale, v) => formatPct(locale, v / display.chart.factor, 0),
+    };
+  }
+  if (display.kind === "ratio") {
+    return {
+      value: (locale, x) => formatRatio(locale, x),
+      gap: (locale, x) => formatRatio(locale, Math.max(step, x)),
+      delta: metricDeltaKind(display),
+      tick: (locale, v) => formatRatio(locale, v / display.chart.factor, 1),
+    };
+  }
+  if (display.kind === "money") {
+    return {
+      value: (locale, x) => formatEuros(locale, x),
+      gap: (locale, x) => formatEuros(locale, Math.max(step, x)),
+      delta: metricDeltaKind(display),
+      tick: (locale, v) => formatEuros(locale, v / display.chart.factor, 0),
     };
   }
   const toStep = (x: number) => Math.round(x / step) * step;
