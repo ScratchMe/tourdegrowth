@@ -724,7 +724,7 @@ contrôle a trouvé trois contrats sans description (`TotalBand`, `PaybackChart`
 réparés et gardés par `src/__tests__/component-docs.test.ts` ; le halo de la
 carte de courbe absent des aperçus « slide » de `MrrCurve` ; et dans le produit,
 le « +14 mois » de `WhatIfFigures` entre « part ~4 mois avant » et « ~9 mois »,
-corrigé à +13 (chaque côté arrondi au mois avant la différence). Clos.
+corrigé à +13 (chaque côté arrondi au mois avant la différence). Clos (#331).
 
 **B16, ouvert le 2026-10-04 : la page d'aperçu n'est pas le projet que la synchro
 écrit — c'est la cause de B8.** La page qu'Antoine ouvre est l'artefact

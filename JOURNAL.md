@@ -1074,7 +1074,7 @@ En anglais à 1 280 : tableau 3 372 → 4 212 (+840, le retour +828). À 390 : t
 
 **Vérifié** : les deux fichiers de tests (38 tests) ; chaque note de non-vacuité de leurs en-têtes mesurée en sabotant le code (la commission prise aussi sur la pub, la décroissance décalée d'un mois, le mois de remboursement pris entier, le total réduit aux abonnements, le coût du vendeur sans la première vente, le levier d'argent sur les seuls nouveaux acheteurs, le prix des vendeurs sur les seuls nouveaux abonnés, le total réduit aux commissions) : chacune fait rougir le test qu'elle nomme. `tsc` et `eslint` propres ; `vitest run --coverage` : 3 327 tests sur 3 327, seuils tenus.
 
-## B15 : la re-synchro d'A21, complète, et la page d'aperçu retrouvée (2026-10-04)
+## B15 : la re-synchro d'A21, complète, et la page d'aperçu retrouvée (2026-10-04, #331)
 
 **La règle d'Antoine, posée pendant la synchro** : « tous les composants doivent s'y trouver dans leur dernière version ». La synchro envoie désormais les 112 composants (571 fichiers), pas seulement ceux que le pilote marque changés, puis l'index (112 cartes) et l'ancre relus côté projet (`.design-sync/NOTES.md`, « Every sync leaves every component current »). Le pilote en marquait trois (`MrrCurve`, `TotalBand`, `WhatIfFigures`), quinze cellules notées ; seuls les quatre avertissements attendus.
 
