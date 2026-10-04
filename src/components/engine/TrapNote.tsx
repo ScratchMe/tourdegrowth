@@ -23,8 +23,8 @@ export interface TrapNoteProps {
  *
  * Advice, so a dashed red edge (`--engine-advice-edge`): never a wash, never
  * a solid red edge (those are a diagnosis), never a card. One per number;
- * the hybrid's trap joins the same note under its own label. The repair of
- * « Je ne le trouve pas » is advice too and uses it, with its own label.
+ * the hybrid's trap joins the same note under its own label. The number's
+ * screen (`MetricSheet`) is its one call site.
  */
 export function TrapNote({ label, children, hybrid, action, className, "data-testid": testId }: TrapNoteProps) {
   return (

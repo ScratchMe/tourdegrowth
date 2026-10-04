@@ -17,9 +17,10 @@ export interface StatTileDelta {
    * nothing is good or bad. Absent: muted.
    *
    * `neutral`: a change that is the news but nobody's verdict — a projection
-   * the reader set up themselves (the engine's « Et si »). Bold ink, neither
-   * green nor red, as the what-if slides print their « change » column: the
-   * sign and the word say which way (Antoine, 2026-09-28).
+   * the reader set up themselves. Bold ink, neither green nor red, as the
+   * engine's what-if slides print their « change » column: the sign and the
+   * word say which way (Antoine, 2026-09-28). No tile passes it since the
+   * engine's figures left `StatTile` for its tables (A20.d T3.b).
    */
   sentiment?: "good" | "bad" | "neutral";
 }

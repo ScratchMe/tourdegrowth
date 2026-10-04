@@ -32,7 +32,7 @@ document : `copy-typography.test.ts` la vérifie.*
 
 ---
 
-## 21. L'app grand public — spécification A21, premier jet du 2026-10-04
+## 21. L'app grand public — spécification A22, premier jet du 2026-10-04
 
 ### 21.0 En une page
 
@@ -457,7 +457,7 @@ s'applique au catalogue de l'app comme à l'autre (U1 l'étend).
 #### 21.5.2 La prose (`src/content/engine-catalog-consumer.ts`)
 
 ```ts
-// TODO: à relire — copie neuve (convention 6), §21 (A21 U1)
+// TODO: à relire — copie neuve (convention 6), §21 (A22 U1)
 import type { EngineCatalogEntry, EngineDerivedEntry } from "./engine-catalog";
 import type { PlgDerivedId, PlgMetricId } from "@/lib/engine/types";
 export const ENGINE_CATALOG_CONSUMER: Record<PlgMetricId, EngineCatalogEntry> = { … };
@@ -1044,10 +1044,10 @@ tirer. Toute copie neuve porte « TODO: à relire ». Chaque PR ajoute son entr�
 | **U3 — Le départ et le réglage** | `StartChoice`, `typeOf` ; la carte de départ à cinq options ; `Setup` avec le type en état ; les Réglages en lecture ; les feuilles nouvelles de §21.6.4 ; l'événement `engine_setup/app` | `EngineStart.tsx`, `start.ts`, `Setup.tsx`, `EngineWorkbench.tsx`, `BoardHead.tsx`, `engine-copy.ts`, `goatcounter.ts`, `EngineSection.tsx` | U2 | `start.test.ts` ; la carte inchangée sans le type ouvert ; captures FR 1 280 et EN 390 relues | 1,5 |
 | **U4 — L'exemple de l'app** | `exampleEngine(…, type)` ; `consumerState()` ; l'exemple dans `ExampleView` ; `golden-consumer` | `example.ts`, `fixtures.ts`, `ExampleView.tsx`, `golden-consumer*.json`, `golden-consumer.test.ts` | U3 | les nombres de §21.9.2 retrouvés dans le golden | 1 |
 | **U5 — Les slides** | le pointillé retiré pour l'app ; vérification visuelle du deck de l'exemple, FR et EN | `deck-unit.ts` (si pas déjà fait en U1), `SlideUnitEconomics.tsx` | U4 | captures des slides relues ; `engine-deck.spec.ts` étendu | 0,5 |
-| **U6 — Intégration** | `engine-consumer.spec.ts` ; `engine-screens`, `engine-canary`, `engine-deck` étendus ; captures ; `ENGINE.md` (l'état) ; `CHANTIERS.md` (A21) | `e2e/`, `ENGINE.md`, `CHANTIERS.md`, `JOURNAL.md` | U5 | la suite e2e verte en CI ; la non-vacuité de §21.10.4 mesurée et écrite au journal | 1,5 |
+| **U6 — Intégration** | `engine-consumer.spec.ts` ; `engine-screens`, `engine-canary`, `engine-deck` étendus ; captures ; `ENGINE.md` (l'état) ; `CHANTIERS.md` (A22) | `e2e/`, `ENGINE.md`, `CHANTIERS.md`, `JOURNAL.md` | U5 | la suite e2e verte en CI ; la non-vacuité de §21.10.4 mesurée et écrite au journal | 1,5 |
 
 Total ≈ **10 jours-agent**, chemin critique linéaire (U0 → U6). Vient ensuite
-**A21.b**, le bon à tirer de toute la copie neuve de l'app (`/bon-a-tirer`,
+**A22.b**, le bon à tirer de toute la copie neuve de l'app (`/bon-a-tirer`,
 depuis `grep -rn "TODO: à relire" src/`), puis l'ouverture du type par Antoine
 (`ENGINE_TYPES=consumer-app` dans Vercel, puis redéployer).
 
@@ -1087,7 +1087,7 @@ colonne « Si on renverse » dit ce qui change.*
 | C59 | **La commission des stores** dans la marge brute, sans chiffre à part ? | **Oui** : un chiffre de moins, et la finance la compte déjà dans ses coûts directs ; le piège de la marge et celui du revenu par abonné le disent deux fois | Un dix-huitième chiffre, « commission moyenne des stores », et une marge « hors commission » : §21.5, §21.7 (un calcul de plus), §21.9 |
 | C60 | **Les repères** : seule la rétention à J30 (20 à 30 %, déjà approuvée dans le glossaire) situe ; les repères SaaS (activation, churn, marge, payback, LTV:CAC) sont retirés ? | **Oui.** Un repère SaaS sur une app situerait mal ; aucun ne désigne de toute façon (C1) | Garder les repères SaaS avec une réserve « pour le SaaS » : moins de code (pas de retrait), mais un contexte trompeur |
 | C61 | **Le type** se choisit à la création et ne change plus ? | **Oui** (D5) | Un type modifiable : l'écran « ce chiffre ne décrit plus la même chose » sur dix-sept chiffres, ~1 jour-agent de plus |
-| C62 | **L'ouverture** : le type s'ouvre par `ENGINE_TYPES`, indépendamment du moteur ; l'ouverture du moteur n'attend pas ce lot ? | **Oui.** Le moteur SaaS ouvre d'abord (son bon à tirer nº9 est le seul verrou) ; l'app suit, drapeau à part | Si l'ouverture du moteur attend l'app : D2 de `CHANTIERS.md` gagne A21 et son bon à tirer |
+| C62 | **L'ouverture** : le type s'ouvre par `ENGINE_TYPES`, indépendamment du moteur ; l'ouverture du moteur n'attend pas ce lot ? | **Oui.** Le moteur SaaS ouvre d'abord (son bon à tirer nº9 est le seul verrou) ; l'app suit, drapeau à part | Si l'ouverture du moteur attend l'app : D2 de `CHANTIERS.md` gagne A22 et son bon à tirer |
 | C63 | **La page publique** : rien de neuf (ni section, ni FAQ, ni terme de glossaire, ni changement de la promesse) ; l'app n'apparaît que sur la carte de départ ? | **Oui** en v1 : la page vise « AARRR funnel template », une requête SaaS, et la FAQ est tenue à six questions par un test. Un terme de glossaire (« taux d'installation » ou « rétention J1/J7/J30 ») pourra venir avec un relevé Search Console qui le justifie | Une septième question de FAQ (le test passe à sept) ou une section : copie neuve, et le test des six questions à changer |
 
 ---

@@ -33,7 +33,7 @@ puis bon à tirer. La typographie finale se pose dans `src/content/`.*
 
 ---
 
-## 22. La place de marché — spécification A22, premier jet du 2026-10-04
+## 22. La place de marché — spécification A23, premier jet du 2026-10-04
 
 ### 22.0 En une page
 
@@ -1356,11 +1356,11 @@ liste pas, porte sa copie « à relire » et son entrée de `JOURNAL.md`.
 | **M4 — Tableau** | `mktBody` ; `PelotonGrid`, `MktPeloton`, `SupplyBand`, `MktFunnelView` ; `money-view.ts`, `BoardMoney`, `BoardLever`, `MktWhatIfPanel`, `whatif-figures.ts` ; `NumberRow.tag` ; `MetricSheet` ; la barre ; l'import | M3 | le rendu de `Peloton` inchangé (`renderToStaticMarkup`) ; les écrans passés à axe ; **captures relues par Antoine** (D9) | 3,5 |
 | **M5 — Deck** | `deck-mkt.ts`, `SlideMktFunnel`, les titres de §22.7 et le contrat, les notes, `DEFAULT_INCLUDE`, `title-accent.ts` | M4 | l'ordre et les titres de l'exemple ; le texte exporté ; `engine-deck.spec.ts` étendu | 3 |
 | **M6 — Exemple et golden** | `ExampleView` (motion `mkt`), la copie de l'exemple, `golden-mkt` | M5 | le golden écrit après vérification à la main | 1,5 |
-| **M7 — Intégration** | la garde des mots et le calque `ENGINE_COPY_MARKETPLACE` ; `engine-marketplace.spec.ts` ; `engine-screens`, `engine-canary`, `engine-deck` ; `ENGINE.md`, `CHANTIERS.md` (A22) ; la non-vacuité de §22.12.5 au journal | M6 | la suite e2e verte en CI | 2 |
+| **M7 — Intégration** | la garde des mots et le calque `ENGINE_COPY_MARKETPLACE` ; `engine-marketplace.spec.ts` ; `engine-screens`, `engine-canary`, `engine-deck` ; `ENGINE.md`, `CHANTIERS.md` (A23) ; la non-vacuité de §22.12.5 au journal | M6 | la suite e2e verte en CI | 2 |
 | **M8 — Glossaire** (C72) | trois termes, « GMV », « take rate », « liquidité » (slugs `gmv`, `take-rate`, `marketplace-liquidity`), sur le modèle d'A7.3.e ; les liens `glossary` des chiffres de la place de marché y passent | M1 (peut partir en parallèle de M2) | `glossary.test.ts` (500 mots, liens, `inTheTour`) ; le sitemap | 2 |
 
 Total ≈ **23 jours-agent** ; chemin critique M0 → M7 ≈ 21 (M8 en
-parallèle). Vient ensuite **A22.b**, le bon à tirer de la copie neuve, puis
+parallèle). Vient ensuite **A23.b**, le bon à tirer de la copie neuve, puis
 l'ouverture (`ENGINE_TYPES=consumer-app,marketplace` dans Vercel, puis
 redéployer), puis la re-synchro avec Claude Design qui emporte `SupplyBand`,
 `MktPeloton` et `PelotonGrid` (geste d'Antoine, `/design-sync`).
