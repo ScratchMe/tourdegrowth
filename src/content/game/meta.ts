@@ -64,6 +64,19 @@ export const GAME_META = {
       "A year at Pédalix: 2,000 new customers a month, customer trust and the regulator's radar missing from the dashboard.",
     ),
   },
+  // TODO: à relire — 2026-10-04 (A24.ACT-1) : le niveau activation, tout le bloc.
+  activation: {
+    title: t("Quandi : le jeu de l'activation — Tour de Growth", "Quandi: the activation game — Tour de Growth"),
+    description: t(
+      "Joue une année comme PM growth d'un outil de planification pour indépendants : un DG qui veut 45 % d'activation, et huit astuces à reconnaître.",
+      "Play a year as the growth PM of a scheduling tool for freelancers: a CEO who wants 45% activation, and eight tricks to learn to spot.",
+    ),
+    breadcrumb: t("Une année chez Quandi", "A year at Quandi"),
+    shareImageAlt: t(
+      "Une année chez Quandi : 30,0 % d'activation, la confiance et le radar CNIL absents du dashboard.",
+      "A year at Quandi: 30.0% activation, user trust and the regulator's radar missing from the dashboard.",
+    ),
+  },
 } as const satisfies Record<string, Record<string, Translatable>>;
 
 /**
@@ -130,6 +143,24 @@ export const ACQUISITION_INTRO = {
   lead: t(
     "Ton DG a quitté Flixo, une appli de streaming, pour diriger Pédalix, une boutique en ligne de vélos, et il t'a emmené avec lui comme PM growth. 2 000 nouveaux clients par mois, et le board en veut 3 000 d'ici décembre. Chaque trimestre, le DG t'appelle en visio, puis tu as droit à deux actions, nommées comme on les nomme en réunion. Tu ne sauras ce qu'elles valent qu'une fois le trimestre passé. Le DG, lui, sait déjà ce qu'il veut.",
     "Your CEO has left Flixo, a streaming app, to run Pédalix, an online bike shop, and he brought you along as growth PM. 2,000 new customers a month, and the board wants 3,000 by December. Every quarter the CEO calls you on video, then you get two actions, named the way they are named in meetings. You will only learn what they are worth once the quarter is over. The CEO already knows what he wants.",
+  ),
+  stepsTitle: RETENTION_INTRO.stepsTitle,
+  steps: RETENTION_INTRO.steps,
+  glossaryLead: RETENTION_INTRO.glossaryLead,
+} as const;
+
+/**
+ * The activation level's intro (GAME-BRIEF §18). The three steps and the glossary
+ * lead say how any year plays, so they are level 1's own objects.
+ *
+ * TODO: à relire — 2026-10-04 (A24.ACT-1) : le bandeau, le titre et le chapeau.
+ */
+export const ACTIVATION_INTRO = {
+  eyebrow: t("Le côté obscur · activation", "The dark side · activation"),
+  title: t("Une année chez Quandi", "A year at Quandi"),
+  lead: t(
+    "Ton DG dirige maintenant Quandi, un outil de planification en ligne pour indépendants, et il t'a emmené avec lui comme PM growth. 10 000 inscriptions par mois, et 30 % seulement publient un premier planning dans la semaine. Le board en veut 45 % d'ici décembre. Chaque trimestre, le DG t'appelle en visio, puis tu as droit à deux actions, nommées comme on les nomme en réunion. Tu ne sauras ce qu'elles valent qu'une fois le trimestre passé. Le DG, lui, sait déjà ce qu'il veut.",
+    "Your CEO now runs Quandi, an online scheduling tool for freelancers, and he brought you along as growth PM. 10,000 sign-ups a month, and only 30% publish a first schedule within the week. The board wants 45% by December. Every quarter the CEO calls you on video, then you get two actions, named the way they are named in meetings. You will only learn what they are worth once the quarter is over. The CEO already knows what he wants.",
   ),
   stepsTitle: RETENTION_INTRO.stepsTitle,
   steps: RETENTION_INTRO.steps,

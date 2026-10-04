@@ -805,7 +805,9 @@ unités pour les sous-agents est au §21.9 (unités ACT-1 à ACT-4).
     `GAME_META.activation.description` ; « 30 % » / "30%" dans
     `ACTIVATION_INTRO.lead` (U+00A0 avant « % » en français) ;
   - **C6** : les listes et la nature des cas du §18.9 ;
-  - **C13** : pas dans ce test (ses constantes naissent en T2) ;
+  - **C13** : la partie copie seulement (les nombres que la copie écrit
+    plusieurs fois sont égaux entre eux, §21.3 T1) ; la liaison aux
+    constantes de la pastille est en ACT-2 (§18.7) ;
   - `endings.*.win` et `nextLevel` comme le §18.8 le dit ;
   - `src/content/__tests__/game-hub.test.ts` étendu à `GAME_META.activation`
     et `ACTIVATION_INTRO` (§21.3 T1).

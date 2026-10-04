@@ -24,6 +24,7 @@ import type { Locale } from "../i18n/locale";
 import type { Translatable } from "../i18n/translatable";
 import { tc } from "../i18n/translatable";
 import type { AcquisitionCardId, AcquisitionDarkId } from "./levels/acquisition";
+import type { ActivationCardId, ActivationDarkId } from "./levels/activation";
 import type { RetentionCardId, RetentionDarkId } from "./levels/retention";
 import type { EndingId } from "./types";
 
@@ -483,6 +484,95 @@ export type AcquisitionCopy = LevelCopy<AcquisitionCardId, AcquisitionDarkId, Ac
   basket: BasketPillCopy;
 };
 
+/** The CEO only ever asks for these five on the activation level (GAME-BRIEF §18.5). */
+export type ActivationOrderId = Extract<ActivationDarkId, "bundle" | "banner" | "phone" | "prechecked" | "partners">;
+
+/**
+ * Quandi's app, from the cookie banner to the first screen (GAME-BRIEF §18.7) —
+ * a drawn app, fictional brand. Each string is one line the phone shows when
+ * the card it belongs to is in production or picked; the phone composes them,
+ * the copy never does. The doc-comment of a field says what shows it.
+ */
+export interface ActivationPhoneCopy {
+  /** Always: the line over the phone. */
+  caption: string;
+  /** `appBar`. */
+  appName: string;
+  time: string;
+  /** `permissions`: the one sheet that asks for everything, and its single button. */
+  permissions: string;
+  permissionsAllow: string;
+  /** `banner`, plain and equal. */
+  bannerText: string;
+  /** `banner`, nudged. */
+  bannerTextNudged: string;
+  /** `banner`, plain: two buttons of the same size. */
+  bannerAccept: string;
+  bannerContinue: string;
+  /** `banner`, nudged and equal. */
+  bannerAcceptAll: string;
+  /** `banner`, equal. */
+  bannerRejectAll: string;
+  /** `banner`, nudged and equal. */
+  bannerCustomise: string;
+  /** `demo`. */
+  demo: string;
+  /** `signup`: the screen's title, and its button (the same words, on purpose). */
+  signupTitle: string;
+  /** `signup`, without `minimal`. */
+  fields: string;
+  /** `signup`, with `minimal`. */
+  fieldsMinimal: string;
+  /** `signup`, `phone: "required"`. */
+  phoneRequired: string;
+  /** `signup`, `phone: "optional"`. */
+  phoneOptional: string;
+  /** `signup`, `prechecked`. */
+  prechecked: string;
+  /** `signup`, `partners`: small, under the button. */
+  partners: string;
+  /** `signup`. */
+  submit: string;
+  /** `analysis`: the line, with its progress bar. */
+  analysis: string;
+  /** `home`: the empty schedule and its button. */
+  homeEmpty: string;
+  homeCreate: string;
+  /** `home.checklist`, and its close button. */
+  checklist: string;
+  checklistClose: string;
+  /** `home.importer`. */
+  importer: string;
+  /** `home.tour`: the tooltip that points at `homeCreate`, with no "Skip" and no cross. */
+  tour: string;
+  /** `push`. */
+  push: string;
+  /** `welcome`. */
+  welcome: string;
+  /** `calls`: the offer, then three answers as bullets. */
+  calls: string;
+  callsAnswers: readonly string[];
+}
+
+/**
+ * The pill under Quandi's phone: how many clicks it takes to refuse the cookies
+ * (GAME-BRIEF §18.7). A measurable fact the CNIL frames, never a judgement —
+ * level 1's « N clics pour résilier ».
+ */
+export interface CookiePillCopy {
+  /** « Refuser les cookies : 1 clic ». */
+  easy: string;
+  /** `banner` without `refuse`: « Refuser les cookies : 3 clics ». */
+  hidden: string;
+  /** What the law says about it, after `hidden`. */
+  lawSuffix: string;
+}
+
+export type ActivationCopy = LevelCopy<ActivationCardId, ActivationDarkId, ActivationOrderId> & {
+  phone: ActivationPhoneCopy;
+  cookies: CookiePillCopy;
+};
+
 /**
  * Every template, and the placeholders the island supplies for it. A dotted
  * path; `*` stands for any key of a record. A template may use a subset of
@@ -547,6 +637,16 @@ export const RETENTION_COPY_TEMPLATES: Readonly<Record<string, readonly string[]
 export const ACQUISITION_COPY_TEMPLATES: Readonly<Record<string, readonly string[]>> = {
   ...LEVEL_COPY_TEMPLATES,
   "basket.extra": ["amount"],
+};
+
+/**
+ * The activation level has none of its own: its phone and its cookie pill carry
+ * no placeholder (the clicks are a sentence of their own, `cookies.easy` and
+ * `cookies.hidden`). Declared all the same, so the content test checks the
+ * templates every level shares.
+ */
+export const ACTIVATION_COPY_TEMPLATES: Readonly<Record<string, readonly string[]>> = {
+  ...LEVEL_COPY_TEMPLATES,
 };
 
 function isTranslatable(value: object): value is Translatable {

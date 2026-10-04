@@ -525,7 +525,9 @@ Tous vécus sur les niveaux 1 et 2 ; chacun a coûté au moins une relecture.
   contiennent déjà des U+00A0 invisibles ; une chaîne existante retapée à la
   main n'est plus la même, et un remplacement qui la cherche échoue ou, pire,
   la change. Lire la chaîne dans le fichier (ou `git show origin/main:…`) et la
-  recopier par script.
+  recopier par script. **L'outil Write remplace une U+00A0 tapée par une
+  espace ordinaire** (ACT-1) : dans du code écrit à la main, l'échappement
+  `\u00a0`, jamais l'insécable littérale.
 - **Une chaîne du prototype qui change de fichier garde sa garde** (U0) : C11
   (`game-retention.test.ts`) ne parcourt que `RETENTION_CONTENT` et ce qu'il
   nomme. Une ligne validée déplacée ailleurs se vérifie par son nom, et le
