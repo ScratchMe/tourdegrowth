@@ -389,8 +389,8 @@ gabarit de `curveSummaryWhatif`, dont les mots ne changent pas sur le tableau).
 | A21.9 | **L'export PNG perdait les styles des graphiques** des slides depuis A20.d T4 : pas de ligne du coût ni de marge, la courbe du MRR remplie de noir, les étiquettes dans la police par défaut. `html-to-image` copie un `<svg>` d'un bloc sans en parcourir les enfants | `export-png.ts` écrit en ligne, le temps de l'export, le style calculé des enfants de chaque `<svg>`, puis le retire |
 
 Les composants changés (`TotalBand`, `HowItCompares`, `PaybackChart`,
-`MrrCurve`) attendent la prochaine re-synchro (B15) ; l'aperçu de `TotalBand`
-passe déjà `missing`.
+`MrrCurve`) attendent la prochaine re-synchro (B15) ; les aperçus de `TotalBand`
+et de `WhatIfFigures` sont déjà repris dans le dépôt.
 
 ---
 
@@ -644,7 +644,9 @@ neufs, `LeverCard` et `TotalBand` changés, aucun composant synchronisé touché
 sans changer d'usage : `TotalBand` prend `missing` (« pas de chiffre » en police
 de texte ; son aperçu `TotalUnknown` le passe déjà), `HowItCompares` ne dessine
 plus la pastille d'une barre absente, `PaybackChart` place autrement deux
-étiquettes, et `MrrCurve` et `PaybackChart` lisent `--chart-halo`. Rien ne
+étiquettes, et `MrrCurve` et `PaybackChart` lisent `--chart-halo`. Un cinquième
+aperçu change avec la copie : `WhatIfFigures` dit la perte en mois (« part ~4 mois
+avant »), déjà repris dans le dépôt. Rien ne
 presse : à lancer avec la prochaine synchro (après le bon à tirer nº9, par
 exemple), le contrôle ponctuel relira `PaybackChart.PaysBackLate` et
 `CompactLoss`, dont les étiquettes ont bougé.

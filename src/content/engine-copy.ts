@@ -493,6 +493,8 @@ export const ENGINE_COPY = {
      * `{key}`: the curve's own key for the what-if line — `curveWhatif` on the board (« avec tes « Et si » », the same
      * sentence as before), `slide.curveWhatifOne` or `curveWhatifAll` on a slide. Until A21.6 (2026-10-04) the words
      * were fixed here, and a one-lever slide said « avec tes « Et si » » in a board's « tu », in the plural.
+     * TODO: à relire — retouchée le 2026-10-04 (A21.6) : `{key}` remplace « avec tes « Et si » » ; le tableau dit la même
+     * phrase, les slides deux phrases neuves (« … avec cet « Et si » », « … avec les 3 « Et si » »).
      */
     curveSummaryWhatif: {
       fr: "Le MRR mois par mois, depuis {start} aujourd'hui : {today} dans 12 mois au rythme actuel, {whatif} {key}.",
