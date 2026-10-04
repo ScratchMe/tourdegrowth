@@ -91,19 +91,44 @@ de `JOURNAL.md` et met à jour `CHANTIERS.md` A24.
 
 À faire dans la première construction, avant sa PR T3. Les décisions qu'elle
 applique sont les questions communes QC1 et QC2 (§21.8), tranchées une fois
-pour les trois niveaux.
+pour les trois niveaux (C75 et C76, le 2026-10-04, ni l'une ni l'autre sur la
+reco).
 
-1. **Le bloc qui clôt décembre** (`nextLevel`, C31). À deux niveaux, chacun
-   renvoie à l'autre ; à trois et plus, la règle devient : **le niveau suivant
-   dans l'ordre du Tour (acquisition, activation, rétention, referral, revenue),
-   parmi les niveaux ouverts, en bouclant** (le revenue renvoie à l'acquisition).
-   - `src/lib/game/levels.ts` : ajouter `nextLevelFor(slug: LevelSlug, levels = GAME_LEVELS_BY_PILLAR): LevelSlug | null`,
-     pure, qui parcourt `PILLARS` à partir du pilier suivant celui du niveau,
-     en bouclant, et rend le premier niveau `enabled` qui n'est pas lui-même ;
-     `null` s'il n'y en a pas. Tests dans `levels.test.ts` : à deux niveaux
-     ouverts, l'acquisition rend la rétention et la rétention rend
-     l'acquisition (C31 tient) ; à cinq, la boucle complète ; un niveau fermé
-     est sauté ; un seul niveau ouvert rend `null`.
+1. **Le bloc qui clôt décembre** (`nextLevel`, C31, puis C75). À deux niveaux,
+   chacun renvoie à l'autre ; à trois et plus, la règle devient (C75) : **le
+   premier niveau ouvert que le joueur n'a pas encore fini, dans l'ordre du
+   Tour (acquisition, activation, rétention, referral, revenue) à partir du
+   niveau suivant, en bouclant**. « Fini » veut dire qu'une fin est enregistrée
+   pour ce niveau dans la collection (`loadCollection().endings[slug]`, écrite
+   en décembre par `recordYearEnd`, quelle que soit la fin). Si tous les autres
+   niveaux ouverts sont finis, c'est le suivant dans l'ordre du Tour ; si le
+   niveau est le seul ouvert, le bloc ne s'affiche pas.
+   - `src/lib/game/levels.ts` : ajouter
+     `nextLevelFor(slug: LevelSlug, finished: ReadonlySet<LevelSlug> = new Set(), levels = GAME_LEVELS_BY_PILLAR): LevelSlug | null`,
+     pure : elle parcourt `PILLARS` (importé en relatif,
+     `../scoring/pillars`, comme le veut l'en-tête du fichier : les specs
+     Playwright importent le moteur) à partir du pilier qui suit celui du
+     niveau (l'entrée de `levels` dont le `slug` est le sien), en bouclant, garde les niveaux `enabled` autres que lui-même, et
+     rend le premier qui n'est pas dans `finished`, sinon le premier gardé ;
+     `null` si elle n'en garde aucun. Tests dans `levels.test.ts` : à deux
+     niveaux ouverts, l'acquisition rend la rétention et la rétention rend
+     l'acquisition, finies ou non (C31 tient) ; à cinq niveaux ouverts et rien
+     de fini, l'activation rend la rétention et le revenue rend l'acquisition ;
+     un niveau fini est sauté (activation, avec la rétention finie : le
+     referral) ; tous les autres finis : le suivant dans l'ordre ; un niveau
+     fermé est sauté ; un seul niveau ouvert rend `null`.
+   - `src/lib/game/storage.ts` : ajouter
+     `finishedLevels(collection: GameCollection): Set<LevelSlug>`, les clés
+     de `collection.endings`, avec un test dans `storage.test.ts`.
+   - **Le calcul se fait dans le navigateur, en décembre.** Décembre ne se rend
+     jamais sur le serveur (l'îlot n'y arrive qu'après un clic, ou une reprise
+     lue dans `localStorage` après le montage) : lire la collection à ce
+     moment ne casse pas l'hydratation. Dans `GameIsland.tsx`, juste après
+     `const december = …` :
+     `const inDecember = december !== null;` puis
+     `const nextSlug = useMemo(() => (inDecember ? nextLevelFor(slug, finishedLevels(loadCollection())) : null), [inDecember, slug]);`
+     (`recordYearEnd` a déjà écrit la fin de l'année en cours ; le niveau
+     lui-même est de toute façon exclu).
    - Le titre du bloc annonce le niveau **visé** : il vient donc du niveau
      visé, et non plus de la copie du niveau qui l'affiche.
      `LEVEL_TEASERS: Record<LevelSlug, Translatable>` dans
@@ -118,10 +143,20 @@ pour les trois niveaux.
      `status`. L'`eyebrow` devient « Niveau suivant » / « Next level » pour
      tous les niveaux (celui du niveau 2 disait « L'autre niveau », vrai à deux
      niveaux seulement) ; `status` reste « jouable » / « playable ».
-   - Chaque `page.tsx` calcule `const next = nextLevelFor(SLUG)` et passe
-     `nextLevelHref={next ? otherLevelHref(locale, next) : undefined}` et le
-     teaser de `next` à l'îlot (`GameIsland` gagne une prop `nextLevelTitle`,
-     qui remplace `copy.nextLevel.title`). `NextLevel` ne change pas.
+   - **Ce que la page passe à l'îlot** : tous les niveaux que le bloc peut
+     viser, puisque le choix se fait dans le navigateur. Dans
+     `src/app/[locale]/game/_level/LevelPage.tsx`, à côté d'`otherLevelHref` :
+     `export interface NextLevelLink { href: string; title: string }` et
+     `export function nextLevelLinks(locale: Locale, slug: LevelSlug): Partial<Record<LevelSlug, NextLevelLink>>`,
+     une entrée par niveau `enabled` autre que `slug`, avec
+     `href: otherLevelHref(locale, s)` et `title: tc(LEVEL_TEASERS[s], locale)`.
+     Chaque `page.tsx` passe `nextLevels={nextLevelLinks(locale, SLUG)}` ;
+     `GameIsland` perd `nextLevelHref` et gagne `nextLevels`, et rend
+     `const next = nextSlug ? nextLevels[nextSlug] : undefined;` puis, si
+     `next` existe seulement,
+     `<NextLevel eyebrow={copy.nextLevel.eyebrow} title={next.title} status={copy.nextLevel.status} href={next.href} />`.
+     `NextLevel` ne change pas ; le `?from=other_level` d'`otherLevelHref`
+     non plus.
    - L'aperçu `.design-sync/previews/NextLevel.tsx` suit ; la re-synchro avec
      Claude Design est un item de la section B de `CHANTIERS.md`, pas de cette
      PR.
@@ -139,12 +174,20 @@ pour les trois niveaux.
    cinq » / « two », « three », « four », « all five »), avec un test qui le
    lie à `GAME_LEVELS_BY_PILLAR`. Chercher toute autre mention codée en dur :
    `grep -rn "deux niveaux\|two levels\|deux sont\|two of them" src/`.
-4. **Le bandeau d'un niveau** (`Le côté obscur · niveau N`, `content/game/meta.ts`) :
-   N est le rang d'ouverture, pas la place dans le Tour. Le troisième niveau
-   construit est le « niveau 3 », quel qu'il soit, le quatrième le « niveau
-   4 », etc. La spécification écrit `niveau {N}` : l'agent y met le rang.
-5. **Copie neuve « à relire »** (convention 6) : les trois `eyebrow` changés,
-   le gabarit de `shareImageAlt` et ses nombres en lettres. Chaque chaîne porte
+4. **Le bandeau d'un niveau** (`<NIVEAU>_INTRO.eyebrow`, `content/game/meta.ts`)
+   dit l'étape, sans numéro (C76), sur les cinq niveaux : « Le côté obscur ·
+   rétention » / "The dark side · retention" (`RETENTION_INTRO`, qui disait
+   « niveau 1 »), « Le côté obscur · acquisition » / "The dark side ·
+   acquisition" (`ACQUISITION_INTRO`, qui disait « niveau 2 »). Les trois
+   nouveaux niveaux ont le leur dans leur spécification, section .11. Le
+   bandeau sert aussi de surtitre à l'image de partage du niveau
+   (`src/lib/og/game-level-share-text.ts`, `kicker`) : rien à y changer, il
+   suit. Dans `src/content/updated-at.ts`, les dates de `/game/retention` et
+   de `/game/acquisition` passent au jour de la PR (les mots de la page
+   changent).
+5. **Copie neuve « à relire »** (convention 6) : les deux `nextLevel.eyebrow`
+   changés, les deux bandeaux du point 4, le gabarit de `shareImageAlt` et ses
+   nombres en lettres. Chaque chaîne porte
    son marqueur daté (`// TODO: à relire — <date> (A24.T0) : …`).
 
 ### T1 — La copie du niveau (modèle : A12.c, PR #242)
@@ -234,7 +277,7 @@ nouveau niveau aussi :
 | `src/content/game/hub.ts` | `zones.<pilier>.company` (le nom de l'entreprise, depuis la spécification), et dans `ENDINGS_BY_LEVEL` le libellé de la fin `fine` du niveau |
 | `src/app/[locale]/game/_island/sides.tsx` | `IslandCopies.<niveau>` et `ISLAND_SIDES.<niveau>` |
 | `src/app/[locale]/game/_island/GameIsland.tsx`, `useGame.ts` | ce que le compilateur demande (le modèle du niveau, sa copie) |
-| `src/app/[locale]/game/<niveau>/page.tsx` | sur le modèle d'`acquisition/page.tsx` : l'intro, les deux mots du glossaire (dans la spécification), la copie, l'îlot, `nextLevelFor` (T0) |
+| `src/app/[locale]/game/<niveau>/page.tsx` | sur le modèle d'`acquisition/page.tsx` : l'intro, les deux mots du glossaire (dans la spécification), la copie, l'îlot, `nextLevels={nextLevelLinks(locale, SLUG)}` (T0) |
 | `src/app/[locale]/game/<niveau>/opengraph-image.tsx` | sur le modèle d'`acquisition/opengraph-image.tsx` |
 | `src/lib/og/game-level-share-text.ts` | ce que le compilateur demande pour le niveau |
 | `src/app/(app)/admin/stats/game.ts` | ce que le compilateur demande (les fins et les départs par niveau) |
@@ -267,7 +310,10 @@ premier écran (P1, P2), le téléphone et la pastille qui suivent les cartes
 (P5), les années A en français et C en anglais jouées à l'interface **d'après
 les tables de la spécification, jamais recalculées**, l'année D renvoyée en
 juin (P9), la sauvegarde sous sa propre clé, 390 px à chaque phase (P17), axe
-sur décembre (P21) et l'analytique par niveau (P20).
+sur décembre (P21) et l'analytique par niveau (P20). Et, pour le bloc
+« Niveau suivant » (C75), deux décembres semés : sans collection, son lien va
+au niveau ouvert qui suit dans l'ordre du Tour ; avec une fin enregistrée pour
+ce niveau-là (`tdg.game.collection.v1`, `endings`), il va au suivant encore.
 
 ### T5 — Ce qui n'est pas à l'agent
 
@@ -383,9 +429,9 @@ une autre réponse change ce guide et les spécifications avant le code.
 
 | # | Question | Reco | Si on se trompe | Réponse |
 |---|---|---|---|---|
-| QC1 | **Le bloc qui clôt décembre, à trois niveaux et plus** : vers quel niveau renvoie-t-il ? (C31 ne tranche que le cas à deux.) | **Le niveau suivant dans l'ordre du Tour, parmi les niveaux ouverts, en bouclant** (T0, point 1), sous le bandeau « Niveau suivant » pour tous. Calculé sur le serveur : la page reste prérendue. | Écarté : renvoyer vers le niveau que le joueur n'a pas encore fini, qui demande de lire la sauvegarde dans le navigateur et rend le bloc instable au rechargement. Changer de règle plus tard ne touche qu'une fonction pure. | |
-| QC2 | **Le bandeau de l'intro, « Le côté obscur · niveau N »** : N au rang d'ouverture ? | **Oui** : le troisième niveau construit est le « niveau 3 », quel que soit son étape. C'est ce que disent déjà les niveaux 1 et 2. | Écarté : remplacer le numéro par l'étape (« Le côté obscur · activation ») sur les cinq niveaux ; plus juste dans l'ordre du hub, mais deux bandeaux validés changent. | |
-| QC3 | **Les sanctions de la CNIL, citées sans le nom de l'entreprise** ? La CNIL anonymise ses délibérations deux ans après leur publication ; Google, Facebook, Microsoft et TikTok sont déjà « [X] » sur Légifrance pour leurs amendes sur les cookies. | **Oui** : « un moteur de recherche », « un courtier en données de neuf salariés ». Une entreprise est nommée quand un tribunal la nomme (Google, par le Conseil d'État) ou quand l'autorité n'est pas la CNIL (Twitter, par la FTC). | Écarté : nommer d'après la presse. Plus parlant, mais le jeu prolongerait une publicité que la CNIL a voulue limitée dans le temps, et chaque nom aurait une date d'expiration à surveiller. | |
+| QC1 | **Le bloc qui clôt décembre, à trois niveaux et plus** : vers quel niveau renvoie-t-il ? (C31 ne tranche que le cas à deux.) | **Le niveau suivant dans l'ordre du Tour, parmi les niveaux ouverts, en bouclant** (T0, point 1), sous le bandeau « Niveau suivant » pour tous. Calculé sur le serveur : la page reste prérendue. | Écarté : renvoyer vers le niveau que le joueur n'a pas encore fini, qui demande de lire la sauvegarde dans le navigateur et rend le bloc instable au rechargement. Changer de règle plus tard ne touche qu'une fonction pure. | **Non : le premier niveau ouvert que le joueur n'a pas encore fini** (C75, Antoine, 2026-10-04). T0 point 1 réécrit : calculé dans le navigateur, en décembre. |
+| QC2 | **Le bandeau de l'intro, « Le côté obscur · niveau N »** : N au rang d'ouverture ? | **Oui** : le troisième niveau construit est le « niveau 3 », quel que soit son étape. C'est ce que disent déjà les niveaux 1 et 2. | Écarté : remplacer le numéro par l'étape (« Le côté obscur · activation ») sur les cinq niveaux ; plus juste dans l'ordre du hub, mais deux bandeaux validés changent. | **Non : l'étape, sans numéro, sur les cinq niveaux** (C76, Antoine, 2026-10-04). T0 point 4 réécrit ; les bandeaux des niveaux 1 et 2 changent en U0. |
+| QC3 | **Les sanctions de la CNIL, citées sans le nom de l'entreprise** ? La CNIL anonymise ses délibérations deux ans après leur publication ; Google, Facebook, Microsoft et TikTok sont déjà « [X] » sur Légifrance pour leurs amendes sur les cookies. | **Oui** : « un moteur de recherche », « un courtier en données de neuf salariés ». Une entreprise est nommée quand un tribunal la nomme (Google, par le Conseil d'État) ou quand l'autorité n'est pas la CNIL (Twitter, par la FTC). | Écarté : nommer d'après la presse. Plus parlant, mais le jeu prolongerait une publicité que la CNIL a voulue limitée dans le temps, et chaque nom aurait une date d'expiration à surveiller. | **Oui** (C77, Antoine, 2026-10-04). |
 
 ## 21.9 L'orchestration : un agent Opus, des sous-agents Sonnet
 
@@ -419,7 +465,7 @@ trois niveaux est libre.
 
 | Unité | Ce qu'elle livre | Prérequis | Relecteurs | Point de pause après |
 |---|---|---|---|---|
-| **U0** | T0 (§21.3) : `nextLevelFor`, `LEVEL_TEASERS` avec les deux niveaux existants (typé `Record<LevelSlug, …>`, il ne peut pas encore nommer un niveau en brouillon), les bandeaux « Niveau suivant », `MAX_URL` à 6 000, le gabarit `{open}` de `shareImageAlt` | QC1 à QC3 tranchées | copie | oui |
+| **U0** | T0 (§21.3) : `nextLevelFor`, `finishedLevels`, `nextLevelLinks`, `LEVEL_TEASERS` avec les deux niveaux existants (typé `Record<LevelSlug, …>`, il ne peut pas encore nommer un niveau en brouillon), les deux `nextLevel.eyebrow` « Niveau suivant », les bandeaux des niveaux 1 et 2 à l'étape, `MAX_URL` à 6 000, le gabarit `{open}` de `shareImageAlt` | QC1 à QC3 tranchées (C75 à C77, faites) | copie | oui |
 | **X-1** | T1 : la copie du niveau, ses types, son intro et ses métadonnées, son test de contenu | questions du niveau tranchées ; U0 pour le premier niveau | copie | oui |
 | **X-2** | T2 : le téléphone, sa pastille, le côté de l'îlot, les aperçus, leurs tests, les captures | X-1 | copie (les chaînes du téléphone) | oui |
 | **X-3** | T3 : le slug déplacé et tout ce que le compilateur demande (dont la ligne du niveau dans `LEVEL_TEASERS`), la page, l'image, l'encart du résultat, le hub, les tests et specs communs | X-2 ; U0 | copie, sécurité | oui |

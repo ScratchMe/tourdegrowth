@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { metricFormat } from "../format";
 import { REFERRAL_LEVEL } from "../levels/referral";
 import { fresh, handIds, reachesBoard, stepMonth } from "../model";
+import { gameReducer } from "../reducer";
 import { decemberView, driverRows } from "../view";
 import { mismatches, type Fixture } from "./fixture-check";
 import { deepFreeze } from "./paths";
@@ -191,5 +192,72 @@ describe("referral — its economy, its number, its frame", () => {
     expect(d.metric.scale.min).toBeLessThanOrEqual(L.display.chart.min);
     expect(d.metric.scale.max).toBeGreaterThanOrEqual(L.display.chart.max);
     expect(d.metric.scale.ticks).toContain(L.display.chart.tickFrom);
+  });
+});
+
+// C86 (Antoine, 2026-10-04): « durcir maintenant ». The tile rounds to the
+// hundredth, so a year ending at 0,595 shows 0,60 and wins — a tolerance five
+// times level 2's — and a random honest player was applauded 49 % of the time
+// against level 2's 43 %. The honest gains and ramps are × 0,99 for it.
+
+/** Mulberry32: a fixed seed gives the same 2 000 years on every run. */
+function seeded(seed: number): () => number {
+  let s = seed >>> 0;
+  return () => {
+    s = (s + 0x6d2b79f5) >>> 0;
+    let t = s;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+/** Two honest cards drawn from the hand each quarter (the whole hand once fewer than two are left), as in the spec's table. */
+function applauseRate(level: Level, years: number, seed: number): number {
+  const random = seeded(seed);
+  const reduce = gameReducer(level);
+  let applause = 0;
+  for (let y = 0; y < years; y++) {
+    let s = fresh(level);
+    while (!s.ending && !s.fired) {
+      const hand = handIds(level, s);
+      const honest = hand.filter((id) => level.cards[id].kind === "h");
+      const pool = honest.length >= 2 ? honest : hand;
+      let next = s;
+      for (let tries = 0; next === s && tries < 400; tries++) {
+        const a = pool[Math.floor(random() * pool.length)]!;
+        const b = pool[Math.floor(random() * pool.length)]!;
+        if (a === b) continue;
+        let t = reduce(s, { type: "hangup" });
+        t = reduce(reduce(t, { type: "toggle", card: a }), { type: "toggle", card: b });
+        const run = reduce(t, { type: "run" });
+        if (run !== t) next = run;
+      }
+      if (next === s) throw new Error(`no playable pair in quarter ${s.q + 1}`);
+      s = next;
+    }
+    if (s.ending === "applause") applause++;
+  }
+  return applause / years;
+}
+
+/** Level 2's honest numbers, before C86: the referral level as it was specified first. */
+function unhardened(level: Level): Level {
+  const cards = Object.fromEntries(
+    Object.entries(level.cards).map(([id, c]) => [
+      id,
+      c.kind === "h" ? { ...c, ...(c.gain && c.gain > 0 ? { gain: c.gain / 0.99 } : {}), ...(c.ramp ? { ramp: c.ramp / 0.99 } : {}) } : c,
+    ]),
+  ) as Level["cards"];
+  return { ...level, cards };
+}
+
+describe("referral — F19.C86, a random honest player is applauded about as often as on level 2", () => {
+  it("under 45 % of 2 000 seeded honest years end in applause (level 2: 43 %)", () => {
+    expect(applauseRate(L, 2_000, 7)).toBeLessThan(0.45);
+  });
+
+  it("non-vacuity: without the × 0,99, the same years are applauded more than 45 % of the time", () => {
+    expect(applauseRate(unhardened(L), 2_000, 7)).toBeGreaterThan(0.45);
   });
 });
