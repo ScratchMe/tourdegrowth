@@ -88,9 +88,9 @@ export const ENGINE_COPY = {
       fr: "Ton Tour dit si tu mesures. Le moteur montre ce que disent tes chiffres.",
       en: "Your Tour tells you whether you measure. The engine shows what your numbers say.",
     },
-    // TODO: à relire — réécrit le 2026-09-28 (audit du design kit) : le moteur collecte dix-sept
+    // Validé au bon à tirer nº10 (2026-10-04, la chaîne entière : C55) — réécrit le 2026-09-28 (audit du design kit) : le moteur collecte dix-sept
     // chiffres depuis le 2026-09-26 (expansion et rétrogradation), la page disait encore quinze.
-    // TODO: à relire (convention 6) — réécrit le 2026-09-30 (A7.1, C1 : aucun repère ne désigne).
+    // Validé au bon à tirer nº10 (2026-10-04, la chaîne entière : C55) — réécrit le 2026-09-30 (A7.1, C1 : aucun repère ne désigne).
     // Validé au bon à tirer nº10 (2026-10-04, la chaîne entière, à la place du nº9 : C55) — réécrit le 2026-10-01 (A7.3.c S3) : les chiffres de l'assisté.
     // Validé au bon à tirer nº10 (2026-10-04) — réécrit le 2026-10-03 (A20.d T6, C52, le retour 09, design/ds-extension-09-return/COPY.md) :
     // ce que rapporte chaque nouveau client, le board ou les investisseurs à côté du CODIR, et « prêtes » / « ready » retirés comme
@@ -1866,7 +1866,7 @@ export const ENGINE_COPY = {
       term: { fr: "ARR", en: "ARR" },
       definition: {
         fr: "Ton revenu annuel, extrapolé de ton revenu mensuel : le MRR × 12, comme si rien ne changeait pendant un an. Ce n'est pas un revenu acquis : avec des contrats au mois, des résiliations le font baisser dès le mois suivant.",
-        en: "Your annual revenue, extrapolated from your monthly revenue: the MRR × 12, as if nothing changed for a year. It isn't revenue in the bank: on monthly contracts, cancellations bring it down the very next month.",
+        en: "Your annual revenue, extrapolated from your monthly revenue: the MRR × 12, as if nothing changed for a year. It isn't guaranteed revenue: on monthly contracts, cancellations bring it down the very next month.",
       },
     },
     /** Validé au bon à tirer nº10 (2026-10-04) — neuf le 2026-10-03 (A20.d T2, le retour du brief 09) : the cash a pace of acquisition keeps out of the bank (§20.6). */
