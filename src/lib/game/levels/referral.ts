@@ -34,16 +34,21 @@ export type ReferralDarkId = (typeof REFERRAL_DARK_IDS)[number];
 export type ReferralCardId = ReferralHonestId | ReferralDarkId;
 
 // The level 1 card each one stands in for is at the end of its line; the
-// numbers are level 2's for the same role (levels/acquisition.ts).
+// numbers are level 2's for the same role (levels/acquisition.ts), except the
+// honest gains and ramps, × 0,99 (C86, 2026-10-04): the tile rounds to the
+// hundredth, so a year ending at 0,595 already shows 0,60 and wins, and a
+// random honest player was applauded 49 % of the time against level 2's 43 %.
+// One percent off the honest effects brings it back to 42 % and leaves the
+// reference years where they were.
 const CARDS = {
   // Honest cards — slow, and they raise a counter the dashboard never shows.
-  fairbonus: { id: "fairbonus", kind: "h", perm: true, gain: 0.05, ramp: 0.09, trust: 4, radar: -2 }, // pause
+  fairbonus: { id: "fairbonus", kind: "h", perm: true, gain: 0.0495, ramp: 0.0891, trust: 4, radar: -2 }, // pause
   guests: { id: "guests", kind: "h", perm: false, insight: true, trust: 2 }, // survey
-  recap: { id: "recap", kind: "h", perm: true, gain: 0, ramp: 0.12, trust: 3 }, // onboard
-  guestpage: { id: "guestpage", kind: "h", perm: true, gain: 0.03, ramp: 0.08, trust: 3 }, // annual
+  recap: { id: "recap", kind: "h", perm: true, gain: 0, ramp: 0.1188, trust: 3 }, // onboard
+  guestpage: { id: "guestpage", kind: "h", perm: true, gain: 0.0297, ramp: 0.0792, trust: 3 }, // annual
   present: { id: "present", kind: "h", perm: false, present: true }, // present
   chosen: { id: "chosen", kind: "h", perm: true, gain: -0.01, trust: 8, radar: -8 }, // remind
-  grouplink: { id: "grouplink", kind: "h", perm: true, gain: 0, ramp: 0.08, trust: 3 }, // reco
+  grouplink: { id: "grouplink", kind: "h", perm: true, gain: 0, ramp: 0.0792, trust: 3 }, // reco
   nobook: { id: "nobook", kind: "h", perm: true, gain: -0.03, temp: true, trust: 10, radar: -20 }, // three
   clean: { id: "clean", kind: "h", perm: false, clean: true, onlyIfDark: true, trust: 6, radar: -25 }, // clean
   // Dark patterns, under the names they carry in a meeting.
@@ -85,9 +90,9 @@ export const REFERRAL_LEVEL: LevelDefinition<ReferralCardId, "referral"> = {
     // invitations go to it.
     season: { months: [4, 5, 6], add: 0.02 },
     // An administrative fine by the CNIL's formation restreinte, made public:
-    // about 3 % of the app's year, the published fines for consent and
-    // prospection running at 1 to 2 % for a single breach and these breaches
-    // adding up — docs/game/referral.md §19.3 and §19.9. Fixed (C14).
+    // about 3 % of the app's year, for breaches that add up (GDPR articles 6
+    // and 14, minimisation, prospection) — docs/game/referral.md §19.3 and
+    // §19.9, C84. Fixed (C14).
     control: {
       radar: 75, fine: 75_000, leaversRate: 0.015,
       radarAfter: 20, trustHit: -10, patienceHit: -15, spike: 0.1,
