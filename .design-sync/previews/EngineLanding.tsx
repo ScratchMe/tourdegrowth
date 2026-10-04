@@ -12,9 +12,9 @@ import { EngineLanding, Stopwatch } from "tour-de-growth";
  * it renders read back — `strings.page` from `resolveEngineProps`, with the
  * page's own mapping (the lede is `page.positioning`, the positioning is
  * `page.promise`). Its phone form (a 40px title, the card's mobile padding)
- * is a 760px media query on the window, which this card's 900px capture
- * cannot draw: a narrow wrapper would show the desktop title squeezed, so
- * there is no phone cell.
+ * is a 760px media query on the window, wider than this card's capture
+ * viewport, so a still cannot draw it: a narrow wrapper would show the
+ * desktop title squeezed, so there is no phone cell.
  */
 
 /**
@@ -22,9 +22,8 @@ import { EngineLanding, Stopwatch } from "tour-de-growth";
  * at hero size, the lede and the positioning, then the privacy promise as the one raised card
  * — solid ultramarine on its own shadow, BEFORE the call to action and never folded — then
  * « Entre tes chiffres → », drawn secondary (the page's one primary is the start card's,
- * below), with its note. The page passes its Stopwatch as `aside`; it stands beside the intro
- * from 1100px and is hidden at this card's 900px, as on any window that narrow. The bottom is
- * below the capture's fold.
+ * below), with its note. The page passes its Stopwatch as `aside`: it stands beside the intro
+ * on a window 1100px wide or more, and is hidden on a narrower one, as at this card's 900px.
  */
 export const FirstVisit = () => (
   <EngineLanding
@@ -70,7 +69,7 @@ export const Returning = () => (
 /**
  * The first visit in English, the page's own words: « Your growth engine », the promise
  * « Nothing you enter leaves this page », the call to action « Enter your numbers → ». Same
- * composition as the French; the stopwatch is hidden at this width, the bottom below the fold.
+ * composition as the French; the stopwatch is hidden at this card's width.
  */
 export const FirstVisitEnglish = () => (
   <EngineLanding
