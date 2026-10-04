@@ -48,6 +48,13 @@ import { engineSeed, openNumber, skipToAsks } from "../e2e/engine-helpers";
  * every lever moved (15).
  *
  *   OUT=design/ds-extension-09-after npx playwright test --config scripts/engine-density.config.ts --grep "brief 09"
+ *
+ * Since MKT-B (2026-10-04) it takes the screens of brief 10, the marketplace
+ * (`design/ds-extension-10/`, `docs/engine/place-de-marche.md` §22.7): the tests
+ * named « brief 10 », on the screens a marketplace will reuse (the public example,
+ * the hybrid, the self-serve slides). The build is the one above, nothing more.
+ *
+ *   OUT=design/ds-extension-10 npx playwright test --config scripts/engine-density.config.ts --grep "brief 10"
  */
 const OUT = process.env.OUT ?? "design/ds-extension-07-after";
 /** Every self-serve lever moved, as `e2e/engine-deck-whatif.spec.ts` moves them: the densest « together » slide. */
@@ -556,4 +563,115 @@ test("brief 09: measurements", async ({ browser }) => {
       await context.close();
     }
   }
+});
+
+// --- Brief 10 (A23, MKT-B, 2026-10-04): the marketplace, on the screens it will reuse ----------
+
+/**
+ * The public example with two levers moved — the activation rate and the churn, at the values
+ * `EVERY_LEVER` gives them — so the « Et si » panel and its slide are captured at work.
+ */
+function exampleWithTwoLevers(): EngineState {
+  return { ...exampleState(), whatIf: { "act.rate": EVERY_LEVER["act.rate"], "ret.logo-churn": EVERY_LEVER["ret.logo-churn"] } };
+}
+
+/**
+ * `shootEl` for brief 10. Playwright scrolls to an element so that it lands about 94 px below the top of the
+ * viewport (the sticky header's room): one that fits the viewport, but not what is left of it from there
+ * (the 390 px start card is 781 px tall in an 844 px viewport), comes out clipped at its foot. The viewport
+ * gets room first. Anything taller than the viewport is captured whole by Playwright as it is.
+ */
+async function shootRoomy(page: Page, el: Locator, name: string, viewport: { width: number; height: number }): Promise<void> {
+  const box = await el.boundingBox();
+  if (box && box.height <= viewport.height && box.height > viewport.height - 100) await page.setViewportSize({ width: viewport.width, height: Math.ceil(box.height) + 300 });
+  await shootEl(el, name);
+}
+
+for (const { locale, size, viewport } of SCREENS) {
+  const tag = `${locale}-${size}`;
+
+  test(`brief 10: the start card (${tag})`, async ({ page }) => {
+    await page.setViewportSize(viewport);
+    await page.clock.setFixedTime(CLOCK);
+    await page.goto(`/${locale}/aarrr-funnel-template`);
+    await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
+    await shootRoomy(page, page.getByTestId("engine-start"), `01-start-card-${tag}`, viewport);
+  });
+
+  test(`brief 10: the self-serve board and its parts (${tag})`, async ({ page }) => {
+    await page.setViewportSize(viewport);
+    await seed(page, locale, exampleState());
+    const board = page.getByTestId("engine-board");
+    await expect(board).toBeVisible();
+    await shootRoomy(page, board, `03-board-full-${tag}`, viewport);
+    await shootRoomy(page, page.getByTestId("engine-board-peloton"), `05-peloton-${tag}`, viewport);
+    await shootRoomy(page, page.getByTestId("engine-money-plg"), `07-money-${tag}`, viewport);
+    await shootRoomy(page, page.getByTestId("engine-numbers"), `09-numbers-list-${tag}`, viewport);
+  });
+
+  test(`brief 10: the hybrid board (${tag})`, async ({ page }) => {
+    await page.setViewportSize(viewport);
+    await seed(page, locale, hybridState());
+    const board = page.getByTestId("engine-board");
+    await expect(board).toBeVisible();
+    await expect(page.getByTestId("engine-motion-selector")).toBeVisible();
+    await shootRoomy(page, board, `04-hybrid-board-${tag}`, viewport);
+  });
+
+  test(`brief 10: the full « Et si » panel, two levers moved (${tag})`, async ({ page }) => {
+    await page.setViewportSize(viewport);
+    await seed(page, locale, exampleWithTwoLevers());
+    await expect(page.getByTestId("engine-board")).toBeVisible();
+    await openWhatIf(page);
+    await shootRoomy(page, page.getByTestId("engine-whatif-panel"), `08-whatif-panel-${tag}`, viewport);
+  });
+}
+
+test("brief 10: the setup card, its type list (fr-desktop)", async ({ page }) => {
+  await page.setViewportSize(DESKTOP);
+  await page.clock.setFixedTime(CLOCK);
+  await page.goto("/fr/aarrr-funnel-template");
+  await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
+  // « Changer » opens the whole setup card; its first question is the type, the marketplace greyed (« Plus tard »).
+  await page.getByTestId("engine-start-change").click();
+  const setup = page.getByTestId("engine-setup");
+  await expect(setup).toBeVisible();
+  await shootRoomy(page, setup, "02-setup-types-fr-desktop", DESKTOP);
+});
+
+test("brief 10: sales-assisted's relays (fr-desktop)", async ({ page }) => {
+  await page.setViewportSize(DESKTOP);
+  await seed(page, "fr", hybridState());
+  await expect(page.getByTestId("engine-board")).toBeVisible();
+  // The hybrid shows one engine at a time: sales-assisted is the selector's second button.
+  await page.getByTestId("engine-motion-selector").getByRole("button").nth(1).click();
+  // The card the relays sit in on the board, as 05 takes the peloton's: it holds the open-pipeline band under them.
+  const relays = page.getByTestId("engine-board-relays");
+  await expect(relays.getByTestId("engine-relays")).toBeVisible();
+  await shootRoomy(page, relays, "06-relays-fr-desktop", DESKTOP);
+});
+
+test("brief 10: a number's own screen (fr-desktop)", async ({ page }) => {
+  await page.setViewportSize(DESKTOP);
+  await seed(page, "fr", exampleState());
+  await expect(page.getByTestId("engine-board")).toBeVisible();
+  await openNumber(page, "act-rate");
+  await shootRoomy(page, page.getByTestId("engine-number"), "10-metric-sheet-fr-desktop", DESKTOP);
+});
+
+test("brief 10: the self-serve slides (fr-desktop)", async ({ page }) => {
+  await page.setViewportSize(DESKTOP);
+  await seed(page, "fr", exampleWithTwoLevers());
+  await openDeck(page);
+  await shootRoomy(page, page.getByTestId("slide-peloton"), "11-slide-peloton-fr-desktop", DESKTOP);
+  await shootRoomy(page, page.getByTestId("slide-leak"), "12-slide-leak-fr-desktop", DESKTOP);
+  await shootRoomy(page, page.getByTestId("slide-unit-economics"), "13-slide-unit-economics-fr-desktop", DESKTOP);
+  await shootRoomy(page, page.locator('[data-testid="slide-whatif:ret.logo-churn"]'), "14-slide-whatif-fr-desktop", DESKTOP);
+});
+
+test("brief 10: the hybrid's total slide (fr-desktop)", async ({ page }) => {
+  await page.setViewportSize(DESKTOP);
+  await seed(page, "fr", hybridState());
+  await openDeck(page);
+  await shootRoomy(page, page.getByTestId("slide-total"), "15-slide-total-fr-desktop", DESKTOP);
 });
