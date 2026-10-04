@@ -1,5 +1,5 @@
 import * as React from "react";
-import { FieldRow, NumberField } from "tour-de-growth";
+import { DefinitionTrigger, FieldRow, NumberField } from "tour-de-growth";
 
 /*
  * Two fields that are one statement — the growth engine's commonest shape.
@@ -9,16 +9,21 @@ import { FieldRow, NumberField } from "tour-de-growth";
  * row. The engine draws two shapes, both here:
  *
  * - a count out of a count, joined by `sheet.over` (« out of » / « sur »):
- *   the metric sheet's « I have it » (`_engine/ValueEditor.tsx`, the `ratio`
- *   branch; the same pair in `MissingTriage.tsx`'s two readings);
+ *   a number's value boxes (`_engine/ValueEditor.tsx`, the `ratio` branch).
+ *   Since A18 T1 the boxes are the question itself: typing in them is the
+ *   answer, and the three other answers sit one tap under them
+ *   (`AnswerSwitch`). The same pair draws each of the two readings that
+ *   disagree in `MissingTriage.tsx` (`ReadingFields`);
  * - « At least » / « At most », which name themselves: no joiner, and the
- *   rule about the two is the row's (`_engine/MetricSheet.tsx`, the estimate).
+ *   rule about the two is the row's (`_engine/MetricSheet.tsx`, the
+ *   estimate). The slides' cost in weeks and people (`deck/AskForm.tsx`)
+ *   is the same shape.
  *
- * Paths are under `src/app/[locale]/aarrr-funnel-template/`; copy is
- * `src/content/engine-copy.ts` and the catalogue's count labels
- * (`engine-catalog.ts`) filled for the engine's example
- * (`src/lib/engine/example.ts`: August 2026, cohort July 2026, EUR), whose
- * numbers these are. `size="sm"`: a sheet of fields.
+ * Every prop is captured from those call sites, run on the engine's example
+ * (`exampleState()`, `src/lib/engine/__tests__/fixtures.ts`: August 2026,
+ * cohort July 2026, EUR) with the resolved copy (`src/content/engine-copy.ts`,
+ * the catalogue's count labels from `engine-catalog.ts`). Paths are under
+ * `src/app/[locale]/aarrr-funnel-template/`. `size="sm"`: a sheet of fields.
  */
 
 const Count = (props: { initial: number | null } & Omit<React.ComponentProps<typeof NumberField>, "value" | "onChange">) => {
@@ -28,22 +33,34 @@ const Count = (props: { initial: number | null } & Omit<React.ComponentProps<typ
 };
 
 /**
- * A count out of a count, « out of » between them: the activation rate's two
- * counts, 144 activated out of 800 sign-ups (18 %). The second count is the
- * followed cohort, shared by five numbers, and its hint says so
- * (`sheet.sharedHint`); the boxes stay on one line above it. The row sits in
- * the sheet's 760px (`Board.module.css`, `.metricBody`); narrow the frame
+ * A count out of a count, « out of » between them: the activation rate's two counts on the
+ * example (`exampleState()`, English), 144 activated out of 800 sign-ups. The second count is
+ * the cohort followed; its hint says which sign-ups to count and ends on the engine's « ? »
+ * for « cohort » (`periodHint`, `EngineTerm` drawn as the system's `DefinitionTrigger`,
+ * closed). The boxes stay on one line however the labels and hints wrap. Not drawn, because
+ * they are the sheet's own paragraphs under the row: the live rate, and the line saying the
+ * count is shared, « Same number as for day-30 retention, referred sign-up share, viral
+ * coefficient (K) and paid conversion: changing it here changes it everywhere. »
+ * (`sheet.sharedHint`, `Sheet.module.css` `.sharedLine`). The row sits in the sheet's 660px
+ * (`NumberSheet`'s 720px `--engine-measure`, in a card with 30px sides); narrow the frame
  * under 480px and the two stack.
  */
 export const CountOutOfACount = () => (
-  <div style={{ maxWidth: 760 }}>
+  <div style={{ maxWidth: 660 }}>
     <FieldRow joiner="out of">
-      <Count initial={144} size="sm" label="Activated within 7 days" locale="en" integer parseError="A whole number: these are people." />
+      <Count
+        initial={144}
+        size="sm"
+        label="Activated within 7 days"
+        locale="en"
+        integer
+        parseError="A whole number: these are people."
+      />
       <Count
         initial={800}
         size="sm"
         label="Sign-ups from July 2026"
-        hint="Same number as for day-30 retention, referred sign-up share, viral coefficient (K) and paid conversion: changing it here changes it everywhere."
+        hint={<>{"Use the sign-ups from July 2026: those from August 2026 haven't had 7 days yet."}<span style={{ marginInlineStart: "var(--space-2)" }}><DefinitionTrigger term={"cohort"} label={"Definition: cohort"} /></span></>}
         locale="en"
         integer
         parseError="A whole number: these are people."
@@ -53,28 +70,28 @@ export const CountOutOfACount = () => (
 );
 
 /**
- * An amount out of a count, in French: the CAC's spend, « 21 000 € », sur 42
- * new paying customers. The amount takes `moneyUnit("EUR", "fr")` and may be
- * a decimal; the count is whole. The first field spans the joiner's column
- * and its label does not size the columns, so « sur » sits against the box
+ * An amount out of a count, in French, on the example: the CAC's €21,000 of spend « sur » 42
+ * new paying customers. The amount takes `moneyUnit("EUR", "fr")` and may be a decimal; the
+ * count is whole. Neither count is shared, so no line follows the row. The first field spans
+ * the joiner's column and its label does not size the columns, so « sur » sits against the box
  * and the longer label runs over both (A11.3, 2026-09-30).
  */
 export const AmountOutOfACount = () => (
-  <div style={{ maxWidth: 760 }}>
+  <div style={{ maxWidth: 660 }}>
     <FieldRow joiner="sur">
       <Count
         initial={21000}
         size="sm"
-        label="Dépense d'acquisition en août 2026"
+        label={"Dépense d'acquisition en août 2026"}
         locale="fr"
         suffix={" €"}
         unitName="euros"
-        parseError="Écris un nombre, par exemple 1 250 ou 18,5."
+        parseError={"Écris un nombre, par exemple 1 250 ou 18,5."}
       />
       <Count
         initial={42}
         size="sm"
-        label="Nouveaux clients payants en août 2026"
+        label={"Nouveaux clients payants en août 2026"}
         locale="fr"
         integer
         parseError={"Un nombre entier : on compte des personnes."}
@@ -83,24 +100,43 @@ export const AmountOutOfACount = () => (
   </div>
 );
 
-/** « At least » / « At most »: a pair with no joiner. The example's paid-conversion estimate, 6 to 9 %. */
+/**
+ * « At least » / « At most »: a pair with no joiner, the answer « I can estimate it »
+ * (`MetricSheet.tsx`, the estimate). The example's paid-conversion estimate, 6 to 9 %.
+ */
 export const AtLeastAtMost = () => (
-  <div style={{ maxWidth: 760 }}>
+  <div style={{ maxWidth: 660 }}>
     <FieldRow>
-      <Count initial={6} size="sm" label="At least" locale="en" suffix="%" unitName="per cent" parseError="Type a number, such as 1,250 or 18.5." />
-      <Count initial={9} size="sm" label="At most" locale="en" suffix="%" unitName="per cent" parseError="Type a number, such as 1,250 or 18.5." />
+      <Count
+        initial={6}
+        size="sm"
+        label="At least"
+        locale="en"
+        suffix="%"
+        unitName="per cent"
+        parseError="Type a number, such as 1,250 or 18.5."
+      />
+      <Count
+        initial={9}
+        size="sm"
+        label="At most"
+        locale="en"
+        suffix="%"
+        unitName="per cent"
+        parseError="Type a number, such as 1,250 or 18.5."
+      />
     </FieldRow>
   </div>
 );
 
 /**
- * The same pair in French, typed the wrong way round (9 then 6): the pair's
- * own message, `sheet.lowAboveHigh`, under the whole row — shown as soon as
- * both are typed, not on save.
+ * The same pair in French, typed the wrong way round (9 then 6, an unsaved draft): the pair's
+ * own message, `sheet.lowAboveHigh`, under the whole row — shown as soon as both are typed,
+ * not on save.
  */
 export const RangeWithItsMessage = () => (
-  <div style={{ maxWidth: 760 }}>
-    <FieldRow error="Échange les deux : le minimum dépasse le maximum.">
+  <div style={{ maxWidth: 660 }}>
+    <FieldRow error={"Échange les deux : le minimum dépasse le maximum."}>
       <Count
         initial={9}
         size="sm"
@@ -108,7 +144,7 @@ export const RangeWithItsMessage = () => (
         locale="fr"
         suffix={" %"}
         unitName="pour cent"
-        parseError="Écris un nombre, par exemple 1 250 ou 18,5."
+        parseError={"Écris un nombre, par exemple 1 250 ou 18,5."}
       />
       <Count
         initial={6}
@@ -117,7 +153,7 @@ export const RangeWithItsMessage = () => (
         locale="fr"
         suffix={" %"}
         unitName="pour cent"
-        parseError="Écris un nombre, par exemple 1 250 ou 18,5."
+        parseError={"Écris un nombre, par exemple 1 250 ou 18,5."}
       />
     </FieldRow>
   </div>

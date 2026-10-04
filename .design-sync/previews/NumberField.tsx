@@ -1,5 +1,5 @@
 import * as React from "react";
-import { NumberField } from "tour-de-growth";
+import { DefinitionTrigger, NumberField } from "tour-de-growth";
 
 /*
  * A count or an amount, typed the way people write numbers: a text input with
@@ -30,25 +30,28 @@ const Live = (props: { initial: number | null } & Omit<React.ComponentProps<type
 };
 
 /**
- * An amount in English: the sign comes first, the figure starts against it.
- * The metric sheet's « I only have the amount » (`ValueEditor.tsx`, the
- * `amount` branch) for the CAC: `moneyUnit("EUR", "en")` gives `prefix` and
- * `unitName`. €500 is the example's CAC, €21,000 of spend over 42 customers.
+ * An amount in English: the sign comes first, the figure starts against it. A number's screen,
+ * « I only have the amount » (`ValueEditor.tsx`, the `amount` branch, reached from
+ * `MetricSheet.tsx`) for the CAC: `moneyUnit("EUR", "en")` gives `prefix` and `unitName`. €500
+ * is the example's CAC, €21,000 of spend over 42 customers.
  */
 export const AmountEnglish = () => (
   <Live
     initial={500}
     size="sm"
     label="CAC"
-    hint="Without both counts, the number will be marked approximate: it can't be recounted."
+    hint={"Without both counts, the number will be marked approximate: it can't be recounted."}
     locale="en"
-    prefix="€"
+    prefix={"€"}
     unitName="euros"
     parseError="Type a number, such as 1,250 or 18.5."
   />
 );
 
-/** The same field in French: `moneyUnit("EUR", "fr")` puts the sign after the figure, after the no-break space French writes. */
+/**
+ * The same field in French (« Je n'ai que le montant »): `moneyUnit("EUR", "fr")` puts the
+ * sign after the figure, after the no-break space French writes.
+ */
 export const AmountFrench = () => (
   <Live
     initial={500}
@@ -58,38 +61,46 @@ export const AmountFrench = () => (
     locale="fr"
     suffix={" €"}
     unitName="euros"
-    parseError="Écris un nombre, par exemple 1 250 ou 18,5."
+    parseError={"Écris un nombre, par exemple 1 250 ou 18,5."}
   />
 );
 
 /**
- * No sign in the box when the label already carries the currency: the slide
- * builder's cost (`deck/AskForm.tsx`, « An amount »), label
- * `deckUi.askAmount` filled with the page's currency sign. 26,000 is the
- * value `e2e/engine-forms.spec.ts` types there, grouped as the field groups it.
+ * No sign in the box when the label already carries the currency: the slide builder's cost
+ * (`deck/AskForm.tsx`, « An amount »), label `deckUi.askAmount` filled with the page's
+ * currency sign. 26,000 is the value `e2e/engine-forms.spec.ts` types there, grouped as the
+ * field groups it.
  */
 export const CurrencyInTheLabel = () => (
-  <Live initial={26000} size="sm" label="Amount (€)" locale="en" parseError="Type a number, such as 1,250 or 18.5." />
+  <Live
+    initial={26000}
+    size="sm"
+    label={"Amount (€)"}
+    locale="en"
+    parseError="Type a number, such as 1,250 or 18.5."
+  />
 );
 
 /**
- * A rate in French, « % » after its no-break space (`percentUnit("fr")`):
- * the team target on a metric sheet (`MetricSheet.tsx`, `TargetField`), in a
- * five-character box. « facultatif » is Field's `optional` word, drawn after
- * the label (C29). 20 % is the example's activation target.
+ * A rate in French, « % » after its no-break space (`percentUnit("fr")`): the team's target on
+ * a number's screen (`MetricSheet.tsx`, `TargetField`, the `targetField` of `HowItCompares`),
+ * written when the box is left, in a five-character box. « facultatif » is Field's `optional`
+ * word, drawn after the label (C29). The hint ends on the engine's « ? » for « cible »
+ * (`EngineTerm`, drawn here as the system's `DefinitionTrigger`, closed). 20 % is the
+ * example's activation target.
  */
 export const PercentTarget = () => (
   <Live
     initial={20}
     size="sm"
-    label="Ta cible"
+    label={"La cible de ton équipe"}
     optional="facultatif"
-    hint={"Seule une cible d'équipe permet de dire quelle étape freine."}
+    hint={<>{"Seule une cible désigne l'étape qui freine. Sans cible, le chiffre compte quand même."}<span style={{ marginInlineStart: "var(--space-2)" }}><DefinitionTrigger term={"cible"} label={"Définition : cible"} /></span></>}
     locale="fr"
     digits={5}
     suffix={" %"}
     unitName="pour cent"
-    parseError="Écris un nombre, par exemple 1 250 ou 18,5."
+    parseError={"Écris un nombre, par exemple 1 250 ou 18,5."}
   />
 );
 
@@ -110,18 +121,17 @@ export const Empty = () => (
 );
 
 /**
- * Invalid, from a rule the caller checks: the rate-only field
- * (`ValueEditor.tsx`, the `rate` branch) after a save was tried, with
- * `workbench.percentRange`. The message comes first, the hint stays. 140 on
- * the activation rate is the case `_engine/__tests__/sheet-draft.test.ts`
- * refuses with this rule.
+ * Invalid, from a rule the caller checks: the rate-only field (« I only have the rate »,
+ * `ValueEditor.tsx`, the `rate` branch) once the box is left (A15.3) or a save was tried, with
+ * `workbench.percentRange`. The message comes first, the hint stays. 140 on the activation
+ * rate is the case `_engine/__tests__/sheet-draft.test.ts` refuses with this rule.
  */
 export const Invalid = () => (
   <Live
     initial={140}
     size="sm"
     label="Activation rate"
-    hint="Without both counts, the number will be marked approximate: it can't be recounted."
+    hint={"Without both counts, the number will be marked approximate: it can't be recounted."}
     error="A rate sits between 0 and 100%."
     locale="en"
     digits={5}

@@ -36,52 +36,50 @@ export const Checked = () => <Live initial label="Compare with that Tour" />;
 export const Unchecked = () => <Live initial={false} label="Montrer le score du Tour dans le livrable" />;
 
 /**
- * The slides' settings (`_engine/deck/DeckView.tsx`), for an engine with a
- * company name and a linked Tour: three plain rows under the panel's own
- * heading (« Réglages des slides », not drawn here), split by the dashed
- * rule. The name and the credit start ticked;
- * the « declared × measured » slide starts left out, and its hint says when
- * to put it in.
+ * The slides' settings (`_engine/deck/DeckView.tsx`), in French, for an engine with a company
+ * name and a linked Tour: four plain rows under the panel's own heading (« Réglages des
+ * slides », not drawn here), split by the dashed rule. The name and the credit start ticked,
+ * as the deck's state starts (`showCompany` with a company name, `showSiteCredit`); the white
+ * background (the paper theme is the default) and the « declared × measured » slide
+ * (`DEFAULT_INCLUDE.mirror`, false) start unticked, and the last one's hint says when to put
+ * it in. Without a company name the first row is not drawn; without a linked Tour, the last.
  */
 export const SettingsRows = () => (
   <div style={{ maxWidth: 480 }}>
     <Live initial label={"Nom de l'entreprise sur les slides"} />
-    <Live initial label="Mention tourdegrowth.com" />
-    <Live
-      initial={false}
-      label={"Slide « Déclaré × mesuré »"}
-      hint={"Le Tour est une auto-évaluation : à montrer seulement si l'écart est ton argument."}
-    />
+    <Live initial label={"Mention tourdegrowth.com"} />
+    <Live initial={false} label={"Fond blanc (pour un gabarit d'entreprise)"} />
+    <Live initial={false} label={"Slide « Déclaré × mesuré »"} hint={"Le Tour est une auto-évaluation : à montrer seulement si l'écart est ton argument."} />
   </div>
 );
 
 /**
- * The engine's settings, « How you sell » (`_engine/Setup.tsx`, A7.3.c): two
- * boxes in a Field group, at least one ticked. With self-serve the only one
- * ticked, its box is disabled and says why under its sentence
- * (`disabledReason`, `strings.settings.motionLast`) — a reason of its own,
- * unlike the list at its limit below, where the group's hint is the reason.
- * Each box stands in its own block, spaced rather than split by the dashed
- * rule, because a ticked motion unfolds its own windows under it (two
- * Segmented, left out of this card) — as `Screens.module.css` lays them out.
+ * The engine's settings, « How you sell » (`_engine/Setup.tsx`, A7.3.c), captured on the
+ * example (`exampleState()`, self-serve only): two boxes in a Field group, at least one
+ * ticked. With self-serve the only one ticked, its box is disabled and says why under its
+ * sentence (`disabledReason`, `strings.settings.motionLast`) — a reason of its own, unlike the
+ * list at its limit below, where the group's hint is the reason. Each box stands in its own
+ * block, spaced rather than split by the dashed rule, because a ticked motion unfolds its own
+ * windows under it (two Segmented, left out of this card) — as `Screens.module.css` lays them
+ * out (`.motions`, `--space-5` apart).
  */
 export const LastMotion = () => (
   <div style={{ maxWidth: 560 }}>
-    <Field group label="How you sell" hint="Both? Tick both: you get two engines and their total, never one against the other.">
+    <Field group label={"How you sell"} hint={"Both? Tick both: you get two engines and their total, never one against the other."}>
       {({ describedBy }) => (
         <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-5)" }}>
           <div>
             <Checkbox
-              label="Self-serve (PLG): customers sign up and pay on their own"
+              label={"Self-serve (PLG): customers sign up and pay on their own"}
               checked
               onChange={() => undefined}
               disabled
-              disabledReason="You need at least one way you sell."
+              disabledReason={"You need at least one way you sell."}
               describedBy={describedBy}
             />
           </div>
           <div>
-            <Live initial={false} label="Sales-assisted (SLG): a sales team signs the contracts" describedBy={describedBy} />
+            <Live initial={false} label={"Sales-assisted (SLG): a sales team signs the contracts"} describedBy={describedBy} />
           </div>
         </div>
       )}
@@ -118,29 +116,30 @@ function MeasureFirst(props: { label: string; hint: string; rows: MeasureRow[]; 
 }
 
 /**
- * The filled-in example's slides: its three missing numbers
- * (`missingByRepairCost`), cheapest to repair first, each with that cost as
- * its hint, all three ticked by the form's defaults (`askDefaults`).
+ * The page's example (`exampleState()`), in English: its missing numbers
+ * (`missingByRepairCost`), cheapest to repair first, each with that cost as its hint, all
+ * ticked by the form's defaults (`askDefaults`). Two since C50 gave the example an estimated
+ * margin, under a hint that allows three. The label is the deck's `SlideText` on the name,
+ * which draws the name as is.
  */
 export const List = () => (
   <MeasureFirst
-    label="What to measure first"
-    hint="Three at most. The cheapest to fix are checked first."
-    checked={["ret.churn-cause", "rev.gross-margin", "ret.d30"]}
+    label={"What to measure first"}
+    hint={"Three at most. The cheapest to fix are checked first."}
+    checked={["ret.churn-cause", "ret.d30"]}
     rows={[
       { id: "ret.churn-cause", name: "Main churn cause", repair: "a meeting" },
-      { id: "rev.gross-margin", name: "Gross margin", repair: "a meeting" },
       { id: "ret.d30", name: "Day-30 retention", repair: "a sprint" },
     ]}
   />
 );
 
 /**
- * The same list in French, with a fourth number the team can't find (the
- * example, plus the viral coefficient marked « on ne le mesure pas », whose
- * proposed repair is a sprint). Three are ticked, so the fourth box waits,
- * dashed: the box carries no reason of its own — the group's hint, « trois au
- * plus », is the reason. Untick one and it frees.
+ * The same list in French, with four numbers the team can't find: the example without its
+ * margin (`noMarginState()`, the margin asked of finance in a meeting), plus the viral
+ * coefficient marked « on ne le mesure pas », whose proposed repair is a sprint. Three are
+ * ticked, so the fourth box waits, dashed: the box carries no reason of its own — the group's
+ * hint, « trois au plus », is the reason. Untick one and it frees.
  */
 export const DisabledAtTheLimit = () => (
   <MeasureFirst

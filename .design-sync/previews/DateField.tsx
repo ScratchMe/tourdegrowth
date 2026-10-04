@@ -8,13 +8,16 @@ import { DateField } from "tour-de-growth";
  * desktop Safari). Nothing is pre-filled with today.
  *
  * Two real callers:
- * - the growth engine's setup card
- *   (`src/app/[locale]/aarrr-funnel-template/_engine/Setup.tsx`), bilingual:
- *   two months side by side, each list the 18 months ending at the last
- *   closed one (`monthsEndingAt` + `formatMonth`), copy from
- *   `src/content/engine-copy.ts` (`setup.*`), filled for the engine's example
- *   day (`src/lib/engine/example.ts`, 24 September 2026: flows August 2026,
- *   cohort July 2026, a 30-day window);
+ * - the growth engine's settings card
+ *   (`src/app/[locale]/aarrr-funnel-template/_engine/Setup.tsx`: an engine's
+ *   Settings, and what « Change » opens from the start screen before one
+ *   exists), bilingual: two months side by side, each list the 18 months
+ *   ending at the last closed one (`monthsEndingAt` + `formatMonth`), copy
+ *   from `src/content/engine-copy.ts` (`setup.*`; the first label is
+ *   "Month of the figures" since C42), props captured from the card run for the
+ *   engine's example day (`src/lib/engine/__tests__/fixtures.ts`,
+ *   `EXAMPLE_TODAY`, 24 September 2026: figures August 2026, cohort July
+ *   2026, a 30-day payment window);
  * - the audit's `IsoDateField` (`src/app/(app)/admin/audit/IsoDateField.tsx`),
  *   French only, `size="sm"`: three lists, month names from `Intl` in
  *   French, years this year − 10 to + 3, copy from `labels.ts` (`FORM_COPY`).
@@ -74,43 +77,51 @@ const Month = (props: { initial: string } & Omit<MonthProps, "value" | "onChange
   return <DateField precision="month" {...rest} value={value} onChange={setValue} />;
 };
 
-/** The setup card's grid from 761px: two columns of its 500px content. */
+/** The settings card's grid from 761px: two columns of its 500px content (a 560px card, 30px sides). */
 const SetupGrid = ({ children }: { children: React.ReactNode }) => (
   <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: "var(--form-gap-md)", maxWidth: 500 }}>
     {children}
   </div>
 );
 
-/** `precision="month"`: one list of the months the caller offers, newest first. The engine's two months, in English. */
+/**
+ * `precision="month"`: one list of the months the caller offers, newest first. The engine's
+ * two months, in English: the month of the figures, then the cohort followed — drawn only
+ * while self-serve is ticked (sales-assisted reads three months, said in a line under the
+ * grid).
+ */
 export const SetupMonths = () => (
   <SetupGrid>
     <Month
       initial="2026-08"
-      label="Month for flows"
-      hint="Visitors, sign-ups, spend, churn and ARPA for that month. Default: the last full month."
+      label={"Month of the figures"}
+      hint={"Visitors, sign-ups, spend, churn and ARPA for that month. Default: the last full month."}
       months={MONTHS_EN}
     />
     <Month
       initial="2026-07"
-      label="Cohort you follow"
-      hint="We follow the sign-ups from July 2026: those from August 2026 haven't had 30 days yet."
+      label={"Cohort you follow"}
+      hint={"We follow the sign-ups from July 2026: those from August 2026 haven't had 30 days yet."}
       months={MONTHS_EN}
     />
   </SetupGrid>
 );
 
-/** The same two in French: the month names are lower case, and the hints carry their no-break spaces. */
+/**
+ * The same two in French: the month names are lower case, and the hints carry their no-break
+ * spaces.
+ */
 export const SetupMonthsFrench = () => (
   <SetupGrid>
     <Month
       initial="2026-08"
-      label="Mois des flux"
+      label={"Mois des chiffres"}
       hint={"Visiteurs, inscriptions, dépense, churn et ARPA de ce mois-là. Par défaut : le dernier mois terminé."}
       months={MONTHS_FR}
     />
     <Month
       initial="2026-07"
-      label="Cohorte suivie"
+      label={"Cohorte suivie"}
       hint={"On suit les inscrits en juillet 2026 : ceux inscrits en août 2026 n'ont pas encore eu 30 jours."}
       months={MONTHS_FR}
     />

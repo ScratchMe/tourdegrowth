@@ -334,7 +334,22 @@ doc comment says why the layout uses an auto margin rather than
 ## Synced
 
 Project `23b9671c-a55b-452e-aa41-39906ee71ba8` ("Tour de Growth"), pinned as
-`projectId` in `config.json`. **Last upload: 2026-10-02, B9 and B12** (the
+`projectId` in `config.json`. **Last upload: 2026-10-04, B13 and A20.f** (the
+growth engine's 21 components, A18's and A20's, and the copy those two retired
+from six older previews), from a claude.ai/code cloud session — **112
+components, 408 story cells**, all graded good. The driver keyed 21 components
+as new (the whole `engine` group: 101 cells, written from the product's call
+sites, see "The engine group" below) and 9 as changed (`Checkbox`, `Choices`,
+`DateField`, `FieldRow`, `NumberField`, `StatTile`: retired copy; `ProsePage`,
+`ContentHeader`, `SiteHeader`: doc and spot-check retouches), none removed; see
+"Found in the 2026-10-04 re-sync". 30 components uploaded, 82 carried forward:
+571 files, no bundle delete; and, decided by Antoine, the last briefs and
+returns under `design/` (07 and 09, ported by A18 and A20: 259 paths named,
+257 deleted; the tool does not say which two it did not find), so `design/`
+is empty there: `list_files` after the upload shows no path under it. Three driver runs; `report_validate`: 112 total, 0 bad, 0
+thin, 0 identical; manifest 112 cards (21 `engine`), read back identical;
+anchor `bundleSha12` `6850313bcfa9`. The upload before it: 2026-10-02, B9 and
+B12 (the
 stage score sheet of A15.19, which replaced `PillarChip`, C34's red rows,
 A18 T0's `Disclosure` and the compact header of A19), from a claude.ai/code
 cloud session — **91 components, 308 story cells**, all graded good. The
@@ -429,6 +444,12 @@ after the content and before the second sentinel. Only brief 07 and its
 return stay (`design/DS-EXTENSION-BRIEF-07.md`, `design/ds-extension-07/`,
 `design/ds-extension-07-return/`): its port, A18, is under way. Everything
 removed is in this repo, under the same paths.
+
+**And B13 removed the last two, on 2026-10-04**: brief 07 (A18, ported) and
+brief 09 (A20, ported; it went in on 2026-10-03 with its 21 PNGs, and Claude
+Design returned it under `design/ds-extension-09-return/` the same evening),
+each with its PNGs and its return, decided by Antoine. The project holds no
+`design/` folder any more; the next brief starts it again.
 
 **A19 (2026-10-02) added two exports that are not cards.** `SpaceRace` (the
 race, out of `SpaceBand`, that the band renders and the compact header
@@ -799,6 +820,104 @@ adds five components under `src/components/engine/` with no
 `check-inventory` (by design), and it retires copy that `Choices`,
 `NumberField` and `FieldRow` still quote. That is `CHANTIERS.md` B13, the
 re-sync at the end of A18.
+
+### The engine group (2026-10-04, B13 and A20.f): how its 21 previews are built
+
+The 21 components of `src/components/engine/` (14 from A18, 7 from A20) are
+pinned in `componentSrcMap` and set to `cardMode: "column"` (all of them,
+`EngineLanding` with `"viewport": "1200x700"`, see below). Their previews were
+written by five parallel agents on a shared harness, and every prop comes from
+**running the product's own call site**, not from reading it:
+
+- **Call the island's wrapper as a function when it calls no hook.**
+  `BoardLever`, the island's `TotalBand`, `BoardBar`, `BoardNumbers`,
+  `AskScreen` return the DS element: its `.props` IS the call (the composed
+  `MrrCurve` inside `LeverCard` included). A wrapper with a hook
+  (`BoardNextStep`, `Setup`, `MetricSheet`, `AskForm`) is rendered once with
+  `renderToStaticMarkup` inside a throwaway component and its element
+  captured there, or called under a dispatcher that returns each hook's
+  initial value. The page itself is an async Server Component:
+  `await EnginePage({ params })` gives `EngineLanding`'s props as passed.
+  A module-private helper (`startCopy` in `EngineWorkbench.tsx`) is run by an
+  esbuild `onLoad` plugin that appends an export at bundle time — `src/` is
+  not touched.
+- **Views on fixtures, copy resolved**: `lib/engine/__tests__/fixtures.ts`
+  (`exampleState`, `filmState`, `noMarginState`, `hybridState`,
+  `hybridLossState`, `salesAssistedState`, `withEntry`, `measured`,
+  `estimated`, `ratio`) and `lib/engine/__tests__/props.ts` (`FR`, `EN`,
+  `CTX_*`). The English example is `exampleEngine` with `strings.example`'s
+  words, as `ExampleView` builds it: `exampleState()` carries French words
+  even in an English cell. `hybridState()` has no sales-assisted margin;
+  the band with all three totals and a healthy assisted engine needs
+  `hybridLossState()`. A sheet's unsaved state is seeded through the
+  product's own draft store (`keepDraft(draftKey(…), …)`).
+- **Island-only pieces are drawn as the DS components they render**, never
+  imitated: the engine's « ? » (`EngineTerm`) is the closed
+  `DefinitionTrigger` in a span with `margin-inline-start: var(--space-2)`;
+  `RequestCopy` is the quiet `Button`; `EngineSwitcher` the closed `sm`
+  `Disclosure`. Island CSS (`Sheet.module.css`, the deck's slide classes) is
+  not in the bundle: inlined as `style` where needed, or said in the doc.
+- The generators printed the whole `.tsx` (strings JSON-quoted, so U+00A0 and
+  U+202F survive). They lived in that session's scratchpad and are not in the
+  repo: re-derive with the same calls when the engine changes. A word-wrap
+  helper that splits on `\s+` eats the insécable in a French doc comment
+  (JavaScript's `\s` matches U+00A0): split on ASCII spaces.
+
+What the engine cards cannot show, and say instead: every phone form chosen by
+a **viewport** media query (`EngineBar`'s stacked menu, `NextStep`'s full-width
+primary, `TotalBand`'s and `EngineLanding`'s phone layouts — 760px of window,
+which a 900px card never is); the menu opened on a click; tall cells cut at
+700px (`NumberSheet` 820–1540px, `AskList`, the moved `WhatIfFigures`, three
+`MoneyBlock` cells), graded from full-page scratch shots.
+
+Two presentation traps, fixed in the previews:
+- **The preview stage is white, the product's ground is paper.** `MrrCurve` and
+  `PaybackChart` paint their labels' halo in `--surface-page`, so on white every
+  label wore a beige box. Their cells sit in a wrapper with the ground the
+  product draws them on (`--surface-page` for the board, `--surface-card` and
+  the card's padding for a slide's curve card).
+- **`EngineStart`'s radios have a fixed `name="engine-motion"`**: several cells
+  on one card page form ONE radio group, and only the last keeps its choice.
+  Each cell is its own `<form>`. Any preview that composes `EngineStart` twice
+  needs the same.
+- `PaybackChart` at the slide's 900px does not fit a 900px card: its wrapper
+  zooms 0.9; the 780px compact form stays at real size.
+- `EngineLanding`'s stopwatch only shows on a window of 1100px or more, so the
+  card is 1200×700, the page's designed look.
+
+### Found in the 2026-10-04 re-sync (B13, A20.f)
+
+- **The drift search** (from 44f2a2a, the last build actually uploaded — A18
+  T1 merged while B9/B12 ran, so `cca4b8d` was the wrong base and missed
+  half) found five previews quoting copy A18 and A20 retired: `Choices` (the
+  sheet's « Where are you with this number? », now `AnswerSwitch`),
+  `DateField` (« Mois des flux », now « Mois des chiffres »), `NumberField`
+  (the target hint), `StatTile` (an engine tile: the engine draws no
+  `StatTile` since A20.d T3.b) and `FieldRow` (« I have it », and the
+  shared-count sentence that is no longer the box's hint). « une réunion » was
+  a false positive: still `strings.repair.meeting`. Rebuilding them from the
+  call sites found more in the same files: `Checkbox` (four deck settings rows
+  since the white theme; the example's margin estimated since C50) and
+  `Choices`' docs (`md` is also `EngineStart`'s). `StatTile.Unknown` was
+  removed: no caller passes `value={null}` any more.
+- **The spot check** of components whose code changed without their preview
+  (`ProsePage`, `SpaceBand`, `Field`, `DefinitionPopover`) rendered as graded;
+  `ProsePage`'s NightIntro doc now says a space's page sits on the 1040px
+  frame.
+- **Four doc defects in `src/`**, fixed in the same PR because they reached the
+  design agent's contracts or misled the next reader: `NextStep`'s `eyebrow`
+  promised « {mois} · lecture seule » (no call site), `TrapNote` promised a
+  second usage (none), `StatTile`'s `neutral` named the engine (no caller since
+  #313; its `dtsPropsFor` line too), `Sheet.module.css` cited a removed class.
+- **Seen in the product, left to `CHANTIERS.md`** (none is in a cell): the
+  « Dernière visite » eyebrow says « aujourd'hui » on a past month
+  (`BoardHead.tsx`, `daysBetween` against the month's close); the « Mois après
+  remboursement » row reads « part avant | part avant | stable » when a lever
+  shrinks the shortfall without closing it (`whatif-figures.ts`); « pas de
+  chiffre » set in `TotalBand`'s stencil figure font; the charts' halos in
+  `--surface-page` on a slide's card and in the deck's white theme; two
+  `PaybackChart` labels crossed by a line; a one-lever slide's curve summary
+  in « tu » (`deck.ts`, `curveSummaryWhatif`).
 
 ## `_ds_manifest.json` — Claude Design never rebuilt it, and writing it was not enough
 
