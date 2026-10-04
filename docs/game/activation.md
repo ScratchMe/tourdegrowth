@@ -812,9 +812,12 @@ unités pour les sous-agents est au §21.9 (unités ACT-1 à ACT-4).
   - `src/content/__tests__/game-hub.test.ts` étendu à `GAME_META.activation`
     et `ACTIVATION_INTRO` (§21.3 T1).
 - **T2, le téléphone (ACT-2)** : `src/lib/game/planner-phone.ts`
-  (`plannerPhoneView`, `plannerItemKey`, `cookieRefusal`, `REFUSE_CLICKS_EASY`,
+  (`plannerPhoneView`, `cookieRefusal`, `REFUSE_CLICKS_EASY`,
   `REFUSE_CLICKS_HIDDEN`, recopiés du §18.7 ; ce sont les noms du gabarit `<téléphone>-phone.ts` du §21.3 T2, comme `shop-phone.ts` au niveau 2),
-  `src/components/game/PlannerPhone.tsx` et son `.module.css`,
+  `src/components/game/PlannerPhone.tsx` (qui exporte `plannerItemKey`, comme
+  `ShopPhone.tsx` exporte `shopItemKey` : le composant l'appelle par valeur,
+  et la règle 2 de `game-bundles.test.ts` lui interdit d'importer `lib/game`
+  autrement qu'en type ; fait ainsi en ACT-2) et son `.module.css`,
   `CookiePill.tsx` (qui importe `ClickPill.module.css`), le jeton
   `--planner-brand` et sa ligne de contraste (§18.7), `ACTIVATION_SIDE` dans
   `sides.tsx` (le code du §18.7), les aperçus

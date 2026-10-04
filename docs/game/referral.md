@@ -768,9 +768,10 @@ REF-4 du §21.9).
   - `src/content/__tests__/game-hub.test.ts` étendu à `GAME_META.referral` et
     `REFERRAL_INTRO` (§21.3 T1).
 - **T2, le téléphone (REF-2)** : `src/lib/game/split-phone.ts`
-  (`splitPhoneView`, `splitItemKey`, `sentInYourName`, `CONTACTS`,
-  `MESSAGES_PER_CONTACT` ; ce sont les noms du gabarit `<téléphone>-phone.ts` du §21.3 T2, comme `shop-phone.ts` au niveau 2), `src/components/game/SplitPhone.tsx` et
-  son `.module.css`, `SentPill.tsx` (qui importe `ClickPill.module.css`), le
+  (`splitPhoneView`, `sentInYourName`, `CONTACTS`,
+  `MESSAGES_PER_CONTACT` ; ce sont les noms du gabarit `<téléphone>-phone.ts` du §21.3 T2, comme `shop-phone.ts` au niveau 2), `src/components/game/SplitPhone.tsx`
+  (qui exporte `splitItemKey`, comme `ShopPhone.tsx` exporte `shopItemKey` :
+  règle 2 de `game-bundles.test.ts`) et son `.module.css`, `SentPill.tsx` (qui importe `ClickPill.module.css`), le
   jeton `--split-brand` et sa ligne de contraste (§19.7), `REFERRAL_SIDE` dans
   `sides.tsx` (le code du §19.7), les aperçus, l'inscription de `SplitPhone`
   et `SentPill` dans `.design-sync/config.json` (`componentSrcMap`, et

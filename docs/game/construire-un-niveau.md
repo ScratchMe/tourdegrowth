@@ -635,6 +635,11 @@ autre session, sans rien relire d'autre que l'état d'A24.
   manquante (§21.0). Si la CI rougit sur sa PR, l'orchestrateur relance un
   sous-agent avec le journal de la CI et la même branche (une « relance de
   correction », dans le prompt).
+- **Les relecteurs avant la PR** (ACT-1, le 2026-10-04) : la CI tourne
+  environ 13 minutes et chaque push la relance. L'orchestrateur attend donc
+  le retour des relecteurs, applique leurs corrections, puis ouvre la PR et
+  pousse aussitôt la case cochée (ce push annule un run qui vient de partir,
+  sans rien coûter). Une correction poussée en pleine CI la recommence.
 - **Un seul clone pour les deux** : tant que le sous-agent travaille (l'outil
   Agent peut le lancer en arrière-plan), l'orchestrateur ne change pas de
   branche et n'écrit rien dans le clone ; il peut lire. Les modifications non
