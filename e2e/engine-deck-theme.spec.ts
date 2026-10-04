@@ -99,6 +99,30 @@ for (const locale of ["en", "fr"] as const) {
 }
 
 /*
+ * A chart in the PNG (A21.9): html-to-image copies an <svg> whole without walking it, so its lines and curves lost
+ * their classes' strokes in the image — no cost line, no margin line, the MRR curve filled black. The export writes
+ * each SVG child's computed style inline for its duration: the pixel under the cost line is ink, not the paper.
+ */
+test("the PNG keeps a chart's lines: under the unit economics' cost line, ink (A21.9)", async ({ page }) => {
+  await openDeck(page, "fr");
+  const slide = page.getByTestId("slide-unit-economics");
+  const cost = slide.locator('[data-testid="slide-payback-chart"] svg line[class*="cost"]');
+  await expect(cost).toHaveCount(1);
+  // The cost line's middle, in the 1 920-pixel slide's own coordinates (the slide on screen is scaled down).
+  const at = await slide.evaluate((el) => {
+    const box = el.getBoundingClientRect();
+    const line = el.querySelector('[data-testid="slide-payback-chart"] svg line[class*="cost"]')!.getBoundingClientRect();
+    const k = 1920 / box.width;
+    return { x: Math.round((line.left + line.width / 2 - box.left) * k), y: Math.round((line.top + line.height / 2 - box.top) * k) };
+  });
+  const download = page.waitForEvent("download");
+  await page.getByTestId("deck-png-unit-economics").click();
+  const [r, g, b] = await pngPixel(page, (await (await download).path())!, at.x, at.y);
+  // Ink is dark; the paper around it is rgb(231, 225, 210).
+  expect(Math.max(r, g, b)).toBeLessThan(120);
+});
+
+/*
  * The PDF is the browser's print of the deck (§10.2): no file to read a pixel
  * of, so the print sheet is read where it applies — under print media, each
  * slide keeps the ground it is painted with, and `print-color-adjust: exact`
