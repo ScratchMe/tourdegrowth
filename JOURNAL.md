@@ -1092,3 +1092,29 @@ C'est ce dernier réglage qui est appliqué dans `levels/referral.ts`. Le test F
 **Corrigé en route** : le commentaire de l'amende dans `levels/referral.ts` citait encore les « 1 à 2 % » des amendes publiées. La spécification les avait retirés à la relecture de copie, faute de source.
 
 **Vérifié** : `tsc` et `eslint` propres ; la suite du jeu et le budget des documents passent. Les tableaux F19 n'ont pas eu à bouger, puisqu'ils sont arrondis au centième.
+
+## B15 : la re-synchro d'A21, complète, et la page d'aperçu retrouvée (2026-10-04, #331)
+
+**La règle d'Antoine, posée pendant la synchro** : « tous les composants doivent s'y trouver dans leur dernière version ». La synchro envoie désormais les 112 composants (571 fichiers), pas seulement ceux que le pilote marque changés, puis l'index (112 cartes) et l'ancre relus côté projet (`.design-sync/NOTES.md`, « Every sync leaves every component current »). Le pilote en marquait trois (`MrrCurve`, `TotalBand`, `WhatIfFigures`), quinze cellules notées ; seuls les quatre avertissements attendus.
+
+**Ce que le contrôle a trouvé.** Trois contrats ouvraient sur « Props » sans description pour l'agent de Claude Design : le convertisseur prend la doc juste au-dessus de l'export, et une constante (A21 dans `TotalBand`, A20.d dans `PaybackChart`) ou l'interface (`WordmarkLink`) s'y était glissée. Réparés, et gardés par `src/__tests__/component-docs.test.ts`, qui échoue en nommant `TotalBand` si la constante revient. Les deux cellules « slide » de `MrrCurve` peignaient le fond de la carte sans `--chart-halo` : le défaut A21.4 survivait dans l'aperçu ; elles posent maintenant la variable comme `.curveCard`, et la doc des deux graphiques la nomme.
+
+**Dans le produit** : le panneau « Et si » du film affichait « +14 mois » entre « part ~4 mois avant » et « ~9 mois ». L'écart prenait les milieux bruts (−4,4 → 9,4) quand chaque cellule arrondit le sien. La ligne arrondit maintenant chaque côté au mois avant la différence (+13) ; l'aperçu `OneLever` passe de +1 à +2 (« ~30 à 31 » → « ~32 »). Test non vide : l'ancien code donne +14. Re-synchronisé dans une seconde passe (ancre `9974368b8c6c`, le contrat relu).
+
+**La page d'aperçu n'est pas le projet** — la cause de B8. Le lien qu'Antoine ouvre, `claude.ai/artifact/UYbV6SsEQP95kVFG7jr5Lq`, est un artefact « Design System » que Claude Design a tiré du projet `23b9671c…` le 2026-09-16 (son index : `source.projectId`, `exportedAt`), avec les 34 composants compilés le 11 ; `/design-sync` écrit dans le projet, que cette page ne lit pas. Rien n'était cassé : deux copies, et la synchro n'en écrivait qu'une. D13 (le signalement) devient sans objet. Une sonde `register_assets` (une carte, `MrrCurve`) envoyée avant la découverte ne change rien de visible.
+
+**Arrêté avant d'écrire dans l'artefact** : la génération de ses fichiers a été refusée par le garde de permissions de la session, comme une modification d'une ressource partagée sans accord explicite. Le chemin est prêt, la décision revient à Antoine (`CHANTIERS.md`, B16).
+
+**Vérifié** : `tsc`, `eslint` sur les fichiers touchés, les 3 329 tests unitaires après la fusion de `main` ; côté projet, `list_files` (quatre fichiers et un aperçu par composant), l'index relu identique au local, les contrats de `TotalBand` et `WhatIfFigures` relus, `report_validate` 112/0/0/0.
+
+## B16 : la page d'aperçu remise à jour, les 112 composants (2026-10-04, #331)
+
+**Le feu vert d'Antoine** : « mets l'artefact à jour ». L'artefact « Design System » [UYbV6SsEQP95kVFG7jr5Lq](https://claude.ai/artifact/UYbV6SsEQP95kVFG7jr5Lq), la page qu'il ouvre, avait les 34 composants du 2026-09-16.
+
+**Comment** : `.design-sync/build-ds-artifact.mjs` refait depuis `ds-bundle` la conversion que Claude Design avait faite une fois en septembre, dans la même forme. Un `preview.html` par composant, avec le module d'aperçu en ligne et sans les balises que le cadre de la page fournit déjà. Une fiche tirée du `.prompt.md`, les types, le bundle et sa feuille, React 19.3 au lieu de 18.3. Un `tokens.json` refait depuis les 430 jetons, au format de listes du type : 161 couleurs, les longueurs réparties en trois familles pour tenir sous 60, 80 styles de texte. Quinze valeurs composées tombent, la feuille les garde. L'index est relu juste avant d'être réécrit : seuls `libraries` et `lastChange` changent. Le reste vient des règles que porte l'artefact lui-même (`SKILL.md`, `format.md`).
+
+**Vérifié avant de publier** : les 112 aperçus rendus en local dans un cadre qui imite celui de la page (jetons, polices, feuille, React, bundle) donnent 408 cellules, aucune vide, avec un coup d'œil sur `TotalBand`, `NightSurface` et `MrrCurve`. Deux signalements ne viennent pas de la conversion : `ErrorScreen` journalise exprès les erreurs qu'il montre, et `GlossaryTerm` produit un avertissement de développement de React que les cartes du projet ont déjà.
+
+**Publié** en deux appels (versions 11 et 12). Le premier a été refusé une fois : les `.d.ts` et `.jsx` doivent être déclarés `text/plain`. La liste relue montre un dossier par composant ; `PillarChip` et React 18 sont partis. Les fichiers que la page génère elle-même (`manifest.json`, `api/`, `tokens.css`) restent ceux de septembre jusqu'à son prochain enregistrement : le format interdit de les écrire, et les aperçus n'en dépendent pas, puisque la feuille porte toutes les valeurs.
+
+**Désormais** : chaque synchro refait l'artefact (`CHANTIERS.md`, prompt B, étape 5 ; `.design-sync/NOTES.md`, « The Design System artifact »). D13, le signalement, est sans objet.

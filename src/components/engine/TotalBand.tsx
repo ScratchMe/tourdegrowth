@@ -25,6 +25,8 @@ export interface TotalBandProps {
   "data-testid"?: string;
 }
 
+const valueClass = (missing?: boolean) => (missing ? `${styles.value} ${styles.missing}` : styles.value);
+
 /**
  * The hybrid's sum, once, at the top of its board — design system extension
  * 07 (brief 07 Q18, A18 T5). Two engines, one total (C4):
@@ -42,8 +44,6 @@ export interface TotalBandProps {
  * The link is its last line. Text only, and a definition list: a screen
  * reader hears each label with its figure.
  */
-const valueClass = (missing?: boolean) => (missing ? `${styles.value} ${styles.missing}` : styles.value);
-
 export function TotalBand({ eyebrow, title, engines, total, totals, link, headingId = "engine-total-title", "data-testid": testId }: TotalBandProps) {
   return (
     <section className={styles.root} aria-labelledby={headingId} data-testid={testId}>

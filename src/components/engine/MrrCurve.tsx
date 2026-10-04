@@ -54,7 +54,9 @@ const DEFAULT_WIDTH = 720;
  * - one figure on the curve, today's MRR at its origin. The MRR in twelve
  *   months is printed once, under it, by the card — real text.
  *
- * The SVG is `aria-hidden`; `summary` says the curve in words.
+ * The SVG is `aria-hidden`; `summary` says the curve in words. The labels
+ * carry a halo of their ground: the page's, unless the parent sets
+ * `--chart-halo` to its own (a card, a white slide — A21.4).
  */
 export function MrrCurve({
   today,

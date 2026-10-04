@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { MrrCurve } from "tour-de-growth";
 
 /*
@@ -188,16 +189,25 @@ export const Phone = () => (
   </div>
 );
 
+/** The deck's curve card (`.curveCard`): its ground, its padding, and its halo (A21.4). */
+const SLIDE_CARD = {
+  background: "var(--surface-card)",
+  padding: "14px 24px",
+  width: 698,
+  boxSizing: "border-box",
+  "--chart-halo": "var(--surface-card)",
+} as CSSProperties;
+
 /**
  * A what-if slide (`SlideWhatIf`), in English: the deck's `curve` for the churn lever alone (6
  * → 4 %, of `FILM_LEVERS`), « with this what-if » against today's pace. `medium="slide"`, 650
  * × 250 — tall, because churn leaves the month's funnel as it is: the deck's type (18px and
  * up), the keys in a legend under the plot. Shown at its real size on the curve card's ground
- * (`--surface-card`), whose padding the cell keeps; the start label's halo is painted in
- * `--surface-page`, so on this card it shows as a paper edge — as on the slide.
+ * (`--surface-card`), whose padding the cell keeps. The card also sets `--chart-halo` to its
+ * own ground, as the deck's curve card does (A21.4): the start label's halo is invisible.
  */
 export const OnASlide = () => (
-  <div style={{ background: "var(--surface-card)", padding: "14px 24px", width: 698, boxSizing: "border-box" }}>
+  <div style={SLIDE_CARD}>
     <MrrCurve
       medium="slide"
       width={650}
@@ -236,7 +246,7 @@ export const OnASlide = () => (
       keys={{ today: "at today's pace", whatif: "with this what-if" }}
       start={"€48,000 today"}
       xLabels={["August 2026", "February 2027", "August 2027"]}
-      summary={"The MRR month by month, from €48,000 today: ~€80,000 in 12 months at today's pace, ~€94,000 with your what-ifs."}
+      summary={"The MRR month by month, from €48,000 today: ~€80,000 in 12 months at today's pace, ~€94,000 with this what-if."}
     />
   </div>
 );
@@ -247,7 +257,7 @@ export const OnASlide = () => (
  * above the drawn levers (650 × 135), on the curve card's ground.
  */
 export const OnTheScenarioSlide = () => (
-  <div style={{ background: "var(--surface-card)", padding: "14px 24px", width: 698, boxSizing: "border-box" }}>
+  <div style={SLIDE_CARD}>
     <MrrCurve
       medium="slide"
       width={650}
@@ -286,7 +296,7 @@ export const OnTheScenarioSlide = () => (
       keys={{ today: "au rythme d'aujourd'hui", whatif: "avec les 3 « Et si »" }}
       start={"48 000 € aujourd'hui"}
       xLabels={["août 2026", "février 2027", "août 2027"]}
-      summary={"Le MRR mois par mois, depuis 48 000 € aujourd'hui : ~80 000 € dans 12 mois au rythme actuel, ~120 000 € avec tes « Et si »."}
+      summary={"Le MRR mois par mois, depuis 48 000 € aujourd'hui : ~80 000 € dans 12 mois au rythme actuel, ~120 000 € avec les 3 « Et si »."}
     />
   </div>
 );
