@@ -10,7 +10,10 @@ import type { Translatable } from "@/lib/i18n/translatable";
  * **TODO: à relire** (convention 6). The five zone questions are the
  * prototype's own French (its `<nav class="tour">`); their English, the
  * company lines (from GAME-BRIEF 11.1-11.4), the ending labels and every
- * other string are new copy written by the code session.
+ * other string are new copy written by the code session. One exception
+ * besides the zone questions: `LEVEL_TEASERS.acquisition` in French is the
+ * prototype's too (`design/game/prototype-s-ils-reviennent.html`), hence
+ * validated — see the state of each `LEVEL_TEASERS` line below.
  *
  * Zone names show BOTH names (orchestrator decision 4, 2026-09-24):
  * « Retention — S'ils reviennent ». The Tour says "Retention" everywhere and
@@ -46,6 +49,14 @@ const ENDINGS_BY_LEVEL: Partial<Record<LevelSlug, Partial<Record<EndingId, Trans
  * (`nextLevelFor`), chosen in the browser. Each level's own December copy
  * used to carry the other's line; these two are those lines, moved as they
  * stood. A level adds its own at the step that makes it a `LevelSlug`.
+ *
+ * The state of each line (moved, so each keeps the one it had):
+ * - `acquisition`, French: the prototype's own French, validated, not marked;
+ *   `game-retention.test.ts` keeps it word for word (C11).
+ * - `acquisition`, English: TODO: à relire — premier jet du 2026-09-24, venu du
+ *   niveau 1 (`retention.ts`).
+ * - `retention`, both languages: TODO: à relire — écrites pour A12.c le
+ *   2026-10-01, venues du niveau 2 (`acquisition.ts`).
  */
 export const LEVEL_TEASERS: Record<LevelSlug, Translatable> = {
   acquisition: t(
