@@ -1863,7 +1863,7 @@ export const ENGINE_COPY = {
     arr: {
       term: { fr: "ARR", en: "ARR" },
       definition: {
-        fr: "Ton revenu annuel, extrapolé de ton revenu mensuel : le MRR × 12, comme si rien ne changeait pendant un an. Ce n'est pas un revenu acquis : avec des contrats au mois, des résiliations le font baisser dès le mois suivant.",
+        fr: "Ton revenu annuel, extrapolé de ton revenu mensuel : le MRR × 12, comme si rien ne changeait pendant un an. Ce n'est pas un revenu acquis : avec des contrats au mois, des résiliations le font baisser dès le mois suivant.",
         en: "Your annual revenue, extrapolated from your monthly revenue: the MRR × 12, as if nothing changed for a year. It isn't revenue in the bank: on monthly contracts, cancellations bring it down the very next month.",
       },
     },
