@@ -763,7 +763,17 @@ existe pas) :
   `hybrid`, `Hybrid`, `link` ou `Link` ;
 - toute feuille dont un segment du chemin **est exactement** `sa`, `saNote`,
   `saTyped`, `both`, `bothNote` ou `bothTyped` (les options de la carte de
-  départ propres au SaaS).
+  départ propres au SaaS) ;
+- ces chemins exacts, qui nomment les types eux-mêmes ou que l'app remplace
+  par ses propres clés (§21.6.4) : toute la clé `start` (la carte de départ
+  s'affiche avant qu'un type existe, et porte ses clés par type), `setup.types`,
+  `setup.typeLater`, `setup.motions`, `setup.motionPlg`, `setup.motionSlg`,
+  `setup.companyLabel`, `workbench.modelShort`, `example.bannerTitle`,
+  `example.company`, et `tools` (des noms de produits).
+
+Si une autre feuille désignée n'est jamais affichée pour une app, l'exécutant
+ne l'ajoute pas aux exclusions de lui-même : il la réécrit (c'est sans risque),
+ou il demande.
 
 Le test imprime la liste des feuilles désignées quand il échoue, pour que
 l'exécutant voie ce qui manque.
