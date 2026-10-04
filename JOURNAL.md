@@ -1041,6 +1041,39 @@ En anglais à 1 280 : tableau 3 372 → 4 212 (+840, le retour +828). À 390 : t
 
 **Fusionné deux fois avec `main`**, qui a pris les numéros pendant que la PR attendait : #323 (la re-synchro A20.f) a pris A21, puis #324 (l'app grand public et la place de marché) A22, A23, C56 à C74 et les prompts G et H. L'item du jeu est devenu **A24**, ses questions **C75 à C91**, son prompt le **prompt I**, partout (spécifications, tests, `types.ts`, `CHANTIERS.md`, `CLAUDE.md`). Le signe : la PR était en conflit, et sa CI n'avait jamais démarré, sans que rien ne le dise (`GITHUB.md` §1.8).
 
+## A21.2, l'anglais tranché : « before paying back » (2026-10-04, #327)
+
+**Décidé par Antoine** après #326 : dans le panneau « Et si », la perte en mois se dit en anglais « leaves ~4 months before paying back », plus clair que « leaves ~4 months early », et la même tournure que la slide d'unit economics (`unitLeavesBefore`). Le français ne bouge pas (« part ~4 mois avant », l'en-tête de la ligne dit déjà « Mois après remboursement »). `leavesFirst` reste « à relire » pour son français ; son marqueur dit que l'anglais est tranché.
+
+**Vérifié** : les tests du panneau et de la copie, les 18 specs « Et si », et la ligne regardée en anglais à 1 280 et à 390 px : plus longue, elle tient sur trois puis quatre lignes, sans rien couper ni faire défiler de côté. L'aperçu `WhatIfFigures` est repris.
+
+## C56 à C74, C92 et C93 : les décisions de l'app grand public et de la place de marché (2026-10-04)
+
+**La séance** : Antoine a tranché les dix-neuf questions de §21.13 et §22.15 une par une (le prompt C, avec `AskUserQuestion`), puis les deux questions de suivi que deux de ses réponses ont fait naître. Chaque réponse est consignée, datée, dans la colonne « Réponse d'Antoine » de sa spécification, et indexée dans `docs/decisions.md`.
+
+**Huit réponses vont contre la recommandation**, et elles changent les deux modèles :
+- **l'app grand public** (A22) : les achats intégrés et la publicité entrent dans la v1 (C56) ; la commission des stores devient un chiffre à part, avec un levier « Et si » (C59) ; une phrase sur la page, dans une réponse de la FAQ (C63). La question de suivi **C92** fixe le modèle de revenu : deux flux, les abonnements (MRR) et les achats et la pub sur les utilisateurs actifs du mois, chacun projeté par la boucle du MRR, et des unit economics par installation ;
+- **la place de marché** (A23) : les abonnements des vendeurs sont modélisés (C64) ; un réglage « produits ou services » et deux vocabulaires (C65) ; deux diagnostics, un par côté, comme l'hybride (C70) ; un brief 10 à Claude Design avant les écrans (C71). La question de suivi **C93** fixe les abonnements des vendeurs : un flux récurrent, quatre chiffres de plus côté offre, et une marge par flux (une précision d'Antoine sur la proposition).
+
+**Ce qui en découle** : §21 et §22 décrivent encore la version d'avant ces réponses. Un bandeau en tête de chacune le dit, et interdit d'exécuter avant leur réécriture (A22.b, A23.b). Antoine a aussi fixé la forme de l'exécution : un agent qui orchestre et lance des sous-agents autonomes, un travail qui avance par petites étapes et peut s'arrêter régulièrement. La réécriture en tient compte : une fiche autonome par PR, un graphe de dépendances, un tableau d'avancement, une procédure de reprise et des points d'arrêt.
+
+## A22.b et A23.b, premier pas : les modèles purs de l'app et de la place de marché (2026-10-04)
+
+**Ce qui est livré** : trois modules purs, isolés (rien ne les importe encore), et leurs tests. Ils portent l'argent que les décisions C56 à C74, C92 et C93 demandent, avant toute réécriture de §21 et §22 : les deux spécifications citeront leurs chiffres au lieu de les recalculer à la main, et l'exécution les importera sans les modifier.
+- **`stream.ts`** : la boucle commune à tout flux récurrent (`pathFromNextMonth`, qui redonne exactement `mrrPath` quand aucun levier ne joue sur la base) et les deux règles de prix d'une fuite, celle d'un flux (`flowGain`) et celle d'une rétention (`keptGain`), les mêmes que `impact.ts#rankingImpact`.
+- **`app-model.ts`** : les deux flux de l'app (C92), les abonnements et les achats et la pub sur les actifs du mois ; la commission des stores à part, prise sur ce que les stores encaissent et jamais sur la pub (C59) ; l'économie d'une installation, mois par mois, la part d'abonné décroissant avec le churn des abonnés et la part d'actif avec la rétention des actifs, sur 12 mois (le ratio de C92) et sur 36 mois (la perte, comme la LTV du SaaS) ; le remboursement trouvé sur cette courbe, interpolé dans le mois où il tombe ; la courbe elle-même, en 37 points, pour le graphique de remboursement ; le classement, où les flux qui mènent à J30 nourrissent aussi les actifs.
+- **`mkt-model.ts`** : la demande (le revenu net des commissions, les leviers d'argent sur tous les acheteurs dès le mois suivant, C69), l'offre (les abonnements des vendeurs, C64 et C93, avec leur propre marge), le total (les deux additionnés, ou les commissions seules quand les vendeurs ne paient rien, jamais une part prise pour le tout, S9), et l'économie d'un côté (un acheteur, un vendeur abonné). Le coût d'un vendeur abonné se déduit de celui d'un vendeur actif : × première vente ÷ conversion en abonné, sur la même cohorte.
+
+**Ce que disent les exemples** (chaque chiffre recalculé par un script indépendant avant d'être épinglé) :
+- **l'app** (une app de méditation, 12 000 installations par mois, 15 000 actifs) : 39 300 € de revenu ce mois-ci (28 800 € d'abonnements, 10 500 € d'achats et de pub), 42 678 € dans 12 mois ; une installation coûte 1,50 €, rapporte 1,43 € en 12 mois (0,95 fois son coût) et se rembourse en 13,01 mois ; la commission à 15 % au lieu de 22 % la rembourse en 11,55 mois. Le classement change avec le second flux : J30 à 15 % vaut 828 €/mois (576 d'abonnements, 252 d'achats et de pub), la conversion en abonné à 4 %, 768 € : aucune ne dépasse l'autre de 25 %, les deux seront nommées ensemble, quand les abonnements seuls nommaient la conversion ;
+- **la place de marché** (le mobilier d'occasion du premier jet) : la demande retrouve au centime les chiffres du modèle de référence de §22.11 (33 723,61 € dans 12 mois ; 46 351,72 € avec les trois « Et si ») ; l'offre, 900 vendeurs abonnés à 29 €, 60 nouveaux par mois, 3 % de churn : 35 866,43 € dans 12 mois ; un vendeur abonné coûte 200 €, se rembourse en 8,1 mois, 4,1 fois ; le total, 58 953,60 € ce mois-ci, 69 590,04 € dans 12 mois.
+
+**Deux choix de conception, écrits pour la réécriture** :
+- **La perte de l'app se lit sur 36 mois**, comme la LTV du SaaS : « l'installation n'a pas remboursé son coût dans la durée comptée ». La valeur sur 12 mois est le ratio que C92 compare au coût, affiché à côté. Une perte sur 12 mois dirait « perte » d'une installation qui se rembourse en 13 mois.
+- **Pas de trésorerie immobilisée pour l'app** : la formule d'A20 (dépense × payback ÷ 2) suppose un remboursement linéaire, que la marge décroissante d'une installation contredit. La réécriture de §21 le dit et le laisse renverser.
+
+**Vérifié** : les deux fichiers de tests (38 tests) ; chaque note de non-vacuité de leurs en-têtes mesurée en sabotant le code (la commission prise aussi sur la pub, la décroissance décalée d'un mois, le mois de remboursement pris entier, le total réduit aux abonnements, le coût du vendeur sans la première vente, le levier d'argent sur les seuls nouveaux acheteurs, le prix des vendeurs sur les seuls nouveaux abonnés, le total réduit aux commissions) : chacune fait rougir le test qu'elle nomme. `tsc` et `eslint` propres ; `vitest run --coverage` : 3 327 tests sur 3 327, seuils tenus.
+
 ## C75 à C91 : les décisions des trois derniers niveaux du jeu, et le referral durci (2026-10-04)
 
 **La séance** : les dix-sept questions d'A24, posées une par une avec leur reco, juste après le merge des spécifications (#325). Quatorze sur la reco, trois non :
