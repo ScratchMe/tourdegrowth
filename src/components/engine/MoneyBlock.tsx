@@ -63,7 +63,8 @@ export interface MoneyBlockProps {
  * but the « ? » of the words it teaches.
  *
  * 1. `figures` — the MRR and its ARR, side by side, MRR first: it is the
- *    typed fact; the ARR is « the MRR × 12 », said in its label.
+ *    typed fact; the ARR is « the MRR × 12 », said in its label, and its « ? »
+ *    says it is no revenue in the bank (bon à tirer nº10).
  * 2. `worth` — what one new customer is worth: the finding first, in words,
  *    and named by a tag when there is one — the loss in ink, solid (today's
  *    numbers say so), its « maybe » dashed (not yet). Never red: the loss is

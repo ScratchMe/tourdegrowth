@@ -642,21 +642,21 @@ export const ENGINE_COPY = {
      * "1 month") — since A20.d T5, when a runway can be typed (it was « {n} mois », and « 1 months » in English).
      */
     warnRunway: {
-      fr: "Rembourser un client prend {payback}, plus que ton runway ({n}) : tu gagnes de l'argent, mais peut-être après la fin de ta trésorerie.",
-      en: "Paying back a customer takes {payback}, longer than your runway ({n}): you make money, but maybe after your cash runs out.",
+      fr: "Un client met {payback} à rembourser son coût, plus que ton runway ({n}) : tu gagnes de l'argent, mais peut-être après la fin de ta trésorerie.",
+      en: "A customer takes {payback} to pay back its cost, longer than your runway ({n}): you make money, but maybe after your cash runs out.",
     },
     warnRunwayMaybe: {
-      fr: "Rembourser un client prend {payback} : peut-être plus que ton runway ({n}).",
-      en: "Paying back a customer takes {payback}: maybe longer than your runway ({n}).",
+      fr: "Un client met {payback} à rembourser son coût : peut-être plus que ton runway ({n}).",
+      en: "A customer takes {payback} to pay back its cost: maybe longer than your runway ({n}).",
     },
     /** C49, Antoine: with no runway typed, a payback of 30 months or more warns. */
     warnFloor: {
-      fr: "Rembourser un client prend {payback} : {n} ou plus. Tu gagnes de l'argent, mais tard. Saisis ton runway dans les Réglages pour y comparer ton payback.",
-      en: "Paying back a customer takes {payback}: {n} or more. You make money, but late. Type your runway in Settings to hold your payback against it.",
+      fr: "Un client met {payback} à rembourser son coût : {n} ou plus. Tu gagnes de l'argent, mais tard. Saisis ton runway dans les Réglages pour y comparer ton payback.",
+      en: "A customer takes {payback} to pay back its cost: {n} or more. You make money, but late. Type your runway in Settings to hold your payback against it.",
     },
     warnFloorMaybe: {
-      fr: "Rembourser un client prend {payback} : peut-être {n} ou plus. Saisis ton runway dans les Réglages pour y comparer ton payback.",
-      en: "Paying back a customer takes {payback}: maybe {n} or more. Type your runway in Settings to hold your payback against it.",
+      fr: "Un client met {payback} à rembourser son coût : peut-être {n} ou plus. Saisis ton runway dans les Réglages pour y comparer ton payback.",
+      en: "A customer takes {payback} to pay back its cost: maybe {n} or more. Type your runway in Settings to hold your payback against it.",
     },
   },
 
@@ -1855,6 +1855,18 @@ export const ENGINE_COPY = {
         en: "A count several numbers use, like the month's sign-ups. Typed once: change it in one number and it changes in the others, except one it would make impossible: that one keeps its own base, and its screen says so.",
       },
     },
+    /**
+     * TODO: à relire (convention 6) — neuf le 2026-10-04 (bon à tirer nº10, carte `money-head`, Antoine : « Rajouter un ?
+     * sur l'ARR […] revenu annuel extrapolé à partir du revenu mensuel ») : l'ARR du bloc d'argent n'est pas un revenu
+     * acquis. La durée des contrats n'est pas demandée (laissée de côté le même jour, `CHANTIERS.md` E).
+     */
+    arr: {
+      term: { fr: "ARR", en: "ARR" },
+      definition: {
+        fr: "Ton revenu annuel, extrapolé de ton revenu mensuel : le MRR × 12, comme si rien ne changeait pendant un an. Ce n'est pas un revenu acquis : avec des contrats au mois, des résiliations le font baisser dès le mois suivant.",
+        en: "Your annual revenue, extrapolated from your monthly revenue: the MRR × 12, as if nothing changed for a year. It isn't revenue in the bank: on monthly contracts, cancellations bring it down the very next month.",
+      },
+    },
     /** TODO: à relire (convention 6) — neuf le 2026-10-03 (A20.d T2, le retour du brief 09) : the cash a pace of acquisition keeps out of the bank (§20.6). */
     cashTied: {
       term: { fr: "trésorerie immobilisée", en: "cash tied up" },
@@ -2186,20 +2198,20 @@ export const ENGINE_COPY = {
     unitRetentionUnknown: { fr: "GRR et NRR incalculables : il manque {input}.", en: "GRR and NRR can't be computed. Missing: {input}." },
     /** C49, on a slide: « nous », and no « saisis ton runway » — a slide gives the room no orders. `{n}`: « 24 mois », « 30 mois », a duration with its unit. */
     unitWarnRunway: {
-      fr: "Rembourser un client prend {payback}, plus que notre runway ({n}) : nous gagnons de l'argent, mais peut-être après la fin de notre trésorerie.",
-      en: "Paying back a customer takes {payback}, longer than our runway ({n}): we make money, but maybe after our cash runs out.",
+      fr: "Un client met {payback} à rembourser son coût, plus que notre runway ({n}) : nous gagnons de l'argent, mais peut-être après la fin de notre trésorerie.",
+      en: "A customer takes {payback} to pay back its cost, longer than our runway ({n}): we make money, but maybe after our cash runs out.",
     },
     unitWarnRunwayMaybe: {
-      fr: "Rembourser un client prend {payback} : peut-être plus que notre runway ({n}).",
-      en: "Paying back a customer takes {payback}: maybe longer than our runway ({n}).",
+      fr: "Un client met {payback} à rembourser son coût : peut-être plus que notre runway ({n}).",
+      en: "A customer takes {payback} to pay back its cost: maybe longer than our runway ({n}).",
     },
     unitWarnFloor: {
-      fr: "Rembourser un client prend {payback} : {n} ou plus. Nous gagnons de l'argent, mais tard.",
-      en: "Paying back a customer takes {payback}: {n} or more. We make money, but late.",
+      fr: "Un client met {payback} à rembourser son coût : {n} ou plus. Nous gagnons de l'argent, mais tard.",
+      en: "A customer takes {payback} to pay back its cost: {n} or more. We make money, but late.",
     },
     unitWarnFloorMaybe: {
-      fr: "Rembourser un client prend {payback} : peut-être {n} ou plus.",
-      en: "Paying back a customer takes {payback}: maybe {n} or more.",
+      fr: "Un client met {payback} à rembourser son coût : peut-être {n} ou plus.",
+      en: "A customer takes {payback} to pay back its cost: maybe {n} or more.",
     },
     /** What the cash tile assumes, printed with it, as every « Et si » assumption is. */
     unitAssume: {
@@ -2979,8 +2991,8 @@ export const ENGINE_COPY = {
     cash: { fr: "Trésorerie", en: "Cash" },
     runway: { fr: "Runway, en mois", en: "Runway, in months" },
     runwayHint: {
-      fr: "Sert seulement à te prévenir quand rembourser un client prend plus longtemps.",
-      en: "Only used to warn you when paying back a customer takes longer.",
+      fr: "Sert seulement à te prévenir quand un client met plus longtemps à rembourser son coût.",
+      en: "Only used to warn you when a customer takes longer to pay back its cost.",
     },
     /** The box's unit, in the typed number's grammatical number (`wordUnit`): « 1 mois », "1 month", "24 months". */
     runwayMonth: { fr: "mois", en: "month" },

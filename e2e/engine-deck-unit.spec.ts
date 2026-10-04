@@ -138,7 +138,7 @@ for (const locale of ["fr", "en"] as const) {
         const slide = page.locator('[data-slide="unit-economics"]');
         const warning = slide.getByTestId("slide-unit-warning");
         await expect(warning).toHaveText(
-          locale === "fr" ? "Rembourser un client prend 32 mois : 30 mois ou plus. Nous gagnons de l'argent, mais tard." : "Paying back a customer takes 32 months: 30 months or more. We make money, but late.",
+          locale === "fr" ? "Un client met 32 mois à rembourser son coût : 30 mois ou plus. Nous gagnons de l'argent, mais tard." : "A customer takes 32 months to pay back its cost: 30 months or more. We make money, but late.",
         );
         expect(await warning.evaluate((el) => getComputedStyle(el).borderLeftStyle)).toBe("dashed");
         await expect(slide.getByTestId("slide-payback-chart")).toHaveAttribute("data-story", "pays-back");

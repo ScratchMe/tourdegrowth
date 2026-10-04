@@ -83,7 +83,7 @@ describe("WorthBars", () => {
 
 describe("CashWarning", () => {
   it("one sentence, marked when it is only a maybe", () => {
-    expect(html(createElement(CashWarning, {} as CashWarningProps, "Rembourser un client prend 33 mois"))).toMatch(/^<p class="[^"]*">Rembourser/);
+    expect(html(createElement(CashWarning, {} as CashWarningProps, "Un client met 33 mois à rembourser son coût"))).toMatch(/^<p class="[^"]*">Un client/);
     expect(html(createElement(CashWarning, { maybe: true } as CashWarningProps, "x"))).toContain('data-maybe="true"');
   });
 });

@@ -8,7 +8,7 @@ import { fill } from "./text";
 import styles from "./EngineTerm.module.css";
 
 /** The engine's own words with a « ? » (A18 T6, the return 07's five glossary entries; A20.d T2 and T5, the return 09's money and runway). */
-export type EngineTermId = "cohort" | "target" | "reference" | "window" | "sharedCount" | "cashTied" | "afterPayback" | "runway";
+export type EngineTermId = "cohort" | "target" | "reference" | "window" | "sharedCount" | "cashTied" | "afterPayback" | "runway" | "arr";
 
 const Scope = createContext<{
   openId: EngineTermId | null;

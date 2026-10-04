@@ -96,16 +96,16 @@ describe("the money block — the warning (C49)", () => {
     let state = withEntry(filmState(), "acq.cac", measured({ kind: "amount", amount: 3_000 }));
     state = withEntry(state, "ret.logo-churn", measured(ratio(8, 400)));
     const m = viewFr(state);
-    expect(m.cash.warning).toEqual({ text: `Rembourser un client prend 33${N}mois${N}: 30${N}mois ou plus. Tu gagnes de l'argent, mais tard. Saisis ton runway dans les Réglages pour y comparer ton payback.`, maybe: false });
+    expect(m.cash.warning).toEqual({ text: `Un client met 33${N}mois à rembourser son coût${N}: 30${N}mois ou plus. Tu gagnes de l'argent, mais tard. Saisis ton runway dans les Réglages pour y comparer ton payback.`, maybe: false });
   });
 
   it("a runway typed: longer than it warns, in its own words", () => {
     const base = withEntry(filmState(), "ret.logo-churn", measured(ratio(8, 400)));
     const state: EngineState = { ...base, setup: { ...base.setup, runwayMonths: 9 } };
     expect(viewFr(state).cash.warning?.text).toBe(
-      `Rembourser un client prend 21${N}mois, plus que ton runway (9${N}mois)${N}: tu gagnes de l'argent, mais peut-être après la fin de ta trésorerie.`,
+      `Un client met 21${N}mois à rembourser son coût, plus que ton runway (9${N}mois)${N}: tu gagnes de l'argent, mais peut-être après la fin de ta trésorerie.`,
     );
-    expect(viewEn(state).cash.warning?.text).toBe("Paying back a customer takes 21 months, longer than your runway (9 months): you make money, but maybe after your cash runs out.");
+    expect(viewEn(state).cash.warning?.text).toBe("A customer takes 21 months to pay back its cost, longer than your runway (9 months): you make money, but maybe after your cash runs out.");
   });
 });
 

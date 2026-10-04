@@ -3,7 +3,7 @@ import styles from "./CashWarning.module.css";
 
 export interface CashWarningProps {
   /**
-   * One sentence; its limit is a slot (C49): « Rembourser un client prend 11 mois, plus que ton runway (9 mois) :
+   * One sentence; its limit is a slot (C49): « Un client met 11 mois à rembourser son coût, plus que ton runway (9 mois) :
    * tu gagnes de l'argent, mais peut-être après la fin de ta trésorerie. » — the team's runway, or, with none typed,
    * the 30-month floor. Never a published reference (C1).
    */
