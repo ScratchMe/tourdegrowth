@@ -964,6 +964,25 @@ En anglais à 1 280 : tableau 3 372 → 4 212 (+840, le retour +828). À 390 : t
 
 **Vérifié** : le rendu des 112 cartes (112 sur 112, 0 vide, 0 mince, 0 identique), chaque feuille de capture lue avant sa note, les 21 aperçus du moteur et les six repris type-checkés contre les vrais composants ; après l'envoi, `list_files` (aucun chemin sous `design/`, les 21 dossiers `components/engine/`), l'ancre relue, l'index relu identique au local. Le volet Design System, lui, n'est pas vérifiable d'ici : il montrait encore la copie du 2026-09-11 (B8).
 
+## A22 et A23 : les spécifications de l'app grand public et de la place de marché (2026-10-04)
+
+**La demande** : Antoine pensait qu'il ne restait au moteur que « les deux motions suivantes, l'app grand public et la place de marché », et voulait l'effort pour finir. Correction d'abord : les deux motions (libre-service, assisté) et l'hybride sont faits ; l'app grand public et la place de marché sont l'autre axe du réglage, le **type**, grisé « Plus tard » (C4, C25 Q16), et rien ne fait attendre l'ouverture du moteur sur eux. Ce qui bloque l'ouverture est ailleurs : le nº9 (six décisions tranchées, **114 cartes jamais relues**, vérifié dans `cards/` de l'artifact : seules les six décisions y ont une entrée), dix chaînes laissées « à relire » par le nº10, A7.4, puis D2. Antoine a ensuite demandé les deux spécifications, « pour lancer l'implémentation plus tard » dans une session qui n'aurait plus qu'à exécuter.
+
+**Ce qui est écrit** :
+- **§21, `docs/engine/app-grand-public.md`** : une app par abonnement réutilise le libre-service tel quel (mêmes ids, mêmes formules, aucun fichier qui change de forme) ; ce qui diffère tient en trois couches, chacune avec un seul point d'entrée (la forme affichée, `displayShapeOf` ; un second catalogue complet ; un calque de copie fusionné une fois en tête de l'îlot, rempli par une règle de mots et son test). Les types s'ouvrent par `ENGINE_TYPES`, lu au build par la page, sans toucher `next.config.mjs`. Sept PR, ~10 jours-agent.
+- **§22, `docs/engine/place-de-marche.md`** : une troisième motion, `"mkt"`, exclusive et jamais stockée (`activeMotions(setup)`), sur le chemin qu'avait pris l'assisté ; quatorze chiffres ; une seule fuite pour les deux côtés ; l'offre nommée, jamais chiffrée en euros ; le taux de service chiffré sur les seuls nouveaux acheteurs (un minimum) ; l'argent en revenu net (GMV × commission) projeté par la boucle du MRR, sur des acheteurs actifs à 12 mois ; les leviers d'argent sur tous les acheteurs dès le mois 1. Neuf PR, ~23 jours-agent, après §21.
+- **C56 à C74**, chacune avec sa recommandation et ce qui change si on la renverse ; les deux documents appliquent les recommandations. Les prompts G et H de `CHANTIERS.md` lancent les sessions d'exécution une fois les questions tranchées.
+
+**Les deux exemples chiffrés ne sont pas de tête** :
+- celui de l'app a été calculé en faisant tourner `deriveEngine`, `buildScenario`, `leverAlone` et `buildDeck` sur ses entrées, par un test jetable supprimé ensuite (MRR dans 12 mois 32 479,21 €, conversion en abonné nommée à 768 €/mois contre 576 € pour la rétention à J30) ;
+- celui de la place de marché sort d'un modèle de référence écrit pour l'occasion, recopié en §22.11 comme oracle des tests (revenu net dans 12 mois 33 723,61 € ; taux de service nommé à 468 €/mois contre 351 € ; la chaîne de la fuite sur un an, 4 531,30 €, égale au gain du levier seul, et c'est un test).
+
+**Les faits sur les outils sont sourcés** en annexe des deux documents : les métriques d'App Store Connect et de la Play Console, les graphiques et les trois vues du revenu de RevenueCat (*Proceeds* : après commission et taxes), les commissions des stores, AdAttributionKit, les définitions du GMV, du take rate et du taux de service. La règle d'`engine-catalog.ts` est tenue : aucun menu inventé, et aucune fourchette dans une raison « sans repère » qui ne soit déjà dans le glossaire (la fourchette des take rates a été retirée de sa raison pour cela).
+
+**Les estimations** sont en jours-agent, l'unité du dépôt, avec leur calibrage écrit : A7.3 (estimé à ~12) s'est fait en deux jours de calendrier, A14 (16,5) en un. Ce qui fixe le calendrier, ce sont les réponses d'Antoine, les captures à relire et les bons à tirer.
+
+**Vérifié** : les chemins, types et fonctions cités relus dans le code de `main` (`5d98683`) par deux cartographies et des lectures directes ; `CLAUDE.md` sous son budget ; aucun fichier de `src/` modifié (doc seule).
+
 ## A21 : les huit défauts vus par les aperçus, et l'export PNG des graphiques (2026-10-04, #326)
 
 **Demandé par Antoine** après le merge de #323 : « lance-toi sur les corrections en A21 ». Les huit défauts possibles notés par la re-synchro sont reproduits un par un avant d'être corrigés. Tous étaient réels ; A21.7 était peut-être voulu, et la règle du composant l'a tranché.
