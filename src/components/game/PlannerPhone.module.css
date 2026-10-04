@@ -1,0 +1,232 @@
+/*
+ * Quandi's phone: the contents of its screen. The frame — caption, bezel,
+ * screen, app bar, flash — is PhoneFrame.module.css, shared with the other
+ * levels' phones. The screen is another company's app: it reads only the
+ * --app-* island and its own brand violet (--planner-brand, game.css). Every
+ * text pairing below is one game-token-contrast.test.ts measures: the violet
+ * as text on white, white on the violet, and the --app-* pairs already there.
+ */
+
+/* Quandi's brand, for the frame's dot. */
+.planner {
+  --phone-brand: var(--planner-brand);
+}
+
+/* Spans styled as the app's buttons: drawn, never pressable (plan R14). */
+.button {
+  display: block;
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-panel);
+  background: var(--planner-brand);
+  color: var(--app-on-brand);
+  text-align: center;
+  font-weight: 600;
+}
+
+.buttons {
+  display: flex;
+  gap: var(--space-4);
+}
+
+/* Side by side, two buttons share the width: the same size, the same style. */
+.buttons > .button {
+  flex: 1;
+}
+
+.link {
+  font: var(--app-text-sm);
+  color: var(--app-muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.brandLink {
+  font: var(--app-text-sm);
+  color: var(--planner-brand);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.sheet {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-5) var(--space-6);
+  border: var(--border-width-hairline) solid var(--app-line);
+  border-radius: var(--radius-panel);
+  background: var(--app-modal-bg);
+}
+
+.sheetText {
+  font: var(--app-text-sm);
+}
+
+.banner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-5) var(--space-6);
+  border: var(--border-width-hairline) solid var(--app-line);
+  border-radius: var(--radius-panel);
+  background: var(--app-modal-bg);
+}
+
+.bannerText {
+  font: var(--app-text-sm);
+}
+
+.signup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.signupTitle {
+  font-weight: 700;
+}
+
+.field {
+  font: var(--app-text-sm);
+  color: var(--app-muted);
+}
+
+.ticked {
+  font: var(--app-text-sm);
+  color: var(--app-ink);
+}
+
+.small {
+  font: var(--app-text-link);
+  color: var(--app-muted);
+}
+
+.analysis {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  font: var(--app-text-sm);
+}
+
+/* The progress bar: a track and a fill, decorative — the line says the percentage. */
+.track {
+  height: var(--space-3);
+  border-radius: var(--radius-round);
+  background: var(--app-line);
+  overflow: hidden;
+}
+
+/* The copy's « 64 % ». A span: it needs its own box to have a width. */
+.fill {
+  display: block;
+  width: 64%;
+  height: 100%;
+  background: var(--planner-brand);
+}
+
+.home {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.homeEmpty {
+  color: var(--app-muted);
+}
+
+/* The tooltip points up at the button it explains, and has no way to be closed. */
+.tip {
+  position: relative;
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-panel);
+  background: var(--app-push-bg);
+  color: var(--app-push-text);
+  font: var(--app-text-sm);
+}
+
+.tip::before {
+  content: "";
+  position: absolute;
+  top: calc(-1 * var(--space-3));
+  left: var(--space-7);
+  width: var(--space-5);
+  height: var(--space-3);
+  background: var(--app-push-bg);
+  clip-path: polygon(50% 0, 0 100%, 100% 100%);
+}
+
+.checklist {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  border: var(--border-width-hairline) solid var(--app-line);
+  border-radius: var(--radius-panel);
+  background: var(--app-modal-bg);
+  font: var(--app-text-sm);
+}
+
+.checklistClose {
+  flex: none;
+  color: var(--app-muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.push {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-panel);
+  background: var(--app-push-bg);
+  color: var(--app-push-text);
+  font: var(--app-text-sm);
+}
+
+.pushIcon {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--space-1);
+  background: var(--planner-brand);
+}
+
+.notice {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-panel);
+  font: var(--app-text-sm);
+}
+
+.ok {
+  background: var(--app-ok-bg);
+  color: var(--app-ok-text);
+}
+
+.calls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  border: var(--border-width-hairline) solid var(--app-line);
+  border-radius: var(--radius-panel);
+  background: var(--app-modal-bg);
+}
+
+.callsText {
+  font: var(--app-text-sm);
+  font-weight: 600;
+}
+
+.answers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.answer {
+  font: var(--app-text-sm);
+  color: var(--app-muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}

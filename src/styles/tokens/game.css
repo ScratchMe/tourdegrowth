@@ -101,6 +101,13 @@
    * reads the --app-* island for everything else.
    */
   --shop-brand: #1d6b46; /* 6.47 as text on white */
+  /*
+   * Quandi's app (activation level, GAME-BRIEF §18.7): a violet, foreign to
+   * Tour de Growth and to the other apps' blue and green. It passes 4.5:1 on
+   * white both ways: as text, and as the ground of its buttons under white
+   * (--app-on-brand).
+   */
+  --planner-brand: #6a4bd8; /* 5.82 as text on white, and white on it */
 
   /* The bezel is 1.06:1 against --night-0: its outline carries the edge. */
   --phone-bezel: #0b0907;
