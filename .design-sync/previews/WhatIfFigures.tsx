@@ -45,7 +45,7 @@ export const OneLever = () => (
             { id: "ltvCac", label: "LTV:CAC", today: "6 à 6,9 fois", whatif: "8,1 à 9,2 fois", change: "+2,2 · mieux" },
             { id: "gap", label: "Par nouveau client", today: "~2 520 € à 2 960 € de plus", whatif: "~2 650 € à 3 080 € de plus", change: "+130 € · mieux" },
             { id: "payback", label: "CAC payback", today: "5 à 6 mois", whatif: "4 mois", change: "−1 mois · mieux" },
-            { id: "after", label: "Mois après remboursement", today: "~30 à 31 mois", whatif: "~32 mois", change: "+1 mois · mieux" },
+            { id: "after", label: "Mois après remboursement", today: "~30 à 31 mois", whatif: "~32 mois", change: "+2 mois · mieux" },
           ],
         },
         {
@@ -92,7 +92,7 @@ export const ThreeLevers = () => (
             { id: "ltvCac", label: "LTV:CAC", today: "0.79×", whatif: "1.6×", change: "+0.79 · better" },
             { id: "gap", label: "Per new customer", today: "~€400 short", whatif: "~€830 more", change: "+€1,200 · better" },
             { id: "payback", label: "CAC payback", today: "21 months", whatif: "16 months", change: "−5 months · better" },
-            { id: "after", label: "Months after payback", today: "leaves ~4 months before paying back", whatif: "~9 months", change: "+14 months · better" },
+            { id: "after", label: "Months after payback", today: "leaves ~4 months before paying back", whatif: "~9 months", change: "+13 months · better" },
           ],
         },
         {

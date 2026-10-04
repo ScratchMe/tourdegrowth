@@ -52,6 +52,12 @@ export interface PaybackChartProps {
   "data-testid"?: string;
 }
 
+/** A label hung right of a point this close to the plot's end would run off it: it ends at the point instead. */
+const LABEL_ROOM = 320;
+const nearEnd = (x: number, end: number) => x > end - LABEL_ROOM;
+/** `size="sm"`: where the months' line starts, past the axis's « 0 ». */
+const TIME_INDENT = 34;
+
 /**
  * One customer, month by month — design system extension 09 (Q12). It
  * replaces the unit-economics slide's 0–36 month bar, on the same axis, with
@@ -71,14 +77,10 @@ export interface PaybackChartProps {
  *   line stays, it is known.
  *
  * Ink only, never red: a loss is arithmetic on the team's own numbers, not
- * the leak (C48). Labels carry a paper halo where they cross a line.
+ * the leak (C48). Labels carry a halo of their ground where they cross a
+ * line: the page's, unless the parent sets `--chart-halo` to its own (a
+ * card, a white slide — A21.4).
  */
-/** A label hung right of a point this close to the plot's end would run off it: it ends at the point instead. */
-const LABEL_ROOM = 320;
-const nearEnd = (x: number, end: number) => x > end - LABEL_ROOM;
-/** `size="sm"`: where the months' line starts, past the axis's « 0 ». */
-const TIME_INDENT = 34;
-
 export function PaybackChart({
   story,
   monthlyMargin,

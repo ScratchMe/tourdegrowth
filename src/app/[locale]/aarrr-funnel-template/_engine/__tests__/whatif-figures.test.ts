@@ -42,7 +42,8 @@ describe("whatIfFigureGroups", () => {
     expect(rowOf(g, "cac")).toMatchObject({ whatif: nb("~1^400^€"), change: nb("−480^€ ·^mieux") });
     expect(rowOf(g, "gap")).toMatchObject({ whatif: nb("~830^€ de plus"), change: nb("+1^200^€ ·^mieux") });
     expect(rowOf(g, "payback")).toMatchObject({ whatif: nb("16^mois"), change: nb("−5^mois ·^mieux") });
-    expect(rowOf(g, "after").whatif).toBe(nb("~9^mois"));
+    // From « part ~4 mois avant » to « ~9 mois »: +13, what the two cells add up to — the raw middles said +14 (B15).
+    expect(rowOf(g, "after")).toMatchObject({ whatif: nb("~9^mois"), change: nb("+13^mois ·^mieux") });
     expect(rowOf(g, "spend")).toMatchObject({ whatif: nb("93^480^€"), change: "stable" });
     expect(rowOf(g, "cash")).toMatchObject({ whatif: nb("~740^000^€"), change: nb("−250^000^€ ·^mieux") });
   });

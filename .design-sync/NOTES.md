@@ -331,10 +331,50 @@ component's CSS on 2026-09-11; the story now shows the intended shape, and its
 doc comment says why the layout uses an auto margin rather than
 `justify-content`.
 
+## Every sync leaves every component current — Antoine, 2026-10-04
+
+« De manière générale, il faut que la page d'aperçu soit à jour, tous les
+composants doivent s'y trouver dans leur dernière version. » So a sync no
+longer uploads only what the driver keys as changed: **it uploads every
+component** (`components/**` and `_preview/**`, 560 files for 112), with the
+shared files, between the two sentinels, then the manifest and the anchor.
+Identical bytes cost nothing; a file the anchor wrongly carried forward, or one
+edited on the project's side, is overwritten. After the upload, check three
+things, not one: `list_files` holds four files per component and one
+`_preview/<Name>.js` each, the manifest read back has as many cards as
+components, and `_ds_sync.json` read back has the local `bundleSha12`.
+
+Two things the files cannot prove, and the sync must say so rather than claim
+them: **a card that shows an old state** (a contract changed without a cell
+that shows it: write the cell, as B15 did for `TotalBand`'s `missing`), and
+**the Design System pane** (B8, below: frozen on 2026-09-11 whatever is
+uploaded; only someone looking at it can tell). A contract with no description
+is caught earlier, by `src/__tests__/component-docs.test.ts` (B15).
+
 ## Synced
 
 Project `23b9671c-a55b-452e-aa41-39906ee71ba8` ("Tour de Growth"), pinned as
-`projectId` in `config.json`. **Last upload: 2026-10-04, B13 and A20.f** (the
+`projectId` in `config.json`. **Last upload: 2026-10-04 in the evening, B15**
+(A21's retouched components, and every other component with them on Antoine's
+rule above), from a claude.ai/code cloud session — **112 components, 408
+story cells**, all graded good. The driver keyed 3 components as changed
+(`MrrCurve`: the slide cells now set `--chart-halo` as the deck's curve card
+does, and their summaries are the deck's; `TotalBand`: `missing`;
+`WhatIfFigures`: « leaves ~4 months before paying back »), all 15 cells
+regraded; 3 more went up for their contracts (`PaybackChart`, `TotalBand` and
+`WordmarkLink` had lost their description, see "Found in B15"), and
+`HowItCompares` for its emitted files (its `Situates` cell already drew no
+swatch: the card renders the live bundle). Then **all 112 went up**: 571
+files, no delete, then the sentinel with the manifest (112 cards, read back
+identical), then `_ds_sync.json` (read back: `bundleSha12` `afc9af8e4bc3`).
+Four driver runs; `report_validate`: 112 total, 0 bad, 0 thin, 0 identical.
+**A second pass the same evening** carried `WhatIfFigures` alone, after the
+months-after-payback fix (« +13 », see "Found in B15"): 6 cells regraded, its
+four files, its preview and the bundle between the sentinels, then the
+manifest and the anchor, `9974368b8c6c`; its contract read back with
+« +13 months · better ». **A probe for the pane (B8)**, now moot: one card,
+`MrrCurve`, registered with the legacy `register_assets` before the cause
+below was found; it changes nothing anyone sees. The upload before it: 2026-10-04, B13 and A20.f (the
 growth engine's 21 components, A18's and A20's, and the copy those two retired
 from six older previews), from a claude.ai/code cloud session — **112
 components, 408 story cells**, all graded good. The driver keyed 21 components
@@ -919,6 +959,37 @@ Two presentation traps, fixed in the previews:
   `PaybackChart` labels crossed by a line; a one-lever slide's curve summary
   in « tu » (`deck.ts`, `curveSummaryWhatif`).
 
+### Found in B15 (2026-10-04), by the contract check and by grading
+
+- **Three contracts opened on « Props »**, with no description for the design
+  agent: the converter takes a component's doc from the comment directly above
+  its export, and something sat between them — a one-line helper A21 added
+  above `TotalBand`, two constants above `PaybackChart` since A20.d, and
+  `WordmarkLink`'s doc on its props interface. Moved, and
+  `src/__tests__/component-docs.test.ts` now fails the CI on the next one
+  (non-vacuity: the helper put back names `TotalBand`).
+- **The curve card's halo**: `MrrCurve`'s two slide cells painted the card's
+  ground but not `--chart-halo`, so the start label kept a page-coloured edge
+  — the A21.4 defect, kept alive by the preview. They now set it as the deck's
+  `.curveCard` does, and both components' docs name the variable.
+- **Seen in the product, fixed the same day**: in `WhatIfFigures`' `ThreeLevers`,
+  the change read « +14 months » from « leaves ~4 months before paying back »
+  to « ~9 months »: the change was the raw middles' (−4.4 → 9.4), each cell
+  rounds its own. The months-after row now rounds each side to whole months
+  before the difference (`whatif-figures.ts`), so it adds up to what the cells
+  say (+13); `OneLever` moves with it, « ~30 à 31 » → « ~32 », +1 → +2. Unit
+  test non-vacuous (the old code gives +14).
+- **The page Antoine opens is not this project.** On 2026-09-16 Claude Design
+  converted the project into an Artifact of type "Design System",
+  claude.ai/artifact/UYbV6SsEQP95kVFG7jr5Lq: its index says
+  `"source": {"app": "claude-design", "projectId": "23b9671c-…", "exportedAt":
+  "2026-09-16T21:51:38Z"}`, and it holds the 34 components compiled then
+  (`PillarChip` included; no engine, game or viz), in its own files under
+  `project/`. Every sync since wrote to the project, which that page never
+  reads: **that is B8**. Bringing the page up to date means rewriting the
+  artifact's files from the bundle (`CHANTIERS.md`, B16), which waits on
+  Antoine's go.
+
 ## `_ds_manifest.json` — Claude Design never rebuilt it, and writing it was not enough
 
 **What Antoine saw on 2026-10-01**: no kilometre marker anywhere in the
@@ -990,6 +1061,15 @@ also shows content removed on 2026-09-29, the refresh has failed since at
 least the first upload after 2026-09-11, before `design/` held anything. No
 file the sync can write restarts it. It is a Claude Design defect to report
 (`CHANTIERS.md`, B8 and D13), not a step this repo is missing.
+
+**The cause, found on 2026-10-04 (B15)**: the pane is not the project's. On
+2026-09-16 Claude Design converted the project into an Artifact of type
+"Design System" (claude.ai/artifact/UYbV6SsEQP95kVFG7jr5Lq; its index's
+`source` names this project and `exportedAt` 2026-09-16T21:51:38Z) from the
+34 cards compiled on 2026-09-11, and the page has read that artifact's own
+files ever since. Nothing restarts because nothing is broken: the project
+and the artifact are two copies, and the sync writes to the first. The fix
+is to write the second (`CHANTIERS.md`, B16).
 
 ## Re-sync risks
 

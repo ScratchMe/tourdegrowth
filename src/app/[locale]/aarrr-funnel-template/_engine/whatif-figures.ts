@@ -111,11 +111,12 @@ export function whatIfFigureGroups(input: Input, motion: Motion, targets: Partia
     higherIsBetter: boolean,
     missing: readonly MetricId[],
     round?: (v: number, extra: number) => number,
+    diff: (a: Interval, b: Interval) => number = (a, b) => middle(b) - middle(a),
   ): FigureRow => {
     const extra = moved && a && b && round ? pairPrecision(middle(a), middle(b), round) : 0;
     const today = a ? show(a, extra) : "?";
     const whatif = b ? show(b, extra) : "?";
-    const d = a && b ? middle(b) - middle(a) : 0;
+    const d = a && b ? diff(a, b) : 0;
     const change = !moved ? null : !a || !b ? "?" : today === whatif || d === 0 ? w.stable : `${delta(d)} ·\u00a0${sense(higherIsBetter ? d > 0 : d < 0)}`;
     return { id, label, today, whatif: moved ? whatif : null, change, missing: !a || (moved && !b) ? missingFor(missing) : null };
   };
@@ -156,7 +157,11 @@ export function whatIfFigureGroups(input: Input, motion: Motion, targets: Partia
     row("ltvCac", w.rowLtvCac, t.ltvCac, p.ltvCac, ratio, ratioDelta, true, [...ltvIds, ...cacIds]),
     gapRow,
     fromKpi("payback"),
-    row("after", w.rowAfter, t.afterPayback, p.afterPayback, afterText, monthsDelta, true, [...ltvIds, ...paybackIds]),
+    // Whole months on each side before the difference: « part ~4 mois avant » then « ~9 mois » is +13, never the +14
+    // of the raw middles (B15).
+    row("after", w.rowAfter, t.afterPayback, p.afterPayback, afterText, monthsDelta, true, [...ltvIds, ...paybackIds], undefined, (a, b) =>
+      Math.round(middle(b)) - Math.round(middle(a)),
+    ),
   ].filter((r): r is FigureRow => r !== null);
   const cash = [
     // A fact, to the unit: the month's spend never moves with the what-ifs.
