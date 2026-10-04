@@ -460,10 +460,19 @@ est libre. Le jeu reste fermé (C23).
 | Unité | Quoi | État |
 |---|---|---|
 | A24.spec | Les spécifications, le guide, les modèles en brouillon | **Livré le 2026-10-04** ([#325](https://github.com/ScratchMe/tourdegrowth/pull/325)) |
-| U0 | Ce qui change à trois niveaux : le bloc « Niveau suivant » (QC1), le budget d'URL des statistiques, le gabarit du hub | À faire, avant le premier niveau |
-| ACT-1 · ACT-2 · ACT-3 · ACT-4 | L'activation : copie, téléphone, branchement, specs | À faire |
-| REF-1 · REF-2 · REF-3 · REF-4 | Le referral : copie, téléphone, branchement, specs | À faire |
-| REV-1 · REV-2 · REV-3 · REV-4 | Le revenue : copie, téléphone, branchement, specs | À faire |
+| U0 | Ce qui change à trois niveaux : le bloc « Niveau suivant » (C75), les bandeaux à l'étape (C76), le budget d'URL des statistiques, le gabarit du hub | À faire, avant le premier niveau |
+| ACT-1 | L'activation : la copie | À faire |
+| ACT-2 | L'activation : le téléphone et sa pastille | À faire |
+| ACT-3 | L'activation : le branchement | À faire |
+| ACT-4 | L'activation : les specs Playwright | À faire |
+| REF-1 | Le referral : la copie | À faire |
+| REF-2 | Le referral : le téléphone et sa pastille | À faire |
+| REF-3 | Le referral : le branchement | À faire |
+| REF-4 | Le referral : les specs Playwright | À faire |
+| REV-1 | Le revenue : la copie | À faire |
+| REV-2 | Le revenue : le téléphone et sa pastille | À faire |
+| REV-3 | Le revenue : le branchement | À faire |
+| REV-4 | Le revenue : les specs Playwright | À faire |
 | A24.bat | Le bon à tirer de chaque niveau construit (`/bon-a-tirer`, par Antoine), puis la recette avec les niveaux 1 et 2 (D9) | Après chaque X-4 |
 | A24.sync | La re-synchro des composants neufs (`PlannerPhone`, `CookiePill`, `SplitPhone`, `SentPill`, `FitPhone`, `ChargePill`, `NextLevel`) | Après chaque X-3, section B |
 
@@ -999,11 +1008,11 @@ unité, et une session suivante reprend avec le même prompt.
 ```text
 Tu orchestres la construction des trois derniers niveaux du jeu « Le côté obscur » de Tour de Growth : le lot A24 de CHANTIERS.md. Tu ne codes pas toi-même : tu lances des sous-agents Sonnet, une unité à la fois.
 
-1. Lis CLAUDE.md, l'item A24 de CHANTIERS.md (le tableau des unités dit ce qui est fait), et docs/game/construire-un-niveau.md en entier, surtout §21.9. Vérifie que C75 à C91 ont leur réponse dans les tableaux de questions des spécifications ; s'il en manque une, arrête-toi et dis-le-moi.
-2. Choisis l'unité suivante : U0 si elle n'est pas faite, sinon la suivante du niveau en cours, sinon le premier niveau pas commencé, dans l'ordre que je te donne (par défaut : activation, referral, revenue).
-3. Lance un sous-agent avec l'outil Agent, model "sonnet", le prompt du §21.9 rempli (unité, spécification, branche), au premier plan.
-4. À son retour : lis son compte rendu, lance les relecteurs que le §21.9 demande pour l'unité, ouvre la PR en brouillon, abonne-toi à son activité, et si la CI ou un relecteur trouve quelque chose, relance un sous-agent sur la même branche avec ce qu'il faut corriger. Pour X-2 et X-3, ouvre toi-même deux captures.
-5. Quand la PR est verte et relue : merge-la en suivant /livrer (lu, pas appelé), sauf si sa barrière §0 dit de me demander. Vérifie le squash (git show --stat), coche l'unité dans A24 avec le numéro de PR lu sur GitHub, mets à jour CLAUDE.md si l'état du jeu change.
+1. Lis CLAUDE.md, l'item A24 de CHANTIERS.md (le tableau des unités dit ce qui est fait), et docs/game/construire-un-niveau.md en entier, surtout §21.9. Vérifie que C75 à C91 ont leur réponse : C75 à C77 dans le §21.8 du guide, C78 à C91 dans les tableaux de questions des trois spécifications ; s'il en manque une, arrête-toi et dis-le-moi.
+2. Fais git fetch --prune origin, puis regarde les PR ouvertes et les branches a24-* : une unité poussée mais pas mergée se reprend (relance de correction), elle ne se recrée pas. Sinon, choisis l'unité suivante : U0 si elle n'est pas faite, sinon la suivante du niveau en cours, sinon le premier niveau pas commencé, dans l'ordre que je te donne (par défaut : activation, referral, revenue). Branche : a24-<unité en minuscules> (a24-u0, a24-act-1…).
+3. Lance un sous-agent avec l'outil Agent, model "sonnet", le prompt du §21.9 rempli (unité, mode, spécification, branche), au premier plan.
+4. À son retour : lis son compte rendu, lance les relecteurs que le §21.9 demande pour l'unité, ouvre la PR en brouillon, abonne-toi à son activité, lis son numéro sur GitHub et pousse sur la même branche un commit qui coche l'unité dans A24 avec ce numéro. Si la CI, un relecteur ou un conflit avec main trouve quelque chose, relance un sous-agent en « relance de correction » sur la même branche avec ce qu'il faut corriger. Pour X-2 et X-3, lis toi-même deux des captures dont le compte rendu donne le chemin.
+5. Quand la PR est verte, relue et sans conflit : vérifie qu'elle a mis à jour les chiffres de référence de CLAUDE.md, passe-la en prête (draft: false), merge-la en suivant /livrer (lu, pas appelé), sauf si sa barrière §0 dit de me demander (à X-3, mesure le poids de la route d'image, §21.9). Puis vérifie le squash (git show --stat).
 6. Puis dis-moi en deux lignes ce qui est livré et quelle est l'unité suivante, et attends que je dise « continue » avant de la lancer, sauf si je t'ai demandé d'enchaîner un nombre d'unités.
 
 Réponds-moi en français, court.

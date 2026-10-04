@@ -3,7 +3,7 @@
  * its LevelDefinition, in DRAFT (`DraftLevelSlug`): no page, no copy, no save
  * yet. The spec is `docs/game/referral.md` (GAME-BRIEF §19), written on
  * 2026-10-04 for an agent to build from; every number it quotes is one this
- * file produces, pinned by the fixtures F4.1 to F4.4 of
+ * file produces, pinned by the fixtures F19.1 to F19.4 of
  * `__tests__/referral.test.ts`.
  *
  * An app for splitting costs with friends: the board wants the viral
@@ -38,7 +38,7 @@ export type ReferralCardId = ReferralHonestId | ReferralDarkId;
 // honest gains and ramps, × 0,99 (C86, 2026-10-04): the tile rounds to the
 // hundredth, so a year ending at 0,595 already shows 0,60 and wins, and a
 // random honest player was applauded 49 % of the time against level 2's 43 %.
-// One percent off the honest effects brings it back to 42 % and leaves the
+// One percent off the honest effects brings it back to 43 % and leaves the
 // reference years where they were.
 const CARDS = {
   // Honest cards — slow, and they raise a counter the dashboard never shows.

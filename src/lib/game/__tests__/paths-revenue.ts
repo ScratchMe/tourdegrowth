@@ -26,7 +26,7 @@ export const PATH_B: Path = [["fullprice", "checkout"], ["downgrade", "programs"
 export const PATH_C: Path = [["addon", "lootbox"], ["trial", "hiddensub"], ["express", "renewal"], ["fullprice", "trialmail"]];
 /** §20 D — honest with nothing strong: fired in June. */
 export const PATH_D: Path = [["checkout", "trialmail"], ["present", "roundpacks"]];
-/** The three endings no reference year reaches — level 2's pinned years, by role — so they stay reachable. */
+/** The four endings no reference year reaches — level 2's pinned years, by role — so they stay reachable. */
 export const PATH_CLEAN_MISS: Path = [["checkout", "downgrade"], ["roundpacks", "present"], ["programs", "renewmail"], ["present", "trialmail"]];
 export const PATH_REPENTANT: Path = [["roundpacks", "hiddensub"], ["pricing", "downgrade"], ["trialmail", "fullprice"], ["programs", "clean"]];
 export const PATH_LABYRINTH: Path = [["checkout", "addon"], ["fullprice", "programs"], ["clean", "lootbox"], ["trial", "trialmail"]];

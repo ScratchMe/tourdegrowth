@@ -3,8 +3,8 @@
  * card identifiers and its LevelDefinition, in DRAFT (`DraftLevelSlug`): no
  * page, no copy, no save yet. The spec is `docs/game/activation.md`
  * (GAME-BRIEF §18), written on 2026-10-04 for an agent to build from; every
- * number it quotes is one this file produces, pinned by the fixtures F3.1 to
- * F3.4 of `__tests__/activation.test.ts`.
+ * number it quotes is one this file produces, pinned by the fixtures F18.1 to
+ * F18.4 of `__tests__/activation.test.ts`.
  *
  * A scheduling tool for freelancers: the board wants the share of sign-ups
  * who publish a first schedule within seven days UP, from 30 % in January

@@ -72,8 +72,8 @@ Résultat : **les huit noms officiels sont absents des niveaux 1 et 2**.
   0,20 M€ de revenu mensuel en janvier. À K = 0,40, la base ne bouge pas.
 - **L'affichage** : la tuile arrondit au centième (« 0,43 »). Décembre est
   gagné à 0,60 affiché, soit 0,595 et plus. Un centième pèse plus lourd qu'une
-  dizaine de clients au niveau 2 : le niveau pardonne un peu plus au hasard
-  (§19.6), et la recette tranchera.
+  dizaine de clients au niveau 2 : le niveau pardonnait un peu plus au hasard,
+  et il est durci par C86 (§19.6).
 
 ### 19.3 Le modèle
 
@@ -107,8 +107,8 @@ Déjà codé (`levels/referral.ts`) : **l'agent n'y touche pas** (§21.2).
 
 **Le contrôle : une amende administrative de la CNIL, rendue publique**, pour
 des données de tiers collectées sans base légale, de la prospection par
-messages sans consentement et des personnes non informées. **Proposé :
-75 000 €**, fixe (C14), à valider (§19.10, Q3) : environ 3 % du chiffre
+messages sans consentement et des personnes non informées. **75 000 €**,
+fixe (C14), validé par Antoine (C84) : environ 3 % du chiffre
 d'affaires annuel de Partix (2,4 M€), pour des manquements qui s'additionnent
 (articles 6 et 14 du RGPD, minimisation, prospection). Les cas sont au §19.9.
 
@@ -256,12 +256,23 @@ fixe, applaudies moins de 45 % du temps, et plus de 45 % sans le réglage.
 
 En haut, l'écran de Thomas, qui invite ; en bas, après un séparateur, ce que
 reçoit Léa, une de ses contacts. Le téléphone reflète l'union des cartes en
-production et cochées. Figure de texte, sans faux boutons. Couleur de marque :
-un orange, `--phone-brand: #E8742A` (contraste à vérifier sur son fond réel).
+production et cochées. Figure de texte, sans faux boutons.
+
+**Couleur de marque** : un orange brûlé, en jeton (§21.3 T2, jamais
+d'hexadécimal dans le module) : `--split-brand: #b04f12; /* 5.29 as text on white, and white on it */`
+dans `src/styles/tokens/game.css` (bloc `:root`, après `--shop-brand`) ; dans les
+`PAIRS` de `src/__tests__/game-token-contrast.test.ts`, après la ligne de
+`shop-brand` :
+`{ fg: "split-brand", bg: "app-bg", stated: 5.29, role: "text", why: "Partix's orange as text, and under white on its big button" }`.
+`SplitPhone.module.css` pose `.split { --phone-brand: var(--split-brand); }`.
+L'orange passe 4,5:1 sur blanc dans les deux sens : le gros bouton « Continuer »
+est un `<span>` à fond de marque, texte `--app-on-brand`.
 
 **Le type et l'ordre** (`src/lib/game/split-phone.ts`, composant `SplitPhone`) :
 
 ```ts
+import type { ReferralCardId } from "./levels/referral";
+
 export type SplitPhoneItem =
   | { kind: "appBar" }
   /** Always: the group and its total. */
@@ -377,18 +388,91 @@ export function sentInYourName(ids: readonly string[]): { messages: number; aler
 | `autoinvite` | 642 messages envoyés au nom de Thomas · des messages qu'il n'a pas écrits | oui |
 | les deux | 856 messages envoyés au nom de Thomas · des messages qu'il n'a pas écrits | oui |
 
-`continueFine` est écrit en petit sous le gros bouton, `continueSkip` en lien
-gris : c'est ce que la carte met en production. `chosen` et `nobook` ne
+**Le dessin, élément par élément** : la moitié de Thomas a la barre d'appli
+(`appName`, `time`), celle de Léa n'en a pas ; `guestDivider` les sépare.
+- `group` : la ligne du groupe, en tête.
+- `continue` : `continueExpense`, `continueButton` en gros bouton plein,
+  `continueFine` en petit sous le bouton, `continueSkip` en lien gris : c'est ce
+  que la carte met en production.
+- `bonus` : la ligne (`bonusClear` ou `bonusLoud`), puis sa mention
+  (`bonusClearTerms` ou `bonusLoudFine`, en petit).
+- `locked` : une ligne, avec un cadenas dessiné en CSS (aucune chaîne de plus).
+- `invite` : `inviteTitle`, puis une seule des trois lignes (`invitePreselected`
+  ou `inviteChosen` **remplacent** `inviteBase`), puis `groupLink` quand il y
+  est.
+- `autoSent`, `review` (`reviewQuestion`, puis `reviewYes` et `reviewNo`),
+  `recap` : dans cet ordre, une ligne ou un bloc chacun.
+- Côté Léa : `guestMessage` est une bulle sans expéditeur ni heure ;
+  `guestMessagePersonalised` la **remplace** (comme `resultSponsored` remplace
+  `resultTop` au niveau 2) ; puis `guestShadow`, `guestPage`, `guestQuestion`
+  et ses trois `guestAnswers` en puces.
+- `noBook` se dessine en pied de téléphone, hors des deux moitiés, sous un
+  filet : il parle de l'appli, pas à Léa ; `noBookNumbers` suit sur la même
+  ligne quand il y est.
+
+**Les identifiants de test et l'éclair** : `<figure data-testid="game-phone">` ;
+chaque élément sauf `appBar` porte `data-testid="game-split-<kind>"`. La clé de
+l'éclair, exportée : `splitItemKey(item)` rend `bonus:${style}`,
+`invite:${preselected}:${chosen}:${groupLink}`,
+`guestMessage:${personalised}`, `noBook:${numbers}`, sinon `kind`.
+
+**Ce qui ne se voit pas** : seules `present` et `clean` ne changent rien au
+téléphone. `chosen` et `nobook` ne
 changent pas la pastille : un écran honnête ne coupe
 pas une automatisation, seul `clean` la retire. Chaînes (`SentPillCopy`, sous la clé `sent`) :
 `none` « 0 message envoyé au nom de Thomas » / "0 messages sent in Thomas's name" ;
 `some` « {n} messages envoyés au nom de Thomas » / "{n} messages sent in Thomas's name"
 (`{n}` formaté par `formatInt`) ; `suffix` « des messages qu'il n'a pas
 écrits » / "messages he didn't write". Gabarit déclaré :
-`REFERRAL_COPY_TEMPLATES = { ...LEVEL_COPY_TEMPLATES, "sent.some": ["n"] }`. **Test C13 du niveau** :
-214 dans `invitePreselected` et `autoSent` est `CONTACTS` ; les « 2 relances »
-d'`autoSent` sont `MESSAGES_PER_CONTACT − 1` ; 642 et 856 n'apparaissent dans
-aucune chaîne (ils sont calculés).
+`REFERRAL_COPY_TEMPLATES = { ...LEVEL_COPY_TEMPLATES, "sent.some": ["n"] }`.
+
+**C13, en deux temps.** En REF-1 (`game-referral.test.ts`, la copie seule) :
+« 214 » dans `phone.invitePreselected` et `phone.autoSent`, en français et en
+anglais ; « 2 relances » / « 2 follow-ups » dans `autoSent` ; ni `642` ni `856`
+dans aucune feuille (`/\b(642|856)\b/`). En REF-2
+(`game-split-phone.test.ts`) : `phone.invitePreselected` et `phone.autoSent`
+contiennent `formatInt(locale, CONTACTS)`, et `autoSent` contient
+`MESSAGES_PER_CONTACT − 1`.
+
+**La pastille** (`src/components/game/SentPill.tsx`, qui importe
+`ClickPill.module.css` comme `BasketPill`) :
+`SentPill({ count, alert, labels, size, announce, className }: { count: string; alert: boolean; labels: SentPillCopy; size?: "md" | "sm"; announce?: boolean; className?: string })`,
+rendue `<p data-testid="game-sent" data-alert={alert}>` : `none` quand `!alert`,
+sinon `some` rempli avec `count` (déjà formaté), suivi de
+`<span> · {suffix}</span>` ; corail quand `alert` ; `aria-live="polite"` sauf
+avec `announce={false}`. Elle n'importe `lib/game` qu'en `import type`.
+
+**Le côté de l'îlot** (`sides.tsx`), à recopier :
+
+```tsx
+type ReferralSideCopy = Pick<ReferralCopy, "phone" | "sent">;
+
+/** The pill's sentence: the messages sent in Thomas's name, and that he didn't write them. */
+export function sentSentence(copy: ReferralSideCopy, locale: Locale, r: ReturnType<typeof sentInYourName>): string {
+  return r.alert ? `${fill(copy.sent.some, { n: formatInt(locale, r.messages) })} · ${copy.sent.suffix}` : copy.sent.none;
+}
+
+export const REFERRAL_SIDE: IslandSide<ReferralSideCopy> = {
+  render: ({ ids, copy, locale }) => {
+    const r = sentInYourName(ids);
+    return (
+      <>
+        <SplitPhone items={splitPhoneView(ids)} labels={copy.phone} />
+        <SentPill count={formatInt(locale, r.messages)} alert={r.alert} labels={copy.sent} announce={false} />
+      </>
+    );
+  },
+  pill: ({ ids, copy, locale }) => {
+    const r = sentInYourName(ids);
+    return { text: r.alert ? fill(copy.sent.some, { n: formatInt(locale, r.messages) }) : copy.sent.none, alert: r.alert };
+  },
+  announce: ({ before, after, copy, locale }) => {
+    const was = sentInYourName(before);
+    const now = sentInYourName(after);
+    return was.messages === now.messages ? null : sentSentence(copy, locale, now);
+  },
+};
+```
 
 ### 19.8 La copie, clé par clé
 
@@ -398,7 +482,8 @@ aucune chaîne (ils sont calculés).
 `dashboard.revenue`, `dashboard.revenueDelta`, `dashboard.patience`,
 `dashboard.patienceLow`, `dashboard.notOnDashboard`, `dashboard.hiddenValue`,
 `dashboard.revealed`, `dashboard.delta`, `visio` (sauf `tag`), les clés de
-`boss` listées au §19.5, `hand` (sauf `unlocked` et `productionEmpty`),
+`boss` que le §19.5 n'écrit pas (`t2Hit`, `t3Hit`, `t3Miss`, `orderWrap`,
+`yearEnd`, `fired`), `hand` (sauf `unlocked` et `productionEmpty`),
 `cards.present`, `cards.clean.name`, `report` (sauf les clés écrites
 ci-dessous), `journal`, `effects.insight`, `effects.present`, `effects.none`,
 `events.midMailMoving`, `events.midMailStalled`, `events.present`,
@@ -413,7 +498,8 @@ des fins sauf `cleanMiss` et `labyrinth`, `december.cells.outOf`,
 `december.table.trust`, `playbook`, `catalogue` (sauf `hiddenEffect`),
 `share.replay`, `share.copy`, `share.copied`, `tourLoop`, `resume.title`,
 `resume.resume`, `resume.restart`, `resume.review`, `footer`, `a11y.handLabel`,
-`a11y.resumed`.
+`a11y.resumed`, et `nextLevel` (après U0 : `eyebrow` « Niveau suivant »,
+`status` « jouable » ; `nextLevel: L1.nextLevel`).
 
 **Écrit pour le niveau** :
 
@@ -463,14 +549,14 @@ des fins sauf `cleanMiss` et `labyrinth`, `december.cells.outOf`,
 | december.table.metric | Coefficient viral | Viral coefficient |
 | catalogue.hiddenEffect | Confiance {trust}, radar {radar}, une seule fois, le jour où elle entre en production. Les invitations qu'elle fait accepter baissent de 30 % après trois mois. | Trust {trust}, radar {radar}, once, on the day it goes into production. The invitations it gets accepted drop by 30% after three months. |
 | share.text | Une année chez Partix : {title} Coefficient viral à {metric}, confiance à {trust}. Et toi, tu tiendrais ? {url} | A year at Partix: {title} Viral coefficient at {metric}, trust at {trust}. Would you hold out? {url} |
-| nextLevel.eyebrow | Niveau suivant | Next level |
-| nextLevel.status | jouable | playable |
 | resume.previously | Précédemment chez Partix | Previously at Partix |
 | resume.quarterLine | Trimestre {q} : {cards}. Coefficient viral à {metric}. | Quarter {q}: {cards}. Viral coefficient at {metric}. |
 | resume.finished | Ta dernière année chez Partix s'est terminée ainsi : « {title} » | Your last year at Partix ended like this: "{title}" |
 | a11y.quarterEnd | Fin du trimestre {q} : coefficient viral {metric}, objectif {target} {status}, patience {patience}. | End of quarter {q}: viral coefficient {metric}, target {target} {status}, patience {patience}. |
 
-**Les fins** (`{metric}` arrive formaté : « 0,60 ») :
+**Les fins** (`{metric}` arrive formaté : « 0,60 ») : `win` est un littéral,
+`true` pour `applause` et `cleanMiss`, `false` pour les cinq autres, comme dans
+`acquisition.ts` ; `eyebrow` et les titres non listés viennent du niveau 1.
 
 | id | Titre (si écrit) | Texte FR | Texte EN |
 |---|---|---|---|
@@ -581,7 +667,21 @@ secondaire est signalé ; tout reste à relire par Antoine avant l'ouverture
 **Liste blanche des marques** (série C6) : Clubhouse, Tagged, FarmVille, Facebook,
 LinkedIn, WhatsApp, Beer52, Meriton. « App Store » paraît dans les textes de loi,
 pas dans les `cas`. Les institutions (CNIL, Cour fédérale de justice
-allemande, université Purdue…) sont des mots ordinaires du test.
+allemande, université Purdue…) sont des mots ordinaires du test. Pour le test
+(§21.3 T1), exactement, calculés avec `CAPITALISED` sur les seize `cas` de ce
+§19.9 :
+- `BRANDS = ["Clubhouse", "Tagged", "FarmVille", "Facebook", "LinkedIn", "WhatsApp", "Beer52", "Meriton"]` ;
+- `BRAND_WORDS = new Set([...BRANDS.flatMap((b) => [b, `${b}'s`]), "Beer"])` :
+  `CAPITALISED` coupe « Beer52 » en « Beer » et garde le possessif
+  « Facebook's » ;
+- `NOT_BRANDS = new Set(["A", "Australian", "Aux", "CNIL", "Cour", "Court", "En", "Federal", "Find", "Germany's", "In", "Ireland's", "Italy's", "Justice", "May", "New", "Purdue", "State's", "States", "Trouver", "UK's", "United", "University", "York", "États-Unis"])` ;
+- aucun domaine.
+
+**La nature de chaque cas** (C6) : `patterns.fakeinvite.cas` contient « sans
+reconnaître sa responsabilité » / "without admitting liability" ;
+`patterns.autoinvite.cas` « pour clore une action collective » / "to settle a
+class action" ; `patterns.shadow.cas` « conteste la décision en justice » / "is
+challenging the decision in court".
 
 **Le nom de l'entreprise** : « Splitto » (une appli existe), « Quotix »,
 « Divizo » (trop proche de Divido), « Rembix », « Partagea » écartés ;
@@ -625,7 +725,7 @@ Les questions communes sont au §21.8.
 | `entry.ts` | `…opening`, `meta`, `band.trust`, `band.notOnDashboard` | *(les constantes partagées du fichier)* | |
 | `hub.ts` | `zones.referral.company` | Partix, une appli de partage de dépenses entre amis | Partix, an app for splitting costs with friends |
 | `hub.ts` | `ENDINGS_BY_LEVEL.referral` | *(aucune entrée : « le contrôle et l'amende » du niveau 1 est juste)* | |
-| `hub.ts` | `LEVEL_TEASERS.referral` (T0) | « S'ils vous recommandent » : les invitations envoyées pour toi, le carnet aspiré, le bonus aux conditions introuvables | "If they recommend you": invitations sent for you, the scraped address book, the bonus with conditions nowhere to be found |
+| `hub.ts` | `LEVEL_TEASERS.referral` (REF-3, quand `referral` entre dans `LevelSlug` ; le mécanisme est celui de T0) | « S'ils vous recommandent » : les invitations envoyées pour toi, le carnet aspiré, le bonus aux conditions introuvables | "If they recommend you": invitations sent for you, the scraped address book, the bonus with conditions nowhere to be found |
 | `page.tsx` | les deux mots du glossaire | `["referral", "viral-coefficient"]` | |
 
 ### 19.12 Plan d'exécution
@@ -633,28 +733,91 @@ Les questions communes sont au §21.8.
 Les PR T1 à T4 du §21.3, avec ce qui est propre au niveau (unités REF-1 à
 REF-4 du §21.9).
 
-- **T1, la copie** : `ReferralCopy`, `ReferralOrderId` (`contacts`,
+- **T1, la copie (REF-1)** : `ReferralCopy`, `ReferralOrderId` (`contacts`,
   `autoinvite`, `bigshare`, `fakeinvite`, `bonus`), `ReferralPhoneCopy` (§19.7,
-  `guestAnswers: readonly string[]`) et `SentPillCopy` (`none`, `some`,
-  `suffix`), la pastille sous la clé `sent` ; `REFERRAL_COPY_TEMPLATES =
-  { ...LEVEL_COPY_TEMPLATES, "sent.some": ["n"] }`. `src/content/game/referral.ts`, `REFERRAL_INTRO` et
-  `GAME_META.referral`. Le test `src/content/__tests__/game-referral.test.ts` :
-  C1 exige dans chaque `law` l'un de « RGPD », « Code de la consommation »,
-  « Code des postes et des communications électroniques », « App Store »
-  (anglais : « GDPR », « Consumer Code », « Postal and Electronic Communications
-  Code », « App Store ») ; la règle du contrôle : l'événement `control` dit
-  « amende » et « CNIL » (EN « fine » et « CNIL ») ; le tampon, repris du
-  niveau 1, dit « Amende » (EN « Fined ») ; la fin `fine` dit « amende » (EN
-  « fine ») ; aucune chaîne du niveau ne dit « transaction » (EN « settlement ») ; C6 avec la liste blanche du
-  §19.9 ; C13 tient 214, les deux relances et l'absence de 642 et 856 dans les
-  chaînes.
-- **T2, le téléphone** : `src/lib/game/split-phone.ts` (`splitPhoneView`,
-  `sentInYourName`, `CONTACTS`, `MESSAGES_PER_CONTACT`),
-  `src/components/game/SplitPhone.tsx` et `SentPill.tsx`, `REFERRAL_SIDE`, les
-  aperçus, et `src/__tests__/game-split-phone.test.ts` (chaque ligne de la
-  table de la pastille ; `fairbonus` l'emporte sur `bonus` ; `chosen` annule la
-  présélection de `contacts` ; `shadow` retire la seconde phrase de `nobook`).
-- **T3, le branchement** : la table du §21.3 ; le niveau prend sa place entre la
-  rétention et le revenue dans `GAME_LEVELS_BY_PILLAR`.
-- **T4, les specs** : `e2e/game-referral.spec.ts`, d'après le §19.6 ; le
-  coefficient s'affiche au centième, sans unité, jamais « % ».
+  un champ par ligne du tableau, la colonne « Montré par » servant de
+  doc-comment, en anglais ; `guestAnswers: readonly string[]`) et
+  `SentPillCopy` (`none`, `some`, `suffix`), la pastille sous la clé `sent` ;
+  `REFERRAL_COPY_TEMPLATES = { ...LEVEL_COPY_TEMPLATES, "sent.some": ["n"] }`.
+  `src/content/game/referral.ts`, `REFERRAL_INTRO` et `GAME_META.referral`. Ce
+  qui reste fictif, pour l'en-tête « What stays fictional » : Partix, Thomas,
+  Léa, @coloc_en_paix / @peaceful_flatshare, L'Écho des applis, Le Fil tech, La
+  Lettre des applis ; les vraies marques n'apparaissent que dans les `cas`.
+  Le test `src/content/__tests__/game-referral.test.ts` :
+  - **C1** (une sous-chaîne, pas la regex du niveau 2) : chaque `law.fr`
+    contient l'un de « RGPD », « Code de la consommation », « Code des postes
+    et des communications électroniques », « App Store » ; chaque `law.en` l'un
+    de « GDPR », « Consumer Code », « Postal and Electronic Communications
+    Code », « App Store » ;
+  - **la règle du contrôle**, qui remplace C14 (après
+    `text.replace(/\{fine\}/g, "")`) : `events.control` correspond à
+    `/amende/` et contient « CNIL » (EN `/\bfine\b/` et « CNIL ») ;
+    `news.stamps.fine`, repris du niveau 1, à `/Amende/` (EN `/Fined/`) ;
+    `endings.fine.text` à `/amende/` (EN `/\bfine\b/`) ; aucune feuille du
+    niveau ne correspond à `/transaction/i` en français ni à
+    `/\bsettlement\b/i` en anglais (« to settle » apparaît dans deux `cas`,
+    voulu) ;
+  - **C4** : `targets[0]` vaut 0.43, `targets[3]` vaut 0.6, `metric0` vaut
+    0.4 ; `boss.t1` contient « 0,43 » / "0.43" ; `boss.t2Miss` contient « au
+    lieu de 0,43. » / "instead of 0.43." ; « 0,60 » / "0.60" dans `boss.t1`,
+    `boss.t4Hit`, `boss.t4Miss`, `REFERRAL_INTRO.lead` et
+    `endings.cleanMiss.title` ; « 0,40 » / "0.40" dans `REFERRAL_INTRO.lead` ;
+  - **C6** : les listes et la nature des cas du §19.9 ;
+  - **C13** : la partie copie du §19.7 ;
+  - `endings.*.win` et `nextLevel` comme le §19.8 le dit ;
+  - `src/content/__tests__/game-hub.test.ts` étendu à `GAME_META.referral` et
+    `REFERRAL_INTRO` (§21.3 T1).
+- **T2, le téléphone (REF-2)** : `src/lib/game/split-phone.ts`
+  (`splitPhoneView`, `splitItemKey`, `sentInYourName`, `CONTACTS`,
+  `MESSAGES_PER_CONTACT` ; ce sont les noms du gabarit `<téléphone>-phone.ts` du §21.3 T2, comme `shop-phone.ts` au niveau 2), `src/components/game/SplitPhone.tsx` et
+  son `.module.css`, `SentPill.tsx` (qui importe `ClickPill.module.css`), le
+  jeton `--split-brand` et sa ligne de contraste (§19.7), `REFERRAL_SIDE` dans
+  `sides.tsx` (le code du §19.7), les aperçus, l'inscription de `SplitPhone`
+  et `SentPill` dans `.design-sync/config.json` (`componentSrcMap`, et
+  `SplitPhone` dans `dtsPropsFor`), et `src/__tests__/game-split-phone.test.ts`
+  (chaque ligne de la table de la pastille ; `fairbonus` l'emporte sur
+  `bonus` ; `chosen` annule la présélection de `contacts` ; `shadow` retire la
+  seconde phrase de `nobook` ; la partie téléphone de C13).
+- **T3, le branchement (REF-3)** : la table du §21.3 ; le niveau prend sa place
+  entre la rétention et le revenue dans `GAME_LEVELS_BY_PILLAR`. L'en-tête de
+  `levels/referral.ts` : « in DRAFT (`DraftLevelSlug`): no page, no copy, no
+  save yet. » devient « wired on <date> (A24, REF-3): its copy is
+  `content/game/referral.ts`, its page `app/[locale]/game/referral/`. ». Et :
+  - `e2e/real-results.ts` : `referralClear: { id: "7d3c9e2a-0b1f-4c5d-8e6f-1a2b3c4d5e09", tone: "neutral", locale: "en", answers: answersFor({ acquisition: 1, activation: 0, retention: 1, referral: 2, revenue: 0 }), total: 54 }`
+    (le referral seul à 0/20 : un goulot `clear`) ; `e2e/result-real.spec.ts`
+    attend `game-entry-cta` vers `/en/game/referral?from=result`, la bande
+    `game-entry-band` « Viral coefficient 0.40 », sur une ligne (hauteur ≤ 44 px
+    à 1 280 px) ;
+  - `e2e/game-helpers.ts` : `REFERRAL_PATH = { en: "/en/game/referral", fr: "/fr/game/referral" }` ;
+  - les liens de décembre des niveaux déjà construits, recalculés (§21.3 T3 :
+    ouvrir le referral fait viser le referral au décembre de la rétention).
+- **T4, les specs (REF-4)** : `e2e/game-referral.spec.ts`, d'après le §19.6 ; le
+  coefficient s'affiche au centième, sans unité : jamais « % » ni « pt » sur la
+  tuile, la frise, le premier chiffre du bilan, la cellule et la courbe de
+  décembre (les lignes d'effet en ont). Et :
+  - **le premier écran (fr)** : le coefficient « 0,40 », sous-titre « objectif
+    du trimestre : 0,43 » ; utilisateurs « 1 000 000 », patience « 55 »,
+    revenu « 0,20 M€ » (en : « €0.20M ») ;
+  - **P5 (T1, en français)**, avec la pastille `game-sent` :
+
+    | Coché | Le téléphone affiche | La pastille dit | `data-alert` |
+    |---|---|---|---|
+    | (rien) | — | « 0 message envoyé au nom de Thomas » | `false` |
+    | `contacts` | « 214 contacts sélectionnés » | inchangée | `false` |
+    | `contacts` + `chosen` | « 2 contacts choisis · message modifiable » | inchangée | `false` |
+    | `fakeinvite` | « Thomas t'attend sur Partix ! 3 de tes amis y sont déjà. » | « 214 messages envoyés au nom de Thomas · des messages qu'il n'a pas écrits » | `true` |
+
+  - **année C (en)** : au T2, `autoinvite` et `fakeinvite` cochés avant de
+    lancer, la pastille dit « 856 messages sent in Thomas's name · messages he
+    didn't write » ; `game-report-3` contient « inspection by the CNIL » ;
+    `game-report-1` ne contient pas « CNIL » ; `game-report-2` contient
+    « complaints filed with the CNIL » (les signalements du T2, pas un
+    contrôle : ne pas recopier le « jamais DGCCRF » du niveau 2) ; le tampon
+    dit « Fined · €75,000 », les départs « 14,318 » ; la fin contient « Here is
+    what you did. » et « fine », jamais « settlement » ;
+  - **année D (fr)** : au T1, « manqué de 0,03 » ;
+  - **décembre** : graduations « 0,2 0,4 0,6 0,8 », repère « objectif 0,60 » ;
+  - **le bloc « Niveau suivant »** (C75) : les deux décembres semés du §21.3
+    T4, avec les `href` calculés par `nextLevelFor` (le revenue est après le
+    referral dans l'ordre du Tour : s'il est ouvert, c'est lui ; sinon on
+    boucle sur l'acquisition).
