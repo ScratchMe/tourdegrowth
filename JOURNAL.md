@@ -1211,7 +1211,7 @@ C'est ce dernier réglage qui est appliqué dans `levels/referral.ts`. Le test F
 
 **Vérifié, sorties réelles de cette relance** : `tsc --noEmit` propre ; `npm run lint` (`eslint .`) propre ; `vitest run --coverage` : **3 348 tests sur 3 348** (262 fichiers, 3 347 avant, soit +1 : la garde), seuils tenus (code de sortie 0), dont `claude-md-budget.test.ts`. `CLAUDE.md` : 3 347 devient 3 348. **Ni `next build` ni Playwright** : cette relance ne change que des commentaires, un test, des documents, et la documentation venue de `main`.
 
-## A24 : le pilote U0, et le guide corrigé avant ACT-1 (2026-10-04)
+## A24 : le pilote U0, et le guide corrigé avant ACT-1 (2026-10-04, #336)
 
 **Le pilote.** Antoine a demandé de lancer U0 seule, en pilote, avant les douze autres unités. Un sous-agent Sonnet l'a menée depuis le seul guide (`docs/game/construire-un-niveau.md`), puis une relance de correction l'a reprise sur la même branche ; mergée en [#335](https://github.com/ScratchMe/tourdegrowth/pull/335). Ce qui a tenu : aucune question de produit, aucun modèle touché, la suite Playwright complète passée en local avec l'émulateur (995 passées, 6 ignorées par construction), quatre sabotages qui font tomber les tests neufs, les captures relues par l'orchestrateur.
 - **`main` a bougé deux fois pendant l'unité** (#333 puis #334, une autre session) : `JOURNAL.md` en conflit, et **une PR en conflit ne lance pas sa CI**. La seule trace était l'absence de « Types, tests, build » dans ses checks, vue vingt minutes plus tard.
