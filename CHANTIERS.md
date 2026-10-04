@@ -413,7 +413,7 @@ est libre. Le jeu reste fermé (C23).
 
 | Unité | Quoi | État |
 |---|---|---|
-| A22.spec | Les spécifications, le guide, les modèles en brouillon | **Livré le 2026-10-04** (cette PR, numéro au journal) |
+| A22.spec | Les spécifications, le guide, les modèles en brouillon | **Livré le 2026-10-04** ([#325](https://github.com/ScratchMe/tourdegrowth/pull/325)) |
 | U0 | Ce qui change à trois niveaux : le bloc « Niveau suivant » (QC1), le budget d'URL des statistiques, le gabarit du hub | À faire, avant le premier niveau |
 | ACT-1 · ACT-2 · ACT-3 · ACT-4 | L'activation : copie, téléphone, branchement, specs | À faire |
 | REF-1 · REF-2 · REF-3 · REF-4 | Le referral : copie, téléphone, branchement, specs | À faire |

@@ -964,7 +964,7 @@ En anglais à 1 280 : tableau 3 372 → 4 212 (+840, le retour +828). À 390 : t
 
 **Vérifié** : le rendu des 112 cartes (112 sur 112, 0 vide, 0 mince, 0 identique), chaque feuille de capture lue avant sa note, les 21 aperçus du moteur et les six repris type-checkés contre les vrais composants ; après l'envoi, `list_files` (aucun chemin sous `design/`, les 21 dossiers `components/engine/`), l'ancre relue, l'index relu identique au local. Le volet Design System, lui, n'est pas vérifiable d'ici : il montrait encore la copie du 2026-09-11 (B8).
 
-## A22 : les trois derniers niveaux du jeu, spécifiés pour être construits par des sous-agents (2026-10-04)
+## A22 : les trois derniers niveaux du jeu, spécifiés pour être construits par des sous-agents (2026-10-04, #325)
 
 **La demande.** Antoine a d'abord demandé l'effort qu'il restait pour finir le jeu (activation, referral, revenue : environ huit à dix jours de session, plus ses décisions, ses bons à tirer et la recette), puis : « écrire les spécifications des 3 niveaux pour que, plus tard, un agent Sonnet 5.5 puisse faire l'implémentation […] n'ait plus qu'à exécuter, pas à réfléchir ». En cours de route, il a précisé la cible : un agent Opus qui orchestre des sous-agents Sonnet autonomes, et un travail découpé pour pouvoir faire des pauses.
 
@@ -992,4 +992,6 @@ En anglais à 1 280 : tableau 3 372 → 4 212 (+840, le retour +828). À 390 : t
 
 **Vérifié au bit près** : avant de toucher au moteur, 3 000 années jouées au hasard sur chacun des niveaux 1 et 2 ont été enregistrées en entier (états, tableaux de bord, rapports, décembres) ; rejouées après, le JSON est identique, octet pour octet (46 Mo).
 
-**Vérifié** : `tsc` et `eslint` propres ; **3 275 tests unitaires** (63 de plus : 60 pour les trois modèles, 3 pour les formats), `vitest --coverage` au-dessus de ses seuils (lignes 97,9 %).
+**Vérifié** : `tsc` et `eslint` propres ; **3 275 tests unitaires** (63 de plus : 60 pour les trois modèles, 3 pour les formats), `vitest --coverage` au-dessus de ses seuils (lignes 97,9 %) ; `next build` avec les variables de la CI ; les specs Playwright du jeu sur ce build (`game-level`, `game-level2`, `game-endings`, `game-island`, `game-news`, `game-share-images`) : 72 passées, 3 ignorées par construction. Le reste de la suite Playwright tourne en CI : la PR ne touche aucune page.
+
+**Fusionné avec `main`** (#323, la re-synchro A20.f), qui avait pris le numéro A21 pour ce que ses aperçus ont vu dans le moteur : l'item du jeu est devenu A22 partout.
