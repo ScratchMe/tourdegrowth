@@ -768,8 +768,10 @@ REV-4 du §21.9).
   - `src/content/__tests__/game-hub.test.ts` étendu à `GAME_META.revenue` et
     `REVENUE_INTRO` (§21.3 T1).
 - **T2, le téléphone (REV-2)** : `src/lib/game/fit-phone.ts` (`fitPhoneView`,
-  `fitItemKey`, `trialCharge` et ses constantes ; ce sont les noms du gabarit `<téléphone>-phone.ts` du §21.3 T2, comme `shop-phone.ts` au niveau 2),
-  `src/components/game/FitPhone.tsx` et son `.module.css`, `ChargePill.tsx`
+  `trialCharge` et ses constantes ; ce sont les noms du gabarit `<téléphone>-phone.ts` du §21.3 T2, comme `shop-phone.ts` au niveau 2),
+  `src/components/game/FitPhone.tsx` (qui exporte `fitItemKey`, comme
+  `ShopPhone.tsx` exporte `shopItemKey` : règle 2 de `game-bundles.test.ts`)
+  et son `.module.css`, `ChargePill.tsx`
   (qui importe `ClickPill.module.css`), le jeton `--fit-brand` et sa ligne de
   contraste (§20.7), `REVENUE_SIDE` (le code du §20.7), les aperçus,
   l'inscription de `FitPhone` et `ChargePill` dans `.design-sync/config.json`
