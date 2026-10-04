@@ -313,6 +313,8 @@ qu'aucun cycle de valeurs ne naisse) ; `business-type.ts` le réexporte.
 ```ts
 // src/lib/engine/setup-type.ts — gains (MOTIONS is a value of types.ts, which imports nothing of the engine)
 import { MOTIONS } from "./types";
+/** §21.2.2 put the list here (access.ts, read by the Edge proxy, imports it): it gains the marketplace. */
+export const BUSINESS_TYPES: readonly BusinessType[] = ["b2b-saas", "consumer-app", "marketplace"];
 export function isMarketplace(setup: Pick<EngineSetup, "type">): boolean {
   return setup.type === "marketplace";
 }
@@ -340,7 +342,6 @@ import est un `import type` ») gagne cette seule exception, nommée.
 ```ts
 // src/lib/engine/business-type.ts — changes
 export { isMarketplace, activeMotions, isSellingMotion, MKT_DEFAULTS, mktSetup } from "./setup-type";
-export const BUSINESS_TYPES: readonly BusinessType[] = ["b2b-saas", "consumer-app", "marketplace"];
 /** What a type may tick: a marketplace ticks nothing — its motion is derived. */
 export function motionsAllowed(type: BusinessType): readonly Motion[] {
   if (type === "marketplace") return [];
@@ -469,7 +470,7 @@ où elle ne doit pas passer, et à remplacer par `activeMotions` là où elle do
 | Endroit | Ce qui se passerait | Traitement | Unité |
 |---|---|---|---|
 | `phrases.ts:77` `retentionOf` (`motion === "plg" ? … : "slg.ret.renewal"`) | une place de marché lue comme l'assisté | par côté : `diagnosis.side === "demand"` → `mkt.buy.churn`, `"supply"` → `mkt.sell.paid-churn` | MKT-4 |
-| `phrases.ts:279-281` `notEnoughBelowValues` (`candidatesOf(diagnosis.motion)`) | aucune valeur pour l'offre `not-enough` | `Object.keys(diagnosis.positions) as CandidateId[]` (même ordre que les candidats : `diagnoseWith` les pose dans cet ordre ; le SaaS ne change pas) | MKT-4 |
+| `phrases.ts:279-281` `notEnoughBelowValues` (`candidatesOf(diagnosis.motion)`) | aucune valeur pour l'offre `not-enough` | `Object.keys(diagnosis.positions) as CandidateId[]` : **APP-5 le fait déjà** (§21.5.4) ; MKT-4 vérifie seulement que l'offre `not-enough` reçoit sa phrase | MKT-4 |
 | `series.ts:245` (boucle sur les deux cases) | la série d'une place de marché vide | `activeMotions(setup)` | MKT-4 |
 | `deck.ts:377` `buildLeak` (`diagnosis.motion === "slg"`) | la fuite d'un côté lue par la chaîne du libre-service | aucune place de marché n'y passe : `buildMarketplaceDeck` construit ses fuites par `mktWhatIf` | MKT-8 |
 | `deck-motions.ts:102`, `deck.ts:1601`, `deck-slg.ts:474`, `deck/SlideMirror.tsx:29`, `deck/SlideVisibility.tsx:54`, `deck/ask-defaults.ts:81` | rien pour une place de marché | `activeMotions` là où le deck de la place de marché les lit | MKT-8 |
@@ -626,8 +627,8 @@ l'événement). L'ordre du tableau est l'ordre de `MKT_METRIC_SHAPES`.
   fige leurs comptes, ceux qu'A22 a posés) ; `typeCatalogs` gagne
   `marketplace` : les 19 chiffres et les six calculés d'`ENGINE_CATALOG`, dans
   l'ordre de `MKT_METRIC_SHAPES` et de `MKT_DERIVED_SHAPES`, résolus par
-  `resolveTree` ; `_engine/view.ts#metricsFor("marketplace")` et
-  `derivedFor("marketplace")` les rendent (MKT-S ajoute les mots
+  `resolveTree` ; `_engine/view.ts#metricsFor(p, "marketplace")` et
+  `derivedFor(p, "marketplace")` (§21.4.7) les rendent (MKT-S ajoute les mots
   « services »). Le poids du HTML se mesure (§21.4.7).
 - **`phrases.ts#TRAPS_ASKING_DEFINITION`** gagne `mkt.liq.fill-rate`,
   `mkt.rev.take-rate` et `mkt.sell.signup-rate` (leurs pièges disent « Écris… »
@@ -1445,9 +1446,13 @@ export function marketplaceStrings<T>(base: T, layers: MarketplaceLayers<T>, off
   DeepPartial<EngineStrings>; marketplace: MarketplaceLayers<EngineStrings> }`,
   résolu par `resolveTree` (MKT-5) ; `typeCatalogs` gagne
   `"marketplace-services"` (MKT-S ; `marketplace` vient de MKT-1, §22.4.3).
-  `_engine/view.ts#metricsFor(type, offering?)` et `derivedFor(type,
-  offering?)` rendent `typeCatalogs["marketplace-services"]` pour
-  `("marketplace", "services")`.
+  `_engine/view.ts#metricsFor(p, type, offering?)` et `derivedFor(p, type,
+  offering?)` (la signature de §21.4.7, qui gagne `offering`) rendent
+  `p.typeCatalogs["marketplace-services"]` pour `("marketplace", "services")`.
+- **`stringsFor(type)`** (§21.8.1, `EngineWorkbench.tsx`) gagne la place de
+  marché : `stringsFor("marketplace")` rend `marketplaceStrings(…, offering,
+  null)` (le jeu neutre), et les écrans d'avant le moteur (la carte de
+  réglage, l'exemple) le lisent comme pour l'app.
 - **Dans l'îlot**, `EngineWorkbench.tsx` étend la ligne unique de §21.8.1 :
   pour une place de marché, `strings = marketplaceStrings(…, null)` (les mots
   neutres : la barre, la liste, l'écran d'un chiffre, le total) et
@@ -1504,7 +1509,10 @@ une réécriture ne touche jamais aux accords du reste de la phrase, sauf
 #### 22.8.3 Ce que les calques doivent couvrir — la règle, et son test (MKT-5)
 
 **La règle.** Pour chaque feuille d'`ENGINE_COPY` hors des chemins exclus
-(plus bas), deux désignations **indépendantes** :
+(plus bas), on cherche dans son texte **une fois ses gabarits `{…}` retirés**
+(sinon `{arpa}` compterait), les mots « sans tenir compte de la casse » en
+sous-chaîne, les mots entiers (`MRR`, `ARR`, `ARPA`, `CAC`) **en respectant
+la casse** (comme §21.8.3). Deux désignations **indépendantes** :
 - **les mots des deux côtés** — son français contient, sans tenir compte de la
   casse, `client`, `abonné`, `payant` ou `SaaS`, ou comme mot entier `MRR`,
   `ARR` ou `ARPA` ; ou son anglais `customer`, `subscriber`, `paying` ou
@@ -2308,7 +2316,8 @@ neuve (`/bon-a-tirer`, depuis `grep -rn "TODO: à relire" src/`, en
   1. **Les pièces d'A22 dont §22 dépend**, sous le nom et la signature que §22
      écrit : `setup-type.ts` (module feuille, imports de types seulement :
      `isApp`, `monetizationOf`, `DEFAULT_APP_MONETIZATION`) ;
-     `business-type.ts` (`BUSINESS_TYPES`, `motionsAllowed`) ;
+     `BUSINESS_TYPES` (dans `setup-type.ts` depuis la deuxième relecture de
+     §21) ; `business-type.ts` (`motionsAllowed`) ;
      `access.ts#openTypesWith` ; `catalog-shape.ts` (`shapesOf(setup)`,
      `SetupShapes`, `UNIT_INPUT_IDS`, `displayShapeOf`, `DISPLAY_OVERRIDES`) ;
      `strings.ts#mergeStrings` ; `DeepPartialTranslatable` dans
@@ -2595,7 +2604,9 @@ Ton compte rendu, en français : une liste numérotée de constats, rangés par 
   `content/__tests__/mkt-words.ts` et
   `content/__tests__/engine-copy-marketplace.test.ts` (nouveaux),
   `engine-copy.test.ts` (deux fusions de plus dans le paramétrage), les tests
-  de `strings.ts`.
+  de `strings.ts`, `src/__tests__/content-fan-in.test.ts` (une ligne de
+  `BUDGETS` pour `content/engine-copy-marketplace.ts`, `max: 1` : la page du
+  moteur seule).
 - **Étapes** :
   1. Les feuilles `mkt.*` de §22.8.5 b.
   2. `mkt-words.ts` (les listes de §22.8.3 et §22.11.3 qui sont à MKT-5),
@@ -2630,12 +2641,14 @@ Ton compte rendu, en français : une liste numérotée de constats, rangés par 
 - **Fichiers** : `content/engine-copy-mkt-services.ts`,
   `content/engine-catalog-mkt-services.ts` (nouveaux), `engine-props.ts`
   (`typeStrings.marketplace.services`, `typeCatalogs["marketplace-services"]`),
-  `_engine/view.ts` (`metricsFor(type, offering?)`, `derivedFor`), le passage
+  `_engine/view.ts` (`metricsFor(p, type, offering?)`, `derivedFor`), le passage
   de `setup.offering` là où l'îlot appelle `marketplaceStrings` et
   `metricsFor`, `mkt-words.ts` (`SERVICES_BANNED`, `MKT_SERVICES_EXCLUDED`),
   `engine-copy-marketplace.test.ts` (le point 5), `engine-copy.test.ts` (les
   deux fusions « services »), `engine-catalog.test.ts` (étendu au catalogue
-  « services », §22.8.4), leurs tests.
+  « services », §22.8.4), `src/__tests__/content-fan-in.test.ts` (une ligne
+  de `BUDGETS`, `max: 1`, pour `content/engine-copy-mkt-services.ts` et pour
+  `content/engine-catalog-mkt-services.ts`), leurs tests.
 - **Étapes** :
   1. `SERVICES_BANNED`, `MKT_SERVICES_EXCLUDED`, puis le point 5 du test, qui
      imprime ce qu'il attrape.
@@ -2731,6 +2744,11 @@ Ton compte rendu, en français : une liste numérotée de constats, rangés par 
   - les jeux de mots de chaque écran (§22.8.3, « Les jeux de mots que lit
     chaque écran ») ;
   - `data-testid="mkt-side"` et `data-testid="mkt-total"` (§22.11.3).
+  - tout composant neuf exporté de `src/components/` s'épingle dans
+    `componentSrcMap` de `.design-sync/config.json` (sinon la prochaine
+    synchro casse, `.design-sync/NOTES.md`), avec son commentaire de doc
+    juste au-dessus de son `export` (`src/__tests__/component-docs.test.ts`) ;
+    de même en MKT-8.
 - **Arrêt** : tant que cette fiche n'a pas ses rubriques, l'unité ne part pas.
 
 #### MKT-8 — Les slides (à compléter au retour du brief 10)

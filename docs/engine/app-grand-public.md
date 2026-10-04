@@ -333,13 +333,28 @@ export interface EngineDerived {
 a besoin de savoir si un réglage est une app, et `business-type.ts` (APP-2)
 importe `shapeOf` de `catalog-shape.ts`. Le premier lit donc un module
 **feuille**, `setup-type.ts`, qui n'importe que des types ; un test d'APP-0
-vérifie que chaque `import` de `setup-type.ts` est un `import type`.
+vérifie que chaque `import` de `setup-type.ts` est un `import type` (avec
+`valueImports` et `BY_PATH` de `src/__tests__/helpers/import-graph.ts` :
+`valueImports(BY_PATH.get("lib/engine/setup-type.ts")!)` est vide).
+
+**`BUSINESS_TYPES` et `ALWAYS_OPEN_TYPE` vivent aussi dans la feuille**, pas
+dans `business-type.ts` : `access.ts` les lit, et `access.ts` est importé par
+`proxy.ts` (Edge), `sitemap.ts`, `llms.ts`, `owner-preview.ts` et
+`admin/preview/page.tsx`. Lus depuis `business-type.ts`, qui importe
+`catalog-shape.ts` dès APP-2, ils tireraient tout le catalogue des formes
+(~970 lignes) dans le bundle du proxy. Le test d'APP-0 le garde :
+`reachable("lib/engine/access.ts")` (même helper) ne contient ni
+`lib/engine/business-type.ts` ni `lib/engine/catalog-shape.ts`.
 
 ```ts
 // APP-0 — src/lib/engine/setup-type.ts (a leaf: type imports only)
 import type { AppMonetization } from "./app-model";
-import type { EngineSetup } from "./types";
+import type { BusinessType, EngineSetup } from "./types";
 
+/** Every type the code knows, in the order the setup lists them. Here, not in business-type.ts: access.ts (read by the Edge proxy) imports it. */
+export const BUSINESS_TYPES: readonly BusinessType[] = ["b2b-saas", "consumer-app"];
+/** The type every build opens, whatever ENGINE_TYPES says. */
+export const ALWAYS_OPEN_TYPE: BusinessType = "b2b-saas";
 /** An app starts with subscriptions only (the start card's default, §21.6.1). */
 export const DEFAULT_APP_MONETIZATION: AppMonetization = { subscriptions: true, purchases: false, ads: false };
 export function isApp(setup: Pick<EngineSetup, "type">): boolean {
@@ -357,12 +372,8 @@ export function monetizationOf(setup: Pick<EngineSetup, "type" | "monetization">
 ```ts
 // APP-0 — src/lib/engine/business-type.ts
 import type { BusinessType, Motion } from "./types";
-export { DEFAULT_APP_MONETIZATION, isApp, monetizationOf } from "./setup-type";
+export { ALWAYS_OPEN_TYPE, BUSINESS_TYPES, DEFAULT_APP_MONETIZATION, isApp, monetizationOf } from "./setup-type";
 
-/** Every type the code knows, in the order the setup lists them. */
-export const BUSINESS_TYPES: readonly BusinessType[] = ["b2b-saas", "consumer-app"];
-/** The type every build opens, whatever ENGINE_TYPES says. */
-export const ALWAYS_OPEN_TYPE: BusinessType = "b2b-saas";
 /** What a type may tick (§21.1 D1): the consumer app sells self-serve only. */
 export function motionsAllowed(type: BusinessType): readonly Motion[] {
   return type === "consumer-app" ? ["plg"] : ["plg", "slg"];
@@ -504,17 +515,37 @@ export function openTypesAtBuild(): BusinessType[] {
 }
 ```
 
-- **`page.tsx`** passe `openTypes={openTypesAtBuild()}` à `EngineWorkbench` ;
-  `EngineWorkbenchProps` gagne `openTypes: BusinessType[]` ;
-  `resolveEngineProps` ne le calcule pas (il ne lit pas l'environnement).
+- `access.ts` importe `BUSINESS_TYPES` et `ALWAYS_OPEN_TYPE` de
+  **`setup-type.ts`** (§21.2.2 : jamais de `business-type.ts`).
+- **`page.tsx`** passe `openTypes` à `EngineWorkbench` ;
+  `EngineWorkbenchProps` gagne `openTypes: BusinessType[]` (obligatoire) ;
+  `resolveEngineProps` ne le calcule pas (il ne lit pas l'environnement) : son
+  type de retour devient **`Omit<EngineWorkbenchProps, "openTypes">`**, et la
+  page fait `<EngineWorkbench {...props} openTypes={openTypesAtBuild()} />`.
+  `__tests__/props.ts` (les props des tests) ne change pas ; un test qui monte
+  `EngineWorkbench` avec elles ajoute `openTypes={["b2b-saas"]}` (retouche
+  d'appel). Les props qu'APP-2 et APP-3 ajoutent (`typeCatalogs`,
+  `typeStrings`) sont remplies par `resolveEngineProps` et restent
+  obligatoires.
+- **`engine-boundary.test.ts`** : le test « the flag has one reader »
+  (`only lib/engine/access.ts reads ENGINE_ENABLED`) gagne la même assertion
+  pour `ENGINE_TYPES` (même expression régulière, le nom changé ; lecteurs :
+  `["lib/engine/access.ts"]`).
 - **Un type fermé** est grisé dans `Setup` (« Plus tard ») et absent de la
   carte de départ. **Un fichier** d'un type fermé s'ouvre quand même : l'import
   ne dépend pas du build.
 - **`.github/workflows/ci.yml`** : `ENGINE_TYPES: "consumer-app"` dans le bloc
   `env:` du workflow, à côté de `GAME_ENABLED: "true"`. Lire `GITHUB.md`
   d'abord (déclencheur : « écrire ou modifier un workflow »).
-- **`.env.local.example`** : une ligne `ENGINE_TYPES=` commentée, sur le
-  modèle d'`ENGINE_ENABLED`.
+- **`.env.local.example`** : juste après la ligne `ENGINE_ENABLED=`, une
+  ligne vide puis, comme elle, un bloc de commentaires et une affectation
+  vide **non commentée** :
+
+  ```sh
+  # Les types d'entreprise ouverts en plus du SaaS B2B (§21.3), séparés par
+  # des virgules : consumer-app, puis marketplace. Vide : le SaaS B2B seul.
+  ENGINE_TYPES=
+  ```
 - **Pour Antoine** : ouvrir le type, c'est poser `ENGINE_TYPES=consumer-app`
   dans Vercel puis redéployer ; pour le tester avant son bon à tirer, sur
   l'environnement **Preview** seulement.
@@ -626,7 +657,14 @@ tests ; à refaire à APP-2) :
 
 Un test d'APP-2 (`business-type.test.ts`) reprend ce `grep` et échoue si une
 lecture de `.benchmark`, `.sources` ou `.glossary` apparaît hors de cette liste,
-de `business-type.ts`, de `catalog-shape.ts` et de `page.tsx`.
+de `business-type.ts`, de `catalog-shape.ts` et de `page.tsx`. **Sa portée** :
+les fichiers de `FILES` (`src/__tests__/helpers/import-graph.ts`) dont le
+chemin commence par `lib/engine/`, `app/[locale]/aarrr-funnel-template/` ou
+`components/engine/`, hors `__tests__/` ; l'expression,
+`/\.(benchmark|sources|glossary)\b/` sur `stripComments(source)`. Le reste du
+site (`UI_STRINGS.benchmark`, le glossaire, le Tour) n'est pas concerné. La
+liste permise nomme des fichiers, pas des lignes : une ligne qui bouge ne
+casse rien.
 
 #### 21.4.4 La prose des six chiffres `app.*` (APP-1)
 
@@ -842,6 +880,7 @@ Le texte, chiffre par chiffre. Les formulations sont un premier jet pour le bon
   3. mixpanel · « Mixpanel » · « un rapport de rétention sur la cohorte, lu au trentième jour » / "a retention report on the cohort, read at day 30"
 - trap : recopier celui du SaaS (« Actif » doit être écrit…).
 - request : « pour les installations en {cohort}, combien étaient encore actives trente jours après la première ouverture, et combien d'installations au total » / "for the installs from {cohort}, how many were still active thirty days after first open, and how many installs in total"
+- noReferenceReason : **aucune** (la forme affichée de l'app gagne un repère, §21.4.3, et le catalogue veut un `noReferenceReason` seulement quand aucun repère ne s'affiche) ; ne pas recopier celle du SaaS.
 - benchmarkCaveat : « pour les applis mobiles grand public, qui tombent souvent sous 10 % à J90 ; compare-toi dans ta catégorie » / "for consumer mobile apps, which often fall below 10% by day 90; compare within your category". *La réserve cite « 10 % » : ce chiffre est dans le terme `retention` (« moins de 10 % à J90 »), la règle d'en-tête est tenue ; le test la vérifie.*
 
 **`ret.logo-churn`**
@@ -952,16 +991,43 @@ calculés de l'app d'`ENGINE_DERIVED_CATALOG`. `glossaryHref` depuis
 ne les affiche jamais. *Exception* : le catalogue statique de la page
 (`page.tsx`) reste celui du SaaS.
 
-**Dans l'îlot**, une seule fonction choisit : `metricsFor(type)` et
-`derivedFor(type)` (`_engine/view.ts`) rendent le catalogue SaaS pour
-`"b2b-saas"`, celui de l'app pour `"consumer-app"`. `EngineWorkbench` les
-appelle une fois, sur le moteur à l'écran, et passe le résultat partout où il
-passe aujourd'hui `metrics` et `derived`.
+**Dans l'îlot**, une seule paire de fonctions choisit (`_engine/view.ts`, qui
+ne tenait que des types et gagne ces deux fonctions pures) :
+
+```ts
+/** The catalogue a type's screens read (§21.4.7): b2b-saas → p.metrics; consumer-app → p.typeCatalogs["consumer-app"].metrics. */
+export function metricsFor(p: Pick<EngineWorkbenchProps, "metrics" | "typeCatalogs">, type: BusinessType): ResolvedMetric[];
+/** Same, for the derived figures (what EngineWorkbench passes as `derivedCopy` today). */
+export function derivedFor(p: Pick<EngineWorkbenchProps, "derived" | "typeCatalogs">, type: BusinessType): ResolvedDerived[];
+```
+
+`EngineWorkbench` les appelle et passe le résultat partout où il passe
+aujourd'hui `metrics` et `derivedCopy`. **Quel type, écran par écran** :
+- le tableau, la fiche d'un chiffre, le deck, les Réglages, l'import par
+  fusion : `current.setup.type` (le moteur à l'écran) ;
+- l'exemple (`ExampleView`) : `"b2b-saas"` jusqu'à APP-10, puis le type de
+  l'exemple ouvert (APP-10, §21.9) ;
+- la carte de réglage (`Setup`) et la carte de départ, avant qu'un moteur
+  existe : le type du choix en cours ; `EngineWorkbench` leur passe une
+  fonction `metricsOf: (type: BusinessType) => ResolvedMetric[]` (fermée sur
+  ses props) au lieu d'un tableau (APP-7) ;
+- l'aperçu d'un fichier importé (`ImportPanel`) : le type du fichier lu,
+  par la même fonction `metricsOf` (APP-7).
 
 **Le poids.** Ces props voyagent dans le HTML de la page, prérendu. APP-2 et
-APP-3 mesurent le HTML de `/fr/aarrr-funnel-template` avant et après (taille
-brute et gzip) et l'écrivent dans l'entrée du journal ; au-delà de +60 ko gzip
-à eux deux, s'arrêter et le dire à Antoine.
+APP-3 le mesurent avant et après, et l'écrivent dans l'entrée du journal :
+- **la procédure** : `npm run build` avec le bloc `env:` de `ci.yml`
+  (§23.8) ; le fichier est `.next/server/app/fr/aarrr-funnel-template.html`
+  (prérendu au build, quel que soit `ENGINE_ENABLED`, qui ne joue qu'à
+  l'exécution) ; la taille brute `wc -c < <fichier>`, gzip `gzip -c
+  <fichier> | wc -c`. « Avant » se mesure sur la branche juste créée, avant
+  le premier changement de l'unité ;
+- **les ordres de grandeur** (mesurés le 2026-10-04) : les props résolues en
+  français pèsent 125 ko bruts, 35 ko gzip (`metrics` 38 / 9,4, `strings`
+  81 / 25) ; les 21 + 6 entrées du catalogue de l'app ajoutent ~26 ko bruts,
+  `typeStrings` ~18 ko bruts, soit ~11-12 ko gzip à eux deux ;
+- **l'arrêt** : au-delà de **+25 ko gzip** à APP-2 et APP-3 ensemble,
+  s'arrêter et le dire à Antoine.
 
 ---
 
@@ -1190,10 +1256,16 @@ pur sont déjà épinglés par `app-model.test.ts`.
   `app.ret.active-retention` s'il est montré.
 - **`appRules(setup): MotionRules<SelfServeCandidateId>`** (`app.ts`) :
   `motion: "plg"` ; `candidates: appCandidates(setup)` ; `price:
-  appRankingImpact` ; `isFlow` (celui d'`impact.ts`, inchangé) ;
+  appRankingImpact` ; `isFlow: (id) => id !== "app.ret.active-retention" &&
+  isFlow(id)` (celui d'`impact.ts`, inchangé, enveloppé : il ne prend qu'un
+  `PlgCandidateId`, et la comparaison rétrécit le type ; le passer tel quel
+  ne compile pas) ;
   `retentions: ["ret.logo-churn", "app.ret.active-retention"]` ;
   `blindWatch` : les ★ de `shapesOf(setup)`, puis `ret.logo-churn` (avec les
   abonnements), puis `app.ret.active-retention` (s'il est montré).
+- **`MotionRules`** (`diagnose.ts:99`) n'est pas exporté aujourd'hui : APP-5
+  l'exporte (`export interface MotionRules<C>`), et `app.ts` l'importe par
+  `import type`.
 - **`diagnose(state, ctx)`** (motion `"plg"`) : `isApp(state.setup) ?
   diagnoseWith(appRules(state.setup), state, ctx) : diagnoseWith(PLG_RULES,
   state, ctx)`. La règle qui nomme une étape reste une
@@ -1224,7 +1296,20 @@ rendre argent ? { gap: sub.gap, mrr: argent } : sub.gap ? { gap: sub.gap } : {}
   deux rétentions ne se classent qu'en argent.
 - **`subject["app.ret.active-retention"]`** (`engine-copy.ts`,
   `Record<CandidateId, …>`) : « la rétention des actifs » / "active retention".
-- **`series.ts`** : l'ensemble `CANDIDATES` gagne `app.ret.active-retention`.
+- **`series.ts`** (la série mensuelle, « Ce qui a bougé ») : l'ensemble
+  `CANDIDATES` gagne `app.ret.active-retention`, et **les chiffres comparés
+  sont ceux du réglage** : dans `deriveSeries`, la boucle
+  `for (const shape of SHAPES[motion])` devient `for (const shape of
+  isApp(state.setup) ? shapesOf(state.setup) : SHAPES[motion])` (pour une
+  app, `motion` ne vaut que `"plg"`, D1). Sans ça, une app comparerait
+  `acq.cac` et `rev.gross-margin`, qu'elle n'a pas, et tairait ses chiffres
+  `app.*`. Le SaaS ne change pas.
+- **`phrases.ts#notEnoughBelowValues`** (`phrases.ts:281`) cherche l'étape
+  sous sa cible parmi `candidatesOf(diagnosis.motion)` : pour une app dont la
+  seule étape sous sa cible est `app.ret.active-retention`, la phrase
+  tomberait. Elle lit **`Object.keys(diagnosis.positions)`** à la place (les
+  clés suivent l'ordre des candidats de la règle, donc celui de
+  `candidatesOf` pour le SaaS : rien ne bouge).
 - **Les lecteurs de `positions`** (relevés sur `d91ab24`) : dans le code,
   `diagnose.ts:168, 169, 177, 189` (un `!` : `diagnoseWith` vient de les
   poser) et `deck/ask-defaults.ts:49` (le transtypage devient
@@ -1251,7 +1336,9 @@ rendre argent ? { gap: sub.gap, mrr: argent } : sub.gap ? { gap: sub.gap } : {}
   de `unitEconomics`, et la clé `app: appDerived(state, ctx)` ; pour le SaaS,
   rien ne change et la clé `app` n'existe pas.
 - **`appUnitEconomics(state, ctx): UnitEconomics`** (`app.ts`), depuis
-  `scenarioOf(state, {}, ctx).today.kpis` : `ltv` (id
+  `buildAppScenario(state, {}, ctx).today.kpis` (appelé directement : passer
+  par `scenarioOf` ferait importer `scenario-of.ts` par `app.ts`, qu'il
+  importe, un cycle de valeurs) : `ltv` (id
   `app.rev.install-ltv`), `payback` (`app.rev.install-payback`), `ltvCac`
   (`app.rev.value-to-cost`) ; chacun `known` avec la confiance `solid` si
   toutes ses entrées de `appInputsOf` sont connues et `solid`, `approximate`
@@ -1282,9 +1369,29 @@ rendre argent ? { gap: sub.gap, mrr: argent } : sub.gap ? { gap: sub.gap } : {}
   abonnements (APP-8).
 - **`coverage.ts`** : `motionCoverage(snapshot, motion, setup?)` compte
   `shapesOf(setup)` pour la motion `"plg"` d'une app ; `setupCoverage` lit
-  déjà `shapesOf(setup)` depuis APP-1. Ses appelants lui passent le réglage :
-  `derive.ts:58` et `ImportPanel.tsx:211` (l'aperçu d'un fichier importé, qui
-  compterait sinon les 17 chiffres du SaaS pour une app).
+  déjà `shapesOf(setup)` depuis APP-1. `derive.ts:58` lui passe le réglage.
+  **L'aperçu d'un fichier importé** compte ailleurs : `ImportPanel.tsx:78`,
+  `coverage(snapshot)`, dont la liste par défaut est `METRIC_SHAPES` (« n sur
+  17 » pour une app). Il devient `coverage(snapshot, isApp(state.setup) ?
+  shapesOf(state.setup) : METRIC_SHAPES)` ; le SaaS ne change pas.
+  (`ImportPanel.tsx:211`, dans `previewLine`, ne sert qu'aux fichiers de
+  l'assisté : rien à y faire.)
+- **Les chiffres masqués ne se lisent pas** (D7 : décocher une façon de
+  gagner masque ses chiffres, sans les effacer). Pour une app seulement :
+  - `sanity.ts#selfServeChecks` ne lance un contrôle que si tous les ids
+    qu'il lit sont dans `shapesOf(setup)` (sans abonnements,
+    `paid-gt-retained` et le `churn-high` de `ret.logo-churn` ne partent
+    plus, même si leurs chiffres restent stockés) ;
+  - `peloton.ts#cohortIsSmall(snapshot, setup?)` gagne un second paramètre
+    facultatif : avec une app, il ne regarde que les ids de `COHORT_SIZED`
+    montrés par `shapesOf(setup)`. Ses deux appelants le lui passent
+    (`peloton.ts:80`, `impact.ts:159`). Sans le paramètre, ou pour le SaaS :
+    le comportement d'aujourd'hui.
+- **Le miroir du Tour** (`bridge.ts#buildMirror`) : pour une app, il saute
+  les ponts dont le chiffre n'est ni dans `shapesOf(setup)` ni dans
+  `derivedShapesOf(setup)` (`acq.cac` et `rev.ltv` : une app n'en a pas ;
+  sinon `Mirror.tsx` afficherait l'id brut). Pas de pont propre à l'app en v1
+  (un choix d'exécution, signalé au bon à tirer A22.d).
 - **`findings.ts#selfServeFindings`**, pour une app :
   - `no-definition` et `conflict` bouclent sur les chiffres `"plg"` et `"app"`
     de `shapesOf(setup)` au lieu de `METRIC_SHAPES` ;
@@ -1312,7 +1419,27 @@ rendre argent ? { gap: sub.gap, mrr: argent } : sub.gap ? { gap: sub.gap } : {}
   renommage suit dans `EngineWorkbench.tsx`, `start.ts` et les tests ;
   `data-testid="engine-start-motion"` est gardé).
 - **Si `openTypes` ne contient que `"b2b-saas"`**, la carte est **identique à
-  aujourd'hui**, au caractère près. Un test le garde.
+  aujourd'hui**, au caractère près. Le test qui le garde : `startCopy`
+  (aujourd'hui privée, `EngineWorkbench.tsx:867`) **passe dans
+  `_engine/start.ts`**, exportée, avec la signature `startCopy(strings,
+  locale, choice: StartChoice, today: Date, openTypes: readonly
+  BusinessType[], monetization: AppMonetization)` ; elle rend les props
+  d'`EngineStart` sans les fonctions. **Avant de la déplacer**, écrire dans
+  `start.test.ts` un test qui fige sa sortie d'aujourd'hui pour `ss`, `sa` et
+  `both`, en français et en anglais (`toMatchInlineSnapshot()`, rempli par le
+  code d'avant) ; après le déplacement, le même test, appelé avec
+  `openTypes: ["b2b-saas"]`, reste vert sans toucher au snapshot. La CI
+  construit avec le type ouvert : aucun e2e de la CI ne voit la carte fermée,
+  ce test unitaire est la garde.
+- **Les ids que les e2e lisent ne changent pas**, type ouvert ou non :
+  `engine-start`, `#engine-start-motion-ss|sa|both` (et `-app`, neuf),
+  `engine-start-plan`, `engine-start-defaults`, `engine-start-go`,
+  `engine-start-change`, `engine-start-import`, `engine-start-example`. Avec le
+  type ouvert (la CI depuis APP-0), seuls la légende et les libellés des trois
+  options du SaaS changent ; le plan et la phrase des défauts de `ss`, `sa` et
+  `both` restent mot pour mot (« B2B SaaS, in euros » ; 17, 33…) :
+  `engine-collect`, `engine-forms`, `engine-hybrid`, `engine-mobile` et
+  `engine-engines` les lisent.
 - **Si `"consumer-app"` est ouvert** : la légende devient `start.legendTypes`,
   les options sont `ss` (`start.ssTyped`), `sa` (`start.saTyped`), `both`
   (`start.bothTyped`), `app` (`start.app`, note `start.appNote`), les notes du
@@ -1323,10 +1450,37 @@ rendre argent ? { gap: sub.gap, mrr: argent } : sub.gap ? { gap: sub.gap } : {}
   `.ads`, cochées au départ selon `DEFAULT_APP_MONETIZATION` (abonnements).
   Aucune cochée : le bouton « Commencer » reste actif, et un clic affiche
   `start.appEarnsNone` sous le groupe (le motif de l'erreur « aucune motion »
-  de `Setup.tsx`) sans créer le moteur.
+  de `Setup.tsx`) sans créer le moteur. **Qui tient quoi** :
+  `EngineWorkbench` tient le choix (`startMotion`, renommé `startChoice`), la
+  monétisation (`useState<AppMonetization>(DEFAULT_APP_MONETIZATION)`) et
+  `startTried` (`useState(false)`, remis à `false` quand le choix ou une case
+  change) ; « Commencer » avec `app` et aucune case pose `startTried` et ne
+  crée rien.
+- **Les props d'`EngineStart`** : `options` et `motion` passent à
+  `StartChoice` ; une prop neuve, facultative (absente : rien ne s'affiche,
+  la carte du SaaS) :
+
+  ```ts
+  /** §21.6.1: the app's three ways of earning, shown when `motion === "app"`. */
+  earns?: {
+    legend: ReactNode;
+    options: readonly { id: "subscriptions" | "purchases" | "ads"; label: ReactNode }[];
+    value: AppMonetization;
+    onChange: (next: AppMonetization) => void;
+    /** `start.appEarnsNone`, set by the caller after a click on « Commencer » with nothing ticked. */
+    error?: ReactNode;
+  };
+  ```
+
+  Ses `data-testid` : `engine-start-earns` (le groupe),
+  `engine-start-earns-subscriptions`, `-purchases`, `-ads` (les cases),
+  `engine-start-earns-error` (l'erreur).
 - Le plan (`start.plan`) se calcule par `startPlan(setup)` (la fonction prend
-  le réglage, D3) ; la phrase des défauts est `start.defaultsApp` ; « Voir un
-  exemple rempli » ouvre l'exemple de l'app (§21.9).
+  le réglage, D3) ; la phrase des défauts est `start.defaultsApp`. **« Voir un
+  exemple rempli »** : jusqu'à APP-10, avec `app` choisi, il ouvre l'exemple
+  du SaaS (`openExample(motionsOf(choice))`, inchangé) ; APP-10 change la
+  signature en `openExample(choice: StartChoice, monetization:
+  AppMonetization)` et ouvre l'exemple de l'app (§21.9).
 - **`start.ts`** : `motionsOf("app") = { plg: true, slg: false }` ;
   `typeOf(choice): BusinessType` (`"consumer-app"` pour `app`, `"b2b-saas"`
   sinon) ; `startDefaults(choice, monetization, today)` écrit `type`, et
@@ -1334,12 +1488,29 @@ rendre argent ? { gap: sub.gap, mrr: argent } : sub.gap ? { gap: sub.gap } : {}
 
 #### 21.6.2 La carte de réglage et les Réglages (`_engine/Setup.tsx`, APP-7)
 
+- **Les props de `Setup`** gagnent : `openTypes: readonly BusinessType[]` ;
+  `startType?: BusinessType` et `startMonetization?: AppMonetization` (le
+  choix de la carte de départ, comme `startMotions` aujourd'hui) ;
+  `stringsFor?: (type: BusinessType) => EngineStrings` (§21.8.1 : absent,
+  `strings` comme aujourd'hui ; présent, `Setup` lit `stringsFor(type)` pour
+  tous ses textes) ; `existing.enteredIds: readonly MetricId[]` (les chiffres
+  saisis, tout statut sauf « à faire », calculés dans `EngineWorkbench` à côté
+  d'`enteredCounts`).
 - **Le type devient un état** (`useState<BusinessType>`, depuis
-  `initial?.setup.type ?? startType`, nouvelle prop). Le groupe des types :
-  `value` = l'état ; `consumer-app` désactivé **seulement** s'il n'est pas dans
-  `openTypes` (note `setup.typeLater`) ; `marketplace` reste désactivé ;
-  **dans les Réglages** tout le groupe est désactivé, note `setup.typeFixed`
-  (D7).
+  `initial?.setup.type ?? startType ?? "b2b-saas"`). Le groupe des types,
+  **à la création** : `value` = l'état ; `consumer-app` désactivé
+  **seulement** s'il n'est pas dans `openTypes` (note `setup.typeLater`) ;
+  `marketplace` reste désactivé. **Dans les Réglages** (D7), ce n'est plus un
+  `Choices` : `Choices` grise chaque option désactivée en pointillés « pas
+  encore », raison obligatoire, ce qui dirait du type actuel qu'il vient plus
+  tard. C'est un texte en lecture seule, dans le même `Field` et sous la même
+  légende que le groupe, qui dit le type (`setup.types.b2bSaas` ou
+  `.consumerApp`), avec `setup.typeFixed` en `hint` ; `data-testid`
+  `engine-setup-type-fixed`. Pour le SaaS aussi (une ligne de texte de plus :
+  rien ne change dans ce qu'on peut faire).
+- **`Setup.start()`** reconstruit le réglage de zéro (`Setup.tsx:219`,
+  `type: SETUP_V2_DEFAULTS.type`) : il écrit maintenant `type` (l'état) et,
+  pour une app, `monetization` (l'état des trois cases).
 - **Type `consumer-app`** :
   - le champ « Comment tu vends » est remplacé par la ligne `setup.appSells`,
     puis les deux fenêtres du libre-service (activation, paiement), mêmes
@@ -1354,10 +1525,11 @@ rendre argent ? { gap: sub.gap, mrr: argent } : sub.gap ? { gap: sub.gap } : {}
 - **Dans les Réglages d'une app**, changer la monétisation dit, avant
   l'enregistrement, ce que ça fait (le motif de `motionLines`) : pour chaque
   façon décochée, `settings.streamOffNone` / `streamOffOne` / `streamOff`
-  (« {n} » = les chiffres saisis qui se masquent) ; pour chaque façon cochée,
-  `settings.streamOnOne` / `streamOn` (« {n} » = les chiffres qui
-  apparaissent). Les ensembles se calculent par différence de
-  `shapesOf(avant)` et `shapesOf(après)`. Rien n'est effacé ; une dernière
+  (« {n} » = les chiffres saisis qui se masquent : ceux
+  d'`existing.enteredIds` qui sont dans `shapesOf(avant)` et pas dans
+  `shapesOf(après)`) ; pour chaque façon cochée, `settings.streamOnOne` /
+  `streamOn` (« {n} » = les chiffres qui apparaissent : `shapesOf(après)`
+  moins `shapesOf(avant)`). Rien n'est effacé ; une dernière
   façon cochée ne se décoche pas (le motif de `motionLast`).
 - **Les actifs du mois dans les Réglages** : `shared-counts.ts#settingsSharedCounts`
   propose un compte partagé quand au moins deux chiffres montrés le portent ;
@@ -1370,22 +1542,45 @@ rendre argent ? { gap: sub.gap, mrr: argent } : sub.gap ? { gap: sub.gap } : {}
 
 #### 21.6.3 La validation, l'import, la fusion (APP-0)
 
-- **`validate.ts#setupErrors`** : `type` dans `BUSINESS_TYPES` (sinon
-  `"setup.type: unknown type"`) ; pour une app : `motions` vaut `{ plg: true,
-  slg: false }` (sinon `"setup.motions: a consumer app sells self-serve only"`)
-  et `monetization` est un objet de trois booléens dont au moins un vrai
-  (sinon `"setup.monetization: not three booleans, one at least true"`) ; pour
-  un SaaS, `monetization` absent (sinon `"setup.monetization: only for a
-  consumer app"`).
+- **`validate.ts#setupErrors`**, la chaîne exacte (les messages dans cet
+  ordre ; les tests en `toEqual([...])` en dépendent) :
+
+  ```ts
+  if (!oneOf(BUSINESS_TYPES, setup.type)) errors.push("setup.type: unknown type");
+  const motions = setup.motions;
+  if (!isObj(motions) || !isBool(motions.plg) || !isBool(motions.slg)) errors.push("setup.motions: not two booleans (plg, slg)");
+  else if (!motions.plg && !motions.slg) errors.push("setup.motions: none ticked");
+  else if (setup.type === "consumer-app" && (!motions.plg || motions.slg)) errors.push("setup.motions: a consumer app sells self-serve only");
+  // Just after the motions, before the currency:
+  if (setup.type === "consumer-app") {
+    const m = setup.monetization;
+    if (!isObj(m) || !isBool(m.subscriptions) || !isBool(m.purchases) || !isBool(m.ads) || !(m.subscriptions || m.purchases || m.ads)) {
+      errors.push("setup.monetization: not three booleans, one at least true");
+    }
+  } else if (setup.monetization !== undefined) errors.push("setup.monetization: only for a consumer app");
+  ```
+
+  Une app sans aucune case cochée reçoit donc « none ticked » seul ; un type
+  inconnu avec une `monetization` reçoit les deux messages (« unknown type »,
+  puis « only for a consumer app »). `validate.ts` compare le type en clair
+  (il fait partie des fichiers permis par la garde 3 de §21.10.1).
 - **`validate.ts`**, le reste : `METRIC_IDS` et `ALL_LEVER_IDS` incluent les ids
   de l'app (ils lisent les listes de `catalog-shape.ts`, APP-1 et APP-4) ; une
   valeur de `whatIf` pour un levier `app.*` suit la règle d'aujourd'hui
   (nombre ≥ 0, ≤ 100 pour un pourcentage borné).
 - **`io.ts#sellsSomehow`** : un réglage de `BUSINESS_TYPES` dont les motions
-  cochées sont dans `motionsAllowed(type)`, au moins une. Les tests qui
-  refusent `"consumer-app"` (`io.test.ts:107-114`) et `"marketplace"`
-  (`validate.test.ts:123`) changent : l'app s'ouvre, la place de marché est
-  toujours refusée, une app avec l'assisté coché est refusée.
+  cochées sont dans `motionsAllowed(type)`, au moins une. Elle ne lit pas la
+  monétisation. Les tests qui refusent `"consumer-app"`
+  (`io.test.ts:107-114`) et `"marketplace"` (`validate.test.ts:123`)
+  changent :
+  - l'app s'ouvre (`refusal` absent, `errors` vide) ;
+  - la place de marché est toujours refusée (`refusal: "unsupported-setup"`) ;
+  - une app avec l'assisté coché est refusée (`refusal: "unsupported-setup"`,
+    `motionsAllowed` ne l'autorise pas) ;
+  - une app **sans monétisation** n'est **pas** refusée : `parseEngineFile`
+    rend l'état, sans `refusal`, avec `errors` qui contient
+    `"setup.monetization: not three booleans, one at least true"` (l'assertion
+    du test porte sur ce message).
 - **`merge.ts`** : rien pour le type (deux types différents refusent déjà, avec
   `"type"`). Deux apps de monétisations différentes refusent avec `"motions"`
   (la phrase existante dit qu'ils ne vendent pas de la même façon) ; la
@@ -1545,7 +1740,13 @@ export function teamTools(tools: readonly ToolId[] | undefined, type: BusinessTy
   `business-type.ts#setupToolsFor(type)` vaut
   `toolFamiliesFor(type).flatMap((f) => f.tools)`. Les appelants de
   `teamTools` qui ont le réglage lui passent `setup.type` ; `Setup.tsx` rend
-  les familles de `toolFamiliesFor(setup.type)`. `setup.toolFamily.mobile` :
+  les familles de `toolFamiliesFor(setup.type)`, **et ses outils gardés
+  (`Setup.tsx:148`, `keptTools`) se calculent sur `setupToolsFor(type)` au lieu
+  de `SETUP_TOOLS`** : sinon un outil de l'app (`revenuecat`) compterait comme
+  « gardé » **et** comme coché, s'écrirait deux fois, et `validate.ts`
+  refuserait le réglage (« a tool listed twice »). Un test de `Setup` le
+  garde : une app avec `tools: ["revenuecat"]` enregistrée sans changement
+  garde `["revenuecat"]`. `setup.toolFamily.mobile` :
   « Stores et abonnements » / "Stores and subscriptions". `tools.test.ts`
   garde ses deux tests et en gagne un : les familles de l'app, et
   `teamTools(["revenuecat", "chargebee"], "consumer-app")` vaut
@@ -1634,10 +1835,16 @@ ordre, mêmes cases cochées par défaut. Ce qui change :
 
 #### 21.7.1 Le peloton
 
-- `pelotonTitle` itère sur `peloton.columns.map((c) => c.metric)` au lieu de
-  `PELOTON_METRICS` (même résultat pour le SaaS) ; deux colonnes complètes
-  donnent le titre **`pelotonCompleteTwo`** (`{ activated, d30 }`) ; les titres
-  `pelotonGap*`, `pelotonTailBreak*` et `pelotonEmpty` servent tels quels.
+- `pelotonTitle` (`deck.ts:274`) itère sur `peloton.columns.map((c) =>
+  c.metric)` au lieu de `PELOTON_METRICS` (même résultat pour le SaaS). Ses
+  clauses se lisent aujourd'hui **par position** (`CLAUSES[i]`, `deck.ts:261`)
+  : elles se lisent désormais **par chiffre**, `CLAUSES` devenant un record
+  `{ "act.rate": ["clauseActivated", "a"], "ret.d30": ["clauseD30", "r"],
+  "rev.paid-conversion": ["clausePaid", "p"] }`, et la liste des étapes
+  inconnues (`unknown`) se calcule sur les mêmes colonnes. Deux colonnes
+  complètes donnent le titre **`pelotonCompleteTwo`** (`{ activated, d30 }`) ;
+  les titres `pelotonGap*`, `pelotonTailBreak*` et `pelotonEmpty` servent
+  tels quels.
 - `pelotonLines` et `SlidePeloton.tsx` itèrent déjà sur `peloton.columns`.
 
 #### 21.7.2 La fuite (`buildLeak`, la chaîne de l'app)
@@ -1673,11 +1880,41 @@ ligne se recompte à la calculatrice depuis celle du dessus) :
    telle quelle (l'usage ne bouge pas), sans sa ligne `annual`, puis
    `annual` (`whatIf.annualApp`, la part des abonnements seule).
 
-`ImpactLine.key` gagne `"usage-then" | "usage-times" | "sum"` ;
-`phrases.ts#chainTemplate` les traduit ; `SlideLeak.tsx` ajoute les trois à
-`CHAIN_STEPS` (la carte de calcul). `Impact.mrrPerMonth` = le total affiché.
-Le titre (`impactHeadline`) prend ce total : `leakClearMrrNew` ou
-`leakClearMrrRetained`, avec les mots de l'app (§21.8).
+`ImpactLine.key` gagne `"usage-then" | "usage-times" | "sum"`.
+
+**Quelle chaîne, pour `chainTemplate`.** `phrases.ts#chainTemplate(line,
+impact, words, locale)` choisit aujourd'hui son gabarit par `impact.metric`
+et `impact.kind` ; pour une app, deux chaînes de même `metric` et même `kind`
+(un flux avec ou sans abonnements) prennent des gabarits différents. `Impact`
+gagne donc un champ :
+
+```ts
+/** §21.7.2: which of the app's chains `appWhatIf` built; absent for the SaaS (today's templates, unchanged). */
+appChain?: "subscriptions" | "actives-flow" | "actives-retention";
+```
+
+`appWhatIf` le pose toujours ; `chainTemplate` prend `Pick<Impact, "metric"
+| "kind" | "appChain">` et, quand il est là :
+
+| `appChain` | `today` | `then` | `times` | `usage-then` | `usage-times` | `sum` | `annual` |
+|---|---|---|---|---|---|---|---|
+| `"subscriptions"` (un flux, la conversion ou le churn, avec les abonnements, avec ou sans usage) | comme le SaaS | comme le SaaS | comme le SaaS | `usageThenReferral` pour `ref.referred-share`, `usageThenFlow` sinon | `timesActivesFlow` | `sumApp` | `annualApp` |
+| `"actives-flow"` (un flux, sans les abonnements) | `todayActivesFlow` / `…One` (par `numbered`) | `thenReferral` pour `ref.referred-share`, `thenFlow` sinon | `timesActivesFlow` | — | — | — | `annualApp` |
+| `"actives-retention"` (`app.ret.active-retention`) | `todayActives` | `thenActives` / `…One` (par `numbered`) | `timesActives` | — | — | — | `annualApp` |
+
+`if` reste `ifFlow` partout. Une clé marquée « — » lève une erreur, comme
+`per-month` aujourd'hui ; sans `appChain`, `usage-then`, `usage-times` et
+`sum` lèvent aussi. `SlideLeak.tsx` ajoute les trois clés neuves à
+`CHAIN_STEPS` (la carte de calcul).
+
+**Le titre** (`impact.ts#impactHeadline`) lit aujourd'hui le montant de la
+première ligne `times` : pour une app avec les abonnements et l'usage, ce
+serait la part des abonnements seule (~580 €), pas le total (~830 €). Il lit
+**d'abord la ligne `sum`** quand elle existe (`if (sum?.values.amount)
+return { amount: sum.values.amount }`, avant `times`), puis comme
+aujourd'hui. `Impact.mrrPerMonth` = le total affiché. Le titre est
+`leakClearMrrNew` ou `leakClearMrrRetained`, avec les mots de l'app
+(§21.8).
 
 **L'exemple** (J30 de 12 à 15 %, §21.9) doit imprimer, en français :
 « 12 %, soit 360 nouveaux abonnés par mois » · « La rétention à J30 atteint
@@ -1714,6 +1951,16 @@ et `derived.unit` (§21.5.5), et rend :
   (pas de marge : la slide garde ses « ? »).
   `SlideUnitEconomics.tsx` rend `InstallPaybackChart` quand `installChart` est
   là, `PaybackChart` sinon, au même endroit.
+- **La rangée des tuiles** : celle du SaaS en a six (`styles.figureRowSix`,
+  `repeat(6, …)`, `deck.module.css:1156`), celle d'une app cinq (`cac`,
+  `value12`, `ltv`, `ltvCac`, `payback`). `.figureRowSix` lit
+  `repeat(var(--figure-columns, 6), minmax(0, 1fr))`, et
+  `SlideUnitEconomics.tsx` pose `--figure-columns: 5` en style en ligne
+  **seulement** quand `installChart` est là (le motif du peloton, §21.5.5) :
+  le SaaS ne change pas d'un pixel.
+- **`deck-unit.ts`** : la slide d'une app se construit dans une fonction à
+  part, `appUnitMoney`, à côté d'`unitMoney` (que le SaaS et l'assisté
+  partagent, et qui ne change pas).
 - `deck/deck-rows.ts` : `value12` rejoint les lignes `ROW_FIELDS` de la slide
   (son test, `deck-rows.test.ts`, la vérifie contre le vrai `buildDeck`) ;
   `SlideUnitEconomics.tsx` rend sa tuile entre `cac` et `ltv`.
@@ -1727,10 +1974,12 @@ et `derived.unit` (§21.5.5), et rend :
   remboursement change à l'impression : **`whatIfLeverMargin`** `{ stage,
   from, to, payback, paybackToday }` ; sinon `whatIfLeverPlain`.
 - `leverSubject` gagne les quatre leviers de l'app (§21.8.4).
-- **La slide `scenario`** : ses lignes de chiffres (`WHATIF_KPI_IDS`) pour une
-  app sont `mrr12`, `arr12`, `nrr` (avec les abonnements), `cac`, `value12`
-  (`kpis.app.value12`, libellé `scenario.kpiValue12`), `ltv`, `ltvCac`,
-  `payback` ; jamais `cash`. Ses lignes de funnel (`STEP_ROWS`) perdent
+- **La slide `scenario`** : ses lignes de chiffres pour une app sont une liste
+  à part, `APP_WHATIF_KPI_IDS` (`deck.ts`, à côté de `WHATIF_KPI_IDS`, qui ne
+  change pas : `deck-slg.ts:219` la lit aussi) : `mrr12`, `arr12`, `nrr`
+  (avec les abonnements), `cac`, `value12` (`kpis.app.value12`, libellé
+  `scenario.kpiValue12`), `ltv`, `ltvCac`, `payback` ; jamais `cash`.
+  `WhatIfKpiId` gagne `"value12"`. Ses lignes de funnel (`STEP_ROWS`) perdent
   `paying` sans les abonnements.
 - `deck.ts:1251` (`starsKnown`) compte les ★ de `shapesOf(state.setup)`.
 
@@ -1739,8 +1988,9 @@ et `derived.unit` (§21.5.5), et rend :
 - **L'annexe** imprime la prose de `metricsFor(type)` (§21.4.7), donc « Où le
   trouver » avec App Store Connect et RevenueCat.
 - **L'export texte** (`deckMarkdown`) : mêmes règles, mots de l'app.
-- **`title-accent.ts`** : `pelotonCompleteTwo` est à l'encre comme
-  `pelotonComplete` ; `whatIfLeverMargin` comme `whatIfLever`.
+- **`title-accent.ts`** : rien à écrire (l'encre est le défaut, `RED` est une
+  liste explicite qui ne les contient pas) ; `title-accent.test.ts` ne change
+  pas.
 - **`TITLE_CONTRACT`** (`engine-copy.test.ts`) gagne `pelotonCompleteTwo:
   ["activated", "d30"]` et `whatIfLeverMargin: ["from", "payback",
   "paybackToday", "stage", "to"]`.
@@ -1778,15 +2028,28 @@ export type DeepPartialTranslatable<T> = T extends Translatable ? Translatable :
 ```
 
   Il ne contient **que** les feuilles qui changent. `resolveEngineProps` le
-  résout avec `resolveTree` (qui accepte un arbre partiel : le vérifier, sinon
-  ajouter le test dans `translatable.test.ts`) et le passe en
+  résout avec `resolveTree` (qui accepte un arbre partiel, à l'exécution comme
+  au typage, vérifié le 2026-10-04 ; APP-3 ajoute le test dans
+  `translatable.test.ts`, §21.8.3) et le passe en
   `typeStrings: { "consumer-app": DeepPartial<EngineStrings> }`.
-- **`EngineWorkbench.tsx`** calcule, une fois et **seulement là** : `const
-  strings = isApp(setup) ? mergeStrings(props.strings,
-  props.typeStrings["consumer-app"]) : props.strings;` (mémoïsé sur le type).
-  Tout ce qui est en dessous reçoit `strings` comme aujourd'hui. La carte de
-  départ et l'exemple, avant qu'un moteur existe, prennent le type du choix en
-  cours. Un test statique garde qu'un seul fichier de l'îlot nomme
+- **`EngineWorkbench.tsx`** est **le seul** fichier de l'îlot qui fusionne.
+  Il définit une fonction mémoïsée par type,
+
+  ```ts
+  const stringsFor = (type: BusinessType): EngineStrings =>
+    type === "consumer-app" ? mergeStrings(props.strings, props.typeStrings["consumer-app"]) : props.strings;
+  ```
+
+  et calcule `const strings = stringsFor(current.setup.type)` : tout ce qui
+  est en dessous reçoit `strings` comme aujourd'hui. **Avant qu'un moteur
+  existe, ou pour un autre type que le moteur à l'écran**, l'écran reçoit
+  `stringsFor` lui-même (une fonction, pas `typeStrings`) :
+  - la carte de réglage (`Setup`) lit `stringsFor(type choisi)` pour ses
+    textes, dont `setup.referenceMonthHint` et `setup.cohortHint`, que la
+    règle désigne (APP-7) ;
+  - l'exemple (`ExampleView`) lit `stringsFor(type de l'exemple)` (APP-10).
+
+  Le test statique de §21.8.3 garde qu'un seul fichier de l'îlot nomme
   `typeStrings`.
 
 #### 21.8.2 Le lexique (FR / EN)
@@ -1818,64 +2081,111 @@ tout le revenu.
 
 #### 21.8.3 Ce que le calque doit couvrir — la règle, et son test (APP-3)
 
-**La règle.** Pour chaque feuille d'`ENGINE_COPY` hors des chemins exclus, si
-son français contient (sans tenir compte de la casse) `inscrit`, `inscription`,
-`client`, `SaaS`, `visiteur`, ou, comme mot entier, `ARPA`, `MRR`, `ARR`,
-`CAC`, `LTV` ; ou son anglais `sign-up`, `signup`, `signed up`, `sign up`,
-`customer`, `SaaS`, `visitor`, ou comme mot entier `ARPA`, `MRR`, `ARR`, `CAC`,
-`LTV` ; alors `ENGINE_COPY_CONSUMER` porte **la même feuille**, réécrite avec
-le lexique. **Les feuilles de §21.8.4 a s'écrivent mot pour mot** ; les autres
-se réécrivent par le lexique, sans rien ajouter ni retrancher au sens. Une
-feuille qui ne se réécrit pas par le lexique sans changer de sens : s'arrêter
-et la lister dans le compte rendu.
+**La règle.** Pour chaque feuille d'`ENGINE_COPY` hors des chemins exclus
+(plus bas), on cherche dans son texte **une fois ses gabarits `{…}` retirés**
+(sinon `{cac}` ou `{arpa}` compteraient) :
+- en français, sans tenir compte de la casse, `inscrit`, `inscription`,
+  `client`, `payant`, `SaaS` ou `visiteur` ; ou, comme mot entier **en
+  respectant la casse**, `ARPA`, `MRR`, `ARR`, `CAC` ou `LTV` ;
+- en anglais, sans tenir compte de la casse, `sign-up`, `signup`, `signed up`,
+  `sign up`, `customer`, `paying`, `SaaS` ou `visitor` ; ou, comme mot entier en
+  respectant la casse, `ARPA`, `MRR`, `ARR`, `CAC` ou `LTV`.
 
-**Les chemins exclus** (ce qu'une app n'affiche jamais) :
-- les clés de premier niveau `hybrid`, `total`, `relays`, `pipeline`,
-  `slgChain`, `faq`, `meta`, `page`, `start` (la carte de départ porte ses
-  clés par type) et `tools` ;
-- toute feuille dont un segment du chemin **contient** `slg`, `Slg`, `hybrid`,
-  `Hybrid`, `link` ou `Link` ;
-- toute feuille dont un segment du chemin **commence par** `mkt` (la place de
-  marché, §22, qui écrit ses propres feuilles et ses propres calques) ;
-- toute feuille dont un segment **est exactement** `sa`, `saNote`, `saTyped`,
-  `both`, `bothNote` ou `bothTyped` ;
-- ces chemins exacts : `setup.types`, `setup.typeLater`, `setup.motions`,
-  `setup.motionPlg`, `setup.motionSlg`, `setup.companyLabel`,
-  `workbench.modelShort`, `example.bannerTitle`, `example.company`,
-  `example.bannerBody` ;
-- **ce que la trésorerie et la durée de vie du SaaS impriment, qu'une app
-  n'imprime pas (D10, D11)** : `money.assume*`, `money.line*` sauf
-  `money.lineApp`, `money.months*` sauf `money.monthsApp*`, `money.slgAnnual`,
-  `money.tied`, `scenario.assumeCash*`, `scenario.assumeLtv` et
-  `scenario.assumeLtvSlg`, `scenario.rowCash`, `scenario.rowAfter`,
-  `slide.unitFloor*`, `slide.unitBilled*`, `slide.unitNotAllBack`,
-  `slide.unitMayNotAllBack`, `slide.unitCompanyWide*`, `slide.unitLost*`,
-  `slide.unitLeavesBefore`, `slide.unitMayLeaveBefore`, **toutes les
-  feuilles `slide.chart*` sauf `slide.chartCost`** (le graphique d'une app est
-  `InstallPaybackChart`, §21.6.6), `slide.chartLeaves`,
-  `slide.chartWouldPayBack`, `slide.chartTimeLoss`, `slide.unitRatioReference`,
-  `slide.unitReference`, `slide.unitBothReference`.
+Une feuille où l'une des deux langues en contient un : `ENGINE_COPY_CONSUMER`
+porte **la même feuille**, réécrite avec le lexique de §21.8.2, sans rien
+ajouter ni retrancher au sens. **Les feuilles de §21.8.4 a s'écrivent mot pour
+mot**, y compris les feuilles d'accord que la règle ne désigne pas (« Activés »
+→ « Activées ») ; une feuille du calque qui les contredit se corrige sur elles.
+Mesuré le 2026-10-04 avec ces exclusions : **138 feuilles désignées** (un ordre
+de grandeur, pas un critère).
 
-Une feuille désignée hors de ces exclusions, que l'exécutant croit jamais
-affichée pour une app : il la réécrit (sans risque), il ne l'exclut pas.
+**Une feuille désignée qui ne se réécrit pas par le lexique sans changer de
+sens** : ne pas s'arrêter. L'ajouter à `APP_OVERLAY_SKIPPED`, une liste
+exportée du test (son chemin, une ligne de commentaire qui dit pourquoi), et
+la nommer dans le compte rendu de l'unité : l'orchestrateur la relaie à
+Antoine à la pause. Une feuille désignée que l'exécutant croit jamais affichée
+pour une app, et qui n'est pas dans les exclusions : il la réécrit quand même
+(sans risque), il ne l'exclut pas.
+
+**Les chemins exclus** (ce qu'une app n'affiche jamais). Une feuille est
+exclue dès qu'**une** de ces lignes la désigne ; la liste vit dans le test sous
+le nom `APP_EXCLUDED`, ligne pour ligne, dans le même ordre.
+
+1. **Les clés de premier niveau** `hybrid`, `total`, `relays`, `pipeline`,
+   `slgChain`, `faq`, `meta`, `page`, `start` (la carte de départ porte ses
+   clés par type), `tools` et `role` (des noms de métier : « Customer
+   Success » reste tel quel).
+2. **Un segment du chemin qui contient** `slg`, `Slg`, `hybrid`, `Hybrid`,
+   `link`, `Link`, `Plg` ou `Both`, **ou qui commence par** `mkt` (la place de
+   marché, §22). Pas `plg` en minuscules : `slide.plgLeakAssumption`, le pied
+   de la fuite du libre-service, s'imprime pour une app et se réécrit.
+3. **Un segment qui est exactement** `sa`, `saNote`, `saTyped`, `both`,
+   `bothNote` ou `bothTyped`.
+4. **Le réglage des autres types** (le chemin, et tout ce qui est dessous) :
+   `setup.types`, `setup.typeLater`, `setup.motions`, `setup.motionsRequired`,
+   `setup.motionPlg`, `setup.motionSlg`, `setup.companyLabel`,
+   `settings.motionLast`, `workbench.modelShort`, `example.bannerTitle`,
+   `example.company`, `example.bannerBody`, `example.liveEvent`,
+   `example.lossCause`, `example.pqlThreshold`.
+5. **Ce que seuls l'hybride et l'assisté impriment** :
+   `slideTitles.total`, `slideTitles.totalUnknown`,
+   `slideTitles.unitEconomicsNoneDifferent`,
+   `slideTitles.unitEconomicsNoneMargins`, `slideTitles.unitEconomicsSides`,
+   `notes.cycleLong`, `notes.whoCountsWhere`, `notes.whyNotCompare`,
+   `notes.selfServeFeeds`, `notes.selfServeLever`, `findings.base` (et ses
+   feuilles), `sanity.cacVariantsDiffer`, `scenario.kpiWon`, `scenario.won`,
+   `slide.unitSideLoss`, `slide.unitSideUnknown`, `worth.customersQuarter`,
+   `worth.customersQuarterOne`, `worth.lessThanOneQuarter`.
+6. **Ce que la trésorerie et la durée de vie du SaaS impriment, qu'une app
+   n'imprime pas (D10, D11)** : `money.assume*`, `money.line*` sauf
+   `money.lineApp`, `money.months*` sauf `money.monthsApp*`,
+   `money.slgAnnual`, `money.tied`, `scenario.assumeCash*`,
+   `scenario.assumeLtv` et `scenario.assumeLtvSlg`, `scenario.rowCash`,
+   `scenario.rowAfter`, `slide.unitFloor*`, `slide.unitBilled*`,
+   `slide.unitNotAllBack`, `slide.unitMayNotAllBack`,
+   `slide.unitCompanyWide*`, `slide.unitLost*`, `slide.unitLeavesBefore`,
+   `slide.unitMayLeaveBefore`, **toutes les feuilles `slide.chart*` sauf
+   `slide.chartCost`** (le graphique d'une app est `InstallPaybackChart`,
+   §21.6.6), `slide.unitRatioReference`, `slide.unitReference`,
+   `slide.unitBothReference`, `terms.cashTied`, `terms.afterPayback`.
+7. **Ce qu'une app ne déclenche jamais** : `findings.reconcile`,
+   `findings.reconcileOne`, `sanity.reconcileGap`, `sanity.reconcileGapOne`
+   (le contrôle lit `acq.cac`, qu'une app n'a pas, §21.5.5).
 
 **Le test** (`src/content/__tests__/engine-copy-consumer.test.ts`), critère
 d'acceptation d'APP-3 :
-1. il parcourt `ENGINE_COPY`, applique la règle et les exclusions, et vérifie
-   que chaque feuille désignée existe dans `ENGINE_COPY_CONSUMER` ; en cas
-   d'échec, il imprime la liste des feuilles qui manquent ;
-2. aucune feuille de `mergeStrings(ENGINE_COPY, ENGINE_COPY_CONSUMER)`, hors
-   exclusions, ne contient encore un mot de la règle, sauf les exceptions
-   **nommées une par une**, chacune commentée (par exemple une phrase qui dit
-   que le repère ne vaut que pour le SaaS) ;
-3. chaque feuille du calque existe dans `ENGINE_COPY` (pas de clé orpheline) et
-   a **les mêmes gabarits** (`{…}`) que la feuille qu'elle remplace, dans les
-   deux langues ;
-4. les tests de contrat d'`engine-copy.test.ts` (`TITLE_CONTRACT`, longueurs,
-   glyphes des slides, `**`, « de {month} », pas de tutoiement sur les slides,
-   mots bannis, FR ≠ EN) s'appliquent **aussi** à la copie fusionnée : APP-3
-   les paramètre sur `[ENGINE_COPY, mergeStrings(ENGINE_COPY,
-   ENGINE_COPY_CONSUMER)]`.
+1. **la couverture** : il parcourt `ENGINE_COPY`, applique la règle et
+   `APP_EXCLUDED`, et vérifie que chaque feuille désignée existe dans
+   `ENGINE_COPY_CONSUMER`, hors `APP_OVERLAY_SKIPPED` ; et que chaque feuille
+   de §21.8.4 a y est ; en cas d'échec, il imprime la liste de ce qui manque ;
+2. **plus aucun mot du SaaS** : aucune feuille de `mergeStrings(ENGINE_COPY,
+   ENGINE_COPY_CONSUMER)` que la règle désigne ne contient encore un mot de la
+   règle (cherché comme la règle le cherche : gabarits retirés, acronymes en
+   mots entiers et en respectant la casse), **après avoir retiré** les
+   expressions cibles du lexique qui en contiennent : `visiteurs de la fiche`,
+   `abonné payant`, `abonnés payants` ; `store page visitors`, `paying
+   subscriber`, `paying subscribers`. Sauf les exceptions nommées une par une,
+   chacune commentée (par exemple une phrase qui dit que le repère ne vaut que
+   pour le SaaS) ;
+3. **pas de clé orpheline** : chaque feuille du calque existe dans
+   `ENGINE_COPY` et a **les mêmes gabarits** (`{…}`) que la feuille qu'elle
+   remplace, dans les deux langues ;
+4. **les contrats de la copie** : les tests de contrat d'`engine-copy.test.ts`
+   s'appliquent **aussi** à la copie fusionnée. APP-3 paramètre sur
+   `[ENGINE_COPY, mergeStrings(ENGINE_COPY, ENGINE_COPY_CONSUMER)]`
+   (`describe.each`) ses blocs de contrat : `TITLE_CONTRACT`, les longueurs,
+   les glyphes des slides, `**`, « de {month} », pas de tutoiement sur les
+   slides, les mots bannis, FR ≠ EN. Pas les blocs qui ne lisent que des clés
+   exclues (`faq`, `meta`, `stages`, le piège de l'hybride).
+
+Et `src/lib/i18n/__tests__/translatable.test.ts` gagne un test : `resolveTree`
+résout un arbre partiel (le calque) sans ajouter de clé.
+
+**Un seul fichier de l'îlot nomme `typeStrings`** : un test de
+`src/__tests__/engine-boundary.test.ts` parcourt `reachable(ISLAND)` (les
+modules que l'îlot atteint ; `engine-props.ts`, côté serveur, n'en est pas)
+et vérifie que seul `app/[locale]/aarrr-funnel-template/EngineWorkbench.tsx`
+contient le mot `typeStrings` hors commentaires.
 
 #### 21.8.4 Le texte, mot pour mot
 
@@ -1905,8 +2215,10 @@ recopiant ; `copy-typography.test.ts` la vérifie.
 | `slideTitles.unitEconomicsLoss` | Chaque installation nous coûte {cac} et en rapporte {ltv} en 36 mois : **on perd {gap} sur chacune**. | Each install costs us {cac} and brings back {ltv} over 36 months: **we lose {gap} on each one**. |
 | `slideTitles.leakClearMrrNew` | Ramener {stage} à {target} vaudrait **{amount} de revenu nouveau** chaque mois. | Bringing {stage} to {target} would be worth **{amount} of new revenue** every month. |
 | `slideTitles.leakClearMrrRetained` | Ramener {stage} à {target} vaudrait **{amount} de revenu préservé** chaque mois. | Bringing {stage} to {target} would be worth **{amount} of retained revenue** every month. |
-| `slideTitles.leakClearCustomers` / `…One` | Ramener {stage} à {target} ajouterait **{n} abonnés payants** par mois. / … **{n} abonné payant** … | Bringing {stage} to {target} would add **{n} paying subscribers** a month. / … **{n} paying subscriber** … |
-| `slideTitles.leakClearKept` / `…One` | Ramener {stage} à {target} garderait **{n} abonnés payants** de plus par mois. / … **{n} abonné payant** … | Bringing {stage} to {target} would keep **{n} more paying subscribers** a month. / … **{n} more paying subscriber** … |
+| `slideTitles.leakClearCustomers` | Ramener {stage} à {target} ajouterait **{n} abonnés payants** par mois. | Bringing {stage} to {target} would add **{n} paying subscribers** a month. |
+| `slideTitles.leakClearCustomersOne` | Ramener {stage} à {target} ajouterait **{n} abonné payant** par mois. | Bringing {stage} to {target} would add **{n} paying subscriber** a month. |
+| `slideTitles.leakClearKept` | Ramener {stage} à {target} garderait **{n} abonnés payants** de plus par mois. | Bringing {stage} to {target} would keep **{n} more paying subscribers** a month. |
+| `slideTitles.leakClearKeptOne` | Ramener {stage} à {target} garderait **{n} abonné payant** de plus par mois. | Bringing {stage} to {target} would keep **{n} more paying subscriber** a month. |
 | `slideTitles.leakClearPerHundred` | Ramener {stage} à {target} ajouterait **{n} abonnés pour 100 installations**. | Bringing {stage} to {target} would add **{n} subscribers per 100 installs**. |
 | `slideTitles.pelotonComplete` | Sur 100 installations, {activated}, {d30} et **{paid}**. | Out of 100 installs, {activated}, {d30} and **{paid}**. |
 | `slideTitles.whatIfLever` | Si {stage} passait à {to} (aujourd'hui : {from}), le revenu dans 12 mois gagnerait **{gain}**. | If {stage} went to {to} (today: {from}), revenue in 12 months would gain **{gain}**. |
@@ -1916,7 +2228,8 @@ recopiant ; `copy-typography.test.ts` la vérifie.
 | `whatIf.todayPerHundred` / `…One` | {rate}, soit {n} abonnés pour 100 installations / {rate}, soit {n} abonné pour 100 installations | {rate}, i.e. {n} subscribers per 100 installs / {rate}, i.e. {n} subscriber per 100 installs |
 | `whatIf.timesFlow` | {arpa} par abonné, soit {amount} d'abonnements ajoutés chaque mois | {arpa} per subscriber, i.e. {amount} of subscriptions added every month |
 | `whatIf.todayChurn` | {churn} de churn sur {base} abonnés payants | {churn} churn on {base} paying subscribers |
-| `whatIf.thenChurn` / `…One` | {base} × ({churn} – {target}) = {n} abonnés gardés par mois / … {n} abonné gardé par mois | {base} × ({churn} – {target}) = {n} subscribers kept a month / … {n} subscriber kept a month |
+| `whatIf.thenChurn` | {base} × ({churn} – {target}) = {n} abonnés gardés par mois | {base} × ({churn} – {target}) = {n} subscribers kept a month |
+| `whatIf.thenChurnOne` | {base} × ({churn} – {target}) = {n} abonné gardé par mois | {base} × ({churn} – {target}) = {n} subscriber kept a month |
 | `whatIf.timesChurn` | {arpa} par abonné, soit {amount} d'abonnements préservés chaque mois | {arpa} per subscriber, i.e. {amount} of subscriptions kept every month |
 | `whatIf.lessThanOne` | Moins d'un abonné de plus par mois. | Less than one more subscriber a month. |
 | `scenario.kpiMrr12` | Revenu dans 12 mois | Revenue in 12 months |
@@ -1942,6 +2255,33 @@ recopiant ; `copy-typography.test.ts` la vérifie.
 | `peloton.upstream` | ~{n} visiteurs de la fiche pour 100 installations · {source} · {month} | ~{n} store page visitors per 100 installs · {source} · {month} |
 | `peloton.signups` | Installations | Installs |
 | `board.pelotonTitle` | Pour 100 installations | Per 100 installs |
+| `slide.unitRetention` | GRR {grr} · NRR {nrr} des abonnements par mois — approximatives : le churn des abonnés tient lieu de churn en revenu, comme si les abonnés partis payaient le revenu moyen. | Subscriptions' monthly GRR {grr} · NRR {nrr} — approximate: subscriber churn stands in for revenue churn, as if the subscribers who left paid the average revenue. |
+| `slide.plgLeakAssumption["ret.d30"]` | les abonnés sont supposés parmi les installations encore actives à J30 | subscribers are assumed to be among the installs still active at day 30 |
+| `slide.plgLeakAssumption["ref.referred-share"]` | les installations recommandées s'ajoutent aux autres et convertissent comme elles | referred installs come on top of the others and convert like them |
+
+**Les feuilles d'accord** (même tableau, même calque) : une installation est
+féminine, un inscrit masculin. Ces feuilles ne portent pas toutes un mot de la
+règle ; elles s'écrivent quand même, mot pour mot :
+
+| Feuille | FR | EN |
+|---|---|---|
+| `peloton.activated` | Activées | Activated |
+| `peloton.d30` | Actives à J30 | Active at day 30 |
+| `peloton.paid` | Abonnées à J{n} | Subscribed by day {n} |
+| `peloton.legendReferred` | venues par recommandation ({n}) | came through a referral ({n}) |
+| `peloton.unmeasured.paid` | la conversion en abonné | subscriber conversion |
+| `scenario.activated` | Activées | Activated |
+| `scenario.d30` | Actives à J30 | Active at day 30 |
+| `scenario.paying` | Nouveaux abonnés | New subscribers |
+| `scenario.referred` | dont recommandées | of which referred |
+| `scenario.assumption.activation-drives-downstream` | Les installations actives à J30 et celles qui s'abonnent font partie des installations activées : elles suivent l'activation dans la même proportion, sans jamais la dépasser. | Installs active at day 30 and those that subscribe are among the activated installs: they follow activation in the same proportion, never above it. |
+| `subject["rev.paid-conversion"]` | la conversion en abonné | subscriber conversion |
+| `leverSubject["rev.paid-conversion"]` | la conversion en abonné | subscriber conversion |
+| `settings.paidReset` | La fenêtre de paiement fait partie de la définition de la conversion en abonné : ton chiffre déjà saisi repassera « à faire », pour que tu le remesures sur {n} jours. | The payment window is part of the subscriber conversion's definition: the number you already entered will go back to "to do", so you can measure it again over {n} days. |
+
+L'anglais de trois d'entre elles ne change pas (« Activated », « Active at day
+30 », « came through a referral ({n}) ») : le calque porte quand même la
+feuille entière, `{ fr, en }`, comme toutes les autres.
 
 *Si une feuille de ce tableau n'existe pas sous ce chemin dans `ENGINE_COPY`
 (les chemins sont relevés sur `d91ab24`), chercher la feuille qui porte le
@@ -2016,6 +2356,8 @@ les affiche pas). Chaque unité ajoute celles qu'elle utilise.
 | APP-9 | `slide.unitAssumeApp` | Une installation : sa marge baisse chaque mois avec les départs ; le remboursement se lit sur cette courbe. | One install: its margin falls each month as people leave; the payback is read on that curve. |
 | APP-9 | `scenario.kpiValue12` | Valeur d'une installation sur 12 mois | An install's 12-month value |
 | APP-10 | `example.bannerTitleApp` · `example.companyApp` | Exemple : une app grand public fictive · Exemple d'app | Example: a fictional consumer app · Example app |
+| APP-10 | `example.eventApp` · `example.channelApp` | a terminé une première séance · Recherche App Store | completed a first session · App Store search |
+| APP-10 | `example.churnCauseApp` | l'essai se termine avant la troisième séance | the trial ends before the third session |
 | APP-10 | `example.bannerBodyApp` | Chiffres et cibles inventés, pour montrer le funnel et les slides une fois remplis : l'équipe fictive vise {d30} de rétention à J30, {paid} de conversion en abonné et {retention} de rétention des actifs. Rien n'est enregistré, et ça ne touche pas à ton moteur. | Made-up numbers and targets, to show the funnel and the slides once filled in: the fictional team aims for {d30} day-30 retention, {paid} subscriber conversion and {retention} active retention. Nothing is saved, and it doesn't touch your engine. |
 | APP-11 | `faqTypeNote.consumerApp` | Il sert aussi les apps grand public : choisis-la sur la carte de départ. | It also works for consumer apps: pick one on the start card. |
 
@@ -2143,7 +2485,7 @@ journal. « Les goldens inchangés » veut dire leurs sorties JSON et
 | `engine-copy.test.ts:44-48` | `subject` couvre `app.ret.active-retention` | APP-5 |
 | `engine-copy.test.ts:107-173` | `TITLE_CONTRACT` gagne `pelotonCompleteTwo` et `whatIfLeverMargin` | APP-9 |
 | `content/__tests__/engine-catalog.test.ts` | couvre les six chiffres et les quatre calculés de l'app (les records les contiennent) ; aucun `benchmarkCaveat` pour eux ; le `it.each` du plafond gagne `app.rev.install-ltv` | APP-1 |
-| `shared-counts.test.ts:15-43` (la parité des libellés) | les places `app.*` d'un groupe se comparent au **catalogue de l'app** : en APP-1, la boucle saute les places `app.*` (une exemption nommée, commentée « catalogue de l'app : APP-2 ») ; en APP-2, un second bloc compare, pour chaque groupe qui contient une place `app.*`, ses libellés lus dans le catalogue de l'app (`ENGINE_CATALOG_CONSUMER` pour les quinze, `ENGINE_CATALOG` pour les `app.*`) : « Installations en {month} » trois fois pour `monthSignups`, « Actifs en {month} » deux fois pour `appActives` | APP-1, APP-2 |
+| `shared-counts.test.ts:15-43` (la parité des libellés) | les places `app.*` d'un groupe se comparent au **catalogue de l'app** : en APP-1, la boucle saute les places `app.*` (une exemption nommée, commentée « catalogue de l'app : APP-2 »), **et saute un groupe dont il ne reste aucune place** (`appActives`, sinon `labels.size` vaut 0) ; en APP-2, un second bloc compare, pour chaque groupe qui contient une place `app.*`, ses libellés lus dans le catalogue de l'app (`ENGINE_CATALOG_CONSUMER` pour les quinze, `ENGINE_CATALOG` pour les `app.*`) : « Installations en {month} » trois fois pour `monthSignups`, « Actifs en {month} » deux fois pour `appActives` | APP-1, APP-2 |
 | `shared-counts.test.ts:138` | l'appel `shapesOf({ type: "b2b-saas", motions: { plg, slg } })` | APP-1 |
 | `golden-v2.test.ts:94` | l'appel `motionShapes(state.setup)` ; la sortie JSON inchangée | APP-1 |
 | `cohort.test.ts:93`, `cohort.ts:110` | **rien** : `defaultMonths` est construit sur `METRIC_SHAPES` et n'a pas de clé `app.*` | — |
@@ -2152,8 +2494,9 @@ journal. « Les goldens inchangés » veut dire leurs sorties JSON et
 | `diagnose.test.ts` (21 lignes), `diagnose-slg.test.ts` (8), `phrases.test.ts` (4), `sentences-guard.test.ts` (1), `deck/__tests__/ask-defaults.test.ts:49` (1) | `positions` devient `Partial` : un `!` là où le test lit une position qu'il sait présente ; mêmes valeurs | APP-5 |
 | `_engine/__tests__/start.test.ts:20-24, 37-41` | `startPlan(setup)` ; `typeOf` ; les comptes du SaaS inchangés ; l'app à 18 (abonnements seuls) | APP-7 |
 | `tools.test.ts` | ses deux tests inchangés ; un troisième (§21.6.5) | APP-2 |
-| `sentences-guard.test.ts:634-644` | les titres `pelotonCompleteTwo`, `whatIfLeverMargin` et le contrôle `commission-high` doivent être déclenchés : le balayage gagne les états `consumerState()` et `consumerUsageOnlyState()` | APP-6, APP-9 |
-| `src/__tests__/engine-boundary.test.ts`, règle 5 | `ENGINE_SETUP_DETAILS` gagne `"app"`, émis par `createEngine` | APP-7 |
+| `sentences-guard.test.ts:634-644` | APP-6 : le balayage gagne trois scénarios d'app (`consumerState()`, `consumerUsageOnlyState()`, l'app à commission 35 %), avec `type: "consumer-app"` et `deck: false` (§21.11, APP-6) ; « every finding kind and every sanity check » gagne `commission-high`. APP-9 : les trois scénarios perdent `deck: false`, et « fires every slide title template » voit `pelotonCompleteTwo` et `whatIfLeverMargin` | APP-6, APP-9 |
+| `src/__tests__/engine-boundary.test.ts` | la règle 5 ne change pas (elle importe `ENGINE_SETUP_DETAILS`) ; deux tests neufs : le lecteur unique d'`ENGINE_TYPES` (APP-0, §21.3) et « un seul fichier de l'îlot nomme `typeStrings` » (APP-3, §21.8.3) | APP-0, APP-3 |
+| `src/lib/analytics/__tests__/goatcounter-api.test.ts:347, :394` | **ses valeurs changent** (pas une retouche d'appel) : la liste des chemins gagne `engine_setup/app` ; `setup` gagne `app: 0` | APP-7 |
 | `golden-v1.test.ts`, `golden-v2.test.ts` | **leurs sorties ne bougent pas** : ils restent verts sans toucher à `golden-projection.ts` (seule une ligne d'appel peut changer, ci-dessus) | toutes |
 
 **Les gardes neuves** (`src/lib/engine/__tests__/business-type.test.ts`) :
@@ -2227,6 +2570,13 @@ en français à 1 280 px et en anglais à 390 px :
 8. **build sans `ENGINE_TYPES`** (spec « type fermé », comme les specs « jeu
    fermé ») : la carte de départ est celle d'aujourd'hui, « App grand public »
    est grisée dans la carte complète, et la phrase de la FAQ est absente.
+   **La CI ne la fait jamais tourner** (elle construit avec
+   `ENGINE_TYPES=consumer-app`) : la spec saute quand le type est ouvert, sur
+   le motif inversé de `test.skip(!GAME_OPEN, …)` de `game-flag.spec.ts`, et
+   ne se lance qu'en local, sur un build sans la variable ; le compte rendu
+   d'APP-11 dit qu'elle a tourné. Dans la CI, la garde de ce cas est
+   unitaire : le test de `startCopy` (§21.6.1) et `openTypesWith("")` (garde
+   1 de §21.10.1).
 
 Et les specs existantes étendues : `engine-screens.spec.ts` (la carte de départ
 à quatre options et ses cases, le tableau d'une app, passés à axe et aux
@@ -2248,12 +2598,15 @@ remboursement, pas de pointillé de 12 mois, pas de tuile de trésorerie).
 | La part d'usage comptée pour la conversion en payant | le diagnostic de l'exemple (`shared` → `clear`) | APP-5 |
 | `retentions` qui oublie `app.ret.active-retention` (classée en écart) | le prix de la rétention des actifs | APP-5 |
 | La perte lue sur 12 mois au lieu de 36 | le constat de l'exemple (perte à tort) | APP-6 |
-| La colonne « abonnés » gardée sans abonnements | le titre `pelotonCompleteTwo` | APP-6, APP-9 |
+| La colonne « abonnés » gardée sans abonnements | APP-6 : `peloton.columns.length` vaut 2 (le titre n'existe pas encore) ; APP-9 : le titre `pelotonCompleteTwo` | APP-6, APP-9 |
+| `sum` ignoré par `impactHeadline` (le titre lit la part des abonnements) | le titre de la fuite de l'exemple (~830 €, pas ~580 €) | APP-9 |
+| Un chiffre masqué lu par un contrôle (`paid-gt-retained` sans abonnements) | le test de §21.5.5 (les chiffres masqués) | APP-6 |
+| `keptTools` calculé sur `SETUP_TOOLS` | le test de `Setup` (un outil de l'app écrit deux fois) | APP-2 |
+| `ENGINE_TYPES` ignoré par la page | e2e 1 ; e2e 8 en local | APP-11 |
 | `money.lineApp` jamais affichée (la trésorerie du SaaS calculée) | e2e 4 | APP-8, APP-11 |
 | `installChart` posé sur la slide d'un SaaS | golden v2 | APP-9 |
 | Un gain nul imprimé « −0 € » | le test de `signed` ; le levier de la commission seul | APP-8 |
 | `candidateValues` qui boucle encore sur `candidatesOf` | e2e 5 bis (la cible de la rétention des actifs) | APP-8, APP-11 |
-| `ENGINE_TYPES` ignoré par la page | e2e 1 et 8 | APP-11 |
 
 ---
 
@@ -2315,28 +2668,36 @@ relire" src/`), puis l'ouverture par Antoine.
 - **À lire** : §21.1 (D1, D7, D8), §21.2.1 (le bloc APP-0), §21.2.2 (le bloc
   APP-0), §21.3, §21.6.3 ; le code : `types.ts:48-60, 303-342`, `access.ts`,
   `validate.ts:259-297`, `io.ts:41-102`, `merge.ts:37-66`, `page.tsx`,
-  `EngineWorkbench.tsx` (ses props), `.github/workflows/ci.yml`,
+  `engine-props.ts`, `EngineWorkbench.tsx` (ses props),
+  `src/__tests__/engine-boundary.test.ts` (son dernier test),
+  `src/__tests__/helpers/import-graph.ts`, `.github/workflows/ci.yml`,
   `.env.local.example`, `GITHUB.md` (avant le workflow).
 - **Fichiers** : `src/lib/engine/types.ts`, `setup-type.ts` et
   `business-type.ts` (nouveaux), `access.ts`, `validate.ts`, `io.ts`, `merge.ts`,
-  `src/app/[locale]/aarrr-funnel-template/page.tsx`, `EngineWorkbench.tsx`
-  (la prop seulement), `.github/workflows/ci.yml`, `.env.local.example`, leurs
-  tests.
+  `src/app/[locale]/aarrr-funnel-template/page.tsx`, `engine-props.ts` (son
+  type de retour), `EngineWorkbench.tsx` (la prop seulement),
+  `.github/workflows/ci.yml`, `.env.local.example`,
+  `src/__tests__/engine-boundary.test.ts`, leurs tests.
 - **Étapes** :
   1. `types.ts` : `BusinessType`, `EngineSetup.monetization` (§21.2.1).
   2. `setup-type.ts` et `business-type.ts` : les blocs APP-0 de §21.2.2.
   3. `access.ts` : `engineTypesFlag`, `openTypesWith`, `openTypesAtBuild`.
   4. `validate.ts`, `io.ts`, `merge.ts` : §21.6.3.
   5. `page.tsx` → `openTypes` ; `EngineWorkbenchProps.openTypes` (lu nulle part
-     encore).
+     encore) ; `resolveEngineProps` rend `Omit<EngineWorkbenchProps,
+     "openTypes">` (§21.3).
   6. `ci.yml` : `ENGINE_TYPES: "consumer-app"` dans le bloc `env:` ;
      `.env.local.example`.
-  7. Tests : `business-type.test.ts` (garde 1 de §21.10.1, et : chaque
-     `import` de `setup-type.ts` est un `import type`) ; `validate.test.ts`,
+  7. Tests : `business-type.test.ts` (garde 1 de §21.10.1 ; chaque
+     `import` de `setup-type.ts` est un `import type` ; `access.ts` n'atteint
+     ni `business-type.ts` ni `catalog-shape.ts`, §21.2.2) ;
+     `engine-boundary.test.ts` (le lecteur unique d'`ENGINE_TYPES`, §21.3) ; `validate.test.ts`,
      `io.test.ts`, `merge.test.ts` (une app valide ; sans monétisation ; avec
      l'assisté ; la place de marché toujours refusée ; deux apps de
      monétisations différentes refusées avec `"motions"`).
-- **Acceptation** : commune.
+- **Acceptation** : commune. Depuis cette unité, **toute la suite Playwright
+  de la CI tourne avec `ENGINE_TYPES=consumer-app`** : rien n'y change avant
+  APP-7 (la carte de départ ne lit `openTypes` qu'à partir d'elle).
 - **Arrêt** : un test existant hors de §21.10.1 rougit ; `ci.yml` demande plus
   qu'une ligne.
 - **Relecteurs** : sécurité (une prop de plus vers le client).
@@ -2434,14 +2795,28 @@ relire" src/`), puis l'ouverture par Antoine.
   4. `typeCatalogs` (§21.4.7) ; `metricsFor`, `derivedFor`.
   5. Les outils : `APP_TOOL_FAMILIES`, `toolFamiliesFor`, `teamTools(tools,
      type)` et leurs appelants (§21.6.5).
-  6. Tests : `engine-catalog-consumer.test.ts` (les règles d'`engine-catalog.test.ts`
-     sur le catalogue de l'app ; chaque outil de `where` dans
-     `displayShapeOf(id, "consumer-app").sources`) ; la garde 2 de §21.10.1 ;
-     le second bloc de parité de `shared-counts.test.ts` ; `tools.test.ts` ;
-     le poids du HTML mesuré (§21.4.7).
+  6. Tests : `engine-catalog-consumer.test.ts` (nouveau) applique au
+     catalogue de l'app les règles d'`engine-catalog.test.ts`. Ces règles
+     sont écrites au niveau du module sur `ENGINE_CATALOG` et
+     `ALL_*_SHAPES` : **les extraire** en une fonction
+     `catalogRules(name, catalog, derivedCatalog, shapes, derivedShapes)`
+     dans `src/content/__tests__/engine-test-helpers.ts` (qui déclare ses
+     `describe` et ses `it`), qu'`engine-catalog.test.ts` appelle avec le
+     catalogue du SaaS (ses tests gardent leurs noms et leurs assertions :
+     une retouche d'appel) et `engine-catalog-consumer.test.ts` avec
+     `ENGINE_CATALOG_CONSUMER` et les formes **affichées**
+     (`displayShapeOf(id, "consumer-app")`), pour que la règle « restates
+     every range » vérifie le 20-30 % neuf de `ret.d30` contre le terme
+     `retention`. Et : chaque outil de `where` dans
+     `displayShapeOf(id, "consumer-app").sources`. Puis la garde 2 de
+     §21.10.1 ; le second bloc de parité de `shared-counts.test.ts` ;
+     `tools.test.ts` (dont le test de `Setup` de §21.6.5) ;
+     `src/__tests__/content-fan-in.test.ts` gagne une ligne de `BUDGETS`
+     pour `content/engine-catalog-consumer.ts` (`max: 1`, la page du moteur
+     seule) ; le poids du HTML mesuré (§21.4.7).
 - **Acceptation** : commune ; le poids écrit au journal.
-- **Arrêt** : le poids dépasse +60 ko gzip ; un point de lecture hors de la
-  liste de §21.4.3 dont la bonne lecture n'est pas évidente.
+- **Arrêt** : le poids dépasse +25 ko gzip (§21.4.7) ; un point de lecture
+  hors de la liste de §21.4.3 dont la bonne lecture n'est pas évidente.
 - **Relecteurs** : copie.
 - **Pause** : rien de visible (le type est fermé, la carte de départ ne le
   propose pas encore).
@@ -2455,10 +2830,14 @@ relire" src/`), puis l'ouverture par Antoine.
   appliquer la règle), `content/__tests__/engine-copy.test.ts`.
 - **Fichiers** : `strings.ts`, `lib/i18n/translatable.ts`
   (`DeepPartialTranslatable` exporté), `content/engine-copy-consumer.ts`
-  (nouveau), `engine-props.ts`, `EngineWorkbench.tsx`, `engine-copy.test.ts`
-  (paramétré),
+  (nouveau), `engine-props.ts`, `EngineWorkbench.tsx` (`stringsFor`),
+  `engine-copy.test.ts` (paramétré),
   `content/__tests__/engine-copy-consumer.test.ts` (nouveau),
-  `lib/engine/__tests__/strings.test.ts`.
+  `lib/engine/__tests__/strings.test.ts`,
+  `lib/i18n/__tests__/translatable.test.ts`,
+  `src/__tests__/engine-boundary.test.ts` (le test « un seul fichier nomme
+  `typeStrings` »), `src/__tests__/content-fan-in.test.ts` (une ligne de
+  `BUDGETS` pour `content/engine-copy-consumer.ts`, `max: 1`).
 - **Étapes** :
   1. `DeepPartial`, `mergeStrings` et leurs tests (feuille remplacée, tableau
      remplacé entier, base jamais mutée, calque vide = base) ;
@@ -2466,13 +2845,18 @@ relire" src/`), puis l'ouverture par Antoine.
   2. Écrire d'abord le test de §21.8.3 : il liste les feuilles désignées.
   3. `ENGINE_COPY_CONSUMER` : le tableau de §21.8.4 a mot pour mot, puis chaque
      autre feuille désignée par le lexique de §21.8.2.
-  4. `typeStrings` en props ; la fusion unique dans `EngineWorkbench.tsx`.
-  5. Paramétrer les tests de contrat sur la copie fusionnée.
-- **Acceptation** : commune ; le test de §21.8.3 vert ; le nombre de feuilles
-  du calque écrit au journal ; le poids du HTML mesuré.
-- **Arrêt** : une feuille qui ne se réécrit pas par le lexique sans changer de
-  sens (la lister) ; une feuille de §21.8.4 a introuvable sous son chemin ; le
-  poids d'APP-2 et APP-3 ensemble dépasse +60 ko gzip.
+  4. `typeStrings` en props ; `stringsFor` et la fusion unique dans
+     `EngineWorkbench.tsx` (§21.8.1).
+  5. Paramétrer les tests de contrat sur la copie fusionnée (§21.8.3, point
+     4) ; le test de `translatable.test.ts` ; le test « un seul fichier » ;
+     la ligne de `BUDGETS`.
+- **Acceptation** : commune ; le test de §21.8.3 vert sur ses quatre points ;
+  le nombre de feuilles du calque écrit au journal, et `APP_OVERLAY_SKIPPED`
+  listée dans le compte rendu, vide ou non ; le poids du HTML mesuré.
+- **Arrêt** : une feuille de §21.8.4 a introuvable sous son chemin ; le poids
+  d'APP-2 et APP-3 ensemble dépasse +25 ko gzip ; un test de contrat qui
+  rougit sur une feuille de §21.8.4 a (le texte mot pour mot ne tient pas un
+  contrat : la session principale le reprend).
 - **Relecteurs** : copie.
 - **Pause** : rien de visible.
 
@@ -2529,7 +2913,8 @@ relire" src/`), puis l'ouverture par Antoine.
   `CandidateId`, `Diagnosis.positions`, `EngineDerived.diagnosis`,
   `MotionDerived`), `diagnose.ts`, `app.ts` (`appCandidates`, `appRules`,
   `appRankingImpact`), `scenario-of.ts` (`candidatesFor`), `phrases.ts`
-  (`isCandidate`, `AnyDiagnosis`), `series.ts`, `deck/ask-defaults.ts:49` (le
+  (`isCandidate`, `AnyDiagnosis`, `notEnoughBelowValues`), `series.ts`
+  (`CANDIDATES`, les chiffres comparés), `deck/ask-defaults.ts:49` (le
   transtypage), les fichiers que `tsc` signale ensuite (§21.5.4 en donne la
   liste relevée), les tests de §21.10.1 (lignes APP-5),
   `content/engine-copy.ts` (`subject`), `app.test.ts`.
@@ -2544,8 +2929,12 @@ relire" src/`), puis l'ouverture par Antoine.
   4. `candidatesFor` (§21.5.1) ; `isCandidate` vrai pour
      `app.ret.active-retention` (§21.5.4) ; aucun écran ne l'appelle encore
      (APP-7 à APP-10).
-  5. `subject`, `series.ts`.
+  5. `subject` ; `series.ts` ; `notEnoughBelowValues` (§21.5.4) ;
+     `MotionRules` exporté.
   6. Tests : le diagnostic de l'exemple et de l'app sans abonnements (§21.9.2) ;
+     la série d'une app sur deux mois ne compare que `shapesOf(setup)` ;
+     `notEnoughBelowValues` nomme `app.ret.active-retention` quand elle est la
+     seule sous sa cible ;
      chaque candidat de `appRankingImpact` ; `candidatesFor` (SaaS : égal à
      `candidatesOf` ; app : `appCandidates`) ; le SaaS inchangé (goldens).
 - **Acceptation** : commune ; `shared`, 828 / 768 / 210 ; l'app sans abonnements
@@ -2563,14 +2952,32 @@ relire" src/`), puis l'ouverture par Antoine.
   code : `derive.ts`, `unit-economics.ts`, `total.ts` (la règle des parts),
   `peloton.ts`, `findings.ts:89-260`, `sanity.ts:89-171`, `sentences.ts:140-150`.
 - **Fichiers** : `types.ts` (`AppDerived`, `EngineDerived.app`, `SanityId`),
-  `derive.ts`, `app.ts` (`appUnitEconomics`, `appDerived`), `peloton.ts`,
-  `coverage.ts`, `findings.ts`, `sanity.ts`, `sentences.ts`,
+  `derive.ts`, `app.ts` (`appUnitEconomics`, `appDerived`), `peloton.ts`
+  (`cohortIsSmall`), `impact.ts` (l'appel de `cohortIsSmall`, ligne 159),
+  `coverage.ts`, `bridge.ts` (`buildMirror`), `_engine/ImportPanel.tsx`
+  (ligne 78), `findings.ts`, `sanity.ts`, `sentences.ts`,
   `catalog-shape.ts` (`COMMISSION_HIGH_PERCENT`), `content/engine-copy.ts`
   (`sanity.commissionHigh`), `app.test.ts`, `sentences-guard.test.ts`.
-- **Étapes** : §21.5.5 dans l'ordre ; puis les tests (les lignes de §21.9.2 de
-  la dérivation ; `commission-high` déclenché et non déclenché ; le peloton à
-  deux colonnes ; le balayage de `sentences-guard` sur les deux états de
-  l'app).
+- **Étapes** : §21.5.5 dans l'ordre ; puis les tests :
+  - les lignes de §21.9.2 de la dérivation ; `commission-high` déclenché et
+    non déclenché ; le peloton à deux colonnes (`peloton.columns.length`
+    vaut 2 sans abonnements) ; sans abonnements, `paid-gt-retained` ne part
+    pas même avec ses chiffres stockés ; le miroir d'une app sans ligne
+    `acq.cac` ;
+  - **le balayage de `sentences-guard.test.ts`**, sans le deck : il gagne
+    trois scénarios d'app, `consumerState()`, `consumerUsageOnlyState()`, et
+    « l'app, commission à 35 % » (`withEntry(consumerState(),
+    "app.rev.commission", measured(ratio(11_655, 33_300),
+    tool("revenuecat")))`, qui déclenche `commission-high`). Chaque scénario
+    du tableau `SCENARIOS` gagne deux champs facultatifs : `type?:
+    "consumer-app"`, qui fait lire à `sweep()` les props de l'app
+    (`strings: mergeStrings(p.strings, p.typeStrings["consumer-app"])`,
+    `metrics: p.typeCatalogs["consumer-app"].metrics`, `derived:
+    p.typeCatalogs["consumer-app"].derived`), et `deck?: false`, qui lui
+    fait sauter `buildDeck` et `deckMarkdown` (le deck d'une app casserait
+    avant APP-9 : `deck.ts:476` et `pelotonTitle`) ; les trois scénarios de
+    l'app portent `deck: false`, qu'APP-9 retire. Le test « fires every
+    finding kind and every sanity check » gagne `"commission-high"`.
 - **Acceptation** : commune ; couverture 21 (20, 0, 0, 1) et 16 ; la valeur, le
   remboursement et le ratio de §21.9.2 dans `derived.unit` et `derived.app`.
 - **Arrêt** : un lecteur des trois colonnes du peloton (`columns[2]`) qui
@@ -2586,21 +2993,44 @@ relire" src/`), puis l'ouverture par Antoine.
   `components/engine/EngineStart.tsx`, `_engine/start.ts`,
   `_engine/Setup.tsx` (en entier), `EngineWorkbench.tsx:180-260, 580-640,
   860-940`, `_engine/BoardHead.tsx:100-110`, `lib/analytics/goatcounter.ts:330-345`,
-  `admin/…/EngineSection.tsx`.
+  `src/app/(app)/admin/stats/EngineSection.tsx`,
+  `src/lib/analytics/__tests__/goatcounter-api.test.ts:340-400`,
+  `components/core/Choices.tsx` (ses options désactivées),
+  `scripts/engine-density.capture.ts` (l'en-tête : les captures).
 - **Fichiers** : ceux-là, `_engine/TargetsStart.tsx` et
   `_engine/settings-numbers.ts` (les cibles par `candidatesFor`, §21.5.4 ;
   `settingsNumbers` reçoit le réglage au lieu des cases),
   `lib/engine/shared-counts.ts` (`settingsSharedCounts` et `appActives`,
   §21.6.2), `content/engine-copy.ts` (APP-7), leurs tests.
-- **Étapes** : §21.6.1 ; §21.6.2 ; les cibles (`TargetsStart`, les Réglages)
-  par `candidatesFor(setup, motion)` ; `workbench.modelShort.app` dans la barre ;
-  l'analytique : `ENGINE_SETUP_DETAILS` gagne `"app"`,
-  `engineSetupDetail(setup)` rend `"app"` pour une app (ses deux appels passent
-  le réglage), `/admin/stats` affiche la ligne (libellé « App grand public »
-  dans la copie de l'admin) ; les tests (`start.test.ts`, la carte
-  inchangée quand seul le SaaS est ouvert, `engine-boundary.test.ts`).
-- **Acceptation** : commune ; captures de la carte de départ et du réglage, FR à
-  1 280 px et EN à 390 px, regardées (leçon nº 1).
+- **Étapes** :
+  1. Le test qui fige `startCopy` (§21.6.1), **avant** tout changement.
+  2. §21.6.1 (dont `startCopy` déplacé, les props d'`EngineStart`,
+     `startTried`) ; §21.6.2 (dont les props de `Setup`, le type en lecture
+     seule dans les Réglages, `Setup.start()`, `enteredIds`).
+  3. Les cibles (`TargetsStart`, les Réglages) par `candidatesFor(setup,
+     motion)` ; `workbench.modelShort.app` dans la barre.
+  4. L'analytique : `ENGINE_SETUP_DETAILS` gagne `"app"` ;
+     `engineSetupDetail(setup)` (`lib/analytics/goatcounter.ts:341`,
+     réexportée par `engine-events.ts`) prend le réglage et rend `"app"` par
+     `isApp(setup)` (jamais `.type === "consumer-app"`, garde 3) ; ses deux
+     appels passent le réglage. `/admin/stats` (`EngineSection.tsx:45`, en
+     anglais comme toute la page) : « Set up — self-serve {…plg},
+     sales-assisted {…slg}, both {…hybrid}, consumer app {engine.setup.app} ».
+  5. Les tests : `start.test.ts` ; `goatcounter-api.test.ts` (ses valeurs
+     attendues changent, ce n'est pas une retouche d'appel : ligne 347, la
+     liste des chemins gagne `engine_setup/app` ; ligne 394, `setup` gagne
+     `app: 0`) ; un test de `Setup` (une app enregistrée sans changement
+     garde son type, sa monétisation et ses outils).
+  6. Les e2e, contre un build `ENGINE_TYPES=consumer-app` comme la CI :
+     `engine-collect`, `engine-forms`, `engine-hybrid`, `engine-engines`,
+     `engine-settings`, `engine-screens`, `engine-canary`, `engine-mobile`,
+     tous verts et inchangés.
+- **Acceptation** : commune ; captures de la carte de départ (avec `app`
+  choisi, et l'erreur « aucune case ») et du réglage d'une app, FR à 1 280 px
+  et EN à 390 px, regardées (leçon nº 1), prises comme §23.8 le dit (une spec
+  jetable hors du dépôt sur le modèle de `scripts/engine-density.capture.ts`,
+  `engineSeed` d'`e2e/engine-helpers.ts`, un build `ENGINE_ENABLED=true
+  ENGINE_TYPES=consumer-app`).
 - **Arrêt** : la carte du SaaS change d'un caractère quand le type est fermé.
 - **Relecteurs** : copie, sécurité (l'analytique).
 - **Pause** : un moteur app se crée derrière le drapeau ; ses écrans de
@@ -2653,16 +3083,30 @@ relire" src/`), puis l'ouverture par Antoine.
   `deck/export-png.ts`, `title-accent.ts`.
 - **Fichiers** : ceux-là (sauf `payback-chart.ts` et `PaybackChart.tsx`),
   `lib/viz/install-payback-chart.ts` et
-  `components/engine/InstallPaybackChart.tsx` + `.module.css` (nouveaux),
-  `app.ts` (`appWhatIf`), `types.ts` (`ImpactLine.key`, `SlideInstallChart`,
-  `Slide.installChart`, `SlideTitleKey`), `content/engine-copy.ts` (APP-9,
+  `components/engine/InstallPaybackChart.tsx` + `.module.css` (nouveaux ; le
+  commentaire de doc juste au-dessus de `export function
+  InstallPaybackChart`, que `src/__tests__/component-docs.test.ts` lit),
+  `.design-sync/config.json` (`componentSrcMap` gagne `"InstallPaybackChart":
+  "src/components/engine/InstallPaybackChart.tsx"` : tout composant exporté
+  de `src/components/` y est épinglé, sinon la prochaine synchro casse,
+  `.design-sync/NOTES.md`),
+  `app.ts` (`appWhatIf`), `impact.ts` (`impactHeadline`), `types.ts`
+  (`ImpactLine.key`, `Impact.appChain`, `SlideInstallChart`,
+  `Slide.installChart`, `SlideTitleKey`, `WhatIfKpiId`),
+  `deck/deck.module.css` (`--figure-columns`),
+  `lib/engine/__tests__/sentences-guard.test.ts` (les trois scénarios de
+  l'app perdent `deck: false`), `content/engine-copy.ts` (APP-9,
   dont `slideTitles.pelotonCompleteTwo`), `content/engine-copy-consumer.ts`
   (la réécriture de `pelotonCompleteTwo`), `engine-copy.test.ts`
   (`TITLE_CONTRACT`), leurs tests.
-- **Étapes** : §21.7.1 à §21.7.5 dans l'ordre ; la chaîne de l'exemple (§21.7.2)
-  vérifiée ligne par ligne ; §21.6.6 (la géométrie et ses tests d'abord, puis
-  le composant, puis `installChart` dans `buildUnitEconomics`) ;
-  `ask-defaults.ts:81` par `candidatesFor`.
+- **Étapes** : §21.7.1 à §21.7.5 dans l'ordre (dont `deck.ts:476`, l'aparté
+  de la fuite, sur les clés de `positions`, et `pelotonTitle` par chiffre) ;
+  la chaîne de l'exemple (§21.7.2) vérifiée ligne par ligne ; `chainTemplate`
+  testé sur ses trois `appChain` ; §21.6.6 (la géométrie et ses tests
+  d'abord, puis le composant, puis `installChart` dans `buildUnitEconomics`) ;
+  `ask-defaults.ts:81` par `candidatesFor` ; enfin `deck: false` retiré des
+  trois scénarios de l'app dans `sentences-guard.test.ts` (§21.10.1) : le
+  balayage passe sur leur deck.
 - **Acceptation** : commune ; captures des slides de l'exemple (peloton, fuite,
   économie avec la courbe, un « Et si »), FR et EN, et de la slide de
   l'économie de l'app sans abonnements (la perte), regardées, par un test
@@ -2684,11 +3128,30 @@ relire" src/`), puis l'ouverture par Antoine.
   (APP-10), `golden-consumer.test.ts`, `golden-consumer-inputs.json`,
   `golden-consumer.json` (nouveaux), `fixtures.ts` (`consumerState` lit
   désormais `exampleEngine`).
-- **Étapes** : `exampleEngine(…, type, monetization)` ; `consumerState()` le
-  lit ; l'exemple dans `ExampleView` (ses cibles par `candidatesFor`,
-  `ExampleView.tsx:127`) ; vérifier §21.9.2 dans les sorties ; **puis
-  seulement** écrire le golden (l'entrée « avec ses deux « Et si » » =
-  `{ ...consumerState(), whatIf: EXAMPLE_CONSUMER_WHATIF }`).
+- **Étapes** :
+  1. **Les mots de l'exemple** : `ExampleWords` (`example.ts:29`) gagne
+     `churnCause?: string` (lu par `exampleConsumerMetrics` seulement).
+     `exampleConsumerMetrics(words)` écrit `act.event` et
+     `acq.top-channel-share` comme `exampleMetrics` (avec `words.event` et
+     `words.channel`), et `"ret.churn-cause": measured({ kind: "text", text:
+     words.churnCause ?? "" }, { kind: "person", role: "data" }, { evidence:
+     "data" })`. Pour une app, `ExampleView` passe `{ event: e.eventApp,
+     channel: e.channelApp, company: e.companyApp, churnCause:
+     e.churnCauseApp }` (§21.8.4 b), où `e` est `stringsFor("consumer-app").example`
+     (§21.8.1).
+  2. `exampleEngine(words, motions, type?, monetization?)` (§21.9.1) ;
+     `consumerState()` le lit.
+  3. `ExampleView` gagne les props `type: BusinessType`, `monetization?:
+     AppMonetization` et `stringsFor` ; pour une app, son bandeau lit
+     `example.bannerTitleApp` et `example.bannerBodyApp` (`{d30}`, `{paid}`,
+     `{retention}` remplis depuis `EXAMPLE_CONSUMER_TARGETS`), ses cibles
+     passent par `candidatesFor` (`ExampleView.tsx:127`), ses chiffres par
+     `metricsFor(props, "consumer-app")`. `EngineWorkbench` lui passe le type
+     de l'exemple demandé : `openExample(choice, monetization)` (§21.6.1)
+     garde le choix et la monétisation de la carte de départ.
+  4. Vérifier §21.9.2 dans les sorties ; **puis seulement** écrire le golden
+     (l'entrée « avec ses deux « Et si » » = `{ ...consumerState(), whatIf:
+     EXAMPLE_CONSUMER_WHATIF }`).
 - **Acceptation** : commune ; le golden écrit une fois.
 - **Arrêt** : un nombre de §21.9.2 absent des sorties.
 - **Relecteurs** : copie.
