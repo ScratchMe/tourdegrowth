@@ -261,8 +261,12 @@ branche** : `ENGINE_TYPES` y vaut `consumer-app` depuis APP-0, puis
 `consumer-app,marketplace` depuis MKT-10 (qui ouvre la place de marché à la CI
 avec ses e2e). Avant MKT-10, les e2e se lancent avec `ENGINE_TYPES=consumer-app`
 comme la CI, et seules les captures d'une unité de la place de marché se
-prennent sur un build `consumer-app,marketplace`. Une unité sans écran saute le
-build et Playwright, et le dit.
+prennent sur un build `consumer-app,marketplace`. **Une unité sans écran
+fait quand même tourner**, contre ce build, `e2e/engine-canary.spec.ts` et
+`e2e/engine-collect.spec.ts`. Le pilote APP-1 n'avait pas d'écran et il en a
+cassé un : un compte partagé nommait un chiffre que les props du SaaS ne
+portent pas. Seuls ces e2e l'ont vu. La suite complète (plus d'une heure en
+local) est celle de la CI.
 
 **Les captures** (leçon nº 1 de `CLAUDE.md`) : une spec Playwright jetable,
 **hors du dépôt**, sur le modèle de `scripts/engine-density.capture.ts` (ses
@@ -278,13 +282,15 @@ ouvre (§23.7, point 4).
 Les pièges déjà rencontrés sur ce moteur, chacun au moins une relecture :
 
 - **Typographie française** : U+00A0 (jamais U+202F) avant `: ; ! ?`, `%`, `€`,
-  après « et avant », et dans les milliers (« 12 000 »). Les spécifications
+  après « et avant », dans les milliers (« 12 000 »), et entre un nombre et
+  son unité (« 12 mois », comme `engine-catalog.ts`). Les spécifications
   n'en ont pas : le sous-agent les pose en recopiant ;
   `copy-typography.test.ts` les vérifie.
 - **Le marqueur** : `TODO: à relire`, avec une espace ordinaire après `TODO`
   (convention 6). Sur toute chaîne neuve ou retouchée, même d'une virgule.
 - **Guillemets** : une chaîne anglaise qui cite entre guillemets droits se
-  met entre apostrophes simples (A12.c a cassé l'import d'un module ainsi).
+  met entre apostrophes simples, ou les échappe (`\"…\"`) si le fichier le
+  fait déjà : suivre le fichier (A12.c a cassé l'import d'un module ainsi).
 - **Les deux langues** (leçon nº 5) : chaque écran se regarde aussi en
   anglais ; une chaîne anglaise identique à la française est refusée par les
   tests de contrat, sauf les noms propres déjà listés.

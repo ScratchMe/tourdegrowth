@@ -70,7 +70,9 @@ partagé**, le dénominateur des deux chiffres « par actif ».
 **Ce qui ne change pas.**
 - **Le SaaS B2B ne bouge pas d'un caractère** : écrans, slides, export texte,
   événements, goldens v1 et v2 verts **sans toucher à `golden-projection.ts`**.
-  C'est le critère de chaque unité.
+  C'est le critère de chaque unité. **Une seule exception**, acceptée par
+  Antoine le 2026-10-05 : la liste « Autres outils » d'une fiche du SaaS
+  propose aussi RevenueCat, AppsFlyer et Adjust (§21.6.5).
 - Aucune migration : un moteur « app » est un fichier v3 avec `setup.type:
   "consumer-app"` et `setup.monetization`.
 - Tout reste local, bilingue, déterministe ; seule une cible d'équipe nomme
@@ -504,6 +506,27 @@ appActives: [
 le dénominateur de `app.ret.active-retention` (les actifs du mois d'avant)
 n'est pas un compte partagé.
 
+**La ligne sous les cases d'une fiche** (« changer ce compte ici le change
+partout », `_engine/MetricSheet.tsx#sharedSides`) nomme les autres chiffres
+d'un groupe. Elle ne nomme plus que ceux que la vue sait nommer, par une
+fonction pure de `shared-counts.ts` :
+
+```ts
+/** The other numbers sharing `id`'s count on `side`, among the ones the view can name (§21.2.4). */
+export function sharedWith(id: MetricId, side: "numerator" | "denominator", named: ReadonlySet<MetricId>): MetricId[];
+```
+
+Elle rend les places du groupe de `sharedCountAt(id, side)` (vide sans
+groupe), moins `id`, parmi `named`, dans l'ordre de `SHARED_COUNTS`.
+`sharedSides` lui passe les ids de `view.metrics`. **Sans elle, la fiche
+d'`acq.signup-rate` d'un SaaS lève une erreur** : `monthSignups` nomme
+`app.acq.cpi`, que les props du SaaS ne portent pas (étape 6 d'APP-1). Le
+pilote APP-1 l'a trouvé le 2026-10-05, par trois e2e, et aucun test
+unitaire ne le voyait. Le SaaS ne change pas : sa ligne nomme toujours
+toutes les places de ses groupes, `link.pql-handoff` compris. On ne filtre
+pas par `shapesOf(setup)`, qui ôterait ce lien. Décidé par Antoine le
+2026-10-05.
+
 ---
 
 ### 21.3 Le drapeau des types (APP-0)
@@ -694,7 +717,11 @@ Dans `ENGINE_CATALOG` (`src/content/engine-catalog.ts`, typé
 `// TODO: à relire — copie neuve (convention 6), §21 (A22)`. Les règles
 d'écriture de l'en-tête d'`engine-catalog.ts` valent (rapport vérifié, aucun
 menu inventé, réserve sans chiffre propre). Les noms d'écrans d'outils sont
-sourcés en annexe.
+sourcés en annexe. Un libellé de `where` donné sans anglais est un nom propre,
+identique dans les deux langues (« RevenueCat », « GA4 (Firebase) »). Les
+anglais des libellés composés (« AppsFlyer or Adjust », « Your revenue
+tracking ») sont ajoutés le 2026-10-05 : le pilote APP-1 les avait traduits
+lui-même.
 
 **`app.acq.cpi`**
 - name : « Coût par installation » / "Cost per install"
@@ -702,7 +729,7 @@ sourcés en annexe.
 - formula : « dépense d'acquisition du mois ÷ installations du mois, organiques comprises » / "acquisition spend in the month ÷ installs in the month, organic included"
 - inputs : numérateur « Dépense pour les installations en {month} » / "Spend on installs in {month}" ; dénominateur « Installations en {month} » / "Installs in {month}" (le numérateur ne reprend pas « Dépense d'acquisition en {month} », le libellé d'`acq.cac` : deux libellés identiques du catalogue doivent être un compte partagé, `shared-counts.test.ts`)
 - where :
-  1. appsflyer · « AppsFlyer ou Adjust » · « le tableau de bord Overview : le coût du mois et les installations, toutes sources » / "the Overview dashboard: the month's cost and installs, all sources"
+  1. appsflyer · « AppsFlyer ou Adjust » / "AppsFlyer or Adjust" · « le tableau de bord Overview : le coût du mois et les installations, toutes sources » / "the Overview dashboard: the month's cost and installs, all sources"
   2. google-ads · « Apple Search Ads, Google Ads, Meta Ads Manager » · « le montant dépensé en {month}, toutes campagnes confondues » / "the amount spent in {month}, all campaigns together"
   3. role finance · « Finance » · recopier le chemin de `acq.cac` (ses variantes)
 - trap : « Divise par toutes les installations du mois, organiques comprises. Le CPI d'une régie ne divise que par les installations qu'elle s'attribue : il paraît plus cher. » / "Divide by every install in the month, organic included. An ad network's CPI only divides by the installs it claims: it looks dearer."
@@ -716,7 +743,7 @@ sourcés en annexe.
 - formula : « actifs du mois déjà actifs le mois d'avant ÷ actifs du mois d'avant » / "actives this month who were already active the month before ÷ actives the month before"
 - inputs : numérateur « Actifs en {month}, déjà actifs avant » / "Actives in {month}, already active before" ; dénominateur « Actifs le mois d'avant » / "Actives the month before"
 - where :
-  1. amplitude · « Amplitude ou Mixpanel » · « un graphique de rétention au mois : les actifs d'un mois, revenus le mois suivant » / "a monthly retention chart: one month's actives who came back the next month"
+  1. amplitude · « Amplitude ou Mixpanel » / "Amplitude or Mixpanel" · « un graphique de rétention au mois : les actifs d'un mois, revenus le mois suivant » / "a monthly retention chart: one month's actives who came back the next month"
   2. ga4 · « GA4 (Firebase) » · « pas de rétention d'un mois sur l'autre dans les rapports standards : à demander à la data, depuis l'export des événements » / "no month-over-month retention in the standard reports: ask the data team, from the event export"
 - trap : « Compte les mêmes personnes d'un mois sur l'autre, pas deux totaux d'actifs : deux mois à 15 000 actifs ne font pas 100 % si 3 000 sont nouveaux. » / "Count the same people from one month to the next, not two totals of actives: two months at 15,000 actives aren't 100% if 3,000 are new."
 - request : « le nombre d'actifs le mois d'avant {month}, et combien d'entre eux ont encore été actifs en {month} » / "the number of actives the month before {month}, and how many of them were still active in {month}"
@@ -742,7 +769,7 @@ sourcés en annexe.
 - inputs : numérateur « Revenu publicitaire en {month} » / "Ad revenue in {month}" ; dénominateur « Actifs en {month} » / "Actives in {month}"
 - where :
   1. role finance · « Finance » · « les relevés des régies pour le mois (AdMob, AppLovin, ironSource…) : ce qu'elles te versent » / "the networks' statements for the month (AdMob, AppLovin, ironSource…): what they pay you"
-  2. spreadsheet · « Ton suivi des revenus » · « le revenu publicitaire du mois, et les actifs du mois depuis ton outil d'analytics » / "the month's ad revenue, and the month's actives from your analytics tool"
+  2. spreadsheet · « Ton suivi des revenus » / "Your revenue tracking" · « le revenu publicitaire du mois, et les actifs du mois depuis ton outil d'analytics » / "the month's ad revenue, and the month's actives from your analytics tool"
 - trap : « Prends ce que les régies te versent, pas ce que les annonceurs paient : la régie garde sa part avant. Et divise par tous les actifs du mois, comme pour les achats. » / "Take what the networks pay you, not what advertisers pay: the network keeps its share first. And divide by every active in the month, as for purchases."
 - request : « le revenu publicitaire versé par les régies pour {month}, et le nombre d'actifs du même mois » / "the ad revenue the networks paid for {month}, and the number of actives that same month"
 - noReferenceReason : « il dépend du pays, du format et du temps passé dans l'app ; suis-le contre ta propre cible » / "it depends on the country, the format and the time spent in the app; follow it against your own target"
@@ -846,7 +873,7 @@ Le texte, chiffre par chiffre. Les formulations sont un premier jet pour le bon
 - where :
   1. app-store-connect · « App Store Connect » · « Analytics : la métrique Product Page Views (vues uniques de la fiche) et la métrique First-Time Downloads, sur le mois » / "Analytics: the Product Page Views metric (unique views of your page) and the First-Time Downloads metric, over the month"
   2. play-console · « Google Play Console » · « Grow users, Store performance, Conversion analysis : Store listing visitors et Store listing acquisitions sur le mois » / "Grow users, Store performance, Conversion analysis: Store listing visitors and Store listing acquisitions over the month"
-  3. appsflyer · « AppsFlyer ou Adjust » · « les installations du mois, toutes sources ; les visiteurs de la fiche viennent des stores » / "the month's installs, all sources; store page visitors come from the stores"
+  3. appsflyer · « AppsFlyer ou Adjust » / "AppsFlyer or Adjust" · « les installations du mois, toutes sources ; les visiteurs de la fiche viennent des stores » / "the month's installs, all sources; store page visitors come from the stores"
 - trap : « La « Conversion Rate » d'App Store Connect porte sur les impressions, pas sur les visiteurs de la fiche. Additionne les deux stores dans les deux comptes, ou fais un moteur par store. » / "App Store Connect's \"Conversion Rate\" is on impressions, not page visitors. Add both stores up in both counts, or keep one engine per store."
 - request : « le nombre de visiteurs uniques de la fiche et le nombre de premières installations en {month}, App Store et Google Play additionnés » / "the number of unique store page visitors and of first-time installs in {month}, App Store and Google Play added up"
 - noReferenceReason : « la conversion d'une fiche dépend de la catégorie et de la part de visiteurs venus d'une pub ; suis-la contre ta propre cible » / "a page's conversion depends on the category and on the share of visitors who came from an ad; follow it against your own target"
@@ -859,7 +886,7 @@ Le texte, chiffre par chiffre. Les formulations sont un premier jet pour le bon
 - where :
   1. app-store-connect · « App Store Connect » · « Analytics : First-Time Downloads ventilées par type de source (recherche dans l'App Store, navigation, référent web, référent app) » / "Analytics: First-Time Downloads broken down by source type (App Store search, browse, web referrer, app referrer)"
   2. play-console · « Google Play Console » · « Conversion analysis, filtrée par source de trafic » / "Conversion analysis, filtered by traffic source"
-  3. appsflyer · « AppsFlyer ou Adjust » · « les installations du mois par media source, organiques compris » / "the month's installs by media source, organic included"
+  3. appsflyer · « AppsFlyer ou Adjust » / "AppsFlyer or Adjust" · « les installations du mois par media source, organiques compris » / "the month's installs by media source, organic included"
 - trap : « Quelqu'un qui voit une pub puis cherche l'app compte en « recherche ». Sur iOS, les pubs s'attribuent par un cadre d'Apple agrégé et en retard : lis les sources payantes dans ton outil d'attribution. » / "Someone who sees an ad then searches for the app counts as \"search\". On iOS, ads are attributed through an aggregated, delayed Apple framework: read paid sources in your attribution tool."
 - request : « le nombre d'installations en {month}, ventilé par source » / "the number of installs in {month}, broken down by source"
 - noReferenceReason : recopier celle du SaaS.
@@ -886,7 +913,7 @@ Le texte, chiffre par chiffre. Les formulations sont un premier jet pour le bon
 **`act.ttv`**
 - oneLiner : « Le temps qu'il faut à une installation pour atteindre la première valeur. » / "How long an install takes to reach first value."
 - formula : « médiane du délai entre la première ouverture et {event} » / "median time between first open and {event}"
-- where : 1. ga4 · « GA4 (Firebase) » · « pas de médiane dans les rapports standards : à demander à la data, depuis l'export des événements » / "no median in the standard reports: ask the data team, from the event export" ; 2. amplitude · « Amplitude ou Mixpanel » · « l'entonnoir première ouverture puis {event}, affiché en temps de conversion » / "the first open then {event} funnel, shown as time to convert"
+- where : 1. ga4 · « GA4 (Firebase) » · « pas de médiane dans les rapports standards : à demander à la data, depuis l'export des événements » / "no median in the standard reports: ask the data team, from the event export" ; 2. amplitude · « Amplitude ou Mixpanel » / "Amplitude or Mixpanel" · « l'entonnoir première ouverture puis {event}, affiché en temps de conversion » / "the first open then {event} funnel, shown as time to convert"
 - trap, noReferenceReason, variants : recopier.
 - request : « le délai médian entre la première ouverture et {event}, pour les installations en {cohort} » / "the median time between first open and {event}, for the installs from {cohort}"
 
@@ -931,8 +958,8 @@ Le texte, chiffre par chiffre. Les formulations sont un premier jet pour le bon
 - formula : « installations arrivées par un utilisateur (lien de partage, code offert, invitation) ÷ installations de la cohorte » / "installs that came through a user (share link, gift code, invite) ÷ cohort installs"
 - inputs : « Installations recommandées » / "Referred installs" ; « Installations en {cohort} » / "Installs from {cohort}"
 - where :
-  1. product-db · « Base produit ou outil de parrainage » · « les installations en {cohort} rattachées à un code ou à un lien de partage » / "the installs from {cohort} attached to a code or a share link"
-  2. appsflyer · « AppsFlyer ou Adjust » · « les installations venues des liens d'invitation ou de partage, si tu les y suis » / "the installs that came through invite or share links, if you track them there"
+  1. product-db · « Base produit ou outil de parrainage » / "Product database or referral tool" · « les installations en {cohort} rattachées à un code ou à un lien de partage » / "the installs from {cohort} attached to a code or a share link"
+  2. appsflyer · « AppsFlyer ou Adjust » / "AppsFlyer or Adjust" · « les installations venues des liens d'invitation ou de partage, si tu les y suis » / "the installs that came through invite or share links, if you track them there"
 - trap : « Les installations « organiques » des stores mélangent recherche, bouche-à-oreille et effet des pubs : elles ne sont pas une mesure de la recommandation. » / "The stores' \"organic\" installs mix search, word of mouth and the effect of ads: they don't measure referral."
 - request : « pour les installations en {cohort}, combien sont arrivées par un code, un lien de partage ou une invitation » / "for the installs from {cohort}, how many came through a code, a share link or an invite"
 - noReferenceReason : recopier.
@@ -941,7 +968,7 @@ Le texte, chiffre par chiffre. Les formulations sont un premier jet pour le bon
 - oneLiner : « Le nombre de nouvelles installations que chaque installation amène, en moyenne. » / "How many new installs each install brings in, on average."
 - formula : « installations invitées par la cohorte ÷ installations de la cohorte » / "installs invited by the cohort ÷ cohort installs"
 - inputs : « Installations invitées par la cohorte » / "Installs invited by the cohort" ; « Installations en {cohort} » / "Installs from {cohort}"
-- where : 1. product-db · « Table d'invitations » / "Invitations table" · « les invités qui ont installé, rattachés à la cohorte de celui qui les a invités » / "the invitees who installed, attached to the cohort of whoever invited them" ; 2. amplitude · « Amplitude ou Mixpanel » · recopier le chemin du SaaS.
+- where : 1. product-db · « Table d'invitations » / "Invitations table" · « les invités qui ont installé, rattachés à la cohorte de celui qui les a invités » / "the invitees who installed, attached to the cohort of whoever invited them" ; 2. amplitude · « Amplitude ou Mixpanel » / "Amplitude or Mixpanel" · recopier le chemin du SaaS.
 - trap : « K se divise par toutes les installations de la cohorte, pas seulement par celles qui ont invité quelqu'un. » / "K divides by every install in the cohort, not just by those that invited someone."
 - request : « pour les installations en {cohort}, le nombre de personnes qui ont installé grâce à leurs invitations » / "for the installs from {cohort}, the number of people who installed through their invites"
 - benchmarkCaveat, naReasons : recopier.
@@ -1738,7 +1765,10 @@ qui change pour une app :
   les deux langues : les noms d'outils sont exemptés du test « FR ≠ EN »).
 - `_engine/sources.ts` : `TOOL_ORDER` gagne les trois, après `"play-console"`
   (APP-1 : `satisfies Record<ToolId, true>` le force) ; `validate.ts#TOOL_SET`
-  aussi (APP-1).
+  aussi (APP-1). **La liste « Autres outils » d'une fiche propose donc les
+  trois au SaaS aussi** : c'est la règle d'A14 T0, tout outil y est proposé,
+  et App Store Connect l'est déjà. C'est le seul changement visible du SaaS,
+  accepté par Antoine le 2026-10-05 (§21.0). On ne filtre pas par type.
 - `lib/engine/tools.ts` (APP-2) : **`TOOL_FAMILIES` ne change pas** (les cinq
   familles du SaaS, sans store), donc `SETUP_TOOLS` et `tools.test.ts` non
   plus. Il gagne :
@@ -2509,6 +2539,7 @@ journal. « Les goldens inchangés » veut dire leurs sorties JSON et
 | `content/__tests__/engine-catalog.test.ts` | couvre les six chiffres et les quatre calculés de l'app (les records les contiennent) ; aucun `benchmarkCaveat` pour eux ; le `it.each` du plafond gagne `app.rev.install-ltv` | APP-1 |
 | `shared-counts.test.ts:15-43` (la parité des libellés) | les places `app.*` d'un groupe se comparent au **catalogue de l'app** : en APP-1, la boucle saute les places `app.*` (une exemption nommée, commentée « catalogue de l'app : APP-2 »), **et saute un groupe dont il ne reste aucune place** (`appActives`, sinon `labels.size` vaut 0) ; en APP-2, un second bloc compare, pour chaque groupe qui contient une place `app.*`, ses libellés lus dans le catalogue de l'app (`ENGINE_CATALOG_CONSUMER` pour les quinze, `ENGINE_CATALOG` pour les `app.*`) : « Installations en {month} » trois fois pour `monthSignups`, « Actifs en {month} » deux fois pour `appActives` | APP-1, APP-2 |
 | `shared-counts.test.ts:138` | l'appel `shapesOf({ type: "b2b-saas", motions: { plg, slg } })` | APP-1 |
+| `shared-counts.test.ts` (nouveau bloc), `engine-props.test.ts` (nouveau) | `sharedWith` (§21.2.4) avec et sans `app.acq.cpi` nommé ; la ligne partagée du SaaS inchangée, chiffre par chiffre | APP-1 |
 | `golden-v2.test.ts:94` | l'appel `motionShapes(state.setup)` ; la sortie JSON inchangée | APP-1 |
 | `cohort.test.ts:93`, `cohort.ts:110` | **rien** : `defaultMonths` est construit sur `METRIC_SHAPES` et n'a pas de clé `app.*` | — |
 | `io.test.ts:107-114` (et des cas neufs dans `validate.test.ts`) | l'app s'ouvre avec sa monétisation ; la place de marché reste refusée ; une app avec l'assisté est refusée ; une app sans monétisation s'ouvre, avec l'erreur `setup.monetization` (§21.6.3). `validate.test.ts:123` ne change pas | APP-0 |
@@ -2743,7 +2774,9 @@ relire" src/`), puis l'ouverture par Antoine.
   filtre), `validate.ts` (`TOOL_SET`), `_engine/sources.ts` (`TOOL_ORDER`),
   `content/engine-catalog.ts`, `content/engine-copy.ts` (`unitInput`,
   `io.sharedCount.appActives`, `tools.*`), les appelants de `shapesOf` et
-  `motionShapes` (la liste ci-dessous), et les fichiers que `tsc` signale
+  `motionShapes` (la liste ci-dessous), `_engine/MetricSheet.tsx`
+  (`sharedSides`, §21.2.4), `src/lib/engine/__tests__/engine-props.test.ts`
+  (nouveau), et les fichiers que `tsc` signale
   parce qu'un `Record<MetricId | DerivedId | ToolId | SharedCount, …>` veut
   ses nouvelles clés (relevé : `engine-copy.ts`, `engine-catalog.ts`,
   `shared-counts.ts`, `sources.ts`, `validate.ts`) ; leurs tests.
@@ -2770,12 +2803,17 @@ relire" src/`), puis l'ouverture par Antoine.
      `UNIT_INPUT_IDS` (§21.2.3) ; `phrases.ts` lit `UNIT_INPUT_IDS`.
   3. Les appelants (la liste ci-dessus). Mécanique ; le SaaS rend exactement
      la même liste.
-  4. `shared-counts.ts` : §21.2.4.
+  4. `shared-counts.ts` : §21.2.4, `sharedWith` compris ; `MetricSheet.tsx#sharedSides`
+     l'appelle avec les ids de `view.metrics`.
   5. `coverage.ts` : `motionCoverage(snapshot, motion, setup?)` (§21.5.5).
   6. `engine-props.ts` : les props `metrics` et `derived` du SaaS **filtrent**
      les formes `scope === "app"` et les calculés dont l'id commence par
      `app.` (APP-2 les remplace par `typeCatalogs`) ; un test fige leurs
-     comptes (33 chiffres, 8 calculés).
+     comptes (33 chiffres, 8 calculés), dans
+     `src/lib/engine/__tests__/engine-props.test.ts` (nouveau). Le même
+     fichier tient la ligne partagée du SaaS : pour chaque chiffre des props
+     SaaS et chaque côté, `sharedWith(id, side, ids des props SaaS)` rend
+     exactement les places de son groupe qui ne sont pas `app.*`.
   7. `validate.ts` : `TOOL_SET` gagne `revenuecat`, `appsflyer`, `adjust` ;
      `_engine/sources.ts` : `TOOL_ORDER` les gagne après `"play-console"`
      (§21.6.5 ; `satisfies Record<ToolId, true>` les exige dès APP-1).
@@ -2783,14 +2821,17 @@ relire" src/`), puis l'ouverture par Antoine.
      `io.sharedCount.appActives`, `tools.*` dans `engine-copy.ts`.
   9. Les tests de §21.10.1 (lignes APP-1).
 - **Acceptation** : commune ; plus les comptes de §21.4.1 ; les comptes des
-  props SaaS (33, 8) ; et `git diff origin/main --
-  src/lib/engine/__tests__/golden-v2.json` vide.
+  props SaaS (33, 8) ; `git diff origin/main --
+  src/lib/engine/__tests__/golden-v2.json` vide ; et, contre un build comme
+  la CI, `e2e/engine-canary.spec.ts` et `e2e/engine-collect.spec.ts` verts
+  (§23.8 : l'unité n'a pas d'écran, mais elle peut en casser un).
 - **Arrêt** : un `Record<…>` dont la valeur pour un id `app.*` n'est ni donnée
   ici ni évidente par la règle de §21.10.1 ; une chaîne de §21.4.4 qui dépasse
   sa longueur (`engine-catalog.test.ts`) ; une source citée qui n'existe plus
   (annexe).
 - **Relecteurs** : copie.
-- **Pause** : rien de visible (les props SaaS ne gagnent pas les ids `app.*`).
+- **Pause** : rien de visible en production. Dans le moteur fermé, la liste
+  « Autres outils » d'un SaaS gagne trois outils (§21.6.5).
 
 #### APP-2 — La forme affichée et la prose des quinze
 
@@ -2835,7 +2876,10 @@ relire" src/`), puis l'ouverture par Antoine.
      `tools.test.ts` (dont le test de `Setup` de §21.6.5) ;
      `src/__tests__/content-fan-in.test.ts` gagne une ligne de `BUDGETS`
      pour `content/engine-catalog-consumer.ts` (`max: 1`, la page du moteur
-     seule) ; le poids du HTML mesuré (§21.4.7).
+     seule) ; le poids du HTML mesuré (§21.4.7). Et la ligne partagée d'une
+     app (§21.2.4) : `sharedWith("acq.signup-rate", "numerator", ids de
+     metricsFor(props, "consumer-app"))` contient `app.acq.cpi`, et chaque id
+     qu'elle rend a un nom dans le catalogue de l'app.
 - **Acceptation** : commune ; le poids écrit au journal.
 - **Arrêt** : le poids dépasse +25 ko gzip (§21.4.7) ; un point de lecture
   hors de la liste de §21.4.3 dont la bonne lecture n'est pas évidente.
