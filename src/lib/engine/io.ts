@@ -51,7 +51,9 @@ export interface ParsedEngineFile {
  *
  * - not JSON → `unreadable`;
  * - JSON that isn't an engine (an audit mission, a random export) → `not-engine`,
- *   so the import screen doesn't offer to "replace" the user's engine with nothing;
+ *   so the import screen doesn't offer to "replace" the user's engine with nothing.
+ *   So is an engine with no month, or with a month the screens cannot read
+ *   (`readableMonths`, A25): opened, it would throw at every visit;
  * - an engine from a NEWER schema version → `unknown-version`. Refused, not
  *   opened with errors: we can't read what that version means, and offering to
  *   work on a state we misread is how data gets silently rewritten;
@@ -79,6 +81,9 @@ export function parseEngineFile(text: string): ParsedEngineFile {
   if (!READABLE_VERSIONS.includes(o.schemaVersion as number) || !looksLikeEngine(o)) {
     return { state: null, errors: ["file: not a growth engine"], refusal: "not-engine" };
   }
+  if (!readableMonths(o.snapshots as unknown[])) {
+    return { state: null, errors: ["snapshots: no month, or a month the screens cannot read"], refusal: "not-engine" };
+  }
   // An older engine is migrated, then validated like any v3 one (§18.3.2, §19.1.3): nothing in its numbers changes.
   const migrated = migrateToV3(o);
   if (!migrated || !sellsSomehow(migrated.state)) {
@@ -86,6 +91,41 @@ export function parseEngineFile(text: string): ParsedEngineFile {
   }
   const { state, from } = migrated;
   return { state, errors: validateEngine(state), ...(from !== ENGINE_SCHEMA_VERSION ? { migratedFrom: from } : {}) };
+}
+
+type Obj = Record<string, unknown>;
+const isObj = (v: unknown): v is Obj => typeof v === "object" && v !== null && !Array.isArray(v);
+/**
+ * `YYYY-MM` with a year from 1970 to 2999. The pattern alone takes 0000 and
+ * 9999, where the month arithmetic (`cohort.ts`) leaves four digits and
+ * throws on the board, and `Date.UTC` reads 0000 to 0099 as the 1900s. Every
+ * month the engine writes comes from today's clock.
+ */
+const isYearMonth = (v: unknown): boolean => {
+  if (typeof v !== "string" || !YEAR_MONTH_PATTERN.test(v)) return false;
+  const year = Number(v.slice(0, 4));
+  return year >= 1970 && year <= 2999;
+};
+
+/**
+ * At least one month, and every month with what the screens read before
+ * anything else (A25): its two months, `referenceMonth` and `cohortMonth`,
+ * as `YYYY-MM` (`isYearMonth`), and its `metrics` and `targets` as objects
+ * (not lists: the validator already calls a list missing). Without one of
+ * them, the import's preview or the board throws, and a state already
+ * stored throws at every visit. Measured in a browser on 2026-10-05, field
+ * by field: everything else a month holds (`id`, `closedAt`, `windows`,
+ * `pipelineOpen`, `base`, two months the same or out of order) opens with
+ * the validator's warnings.
+ * Every build wrote these four fields in every month, v1 included, so no
+ * file the engine saved is refused. Judged before the migration: v1 and v2
+ * months have the same shape.
+ */
+function readableMonths(snapshots: unknown[]): boolean {
+  return (
+    snapshots.length > 0 &&
+    snapshots.every((m) => isObj(m) && isYearMonth(m.referenceMonth) && isYearMonth(m.cohortMonth) && isObj(m.metrics) && isObj(m.targets))
+  );
 }
 
 /** Every version this build reads: the older ones are migrated on the way in. */

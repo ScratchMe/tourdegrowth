@@ -357,6 +357,49 @@ Comme toute copie neuve, elles passent au bon à tirer A22.d.
 
 **Corrigé après la relecture copie** (#355 ; la règle de §21.8.3 corrigée par `36703ee`). La relecture a vu que le lexique fait passer « payback » à « remboursement » sans que la règle française le cherche : elle le cherche maintenant, et `terms.runway.definition` (« le moteur le compare seulement au payback ») entre au calque, « au payback » devenu « au remboursement » et l'anglais recopié de la base (il garde « payback »). `slide.unitAssume` et `slide.unitAssumeOutpaced`, la trésorerie du SaaS, passent à la ligne 6 de `APP_EXCLUDED`. La règle désigne donc **139 feuilles** (138 sans le mot). Trois retouches mécaniques d'après le tableau de §21.8.4 a et la typographie : `slideTitles.leakClearPerHundredOne` en anglais perd « paying » (le paragraphe « Choix d'exécution » ci-dessus le disait, le code ne le faisait pas) ; `terms.window.definition` en français prend une espace insécable dans « 7 jours », la seule autre feuille du calque qui avait une espace ordinaire entre un nombre et une unité (les « 100 installations » gardent l'espace ordinaire de la base, comme ses « 100 inscrits ») ; `terms.arr.term` passe en minuscule, comme les autres termes et le lexique (« revenu annualisé »). **`scenario.assumption.same-spend` n'est plus réécrite**, contrairement à ce que dit « Choix d'exécution » : le lexique en change le sens (« plus d'abonnés font baisser le coût par installation » est faux, le nombre d'abonnés n'entre pas dans le coût par installation), et une app ne l'affiche jamais, elle a `same-spend-installs` (§21.5.3). Elle rejoint `APP_OVERLAY_SKIPPED`, qui en compte **cinq** : l'orchestrateur la relaie à Antoine. Le calque garde ses **142 feuilles** (une retirée, une ajoutée). **Vérifié** : `tsc` propre ; `eslint` propre sur les deux fichiers ; `vitest run src/content` 433 sur 433, la suite complète **3 718 sur 3 718** (272 fichiers, inchangé : le test de la règle gagne deux assertions, pas de test) ; `git diff origin/main -- src/lib/engine/__tests__/golden-v2.json` vide. Ni build ni Playwright : rien d'affiché ne change pour le SaaS, le calque ne s'applique qu'au type `consumer-app`, fermé. Avant la correction, le test de couverture désignait exactement `terms.runway.definition` et rien d'autre.
 
+## A25 : un fichier sans mois lisible est refusé à l'import (2026-10-05)
+
+**Livré** ([#357](https://github.com/ScratchMe/tourdegrowth/pull/357)). La fiche (relecture sécurité d'APP-0, #341) avait été écrite d'après le code, sans reproduction.
+
+**Reproduit en navigateur avant tout correctif.** Le build venait de `main` (`501e703`). Une spec jetable importait 26 variantes de mois, sur un appareil vide puis à côté d'un moteur. Pour chacune, elle relevait le refus, l'aperçu, le tableau après « Ouvrir », puis le tableau après rechargement.
+- **S'ouvrent, puis cassent à chaque visite** : `[]`, `[null]`, `[{}, bon mois]`, un mois sans `targets`, un mois sans `cohortMonth` ou avec `"2026-13"`. L'état se stocke, et la page « Your results took a wrong turn » revient à chaque chargement.
+- **Cassent l'aperçu lui-même** : `[{}]`, un mois sans `referenceMonth`, ou avec `"août"`, `"2026-13"` ou `202608`.
+- **Piège de mesure** : aucune `pageerror` n'est levée, parce que l'error boundary de l'app attrape l'exception. Seule la console la montre. La première passe, qui n'écoutait que `pageerror`, ne voyait rien.
+- **Ce que la fiche n'avait pas nommé** : les deux mois d'un mois, `referenceMonth` et `cohortMonth`.
+- **S'ouvrent avec leurs avertissements, et tiennent au rechargement** : sans `id` ni `createdAt` ; `closedAt`, `windows`, `pipelineOpen` ou `base` invalides ; un mois antérieur non clos ; deux mois identiques ; des mois dans le désordre.
+
+**La décision** : refuser ce que les écrans ne savent pas montrer, et ouvrir avec ses avertissements tout ce qu'ils savent montrer. `readableMonths` (`io.ts`) exige au moins un mois. Chaque mois doit être un objet, avec `referenceMonth` et `cohortMonth` en `YYYY-MM` et `metrics` et `targets` en objets. Sinon, c'est le refus `not-engine` existant, sans copie neuve.
+- **Avant la migration** : les mois v1 et v2 ont la même forme. Une version plus récente reste `unknown-version`, puisqu'elle est jugée d'abord.
+- **Aucun fichier sauvé n'est refusé** : tous les builds ont écrit ces quatre champs dans chaque mois, v1 compris (`docs/engine/v1.md`, `Snapshot`).
+- **Trois refus ne cassaient rien** :
+  - `metrics: []` et `targets: []`, parce que le validateur appelle déjà « missing » un tableau. Une perte de données avait été supposée ; elle est écartée : chaque écriture fait `{ ...metrics, [id]: entry }`, ce qui change le tableau en objet.
+  - Un mois antérieur sans `cohortMonth`, parce que la règle vaut pour chaque mois : la série et la fusion les lisent tous.
+
+**Relecture sécurité du correctif** (`relecteur-securite`) : un contournement dans le périmètre, vérifié puis corrigé.
+- `YEAR_MONTH_PATTERN` accepte `0000-01` et `9999-12`. Dans `cohort.ts`, `monthsBefore("0000-01", 2)` produit `"00-1-12"`, et deux `nextMonth` depuis `"9999-12"` produisent `"10000-01"`. Les deux lèvent.
+- En navigateur, les deux s'ouvraient, puis cassaient le tableau à chaque visite. `0099-12` s'affichait « December 1999 ».
+- `isYearMonth` borne donc l'année de 1970 à 2999. L'app ne tire ses mois que de l'horloge du jour.
+
+**Hors de ce chantier, consigné en A25.b** (`CHANTIERS.md`), vérifié en navigateur :
+- une **entrée** mal formée casse encore le tableau à chaque visite, par exemple un `conflicting` sans ses deux lectures, ou une entrée assistée au `cohortMonth` `"x"` ;
+- les états stockés avant A25 ne sont pas gardés : `storage.ts` ne juge que la forme. Seuls les appareils de l'aperçu propriétaire ont pu en stocker, puisque le moteur est fermé.
+
+La relecture propose une error boundary propre à l'îlot, qui couvre toute la classe. Rien n'en est fait ici.
+
+**Les tests** :
+- `io.test.ts` gagne 21 tests. Les 16 tests du refus échouent sur `main`, pour la bonne raison (un état est renvoyé). Leur compagnon, « tout le reste s'ouvre », passe dans les deux états.
+- **Non-vacuité**, morceau par morceau : la longueur fait tomber 2 tests, `referenceMonth` 5, `cohortMonth` 3, `metrics` 3, `targets` 3, un tableau pris pour un objet 2. La borne d'années en fait tomber 2 par le bas, 1 par le haut, et 1 si on la serre d'un an. Les comptes sont en tête du fichier.
+- **Un sabotage avait d'abord passé** : retirer le `typeof` devant le motif. `RegExp.test` lit `202608` comme `"202608"`, qui ne passe pas le motif de toute façon. En revanche, `["2026-08"]` se lit `"2026-08"`, puis `formatMonth` appelle `split` sur un tableau. Ce cas est ajouté, et il tient le `typeof`.
+- `e2e/engine-migration.spec.ts` gagne une spec, en anglais (`[]`) et en français (`[{}]`) : le refus s'affiche, sans bouton ni aperçu, rien n'est stocké, et le rechargement ramène l'accueil. Elle rougit contre le build de `main`, et verdit après.
+
+**Vérifié, sorties réelles** :
+- `eslint` et `tsc` propres.
+- `vitest run --coverage` : **3 739 sur 3 739** (+21), seuils tenus.
+- Build comme la CI.
+- Playwright, suite complète avec `CI=1` et sans l'émulateur Firestore, sur la première version du correctif : **980 passées, 50 sautées, 0 échec**, sur 1 030 (+1).
+- Après la borne d'années : les 26 variantes et les années limites rejouées en navigateur, et `engine-migration`, `engine-engines` et `engine-collect` passées.
+- **À l'écran** : le refus en français à 390 px, et en anglais à côté d'un moteur. C'est l'écran existant, sans texte neuf.
+
 ## A22, APP-4 : le scénario de l'app et la couture (2026-10-05)
 
 **Livré** (§21.5.1 à §21.5.3, §21.9). Rien de visible : le type est fermé, et rien n'importe encore `scenario-of.ts` (APP-8 et APP-9 y branchent les appelants). `git diff origin/main --stat` est vide sur `stream.ts`, `app-model.ts`, `mkt-model.ts`, les goldens v1 et v2 et `golden-projection.ts`. Aucun test existant n'a été retouché.
