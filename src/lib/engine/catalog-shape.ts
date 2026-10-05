@@ -4,6 +4,7 @@ import type { AppMonetization } from "./app-model"; // type only: app-model.ts i
 import { isApp, monetizationOf } from "./setup-type"; // the leaf, never business-type.ts (§21.2.2)
 import type {
   AppDerivedId,
+  AppLeverId,
   AppMetricId,
   CandidateId,
   DerivedId,
@@ -1035,8 +1036,21 @@ export const SLG_LEVER_IDS: readonly SlgLeverId[] = [
   "link.pql-handoff",
 ];
 
+/**
+ * The consumer app's levers (§21.5.3), after the self-serve ones in panel
+ * order: the actives' retention, the two revenues per active, the stores'
+ * commission. An app shows the ones its monetization calls for
+ * (`app.ts#appLeverIds`).
+ */
+export const APP_LEVER_IDS: readonly AppLeverId[] = [
+  "app.ret.active-retention",
+  "app.rev.purchases-per-active",
+  "app.rev.ads-per-active",
+  "app.rev.commission",
+];
+
 /** Every lever a file may carry a what-if target for. */
-export const ALL_LEVER_IDS: readonly LeverId[] = [...LEVER_IDS, ...SLG_LEVER_IDS];
+export const ALL_LEVER_IDS: readonly LeverId[] = [...LEVER_IDS, ...SLG_LEVER_IDS, ...APP_LEVER_IDS];
 
 /** The five sales-assisted ★ (§18.5.2). The link is none of them, even with a team target (C25 Q7). */
 export const SLG_CANDIDATE_IDS: readonly SlgCandidateId[] = [

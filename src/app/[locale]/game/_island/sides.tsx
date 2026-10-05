@@ -48,6 +48,7 @@ export interface IslandCopies {
   acquisition: Omit<AcquisitionCopy, "footer">;
   activation: Omit<ActivationCopy, "footer">;
   retention: Omit<RetentionCopy, "footer">;
+  referral: Omit<ReferralCopy, "footer">;
 }
 
 // --------------------------------------------------------------- level 1 ---
@@ -206,4 +207,5 @@ export const ISLAND_SIDES: { [S in LevelSlug]: IslandSide<IslandCopies[S]> } = {
   acquisition: ACQUISITION_SIDE,
   activation: ACTIVATION_SIDE,
   retention: RETENTION_SIDE,
+  referral: REFERRAL_SIDE,
 };

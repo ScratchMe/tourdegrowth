@@ -1,4 +1,4 @@
-import { CANDIDATE_IDS, PELOTON_METRICS, SLG_CANDIDATE_IDS, UNIT_INPUT_IDS, candidatesOf, motionOfMetric, shapeOf } from "./catalog-shape";
+import { CANDIDATE_IDS, PELOTON_METRICS, SLG_CANDIDATE_IDS, UNIT_INPUT_IDS, motionOfMetric, shapeOf } from "./catalog-shape";
 import { periodRangeOf, windowDaysOf } from "./cohort";
 import { CHAIN_VERB } from "./findings";
 import { capitalise, fillTemplate, formatMonth, formatMonthRange, joinList, lowerFirst } from "./format";
@@ -15,8 +15,8 @@ import type {
   Interval,
   MetricId,
   Motion,
-  PlgCandidateId,
   Position,
+  SelfServeCandidateId,
   SlgDiagnosis,
   SourceRef,
   UnitInputId,
@@ -61,11 +61,12 @@ function nameOf(metrics: ResolvedMetric[], id: MetricId): string {
 }
 
 export function isCandidate(id: MetricId): id is CandidateId {
-  return (CANDIDATE_IDS as readonly string[]).includes(id) || (SLG_CANDIDATE_IDS as readonly string[]).includes(id);
+  // The actives' retention is an app's own candidate (§21.5.4): its target is entered on its own screen like any other.
+  return (CANDIDATE_IDS as readonly string[]).includes(id) || (SLG_CANDIDATE_IDS as readonly string[]).includes(id) || id === "app.ret.active-retention";
 }
 
 /** Either motion's diagnosis — the sentences below word both alike (§18.5.2). */
-export type AnyDiagnosis = Diagnosis<PlgCandidateId> | SlgDiagnosis;
+export type AnyDiagnosis = Diagnosis<SelfServeCandidateId> | SlgDiagnosis;
 
 /** A candidate's position in its own motion's diagnosis; undefined for another motion's candidate. */
 export function positionIn(diagnosis: AnyDiagnosis, id: CandidateId): { position: Position; comparator?: Comparator; impact?: Impact } | undefined {
@@ -275,7 +276,8 @@ export function blindSentence(ids: readonly MetricId[], strings: Words, metrics:
 /** `not-enough` with a stage behind: which one, and where it sits — the title's and the board's values alike. */
 export function notEnoughBelowValues(diagnosis: AnyDiagnosis, strings: Words, metrics: ResolvedMetric[]): { stage: string; side: string } | null {
   if (diagnosis.state !== "not-enough") return null;
-  const id = candidatesOf(diagnosis.motion).find((c) => positionIn(diagnosis, c)?.position === "below");
+  // The keys are the candidates the rules positioned, in their order (an app's are not `candidatesOf`'s).
+  const id = (Object.keys(diagnosis.positions) as CandidateId[]).find((c) => positionIn(diagnosis, c)?.position === "below");
   if (!id) return null;
   const side = sideText("below", positionIn(diagnosis, id)?.comparator, strings);
   return side ? { stage: capitalise(subjectOf(id, strings, metrics)), side } : null;

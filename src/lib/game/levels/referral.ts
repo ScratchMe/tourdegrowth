@@ -1,10 +1,10 @@
 /**
  * The referral level « S'ils vous recommandent » — its card identifiers and
- * its LevelDefinition, in DRAFT (`DraftLevelSlug`): no page, no copy, no save
- * yet. The spec is `docs/game/referral.md` (GAME-BRIEF §19), written on
- * 2026-10-04 for an agent to build from; every number it quotes is one this
- * file produces, pinned by the fixtures F19.1 to F19.4 of
- * `__tests__/referral.test.ts`.
+ * its LevelDefinition, wired on 2026-10-05 (A24, REF-3): its copy is
+ * `content/game/referral.ts`, its page `app/[locale]/game/referral/`. The spec
+ * is `docs/game/referral.md` (GAME-BRIEF §19), written on 2026-10-04 for an
+ * agent to build from; every number it quotes is one this file produces,
+ * pinned by the fixtures F19.1 to F19.4 of `__tests__/referral.test.ts`.
  *
  * An app for splitting costs with friends: the board wants the viral
  * coefficient UP, from 0,40 in January to 0,60 in December — the same ×1,5

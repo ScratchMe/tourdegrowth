@@ -1223,8 +1223,11 @@ montrés, `app.ret.active-retention`, `app.rev.purchases-per-active`,
 1. `levers = leverViews(state, targets, ctx, appLeverIds(setup))` ; `moved` =
    ceux qui ont une cible, dans cet ordre.
 2. `base = buildScenario(state, plgTargets, ctx)`, où `plgTargets` garde les
-   cibles des leviers de `LEVER_IDS`. Il porte le flux d'abonnements (MRR,
-   nouveau MRR, courbe, NRR, GRR) et le funnel du mois.
+   cibles des leviers de `LEVER_IDS` **que `appLeverIds` rend** : une cible
+   restée sur un chiffre masqué (une façon de gagner décochée, §21.5.5) ne
+   fait pas bouger le funnel. Avec les abonnements, ce sont tous ceux de
+   `LEVER_IDS`. Il porte le flux d'abonnements (MRR, nouveau MRR, courbe, NRR,
+   GRR) et le funnel du mois. *Précisé après APP-4 (#359)*.
 3. **Les nouveaux actifs** : `base.<colonne>.funnel.d30` quand
    `funnel.perHundred` est faux (les installations du mois sont connues),
    `null` sinon. *C'est D9* : le funnel du libre-service fait déjà varier J30
@@ -1235,11 +1238,19 @@ montrés, `app.ret.active-retention`, `app.rev.purchases-per-active`,
    `usagePath(inputs.actives, nouveauxActifs, v("app.ret.active-retention"),
    perToday, projected ? perProjected : perToday)`.
 5. **Le revenu** : `mrrPath = appRevenuePath(m, base.<col>.kpis.mrrPath,
-   usage)` ; `mrr = appRevenueToday(m, base.today.kpis.mrr, usage?.[0] ?? null)`
-   (le même dans les deux colonnes, comme le SaaS) ; `newMrr =
+   usage)` ; `mrr = appRevenueToday(m, base.today.kpis.mrr, usageToday)`, où
+   `usageToday = mul(inputs.actives, perToday)` (`null` si l'un manque, ou
+   sans usage coché), le même dans les deux colonnes, comme le SaaS ; `newMrr =
    appRevenueToday(m, base.<col>.kpis.newMrr, nouveauxActifs × per<col>)` ;
    `mrr12 = mrrPath?.[12] ?? null` ; `arr = arrOf(mrr)` ; `arr12 =
-   arrOf(mrr12)`.
+   arrOf(mrr12)`. **Le revenu du mois se sait sans les installations du
+   mois**, comme le MRR du SaaS sans les inscrits : quand elles manquent
+   (point 3), seuls la courbe d'usage, le nouveau revenu et le revenu dans
+   12 mois restent inconnus. Quand elles sont connues, `usageToday` vaut
+   `usage[0]` et rien ne change. *Décidé par Antoine le 2026-10-05, sur la
+   question du pilote APP-4 (#359)* : le premier texte lisait `usage?.[0] ??
+   null`, et une app aux achats ou à la pub sans installations saisies
+   affichait un revenu du mois inconnu.
 6. **La rétention du revenu** : `nrr` et `grr` de `base` si les abonnements
    sont cochés, sinon `null`.
 7. **Le coût par installation** : aujourd'hui `inputs.cpi` ; en projeté, **à
@@ -1280,7 +1291,8 @@ montrés, `app.ret.active-retention`, `app.rev.purchases-per-active`,
    - `actives-follow-d30` : un levier de flux a bougé et l'usage est coché ;
    - `per-active-all-actives` : un revenu par actif a bougé ;
    - `commission-margin-only` : la commission a bougé ;
-   - `same-spend-installs` : `fInstalls ≠ 1` ;
+   - `same-spend-installs` : `fInstalls ≠ 1` et le coût par installation
+     connu (comme `same-spend` demande le CAC ; précisé après APP-4) ;
    - `install-months` : `ltv` est calculée ;
    - `usage-twelve-months` : la courbe d'usage est calculée.
    `ScenarioAssumption` gagne ces six ids ; leur texte est en §21.8.4.
@@ -1303,8 +1315,12 @@ pur sont déjà épinglés par `app-model.test.ts`.
   dans `numericImpact`). Le SaaS ne change pas (goldens).
 - **`appCandidates(setup): SelfServeCandidateId[]`** (`app.ts`) : les
   `CANDIDATE_IDS` dont le chiffre est montré, dans leur ordre, puis
-  `app.ret.active-retention` s'il est montré.
-- **`appRules(setup): MotionRules<SelfServeCandidateId>`** (`app.ts`) :
+  `app.ret.active-retention` s'il est montré. `setup` est un
+  `Pick<EngineSetup, "monetization">`, comme pour `appLeverIds`, lu par la
+  même aide que lui (les chiffres montrés passent par `monetizationOf` : une
+  monétisation mal formée se lit comme celle par défaut). *Précisé après
+  APP-5 (#361)*.
+- **`appRules(setup: Pick<EngineSetup, "monetization">): MotionRules<SelfServeCandidateId>`** (`app.ts`) :
   `motion: "plg"` ; `candidates: appCandidates(setup)` ; `price:
   appRankingImpact` ; `isFlow: (id) => id !== "app.ret.active-retention" &&
   isFlow(id)` (celui d'`impact.ts`, inchangé, enveloppé : il ne prend qu'un
@@ -2491,6 +2507,14 @@ Playwright importe ce fichier). APP-4 les écrit avec les entrées de §21.9.1
 (par `withEntry` et `measured`, sans `exampleEngine`, que l'app n'a pas
 encore) ; APP-10 les fait lire `exampleEngine(…, "consumer-app", …)`.
 
+**Les sources de la colonne « source »**, telles qu'APP-4 les a posées et
+qu'APP-10 les reprend : « produit » est `{ kind: "other" }`, comme
+`exampleMetrics` pour l'événement d'activation ; « data » et « finance » sont
+`{ kind: "person", role: "data" }` et `{ kind: "person", role: "finance" }` ;
+un nom d'outil est `{ kind: "tool", tool: <id> }`. `act.ttv` porte la variante
+`median`. `EXAMPLE_CONSUMER_TARGETS` est posée par APP-4, dans `example.ts`, à
+côté d'`EXAMPLE_CONSUMER_WHATIF` : `consumerState()` en a besoin.
+
 #### 21.9.2 Ce que le moteur doit en sortir
 
 Les chiffres du modèle pur sont épinglés par `app-model.test.ts` ; ceux qui
@@ -2561,7 +2585,7 @@ journal. « Les goldens inchangés » veut dire leurs sorties JSON et
 | `cohort.test.ts:93`, `cohort.ts:110` | **rien** : `defaultMonths` est construit sur `METRIC_SHAPES` et n'a pas de clé `app.*` | — |
 | `io.test.ts:107-114` (et des cas neufs dans `validate.test.ts`) | l'app s'ouvre avec sa monétisation ; la place de marché reste refusée ; une app avec l'assisté est refusée ; une app sans monétisation s'ouvre, avec l'erreur `setup.monetization` (§21.6.3). `validate.test.ts:123` ne change pas | APP-0 |
 | `_engine/__tests__/collect.test.ts`, `csv.test.ts`, `next-step.test.ts`, `annex-pages.test.ts:90` | l'appel : `shapesOf` / `motionShapes` reçoivent un réglage ; mêmes résultats | APP-1 |
-| `diagnose.test.ts` (21 lignes), `diagnose-slg.test.ts` (8), `phrases.test.ts` (4), `sentences-guard.test.ts` (1), `deck/__tests__/ask-defaults.test.ts:49` (1) | `positions` devient `Partial` : un `!` là où le test lit une position qu'il sait présente ; mêmes valeurs | APP-5 |
+| `diagnose.test.ts` (21 lignes), `diagnose-slg.test.ts` (8), `phrases.test.ts` (3 : `tsc` n'en signale que trois, relevé par APP-5), `sentences-guard.test.ts` (1), `deck/__tests__/ask-defaults.test.ts:49` (1, en position de type : `NonNullable<…>`, pas un `!`) | `positions` devient `Partial` : un `!` là où le test lit une position qu'il sait présente ; mêmes valeurs | APP-5 |
 | `_engine/__tests__/start.test.ts:20-24, 37-41` | `startPlan(setup)` ; `typeOf` ; les comptes du SaaS inchangés ; l'app à 18 (abonnements seuls) | APP-7 |
 | `tools.test.ts` | ses deux tests inchangés ; un troisième (§21.6.5) | APP-2 |
 | `sentences-guard.test.ts:634-644` | APP-6 : le balayage gagne trois scénarios d'app (`consumerState()`, `consumerUsageOnlyState()`, l'app à commission 35 %), avec `type: "consumer-app"` et `deck: false` (§21.11, APP-6) ; « every finding kind and every sanity check » gagne `commission-high`. APP-9 : les trois scénarios perdent `deck: false`, et « fires every slide title template » voit `pelotonCompleteTwo` et `whatIfLeverMargin` | APP-6, APP-9 |
@@ -2662,7 +2686,7 @@ remboursement, pas de pointillé de 12 mois, pas de tuile de trésorerie).
 | `appShapeShown` qui montre la commission avec la pub seule | les comptes de §21.4.1 | APP-1 |
 | `displayShapeOf` qui copie l'objet au lieu de le rendre pour le SaaS | « même référence » | APP-2 |
 | Une feuille désignée retirée du calque | `engine-copy-consumer.test.ts`, point 1 | APP-3 |
-| `scenarioOf` qui pose `kpis.app` pour le SaaS | l'invariance du SaaS ; golden v2 | APP-4 |
+| `scenarioOf` qui pose `kpis.app` pour le SaaS | l'invariance du SaaS ; golden v2 à partir d'APP-9 (avant, personne n'appelle `scenarioOf`) | APP-4 |
 | Les nouveaux actifs qui ne suivent pas J30 (le funnel d'aujourd'hui en projeté) | la courbe de l'« Et si » de §21.9.2 | APP-4 |
 | `fInstalls` calculé autrement que le funnel | la garde de §21.5.3, point 7 | APP-4 |
 | La part d'usage comptée pour la conversion en payant | le diagnostic de l'exemple (`shared` → `clear`) | APP-5 |
@@ -2958,7 +2982,7 @@ relire" src/`), puis l'ouverture par Antoine.
   `ScenarioKpis.app`, `ScenarioAssumption`, `MONEY_LEVERS`, `LOWER_IS_BETTER`,
   `stepOf`), `app.ts` (nouveau), `scenario-of.ts` (nouveau, sans
   `candidatesFor`, qui vient en APP-5), `example.ts`
-  (`EXAMPLE_CONSUMER_WHATIF`), `__tests__/fixtures.ts`,
+  (`EXAMPLE_CONSUMER_WHATIF`, `EXAMPLE_CONSUMER_TARGETS`), `__tests__/fixtures.ts`,
   `content/engine-copy.ts` (`leverSubject`, `scenario.assumption` : §21.8.4 b),
   `src/lib/engine/__tests__/app.test.ts` (nouveau), `business-type.test.ts`.
 - **Étapes** :

@@ -55,7 +55,7 @@ test.describe("P26 — the owner preview", () => {
 });
 
 test.describe("X17 — the locale-less addresses", () => {
-  for (const path of ["/game", "/game/acquisition", "/game/activation", "/game/retention"]) {
+  for (const path of ["/game", "/game/acquisition", "/game/activation", "/game/retention", "/game/referral"]) {
     test(`${path} redirects to its localized form, query intact`, async ({ request }) => {
       const res = await request.get(`${path}?from=share`, {
         maxRedirects: 0,
@@ -77,18 +77,18 @@ test.describe("P27 — discovery follows the flag at build", () => {
     }
   });
 
-  test("the sitemap lists the hub and the three levels, once per language", async ({ request }) => {
+  test("the sitemap lists the hub and the four levels, once per language", async ({ request }) => {
     const xml = await (await request.get("/sitemap.xml")).text();
     for (const path of [
       "/en/game", "/fr/game", "/en/game/acquisition", "/fr/game/acquisition", "/en/game/activation", "/fr/game/activation",
-      "/en/game/retention", "/fr/game/retention",
+      "/en/game/retention", "/fr/game/retention", "/en/game/referral", "/fr/game/referral",
     ]) {
       const matches = xml.match(new RegExp(`<loc>https://(www\\.)?tourdegrowth\\.com${path}</loc>`, "g"));
       expect(matches, path).toHaveLength(1);
     }
   });
 
-  for (const path of ["/game", "/game/acquisition", "/game/activation", "/game/retention"]) {
+  for (const path of ["/game", "/game/acquisition", "/game/activation", "/game/retention", "/game/referral"]) {
     test(`${path} is indexable and declares its hreflang set`, async ({ page }) => {
       await page.goto(`/fr${path}`);
       await expect(page.locator("html")).toHaveAttribute("lang", "fr");
@@ -110,14 +110,15 @@ test.describe("X19 — the hub", () => {
     expect(ids).toEqual(PILLAR_ORDER.map((p) => `game-hub-zone-${p}`));
 
     // Only the enabled levels are links — acquisition since level 2 (A12.f),
-    // activation since level 3 (A24, ACT-3), and retention — and the two others
-    // say "soon" in words.
+    // activation since level 3 (A24, ACT-3), referral since level 4 (A24,
+    // REF-3), and retention — and the one other says "soon" in words.
     const links = page.getByTestId("game-hub-zones").getByRole("link");
-    await expect(links).toHaveCount(3);
+    await expect(links).toHaveCount(4);
     await expect(links.nth(0)).toHaveAttribute("href", "/en/game/acquisition?from=hub");
     await expect(links.nth(1)).toHaveAttribute("href", "/en/game/activation?from=hub");
     await expect(links.nth(2)).toHaveAttribute("href", "/en/game/retention?from=hub");
-    for (const pillar of PILLAR_ORDER.filter((p) => p !== "retention" && p !== "acquisition" && p !== "activation")) {
+    await expect(links.nth(3)).toHaveAttribute("href", "/en/game/referral?from=hub");
+    for (const pillar of PILLAR_ORDER.filter((p) => p !== "retention" && p !== "acquisition" && p !== "activation" && p !== "referral")) {
       await expect(page.getByTestId(`game-hub-zone-${pillar}`)).toContainText(/Soon/i);
     }
   });
@@ -155,7 +156,7 @@ test.describe("X19 — the hub", () => {
     await expect(page.getByTestId("game-hub-last-ending-retention")).toContainText("20 septembre 2026");
   });
 
-  test("each level names its own ending — a settlement at Pédalix, a fine at Quandi and at Flixo", async ({ page }) => {
+  test("each level names its own ending — a settlement at Pédalix, a fine at Quandi, at Flixo and at Partix", async ({ page }) => {
     await page.goto("/fr/game");
     await page.evaluate(() =>
       localStorage.setItem(
@@ -166,6 +167,7 @@ test.describe("X19 — the hub", () => {
             acquisition: { id: "fine", at: "2026-10-01T10:00:00.000Z" },
             activation: { id: "fine", at: "2026-10-05T10:00:00.000Z" },
             retention: { id: "fine", at: "2026-09-20T10:00:00.000Z" },
+            referral: { id: "fine", at: "2026-10-05T11:00:00.000Z" },
           },
         }),
       ),
@@ -175,6 +177,8 @@ test.describe("X19 — the hub", () => {
     // The CNIL's administrative fine is a fine: level 3 keeps the hub's own wording (A24, ACT-3).
     await expect(page.getByTestId("game-hub-last-ending-activation")).toContainText("le contrôle et l'amende");
     await expect(page.getByTestId("game-hub-last-ending-retention")).toContainText("le contrôle et l'amende");
+    // Same for the CNIL's fine at Partix: no ending label of its own (A24, REF-3).
+    await expect(page.getByTestId("game-hub-last-ending-referral")).toContainText("le contrôle et l'amende");
   });
 });
 
@@ -208,8 +212,16 @@ test.describe("the level page", () => {
     await expect(page.locator('a[href="/fr/glossary/aha-moment"]')).toHaveCount(1);
   });
 
-  test("the three open levels' zones link to each other, counted as the other-level door", async ({ page }) => {
-    const levels = ["acquisition", "activation", "retention"] as const;
+  test("level 4 has the same page: Partix's intro, its first call, and its own glossary words (A24, REF-3)", async ({ page }) => {
+    await page.goto("/fr/game/referral");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Une année chez Partix");
+    await expect(page.getByTestId("game-call")).toHaveAttribute("data-state", "open");
+    await expect(page.locator('a[href="/fr/glossary/referral"]')).toHaveCount(1);
+    await expect(page.locator('a[href="/fr/glossary/viral-coefficient"]')).toHaveCount(1);
+  });
+
+  test("the four open levels' zones link to each other, counted as the other-level door", async ({ page }) => {
+    const levels = ["acquisition", "activation", "retention", "referral"] as const;
     for (const from of levels) {
       await page.goto(`/en/game/${from}`);
       const nav = page.getByTestId("game-zone-nav");

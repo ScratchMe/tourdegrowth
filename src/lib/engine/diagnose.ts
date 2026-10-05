@@ -1,5 +1,7 @@
+import { appRules } from "./app";
 import { CANDIDATE_IDS, CLEAR_MARGIN, METRIC_SHAPES, SLG_CANDIDATE_IDS, SLG_METRIC_SHAPES, UNPRICED_CANDIDATES, isPricedAt } from "./catalog-shape";
 import { isFlow, rankingImpact } from "./impact";
+import { isApp } from "./setup-type";
 import { isSlgFlow, slgRankingImpact } from "./slg-impact";
 import type {
   CandidateId,
@@ -13,6 +15,7 @@ import type {
   Motion,
   PlgCandidateId,
   Position,
+  SelfServeCandidateId,
   SlgCandidateId,
   SlgDiagnosis,
 } from "./types";
@@ -45,6 +48,10 @@ import { currentSnapshot, knownIn, statusOf } from "./values";
  * priced over the quarter by `slg-impact.ts`: W and the ACV for the three
  * flows (the referred share among them since §19.3), D and the
  * sales-assisted ARPA for the renewal.
+ *
+ * A consumer app (§21.5.4) follows them too, on the candidates its
+ * monetization shows plus its own, the actives' retention, priced in two
+ * streams by `app.ts#appRules`.
  */
 
 export function directionOf(id: CandidateId): Comparator["direction"] {
@@ -98,12 +105,13 @@ function clearlyAbove(a: number, b: number): boolean {
  * two motions cannot drift apart, and no function ever sees the candidates
  * of both: there is no « biggest leak of the two engines » (§18.6.1).
  */
-interface MotionRules<C extends CandidateId> {
+export interface MotionRules<C extends CandidateId> {
   motion: Motion;
   candidates: readonly C[];
   price: (state: EngineState, id: C, target: number, ctx: EngineCalcContext) => { gap?: Interval; mrr?: Interval };
   isFlow: (id: C) => boolean;
-  retention: C;
+  /** The candidates priced on a base instead of a flow (churn, the renewal, an app's actives): they rank only in money. */
+  retentions: readonly C[];
   /** The ★ (and churn): unknown, any of them may be where the real bottleneck hides. */
   blindWatch: readonly MetricId[];
 }
@@ -113,7 +121,7 @@ const PLG_RULES: MotionRules<PlgCandidateId> = {
   candidates: CANDIDATE_IDS,
   price: rankingImpact,
   isFlow,
-  retention: "ret.logo-churn",
+  retentions: ["ret.logo-churn"],
   blindWatch: [...METRIC_SHAPES.filter((s) => s.primary).map((s) => s.id), "ret.logo-churn"],
 };
 
@@ -123,7 +131,7 @@ const SLG_RULES: MotionRules<SlgCandidateId> = {
   candidates: SLG_CANDIDATE_IDS,
   price: slgRankingImpact,
   isFlow: isSlgFlow,
-  retention: "slg.ret.renewal",
+  retentions: ["slg.ret.renewal"],
   blindWatch: SLG_METRIC_SHAPES.filter((s) => s.primary).map((s) => s.id),
 };
 
@@ -133,10 +141,11 @@ const SLG_RULES: MotionRules<SlgCandidateId> = {
  * candidates and nothing of self-serve's (the independence test holds both
  * directions).
  */
-export function diagnose(state: EngineState, ctx: EngineCalcContext, motion?: "plg"): Diagnosis<PlgCandidateId>;
+export function diagnose(state: EngineState, ctx: EngineCalcContext, motion?: "plg"): Diagnosis<SelfServeCandidateId>;
 export function diagnose(state: EngineState, ctx: EngineCalcContext, motion: "slg"): SlgDiagnosis;
-export function diagnose(state: EngineState, ctx: EngineCalcContext, motion: Motion = "plg"): Diagnosis<PlgCandidateId> | SlgDiagnosis {
-  return motion === "plg" ? diagnoseWith(PLG_RULES, state, ctx) : diagnoseWith(SLG_RULES, state, ctx);
+export function diagnose(state: EngineState, ctx: EngineCalcContext, motion: Motion = "plg"): Diagnosis<SelfServeCandidateId> | SlgDiagnosis {
+  if (motion === "slg") return diagnoseWith(SLG_RULES, state, ctx);
+  return isApp(state.setup) ? diagnoseWith(appRules(state.setup), state, ctx) : diagnoseWith(PLG_RULES, state, ctx);
 }
 
 function diagnoseWith<C extends CandidateId>(rules: MotionRules<C>, state: EngineState, ctx: EngineCalcContext): Diagnosis<C> {
@@ -165,8 +174,9 @@ function diagnoseWith<C extends CandidateId>(rules: MotionRules<C>, state: Engin
     }
   }
 
-  const comparable = candidates.filter((id) => !["unknown", "no-comparator"].includes(positions[id].position));
-  const belows = candidates.filter((id) => positions[id].position === "below");
+  // Every candidate was positioned by the loop above: the `!` reads what it just wrote.
+  const comparable = candidates.filter((id) => !["unknown", "no-comparator"].includes(positions[id]!.position));
+  const belows = candidates.filter((id) => positions[id]!.position === "below");
   const blind = rules.blindWatch.filter((id) => {
     const status = statusOf(currentSnapshot(state).metrics[id]);
     return status !== "not-applicable" && knownIn(state, id, ctx).kind === "unknown";
@@ -174,7 +184,7 @@ function diagnoseWith<C extends CandidateId>(rules: MotionRules<C>, state: Engin
 
   // Every money impact the ranking used is attached to its position; the displayed chain is `whatIf`'s.
   for (const p of priced) {
-    if (p.mrr) positions[p.id].impact = numericImpact(state, p.id, rules.retention, positions[p.id].comparator!, p.mrr, ctx);
+    if (p.mrr) positions[p.id]!.impact = numericImpact(state, p.id, rules.retentions, positions[p.id]!.comparator!, p.mrr, ctx);
   }
 
   const base = { motion: rules.motion, blind, positions };
@@ -186,11 +196,11 @@ function diagnoseWith<C extends CandidateId>(rules: MotionRules<C>, state: Engin
   // without ARPA", §6.6). The volume and the price are the same for every flow, so the flows are
   // priced all together or not at all — save a referred share past its ceiling (§19.3.2), which no
   // volume prices: it stands apart, like go-live.
-  const flowsBelow = priced.filter((p) => rules.isFlow(p.id) && isPricedAt(p.id, impactTarget(positions[p.id].comparator!)));
+  const flowsBelow = priced.filter((p) => rules.isFlow(p.id) && isPricedAt(p.id, impactTarget(positions[p.id]!.comparator!)));
   const moneyPriced = flowsBelow.length > 0 ? flowsBelow.every((p) => p.mrr) : priced.some((p) => p.mrr);
   const basis: Diagnosis["basis"] = moneyPriced ? "mrr" : "relative-gap";
   for (const p of priced) {
-    const value = basis === "mrr" ? p.mrr : p.id === rules.retention ? undefined : p.gap;
+    const value = basis === "mrr" ? p.mrr : rules.retentions.includes(p.id) ? undefined : p.gap;
     if (value) measure.set(p.id, value);
   }
   const rankable = belows.filter((id) => measure.has(id));
@@ -220,11 +230,11 @@ function diagnoseWith<C extends CandidateId>(rules: MotionRules<C>, state: Engin
  * displayed chain — the thing a reader recomputes — is `whatIf`'s job, and
  * it needs the words this function doesn't take.
  */
-function numericImpact(state: EngineState, id: CandidateId, retention: CandidateId, comparator: Comparator, mrr: Interval, ctx: EngineCalcContext): Impact {
+function numericImpact(state: EngineState, id: CandidateId, retentions: readonly CandidateId[], comparator: Comparator, mrr: Interval, ctx: EngineCalcContext): Impact {
   const known = knownIn(state, id, ctx);
   return {
     metric: id,
-    kind: id === retention ? "retained-mrr" : "new-mrr",
+    kind: retentions.includes(id) ? "retained-mrr" : "new-mrr",
     // Only called for a stage that was positioned, so its value is known.
     from: known.kind === "known" ? known.value : mrr,
     to: impactTarget(comparator),

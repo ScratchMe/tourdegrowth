@@ -6,10 +6,12 @@ import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { gameHubShareText } from "@/lib/og/game-hub-share-text";
 import { ACQUISITION_CONTENT } from "@/content/game/acquisition";
 import { ACTIVATION_CONTENT } from "@/content/game/activation";
-import { ACQUISITION_INTRO, ACTIVATION_INTRO, RETENTION_INTRO } from "@/content/game/meta";
+import { ACQUISITION_INTRO, ACTIVATION_INTRO, REFERRAL_INTRO, RETENTION_INTRO } from "@/content/game/meta";
+import { REFERRAL_CONTENT } from "@/content/game/referral";
 import { RETENTION_CONTENT } from "@/content/game/retention";
 import { ACQUISITION_LEVEL } from "@/lib/game/levels/acquisition";
 import { ACTIVATION_LEVEL } from "@/lib/game/levels/activation";
+import { REFERRAL_LEVEL } from "@/lib/game/levels/referral";
 import { RETENTION_LEVEL } from "@/lib/game/levels/retention";
 import { engineShareText } from "@/lib/og/engine-share-text";
 import { gameLevelShareText } from "@/lib/og/game-level-share-text";
@@ -41,7 +43,7 @@ import { SITE_DOMAIN_LABEL } from "@/lib/site";
  * (« LE CÔTÉ OBSCUR », « UNE ANNÉE ») and each level's figure — the churn,
  * whose French form puts a U+00A0 and a « % » in the STENCIL, level 2's
  * « 2 000 » new customers, a U+00A0 between digits, and level 3's activation
- * rate (« 30,0 % ») — are checked as drawn.
+ * rate (« 30,0 % ») and level 4's viral coefficient (0,40) — are checked as drawn.
  */
 
 const WORDMARK = "TOUR DE GROWTH";
@@ -52,11 +54,12 @@ function textsByFamily(locale: Locale) {
   const og = UI_STRINGS.og;
   const pillars = PILLARS.map((pillar) => tc(UI_STRINGS.pillars[pillar], locale));
   const hub = gameHubShareText(locale);
-  // The three levels' images (A12.f, A24 ACT-3): the same frame, each with its own words and figure.
+  // The four levels' images (A12.f, A24 ACT-3 and REF-3): the same frame, each with its own words and figure.
   const levels = [
     gameLevelShareText(locale, { intro: RETENTION_INTRO, dashboard: RETENTION_CONTENT.dashboard, level: RETENTION_LEVEL }),
     gameLevelShareText(locale, { intro: ACQUISITION_INTRO, dashboard: ACQUISITION_CONTENT.dashboard, level: ACQUISITION_LEVEL }),
     gameLevelShareText(locale, { intro: ACTIVATION_INTRO, dashboard: ACTIVATION_CONTENT.dashboard, level: ACTIVATION_LEVEL }),
+    gameLevelShareText(locale, { intro: REFERRAL_INTRO, dashboard: REFERRAL_CONTENT.dashboard, level: REFERRAL_LEVEL }),
   ];
   // The result image's own strings, read through the function the frame is
   // handed them by: the space's pill, the profile's labels and flag, and the

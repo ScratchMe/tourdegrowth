@@ -199,7 +199,7 @@ A12.f.1, A12.f.2 et A12.g aussi : le niveau est jouable, derrière le drapeau, l
 | A12.f.1 | **Le branchement : le niveau jouable** | **Fait le 2026-10-01** ([#247](https://github.com/ScratchMe/tourdegrowth/pull/247)). `LevelSlug` gagne l'acquisition, et le compilateur a listé ce qu'il exigeait : la clé de sauvegarde (`tdg.game.acquisition.v1`), la copie de l'encart du résultat (« Le côté obscur de l'acquisition », « Nouveaux clients 2 000 »), le modèle et le côté dans l'îlot (devenu générique sur le niveau), le vocabulaire analytique. **Une page de niveau commune** aux deux (`app/[locale]/game/_level/LevelPage.tsx`), chaque `page.tsx` n'apportant que son intro, ses deux mots du glossaire (acquisition et CAC pour le niveau 2), sa copie et son îlot. Ensuite : l'image de partage (son texte reçoit le niveau en paramètre), le sitemap, le hub « jouable » avec sa propre fin (« le contrôle et la transaction »), et les deux pages qui se renvoient l'une à l'autre (zones, et le bloc de décembre devenu lien, « jouable », C31). **Analytique** : les fins comptées par niveau (`game_ending/<niveau>/<fin>`), une porte `other_level`, et le passage résultat → jeu calculé sur tout goulot qui a un niveau. Copie neuve « à relire » |
 | A12.f.2 | **L'encart qui propose les deux niveaux** | **Fait le 2026-10-01** ([#248](https://github.com/ScratchMe/tourdegrowth/pull/248)). `gameEntriesFor` rend une liste : chaque étape du goulot qui a un niveau, la plus faible d'abord, sans doublon. `GameEntry` reçoit `levels`. À un niveau, la carte est inchangée ; à plusieurs, une carte qui les propose tous (C30 Q5, `GAME-BRIEF.md` §15.4). Sa bande est empilée, avec le chiffre de chaque niveau puis la confiance absente. Elle prend sa propre copie, « à relire » (`GAME_ENTRY_SEVERAL` : « Le côté obscur de tes étapes »), et une rangée par étape, son nom au-dessus de son bouton. Aucun chemin analytique neuf : chaque bouton compte la porte de son niveau. Une fixture e2e, un vrai résultat à goulot acquisition + rétention lu dans l'émulateur |
 | A12.g | **Les specs Playwright** | **Faites le 2026-10-01** ([#250](https://github.com/ScratchMe/tourdegrowth/pull/250)). `e2e/game-level2.spec.ts`, sur le modèle de P1 à P27, dans les deux langues, à 1 280 et 390 px. Ses specs : le premier écran (P1, P2), le téléphone et le panier qui suivent les cartes (P5), les années A en français et C en anglais jouées à l'interface d'après les tables du §17.6, l'année D renvoyée en juin (P9), la sauvegarde sous sa propre clé, 390 px à chaque phase (P17), axe sur décembre (P21) et l'analytique par niveau (P20). Les assistants de `game-helpers.ts` prennent le niveau en paramètre |
-| A12.h | **Le bon à tirer, puis la recette** | Un bon à tirer du niveau 2, puis une recette (D9) qui couvre les deux niveaux, relecture juridique du catalogue comprise. **Le bon à tirer est construit le 2026-10-04** : le [nº11](https://claude.ai/artifact/BrR1ZX98qPRbk3JcfjokBv) porte tout ce que le niveau écrit lui-même ; le nº7, remis d'accord le même jour, montre les chaînes changées par U0 (C75, C76). Reste : les réponses d'Antoine, puis la recette. **Depuis ACT-3 (2026-10-05)**, la zone « activation » du hub est jouable et nomme Quandi : le nº7 la montre encore « bientôt » et sans nom, il se remet d'accord ou la relit à ce bon à tirer |
+| A12.h | **Le bon à tirer, puis la recette** | Un bon à tirer du niveau 2, puis une recette (D9) qui couvre les deux niveaux, relecture juridique du catalogue comprise. **Le bon à tirer est construit le 2026-10-04** : le [nº11](https://claude.ai/artifact/BrR1ZX98qPRbk3JcfjokBv) porte tout ce que le niveau écrit lui-même ; le nº7, remis d'accord le même jour, montre les chaînes changées par U0 (C75, C76). Reste : les réponses d'Antoine, puis la recette. **Depuis ACT-3 (2026-10-05)**, la zone « activation » du hub est jouable et nomme Quandi : le nº7 la montre encore « bientôt » et sans nom, il se remet d'accord ou la relit à ce bon à tirer. **Depuis REF-3 (le même jour)**, la zone « referral » l'est aussi et nomme Partix : même remarque |
 | A12.i | **La boucle inverse ne porte pas `?ref=`** (trouvé par la re-synchro B6, le 2026-10-01) | GAME-BRIEF 13.3 D : en fin de niveau, « Où en est ta croissance ? » renvoie au Tour, et « le lien porte `?ref=` comme les autres entrées du Tour si un identifiant de résultat est connu ». `TourLoop` sait le faire (`refId`, `tourLoopHref`), mais `GameIsland.tsx` ne le lui passe jamais : le lien mène toujours à `/quiz` nu. À trancher avant d'ouvrir le jeu : quel identifiant est « connu » (celui du lien partagé par lequel le joueur est arrivé, ou son propre résultat), puis le brancher, avec une spec e2e qui lit le `href`. Le jeu est fermé : rien ne fuit aujourd'hui |
 
 ### A14 — Le moteur complet, pour le SaaS B2B (C32 tranchée le 2026-10-01)
@@ -418,8 +418,8 @@ APP-6, APP-9 et APP-11.
 | APP-1 | les chiffres de l'app : formes, listes, `shapesOf(setup)`, comptes partagés, prose | APP-0 | **Livré le 2026-10-05** ([#348](https://github.com/ScratchMe/tourdegrowth/pull/348)) |
 | APP-2 | la forme affichée et la prose des quinze, les outils | APP-1 | **Livré le 2026-10-05** ([#352](https://github.com/ScratchMe/tourdegrowth/pull/352)) |
 | APP-3 | le calque de copie | APP-2 | **Livré le 2026-10-05** ([#355](https://github.com/ScratchMe/tourdegrowth/pull/355)) |
-| APP-4 | le scénario de l'app et la couture | APP-1 | ☐ |
-| APP-5 | le diagnostic de l'app | APP-4 | ☐ |
+| APP-4 | le scénario de l'app et la couture | APP-1 | **Livré le 2026-10-05** ([#359](https://github.com/ScratchMe/tourdegrowth/pull/359)) |
+| APP-5 | le diagnostic de l'app | APP-4 | **Livré le 2026-10-05** ([#361](https://github.com/ScratchMe/tourdegrowth/pull/361)) |
 | APP-6 | la dérivation, les constats, les contrôles, le peloton | APP-5 | ☐ |
 | APP-7 | la carte de départ, le réglage, les Réglages, l'événement | APP-3, APP-6 | ☐ |
 | APP-8 | les écrans de l'argent, la bande des deux flux, la courbe de remboursement | APP-7 | ☐ |
@@ -511,7 +511,7 @@ est libre. Le jeu reste fermé (C23).
 | ACT-4 | L'activation : les specs Playwright | **Livré le 2026-10-05** ([#350](https://github.com/ScratchMe/tourdegrowth/pull/350)) ; le niveau activation est fini (§21.7) |
 | REF-1 | Le referral : la copie | **Livré le 2026-10-05** ([#353](https://github.com/ScratchMe/tourdegrowth/pull/353)) |
 | REF-2 | Le referral : le téléphone et sa pastille | **Livré le 2026-10-05** ([#354](https://github.com/ScratchMe/tourdegrowth/pull/354)) |
-| REF-3 | Le referral : le branchement | À faire |
+| REF-3 | Le referral : le branchement | **Livré le 2026-10-05** ([#358](https://github.com/ScratchMe/tourdegrowth/pull/358)) |
 | REF-4 | Le referral : les specs Playwright | À faire |
 | REV-1 | Le revenue : la copie | À faire |
 | REV-2 | Le revenue : le téléphone et sa pastille | À faire |
@@ -832,7 +832,16 @@ en U0, C75). `.design-sync/NOTES.md` dit encore « Eight components are pinned i
 `cfg.dtsPropsFor` » : la synchro le passe à neuf. Une session de design sync (prompt B),
 pas celle d'ACT-3, qui ne touche aucun composant.
 
-**Rien d'ouvert d'autre que B17** (B8 a trouvé sa cause et sa réponse : B16). La prochaine synchro se lance quand un composant change, ou
+**B18, ouvert le 2026-10-05 : la re-synchro du referral (A24, REF-3).** Ce qu'elle
+emporte : `SplitPhone` et `SentPill` (le téléphone de Partix et la pastille des
+messages envoyés au nom de Thomas, neufs de REF-2 : leurs deux aperçus de
+`.design-sync/previews/` et leur inscription dans `.design-sync/config.json` sont
+faits ; `NextLevel` est déjà dans B17). `.design-sync/NOTES.md` dit encore « Eight
+components are pinned in `cfg.dtsPropsFor` » : la synchro le passe à dix (`SplitPhone`
+est la dixième entrée, après les neuf que B17 compte). Une session de design sync
+(prompt B), pas celle de REF-3, qui ne touche aucun composant.
+
+**Rien d'ouvert d'autre que B17 et B18** (B8 a trouvé sa cause et sa réponse : B16). La prochaine synchro se lance quand un composant change, ou
 quand change une copie, un chiffre du modèle ou un comportement qu'un aperçu
 reprend : c'est ainsi que B3 a trouvé l'amende du jeu et les cartes de
 `SpaceStrip` restées d'avant A7.8 et A7.9, dans des notes reportées. Ce qu'elle

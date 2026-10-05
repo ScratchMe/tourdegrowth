@@ -563,6 +563,15 @@ Tous vécus sur les niveaux 1 et 2 ; chacun a coûté au moins une relecture.
   la suite Playwright complète, la mesure du poids avant le merge) : compter
   environ 1 h 15 entre le lancement du sous-agent et le merge. L'orchestrateur
   n'en lance pas une si la pause qu'on lui a donnée tombe avant.
+- **Une route de plus réordonne les feuilles CSS du site** (REF-3) : une
+  règle qui ne gagnait que par l'ordre des feuilles (deux modules, même
+  spécificité) peut perdre ailleurs, jusque dans le moteur. La suite
+  Playwright complète de X-3 le voit (`engine-deck-unit.spec.ts` l'a vu). Le
+  correctif est de qualifier la règle qui doit gagner (`NEXTJS.md` §1.9), dans
+  la PR qui l'a révélé.
+- **Un identifiant de fixture se vérifie avant d'être pris** (REF-3) :
+  `e2e/real-results.ts` en réserve aussi hors de `REAL_RESULTS`
+  (`MALFORMED_ID`, `…5e09`). Le referral a pris `…5e10`, le revenue `…5e11`.
 - **`npm ci` peut réécrire `package-lock.json`** (ACT-3 : npm 10.9.4 en
   retire des champs `libc`) : un artefact d'outil, jamais un changement de
   l'unité. `git checkout -- package-lock.json` avant le commit ; un lockfile

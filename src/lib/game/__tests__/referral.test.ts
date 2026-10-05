@@ -20,9 +20,9 @@ import {
   type Level,
 } from "./paths-referral";
 
-// GAME-BRIEF §19 (`docs/game/referral.md`): the referral level « S'ils vous recommandent », a DRAFT
-// model the spec quotes number for number — written on 2026-10-04 so an
-// agent can wire the level without re-deriving it (CHANTIERS.md A24). Its
+// GAME-BRIEF §19 (`docs/game/referral.md`): the referral level « S'ils vous recommandent », a
+// model the spec quotes number for number — written on 2026-10-04 as a draft so an
+// agent could wire the level without re-deriving it, wired on 2026-10-05 (A24, REF-3). Its
 // four reference years are level 2's, card for card by role. A rebalancing
 // that moves one regenerates the table and the spec, it does not loosen
 // the tolerance (half a hundredth, what the tile rounds to).

@@ -184,14 +184,14 @@ describe("where a value sits is said physically, from the metric's direction", (
    */
   it("a position as a label: churn behind its target is ABOVE it, in both languages", () => {
     const derivedFr = deriveEngine(exampleState(), CTX_FR, null, FR.bridges, FR.strings.units);
-    const churn = derivedFr.diagnosis.positions["ret.logo-churn"];
+    const churn = derivedFr.diagnosis.positions["ret.logo-churn"]!;
     expect(churn.position).toBe("below");
     expect(positionLabel(churn.position, churn.comparator, FR.strings)).toBe("Au-dessus de la cible");
     const derivedEn = deriveEngine(exampleState(), CTX_EN, null, EN.bridges, EN.strings.units);
-    const churnEn = derivedEn.diagnosis.positions["ret.logo-churn"];
+    const churnEn = derivedEn.diagnosis.positions["ret.logo-churn"]!;
     expect(positionLabel(churnEn.position, churnEn.comparator, EN.strings)).toBe("Above the target");
     // A flow behind is still under, and the other positions take their own words.
-    const act = derivedEn.diagnosis.positions["act.rate"];
+    const act = derivedEn.diagnosis.positions["act.rate"]!;
     expect(positionLabel(act.position, act.comparator, EN.strings)).toBe("Below the target");
     expect(positionLabel("within", down, FR.strings)).toBe("À la cible");
     expect(positionLabel("above", down, FR.strings)).toBe("Sous la cible");

@@ -46,7 +46,7 @@ function derivedWith(diagnosis: Partial<Diagnosis>): EngineDerived {
   return { diagnosis: full, motions: [{ motion: "plg", diagnosis: full }] } as unknown as EngineDerived;
 }
 
-const clearOn = (metric: PlgCandidateId, comparator: Diagnosis["positions"][PlgCandidateId]["comparator"]) =>
+const clearOn = (metric: PlgCandidateId, comparator: NonNullable<Diagnosis["positions"][PlgCandidateId]>["comparator"]) =>
   derivedWith({ state: "clear", named: [metric], basis: "mrr", positions: positions({ [metric]: { position: "below", comparator } }) });
 
 describe("missingByRepairCost", () => {

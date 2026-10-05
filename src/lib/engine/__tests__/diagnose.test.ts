@@ -32,25 +32,25 @@ describe("diagnose — the §6.0 example", () => {
   });
 
   it("every candidate's position, and the exact money the ranking used (560 € vs 240 €)", () => {
-    expect(d.positions["acq.signup-rate"].position).toBe("no-comparator"); // no team target; its reference is context
+    expect(d.positions["acq.signup-rate"]!.position).toBe("no-comparator"); // no team target; its reference is context
     expect(d.positions["act.rate"]).toMatchObject({ position: "below", comparator: { lo: 20, hi: 20 } }); // the fictional team's target
-    expect(d.positions["ret.d30"].position).toBe("unknown");
-    expect(d.positions["rev.paid-conversion"].position).toBe("no-comparator");
-    expect(d.positions["ref.referred-share"].position).toBe("no-comparator");
+    expect(d.positions["ret.d30"]!.position).toBe("unknown");
+    expect(d.positions["rev.paid-conversion"]!.position).toBe("no-comparator");
+    expect(d.positions["ref.referred-share"]!.position).toBe("no-comparator");
     expect(d.positions["ret.logo-churn"]).toMatchObject({ position: "below", comparator: { lo: 2, hi: 2, direction: "lower" } });
-    expect(d.positions["act.rate"].impact!.mrrPerMonth!.lo).toBeCloseTo(560, 9);
-    expect(d.positions["ret.logo-churn"].impact!.mrrPerMonth!.lo).toBeCloseTo(240, 9);
-    expect(d.positions["ret.logo-churn"].impact!.kind).toBe("retained-mrr");
+    expect(d.positions["act.rate"]!.impact!.mrrPerMonth!.lo).toBeCloseTo(560, 9);
+    expect(d.positions["ret.logo-churn"]!.impact!.mrrPerMonth!.lo).toBeCloseTo(240, 9);
+    expect(d.positions["ret.logo-churn"]!.impact!.kind).toBe("retained-mrr");
   });
 });
 
 describe("diagnose — the rules", () => {
   it("a value at or past its target is never a leak; raising the target makes it one", () => {
     const at = withEntry(exampleState(), "act.rate", measured(ratio(160, 800)));
-    expect(diagnose(at, CTX_FR).positions["act.rate"].position).toBe("within");
+    expect(diagnose(at, CTX_FR).positions["act.rate"]!.position).toBe("within");
     expect(diagnose(at, CTX_FR).named).not.toContain("act.rate");
     const past = withEntry(exampleState(), "act.rate", measured(ratio(200, 800)));
-    expect(diagnose(past, CTX_FR).positions["act.rate"].position).toBe("above");
+    expect(diagnose(past, CTX_FR).positions["act.rate"]!.position).toBe("above");
     const raised = withTarget(past, "act.rate", 30);
     expect(diagnose(raised, CTX_FR).positions["act.rate"]).toMatchObject({ position: "below", comparator: { lo: 30, hi: 30 } });
   });
@@ -58,7 +58,7 @@ describe("diagnose — the rules", () => {
   it("maybe-below straddles the comparator: said, never stamped", () => {
     const straddle = withEntry(exampleState(), "act.rate", estimated(15, 25));
     const d = diagnose(straddle, CTX_FR);
-    expect(d.positions["act.rate"].position).toBe("maybe-below");
+    expect(d.positions["act.rate"]!.position).toBe("maybe-below");
     expect(d.named).toEqual(["ret.logo-churn"]);
     expect(positionOf({ lo: 1.5, hi: 3 }, { lo: 2, hi: 2, direction: "lower" })).toBe("maybe-below");
     expect(positionOf({ lo: 0.5, hi: 0.8 }, { lo: 2, hi: 2, direction: "lower" })).toBe("above");
@@ -68,11 +68,11 @@ describe("diagnose — the rules", () => {
     // N = 45 makes the activation's exact value 45 × (20/18 − 1) × 120 = 600 €.
     const n45 = withEntry(exampleState(), "acq.cac", measured(ratio(21_000, 45), tool));
     const clear = diagnose(n45, CTX_FR);
-    expect(clear.positions["act.rate"].impact!.mrrPerMonth!.lo).toBeCloseTo(600, 9);
+    expect(clear.positions["act.rate"]!.impact!.mrrPerMonth!.lo).toBeCloseTo(600, 9);
     expect(clear.state).toBe("clear");
     // Churn at 3 %: 400 × (3 − 2) % = 4 kept × 120 = 480 €.
     const shared = diagnose(withEntry(n45, "ret.logo-churn", measured(ratio(12, 400), tool)), CTX_FR);
-    expect(shared.positions["ret.logo-churn"].impact!.mrrPerMonth!.lo).toBeCloseTo(480, 9);
+    expect(shared.positions["ret.logo-churn"]!.impact!.mrrPerMonth!.lo).toBeCloseTo(480, 9);
     expect(shared.state).toBe("shared");
     expect(shared.named).toEqual(["act.rate", "ret.logo-churn"]);
     // The example's own N (560 € vs 480 €) is shared too.
@@ -97,10 +97,10 @@ describe("diagnose — the rules", () => {
     const withBelow = diagnose(alone, CTX_FR);
     expect(withBelow.state).toBe("not-enough");
     expect(withBelow.named).toEqual([]);
-    expect(withBelow.positions["act.rate"].position).toBe("below");
+    expect(withBelow.positions["act.rate"]!.position).toBe("below");
     const withoutBelow = diagnose(withEntry(alone, "act.rate", measured(ratio(200, 800))), CTX_FR);
     expect(withoutBelow.state).toBe("not-enough");
-    expect(CANDIDATE_IDS.filter((id) => withoutBelow.positions[id].position === "below")).toEqual([]);
+    expect(CANDIDATE_IDS.filter((id) => withoutBelow.positions[id]!.position === "below")).toEqual([]);
   });
 
   it("level: comparable, nothing below", () => {
@@ -131,8 +131,8 @@ describe("diagnose — the rules", () => {
     expect(referred.mrr!.lo).toBeCloseTo(504);
     const d = diagnose(s, CTX_FR);
     for (const id of ["ret.d30", "ref.referred-share"] as const) {
-      expect(d.positions[id].position).toBe("below");
-      expect(d.positions[id].impact?.kind, id).toBe("new-mrr");
+      expect(d.positions[id]!.position).toBe("below");
+      expect(d.positions[id]!.impact?.kind, id).toBe("new-mrr");
     }
     expect(d).toMatchObject({ state: "clear", named: ["ret.d30"], basis: "mrr", belowUnpriced: [] });
     // Without ARPA, the relative gap ranks them with the flows: 3 against activation's 0,11 and the referred 0,1.
@@ -145,7 +145,7 @@ describe("diagnose — the rules", () => {
     s = withTarget(s, "ref.referred-share", 60);
     expect(rankingImpact(s, "ref.referred-share", 60, CTX_FR)).toEqual({});
     const d = diagnose(s, CTX_FR);
-    expect(d.positions["ref.referred-share"].impact).toBeUndefined();
+    expect(d.positions["ref.referred-share"]!.impact).toBeUndefined();
     // Activation's ~560 € and churn's 240 € still rank in money: the share past its ceiling doesn't drag the basis.
     expect(d).toMatchObject({ named: ["act.rate"], basis: "mrr", belowUnpriced: ["ref.referred-share"] });
     // At 50 % exactly, it is priced: (50 − 1)/(100 − 50) = 0,98.
@@ -161,13 +161,13 @@ describe("diagnose — the rules", () => {
     const bare = withoutTargets(exampleState());
     for (const id of CANDIDATE_IDS) expect(comparatorOf(bare, id), id).toBeUndefined();
     const d = diagnose(bare, CTX_FR);
-    expect(d.positions["act.rate"].position).toBe("no-comparator");
-    expect(d.positions["ret.logo-churn"].position).toBe("no-comparator");
+    expect(d.positions["act.rate"]!.position).toBe("no-comparator");
+    expect(d.positions["ret.logo-churn"]!.position).toBe("no-comparator");
     expect(d).toMatchObject({ state: "not-enough", named: [] });
     // 1 % sign-up rate: under the 2-5 % context reference — still nothing without a target.
     const low = withEntry(bare, "acq.signup-rate", measured(ratio(260, 26_000)));
-    expect(diagnose(low, CTX_FR).positions["acq.signup-rate"].position).toBe("no-comparator");
-    expect(diagnose(withTarget(low, "acq.signup-rate", 2), CTX_FR).positions["acq.signup-rate"].position).toBe("below");
+    expect(diagnose(low, CTX_FR).positions["acq.signup-rate"]!.position).toBe("no-comparator");
+    expect(diagnose(withTarget(low, "acq.signup-rate", 2), CTX_FR).positions["acq.signup-rate"]!.position).toBe("below");
   });
 
   it("€ ranking == relative-gap ranking for the flows, over a grid of rates and targets", () => {
