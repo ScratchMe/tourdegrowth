@@ -266,7 +266,7 @@ reco).
   blanche du niveau, dans sa spécification), C8 (gabarits), C10 (séparateurs
   décimaux), C12 (insécables des nombres), C13 (l'arithmétique du téléphone,
   dont la spécification donne les égalités à tenir), le test « repris du
-  niveau 1 » et le test « nomme son entreprise, jamais Flixo ni Pédalix ».
+  niveau 1 » et le test « nomme son entreprise, jamais celle d'un autre niveau » (Flixo, Pédalix, et chaque niveau déjà construit : Quandi depuis ACT-1, REF-1).
   **Deux différences** que chaque spécification précise : la règle C1 « cite un
   article » nomme les textes admis pour ce niveau (le Code de la consommation
   n'est pas le seul), et la règle propre au contrôle (au niveau 2, C14 « jamais
