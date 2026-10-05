@@ -1,4 +1,4 @@
-import { clearEngine, deleteEngine, listEngines, loadEngine, saveEngine, saveOverUnreadable, setActiveEngine, storedEngineCount, type EngineListing, type LoadResult, type SaveResult } from "@/lib/engine/storage";
+import { clearEngine, deleteEngine, deviceCopy, listEngines, loadEngine, restoreDevice, saveEngine, saveOverUnreadable, setActiveEngine, storedEngineCount, type EngineListing, type LoadResult, type SaveResult } from "@/lib/engine/storage";
 import type { EngineState } from "@/lib/engine/types";
 import { loadStoredResults, type StoredResult } from "@/lib/quiz/storage";
 import { dropAllDrafts } from "./sheet-drafts";
@@ -43,6 +43,11 @@ export interface EngineSnapshot {
   engines: EngineListing[] | null;
   /** The engine entries on the device, readable or not: what « Tout effacer » says it erases. */
   stored: number;
+  /**
+   * The engine the board threw on, shown as unreadable (A25.b, `fallBack`): its numbers are intact, so the
+   * « illisible » screen offers its file and the device's other engines. Null otherwise.
+   */
+  undrawn: EngineState | null;
 }
 
 let snapshot: EngineSnapshot | null = null;
@@ -67,6 +72,7 @@ export function getClientSnapshot(): EngineSnapshot {
       tourResults: loadStoredResults(),
       engines: listEngines(),
       stored: storedEngineCount(),
+      undrawn: null,
     };
   }
   return snapshot;
@@ -92,15 +98,19 @@ export type CommitResult = SaveResult;
  * screen: the one way past `saveEngine`'s refusal, which — since a device
  * holds several engines (A14 T5) — keeps every engine it can still read
  * (`saveOverUnreadable`) rather than clearing the device.
+ * `probation` for a state that comes from a file (A25.b): kept only once the
+ * board has drawn it (`drawn`), and undone by `fallBack` if the board throws.
  */
-export function commit(state: EngineState, options: { fresh?: boolean; overUnreadable?: boolean; add?: boolean } = {}): CommitResult {
+export function commit(state: EngineState, options: { fresh?: boolean; overUnreadable?: boolean; add?: boolean; probation?: boolean } = {}): CommitResult {
   // An engine that arrives (setup, an import, over a store or not): no
   // half-typed sheet of the one before survives it (A15.12). A metric the new
   // engine has not filled keys its draft `id@new` too, and would come back
   // pre-filled with the other company's figures.
   if (options.fresh || options.overUnreadable) dropAllDrafts();
+  retries = 0;
   const current = getClientSnapshot();
-  snapshot = { ...current, result: { kind: "ok", state }, returningFrom: options.fresh ? null : current.returningFrom };
+  if (options.probation) probation = { copy: deviceCopy(), before: current };
+  snapshot = { ...current, result: { kind: "ok", state }, returningFrom: options.fresh ? null : current.returningFrom, undrawn: null };
   notify();
   // `add`: beside the device's other engines (« Nouveau moteur », « Ajouter comme nouveau moteur », §19.1.5, §19.7).
   const saved = options.overUnreadable ? saveOverUnreadable(state) : saveEngine(state, { add: options.add });
@@ -126,6 +136,7 @@ function relist(): void {
 export function switchEngine(id: string): CommitResult {
   const result = setActiveEngine(id);
   if (!result.ok) return result;
+  retries = 0;
   dropAllDrafts();
   reload();
   return result;
@@ -139,6 +150,7 @@ export function switchEngine(id: string): CommitResult {
 export function removeEngine(id: string): CommitResult {
   const result = deleteEngine(id);
   if (!result.ok) return result;
+  retries = 0;
   dropAllDrafts();
   reload();
   return result;
@@ -146,15 +158,104 @@ export function removeEngine(id: string): CommitResult {
 
 function reload(): void {
   const current = getClientSnapshot();
-  snapshot = { ...current, result: loadEngine(), returningFrom: null, engines: listEngines(), stored: storedEngineCount() };
+  snapshot = { ...current, result: loadEngine(), returningFrom: null, engines: listEngines(), stored: storedEngineCount(), undrawn: null };
   notify();
+}
+
+/*
+ * The island's net (A25.b, `EngineBoundary`). A file can carry what the
+ * validator only reports — a number « conflicting » without its two
+ * readings, a cohort month that isn't one — and the board throws on it.
+ * Before A25.b that took the page to its « détour » at every visit, and a
+ * merge could carry it into someone's own engine. Three module values, like
+ * the snapshot above: the island remounts under its boundary, and must find
+ * them again.
+ */
+let probation: { copy: Record<string, string> | null; before: EngineSnapshot } | null = null;
+let strikes = 0;
+let retries = 0;
+let fileRefused = false;
+
+/**
+ * Fall-backs that are not an import's, since the person last acted (a write, a switch, a deletion, « Tout effacer »):
+ * past them, the error goes to the page's boundary. An error raised once a screen has committed (an effect, a timer)
+ * would otherwise loop — fall back, draw, throw again — and no effect of the island writes, so no loop resets it.
+ */
+const MAX_RETRIES = 3;
+
+/**
+ * A screen has been drawn: the failures are counted afresh. When it is the board, an import on probation is kept:
+ * the board has drawn it.
+ */
+export function drawn(board: boolean): void {
+  strikes = 0;
+  if (board) probation = null;
+}
+
+/**
+ * What the island does when a render under its boundary throws. True when
+ * something drawable is on screen again; false when nothing is left to try,
+ * and the error goes on to the page's own boundary, as before A25.b.
+ *
+ * 1. An import the board has not drawn yet: the device is put back as it
+ *    was before the click (`restoreDevice`), the screen too, and the import
+ *    screen says the file is refused (`refusedFilePending`). Should the
+ *    device refuse to be put back, it still holds the file: the « illisible »
+ *    screen says so, and offers the engine held before, from memory.
+ * 2. Otherwise, once more, from the board: the screen that threw may not be
+ *    the board, and the board may draw.
+ * 3. The board threw again: the engine on screen is shown as unreadable, on
+ *    the « illisible » screen, which offers its file and the device's other
+ *    engines (`undrawn`). Nothing is written: its numbers stay on the device.
+ */
+export function fallBack(): boolean {
+  if (probation) {
+    const { copy, before } = probation;
+    probation = null;
+    if (!copy || restoreDevice(copy).ok) {
+      snapshot = before;
+      fileRefused = true;
+      notify();
+      return true;
+    }
+    // The device would not be put back: it still holds the file. The engine it held before — the one « Remplacer »
+    // wrote over — is offered from memory on the « illisible » screen, the one copy of it left.
+    snapshot = { ...getClientSnapshot(), result: { kind: "unreadable" }, undrawn: before.result.kind === "ok" ? before.result.state : null };
+    notify();
+    return true;
+  }
+  if (retries >= MAX_RETRIES) return false;
+  retries += 1;
+  if (strikes === 0) {
+    strikes = 1;
+    return true;
+  }
+  return showUnreadable();
+}
+
+function showUnreadable(): boolean {
+  const current = getClientSnapshot();
+  if (current.result.kind !== "ok") return false;
+  snapshot = { ...current, result: { kind: "unreadable" }, undrawn: current.result.state };
+  notify();
+  return true;
+}
+
+/** A file was just refused by the board (1. above): the island opens on the import screen, which says so. */
+export function refusedFilePending(): boolean {
+  return fileRefused;
+}
+
+export function clearRefusedFile(): void {
+  fileRefused = false;
 }
 
 /** "Erase everything": the device and the screen, together. */
 export function erase(): void {
+  retries = 0;
   clearEngine();
   dropAllDrafts();
   const current = getClientSnapshot();
-  snapshot = { ...current, result: { kind: "empty" }, returningFrom: null, engines: [], stored: 0 };
+  snapshot = { ...current, result: { kind: "empty" }, returningFrom: null, engines: [], stored: 0, undrawn: null };
   notify();
 }
