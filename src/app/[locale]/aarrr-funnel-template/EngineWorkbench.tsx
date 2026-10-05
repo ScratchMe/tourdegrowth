@@ -197,7 +197,7 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
     const selected = teamTools(lens.state.setup.tools);
     const citedBy = (id: MetricId) =>
       (metrics.find((m) => m.id === id)?.where ?? []).flatMap((w) => (w.source.kind === "tool" ? [w.source.tool] : []));
-    const plan = collectPlan(lastSnapshot(lens.state), ctx.today, motionShapes(lens.state.setup.motions), { selected, citedBy });
+    const plan = collectPlan(lastSnapshot(lens.state), ctx.today, motionShapes(lens.state.setup), { selected, citedBy });
     const deviceTour = latestTourWithAnswers(tourResults ?? []);
     const tourOnDevice = deviceTour !== null;
     const view: EngineView = { state: lens.state, derived, strings, metrics, derivedCopy, bridges, ctx, tourResult, tourOnDevice, deviceTour };
@@ -543,7 +543,7 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
         view={view}
         actions={actions}
         onNext={() => {
-          const first = nextSelfNumber(plan, motionShapes(current.setup.motions));
+          const first = nextSelfNumber(plan, motionShapes(current.setup));
           if (first) actions.openMetric(first.id);
           else openBoard();
         }}
@@ -718,7 +718,7 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
   };
 
   if (screen === "asks") {
-    const shapes = motionShapes(current.setup.motions);
+    const shapes = motionShapes(current.setup);
     // Past every number of the screen, copied or not: the ones not copied stay « à faire », passed for now.
     const after = continueFrom(plan, shapes, [...askIds, ...skipped]);
     return shell(
@@ -739,7 +739,7 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
 
   if (screen === "number" && numberId) {
     const id = numberId;
-    const shapes = motionShapes(current.setup.motions);
+    const shapes = motionShapes(current.setup);
     // Where this screen leads (A18 T3.b): the board's next step once this number is left — read from the plan
     // as it is now, before the save, with this number and the ones passed for now taken out.
     const after = continueFrom(plan, shapes, [id, ...skipped]);
@@ -848,7 +848,7 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
       }
       onTemplate={() => {
         // The month being filled, its ticked motions, the page's language: « ; » and the decimal comma in French.
-        const text = tableTemplate(current, motionShapes(current.setup.motions), metrics, strings, locale);
+        const text = tableTemplate(current, motionShapes(current.setup), metrics, strings, locale);
         download(`\uFEFF${text}`, monthFileName(current, strings.table.fileName), "text/csv;charset=utf-8");
         trackEngine({ name: "engine_exported", detail: "csv" });
       }}

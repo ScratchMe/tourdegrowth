@@ -17,7 +17,7 @@ const PLG = METRIC_SHAPES;
 
 function preview(text: string, state: EngineState = exampleState(), locale: "en" | "fr" = "en") {
   const props = locale === "en" ? EN : FR;
-  return tablePreview(text, state, motionShapes(state.setup.motions), props.metrics, props.strings, locale, NOW);
+  return tablePreview(text, state, motionShapes(state.setup), props.metrics, props.strings, locale, NOW);
 }
 
 const rowOf = (rows: TableRow[], id: MetricId) => rows.find((r) => r.id === id);

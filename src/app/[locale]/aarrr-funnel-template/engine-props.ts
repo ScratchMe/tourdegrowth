@@ -17,20 +17,23 @@ import type { EngineWorkbenchProps } from "./EngineWorkbench";
  *
  * Catalogue order is `ALL_METRIC_SHAPES`' order (self-serve, sales-assisted,
  * the link), so the prose and the shape always line up index by index as
- * well as by id. All of it travels whatever the setup: the motions are the
- * user's, read in the browser, and the island filters with `shapesOf`.
+ * well as by id. All of it travels whatever the setup (the app's own numbers
+ * excepted, below): the motions are the user's, read in the browser, and the
+ * island filters with `shapesOf`.
  *
  * Not the `openTypes` prop (§21.3): it comes from the build's environment, which
  * this function does not read — the page adds it (`openTypesAtBuild()`).
  */
 export function resolveEngineProps(locale: Locale): Omit<EngineWorkbenchProps, "openTypes"> {
-  const metrics: ResolvedMetric[] = ALL_METRIC_SHAPES.map((shape) => ({
+  // The SaaS catalogue only: the app's own numbers (scope "app", ids "app.*") stay out until APP-2 hands the island
+  // an app's catalogue (`typeCatalogs`, §21.4.7). The counts (33 numbers, 8 computed figures) are held by a test.
+  const metrics: ResolvedMetric[] = ALL_METRIC_SHAPES.filter((shape) => shape.scope !== "app").map((shape) => ({
     id: shape.id,
     ...resolveTree(ENGINE_CATALOG[shape.id], locale),
     glossaryHref: localePath(locale, `/glossary/${shape.glossary}`),
   }));
 
-  const derived: ResolvedDerived[] = ALL_DERIVED_SHAPES.map((shape) => ({
+  const derived: ResolvedDerived[] = ALL_DERIVED_SHAPES.filter((shape) => !shape.id.startsWith("app.")).map((shape) => ({
     id: shape.id,
     ...resolveTree(ENGINE_DERIVED_CATALOG[shape.id], locale),
     glossaryHref: localePath(locale, `/glossary/${shape.glossary}`),

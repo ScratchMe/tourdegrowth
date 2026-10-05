@@ -415,7 +415,7 @@ APP-6, APP-9 et APP-11.
 | Unité | Ce qu'elle livre (fiche en §21.11) | Prérequis | Fait |
 |---|---|---|---|
 | APP-0 | le type, le drapeau `ENGINE_TYPES`, le fichier | — | **Livré le 2026-10-04** ([#341](https://github.com/ScratchMe/tourdegrowth/pull/341)) |
-| APP-1 | les chiffres de l'app : formes, listes, `shapesOf(setup)`, comptes partagés, prose | APP-0 | ☐ |
+| APP-1 | les chiffres de l'app : formes, listes, `shapesOf(setup)`, comptes partagés, prose | APP-0 | **Livré le 2026-10-05** ([#348](https://github.com/ScratchMe/tourdegrowth/pull/348)) |
 | APP-2 | la forme affichée et la prose des quinze, les outils | APP-1 | ☐ |
 | APP-3 | le calque de copie | APP-2 | ☐ |
 | APP-4 | le scénario de l'app et la couture | APP-1 | ☐ |

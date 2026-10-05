@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { METRIC_SHAPES } from "@/lib/engine/catalog-shape";
-import { EN } from "@/lib/engine/__tests__/props";
+import { EN, FR } from "@/lib/engine/__tests__/props";
 import { ALL_TOOLS, moneyUnit, percentUnit, sourceOptions, wordUnit } from "../sources";
 
 /**
@@ -80,6 +80,15 @@ describe("the source list", () => {
     expect(offered).toContain("tool:pipedrive");
     expect(offered).toContain("tool:cs-platform");
     expect(new Set(ALL_TOOLS).size).toBe(Object.keys(strings.tools).length);
+  });
+
+  // Non-vacuity, measured on 2026-10-05: taking `adjust` out of `TOOL_ORDER` fails this test and the one above it (2),
+  // and `tsc` too (`satisfies Record<ToolId, true>`).
+  it("offers an app's three tools right after Google Play Console, and writes their names the same in both languages (§21.6.5)", () => {
+    const at = ALL_TOOLS.indexOf("play-console");
+    expect(ALL_TOOLS.slice(at, at + 4)).toEqual(["play-console", "revenuecat", "appsflyer", "adjust"]);
+    for (const tool of ["revenuecat", "appsflyer", "adjust"] as const) expect(FR.strings.tools[tool]).toBe(EN.strings.tools[tool]);
+    expect([EN.strings.tools.revenuecat, EN.strings.tools.appsflyer, EN.strings.tools.adjust]).toEqual(["RevenueCat", "AppsFlyer", "Adjust"]);
   });
 });
 

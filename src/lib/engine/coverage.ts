@@ -1,5 +1,6 @@
 import { METRIC_SHAPES, SLG_METRIC_SHAPES, shapesOf } from "./catalog-shape";
-import type { MetricShape } from "./catalog-shape";
+import type { MetricShape, SetupShapes } from "./catalog-shape";
+import { isApp } from "./setup-type";
 import type { Coverage, EngineSetup, Motion, Snapshot } from "./types";
 import { statusOf } from "./values";
 
@@ -48,12 +49,16 @@ export function coverage(snapshot: Snapshot, shapes: readonly MetricShape[] = ME
   return result;
 }
 
-/** One motion's own numbers (§18.6.1, its column): 17 for self-serve, 15 for sales-assisted. */
-export function motionCoverage(snapshot: Snapshot, motion: Motion): Coverage {
+/**
+ * One motion's own numbers (§18.6.1, its column): 17 for self-serve, 15 for sales-assisted. With an app's `setup`,
+ * self-serve counts what that app shows (`shapesOf`, §21.5.5); without it, or for a SaaS, today's list.
+ */
+export function motionCoverage(snapshot: Snapshot, motion: Motion, setup?: SetupShapes): Coverage {
+  if (motion === "plg" && setup !== undefined && isApp(setup)) return coverage(snapshot, shapesOf(setup));
   return coverage(snapshot, motion === "plg" ? METRIC_SHAPES : SLG_METRIC_SHAPES);
 }
 
 /** The ticked motions together, the link left out — the board's chips, the common slides' footer, `visibility` (§18.9.2). */
 export function setupCoverage(snapshot: Snapshot, setup: EngineSetup): Coverage {
-  return coverage(snapshot, shapesOf(setup.motions));
+  return coverage(snapshot, shapesOf(setup));
 }
