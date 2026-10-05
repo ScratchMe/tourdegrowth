@@ -89,7 +89,7 @@ describe("cheapestTodo", () => {
 /** Non-vacuity, measured on 2026-10-01: letting the link into `motionShapes` fails the first case. */
 describe("with the setup's motions (A7.3.c S3)", () => {
   it("the hybrid owes both motions' numbers, and never the link: it is optional (§18.4.8)", () => {
-    const shapes = motionShapes({ plg: true, slg: true });
+    const shapes = motionShapes({ type: "b2b-saas", motions: { plg: true, slg: true } });
     const plan = collectPlan(snapshot(), NOW, shapes);
     expect(plan.count).toBe(METRIC_SHAPES.length + SLG_METRIC_SHAPES.length);
     const listed = [...plan.self.flatMap((g) => g.ids), ...plan.ask.flatMap((g) => [...g.toAsk, ...g.requested])];
@@ -98,15 +98,15 @@ describe("with the setup's motions (A7.3.c S3)", () => {
   });
 
   it("sales-assisted alone owes only its own fifteen; self-serve's default is the v1 plan", () => {
-    const slg = collectPlan(snapshot(), NOW, motionShapes({ plg: false, slg: true }));
+    const slg = collectPlan(snapshot(), NOW, motionShapes({ type: "b2b-saas", motions: { plg: false, slg: true } }));
     expect(slg.count).toBe(SLG_METRIC_SHAPES.length);
     expect(slg.self.flatMap((g) => g.ids).every((id) => id.startsWith("slg."))).toBe(true);
-    expect(collectPlan(snapshot(), NOW, motionShapes({ plg: true, slg: false }))).toEqual(collectPlan(snapshot(), NOW));
+    expect(collectPlan(snapshot(), NOW, motionShapes({ type: "b2b-saas", motions: { plg: true, slg: false } }))).toEqual(collectPlan(snapshot(), NOW));
   });
 
   it("« Continuer » goes to sales-assisted's cheapest number when self-serve's are all answered", () => {
     const all = Object.fromEntries(METRIC_SHAPES.map((s) => [s.id, { status: "not-applicable", naReason: "x", updatedAt: NOW.toISOString() }]));
-    const next = cheapestTodo(snapshot(all), motionShapes({ plg: true, slg: true }));
+    const next = cheapestTodo(snapshot(all), motionShapes({ type: "b2b-saas", motions: { plg: true, slg: true } }));
     expect(next).not.toBeNull();
     expect(SLG_METRIC_SHAPES.find((s) => s.id === next)?.effort).toBe("self-5min");
     expect(cheapestTodo(snapshot(all))).toBeNull();

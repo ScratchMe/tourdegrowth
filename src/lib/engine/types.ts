@@ -108,7 +108,15 @@ export type SlgMetricId =
   | "slg.rev.gross-margin";
 /** The hybrid's link (§18.4.8): the share of sales-assisted opportunities that came from self-serve accounts. Optional. */
 export type LinkMetricId = "link.pql-handoff";
-export type MetricId = PlgMetricId | SlgMetricId | LinkMetricId;
+/** The consumer app's own numbers (§21.4.1): two that replace self-serve ones (CAC, margin), four of its own. */
+export type AppMetricId =
+  | "app.acq.cpi"
+  | "app.ret.active-retention"
+  | "app.rev.purchases-per-active"
+  | "app.rev.ads-per-active"
+  | "app.rev.commission"
+  | "app.rev.gross-margin";
+export type MetricId = PlgMetricId | SlgMetricId | LinkMetricId | AppMetricId;
 /**
  * The computed figures (§5.7): never entered, always derived. NRR and GRR
  * joined the three unit-economics figures on 2026-09-26, with the two MRR
@@ -117,7 +125,9 @@ export type MetricId = PlgMetricId | SlgMetricId | LinkMetricId;
 export type PlgDerivedId = "rev.ltv" | "rev.cac-payback" | "rev.ltv-cac" | "rev.nrr" | "rev.grr";
 /** Computed from the NEW contracts' ACV, not the book's ARPA: the CAC is spent on them (§18.4.7). */
 export type SlgDerivedId = "slg.rev.ltv" | "slg.rev.cac-payback" | "slg.rev.ltv-cac";
-export type DerivedId = PlgDerivedId | SlgDerivedId;
+/** The consumer app's computed figures (§21.4.2): per install. */
+export type AppDerivedId = "app.rev.install-value" | "app.rev.install-ltv" | "app.rev.install-payback" | "app.rev.value-to-cost";
+export type DerivedId = PlgDerivedId | SlgDerivedId | AppDerivedId;
 
 export type ToolId =
   | "ga4"
@@ -138,7 +148,11 @@ export type ToolId =
   | "spreadsheet"
   /** Sales-assisted (§18.2): a third CRM, and the customer-success platforms (Gainsight, Vitally, Planhat…). */
   | "pipedrive"
-  | "cs-platform";
+  | "cs-platform"
+  /** The three tools a consumer app reads (§21.6.5), at the end of the union. */
+  | "revenuecat"
+  | "appsflyer"
+  | "adjust";
 /** `sales` and `customer-success` since C25 Q9: go-live, renewals and references are theirs, not Support's. */
 export type RoleId = "finance" | "data" | "product" | "marketing" | "revops" | "support" | "sales" | "customer-success";
 /** Who or what a number came from. A role, never a person's name. */
@@ -277,7 +291,9 @@ export type SharedCount =
   /** Sales-assisted (§18.2, S6): opportunities created, new-customer deals won, both over the three months; customers at the flows' month end. */
   | "slgOppsCreated"
   | "slgDealsWon"
-  | "slgCustomers";
+  | "slgCustomers"
+  /** A consumer app (§21.2.4): the month's actives, the base of its two per-active revenues. */
+  | "appActives";
 
 /**
  * The levers « Et si ? » can move, together (Antoine, 2026-09-26: the
@@ -634,7 +650,7 @@ export interface Relays {
 }
 
 /**
- * The inputs of the five computed figures (`DERIVED_SHAPES[].inputs`), the
+ * The inputs of the computed figures (`UNIT_INPUT_IDS`, catalog-shape.ts), the
  * only numbers a sentence names after « il manque » / "missing:". The copy
  * carries one phrase per id (`unitInput`); a test pins the two sets equal.
  */
@@ -649,7 +665,15 @@ export type UnitInputId =
   | "slg.acq.cac"
   | "slg.rev.acv"
   | "slg.rev.gross-margin"
-  | "slg.ret.renewal";
+  | "slg.ret.renewal"
+  // A consumer app (§21.4.5). Not `ret.d30` nor `rev.paid-conversion`, though its figures read them too: in the SaaS
+  // « il manque » names them without an article, and must go on doing so.
+  | "app.acq.cpi"
+  | "app.rev.gross-margin"
+  | "app.rev.commission"
+  | "app.ret.active-retention"
+  | "app.rev.purchases-per-active"
+  | "app.rev.ads-per-active";
 
 /** §5.7, §6.8. A computed figure with a missing input is "uncomputable — missing: …", never 0. */
 export type DerivedValue =

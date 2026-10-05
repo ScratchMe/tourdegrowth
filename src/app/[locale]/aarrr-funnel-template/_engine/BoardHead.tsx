@@ -207,7 +207,7 @@ export function BoardBar({
 /** The board's one next step for the engine on screen — what `BoardNextStep` shows, and what the board's foot reads. */
 export function boardNextStep(view: EngineView, plan: CollectPlan, writeFailed: boolean, past: boolean): NextStepChoice {
   const { state, ctx } = view;
-  return nextStepFor({ plan, shapes: motionShapes(state.setup.motions), writeFailed, viewingPast: past, nextMonth: nextMonthOf(state, ctx.today) });
+  return nextStepFor({ plan, shapes: motionShapes(state.setup), writeFailed, viewingPast: past, nextMonth: nextMonthOf(state, ctx.today) });
 }
 
 /**
@@ -254,7 +254,7 @@ export function BoardNextStep({
   const { strings, state, ctx } = view;
   const n = strings.next;
   const snapshot = state.snapshots[state.snapshots.length - 1]!;
-  const shapes = motionShapes(state.setup.motions);
+  const shapes = motionShapes(state.setup);
   // The roles followed up in this session: their line stays, so the copy's confirmation and « Me le rappeler » stay with it.
   const [followedUp, setFollowedUp] = useState<Partial<Record<RoleId, MetricId[]>>>({});
 

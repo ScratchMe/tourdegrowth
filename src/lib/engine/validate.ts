@@ -92,6 +92,9 @@ const TOOL_SET = {
   spreadsheet: true,
   pipedrive: true,
   "cs-platform": true,
+  revenuecat: true,
+  appsflyer: true,
+  adjust: true,
 } as const satisfies Record<ToolId, true>;
 const TOOLS = Object.keys(TOOL_SET);
 

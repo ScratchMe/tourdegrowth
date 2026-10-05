@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ENGINE_COPY } from "../engine-copy";
-import { ALL_DERIVED_SHAPES, ALL_METRIC_SHAPES, CANDIDATE_IDS, SLG_CANDIDATE_IDS } from "@/lib/engine/catalog-shape";
+import { ALL_METRIC_SHAPES, CANDIDATE_IDS, SLG_CANDIDATE_IDS, UNIT_INPUT_IDS } from "@/lib/engine/catalog-shape";
 import { hybridTrapOf } from "@/lib/engine/phrases";
 import type { SlideTitleKey } from "@/lib/engine/types";
 import { PILLARS } from "@/lib/scoring/pillars";
@@ -63,8 +63,11 @@ describe("keys the code reads by id", () => {
   });
 
   it("gives every input a derived number can lack an article-ful phrase (« Il manque la marge brute »)", () => {
-    const inputs = [...new Set(ALL_DERIVED_SHAPES.flatMap((d) => d.inputs))].sort();
-    expect(Object.keys(ENGINE_COPY.unitInput).sort()).toEqual(inputs);
+    // `UNIT_INPUT_IDS`, not every input of every figure: the app's figures also read `ret.d30` and `rev.paid-conversion`,
+    // which « il manque » names without an article, as in the SaaS (§21.4.5).
+    expect(Object.keys(ENGINE_COPY.unitInput).sort()).toEqual([...UNIT_INPUT_IDS].sort());
+    expect(Object.keys(ENGINE_COPY.unitInput)).not.toContain("ret.d30");
+    expect(Object.keys(ENGINE_COPY.unitInput)).not.toContain("rev.paid-conversion");
     for (const phrase of Object.values(ENGINE_COPY.unitInput)) expect(phrase.fr).toMatch(/^(le |la |les |l['’])/);
   });
 

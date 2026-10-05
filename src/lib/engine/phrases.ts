@@ -1,4 +1,4 @@
-import { ALL_DERIVED_SHAPES, CANDIDATE_IDS, PELOTON_METRICS, SLG_CANDIDATE_IDS, candidatesOf, motionOfMetric, shapeOf } from "./catalog-shape";
+import { CANDIDATE_IDS, PELOTON_METRICS, SLG_CANDIDATE_IDS, UNIT_INPUT_IDS, candidatesOf, motionOfMetric, shapeOf } from "./catalog-shape";
 import { periodRangeOf, windowDaysOf } from "./cohort";
 import { CHAIN_VERB } from "./findings";
 import { capitalise, fillTemplate, formatMonth, formatMonthRange, joinList, lowerFirst } from "./format";
@@ -133,13 +133,10 @@ export function stagePhrase(id: MetricId, strings: Words, metrics: ResolvedMetri
   return subjectOf(id, strings, metrics);
 }
 
-/** The inputs of the computed figures: the only ids « il manque » / "missing:" ever names. */
-const UNIT_INPUTS: ReadonlySet<MetricId> = new Set(ALL_DERIVED_SHAPES.flatMap((s) => s.inputs));
-
-/** « la marge brute », « le CAC et l'ARPA mensuel » — what « il manque » is followed by. */
+/** « la marge brute », « le CAC et l'ARPA mensuel » — what « il manque » is followed by (`UNIT_INPUT_IDS` get their article from `unitInput`). */
 export function unitInputsPhrase(ids: readonly MetricId[], strings: Words, metrics: ResolvedMetric[]): string {
   return joinList(
-    ids.map((id) => (UNIT_INPUTS.has(id) ? strings.unitInput[id as UnitInputId] : lowerFirst(nameOf(metrics, id)))),
+    ids.map((id) => (UNIT_INPUT_IDS.has(id) ? strings.unitInput[id as UnitInputId] : lowerFirst(nameOf(metrics, id)))),
     strings.grammar,
   );
 }

@@ -87,7 +87,7 @@ describe("the appendix's pages (A2.1)", () => {
         ]);
         const all = pages.flat();
         // The numbers this setup asks for (§18.2.1): the props carry every motion's.
-        const asked = new Set(shapesOf(exampleState().setup.motions).map((s) => s.id));
+        const asked = new Set(shapesOf(exampleState().setup).map((s) => s.id));
         expect(all.map((r) => r.label)).toEqual(props[locale].metrics.filter((m) => asked.has(m.id)).map((m) => m.name));
         const heights = pages.map((p) => p.reduce((sum, r) => sum + annexRowHeight(r), 0));
         for (const h of heights) expect(h).toBeLessThanOrEqual(ANNEX_PAGE_HEIGHT);

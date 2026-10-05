@@ -738,7 +738,8 @@ export const ENGINE_COPY = {
   /**
    * An input of the three computed figures after « il manque » / "missing:" —
    * with its article in French (« il manque la marge brute », never « il manque
-   * marge brute »). Keyed by the only four ids `DERIVED_SHAPES` names as inputs.
+   * marge brute »). Keyed by `UNIT_INPUT_IDS` (catalog-shape.ts): the inputs of the
+   * self-serve and sales-assisted figures, and the app-only ones of the app's.
    */
   unitInput: {
     "acq.cac": { fr: "le CAC", en: "CAC" },
@@ -753,6 +754,13 @@ export const ENGINE_COPY = {
     "slg.rev.acv": { fr: "l'ACV des nouveaux contrats", en: "new contracts' ACV" },
     "slg.rev.gross-margin": { fr: "la marge brute de l'assisté", en: "sales-assisted gross margin" },
     "slg.ret.renewal": { fr: "le renouvellement des contrats", en: "contract renewal" },
+    // TODO: à relire — copie neuve (convention 6), §21 (A22 APP-1) : les six chiffres propres à l'app. Pas `ret.d30` ni `rev.paid-conversion`, que ses calculés lisent aussi : « il manque » les nomme sans article, comme pour le SaaS.
+    "app.acq.cpi": { fr: "le coût par installation", en: "the cost per install" },
+    "app.rev.gross-margin": { fr: "la marge brute après commission", en: "the gross margin after commission" },
+    "app.rev.commission": { fr: "la commission des stores", en: "the store commission" },
+    "app.ret.active-retention": { fr: "la rétention des actifs", en: "active retention" },
+    "app.rev.purchases-per-active": { fr: "les achats par actif", en: "purchases per active" },
+    "app.rev.ads-per-active": { fr: "la publicité par actif", en: "ads per active" },
   } satisfies Record<UnitInputId, Translatable>,
   /**
    * Where a value sits against its comparator — the team's target (« la
@@ -878,6 +886,10 @@ export const ENGINE_COPY = {
     // TODO: à relire (convention 6) — neuf le 2026-09-30 (A7.3.c S0) : les outils de la vente assistée (§18.2).
     pipedrive: { fr: "Pipedrive", en: "Pipedrive" },
     "cs-platform": { fr: "Outil de Customer Success (Gainsight, Vitally, Planhat…)", en: "Customer success platform (Gainsight, Vitally, Planhat…)" },
+    // TODO: à relire — copie neuve (convention 6), §21 (A22 APP-1) : les trois outils qu'une app grand public lit. Des noms propres, identiques dans les deux langues.
+    revenuecat: { fr: "RevenueCat", en: "RevenueCat" },
+    appsflyer: { fr: "AppsFlyer", en: "AppsFlyer" },
+    adjust: { fr: "Adjust", en: "Adjust" },
   } satisfies Record<ToolId, Translatable>,
 
   /**
@@ -3204,6 +3216,8 @@ export const ENGINE_COPY = {
       slgOppsCreated: { fr: "opportunités créées sur trois mois", en: "opportunities created over three months" },
       slgDealsWon: { fr: "contrats gagnés sur trois mois", en: "deals won over three months" },
       slgCustomers: { fr: "clients assistés en fin de mois", en: "sales-assisted customers at the month's end" },
+      // TODO: à relire — copie neuve (convention 6), §21 (A22 APP-1) : les actifs du mois, la base des deux revenus par actif d'une app.
+      appActives: { fr: "actifs du mois", en: "actives in the month" },
     },
   },
   /**

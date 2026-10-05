@@ -91,7 +91,7 @@ function outputsOf(state: EngineState, tour: StoredResult | null) {
       scenario: motions.plg ? buildScenario(state, state.whatIf ?? {}, ctx) : null,
       slgScenario: motions.slg ? buildSlgScenario(state, state.whatIf ?? {}, ctx) : null,
       tabs: Object.fromEntries(derived.motions.map((m) => [m.motion, asTabs(listStages(snapshot, m.diagnosis, m.motion))])),
-      collect: collectPlan(snapshot, EXAMPLE_TODAY, motionShapes(motions)),
+      collect: collectPlan(snapshot, EXAMPLE_TODAY, motionShapes(state.setup)),
     };
   }
   // A round trip through JSON: `undefined` fields drop out exactly as they do in the file.

@@ -48,7 +48,8 @@ export function startMotionOf(motions: Readonly<Record<Motion, boolean>>): Start
  * the board). A number to build counts with the hour-long ones.
  */
 export function startPlan(motions: Readonly<Record<Motion, boolean>>): { n: number; quick: number; hour: number; ask: number } {
-  const shapes = shapesOf(motions);
+  // The motions alone are known here: the SaaS list, until APP-7 passes the setup (§21.11).
+  const shapes = shapesOf({ type: "b2b-saas", motions });
   const count = (efforts: readonly string[]) => shapes.filter((s) => efforts.includes(s.effort)).length;
   return { n: shapes.length, quick: count(["self-5min"]), hour: count(["self-1h", "build"]), ask: count(["ask"]) };
 }

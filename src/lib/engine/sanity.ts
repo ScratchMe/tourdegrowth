@@ -95,7 +95,7 @@ export function sanityChecks(state: EngineState, ctx: EngineCalcContext, words: 
     (id: SanityCheck["id"], metrics: MetricId[], values: Record<string, string> = {}, count?: Interval) =>
       checks.push({ id, ...(motion ? { motion } : {}), blocking: false, metrics, values, ...(count ? { count } : {}) });
 
-  for (const shape of shapesOf(motions)) {
+  for (const shape of shapesOf(state.setup)) {
     const entry = entryOf(snapshot, shape.id);
     const blocking = entry ? blockingCheck(entry, shape, ctx.locale) : null;
     // An imported file can carry what the sheet would have refused.

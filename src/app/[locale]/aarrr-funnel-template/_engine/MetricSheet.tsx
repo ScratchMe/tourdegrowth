@@ -285,7 +285,7 @@ export function MetricSheet({
   }));
   // "Also in Stripe: ARPA, churn" — the other numbers that sit in the same
   // tool, among the ones this setup asks for (§18.2.1).
-  const shown = new Set<MetricId>(shapesOf(state.setup.motions).map((s) => s.id));
+  const shown = new Set<MetricId>(shapesOf(state.setup).map((s) => s.id));
   const alsoIn = metric.where
     .filter((w) => w.source.kind === "tool")
     .map((w) => {

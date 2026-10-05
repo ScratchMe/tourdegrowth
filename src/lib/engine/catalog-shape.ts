@@ -1,9 +1,14 @@
 import type { Pillar } from "@/lib/scoring/pillars";
 import type { GlossaryTermId } from "@/content/glossary-terms"; // type only: erased at compile time
+import type { AppMonetization } from "./app-model"; // type only: app-model.ts imports this module
+import { isApp, monetizationOf } from "./setup-type"; // the leaf, never business-type.ts (§21.2.2)
 import type {
+  AppDerivedId,
+  AppMetricId,
   CandidateId,
   DerivedId,
   Effort,
+  EngineSetup,
   LeverId,
   LinkMetricId,
   MetricId,
@@ -88,11 +93,11 @@ export interface MetricShape<Id extends MetricId = MetricId> {
    */
   window?: "activation" | "paid" | "qualification" | "go-live" | 30;
   /**
-   * Where the number lives (§18.2.1): a motion's own catalogue, or the
-   * hybrid's link. No number is shared by both motions since C25 Q4 (one
-   * gross margin per motion).
+   * Where the number lives (§18.2.1): a motion's own catalogue, the hybrid's
+   * link, or a consumer app's own numbers (§21.4.1). No number is shared by
+   * both motions since C25 Q4 (one gross margin per motion).
    */
-  scope: "plg" | "slg" | "link";
+  scope: "plg" | "slg" | "link" | "app";
   /**
    * Months the number covers: 1 for self-serve, 3 for all of sales-assisted
    * (C25 Q2: a month counts too few deals), 12 for the 12-month NRR.
@@ -116,7 +121,7 @@ export interface MetricShape<Id extends MetricId = MetricId> {
   choices?: readonly string[];
 }
 
-/** The five computed figures (§5.7; NRR and GRR since 2026-09-26). Never entered; an unknown input makes them uncomputable, never 0. */
+/** A computed figure (§5.7; NRR and GRR since 2026-09-26). Never entered; an unknown input makes them uncomputable, never 0. */
 export interface DerivedShape<Id extends DerivedId = DerivedId> {
   id: Id;
   stage: Pillar;
@@ -129,7 +134,7 @@ export interface DerivedShape<Id extends DerivedId = DerivedId> {
 /**
  * The self-serve catalogue — the seventeen v1 numbers, in their v1 order.
  * Every v1 module reads this list; a module that learns the motions reads
- * `shapesOf(motions)` instead (§18.2.1), and the sales-assisted numbers
+ * `shapesOf(setup)` instead (§18.2.1), and the sales-assisted numbers
  * never leak into a self-serve board through it.
  */
 export const METRIC_SHAPES: readonly MetricShape<PlgMetricId>[] = ([
@@ -708,17 +713,163 @@ export const LINK_METRIC_SHAPES: readonly MetricShape<LinkMetricId>[] = [
   },
 ];
 
-/** Every number the engine knows, in catalogue order: self-serve, sales-assisted, the link. */
-export const ALL_METRIC_SHAPES: readonly MetricShape[] = [...METRIC_SHAPES, ...SLG_METRIC_SHAPES, ...LINK_METRIC_SHAPES];
+/**
+ * The consumer app's own numbers (engine spec §21.4.1, A22 APP-1): two that
+ * replace self-serve ones (`APP_REPLACED`: the cost per install for the CAC,
+ * the margin after commission for the margin) and four of its own. Never part
+ * of a SaaS engine: `shapesOf` adds the ones a monetization calls for
+ * (`appShapeShown`) to an app's. None carries a reference (D14) nor a Tour
+ * question: the one reference an app has is day-30 retention's, shown by the
+ * display layer (APP-2).
+ */
+export const APP_METRIC_SHAPES: readonly MetricShape<AppMetricId>[] = ([
+  // --- Acquisition -----------------------------------------------------------
+  {
+    id: "app.acq.cpi",
+    stage: "acquisition",
+    primary: false,
+    valueKinds: ["ratio", "amount"],
+    unit: "money",
+    bounded: false,
+    flow: "month",
+    effort: "ask",
+    defaultRole: "finance",
+    sources: ["appsflyer", "adjust", "google-ads", "meta-ads"],
+    glossary: "cac",
+    defaultRepair: "meeting",
+    variants: ["media-only", "plus-team", "fully-loaded"],
+  },
+  // --- Retention -------------------------------------------------------------
+  {
+    id: "app.ret.active-retention",
+    stage: "retention",
+    primary: false,
+    valueKinds: ["ratio", "rate"],
+    unit: "percent",
+    bounded: true,
+    flow: "month",
+    effort: "self-1h",
+    defaultRole: "data",
+    sources: ["amplitude", "mixpanel", "ga4"],
+    glossary: "retention",
+    defaultRepair: "sprint",
+  },
+  // --- Revenue ---------------------------------------------------------------
+  {
+    // In counts only: the actives are the base of the usage stream (§21.4.1).
+    id: "app.rev.purchases-per-active",
+    stage: "revenue",
+    primary: false,
+    valueKinds: ["ratio"],
+    unit: "money",
+    bounded: false,
+    flow: "month",
+    effort: "self-1h",
+    defaultRole: "finance",
+    sources: ["revenuecat", "app-store-connect", "play-console"],
+    glossary: "arpu",
+    defaultRepair: "afternoon",
+  },
+  {
+    id: "app.rev.ads-per-active",
+    stage: "revenue",
+    primary: false,
+    valueKinds: ["ratio"],
+    unit: "money",
+    bounded: false,
+    flow: "month",
+    effort: "ask",
+    defaultRole: "finance",
+    sources: ["spreadsheet"],
+    glossary: "arpu",
+    defaultRepair: "afternoon",
+  },
+  {
+    id: "app.rev.commission",
+    stage: "revenue",
+    primary: false,
+    valueKinds: ["ratio", "rate"],
+    unit: "percent",
+    amounts: true,
+    bounded: true,
+    flow: "month",
+    effort: "self-1h",
+    defaultRole: "finance",
+    sources: ["revenuecat", "app-store-connect", "play-console"],
+    glossary: "cac-payback",
+    defaultRepair: "meeting",
+  },
+  {
+    id: "app.rev.gross-margin",
+    stage: "revenue",
+    primary: false,
+    valueKinds: ["ratio", "rate"],
+    unit: "percent",
+    amounts: true,
+    bounded: true,
+    flow: "month",
+    effort: "ask",
+    defaultRole: "finance",
+    sources: ["spreadsheet"],
+    glossary: "cac-payback",
+    defaultRepair: "meeting",
+  },
+] satisfies readonly Omit<MetricShape<AppMetricId>, "scope" | "span">[]).map((shape) => ({ ...shape, scope: "app" as const, span: 1 as const }));
+
+/** Every number the engine knows, in catalogue order: self-serve, sales-assisted, the link, the consumer app's. */
+export const ALL_METRIC_SHAPES: readonly MetricShape[] = [...METRIC_SHAPES, ...SLG_METRIC_SHAPES, ...LINK_METRIC_SHAPES, ...APP_METRIC_SHAPES];
+
+/** The two self-serve numbers an app never shows (§21.1 D2), replaced by `app.acq.cpi` and `app.rev.gross-margin`. */
+export const APP_REPLACED: readonly PlgMetricId[] = ["acq.cac", "rev.gross-margin"];
+/** The five numbers of an app's subscription stream: shown when subscriptions are ticked, hidden otherwise (§21.4.1). */
+export const SUBSCRIPTION_METRICS: readonly PlgMetricId[] = ["ret.logo-churn", "rev.paid-conversion", "rev.arpa", "rev.expansion", "rev.contraction"];
+
+/** What `shapesOf` reads of a setup. */
+export type SetupShapes = Pick<EngineSetup, "type" | "motions" | "monetization">;
 
 /**
- * The numbers a setup shows, in catalogue order (§18.2.1): self-serve's if
- * ticked, sales-assisted's if ticked, the link only in the hybrid. Throws on
- * no motion — `validate.ts` refuses such a setup before anything asks.
+ * Which app number a monetization shows (§21.4.1): the cost per install and
+ * the margin always; the commission with subscriptions or purchases (what the
+ * stores bill); the actives' retention with purchases or ads; each per-active
+ * revenue with its own stream. A number is shown as soon as ONE ticked way of
+ * earning calls for it. Reads the boxes itself: `app-model.ts` imports this
+ * module.
  */
-export function shapesOf(motions: Readonly<Record<Motion, boolean>>): MetricShape[] {
+export function appShapeShown(id: AppMetricId, m: AppMonetization): boolean {
+  switch (id) {
+    case "app.acq.cpi":
+    case "app.rev.gross-margin":
+      return true;
+    case "app.rev.commission":
+      return m.subscriptions || m.purchases;
+    case "app.ret.active-retention":
+      return m.purchases || m.ads;
+    case "app.rev.purchases-per-active":
+      return m.purchases;
+    case "app.rev.ads-per-active":
+      return m.ads;
+  }
+}
+
+/**
+ * The numbers a setup shows, in catalogue order (§18.2.1, §21.4.1). A SaaS:
+ * self-serve's if ticked, sales-assisted's if ticked, the link only in the
+ * hybrid. An app: the self-serve numbers minus `APP_REPLACED`, minus
+ * `SUBSCRIPTION_METRICS` when subscriptions are unticked, then the app's
+ * numbers its monetization calls for (`appShapeShown`). Throws on no motion —
+ * `validate.ts` refuses such a setup before anything asks.
+ */
+export function shapesOf(setup: SetupShapes): MetricShape[] {
+  const { motions } = setup;
   if (!motions.plg && !motions.slg) throw new Error("A setup sells at least one way (motions all false)");
-  return ALL_METRIC_SHAPES.filter((s) => (s.scope === "link" ? motions.plg && motions.slg : motions[s.scope]));
+  const app = monetizationOf(setup);
+  return ALL_METRIC_SHAPES.filter((s) => {
+    if (app === null) return s.scope === "app" ? false : s.scope === "link" ? motions.plg && motions.slg : motions[s.scope];
+    if (!motions.plg) return false;
+    if (s.scope === "app") return appShapeShown(s.id as AppMetricId, app);
+    if (s.scope !== "plg") return false;
+    return !(APP_REPLACED as readonly MetricId[]).includes(s.id) && (app.subscriptions || !(SUBSCRIPTION_METRICS as readonly MetricId[]).includes(s.id));
+  });
 }
 
 /** LTV counts at most this many months of margin: "most practitioners cap at three to five years; we take the low end". */
@@ -793,7 +944,55 @@ export const SLG_DERIVED_SHAPES: readonly DerivedShape<SlgDerivedId>[] = [
   },
 ];
 
-export const ALL_DERIVED_SHAPES: readonly DerivedShape[] = [...DERIVED_SHAPES, ...SLG_DERIVED_SHAPES];
+/**
+ * The consumer app's four computed figures, per install (§21.4.2, C92). Their
+ * `inputs` are the COMPLETE list; the calculation reads only the ones the
+ * ticked monetization calls for (`appInputsOf`, APP-4), so « il manque » never
+ * names a hidden number. The three self-serve ones (`rev.ltv`,
+ * `rev.cac-payback`, `rev.ltv-cac`) are never shown for an app: they read
+ * `acq.cac` and `rev.gross-margin` (D2).
+ */
+const APP_VALUE_INPUTS: readonly MetricId[] = [
+  "app.rev.gross-margin",
+  "app.rev.commission",
+  "rev.paid-conversion",
+  "rev.arpa",
+  "ret.logo-churn",
+  "ret.d30",
+  "app.rev.purchases-per-active",
+  "app.rev.ads-per-active",
+  "app.ret.active-retention",
+];
+export const APP_DERIVED_SHAPES: readonly DerivedShape<AppDerivedId>[] = [
+  { id: "app.rev.install-value", stage: "revenue", inputs: APP_VALUE_INPUTS, glossary: "ltv" },
+  { id: "app.rev.install-ltv", stage: "revenue", inputs: APP_VALUE_INPUTS, glossary: "ltv" },
+  { id: "app.rev.install-payback", stage: "revenue", inputs: [...APP_VALUE_INPUTS, "app.acq.cpi"], glossary: "cac-payback" },
+  { id: "app.rev.value-to-cost", stage: "revenue", inputs: [...APP_VALUE_INPUTS, "app.acq.cpi"], glossary: "ltv" },
+];
+
+export const ALL_DERIVED_SHAPES: readonly DerivedShape[] = [...DERIVED_SHAPES, ...SLG_DERIVED_SHAPES, ...APP_DERIVED_SHAPES];
+
+/**
+ * The ids « il manque » writes with `unitInput` (engine-copy.ts): the inputs
+ * of the self-serve and sales-assisted computed figures, plus the app-only
+ * ones of the app's. `ret.d30` and `rev.paid-conversion` stay out although the
+ * app's figures read them: in the SaaS they are named without an article, and
+ * must go on being (§21.4.5).
+ */
+export const UNIT_INPUT_IDS: ReadonlySet<MetricId> = new Set<MetricId>([
+  ...[...DERIVED_SHAPES, ...SLG_DERIVED_SHAPES].flatMap((s) => s.inputs),
+  ...APP_DERIVED_SHAPES.flatMap((s) => s.inputs).filter((id) => id.startsWith("app.")),
+]);
+
+/** The derived figures a setup shows: a SaaS's as today (self-serve's, then sales-assisted's); an app's: `rev.grr` and `rev.nrr` with subscriptions, then `APP_DERIVED_SHAPES`. */
+export function derivedShapesOf(setup: SetupShapes): DerivedShape[] {
+  if (isApp(setup)) {
+    const monetization = monetizationOf(setup);
+    const subscriptionShapes = monetization?.subscriptions ? DERIVED_SHAPES.filter((s) => s.id === "rev.grr" || s.id === "rev.nrr") : [];
+    return [...subscriptionShapes, ...APP_DERIVED_SHAPES];
+  }
+  return [...(setup.motions.plg ? DERIVED_SHAPES : []), ...(setup.motions.slg ? SLG_DERIVED_SHAPES : [])];
+}
 
 /** The self-serve rates that can be named as the bottleneck (§6.6), churn the only lower-is-better one. */
 export const CANDIDATE_IDS: readonly PlgCandidateId[] = [
@@ -960,14 +1159,16 @@ export function metricsOfStage(stage: Pillar): MetricShape<PlgMetricId>[] {
 /**
  * One motion's numbers of a stage, ★ first (A7.3.c S3): the board's stage
  * panel and its tab marks. The link is never one motion's: the sales-assisted
- * Acquisition panel shows it apart, as its own block (§18.6.3).
+ * Acquisition panel shows it apart, as its own block (§18.6.3). For an app's
+ * self-serve motion, among `shapesOf(setup)` (its own numbers, the replaced
+ * and hidden ones left out); `setup` absent: today's behaviour.
  */
-export function metricsOfStageIn(stage: Pillar, motion: Motion): MetricShape[] {
-  const shapes: readonly MetricShape[] = motion === "plg" ? METRIC_SHAPES : SLG_METRIC_SHAPES;
+export function metricsOfStageIn(stage: Pillar, motion: Motion, setup?: SetupShapes): MetricShape[] {
+  const shapes: readonly MetricShape[] = setup !== undefined && isApp(setup) && motion === "plg" ? shapesOf(setup) : motion === "plg" ? METRIC_SHAPES : SLG_METRIC_SHAPES;
   return shapes.filter((s) => s.stage === stage).sort((a, b) => Number(b.primary) - Number(a.primary));
 }
 
 /** One motion's numbers, catalogue order, the link left out: what the collection plan and the coverage count. */
-export function motionShapes(motions: Readonly<Record<Motion, boolean>>): MetricShape[] {
-  return shapesOf(motions).filter((s) => s.scope !== "link");
+export function motionShapes(setup: SetupShapes): MetricShape[] {
+  return shapesOf(setup).filter((s) => s.scope !== "link");
 }

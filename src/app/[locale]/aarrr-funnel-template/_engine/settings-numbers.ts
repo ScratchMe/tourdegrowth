@@ -21,7 +21,8 @@ export function settingsNumbers(state: EngineState, metrics: ResolvedMetric[], s
   const snapshot = state.snapshots[state.snapshots.length - 1]!;
   const { motions } = state.setup;
   const hybrid = motions.plg && motions.slg;
-  const shown = shapesOf(motions).map((shape) => shape.id);
+  // The SaaS list, until APP-7 passes an app's numbers through the settings (§21.11).
+  const shown = shapesOf({ type: "b2b-saas", motions }).map((shape) => shape.id);
   return {
     targets: (["plg", "slg"] as const)
       .filter((m) => motions[m])
