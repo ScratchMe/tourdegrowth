@@ -569,11 +569,18 @@ describe("proxy (percent-encoded paths, 2026-10-05)", () => {
   useFlagEnv();
   beforeEach(() => resetRateLimitsForTests());
 
-  it("decodes exactly once, like the router, %2F included", () => {
+  it("decodes once, %2F included, and keeps only a canonical path", () => {
     expect(gatePath("/en/gam%65/retention")).toBe("/en/game/retention");
     expect(gatePath("/en/game%2Fretention")).toBe("/en/game/retention");
-    expect(gatePath("/en/gam%2565/retention")).toBe("/en/gam%65/retention");
-    expect(gatePath("/en/game/%E0%A4%A")).toBeNull();
+    expect(gatePath("/en/game/retention/")).toBe("/en/game/retention/");
+    expect(gatePath("/r/3f1c2a7e-9b4d-4e21-a8c6-000000000000")).toBe("/r/3f1c2a7e-9b4d-4e21-a8c6-000000000000");
+    expect(gatePath("/en/game/%E0%A4%A")).toBeNull(); // does not decode
+    expect(gatePath("/en/gam%2565/retention")).toBeNull(); // a % left over: double encoding
+    expect(gatePath("/en%2F%2Fgame/retention")).toBeNull(); // an empty segment: Vercel served it
+    expect(gatePath("/en/x%2F..%2Fgame/retention")).toBeNull(); // a .. segment
+    expect(gatePath("/en/%2E/game")).toBeNull(); // a . segment
+    expect(gatePath("/en/game%5Cretention")).toBeNull(); // a backslash
+    expect(gatePath("/en/game%00")).toBeNull(); // a control character
   });
 
   it("closes the game under any encoding the router reads as the game", async () => {
@@ -615,13 +622,50 @@ describe("proxy (percent-encoded paths, 2026-10-05)", () => {
     expect((await read("/%72/3f1c2a7e-9b4d-4e21-a8c6-000000000001")).status).toBe(429);
   });
 
-  it("leaves a double-encoded path to the router, which matches nothing with it", async () => {
-    expect(rewriteOf(await proxy(request("/en/gam%2565/retention")))).toBeNull();
+  it("refuses a path that does not decode, or does not decode to a canonical one, before any check", async () => {
+    for (const path of [
+      "/en/game/%E0%A4%A",
+      "/%61dmin%",
+      "/r/%ZZ",
+      "/en/gam%2565/retention",
+      "/en%2F%2Fgame/retention",
+      "/%2Fadmin/stats",
+      "/x%2F..%2Fadmin/stats",
+      "/en/x%2F..%2Fgame/retention",
+      "/r/sample%2F..%2F3f1c2a7e-9b4d-4e21-a8c6-000000000000",
+    ]) {
+      expect((await proxy(request(path))).status, path).toBe(400);
+    }
   });
 
-  it("refuses a path that does not decode, before any check", async () => {
-    for (const path of ["/en/game/%E0%A4%A", "/%61dmin%", "/r/%ZZ"]) {
-      expect((await proxy(request(path))).status, path).toBe(400);
+  it("never redirects off the site from an encoded legacy address (the review's four forms)", async () => {
+    for (const path of [
+      "/glossary/..%2F..%2F%2Fevil.com",
+      "/glossary/..%5C..%5C%5Cevil.com",
+      "/glossary/%252e%252e%2F%252e%252e%2F%2Fevil.com",
+      "/glossary/.%09.%2F.%09.%2F%2Fevil.com",
+    ]) {
+      const res = await proxy(request(path));
+      expect(res.status, path).toBe(400);
+      expect(res.headers.get("location"), path).toBeNull();
+    }
+  });
+
+  it("still sends an encoded legacy address to its localized form, on the site", async () => {
+    const res = await proxy(request("/glossar%79/cac", { cookie: "tdg_locale=fr" }));
+    expect(res.status).toBe(308);
+    const location = new URL(res.headers.get("location")!);
+    expect(location.origin).toBe("https://tourdegrowth.com");
+    expect(location.pathname).toBe("/fr/glossar%79/cac");
+  });
+
+  it("closes the files the build writes beside the closed hub and engine (their RSC payload)", async () => {
+    for (const [path, unavailable] of [
+      ["/en/game.segments/_full.segment.rsc", "/en/game-unavailable"],
+      ["/fr/game.segments/_tree.segment.rsc", "/fr/game-unavailable"],
+      ["/en/aarrr-funnel-template.segments/_full.segment.rsc", "/en/engine-unavailable"],
+    ] as const) {
+      expect(rewriteOf(await proxy(request(path))), path).toBe(`https://tourdegrowth.com${unavailable}`);
     }
   });
 });

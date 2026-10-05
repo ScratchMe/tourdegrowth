@@ -8,7 +8,8 @@ import { expect, test } from "./helpers";
  * `/%61dmin/stats` reached the admin routes without the Basic Auth (a 500
  * stopped it, not the gate).
  *
- * Against the real router, which the unit tests cannot be: the engine is
+ * Against the real router, which the unit tests cannot be (they hold every
+ * path read back from production, Vercel's router included): the engine is
  * closed on the server these specs run against (`ENGINE_ENABLED` unset, as in
  * `engine-flag.spec.ts`), and `/admin` fails closed with or without
  * `ADMIN_DASHBOARD_PASSWORD`. The game is open in CI, so its closed side is
@@ -18,10 +19,21 @@ import { expect, test } from "./helpers";
 const get = (request: import("@playwright/test").APIRequestContext, path: string) =>
   request.get(path, { maxRedirects: 0, failOnStatusCode: false });
 
-test("the closed engine is a 404 under any encoding the router reads as its page", async ({ request }) => {
-  for (const path of ["/en/a%61rrr-funnel-template", "/%66r/aarrr-funnel-template", "/fr%2Faarrr-funnel-template"]) {
-    expect((await get(request, path)).status(), path).toBe(404);
-  }
+test("the closed engine is a 404 when its language is encoded — the segment next start decodes", async ({ request }) => {
+  // Under `next start`, only the dynamic `[locale]` segment is decoded: this
+  // path served the closed engine before the fix. Vercel decodes every
+  // segment, which `proxy.test.ts` holds.
+  expect((await get(request, "/%66r/aarrr-funnel-template")).status()).toBe(404);
+});
+
+test("the closed engine's RSC payload, beside its page, is a 404 too", async ({ request }) => {
+  expect((await get(request, "/en/aarrr-funnel-template.segments/_full.segment.rsc")).status()).toBe(404);
+});
+
+test("an encoded legacy address never redirects off the site", async ({ request }) => {
+  const res = await get(request, "/glossary/..%2F..%2F%2Fevil.com");
+  expect(res.status()).toBe(400);
+  expect(res.headers()["location"]).toBeUndefined();
 });
 
 test("/admin asks for the password under any encoding, never reaching the page", async ({ request }) => {

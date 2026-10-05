@@ -48,10 +48,12 @@ export function resolveEngineAccess({
  * (`/aarrr-funnel-template/opengraph-image/<locale>`, design brief 06), which
  * must 404 with the page while the engine is closed, as the game's images do
  * (`isGamePath`). Any other address under it is a 404 anyway (`dynamicParams`
- * is off under `[locale]`).
+ * is off under `[locale]`). And the files the build writes beside the page,
+ * `/aarrr-funnel-template.segments/…` (its RSC payload): Vercel served them
+ * for the closed engine until 2026-10-05, as it did the game's.
  */
 export function isEnginePath(rest: string): boolean {
-  return rest === ENGINE_PATH || rest.startsWith(`${ENGINE_PATH}/`);
+  return rest === ENGINE_PATH || rest.startsWith(`${ENGINE_PATH}/`) || rest.startsWith(`${ENGINE_PATH}.`);
 }
 
 /** The raw env value, read at call time (the proxy calls it per request). */

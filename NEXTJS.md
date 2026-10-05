@@ -94,10 +94,25 @@ une route. Une garde qui compare le chemin brut (`startsWith("/admin")`,
   `/%66r/aarrr-funnel-template` y répondait 200, mais `/%61dmin/stats` 404.
 
 Une recette locale ne voit donc qu'une partie de la faille. Les deux ne
-décodent qu'**une fois** : `%2565` reste `%65` et ne sert rien. La règle :
-décoder le chemin une fois (`decodeURIComponent`), refuser en 400 celui qui ne
-se décode pas, et ne faire lire que ce chemin à toutes les gardes (`gatePath`
-dans `src/proxy.ts`).
+décodent qu'**une fois** : `%2565` reste `%65` et ne sert rien.
+
+**La règle** (`gatePath` dans `src/proxy.ts`) :
+- décoder le chemin une fois (`decodeURIComponent`) ;
+- refuser en 400 celui qui ne se décode pas, ou qui se décode en un chemin non
+  canonique : un segment vide (`//`), `.` ou `..`, une barre oblique inverse,
+  un caractère de contrôle, un `%` resté d'un double encodage. Vercel servait
+  le jeu fermé pour `/en%2F%2Fgame/retention`, puisqu'il normalise après le
+  proxy. Et une redirection construite depuis le chemin décodé, sans cette
+  règle, partait hors du site (`/glossary/..%2F..%2F%2Fevil.com` : le setter
+  de `URL.pathname` résout les `..`) ;
+- ne faire lire que ce chemin à toutes les gardes, et construire une
+  redirection depuis le chemin brut.
+
+**Une garde par préfixe doit couvrir les fichiers frères de la page.** Le
+build écrit `/en/game.segments/_full.segment.rsc` à côté de `/en/game`, et
+Vercel le sert : la charge RSC entière d'une page fermée. `isGamePath` et
+`isEnginePath` reconnaissent donc aussi `/game.` et
+`/aarrr-funnel-template.` (trouvé le 2026-10-05, même relecture).
 
 ### 1.2 Layouts racine : la frontière la plus chère du framework
 

@@ -88,15 +88,26 @@ export function isResultReadPath(pathname: string): boolean {
  * the Basic Auth (they only failed on a 500). Decoding exactly once, like the
  * router: `%2565` stays `%65`, which the router does not read as `e` either.
  *
- * `null` when the path does not decode (a malformed escape): the proxy refuses
- * the request before any check, rather than guess how the router would read it.
+ * `null`, and the proxy answers 400 before any check, when the path does not
+ * decode (a malformed escape) or decodes to a path that is not canonical: an
+ * empty segment (`//`), a `.` or `..` segment, a backslash, a control
+ * character, or a `%` left over from a double encoding. Each is a path a
+ * router may still rewrite after the proxy has judged it: Vercel served the
+ * closed game for `/en%2F%2Fgame/retention`, and the 308 below, built from
+ * `/glossary/..%2F..%2F%2Fevil.com`, would have sent the reader off the site
+ * (the security review of this fix, before it shipped). No page of the site
+ * has one in its address.
  */
 export function gatePath(pathname: string): string | null {
+  let decoded: string;
   try {
-    return decodeURIComponent(pathname);
+    decoded = decodeURIComponent(pathname);
   } catch {
     return null;
   }
+  if (/[\\%\u0000-\u001f\u007f]/.test(decoded)) return null;
+  if (decoded.includes("//") || /(^|\/)\.{1,2}(\/|$)/.test(decoded)) return null;
+  return decoded;
 }
 
 /**
@@ -252,7 +263,10 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
   // and Google has already treated them that way since R-13.
   if (!fromUrl && isLocalizableContentPath(pathname)) {
     const target = request.nextUrl.clone();
-    target.pathname = localePath(locale, pathname);
+    // Judged on the decoded path, built from the raw one, which the URL
+    // parser has already normalized: nothing the setter could resolve
+    // differently (security review of `gatePath`, 2026-10-05).
+    target.pathname = localePath(locale, request.nextUrl.pathname);
     const redirect = NextResponse.redirect(target, pathname === "/" ? 307 : 308);
     // Where it lands depends on the browser's language (absent `?lang=` or
     // a cookie): say so, for Google and for any cache on the way.

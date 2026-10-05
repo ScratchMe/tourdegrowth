@@ -545,7 +545,16 @@ le jeu fermé, `/en/a%61rrr-funnel-template` le moteur fermé, et
 `/%61dmin/stats` passait la Basic Auth (un 500 l'arrêtait, sans donnée).
 **Corrigé** (PR de ce jour, `gatePath` dans `src/proxy.ts`) : le chemin est
 décodé une fois avant toutes les gardes, et refusé en 400 s'il ne se décode
-pas. La leçon portable est dans `NEXTJS.md` §1.1.
+pas ou ne se décode pas en un chemin canonique. La relecture sécurité du
+correctif a trouvé, avant sa livraison, une redirection ouverte qu'il
+ouvrait, et deux autres trous en production : `/en%2F%2Fgame/retention` et
+la charge RSC des pages fermées (`/en/game.segments/_full.segment.rsc`,
+`/en/aarrr-funnel-template.segments/…`). Les trois sont fermés dans la même
+PR. La leçon portable est dans `NEXTJS.md` §1.1.
+
+| # | Quoi | Qui | État |
+|---|---|---|---|
+| A26.b | **La défense en profondeur de `/admin`** (relecture sécurité, non bloquant, antérieur) : les pages et la route JSON de `/admin` font entièrement confiance au proxy, et le moindre désaccord entre le proxy et le routeur expose les chiffres Firestore. Vérifier aussi `isAuthorizedForAdmin` côté serveur, dans un `admin/layout.tsx` et dans `admin/stats/json/route.ts` | Session | À faire |
 
 ---
 
