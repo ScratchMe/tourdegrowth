@@ -40,6 +40,9 @@ test.beforeEach(async ({ context }) => {
  * boundary, the two stored-engine tests fall; without the « illisible »
  * screen's file and engines (`undrawn`), the last falls alone. Without the
  * probation, or without the panel's boundary, nothing here falls, as said.
+ * After the security review's second pass: with the device's own engine
+ * allowed to accuse a file, « Remplacer … repairs it » falls alone; without
+ * the cap at `MAX_MONTHS`, « more months than an engine holds » falls alone.
  */
 const POISON = { status: "conflicting", conflict: {}, updatedAt: "2026-09-30T10:00:00.000Z" } as unknown as MetricEntry;
 const CLOCK = new Date(2026, 8, 24, 12);

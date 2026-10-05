@@ -426,6 +426,12 @@ Elle confirme aussi deux points :
 - aucune autre clé de l'appareil n'est touchée ;
 - un autre onglet ne peut pas écrire entre la copie et la remise en place, qui ont lieu dans la même tâche.
 
+**Sa contre-relecture des corrections** confirme 1 à 4 fermés, et en ouvre quatre de plus, faibles à moyens, tous corrigés :
+- **A.** Ouvrir un second moteur piégé depuis l'écran « illisible » épuisait le budget de replis : la page « détour » revenait, et « Réessayer » restait bloqué, puisque les variables de module survivent. Le budget revient maintenant à chaque action de la personne : écriture, changement de moteur, suppression, « Tout effacer ». Aucun effet de l'îlot n'écrit (53 fichiers, 11 effets parcourus), donc une boucle ne peut pas le remettre à zéro.
+- **B.** Un moteur d'appareil qui ne se dessine pas lui-même (un mois passé, stocké avant A25.b) faisait refuser tout fichier par la fusion, y compris « Remplacer » par sa propre sauvegarde, qui est justement la réparation. Seul un moteur qui se dessine peut maintenant accuser un fichier.
+- **C.** Le coût du contrôle n'avait pas de borne : `parseEngineFile` ne refuse pas plus de 36 mois, il le signale seulement. Un fichier de plus de `MAX_MONTHS` mois est maintenant refusé à la lecture : aucun build n'en écrit autant.
+- **D.** Une remise en place ratée perdait le moteur qu'un « Remplacer » avait écrasé. L'écran « illisible » l'offre maintenant depuis la mémoire. Et `restoreDevice` ne réécrit plus une clé inchangée : un appareil qui refuse les écritures « échouait » sinon une remise en place dont il n'avait pas besoin.
+
 **Ce qui reste, sciemment** :
 - Un brouillon de fiche, déjà effacé par l'import (`dropAllDrafts`), ne revient pas après un retour arrière.
 - Un mois ajouté par la fusion n'est pas filtré à `KNOWN_METRICS` (`merge.ts`, antérieur, A14 T5). Le contrôle à la lecture en rend la conséquence inoffensive.
@@ -433,7 +439,7 @@ Elle confirme aussi deux points :
 - Le texte de l'écran « illisible » reste générique (« Les données … sont illisibles »). Une phrase propre au moteur qui lève pourra venir au prochain bon à tirer.
 
 **Les tests** :
-- `e2e/engine-fallback.spec.ts`, 6 specs : un fichier refusé à la lecture sur un appareil vide (en français) et à côté d'un moteur ; le mai fusionné de la relecture ; une fusion qui lève alors que le fichier se lit seul ; le moteur stocké, dans les deux langues ; l'écran de repli, son fichier téléchargé et son autre moteur ouvert.
+- `e2e/engine-fallback.spec.ts`, 8 specs : un fichier refusé à la lecture sur un appareil vide (en français) et à côté d'un moteur ; le mai fusionné de la relecture ; une fusion qui lève alors que le fichier se lit seul ; « Remplacer » qui répare un appareil dont le propre moteur a un mois piégé (B) ; un fichier de 37 mois (C) ; le moteur stocké, dans les deux langues ; l'écran de repli, son fichier téléchargé et son autre moteur ouvert.
 - **Non-vacuité, un build par sabotage** :
 
   | Sabotage | Specs qui tombent |
@@ -444,14 +450,19 @@ Elle confirme aussi deux points :
   | Sans `undrawn` | la dernière |
   | Sans la période d'essai | aucune, comme écrit en tête du fichier |
   | Sans le filet du panneau | aucune, comme écrit en tête du fichier |
+  | Le moteur de l'appareil peut accuser le fichier (B) | celle de « Remplacer » seule |
+  | Sans le plafond de 36 mois (C) | celle des 37 mois seule |
 
   **Un sabotage n'a pas compilé** : il ne prouvait donc rien (`TESTING.md` §1.3). Il a été refait.
-- `_engine/__tests__/engine-store.test.ts`, 18 tests sur le store. Treize sabotages, chacun fait tomber au moins un test, et les comptes sont en tête du fichier.
+- `_engine/__tests__/engine-store.test.ts`, 20 tests sur le store. Seize sabotages, remesurés sur la version finale : chacun fait tomber au moins un test, et les comptes sont en tête du fichier.
 - **Un test a d'abord échoué à cause du plafond lui-même** : sa boucle appelait `fallBack` quatre fois dans la même visite. Le test a été découpé.
 
 **Vérifié, sorties réelles** :
 - `eslint` et `tsc` propres.
-- `vitest run --coverage` : **3 757 sur 3 757** (+18), seuils tenus.
+- `vitest run --coverage` : **3 759 sur 3 759** (+20), seuils tenus.
 - Build comme la CI.
-- Playwright, suite complète avec `CI=1` et sans l'émulateur Firestore, sur le premier jet : **987 passées, 50 sautées, 0 échec** sur 1 037. Sur la version finale : voir la PR.
+- Playwright, suite complète avec `CI=1` et sans l'émulateur Firestore :
+  - sur le premier jet : **987 passées, 50 sautées, 0 échec**, sur 1 037 ;
+  - sur la version d'avant la contre-relecture : **986 passées, 50 sautées, 0 échec**, sur 1 036 ;
+  - après A à D : les 54 specs du moteur passées (`engine-fallback`, `engine-engines`, `engine-migration`, `engine-collect`), sur 1 038 au total. La suite complète, émulateur compris, est celle de la CI.
 - **À l'écran, à 390 px** : l'écran « illisible » en français, puis avec ses trois boutons et l'autre moteur ; le refus après un import en anglais.
