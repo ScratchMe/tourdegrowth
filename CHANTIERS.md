@@ -466,7 +466,7 @@ d'après A22), MKT-1, MKT-4, MKT-6, MKT-7b (le tableau), MKT-8 et MKT-10.
 | MKT-S | les mots « services » : trois calques et le catalogue | MKT-5 | ☐ |
 | MKT-G | trois termes de glossaire (texte écrit d'abord par l'orchestrateur, `docs/engine/glossaire-mkt.md`) | MKT-1 | ☐ |
 | MKT-6 | la carte de départ, le réglage, les cibles, les Réglages, l'analytique | MKT-4, MKT-5 | ☐ |
-| — | **le retour du brief 10**, recopié, ses questions posées et tranchées, puis les fiches MKT-7a, MKT-7b et MKT-8 écrites (PR de documentation) | MKT-B, Antoine | ☑ 2026-10-05 ([#344](https://github.com/ScratchMe/tourdegrowth/pull/344), puis les fiches) |
+| — | **le retour du brief 10**, recopié, ses questions posées et tranchées, puis les fiches MKT-7a, MKT-7b et MKT-8 écrites (PR de documentation) | MKT-B, Antoine | ☑ 2026-10-05 ([#344](https://github.com/ScratchMe/tourdegrowth/pull/344), puis les fiches : [#346](https://github.com/ScratchMe/tourdegrowth/pull/346)) |
 | MKT-7a | les composants du retour 10 : `SideShown`, `SideFunnel`, `SideNote`, les deltas de `MrrCurve` et `NumberList`, les jetons | MKT-R | ☐ |
 | MKT-7b | le tableau : le total, le prochain pas partagé, le sélecteur, le côté affiché, la liste commune ; la barrière levée | MKT-6, MKT-S, MKT-7a | ☐ |
 | MKT-8 | les slides : le total en registre, les quatre slides de chaque côté | MKT-7b | ☐ |
