@@ -23,7 +23,10 @@ import { fullState, toV1 } from "./storage-fixtures";
  * Each piece of the check fails its own: the length 2, `referenceMonth` 5,
  * `cohortMonth` 3, `metrics` 3, `targets` 3, a list taken for an object 2,
  * and the type check before the pattern 1 (a list reads as its text in a
- * pattern, so only `referenceMonth: ["2026-08"]` sees it).
+ * pattern, so only `referenceMonth: ["2026-08"]` sees it). The year bound,
+ * added after the security review: without its floor 2 fall, without its
+ * ceiling 1, without both 3; tightened by a year, "the years the bound keeps
+ * open" falls alone.
  */
 
 /** The same state with its keys inserted in reverse order, deep. */
@@ -197,6 +200,10 @@ describe("a month the screens cannot read is refused (A25)", () => {
     ["with its month as a list", { ...month(), referenceMonth: ["2026-08"] }],
     ["without its cohort month", without("cohortMonth")],
     ["with a cohort month that is not YYYY-MM", { ...month(), cohortMonth: "2026-13" }],
+    // The pattern takes these years; the board's month arithmetic does not (relecture sécurité d'A25, 2026-10-05).
+    ["in year 0000", { ...month(), referenceMonth: "0000-01" }],
+    ["in year 9999", { ...month(), referenceMonth: "9999-12" }],
+    ["with its cohort in year 0000", { ...month(), cohortMonth: "0000-01" }],
   ])("a month %s is refused", (_, broken) => {
     expect(parseEngineFile(withMonths([broken]))).toEqual(REFUSED);
   });
@@ -213,6 +220,12 @@ describe("a month the screens cannot read is refused (A25)", () => {
     expect(parseEngineFile(withMonths([], toV1(fullState())))).toEqual(REFUSED);
     expect(parseEngineFile(withMonths([{}], toV1(fullState())))).toEqual(REFUSED);
     expect(parseEngineFile(withMonths([], { ...JSON.parse(serializeEngine(fullState())), schemaVersion: 2 }))).toEqual(REFUSED);
+  });
+
+  it("the years the bound keeps open: 1970 and 2999, at both ends of the month arithmetic", () => {
+    for (const [referenceMonth, cohortMonth] of [["1970-02", "1970-01"], ["2999-12", "2999-11"]]) {
+      expect(parseEngineFile(withMonths([{ ...month(), referenceMonth, cohortMonth }])).refusal, referenceMonth).toBeUndefined();
+    }
   });
 
   it("everything else a month holds opens WITH its warnings: the screens show it, so the file is not refused", () => {

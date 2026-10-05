@@ -95,12 +95,22 @@ export function parseEngineFile(text: string): ParsedEngineFile {
 
 type Obj = Record<string, unknown>;
 const isObj = (v: unknown): v is Obj => typeof v === "object" && v !== null && !Array.isArray(v);
-const isYearMonth = (v: unknown): boolean => typeof v === "string" && YEAR_MONTH_PATTERN.test(v);
+/**
+ * `YYYY-MM` with a year from 1970 to 2999. The pattern alone takes 0000 and
+ * 9999, where the month arithmetic (`cohort.ts`) leaves four digits and
+ * throws on the board, and `Date.UTC` reads 0000 to 0099 as the 1900s. Every
+ * month the engine writes comes from today's clock.
+ */
+const isYearMonth = (v: unknown): boolean => {
+  if (typeof v !== "string" || !YEAR_MONTH_PATTERN.test(v)) return false;
+  const year = Number(v.slice(0, 4));
+  return year >= 1970 && year <= 2999;
+};
 
 /**
  * At least one month, and every month with what the screens read before
  * anything else (A25): its two months, `referenceMonth` and `cohortMonth`,
- * as `YYYY-MM`, and its `metrics` and `targets` as objects (not lists: the
+ * as `YYYY-MM` (`isYearMonth`), and its `metrics` and `targets` as objects (not lists: the
  * validator already calls a list missing). Without one of them, the import's
  * preview or the board throws, and a state already stored throws at every
  * visit. Measured in a browser on 2026-10-05, field by field: everything
