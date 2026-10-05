@@ -31,6 +31,8 @@ export const SHARED_COUNTS: Readonly<Record<SharedCount, readonly SharedSlot[]>>
   monthSignups: [
     { metric: "acq.signup-rate", side: "numerator" },
     { metric: "acq.top-channel-share", side: "denominator" },
+    // §21: an app's installs of the month are its cost per install's base.
+    { metric: "app.acq.cpi", side: "denominator" },
   ],
   // Antoine, 2026-09-26: « dans marge brute, pourquoi on ne reprend pas le MRR
   // donné au chiffre précédent ? » — the gross margin is read on the month's
@@ -61,10 +63,15 @@ export const SHARED_COUNTS: Readonly<Record<SharedCount, readonly SharedSlot[]>>
     { metric: "slg.rev.arpa", side: "denominator" },
     { metric: "slg.ref.referenceable", side: "denominator" },
   ],
+  // §21: the month's actives, the two per-active revenues' base (C92).
+  appActives: [
+    { metric: "app.rev.purchases-per-active", side: "denominator" },
+    { metric: "app.rev.ads-per-active", side: "denominator" },
+  ],
 };
 
 /** Counts of people, deals or opportunities: whole numbers. The MRRs are amounts and may carry cents. */
-export const WHOLE_SHARED_COUNTS: readonly SharedCount[] = ["cohortSignups", "monthSignups", "slgOppsCreated", "slgDealsWon", "slgCustomers"];
+export const WHOLE_SHARED_COUNTS: readonly SharedCount[] = ["cohortSignups", "monthSignups", "slgOppsCreated", "slgDealsWon", "slgCustomers", "appActives"];
 
 export const SHARED_COUNT_IDS = Object.keys(SHARED_COUNTS) as SharedCount[];
 
@@ -74,6 +81,18 @@ export function sharedCountAt(metric: MetricId, side: SharedSlot["side"]): Share
     if (SHARED_COUNTS[count].some((slot) => slot.metric === metric && slot.side === side)) return count;
   }
   return null;
+}
+
+/**
+ * The other numbers sharing `id`'s count on `side`, among the ones the view can name (§21.2.4): the places of its
+ * group, `id` left out, kept when `named` has them, in `SHARED_COUNTS`' order. Empty for a side with no group. A
+ * SaaS view names every place of its groups (the link included) but the app's: `monthSignups` carries
+ * `app.acq.cpi`, which its props do not.
+ */
+export function sharedWith(id: MetricId, side: SharedSlot["side"], named: ReadonlySet<MetricId>): MetricId[] {
+  const count = sharedCountAt(id, side);
+  if (!count) return [];
+  return SHARED_COUNTS[count].map((slot) => slot.metric).filter((m) => m !== id && named.has(m));
 }
 
 function countIn(entry: MetricEntry | undefined, side: SharedSlot["side"]): number | null {

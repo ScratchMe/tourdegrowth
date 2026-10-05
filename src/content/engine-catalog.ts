@@ -5,8 +5,9 @@ import type { DerivedId, MetricId, SourceRef } from "@/lib/engine/types";
 /**
  * engine-catalog.ts — the PROSE of the growth engine's numbers and computed
  * figures (engine spec §5, §14.13): self-serve's seventeen and five,
- * sales-assisted's fifteen and three, and the hybrid's link (§18.4, A7.3.c
- * S2). Both records are keyed by every id the types know, so a number
+ * sales-assisted's fifteen and three, the hybrid's link (§18.4, A7.3.c
+ * S2), and the consumer app's six and four (§21.4.4, A22 APP-1). Both
+ * records are keyed by every id the types know, so a number
  * without its prose does not compile. Server only: the page
  * resolves it to one language with `resolveTree` and hands the island plain
  * strings, so neither language's catalogue ever ships to the browser. The
@@ -85,7 +86,7 @@ export interface EngineDerivedEntry {
 const tool = (t: Extract<SourceRef, { kind: "tool" }>["tool"]): SourceRef => ({ kind: "tool", tool: t });
 const role = (r: Extract<SourceRef, { kind: "person" }>["role"]): SourceRef => ({ kind: "person", role: r });
 
-/** The prose of every number: self-serve's seventeen, sales-assisted's fifteen (A7.3.c S2), and the link. */
+/** The prose of every number: self-serve's seventeen, sales-assisted's fifteen (A7.3.c S2), the link, and the consumer app's six. */
 export const ENGINE_CATALOG: Record<MetricId, EngineCatalogEntry> = {
   // --- Acquisition -----------------------------------------------------------
   "acq.signup-rate": {
@@ -1170,6 +1171,300 @@ export const ENGINE_CATALOG: Record<MetricId, EngineCatalogEntry> = {
     request: { fr: "les opportunités assistées créées {period}, et combien venaient d'un compte du libre-service qualifié, un PQL", en: "the sales-assisted opportunities created {period}, and how many came from a qualified self-serve account, a PQL" },
     noReferenceReason: { fr: "la seule référence qui vaille est le taux de base de l'équipe", en: "the only reference worth having is the team's own base rate" },
   },
+
+  // --- Consumer app (§21) ---------------------------------------------------
+  // TODO: à relire — copie neuve (convention 6), §21 (A22)
+  "app.acq.cpi": {
+    name: { fr: "Coût par installation", en: "Cost per install" },
+    oneLiner: {
+      fr: "Ce que coûte, en moyenne, une installation de ton app.",
+      en: "What one install of your app costs, on average.",
+    },
+    formula: {
+      fr: "dépense d'acquisition du mois ÷ installations du mois, organiques comprises",
+      en: "acquisition spend in the month ÷ installs in the month, organic included",
+    },
+    inputs: {
+      numerator: { fr: "Dépense pour les installations en {month}", en: "Spend on installs in {month}" },
+      denominator: { fr: "Installations en {month}", en: "Installs in {month}" },
+    },
+    where: [
+      {
+        source: tool("appsflyer"),
+        label: { fr: "AppsFlyer ou Adjust", en: "AppsFlyer or Adjust" },
+        path: {
+          fr: "le tableau de bord Overview : le coût du mois et les installations, toutes sources",
+          en: "the Overview dashboard: the month's cost and installs, all sources",
+        },
+      },
+      {
+        source: tool("google-ads"),
+        label: { fr: "Apple Search Ads, Google Ads, Meta Ads Manager", en: "Apple Search Ads, Google Ads, Meta Ads Manager" },
+        path: {
+          fr: "le montant dépensé en {month}, toutes campagnes confondues",
+          en: "the amount spent in {month}, all campaigns together",
+        },
+      },
+      {
+        source: role("finance"),
+        label: { fr: "Finance", en: "Finance" },
+        path: {
+          fr: "les salaires et les outils des équipes marketing et ventes, pour les variantes « + équipe » et « tout chargé »",
+          en: "marketing and sales salaries and tools, for the \"+ team\" and \"fully loaded\" variants",
+        },
+      },
+    ],
+    trap: {
+      fr: "Divise par toutes les installations du mois, organiques comprises. Le CPI d'une régie ne divise que par les installations qu'elle s'attribue : il paraît plus cher.",
+      en: "Divide by every install in the month, organic included. An ad network's CPI only divides by the installs it claims: it looks dearer.",
+    },
+    request: {
+      fr: "la dépense d'acquisition en {month} ({variant}) et le nombre d'installations du même mois, toutes sources",
+      en: "the acquisition spend in {month} ({variant}) and the number of installs that same month, all sources",
+    },
+    noReferenceReason: {
+      fr: "un coût par installation se juge contre ce qu'une installation rapporte, pas contre celui des autres apps",
+      en: "a cost per install is judged against what an install brings in, not against other apps'",
+    },
+    variants: [
+      { id: "media-only", label: { fr: "Média seul", en: "Media only" } },
+      { id: "plus-team", label: { fr: "+ équipe marketing", en: "+ marketing team" } },
+      { id: "fully-loaded", label: { fr: "Tout chargé", en: "Fully loaded" } },
+    ],
+  },
+  "app.ret.active-retention": {
+    name: { fr: "Rétention mensuelle des actifs", en: "Monthly active retention" },
+    oneLiner: {
+      fr: "La part des actifs du mois d'avant encore actifs ce mois-ci.",
+      en: "The share of last month's actives still active this month.",
+    },
+    formula: {
+      fr: "actifs du mois déjà actifs le mois d'avant ÷ actifs du mois d'avant",
+      en: "actives this month who were already active the month before ÷ actives the month before",
+    },
+    inputs: {
+      numerator: { fr: "Actifs en {month}, déjà actifs avant", en: "Actives in {month}, already active before" },
+      denominator: { fr: "Actifs le mois d'avant", en: "Actives the month before" },
+    },
+    where: [
+      {
+        source: tool("amplitude"),
+        label: { fr: "Amplitude ou Mixpanel", en: "Amplitude or Mixpanel" },
+        path: {
+          fr: "un graphique de rétention au mois : les actifs d'un mois, revenus le mois suivant",
+          en: "a monthly retention chart: one month's actives who came back the next month",
+        },
+      },
+      {
+        source: tool("ga4"),
+        label: { fr: "GA4 (Firebase)", en: "GA4 (Firebase)" },
+        path: {
+          fr: "pas de rétention d'un mois sur l'autre dans les rapports standards : à demander à la data, depuis l'export des événements",
+          en: "no month-over-month retention in the standard reports: ask the data team, from the event export",
+        },
+      },
+    ],
+    trap: {
+      fr: "Compte les mêmes personnes d'un mois sur l'autre, pas deux totaux d'actifs : deux mois à 15 000 actifs ne font pas 100 % si 3 000 sont nouveaux.",
+      en: "Count the same people from one month to the next, not two totals of actives: two months at 15,000 actives aren't 100% if 3,000 are new.",
+    },
+    request: {
+      fr: "le nombre d'actifs le mois d'avant {month}, et combien d'entre eux ont encore été actifs en {month}",
+      en: "the number of actives the month before {month}, and how many of them were still active in {month}",
+    },
+    noReferenceReason: {
+      fr: "elle dépend du rythme d'usage que l'app vise, chaque jour ou chaque semaine ; suis-la contre ta propre cible",
+      en: "it depends on how often the app is meant to be used, daily or weekly; follow it against your own target",
+    },
+  },
+  "app.rev.purchases-per-active": {
+    name: { fr: "Achats par actif", en: "Purchases per active" },
+    oneLiner: {
+      fr: "Ce que les achats intégrés rapportent, par actif et par mois.",
+      en: "What in-app purchases bring in, per active and per month.",
+    },
+    formula: {
+      fr: "revenu des achats intégrés du mois, avant commission ÷ actifs du mois",
+      en: "in-app purchase revenue in the month, before commission ÷ actives in the month",
+    },
+    inputs: {
+      numerator: { fr: "Revenu des achats en {month}", en: "Purchase revenue in {month}" },
+      denominator: { fr: "Actifs en {month}", en: "Actives in {month}" },
+    },
+    where: [
+      {
+        source: tool("app-store-connect"),
+        label: { fr: "App Store Connect", en: "App Store Connect" },
+        path: {
+          fr: "Sales and Trends : Sales moins Subscription Sales, sur le mois — les achats qui ne sont pas des abonnements",
+          en: "Sales and Trends: Sales minus Subscription Sales over the month — the purchases that aren't subscriptions",
+        },
+      },
+      {
+        source: tool("play-console"),
+        label: { fr: "Google Play Console", en: "Google Play Console" },
+        path: {
+          fr: "le rapport des revenus (Earnings) : les ventes du mois au type de produit « One-time product »",
+          en: "the Earnings report: the month's charges with product type \"One-time product\"",
+        },
+      },
+      {
+        source: tool("revenuecat"),
+        label: { fr: "RevenueCat", en: "RevenueCat" },
+        path: {
+          fr: "le graphique Revenue du mois, vue Revenue (net of taxes), sans les abonnements",
+          en: "the month's Revenue chart, Revenue (net of taxes) view, subscriptions left out",
+        },
+      },
+    ],
+    trap: {
+      fr: "Divise par tous les actifs du mois, payeurs ou non, abonnés compris : c'est ce qui l'additionne aux abonnements sans double compte. Et prends le revenu avant commission.",
+      en: "Divide by every active in the month, paying or not, subscribers included: that is what lets it add to subscriptions without double counting. And take revenue before commission.",
+    },
+    request: {
+      fr: "le revenu des achats intégrés en {month}, avant commission des stores, et le nombre d'actifs du même mois",
+      en: "the in-app purchase revenue in {month}, before the stores' commission, and the number of actives that same month",
+    },
+    noReferenceReason: {
+      fr: "ce qu'un actif dépense dépend de la catégorie et du prix des achats ; compare-toi à toi-même",
+      en: "what an active spends depends on the category and on purchase prices; compare with yourself",
+    },
+  },
+  "app.rev.ads-per-active": {
+    name: { fr: "Publicité par actif", en: "Ads per active" },
+    oneLiner: {
+      fr: "Ce que la publicité rapporte, par actif et par mois.",
+      en: "What ads bring in, per active and per month.",
+    },
+    formula: {
+      fr: "revenu publicitaire versé par les régies pour le mois ÷ actifs du mois",
+      en: "ad revenue paid by the networks for the month ÷ actives in the month",
+    },
+    inputs: {
+      numerator: { fr: "Revenu publicitaire en {month}", en: "Ad revenue in {month}" },
+      denominator: { fr: "Actifs en {month}", en: "Actives in {month}" },
+    },
+    where: [
+      {
+        source: role("finance"),
+        label: { fr: "Finance", en: "Finance" },
+        path: {
+          fr: "les relevés des régies pour le mois (AdMob, AppLovin, ironSource…) : ce qu'elles te versent",
+          en: "the networks' statements for the month (AdMob, AppLovin, ironSource…): what they pay you",
+        },
+      },
+      {
+        source: tool("spreadsheet"),
+        label: { fr: "Ton suivi des revenus", en: "Your revenue tracking" },
+        path: {
+          fr: "le revenu publicitaire du mois, et les actifs du mois depuis ton outil d'analytics",
+          en: "the month's ad revenue, and the month's actives from your analytics tool",
+        },
+      },
+    ],
+    trap: {
+      fr: "Prends ce que les régies te versent, pas ce que les annonceurs paient : la régie garde sa part avant. Et divise par tous les actifs du mois, comme pour les achats.",
+      en: "Take what the networks pay you, not what advertisers pay: the network keeps its share first. And divide by every active in the month, as for purchases.",
+    },
+    request: {
+      fr: "le revenu publicitaire versé par les régies pour {month}, et le nombre d'actifs du même mois",
+      en: "the ad revenue the networks paid for {month}, and the number of actives that same month",
+    },
+    noReferenceReason: {
+      fr: "il dépend du pays, du format et du temps passé dans l'app ; suis-le contre ta propre cible",
+      en: "it depends on the country, the format and the time spent in the app; follow it against your own target",
+    },
+  },
+  "app.rev.commission": {
+    name: { fr: "Commission des stores", en: "Store commission" },
+    oneLiner: {
+      fr: "La part de ce que les stores encaissent pour toi qu'ils gardent.",
+      en: "The share of what the stores collect for you that they keep.",
+    },
+    formula: {
+      fr: "commission gardée par l'App Store et Google Play ÷ ce qu'ils ont encaissé (abonnements et achats, hors taxes)",
+      en: "commission kept by the App Store and Google Play ÷ what they collected (subscriptions and purchases, excluding tax)",
+    },
+    inputs: {
+      numerator: { fr: "Commission en {month}", en: "Commission in {month}" },
+      denominator: { fr: "Encaissé par les stores en {month}", en: "Collected by the stores in {month}" },
+    },
+    where: [
+      {
+        source: tool("revenuecat"),
+        label: { fr: "RevenueCat", en: "RevenueCat" },
+        path: {
+          fr: "le graphique Revenue du mois : l'écart entre la vue Revenue (net of taxes) et la vue Proceeds",
+          en: "the month's Revenue chart: the gap between the Revenue (net of taxes) and Proceeds views",
+        },
+      },
+      {
+        source: tool("play-console"),
+        label: { fr: "Google Play Console", en: "Google Play Console" },
+        path: {
+          fr: "le rapport des revenus (Earnings) : la somme des lignes « Google fee », divisée par celle des ventes",
+          en: "the Earnings report: the sum of the \"Google fee\" lines, divided by the charges",
+        },
+      },
+      {
+        source: tool("app-store-connect"),
+        label: { fr: "App Store Connect", en: "App Store Connect" },
+        path: {
+          fr: "Sales and Trends : Sales et Proceeds du mois ; Proceeds retire la commission et les taxes",
+          en: "Sales and Trends: the month's Sales and Proceeds; Proceeds takes off the commission and taxes",
+        },
+      },
+    ],
+    trap: {
+      fr: "Si tes ventes mélangent un taux réduit et le taux plein, ta moyenne est entre les deux. La publicité ne paie pas de commission : ne la mets pas au dénominateur.",
+      en: "If your sales mix a reduced rate and the full rate, your average sits between the two. Ads pay no commission: keep them out of the denominator.",
+    },
+    request: {
+      fr: "la commission gardée par les stores en {month}, et ce qu'ils ont encaissé ce mois-là, abonnements et achats, hors taxes",
+      en: "the commission the stores kept in {month}, and what they collected that month, subscriptions and purchases, excluding tax",
+    },
+    noReferenceReason: {
+      fr: "les taux des stores sont fixés par leurs règles, pas par un marché : vérifie le tien dans tes relevés",
+      en: "the stores' rates are set by their rules, not by a market: check yours in your statements",
+    },
+  },
+  "app.rev.gross-margin": {
+    name: { fr: "Marge brute, après commission", en: "Gross margin, after commission" },
+    oneLiner: {
+      fr: "Ce qu'il te reste d'un euro encaissé, commission déduite, après le coût de servir tes utilisateurs.",
+      en: "What is left of each euro you receive, commission deducted, after the cost of serving your users.",
+    },
+    formula: {
+      fr: "(revenu après commission – coûts directs : serveurs, contenus, frais de paiement du web, support) ÷ revenu après commission",
+      en: "(revenue after commission – direct costs: servers, content, web payment fees, support) ÷ revenue after commission",
+    },
+    inputs: {
+      numerator: { fr: "Marge brute en {month}", en: "Gross margin in {month}" },
+      denominator: { fr: "Revenu après commission en {month}", en: "Revenue after commission in {month}" },
+    },
+    where: [
+      {
+        source: role("finance"),
+        label: { fr: "Finance", en: "Finance" },
+        path: {
+          fr: "le compte de résultat du dernier trimestre clos : le revenu net des commissions des stores, puis les coûts directs",
+          en: "the income statement of the last closed quarter: revenue net of the stores' commission, then the direct costs",
+        },
+      },
+    ],
+    trap: {
+      fr: "Ne déduis pas la commission une deuxième fois : elle a son propre chiffre, que le moteur applique aux abonnements et aux achats, jamais à la pub.",
+      en: "Don't deduct the commission twice: it has its own number, which the engine applies to subscriptions and purchases, never to ads.",
+    },
+    request: {
+      fr: "la marge brute du dernier trimestre clos, calculée sur le revenu après commission des stores, et ce que ses coûts directs comprennent",
+      en: "the gross margin of the last closed quarter, computed on revenue after the stores' commission, and what its direct costs include",
+    },
+    noReferenceReason: {
+      fr: "les repères de marge publiés portent sur le SaaS, sans commission de store ni coût de contenu",
+      en: "the published margin references are for SaaS, with no store commission or content cost",
+    },
+  },
 };
 
 export const ENGINE_DERIVED_CATALOG: Record<DerivedId, EngineDerivedEntry> = {
@@ -1247,5 +1542,43 @@ export const ENGINE_DERIVED_CATALOG: Record<DerivedId, EngineDerivedEntry> = {
     formula: { fr: "LTV assistée ÷ CAC assisté", en: "sales-assisted LTV ÷ sales-assisted CAC" },
     uncomputable: { fr: "incalculable — il manque {input}", en: "can't be computed — missing: {input}" },
     caveat: { fr: "un repère, pas une loi", en: "a rule of thumb, not a law" },
+  },
+  // --- Consumer app (§21) ---------------------------------------------------
+  // TODO: à relire — copie neuve (convention 6), §21 (A22)
+  "app.rev.install-value": {
+    name: { fr: "Valeur d'une installation sur 12 mois", en: "An install's 12-month value" },
+    formula: {
+      fr: "la marge qu'une installation apporte en 12 mois : sa part d'abonné, qui baisse avec le churn des abonnés, et sa part d'actif, qui baisse avec la rétention des actifs",
+      en: "the margin an install brings in 12 months: its share of a subscriber, falling with subscriber churn, and its share of an active, falling with active retention",
+    },
+    uncomputable: { fr: "incalculable — il manque {input}", en: "can't be computed — missing: {input}" },
+  },
+  "app.rev.install-ltv": {
+    name: { fr: "Valeur d'une installation sur 36 mois", en: "An install's 36-month value" },
+    formula: {
+      fr: "la même marge, comptée sur 36 mois au plus, le plafond du moteur",
+      en: "the same margin, counted over 36 months at most, the engine's cap",
+    },
+    uncomputable: { fr: "incalculable — il manque {input}", en: "can't be computed — missing: {input}" },
+    capNote: {
+      fr: "valeur plafonnée à 36 mois, comme la durée de vie d'un client du libre-service : au-delà, une installation ne se projette plus",
+      en: "value capped at 36 months, like a self-serve customer's lifetime: beyond that, an install is no longer projected",
+    },
+  },
+  "app.rev.install-payback": {
+    name: { fr: "Remboursement d'une installation", en: "Install payback" },
+    formula: {
+      fr: "les mois qu'il faut à cette marge, mois par mois, pour rembourser le coût par installation",
+      en: "the months this margin takes, month by month, to pay back the cost per install",
+    },
+    uncomputable: { fr: "incalculable — il manque {input}", en: "can't be computed — missing: {input}" },
+  },
+  "app.rev.value-to-cost": {
+    name: { fr: "Valeur sur 12 mois ÷ coût", en: "12-month value ÷ cost" },
+    formula: {
+      fr: "valeur d'une installation sur 12 mois ÷ coût par installation",
+      en: "an install's 12-month value ÷ cost per install",
+    },
+    uncomputable: { fr: "incalculable — il manque {input}", en: "can't be computed — missing: {input}" },
   },
 };

@@ -121,3 +121,37 @@ describe("coverage per motion, and the union", () => {
     expect(setupCoverage(slg.snapshots[0]!, slg.setup)).toEqual(motionCoverage(slg.snapshots[0]!, "slg"));
   });
 });
+
+// Engine spec §21.5.5, A22 APP-1: an app's self-serve column counts what the app shows. Non-vacuity, measured on
+// 2026-10-05: ignoring the `setup` argument (always the 17 self-serve numbers) fails the app's count line only (1 test):
+// the SaaS lines pass either way, as they must, and the setup-coverage line reads `shapesOf`, not this branch.
+describe("coverage of a consumer app (§21.5.5)", () => {
+  const empty = exampleState().snapshots[0]!;
+  const nothing: Snapshot = { ...empty, metrics: {} };
+  const app = (subscriptions: boolean, purchases: boolean, ads: boolean) => ({
+    type: "consumer-app" as const,
+    motions: { plg: true, slg: false },
+    monetization: { subscriptions, purchases, ads },
+  });
+
+  it("counts the numbers the app shows, not the seventeen: 21 with the three ways, 18 with subscriptions, 14 with ads", () => {
+    expect(motionCoverage(nothing, "plg", app(true, true, true)).denominator).toBe(21);
+    expect(motionCoverage(nothing, "plg", app(true, false, false)).denominator).toBe(18);
+    expect(motionCoverage(nothing, "plg", app(false, false, true)).denominator).toBe(14);
+  });
+
+  it("without a setup, or for a SaaS, self-serve is the seventeen and sales-assisted the fifteen — as before", () => {
+    expect(motionCoverage(nothing, "plg").denominator).toBe(17);
+    expect(motionCoverage(nothing, "plg", { type: "b2b-saas", motions: { plg: true, slg: true } }).denominator).toBe(17);
+    expect(motionCoverage(nothing, "slg").denominator).toBe(15);
+    expect(motionCoverage(nothing, "slg", app(true, true, true)).denominator).toBe(15);
+  });
+
+  it("the setup's coverage reads the same list, and a number the app does not show is never a hole", () => {
+    const setup = { ...exampleState().setup, ...app(false, true, true) };
+    expect(setupCoverage(nothing, setup).denominator).toBe(16);
+    // The logo churn is hidden without subscriptions: filling it moves nothing.
+    const withChurn: Snapshot = { ...nothing, metrics: { "ret.logo-churn": { status: "measured", value: { kind: "rate", percent: 3 }, updatedAt: at } as MetricEntry } };
+    expect(setupCoverage(withChurn, setup)).toEqual(setupCoverage(nothing, setup));
+  });
+});

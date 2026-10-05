@@ -252,6 +252,13 @@ describe("validateEngine — the v3 fields: the series, the tools, the pipeline,
     expect(validateEngine({ ...s, setup: { ...s.setup, tools: "hubspot" as never } })).toEqual(["setup.tools: not a list"]);
   });
 
+  // Non-vacuity, measured on 2026-10-05: taking `appsflyer` out of `TOOL_SET` fails this test alone (1) with « unknown
+  // tool » — and `tsc` too, since `TOOL_SET` is `satisfies Record<ToolId, true>`.
+  it("the tools an app reads — RevenueCat, AppsFlyer, Adjust — are known (§21.6.5, A22 APP-1)", () => {
+    const s = fullState();
+    expect(validateEngine({ ...s, setup: { ...s.setup, tools: ["revenuecat", "appsflyer", "adjust"] } })).toEqual([]);
+  });
+
   it("the pipeline: both numbers optional, both > 0 when there", () => {
     const s = fullState();
     for (const pipeline of [{}, { quarterTarget: 120000 }, { threshold: 2.5 }, { quarterTarget: 120000, threshold: 3 }])

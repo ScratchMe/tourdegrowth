@@ -20,7 +20,7 @@ const REPAIR_ORDER: readonly RepairScale[] = ["meeting", "afternoon", "sprint", 
 export function missingByRepairCost(state: EngineState): MetricId[] {
   const entries = currentSnapshot(state).metrics;
   // Both motions' numbers in the hybrid (§18.8.2), self-serve's first: the catalogue's order breaks the ties.
-  return motionShapes(state.setup.motions)
+  return motionShapes(state.setup)
     .map((shape, index) => ({ id: shape.id, index, repair: entries[shape.id]?.missing?.repair }))
     .filter((m): m is { id: MetricId; index: number; repair: RepairScale } =>
       entries[m.id]?.status === "missing" && m.repair !== undefined,

@@ -819,10 +819,11 @@ dans `formula` et `capNote`) gagne `"app.rev.install-ltv"` : la formule et la
 note ci-dessus disent « 36 ».
 
 **`unitInput`** (`engine-copy.ts`, `Record<UnitInputId, …>`, chaque français
-commence par le/la/les/l') gagne : `app.acq.cpi` « le coût par installation »
-/ "the cost per install" ; `app.rev.gross-margin` « la marge brute après
-commission » / "the gross margin after commission" ; `app.rev.commission`
-« la commission des stores » / "the store commission" ;
+commence par le/la/les/l', l'anglais jamais : « missing: CAC and gross
+margin » ; corrigé après la relecture d'APP-1) gagne : `app.acq.cpi` « le coût par installation »
+/ "cost per install" ; `app.rev.gross-margin` « la marge brute après
+commission » / "gross margin after commission" ; `app.rev.commission`
+« la commission des stores » / "store commission" ;
 `app.ret.active-retention` « la rétention des actifs » / "active retention" ;
 `app.rev.purchases-per-active` « les achats par actif » / "purchases per
 active" ; `app.rev.ads-per-active` « la publicité par actif » / "ads per

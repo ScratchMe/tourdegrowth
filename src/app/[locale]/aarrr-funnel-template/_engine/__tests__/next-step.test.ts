@@ -15,8 +15,8 @@ import { continueFrom, nextSelfNumber, nextStepFor, type NextStepChoice, type Ne
 const NOW = new Date("2026-09-24T10:00:00.000Z");
 const daysAgo = (n: number) => new Date(NOW.getTime() - n * 86_400_000).toISOString();
 const NOT_YET: NextMonth = { kind: "not-yet" };
-const SELF_SERVE = motionShapes({ plg: true, slg: false });
-const HYBRID = motionShapes({ plg: true, slg: true });
+const SELF_SERVE = motionShapes({ type: "b2b-saas", motions: { plg: true, slg: false } });
+const HYBRID = motionShapes({ type: "b2b-saas", motions: { plg: true, slg: true } });
 
 const found: MetricEntry = { status: "measured", value: { kind: "rate", percent: 20 }, updatedAt: daysAgo(1) };
 const asked = (role: "finance" | "data" | "support", days: number): MetricEntry => ({

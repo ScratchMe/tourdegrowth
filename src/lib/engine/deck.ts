@@ -518,7 +518,7 @@ function buildVisibility(state: EngineState, derived: Omit<EngineDerived, "findi
   const k = N - n;
 
   // The ticked motions' numbers (the link is optional and never counted, §18.2.2); self-serve alone is the v1 list.
-  const shapes = motionShapes(state.setup.motions);
+  const shapes = motionShapes(state.setup);
   const hybrid = state.setup.motions.plg && state.setup.motions.slg;
   // In the hybrid, a row says its motion: two numbers can share a stage, and a repair belongs to one team.
   const motionTag = (id: MetricId): Row => (hybrid ? { motion: motionOfMetric(id) } : {});
@@ -661,7 +661,7 @@ function buildAsk(
   // What to measure first when nothing is asked for: the team's own first pick; else a blind ★ — the number
   // whose absence keeps the diagnosis from concluding, which is what "before deciding where to invest" means —
   // else the cheapest missing number to repair.
-  const missing = motionShapes(state.setup.motions)
+  const missing = motionShapes(state.setup)
     .filter((s) => statusOf(entryOf(snapshot, s.id)) === "missing")
     .map((s) => ({ id: s.id, repair: entryOf(snapshot, s.id)?.missing?.repair ?? s.defaultRepair }))
     .sort((a, b) => REPAIR_ORDER.indexOf(a.repair) - REPAIR_ORDER.indexOf(b.repair));
@@ -794,7 +794,7 @@ function buildAnnex(state: EngineState, strings: Words, metrics: ResolvedMetric[
   const { motions } = state.setup;
   const hybrid = motions.plg && motions.slg;
   // Grouped « Libre-service », « Assisté », « Liaison » (§18.8.2); self-serve alone is the v1 table.
-  const shapes = hybrid ? [...motionShapes(motions), ...LINK_METRIC_SHAPES] : motionShapes(motions);
+  const shapes = hybrid ? [...motionShapes(state.setup), ...LINK_METRIC_SHAPES] : motionShapes(state.setup);
   return shapes.map((shape) => {
     const entry = entryOf(snapshot, shape.id);
     const metric = metricOf(metrics, shape.id);
@@ -1478,7 +1478,7 @@ function buildMotionsDeck(state: EngineState, derived: EngineDerived, strings: W
   });
   const indexOf = (id: SlideId) => slides.find((s) => s.id === id)?.index ?? null;
 
-  const allTools = toolsOf(state, motionShapes(state.setup.motions), strings);
+  const allTools = toolsOf(state, motionShapes(state.setup), strings);
   if (hybrid && derived.total) {
     const at = slides.findIndex((s) => s.id === "total");
     const built = buildTotalSlide(state, derived, strings, metrics, ctx, (m) => indexOf(m === "plg" ? "leak" : "slg:leak"), joinList(allTools, strings.grammar));

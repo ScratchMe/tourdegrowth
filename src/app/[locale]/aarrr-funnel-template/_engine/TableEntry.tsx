@@ -60,7 +60,7 @@ export function TableEntry({
   const [text, setText] = useState("");
   const [read, setRead] = useState<string | null>(null);
   const [applied, setApplied] = useState(false);
-  const preview = read === null ? null : tablePreview(read, state, motionShapes(state.setup.motions), view.metrics, strings, ctx.locale, new Date().toISOString());
+  const preview = read === null ? null : tablePreview(read, state, motionShapes(state.setup), view.metrics, strings, ctx.locale, new Date().toISOString());
 
   const nameOf = (id: string) => metricById(view.metrics, id as never).name;
   const valueOf = (row: Extract<TableRow, { entry: unknown }>, which: "entry" | "before") => {
