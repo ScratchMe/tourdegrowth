@@ -520,10 +520,10 @@ est libre. Le jeu reste fermé (C23).
 | A24.bat | Le bon à tirer de chaque niveau construit (`/bon-a-tirer`, par Antoine), puis la recette avec les niveaux 1 et 2 (D9) | Après chaque X-4 ; un bon à tirer qui réécrit une chaîne du téléphone ou de la pastille fait régénérer leurs aperçus `.design-sync` (rien ne le signale) |
 | A24.sync | La re-synchro des composants neufs (`PlannerPhone`, `CookiePill`, `SplitPhone`, `SentPill`, `FitPhone`, `ChargePill`, `NextLevel`) | Après chaque X-3, section B |
 
-### A25 — Un fichier sans mois casse le moteur (trouvé le 2026-10-04)
+### A25 — Un fichier sans mois casse le moteur (trouvé le 2026-10-04, corrigé le 2026-10-05)
 
-Trouvé par la relecture sécurité d'APP-0 (#341), **lu dans le code, pas
-reproduit**. `parseEngineFile` (`io.ts`) ouvre un fichier avec ses erreurs :
+Trouvé par la relecture sécurité d'APP-0 (#341), lu dans le code, puis
+**reproduit et corrigé le 2026-10-05** ([#357](https://github.com/ScratchMe/tourdegrowth/pull/357)). `parseEngineFile` (`io.ts`) ouvre un fichier avec ses erreurs :
 `validateEngine` signale `snapshots: empty`, mais ne refuse pas. Un fichier
 `"snapshots": []` passe donc l'import sans aperçu, donc sans ses
 avertissements (`ImportPanel.tsx`), puis il s'ouvre et se stocke.
@@ -531,11 +531,15 @@ avertissements (`ImportPanel.tsx`), puis il s'ouvre et se stocke.
 cet appareil. Le commentaire de `values.ts` dit pourtant que le validateur
 refuse un état vide. Un fichier `"snapshots": [{}]` casse l'aperçu
 (`coverage.ts` lit des `metrics` absents). Rien ne quitte le navigateur, et
-seul l'appareil qui importe est touché.
+seul l'appareil qui importe est touché. La reproduction, 26 variantes en
+navigateur, a élargi le refus aux deux mois d'un mois (`referenceMonth`,
+`cohortMonth`), et la relecture sécurité du correctif aux années 0000 et 9999
+(`JOURNAL.md`, « A25 »).
 
 | # | Quoi | Qui | État |
 |---|---|---|---|
-| A25.a | Reproduire par un test (l'import de `[]`, puis de `[{}]`). Puis faire refuser par `parseEngineFile` un état sans mois, ou dont un mois n'a pas `metrics` et `targets` objets, avec le refus `not-engine` existant (aucune copie neuve) | Session | À faire, avant l'ouverture du moteur |
+| A25.a | Reproduire par un test (l'import de `[]`, puis de `[{}]`). Puis faire refuser par `parseEngineFile` un état sans mois, ou dont un mois n'a pas `metrics` et `targets` objets, avec le refus `not-engine` existant (aucune copie neuve) | Session | **Livré le 2026-10-05** ([#357](https://github.com/ScratchMe/tourdegrowth/pull/357)) ; le refus couvre aussi les deux mois, en `YYYY-MM` de 1970 à 2999 |
+| A25.b | **Une entrée mal formée casse encore le tableau** (relecture sécurité d'A25.a, vérifié en navigateur le 2026-10-05). Une entrée `conflicting` sans ses deux lectures, ou une entrée assistée au `cohortMonth` invalide : le fichier s'ouvre avec ses avertissements et se stocke, puis le tableau lève à chaque visite. « Fusionner » peut aussi la faire entrer dans un moteur existant. Les états stockés avant A25 sont dans le même cas (`storage.ts` ne juge que la forme). La relecture propose une error boundary propre à l'îlot, qui retombe sur l'écran « illisible » existant (le fichier, « Tout effacer ») sans rien détruire : elle couvre toute la classe, au lieu d'un champ à la fois | Session | À faire, avant l'ouverture du moteur |
 
 ### A26 — Le proxy lisait le chemin encodé (trouvé et corrigé le 2026-10-05)
 

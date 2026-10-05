@@ -143,3 +143,24 @@ test("a file that says nothing of how the company sells is refused", async ({ pa
   await expect(page.getByTestId("engine-import-refused")).toHaveText(ENGINE_COPY.io.unsupportedSetup.en);
   await expect(page.getByTestId("engine-import-open")).toHaveCount(0);
 });
+
+test("a file without a month, or with a month the screens cannot read, is refused, in both languages (A25)", async ({ page }) => {
+  // Before A25 the first opened, then showed the error page at every visit; the second broke the import's own preview.
+  const cases = [
+    ["en", []],
+    ["fr", [{}]],
+  ] as const;
+  for (const [locale, snapshots] of cases) {
+    await page.goto(`/${locale}/aarrr-funnel-template`);
+    await page.getByTestId("engine-start-import").click();
+    const file = { ...exampleState(), snapshots };
+    await page.getByTestId("engine-import-file").setInputFiles({ name: "x.json", mimeType: "application/json", buffer: Buffer.from(JSON.stringify(file)) });
+    await expect(page.getByTestId("engine-import-refused")).toHaveText(ENGINE_COPY.io.notEngine[locale]);
+    await expect(page.getByTestId("engine-import-open")).toHaveCount(0);
+    await expect(page.getByTestId("engine-import-preview")).toHaveCount(0);
+    // Nothing was written: the next visit opens on the start, not on a stored state that throws.
+    expect(await storedEngineEntry(page)).toBeNull();
+    await page.reload();
+    await expect(page.getByTestId("engine-start")).toBeVisible();
+  }
+});
