@@ -451,6 +451,53 @@ export function clearEngine(): void {
   for (const key of keys) removeQuietly(store, key);
 }
 
+/** An item this module writes: the index, an engine's entry, an older copy — what « Tout effacer » erases. */
+const isEngineKey = (key: string): boolean =>
+  key === ENGINE_INDEX_KEY || key.startsWith(ENGINE_ENTRY_PREFIX) || key === LEGACY_STORAGE_KEY_V2 || key === LEGACY_STORAGE_KEY_V1;
+
+/**
+ * Every item of the engine on the device, as stored, to put back with
+ * `restoreDevice` (A25.b): an import is written at once, but kept only once
+ * the board has drawn it, and undone to the byte when the board throws on
+ * it. A copy rather than an undo per write: open, add, replace, merge and a
+ * file over an unreadable device each write differently, and one rule puts
+ * all five back. `null` when storage refuses: there is nothing to put back.
+ */
+export function deviceCopy(): Record<string, string> | null {
+  const store = storage();
+  if (!store) return null;
+  const copy: Record<string, string> = {};
+  try {
+    for (let i = 0; i < store.length; i++) {
+      const key = store.key(i);
+      if (key === null || !isEngineKey(key)) continue;
+      const value = store.getItem(key);
+      if (value !== null) copy[key] = value;
+    }
+  } catch {
+    return null;
+  }
+  return copy;
+}
+
+/** The device as `deviceCopy` read it: every engine item it did not hold goes, every one it held comes back as it was. */
+export function restoreDevice(copy: Record<string, string>): SaveResult {
+  const store = storage();
+  if (!store) return { ok: false, error: "unavailable" };
+  try {
+    const now: string[] = [];
+    for (let i = 0; i < store.length; i++) {
+      const key = store.key(i);
+      if (key !== null && isEngineKey(key)) now.push(key);
+    }
+    for (const key of now) if (!Object.hasOwn(copy, key)) store.removeItem(key);
+    for (const [key, value] of Object.entries(copy)) store.setItem(key, value);
+  } catch (err) {
+    return { ok: false, error: isQuota(err) ? "quota" : "unavailable" };
+  }
+  return { ok: true };
+}
+
 /**
  * Asks the browser to exempt this origin from eviction, once, at the first
  * save (§4.3). Local only — no request leaves the page. Chromium and Firefox

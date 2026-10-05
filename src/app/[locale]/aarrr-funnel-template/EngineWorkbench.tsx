@@ -27,7 +27,8 @@ import { requestPersistence } from "@/lib/engine/storage";
 import { newEngineState } from "@/lib/engine/validate";
 import { propagateFrom, withSettingsNumbers } from "@/lib/engine/shared-counts";
 import { engineSetupDetail, engineStageDetail, trackEngine, type EngineStageDetail } from "./_engine/engine-events";
-import { commit, erase, getClientSnapshot, getServerSnapshot, removeEngine, subscribe, switchEngine, type CommitResult } from "./_engine/engine-store";
+import { clearRefusedFile, commit, erase, fallBack, getClientSnapshot, getServerSnapshot, refusedFilePending, removeEngine, shown, subscribe, switchEngine, type CommitResult } from "./_engine/engine-store";
+import { EngineBoundary } from "./_engine/EngineBoundary";
 import { tableTemplate, type TablePreview } from "./_engine/csv";
 import { DeleteEngineDialog } from "./_engine/DeleteEngineDialog";
 import { download, enginePageUrl } from "./_engine/download";
@@ -156,9 +157,21 @@ function withSnapshot(state: EngineState, change: (snapshot: Snapshot) => Snapsh
  * way back — never on first paint.
  */
 export function EngineWorkbench(props: EngineWorkbenchProps) {
+  // Its net (A25.b): an engine the board cannot draw ends on the « illisible » screen, or, fresh from a file, refused
+  // with the device put back (`fallBack`) — never on the page's « détour ».
+  return (
+    <EngineBoundary onError={fallBack}>
+      <Workbench {...props} />
+    </EngineBoundary>
+  );
+}
+
+function Workbench(props: EngineWorkbenchProps) {
   const { locale, bridges } = props;
   const snap = useSyncExternalStore(subscribe, getClientSnapshot, getServerSnapshot);
-  const [screen, setScreen] = useState<Screen>("board");
+  // A file the board just refused (A25.b): the island is drawn again on the import screen, which says so, its title focused.
+  const [arrivedRefused] = useState(refusedFilePending);
+  const [screen, setScreen] = useState<Screen>(arrivedRefused ? "import" : "board");
   // The number whose own screen is open (A18 T2.b): opened from its row in « Tes chiffres », the next step, or the collect list.
   const [numberId, setNumberId] = useState<MetricId | null>(null);
   // The numbers passed this session (« Passe pour l'instant », A18 T3.b): still « à faire », not offered again by « Enregistre et continue ».
@@ -175,13 +188,18 @@ export function EngineWorkbench(props: EngineWorkbenchProps) {
   // The monthly series (§19.2.4): the month on screen — null, the month being filled — and whether a past one is being corrected.
   const [monthIndex, setMonthIndex] = useState<number | null>(null);
   const [correcting, setCorrecting] = useState(false);
-  const [focusRequest, setFocusRequest] = useState<{ id: string; n: number } | null>(null);
+  const [focusRequest, setFocusRequest] = useState<{ id: string; n: number } | null>(arrivedRefused ? { id: "engine-import-title", n: 1 } : null);
   // « Renommer » (A18 T2.a): the settings open at the company's name, not at their title.
   const [renaming, setRenaming] = useState(false);
 
   useEffect(() => {
     if (focusRequest) document.getElementById(focusRequest.id)?.focus();
   }, [focusRequest]);
+
+  // Said once: the import panel reads it as it opens (`refused` below), and any later one opens on a new file.
+  useEffect(() => {
+    if (arrivedRefused) clearRefusedFile();
+  }, [arrivedRefused]);
 
   useEffect(() => {
     if (snap && !openedTracked) {
@@ -239,11 +257,17 @@ export function EngineWorkbench(props: EngineWorkbenchProps) {
     return { view, verdict, plan, month };
   }, [state, openedAt, tourResults, locale, bridges, strings, metrics, derivedCopy, monthIndex]);
 
+  // The board has been drawn (A25.b): a file just opened is kept, and the net counts its failures afresh. An effect
+  // runs only once the render has committed, so a board that threw never reaches it.
+  useEffect(() => {
+    if (computed && screen === "board") shown();
+  }, [computed, screen]);
+
   const focus = (id: string) => setFocusRequest((current) => ({ id, n: (current?.n ?? 0) + 1 }));
 
-  function persist(next: EngineState, options: { fresh?: boolean; stamp?: boolean; overUnreadable?: boolean; add?: boolean } = {}): CommitResult {
+  function persist(next: EngineState, options: { fresh?: boolean; stamp?: boolean; overUnreadable?: boolean; add?: boolean; probation?: boolean } = {}): CommitResult {
     const stamped = options.stamp === false ? next : { ...next, updatedAt: new Date().toISOString() };
-    const result = commit(stamped, { fresh: options.fresh, overUnreadable: options.overUnreadable, add: options.add });
+    const result = commit(stamped, { fresh: options.fresh, overUnreadable: options.overUnreadable, add: options.add, probation: options.probation });
     setWriteFailed(!result.ok);
     if (result.ok && !persistenceAsked) {
       persistenceAsked = true;
@@ -330,12 +354,14 @@ export function EngineWorkbench(props: EngineWorkbenchProps) {
           locale={locale}
           metrics={metrics}
           device={null}
+          refused={refusedFilePending()}
           onOpen={(imported) => {
             // Over an unreadable store the device refuses to write (it will not overwrite what it
             // can't read). Choosing a file here IS the confirmed way past it, so clear first.
             // Over an unreadable store, under an id of its own: it must not land on an entry nobody could read (A14 T5).
-            if (snap.result.kind === "unreadable") persist({ ...imported, id: newId() }, { fresh: true, stamp: false, overUnreadable: true });
-            else persist({ ...imported, id: importedId(imported.id) }, { fresh: true, stamp: false });
+            // On probation (A25.b), as every file: kept once the board has drawn it.
+            if (snap.result.kind === "unreadable") persist({ ...imported, id: newId() }, { fresh: true, stamp: false, overUnreadable: true, probation: true });
+            else persist({ ...imported, id: importedId(imported.id) }, { fresh: true, stamp: false, probation: true });
             openBoard();
           }}
           onCancel={() => setScreen("board")}
@@ -514,18 +540,20 @@ export function EngineWorkbench(props: EngineWorkbenchProps) {
         locale={locale}
         metrics={metrics}
         device={{ state: current, name: currentName, canAdd: engines.length < MAX_ENGINES }}
+        refused={refusedFilePending()}
         onOpen={(imported, choice: ImportChoice | null) => {
+          // Each on probation (A25.b): a file the board then cannot draw is refused, and the device put back as it was.
           if (choice === "merge") {
             const merged = mergeEngines(current, imported);
             if (merged.kind !== "ok") return;
-            persist(merged.state);
+            persist(merged.state, { probation: true });
           } else if (choice === "add") {
             // Beside the others, always under a new id: the file's own may be another engine of the device
             // (one's own save reopened), an entry nobody could read, or no id at all (the security review of A14 T5).
-            persist({ ...imported, id: newId() }, { fresh: true, stamp: false, add: true });
+            persist({ ...imported, id: newId() }, { fresh: true, stamp: false, add: true, probation: true });
           } else {
             // « Remplacer » the engine on screen — and only it: the file takes its id, so it is written in its place.
-            persist({ ...imported, id: current.id }, { fresh: true, stamp: false });
+            persist({ ...imported, id: current.id }, { fresh: true, stamp: false, probation: true });
           }
           resetBoard();
           openBoard();

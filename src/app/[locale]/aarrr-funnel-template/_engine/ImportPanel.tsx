@@ -12,6 +12,7 @@ import { MAX_ENGINES, MAX_MONTHS, type EngineCalcContext, type EngineState, type
 import { coverage, motionCoverage } from "@/lib/engine/coverage";
 import { parseEngineFile } from "@/lib/engine/io";
 import { displayInterval, entryText } from "./display";
+import { EngineBoundary } from "./EngineBoundary";
 import { fill, formatDate, formatMonth, metricById } from "./text";
 import { Field } from "@/components/core/Field";
 import styles from "./Screens.module.css";
@@ -37,14 +38,39 @@ type Parsed = ReturnType<typeof parseEngineFile>;
  * don't know); a file that is merely incomplete opens with its warnings
  * listed, the way the audit's import does — refusing a half-filled engine
  * would lose the half that is there.
+ *
+ * A file the engine cannot draw (A25.b) gets the refusal of a file that
+ * isn't an engine: when its own preview throws, the panel is drawn again
+ * with it; when the board throws on it once opened, the device is put back
+ * and the island opens here again with `refused`.
  */
-export function ImportPanel({
+export function ImportPanel(props: ImportPanelProps) {
+  const [refusals, setRefusals] = useState(props.refused ? 1 : 0);
+  return (
+    <EngineBoundary
+      onError={() => {
+        setRefusals((n) => n + 1);
+        return true;
+      }}
+    >
+      <ImportPanelBody key={refusals} {...props} refused={refusals > 0} />
+    </EngineBoundary>
+  );
+}
+
+type ImportPanelProps = Parameters<typeof ImportPanelBody>[0];
+
+/** The refusal a file the engine cannot draw gets: no state, so no preview and no button to open it. */
+const REFUSED: Parsed = { state: null, errors: [], refusal: "not-engine" };
+
+function ImportPanelBody({
   strings,
   locale,
   metrics,
   device,
   onOpen,
   onCancel,
+  refused = false,
 }: {
   strings: EngineStrings;
   locale: "en" | "fr";
@@ -54,9 +80,11 @@ export function ImportPanel({
   /** `choice` is null on an empty device: the file is simply opened. */
   onOpen: (state: EngineState, choice: ImportChoice | null) => void;
   onCancel: () => void;
+  /** The file just chosen could not be drawn (A25.b): the panel opens on its refusal, until another file is read. */
+  refused?: boolean;
 }) {
   const inputId = useId();
-  const [parsed, setParsed] = useState<Parsed | null>(null);
+  const [parsed, setParsed] = useState<Parsed | null>(refused ? REFUSED : null);
   const [picked, setPicked] = useState<ImportChoice | null>(null);
 
   async function read(file: File | undefined) {
