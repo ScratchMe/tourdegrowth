@@ -29,7 +29,7 @@ import { proposedFromBefore } from "@/lib/engine/series";
 import { slgBaseNoun } from "@/lib/engine/sentences";
 import { teamTools } from "@/lib/engine/tools";
 import { knownIn } from "@/lib/engine/values";
-import { SHARED_COUNTS, knownSharedCount, sharedCountAt } from "@/lib/engine/shared-counts";
+import { knownSharedCount, sharedCountAt, sharedWith } from "@/lib/engine/shared-counts";
 import { MissingTriage } from "./MissingTriage";
 import { RequestCopy } from "./RequestCopy";
 import { draftFromEntry, entryFromDraft, isWideRange, withProposals, type DraftProblem, type SheetDraft, type SheetMode } from "./sheet-draft";
@@ -124,7 +124,7 @@ export function MetricSheet({
 
   // A count several numbers share is typed once (shared-counts.ts): an empty side of this
   // number's counts starts from it, and the line under the boxes says so.
-  const shared = sharedSides(id, snapshot);
+  const shared = sharedSides(id, snapshot, view.metrics);
   // An unsaved draft comes back when the sheet is remounted (A15.12), in its own month (A14 T2).
   const key = draftKey(id, entry, snapshot.referenceMonth);
   const [draft, setDraft] = useState<SheetDraft>(() => {
@@ -778,20 +778,23 @@ function withDefinition(view: EngineView, id: MetricId, definitionNote: string):
  * The shared counts on each side of this number's counts: the value already
  * typed (the base, or another number's entry) and the other numbers that use
  * it — named in the line under the boxes, so « changing it here changes it
- * everywhere » says where.
+ * everywhere » says where. Only the numbers the view can name (`metrics`):
+ * a SaaS view does not carry the app's.
  */
 function sharedSides(
   id: MetricId,
   snapshot: EngineView["state"]["snapshots"][number],
+  metrics: EngineView["metrics"],
 ): Partial<Record<"numerator" | "denominator", { value: number | null; others: MetricId[] }>> {
   const out: Partial<Record<"numerator" | "denominator", { value: number | null; others: MetricId[] }>> = {};
+  const named = new Set<MetricId>(metrics.map((m) => m.id));
   for (const side of ["numerator", "denominator"] as const) {
     const count = sharedCountAt(id, side);
     if (!count) continue;
     const known = knownSharedCount(snapshot, count);
     out[side] = {
       value: known?.value ?? null,
-      others: SHARED_COUNTS[count].map((slot) => slot.metric).filter((m) => m !== id),
+      others: sharedWith(id, side, named),
     };
   }
   return out;

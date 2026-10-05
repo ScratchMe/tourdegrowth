@@ -83,6 +83,18 @@ export function sharedCountAt(metric: MetricId, side: SharedSlot["side"]): Share
   return null;
 }
 
+/**
+ * The other numbers sharing `id`'s count on `side`, among the ones the view can name (§21.2.4): the places of its
+ * group, `id` left out, kept when `named` has them, in `SHARED_COUNTS`' order. Empty for a side with no group. A
+ * SaaS view names every place of its groups (the link included) but the app's: `monthSignups` carries
+ * `app.acq.cpi`, which its props do not.
+ */
+export function sharedWith(id: MetricId, side: SharedSlot["side"], named: ReadonlySet<MetricId>): MetricId[] {
+  const count = sharedCountAt(id, side);
+  if (!count) return [];
+  return SHARED_COUNTS[count].map((slot) => slot.metric).filter((m) => m !== id && named.has(m));
+}
+
 function countIn(entry: MetricEntry | undefined, side: SharedSlot["side"]): number | null {
   const value = entry?.value;
   return value?.kind === "ratio" ? value[side] : null;
