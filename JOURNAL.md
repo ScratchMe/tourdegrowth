@@ -561,6 +561,69 @@ Et des lacunes moins visibles, chacune un piège : un outil de l'app écrit deux
 
 **Relecture de copie (relance de correction)** : le relecteur copie a trouvé six imprécisions, toutes dans des commentaires, corrigées sans toucher une chaîne visible ni un marqueur « à relire » : les deux lignes de `updated-at.ts` (`/game/retention` dit que « Niveau suivant » peut viser l'activation, `/game` que la zone nomme Quandi), l'en-tête d'`entry.ts` (la carte du niveau 3 est recopiée de `docs/game/activation.md` §18.11) et la doc de `band.metric` (le taux d'activation s'ajoute), l'en-tête de `hub.ts` (les lignes de Pédalix et de Quandi viennent de leur spécification) et le commentaire de `shareImageAlt` dans `meta.ts` (« deux » à deux niveaux ouverts, « trois » depuis l'activation). Vérifié : `tsc --noEmit` propre, `vitest run` **3 481 tests sur 3 481** (266 fichiers, inchangés, `claude-md-budget.test.ts` compris) ; ni build ni Playwright, le diff ne portant que des commentaires.
 
+## A23 : les fiches MKT-7a, MKT-7b et MKT-8, et §22 sur le retour du brief 10 (2026-10-05)
+
+**Livré** (documentation seule) : §22 applique C94 à C103 et porte le retour du brief 10.
+- **MKT-7 est coupée en deux.** MKT-7a fait les composants : `SideShown`, `SideFunnel`, `SideNote`, les deltas de `MrrCurve` et de `NumberList`, et les jetons. Elle ne lit rien du modèle et peut partir dès MKT-R. MKT-7b fait le tableau. Le total passe de quatorze à quinze unités et de ~31 à ~32,5 jours-agent ; le graphe, le tableau des unités et celui d'A23 dans `CHANTIERS.md` suivent.
+- **MKT-8 fait les slides**, avec `SlideStreams`, le total en registre.
+- Les trois fiches sont au format de §23.4.
+- **Le texte de §22 change ici** :
+  - §22.6.2, le contrat des écrans, est réécrit sur le retour ;
+  - les ★ de l'offre sont posés (C95) ;
+  - « demandes envoyées » remplace « demandes » dans la variante et la phrase du taux de service (C99) ;
+  - `mkt.total.newSum` et `sum12`, deux phrases avec « + » et « = », deviennent les étiquettes `newLabel` et `in12Label` : c'est la forme du retour, une bande et un registre ;
+  - `mkt.money.supplyNone` garde sa première moitié : la seconde est devenue le corps de la note ;
+  - onze feuilles s'ajoutent aux calques à écrire mot pour mot (§22.8.5 c) ;
+  - quarante-cinq clés neuves forment le §22.8.5 k, sur 39 lignes ;
+  - les titres de §22.8.5 e passent à MKT-7b, qui en fait le verdict d'un côté et le titre de la bande ;
+  - MKT-R rejoue aussi à blanc les trois fiches neuves.
+
+**Comment les textes ont été triés.** Un sous-agent en lecture seule a rapporté les 193 chaînes de `COPY.md` à §22 : 98 que §22 dit déjà (son texte l'emporte, C98), 40 qu'un calque produit d'une feuille de base (le calque l'emporte), 55 vraiment neuves. Sur les 55 :
+- **Les neuves gardées** passent dans le §22.8.5 k, avec les mots de §22.
+- **Une partie est écartée** :
+  - les phrases d'hypothèses du panneau : les hypothèses restent la liste de §22.5.4 ;
+  - les lignes de calcul de la fuite : la chaîne reste `whatIf.*` ;
+  - les fenêtres dans les noms des chiffres ;
+  - les sources écrites en dur ;
+  - les titres de groupe du panneau, le « Croissance » de base reste ;
+  - la source « Back-office ».
+- **Les numéros de slides** du registre deviennent un gabarit (« slides {from} à {to} ») tiré du deck rendu.
+
+**Ce que la comparaison a corrigé dans le retour**, sans question à Antoine :
+- **Les mots de la place de marché.** « rétrogradation », « expansion » et « facturation mensuelle » n'existent pas sur une place de marché. Les deux définitions du moteur, l'hypothèse de trésorerie, et la tuile et l'hypothèse de la slide d'unit economics ont donc leur texte par côté. « Continue de payer » devient « continue de rapporter ».
+- **Le saut au mois 1** est la part de la projection que les leviers d'argent ajoutent sur la base gardée du mois : `mrr × kept ÷ 100 × (ratio − 1)`, 2 628,29 € pour la commission de l'exemple, « ~2 600 € ». La planche écrit « ~2 700 € » parce qu'elle oublie le churn du mois. Sa phrase couvre aussi la fréquence, le panier et le prix des abonnements (`stepOne`, `stepMany`, `stepSupply`), alors que le retour ne disait que la commission.
+- **L'en-tête du diagnostic** dit le côté dans ses quatre états, pas seulement `clear`.
+- **Un taux de service saisi sans variante** dit « recherches ou demandes envoyées », sans choisir à la place de l'équipe.
+- **Le verdict d'un côté** garde l'accent de `title-accent.ts` (C53). Le rouge reste donc là où l'on ne voit pas, alors que le retour le voulait toujours à l'encre.
+- **Le coût d'un vendeur abonné** perd la clause « un vendeur payant pour 2 actifs », que la fiche aurait dû accorder et arrondir.
+
+**Vérifié** : les tests de budget et de liens des documents.
+
+**Relu par `relecteur-copie`, dix points, tous corrigés** :
+- l'en-tête « partagé » du diagnostic nomme aussi le côté en français ;
+- la définition des mois après remboursement dit « de la marge » dans les deux langues, et « their » en anglais ;
+- les appels fléchés vers les cibles disent « tes » ;
+- quatre retouches d'anglais : "The buyers' verdict", "cost per paid seller", "on both sides", "brings in" ;
+- la note de l'acheteur actif n'a plus d'accord en anglais (« order frequency {freq} ») ;
+- la ligne de côté du registre a une clé par ligne, sans « · », qui sépare les clés dans les tableaux ;
+- trois feuilles de la demande ne nomment plus les abonnements, qu'un calque ne sait pas cochés : la note sans marge, l'hypothèse de la slide d'unit economics et l'introduction du panneau.
+
+## A22 : §21 et §23 corrigés d'après l'arrêt d'APP-1 (2026-10-05)
+
+**L'arrêt.** Le sous-agent d'APP-1 s'est arrêté avant de pousser, sur une condition de §23.6 : trois e2e du moteur rougissaient (`engine-canary.spec.ts:41` et `:235`, `engine-collect.spec.ts:119`). §21.2.4 ajoute `app.acq.cpi` au compte partagé `monthSignups`. L'étape 6 de la fiche retire les chiffres `app.*` des props du SaaS. Or la ligne sous les cases d'une fiche (`MetricSheet.tsx#sharedSides`) nomme chaque chiffre du groupe par `metricById`. La fiche d'`acq.signup-rate` d'un SaaS levait donc une erreur, et l'îlot tombait sur sa page d'erreur. Aucun test unitaire ne couvre cette ligne. Son travail (32 fichiers, vitest 3 491 sur 3 491) est commité à part, `2d9c6b5`, et repris après cette PR.
+
+**Les réponses d'Antoine** (2026-10-05, les deux recos) :
+- **La ligne partagée** ne nomme que les chiffres que la vue sait nommer, par `sharedWith(id, side, named)` dans `shared-counts.ts` (§21.2.4). On ne filtre pas par `shapesOf(setup)`, qui ôterait `link.pql-handoff` de la ligne de l'assisté. APP-1 gagne `MetricSheet.tsx` et `engine-props.test.ts`, qui tient la ligne du SaaS inchangée, chiffre par chiffre. APP-2 vérifie la ligne d'une app.
+- **« Autres outils »** propose RevenueCat, AppsFlyer et Adjust au SaaS aussi, par la règle d'A14 T0 (tout outil y est proposé). C'est la seule exception au « le SaaS ne bouge pas d'un caractère » (§21.0, §21.6.5).
+
+**Ce que le sous-agent a dû deviner, et ce qui est corrigé** :
+- **Libellés de sources sans anglais** : les libellés composés de `where` (« AppsFlyer ou Adjust », « Amplitude ou Mixpanel », « Ton suivi des revenus », « Base produit ou outil de parrainage ») n'avaient pas d'anglais dans §21.4. Ils l'ont désormais, repris de ses traductions, et passent au bon à tirer comme toute copie neuve.
+- **§23.8, typographie** : l'espace insécable entre un nombre et son unité (« 12 mois »), comme `engine-catalog.ts`.
+- **§23.8, guillemets** : des guillemets droits échappés suivent le fichier qui le fait déjà.
+- **§23.8, e2e** : une unité sans écran fait quand même tourner `engine-canary` et `engine-collect` contre le build de la CI. La règle « une unité sans écran saute Playwright » aurait laissé passer ce bug.
+
+**Laissé tel quel** : `shapesOf` d'une app sans `plg` rend une liste vide (un réglage invalide) ; l'ordre de `TOOL_SET` ; le type de `UNIT_INPUT_IDS`.
+
 ## A26 : le proxy lit le chemin décodé, comme le routeur (2026-10-05)
 
 **Trouvé** par la relecture sécurité d'ACT-3 (#345), qui le donnait comme une piste non vérifiée, puis **vérifié en production** par l'orchestrateur, en lecture seule. Les gardes du proxy comparaient `request.nextUrl.pathname`, qui garde l'encodage en pourcent, alors que le routeur le décode avant de choisir une route. Relevé le même jour en production :
@@ -596,6 +659,6 @@ Ont été sondés sans rien trouver : les exclusions du `matcher` (`/_next/stati
 - `tsc` et `eslint` propres ;
 - `vitest run --coverage` : **3 491 sur 3 491** (+10), seuils tenus ;
 - build comme la CI ;
-- Playwright, suite complète, avec l'émulateur Firestore et `CI=1`, sur l'avant-dernière version (la seule différence est la mise en minuscules et la spec retirée) : voir le compte de la PR.
+- Playwright, suite complète, avec l'émulateur Firestore et `CI=1`, sur la version finale : **1 010 passées, 7 ignorées par construction, 0 échec**, sur 1 017 (+4). L'avant-dernière version donnait 1 011 sur 1 018, avec la spec retirée depuis.
 
 La production est à revérifier après le déploiement, avec toutes les adresses ci-dessus.
