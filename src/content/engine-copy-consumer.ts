@@ -212,10 +212,6 @@ export const ENGINE_COPY_CONSUMER: DeepPartialTranslatable<typeof ENGINE_COPY> =
         fr: "Le nouveau revenu par abonné s'applique aux nouveaux abonnés ; les abonnements déjà là gardent leur prix.",
         en: "The new revenue per subscriber applies to new subscribers; the subscriptions already there keep their price.",
       },
-      "same-spend": {
-        fr: "À dépense égale : plus d'abonnés font baisser le coût par installation dans la même proportion.",
-        en: "Same spend: more paying subscribers lower the cost per install in the same proportion.",
-      },
       "churn-as-revenue": {
         fr: "Le churn des abonnés tient lieu de churn en revenu, comme si les abonnés partis payaient le revenu moyen.",
         en: "Subscriber churn stands in for revenue churn, as if the subscribers who left paid the average revenue.",
@@ -266,7 +262,7 @@ export const ENGINE_COPY_CONSUMER: DeepPartialTranslatable<typeof ENGINE_COPY> =
     },
     window: {
       definition: {
-        fr: "Le nombre de jours qu'a une installation pour qu'une action compte : s'activer en 7 jours, payer en 30. Elle se règle dans Réglages.",
+        fr: "Le nombre de jours qu'a une installation pour qu'une action compte : s'activer en 7 jours, payer en 30. Elle se règle dans Réglages.",
         en: "How many days an install has for an action to count: activate within 7 days, pay within 30. Change it in Settings.",
       },
     },
@@ -277,10 +273,16 @@ export const ENGINE_COPY_CONSUMER: DeepPartialTranslatable<typeof ENGINE_COPY> =
       },
     },
     arr: {
-      term: { fr: "Revenu annualisé", en: "Annualised revenue" },
+      term: { fr: "revenu annualisé", en: "annualised revenue" },
       definition: {
         fr: "Ton revenu annuel, extrapolé de ton revenu mensuel : le revenu × 12, comme si rien ne changeait pendant un an. Ce n'est pas un revenu acquis : avec des contrats au mois, des résiliations le font baisser dès le mois suivant.",
         en: "Your annual revenue, extrapolated from your monthly revenue: the revenue × 12, as if nothing changed for a year. It isn't guaranteed revenue: on monthly contracts, cancellations bring it down the very next month.",
+      },
+    },
+    runway: {
+      definition: {
+        fr: "Tes mois de trésorerie : le nombre de mois que couvre ta trésorerie au rythme actuel des dépenses. Facultatif : le moteur le compare seulement au remboursement, pour te prévenir. Il reste sur cet appareil.",
+        en: "Your months of cash: how many months your cash lasts at today's spending. Optional: the engine only compares it with the payback, to warn you. It stays on this device.",
       },
     },
   },
@@ -389,7 +391,7 @@ export const ENGINE_COPY_CONSUMER: DeepPartialTranslatable<typeof ENGINE_COPY> =
     },
     leakClearPerHundredOne: {
       fr: "Ramener {stage} à {target} ajouterait **{n} abonné pour 100 installations**.",
-      en: "Bringing {stage} to {target} would add **{n} paying subscriber per 100 installs**.",
+      en: "Bringing {stage} to {target} would add **{n} subscriber per 100 installs**.",
     },
     unitEconomics: {
       fr: "Une installation rembourse son coût en **{m}** et rapporte **{x}** ce qu'elle coûte en un an.",

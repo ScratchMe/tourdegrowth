@@ -112,7 +112,8 @@ export const APP_EXCLUDED: readonly ExclusionLine[] = [
   },
   {
     // 6. What the SaaS's cash and lifetime print and an app does not (D10, D11): the cash tied up, the lifetime, the
-    // billed and floor wordings, and every `slide.chart*` but `slide.chartCost` (an app's chart is `InstallPaybackChart`).
+    // billed and floor wordings, `slide.unitAssume` and `slide.unitAssumeOutpaced` (an app prints `slide.unitAssumeApp`),
+    // and every `slide.chart*` but `slide.chartCost` (an app's chart is `InstallPaybackChart`).
     line: 6,
     excludes: (_, path) =>
       path.startsWith("money.assume") ||
@@ -122,7 +123,7 @@ export const APP_EXCLUDED: readonly ExclusionLine[] = [
       path.startsWith("scenario.assumeCash") ||
       underAny(path, ["scenario.assumeLtv", "scenario.assumeLtvSlg", "scenario.rowCash", "scenario.rowAfter"]) ||
       ["slide.unitFloor", "slide.unitBilled", "slide.unitCompanyWide", "slide.unitLost"].some((p) => path.startsWith(p)) ||
-      underAny(path, ["slide.unitNotAllBack", "slide.unitMayNotAllBack", "slide.unitLeavesBefore", "slide.unitMayLeaveBefore"]) ||
+      underAny(path, ["slide.unitNotAllBack", "slide.unitMayNotAllBack", "slide.unitLeavesBefore", "slide.unitMayLeaveBefore", "slide.unitAssume", "slide.unitAssumeOutpaced"]) ||
       (path.startsWith("slide.chart") && path !== "slide.chartCost") ||
       underAny(path, ["slide.unitRatioReference", "slide.unitReference", "slide.unitBothReference", "terms.cashTied", "terms.afterPayback"]),
   },
@@ -137,7 +138,7 @@ const isExcluded = (leaf: Leaf) => APP_EXCLUDED.some(({ excludes }) => excludes(
 
 /** Whole words, case-sensitive: an acronym of the SaaS. Unicode-aware, so « ARRÊT » is not « ARR ». */
 const ACRONYMS = /(?<![\p{L}\p{N}_])(ARPA|MRR|ARR|CAC|LTV)(?![\p{L}\p{N}_])/u;
-const FRENCH_WORDS = /inscrit|inscription|client|payant|SaaS|visiteur/i;
+const FRENCH_WORDS = /inscrit|inscription|client|payant|SaaS|visiteur|payback/i;
 const ENGLISH_WORDS = /sign-up|signup|signed up|sign up|customer|paying|SaaS|visitor/i;
 
 /** The lexicon's target expressions that hold one of the words: they are the words the app SAYS (§21.8.2). */
@@ -176,6 +177,8 @@ export const APP_OVERLAY_SKIPPED: readonly string[] = [
   "io.sharedCount.mrrEnd",
   // Same as mrrEnd: the subscriptions' MRR at the start of the month.
   "io.sharedCount.mrrStart",
+  // The lexicon changes the sense: « more subscribers lower the cost per install » is false (subscribers are not in it), and an app never prints this assumption (it has `same-spend-installs`, §21.5.3).
+  "scenario.assumption.same-spend",
 ];
 
 /**
@@ -234,6 +237,9 @@ describe("the rule of §21.8.3 and its list of excluded paths", () => {
     expect(holdsWord({ fr: "ARRÊTER la ARRIVÉE", en: "carry on, macro" }, false)).toEqual([]);
     expect(holdsWord({ fr: "x", en: "Customers" }, false)).toEqual(["en"]);
     expect(holdsWord({ fr: "Visiteurs", en: "x" }, false)).toEqual(["fr"]);
+    // « payback » is a word of the French rule only: the lexicon turns it into « remboursement », and English keeps "payback".
+    expect(holdsWord({ fr: "au Payback", en: "x" }, false)).toEqual(["fr"]);
+    expect(holdsWord({ fr: "x", en: "the payback" }, false)).toEqual([]);
     // The placeholders are out: `{cac}` and `{arpa}` are not the words.
     expect(holdsWord({ fr: "coûte {cac}, {arpa}, {ltv}", en: "costs {cac}, {arpa}, {ltv}" }, false)).toEqual([]);
     // The lexicon's own expressions hold a word and are not a leftover.
