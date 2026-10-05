@@ -1,0 +1,51 @@
+/* SideNote — extension 10. Absent by design (ink, no frame) or not yet
+ * (the system's dashed edge). Never red, never a "?" box. */
+
+.SideNote_root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  max-width: var(--engine-measure);
+}
+
+.SideNote_absent {
+  padding-top: var(--space-7);
+  border-top: var(--border-rule);
+}
+
+.SideNote_pending {
+  padding: var(--space-8) var(--space-9);
+  border: var(--engine-pending-edge);
+  border-radius: var(--radius-panel);
+}
+
+.SideNote_title {
+  margin: 0;
+  font: var(--title-card);
+  color: var(--text-body);
+}
+
+.SideNote_body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-width: var(--measure-read);
+  font: var(--body-md);
+  color: var(--text-body);
+}
+
+.SideNote_body p {
+  margin: 0;
+}
+
+.SideNote_action {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+@media (max-width: 760px) {
+  .SideNote_pending {
+    padding: var(--space-7);
+  }
+}

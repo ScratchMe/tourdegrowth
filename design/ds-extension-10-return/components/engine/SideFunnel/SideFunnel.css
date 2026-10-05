@@ -1,0 +1,349 @@
+/* SideFunnel — extension 10. One side's funnel: the peloton's grammar for
+ * one side at a time. Tokens only (tokens/marketplace.css for the new
+ * ones). The card is the board's one raised card, as the peloton is. */
+
+.SideFunnel_inner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.SideFunnel_title {
+  margin: 0;
+  font: var(--title-card);
+  color: var(--text-body);
+}
+
+.SideFunnel_upstream {
+  margin: 0;
+  font: var(--meta-xs);
+  color: var(--text-muted);
+}
+
+.SideFunnel_arrow {
+  color: var(--text-body);
+}
+
+/* The columns counted on the same 100, then (demand) the base of its own. */
+.SideFunnel_cols {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-12);
+}
+
+.SideFunnel_withBase {
+  grid-template-columns: minmax(0, 3fr) minmax(0, 1fr);
+  gap: var(--space-10);
+}
+
+/* A column never grows past the peloton's (four to a card): one or two
+ * columns keep their width and sit at the left, they do not spread. */
+.SideFunnel_same {
+  display: grid;
+  grid-template-columns: repeat(var(--side-funnel-cols, 3), minmax(0, var(--market-funnel-col)));
+  gap: var(--space-10);
+}
+
+.SideFunnel_col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  min-width: 0;
+  margin: 0;
+}
+
+.SideFunnel_text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  /* The labels run one to three lines ("First booking received within 60
+   * days"): the grids under them start on one line all the same. */
+  min-height: var(--market-funnel-head);
+}
+
+.SideFunnel_n {
+  margin: 0;
+  font: var(--chart-value-xl);
+  font-variant-numeric: var(--tabular);
+}
+
+.SideFunnel_label {
+  margin: 0;
+  font: var(--engine-stage-title);
+  letter-spacing: var(--display-letter-spacing);
+  text-transform: uppercase;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+.SideFunnel_tag {
+  vertical-align: 0.2em;
+  white-space: nowrap;
+}
+
+.SideFunnel_source {
+  font: var(--meta-xs);
+  color: var(--text-muted);
+}
+
+/* A second base of 100: a rule before it, its own heading. */
+.SideFunnel_base {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  min-width: 0;
+  padding-left: var(--space-10);
+  border-left: var(--border-rule);
+}
+
+.SideFunnel_baseTitle {
+  margin: 0 0 var(--space-3);
+  font: var(--meta-xs);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* Its "?" opens a definition, read as a sentence (as MoneyBlock's labels). */
+.SideFunnel_baseTitle [role=dialog] {
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.SideFunnel_baseLine {
+  margin: 0;
+  font: var(--body-sm);
+  color: var(--text-body);
+}
+
+/* The monthly rates: figures in a line, never dots. */
+.SideFunnel_rates {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding-top: var(--space-7);
+  border-top: var(--border-rule);
+}
+
+.SideFunnel_ratesTitle {
+  margin: 0;
+  font: var(--meta-xs);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.SideFunnel_rateList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-5) var(--space-12);
+  margin: 0;
+}
+
+.SideFunnel_rate {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+  margin: 0;
+}
+
+.SideFunnel_rate dd {
+  margin: 0;
+}
+
+.SideFunnel_rateHolds {
+  padding-left: var(--space-5);
+  border-left: var(--engine-diagnosis-edge);
+}
+
+.SideFunnel_rateLabel {
+  font: var(--meta-xs);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.SideFunnel_rateValue {
+  font: var(--chart-value);
+  font-variant-numeric: var(--tabular);
+}
+
+.SideFunnel_rateNote {
+  font: var(--meta-xs);
+  color: var(--text-muted);
+}
+
+.SideFunnel_aside {
+  margin: 0;
+  max-width: var(--measure-read);
+  font: var(--body-md);
+  color: var(--text-body);
+}
+
+.SideFunnel_foot {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding-top: var(--space-7);
+  border-top: var(--border-rule);
+}
+
+.SideFunnel_note {
+  margin: 0;
+  font: var(--body-md);
+  color: var(--text-body);
+}
+
+/* The phone rules are scoped to the card (.SideFunnel_inner): a slide is a
+ * 1 920 canvas scaled whole, never reflowed. */
+@media (max-width: 760px) {
+  .SideFunnel_inner .SideFunnel_withBase,
+  .SideFunnel_inner .SideFunnel_same {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-8);
+  }
+  /* A phone: each column a row — the grid left, its words right — as the
+   * peloton does. */
+  .SideFunnel_inner .SideFunnel_col {
+    display: grid;
+    grid-template-columns: var(--market-funnel-grid-mobile) minmax(0, 1fr);
+    grid-template-areas: "grid text" "grid source";
+    align-items: start;
+    column-gap: var(--space-7);
+    row-gap: var(--space-3);
+    padding-bottom: var(--space-8);
+    border-bottom: var(--border-rule);
+  }
+  .SideFunnel_inner .SideFunnel_col > .DotGrid_grid,
+  .SideFunnel_inner .SideFunnel_col > .DotGrid_unknown {
+    grid-area: grid;
+  }
+  .SideFunnel_inner .SideFunnel_text {
+    grid-area: text;
+    min-height: 0;
+  }
+  .SideFunnel_inner .SideFunnel_source {
+    grid-area: source;
+  }
+  .SideFunnel_inner .SideFunnel_n {
+    font: var(--display-section);
+  }
+  .SideFunnel_inner .SideFunnel_label {
+    font: var(--title-card);
+    text-transform: none;
+    letter-spacing: normal;
+  }
+  .SideFunnel_inner .SideFunnel_base {
+    padding-left: 0;
+    border-left: none;
+  }
+  .SideFunnel_inner .SideFunnel_base .SideFunnel_col {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+  .SideFunnel_inner .SideFunnel_rateList {
+    gap: var(--space-5) var(--space-9);
+  }
+}
+
+/* ── The slide: the deck's 1 920 canvas, no card ─────────────────────── */
+/* The columns left; the monthly rates (supply) at their right, where a
+ * slide has room; the legend on the upstream line's right, so the columns
+ * keep the slide's height. */
+.SideFunnel_slide {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  grid-template-areas:
+    "up up"
+    "cols rates"
+    "aside aside";
+  gap: 28px 64px;
+  align-items: start;
+}
+
+.SideFunnel_slide .SideFunnel_upstream {
+  grid-area: up;
+  font: var(--slide-meta);
+}
+
+.SideFunnel_slide .SideFunnel_cols {
+  grid-area: cols;
+  gap: 56px;
+}
+
+.SideFunnel_slide .SideFunnel_same {
+  grid-template-columns: repeat(var(--side-funnel-cols, 3), var(--market-slide-col));
+  gap: 48px;
+}
+
+.SideFunnel_slide .SideFunnel_withBase {
+  grid-template-columns: max-content max-content;
+  gap: 56px;
+}
+
+.SideFunnel_slide .SideFunnel_text {
+  min-height: var(--market-slide-head);
+}
+
+.SideFunnel_slide .SideFunnel_n {
+  font: var(--slide-numeral);
+}
+
+.SideFunnel_slide .SideFunnel_label {
+  font: var(--slide-label-sm);
+}
+
+.SideFunnel_slide .SideFunnel_source,
+.SideFunnel_slide .SideFunnel_ratesTitle,
+.SideFunnel_slide .SideFunnel_rateLabel,
+.SideFunnel_slide .SideFunnel_rateNote,
+.SideFunnel_slide .SideFunnel_baseTitle {
+  font: var(--slide-meta);
+}
+
+.SideFunnel_slide .SideFunnel_rateValue {
+  font: var(--slide-label-md);
+}
+
+.SideFunnel_slide .SideFunnel_baseLine,
+.SideFunnel_slide .SideFunnel_aside,
+.SideFunnel_slide .SideFunnel_note {
+  font: var(--slide-body-xs);
+}
+
+.SideFunnel_slide .SideFunnel_base {
+  width: var(--market-slide-base);
+  padding-left: 56px;
+}
+
+.SideFunnel_slide .SideFunnel_rates {
+  grid-area: rates;
+  padding: 0 0 0 48px;
+  border-top: none;
+  border-left: var(--border-rule);
+  gap: 20px;
+}
+
+.SideFunnel_slide .SideFunnel_rateList {
+  flex-direction: column;
+  gap: 24px;
+}
+
+.SideFunnel_slide .SideFunnel_aside {
+  grid-area: aside;
+  max-width: 48em;
+}
+
+/* The legend shares the upstream line's row, at its right. */
+.SideFunnel_slide .SideFunnel_foot {
+  grid-area: up;
+  justify-self: end;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 12px 40px;
+  padding-top: 0;
+  border-top: none;
+}
