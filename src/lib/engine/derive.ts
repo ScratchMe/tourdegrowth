@@ -1,4 +1,5 @@
 import type { StoredResult } from "@/lib/quiz/storage";
+import { appDerived, appUnitEconomics } from "./app";
 import { buildMirror } from "./bridge";
 import { motionCoverage, setupCoverage } from "./coverage";
 import { diagnose } from "./diagnose";
@@ -8,6 +9,7 @@ import { buildPeloton } from "./peloton";
 import { buildRelays } from "./relays";
 import { sanityChecks } from "./sanity";
 import { deriveSeries } from "./series";
+import { isApp } from "./setup-type";
 import type { ResolvedBridge } from "./strings";
 import { buildTotal } from "./total";
 import type { EngineCalcContext, EngineDerived, EngineState, MotionDerived } from "./types";
@@ -37,7 +39,9 @@ import { currentSnapshot } from "./values";
  * motions' candidates, so none can rank one leak against the other. Only the
  * total adds, and only in the hybrid. Self-serve's peloton, diagnosis and
  * unit economics are also kept at the top, where every v1 reader finds them
- * (`EngineDerived`): the same objects as the `plg` motion's.
+ * (`EngineDerived`): the same objects as the `plg` motion's. An app (§21.5.5)
+ * derives its per-install economics in place of the customer's, and alone
+ * carries the `app` key: its twelve-month value and its two streams.
  */
 export function deriveEngine(
   state: EngineState,
@@ -53,9 +57,11 @@ export function deriveEngine(
 
   const peloton = buildPeloton(state, ctx);
   const diagnosis = diagnose(state, ctx);
-  const unit = unitEconomics(state, ctx);
+  // An app's economy is per install (§21.5.5): its own figures take the place of the customer's.
+  const app = isApp(state.setup);
+  const unit = app ? appUnitEconomics(state, ctx) : unitEconomics(state, ctx);
   const motions: MotionDerived[] = [];
-  if (ticked.plg) motions.push({ motion: "plg", coverage: motionCoverage(snapshot, "plg"), peloton, diagnosis, unit });
+  if (ticked.plg) motions.push({ motion: "plg", coverage: motionCoverage(snapshot, "plg", state.setup), peloton, diagnosis, unit });
   if (ticked.slg) {
     motions.push({
       motion: "slg",
@@ -78,5 +84,6 @@ export function deriveEngine(
   };
   // The series only exists from the second month: a one-month engine — every v1 and v2 file — derives with no key for it.
   const series = deriveSeries(state, ctx);
-  return { ...partial, findings: findings(state, partial, ctx, words), ...(series ? { series } : {}) };
+  // Only an app has the `app` key: the SaaS derives exactly what it did (the goldens never see it).
+  return { ...partial, findings: findings(state, partial, ctx, words), ...(series ? { series } : {}), ...(app ? { app: appDerived(state, ctx) } : {}) };
 }

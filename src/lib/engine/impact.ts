@@ -156,7 +156,7 @@ export function whatIf(
   const snapshot = currentSnapshot(state);
   const referral = REFERRAL_CANDIDATES.includes(candidate);
   // A small COHORT shows whole percents; the month's flows (sign-up, churn, the referred share) aren't a cohort.
-  const noDecimals = candidate !== "ret.logo-churn" && candidate !== "acq.signup-rate" && !referral && cohortIsSmall(snapshot);
+  const noDecimals = candidate !== "ret.logo-churn" && candidate !== "acq.signup-rate" && !referral && cohortIsSmall(snapshot, state.setup);
   const pct = (i: Interval) => formatInterval(i, "percent", ctx, words, { noDecimals });
   const bare = (i: Interval) => formatInterval(i, "ratio", ctx, words); // a displayed rate without its sign, for "20/18"
   const currency = state.setup.currency;

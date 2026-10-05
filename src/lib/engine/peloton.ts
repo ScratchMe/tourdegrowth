@@ -1,6 +1,7 @@
-import { PELOTON_METRICS, SMALL_COHORT_SIZE, shapeOf } from "./catalog-shape";
+import { PELOTON_METRICS, SMALL_COHORT_SIZE, shapeOf, shapesOf, type SetupShapes } from "./catalog-shape";
 import { periodOf } from "./cohort";
 import { div, mapBounds, point } from "./interval";
+import { isApp } from "./setup-type";
 import type { EngineCalcContext, EngineState, Interval, MetricId, Peloton, PelotonColumn, Snapshot } from "./types";
 import { countsOf, currentSnapshot, entryOf, knownIn } from "./values";
 
@@ -40,9 +41,16 @@ export function chainOf(columnsKnown: readonly boolean[]): Peloton["chain"] {
 /** The cohort metrics whose counts give the cohort's size — the sign-ups every column divides by. */
 const COHORT_SIZED: readonly MetricId[] = ["act.rate", "ret.d30", "rev.paid-conversion", "ref.referred-share"];
 
-/** Any cohort count under SMALL_COHORT_SIZE: each sign-up then weighs more than a point, so rates lose their decimals (§6.2). */
-export function cohortIsSmall(snapshot: Snapshot): boolean {
+/**
+ * Any cohort count under SMALL_COHORT_SIZE: each sign-up then weighs more than a point, so rates lose their decimals (§6.2).
+ * With an app's `setup` (§21.5.5) only the numbers it shows are read: one hidden by what it earns from — the paid
+ * conversion without subscriptions — stays stored and says nothing about the cohort the board prints. Without it, or
+ * for a SaaS: all four, as always.
+ */
+export function cohortIsSmall(snapshot: Snapshot, setup?: SetupShapes): boolean {
+  const shown = setup !== undefined && isApp(setup) ? new Set<MetricId>(shapesOf(setup).map((s) => s.id)) : null;
   return COHORT_SIZED.some((id) => {
+    if (shown !== null && !shown.has(id)) return false;
     const size = countsOf(entryOf(snapshot, id))?.denominator;
     return size !== undefined && size < SMALL_COHORT_SIZE;
   });
@@ -51,7 +59,10 @@ export function cohortIsSmall(snapshot: Snapshot): boolean {
 export function buildPeloton(state: EngineState, ctx: EngineCalcContext): Peloton {
   const snapshot = currentSnapshot(state);
 
-  const columns: PelotonColumn[] = PELOTON_METRICS.map((metric) => {
+  // The columns are the peloton's numbers the setup SHOWS (§21 D12): all three, or for an app without subscriptions the
+  // two it has — the subscribers' column is not an unknown to chase, it does not exist for that app.
+  const shown = isApp(state.setup) ? new Set<MetricId>(shapesOf(state.setup).map((s) => s.id)) : null;
+  const columns: PelotonColumn[] = PELOTON_METRICS.filter((metric) => shown === null || shown.has(metric)).map((metric) => {
     const known = knownIn(state, metric, ctx);
     const entry = entryOf(snapshot, metric);
     if (known.kind === "unknown") return { metric, perHundred: null, confidence: "unknown", source: null, period: null };
@@ -77,6 +88,6 @@ export function buildPeloton(state: EngineState, ctx: EngineCalcContext): Peloto
     upstreamPeriod: signup.kind === "known" ? snapshot.referenceMonth : null,
     columns,
     chain: chainOf(columns.map((c) => c.perHundred !== null)),
-    smallCohort: cohortIsSmall(snapshot),
+    smallCohort: cohortIsSmall(snapshot, state.setup),
   };
 }
