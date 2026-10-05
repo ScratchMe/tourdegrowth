@@ -5,6 +5,7 @@ import { Button } from "@/components/core/Button";
 import { Callout } from "@/components/core/Callout";
 import { Checkbox } from "@/components/core/Checkbox";
 import { TEXT_LIMITS, type MetricShape } from "@/lib/engine/catalog-shape";
+import { displayShapeOf } from "@/lib/engine/business-type";
 import { ROLE_KEY, type ResolvedMetric } from "@/lib/engine/strings";
 import type { RoleId, ToolId } from "@/lib/engine/types";
 import { formatMoney, formatNumber, formatPercent } from "@/lib/engine/format";
@@ -124,7 +125,8 @@ export function ValueEditor({
     return formatNumber(Math.round(q * 100) / 100, locale);
   })();
 
-  const src = sourceOptions(shape, strings, teamTools(view.state.setup.tools));
+  const type = view.state.setup.type;
+  const src = sourceOptions(displayShapeOf(shape.id, type), strings, teamTools(view.state.setup.tools, type));
   // The check « deux outils » (§19.5.3), live as the two sources are chosen: the same sentence the deck's list says.
   const toolOf = (choice: SourceChoice) => (choice.startsWith("tool:") ? { kind: "tool" as const, tool: choice.slice("tool:".length) as ToolId } : undefined);
   const pair =

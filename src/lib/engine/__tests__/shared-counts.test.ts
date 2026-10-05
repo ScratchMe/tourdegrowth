@@ -5,6 +5,7 @@ import { knownSharedCount, offBase, propagateFrom, SHARED_COUNTS, settingsShared
 import type { MetricId } from "../types";
 import { validateEngine } from "../validate";
 import { ENGINE_CATALOG } from "@/content/engine-catalog";
+import { ENGINE_CATALOG_CONSUMER, type ConsumerPlgMetricId } from "@/content/engine-catalog-consumer";
 import { emptyState, exampleState, measured, ratio } from "./fixtures";
 
 // Antoine, 2026-09-25: « il y a des chiffres qui sont demandés plusieurs fois
@@ -45,6 +46,37 @@ describe("SHARED_COUNTS — which numbers share a count", () => {
       });
       expect(covered, `« ${l} » appears in ${slots.join(", ")} but is not shared`).toBe(true);
     }
+  });
+});
+
+// The groups an app's numbers sit in (§21.2.4, A22 APP-2): the first block above skips the app's own places, whose prose is
+// the app's, not the SaaS's. Here they are read where they are written — the app's catalogue for the fifteen self-serve
+// numbers (`ENGINE_CATALOG_CONSUMER`), the main one for the six of its own — and must say the same population, in both languages.
+// Non-vacuity, measured on 2026-10-05: « Inscrits en {month} » put back in the install rate's label falls the French case.
+describe("SHARED_COUNTS — the groups that hold an app number, read in the app's catalogue", () => {
+  const appLabel = (id: MetricId, side: "numerator" | "denominator", locale: "fr" | "en"): string | null => {
+    const entry = id.startsWith("app.") ? ENGINE_CATALOG[id] : ENGINE_CATALOG_CONSUMER[id as ConsumerPlgMetricId];
+    return entry?.inputs?.[side]?.[locale] ?? null;
+  };
+  const groups = Object.entries(SHARED_COUNTS).filter(([, slots]) => slots.some((s) => s.metric.startsWith("app.")));
+
+  it("holds two groups: the installs of the month (three places) and the month's actives (two)", () => {
+    expect(groups.map(([count, slots]) => [count, slots.length])).toEqual([
+      ["monthSignups", 3],
+      ["appActives", 2],
+    ]);
+  });
+
+  it.each(["fr", "en"] as const)("labels every place of such a group alike (%s) — « Installations en {month} » three times, « Actifs en {month} » twice", (locale) => {
+    const read = Object.fromEntries(
+      groups.map(([count, slots]) => {
+        const labels = slots.map((s) => appLabel(s.metric, s.side, locale));
+        expect(new Set(labels).size, `${locale} ${count}: ${JSON.stringify(labels)}`).toBe(1);
+        expect(labels[0], `${locale} ${count}`).not.toBeNull();
+        return [count, labels[0]];
+      }),
+    );
+    expect(read).toEqual(locale === "fr" ? { monthSignups: "Installations en {month}", appActives: "Actifs en {month}" } : { monthSignups: "Installs in {month}", appActives: "Actives in {month}" });
   });
 });
 

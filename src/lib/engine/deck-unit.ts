@@ -1,9 +1,10 @@
-import { ALL_DERIVED_SHAPES, LTV_CAP_MONTHS } from "./catalog-shape";
+import { displayDerivedShapeOf } from "./business-type";
+import { LTV_CAP_MONTHS } from "./catalog-shape";
 import { fillTemplate, formatApproxMoneyInterval, formatChange, formatDuration, formatDurationInterval, formatInterval, formatNumber } from "./format";
 import type { MoneyKpis } from "./money";
 import { unitInputsPhrase } from "./phrases";
 import type { EngineStrings, ResolvedMetric } from "./strings";
-import type { DerivedValue, EngineCalcContext, EngineState, Interval, MetricId, SlidePaybackChart, SlideTitle } from "./types";
+import type { BusinessType, DerivedId, DerivedValue, EngineCalcContext, EngineState, Interval, MetricId, SlidePaybackChart, SlideTitle } from "./types";
 
 /**
  * deck-unit.ts — the money on the unit-economics slide (design system
@@ -48,9 +49,12 @@ const mid = (i: Interval) => (i.lo + i.hi) / 2;
 const tuple = (i: Interval): [number, number] => [i.lo, i.hi];
 const missingOf = (d: DerivedValue | undefined): readonly MetricId[] => (d && d.kind === "uncomputable" ? d.missing : []);
 
-/** The commonly cited references, read from the catalogue shapes rather than retyped (§5.7). */
-function benchmarkLo(id: string): number | null {
-  return ALL_DERIVED_SHAPES.find((s) => s.id === id)?.benchmark?.lo ?? null;
+/**
+ * The commonly cited references, read from the catalogue shapes rather than retyped (§5.7), as the engine's type shows
+ * them (§21.4.3). A consumer app's slide has its own variant (§21.7.3) and does not read these.
+ */
+function benchmarkLo(id: DerivedId, type: BusinessType): number | null {
+  return displayDerivedShapeOf(id, type).benchmark?.lo ?? null;
 }
 
 export function unitMoney(input: {
@@ -138,13 +142,13 @@ export function unitMoney(input: {
   }
 
   // --- The LTV:CAC's context ---
-  const ratio = benchmarkLo(slg ? "slg.rev.ltv-cac" : "rev.ltv-cac");
+  const ratio = benchmarkLo(slg ? "slg.rev.ltv-cac" : "rev.ltv-cac", state.setup.type);
   const ratioNote = ratio !== null ? fillTemplate(w.unitRatioReference, { n: formatNumber(ratio, ctx.locale) }) : "";
 
   // --- The picture: one customer, month by month ---
   let chart: SlidePaybackChart | null = null;
   if (k.cac) {
-    const reference = benchmarkLo(slg ? "slg.rev.cac-payback" : "rev.cac-payback");
+    const reference = benchmarkLo(slg ? "slg.rev.cac-payback" : "rev.cac-payback", state.setup.type);
     const known = Boolean(k.monthlyMargin && k.lifetime);
     // Loss, or pays back: the verdict decides; a possible loss is drawn by its middles, and its labels say « may ».
     const leavesFirst = verdict === "loss" || (verdict === "maybe" && k.payback !== null && k.lifetime !== null && mid(k.payback) > mid(k.lifetime));
