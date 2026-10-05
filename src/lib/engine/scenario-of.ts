@@ -1,7 +1,7 @@
-import { appLeverAlone, appLeverIds, buildAppScenario } from "./app";
-import { LEVER_IDS } from "./catalog-shape";
+import { appCandidates, appLeverAlone, appLeverIds, buildAppScenario } from "./app";
+import { LEVER_IDS, candidatesOf } from "./catalog-shape";
 import { buildScenario, leverAlone, type Scenario } from "./scenario";
-import type { EngineCalcContext, EngineSetup, EngineState, LeverId } from "./types";
+import type { CandidateId, EngineCalcContext, EngineSetup, EngineState, LeverId, Motion } from "./types";
 
 /**
  * scenario-of.ts — the one entry point for the calculations a screen or a slide reads (engine spec §21.1 D4, §21.5.1).
@@ -25,4 +25,11 @@ export function scenarioOf(state: EngineState, targets: Partial<Record<LeverId, 
 /** Each moved lever on its own, whatever the type: what the deck prints one slide per lever for. */
 export function leverAloneOf(state: EngineState, id: LeverId, ctx: EngineCalcContext): Scenario | null {
   return state.setup.type === "consumer-app" ? appLeverAlone(state, id, ctx) : leverAlone(state, id, ctx);
+}
+/**
+ * The candidates a setup's targets and diagnosis read, for one motion (APP-5): the SaaS's `candidatesOf(motion)`, or,
+ * for an app's self-serve, `appCandidates(setup)` (§21.5.4). Every screen that offers a target loops on it.
+ */
+export function candidatesFor(setup: Pick<EngineSetup, "type" | "motions" | "monetization">, motion: Motion): readonly CandidateId[] {
+  return setup.type === "consumer-app" && motion === "plg" ? appCandidates(setup) : candidatesOf(motion);
 }

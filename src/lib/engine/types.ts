@@ -491,8 +491,12 @@ export type PlgCandidateId =
  * the link (C25 Q7): a target on it names no stage.
  */
 export type SlgCandidateId = "slg.acq.lead-to-opp" | "slg.act.go-live" | "slg.ret.renewal" | "slg.ref.referred-share" | "slg.rev.win-rate";
+/** The consumer app's own candidate (§21.5.4): the actives' monthly retention, priced in money only, like churn. */
+export type AppCandidateId = "app.ret.active-retention";
+/** A self-serve engine's candidates, whatever its type: the SaaS ranks the first six, an app may add its own. */
+export type SelfServeCandidateId = PlgCandidateId | AppCandidateId;
 /** Any stage a diagnosis may name — each diagnosis only ever positions its own motion's (§18.5.2). */
-export type CandidateId = PlgCandidateId | SlgCandidateId;
+export type CandidateId = PlgCandidateId | SlgCandidateId | AppCandidateId;
 /**
  * What may name a stage: the team's own target, and nothing else (decision 5,
  * reversed 2026-09-29, `CHANTIERS.md` C1 — a published reference is context,
@@ -552,11 +556,11 @@ export type DiagnosisState = "clear" | "shared" | "level" | "not-enough";
 /**
  * One motion's diagnosis (§6.6, §18.5.2). Its positions carry ONLY that
  * motion's candidates, so no function can rank a self-serve stage against a
- * sales-assisted one (§18.6.4). The default, `PlgCandidateId`, is the v1
- * reading the screens were written against; the hybrid's screens (S3) read
- * either.
+ * sales-assisted one (§18.6.4). The default, `SelfServeCandidateId`, is the v1
+ * reading the screens were written against, plus an app's own candidate; the
+ * hybrid's screens (S3) read either.
  */
-export interface Diagnosis<C extends CandidateId = PlgCandidateId> {
+export interface Diagnosis<C extends CandidateId = SelfServeCandidateId> {
   motion: Motion;
   state: DiagnosisState;
   /** clear: 1; shared: the WHOLE group, never capped at two; otherwise []. */
@@ -566,7 +570,12 @@ export interface Diagnosis<C extends CandidateId = PlgCandidateId> {
   belowUnpriced: C[];
   /** ★ (or churn) unknown: "the real bottleneck may hide there". */
   blind: MetricId[];
-  positions: Record<C, { position: Position; comparator?: Comparator; impact?: Impact }>;
+  /**
+   * One entry per candidate the motion's rules position. Absent: not a
+   * candidate of this engine (an app without subscriptions has no paid
+   * conversion). Partial since §21, A22 — readers use `?.`.
+   */
+  positions: Partial<Record<C, { position: Position; comparator?: Comparator; impact?: Impact }>>;
 }
 export type SlgDiagnosis = Diagnosis<SlgCandidateId>;
 
@@ -1002,7 +1011,7 @@ export interface DeckModel {
 
 /** One ticked motion, read on its own (§18.6.1): its coverage, its funnel, its diagnosis, its unit economics. */
 export type MotionDerived =
-  | { motion: "plg"; coverage: Coverage; peloton: Peloton; diagnosis: Diagnosis<PlgCandidateId>; unit: UnitEconomics }
+  | { motion: "plg"; coverage: Coverage; peloton: Peloton; diagnosis: Diagnosis<SelfServeCandidateId>; unit: UnitEconomics }
   | { motion: "slg"; coverage: Coverage; relays: Relays; diagnosis: SlgDiagnosis; unit: SlgUnitEconomics };
 
 /**
@@ -1085,7 +1094,7 @@ export interface Series {
 export interface EngineDerived {
   coverage: Coverage;
   peloton: Peloton;
-  diagnosis: Diagnosis<PlgCandidateId>;
+  diagnosis: Diagnosis<SelfServeCandidateId>;
   unit: UnitEconomics;
   motions: MotionDerived[];
   /** null outside the hybrid. */

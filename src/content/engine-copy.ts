@@ -725,6 +725,8 @@ export const ENGINE_COPY = {
     "slg.ret.renewal": { fr: "le renouvellement des contrats", en: "contract renewal" },
     "slg.ref.referred-share": { fr: "la part des opportunités recommandées", en: "the referred share of opportunities" },
     "slg.rev.win-rate": { fr: "le taux de closing", en: "the win rate" },
+    // TODO: à relire — copie neuve (convention 6), §21 (A22 APP-5) : la rétention des actifs, candidate propre à l'app, sujet de phrase avec son article.
+    "app.ret.active-retention": { fr: "la rétention des actifs", en: "active retention" },
   } satisfies Record<CandidateId, Translatable>,
   /**
    * The activation event inside a sentence — what the catalogue's `{event}`

@@ -46,7 +46,7 @@ export function suggestedSuccess(derived: EngineDerived): Pick<EngineAsk, "succe
   if (naming.length !== 1) return {};
   const { named, positions } = naming[0]!;
   const metric = named[0] as CandidateId;
-  const comparator = (positions as Record<CandidateId, { comparator?: Parameters<typeof impactTarget>[0] }>)[metric]?.comparator;
+  const comparator = (positions as Partial<Record<CandidateId, { comparator?: Parameters<typeof impactTarget>[0] }>>)[metric]?.comparator;
   if (!comparator) return { successMetric: metric };
   return { successMetric: metric, successTarget: impactTarget(comparator) };
 }
