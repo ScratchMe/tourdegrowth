@@ -13,8 +13,10 @@ import type { Translatable } from "@/lib/i18n/translatable";
  * (`content/game/retention.ts`, `dashboard.churn` and
  * `dashboard.notOnDashboard`). Level 2's card (2026-10-01, A12.f) is new copy
  * written by the code session on the model of level 1's, the two openings
- * and the mention shared; level 3's (2026-10-05, A24 ACT-3) likewise; so is the card offering several levels
- * (`GAME_ENTRY_SEVERAL`, A12.f.2), with its own title, body and mention.
+ * and the mention shared; level 3's (2026-10-05, A24 ACT-3) is copied from
+ * `docs/game/activation.md` §18.11, written there on the same model; so is
+ * the card offering several levels (`GAME_ENTRY_SEVERAL`, A12.f.2), with its
+ * own title, body and mention.
  *
  * Its own module, and only the result page imports it: the level's text
  * (`retention.ts`, ~800 lines) must not ride into the result page's server
@@ -43,9 +45,9 @@ export interface GameEntryCopy {
    * The night band across the top of the card: the object of the game in one
    * glance — the one number the CEO watches, and the one that is missing from
    * his dashboard. `{metric}` is the level's starting number (churn, new
-   * customers), formatted by the caller from the level model rather than
-   * written here, so the card cannot quote a number the game does not start
-   * from.
+   * customers, activation rate), formatted by the caller from the level model
+   * rather than written here, so the card cannot quote a number the game does
+   * not start from.
    */
   band: {
     metric: Translatable;

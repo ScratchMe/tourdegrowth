@@ -9,7 +9,9 @@ import type { Translatable } from "@/lib/i18n/translatable";
  *
  * **TODO: à relire** (convention 6). The five zone questions are the
  * prototype's own French (its `<nav class="tour">`); their English, the
- * company lines (from GAME-BRIEF 11.1-11.4), the ending labels and every
+ * company lines (from GAME-BRIEF 11.1-11.4; Pédalix's and Quandi's from
+ * their level's specification, `docs/game/niveau-2.md` §17 and
+ * `docs/game/activation.md` §18.11), the ending labels and every
  * other string are new copy written by the code session. One exception
  * besides the zone questions: `LEVEL_TEASERS.acquisition` in French is the
  * prototype's too (`design/game/prototype-s-ils-reviennent.html`), hence
