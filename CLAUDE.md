@@ -45,7 +45,7 @@ antérieur du type « `CLAUDE.md`, étape 5 », « l'entrée R-12 de `CLAUDE.md`
 « `CLAUDE.md`, 2026-09-14 », dans le code comme dans les documents, désigne une
 entrée du journal. Les règles, les leçons et les conventions numérotées,
 elles, sont restées ici. **Depuis le 2026-10-01, `JOURNAL.md` n'est plus que le
-volume courant** : les entrées d'avant le 2026-10-04 sont dans `docs/journal/`,
+volume courant** : les entrées d'avant le 2026-10-05 sont dans `docs/journal/`,
 déplacées telles quelles, et un test le tient sous 200 000 caractères (son
 en-tête dit comment archiver).
 
