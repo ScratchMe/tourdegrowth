@@ -1238,11 +1238,19 @@ montrés, `app.ret.active-retention`, `app.rev.purchases-per-active`,
    `usagePath(inputs.actives, nouveauxActifs, v("app.ret.active-retention"),
    perToday, projected ? perProjected : perToday)`.
 5. **Le revenu** : `mrrPath = appRevenuePath(m, base.<col>.kpis.mrrPath,
-   usage)` ; `mrr = appRevenueToday(m, base.today.kpis.mrr, usage?.[0] ?? null)`
-   (le même dans les deux colonnes, comme le SaaS) ; `newMrr =
+   usage)` ; `mrr = appRevenueToday(m, base.today.kpis.mrr, usageToday)`, où
+   `usageToday = mul(inputs.actives, perToday)` (`null` si l'un manque, ou
+   sans usage coché), le même dans les deux colonnes, comme le SaaS ; `newMrr =
    appRevenueToday(m, base.<col>.kpis.newMrr, nouveauxActifs × per<col>)` ;
    `mrr12 = mrrPath?.[12] ?? null` ; `arr = arrOf(mrr)` ; `arr12 =
-   arrOf(mrr12)`.
+   arrOf(mrr12)`. **Le revenu du mois se sait sans les installations du
+   mois**, comme le MRR du SaaS sans les inscrits : quand elles manquent
+   (point 3), seuls la courbe d'usage, le nouveau revenu et le revenu dans
+   12 mois restent inconnus. Quand elles sont connues, `usageToday` vaut
+   `usage[0]` et rien ne change. *Décidé par Antoine le 2026-10-05, sur la
+   question du pilote APP-4 (#359)* : le premier texte lisait `usage?.[0] ??
+   null`, et une app aux achats ou à la pub sans installations saisies
+   affichait un revenu du mois inconnu.
 6. **La rétention du revenu** : `nrr` et `grr` de `base` si les abonnements
    sont cochés, sinon `null`.
 7. **Le coût par installation** : aujourd'hui `inputs.cpi` ; en projeté, **à
