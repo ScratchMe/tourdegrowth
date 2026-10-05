@@ -498,6 +498,73 @@ La relecture propose une error boundary propre à l'îlot, qui couvre toute la c
 
 **Pour la suite.** `deck.ts` lit `positions` par un transtypage en `Record<CandidateId, …>` qui cache le `Partial` : sa boucle sur `CANDIDATE_IDS` (ligne 478) lirait une position absente pour une app sans abonnements, ce qu'APP-9 corrige (§21.5.4) et que le balayage d'APP-6 contourne par `deck: false`. Aucun écran n'appelle encore `candidatesFor`.
 
+## A25.b : un moteur que le tableau ne sait pas dessiner ne casse plus la page (2026-10-05)
+
+**Livré** ([#360](https://github.com/ScratchMe/tourdegrowth/pull/360)). C'est le constat que la relecture sécurité d'A25 avait laissé hors de son périmètre. Une **entrée** mal formée passait l'import avec ses avertissements, se stockait, puis cassait le tableau à chaque visite : la page « détour », sans autre issue que d'effacer les données du site. Les deux cas vérifiés : un `conflicting` sans ses deux lectures, et une entrée assistée au `cohortMonth` invalide. « Fusionner » pouvait aussi la faire entrer dans le moteur de quelqu'un.
+
+**Le premier jet**, la piste de la relecture :
+- une error boundary sur l'îlot (`_engine/EngineBoundary.tsx`), la seule classe de l'îlot ;
+- une seconde chance depuis le tableau, puis l'écran « illisible » existant, sans rien écrire ;
+- un import « en période d'essai » jusqu'à ce que le tableau l'ait dessiné. S'il lève avant, l'appareil est remis octet pour octet par une copie des clés du moteur (`deviceCopy` / `restoreDevice`, `storage.ts`). Une seule règle couvre ainsi ouvrir, ajouter, remplacer, fusionner, et l'import par-dessus un appareil illisible ;
+- un second filet autour du panneau d'import, pour un aperçu qui lève.
+
+Reproduit d'abord : les 6 specs rougissaient contre le build de `main`.
+
+**La relecture sécurité du premier jet** a trouvé quatre trous, tous corrigés dans la même PR :
+1. **Une fusion apportant un mois passé piégé passait.** Le tableau ne lit que les deux derniers mois au premier dessin : la période d'essai se clôturait, et le poison restait jusqu'au jour où quelqu'un ouvrirait ce mois. Le fichier est maintenant **jugé dès sa lecture**. Chaque mois est calculé comme le tableau le calcule : `boardOf`, sorti du `useMemo`, pour que le contrôle et le tableau ne puissent pas diverger. Le moteur de l'appareil fusionné avec le fichier est jugé aussi (`drawnWith`, `ImportPanel.tsx`), et le fichier est refusé avant toute écriture. La période d'essai et le filet du panneau deviennent des filets de second rang, pour une levée de composant que le calcul ne voit pas.
+2. **L'écran « illisible » cachait les autres moteurs** et ne laissait qu'« Importer » ou « Tout effacer », pour des chiffres intacts. L'instantané garde le moteur qui a levé (`undrawn`). L'écran propose « Sauvegarder (.json) » de ce moteur tel quel, et la liste des autres moteurs de l'appareil avec « Ouvrir », sous une chaîne neuve, à relire : « Les autres moteurs de cet appareil : ».
+3. **La seconde chance pouvait boucler** sur une erreur levée après le dessin, et un compteur resté à 1 pouvait déclarer illisible un moteur neuf. Désormais :
+   - `drawn(board)` remet les échecs à zéro après tout écran dessiné ;
+   - il ne clôt la période d'essai que pour le tableau ;
+   - au-delà de trois replis hors import par visite, l'erreur remonte au « détour » ;
+   - le filet du panneau s'arrête aussi après trois.
+4. **Une remise en place qui échouait** montrait l'ancien moteur depuis la mémoire. Elle mène maintenant à l'écran « illisible ».
+
+Elle confirme aussi deux points :
+- aucune autre clé de l'appareil n'est touchée ;
+- un autre onglet ne peut pas écrire entre la copie et la remise en place, qui ont lieu dans la même tâche.
+
+**Sa contre-relecture des corrections** confirme 1 à 4 fermés, et en ouvre quatre de plus, faibles à moyens, tous corrigés :
+- **A.** Ouvrir un second moteur piégé depuis l'écran « illisible » épuisait le budget de replis : la page « détour » revenait, et « Réessayer » restait bloqué, puisque les variables de module survivent. Le budget revient maintenant à chaque action de la personne : écriture, changement de moteur, suppression, « Tout effacer ». Aucun effet de l'îlot n'écrit (53 fichiers, 11 effets parcourus), donc une boucle ne peut pas le remettre à zéro.
+- **B.** Un moteur d'appareil qui ne se dessine pas lui-même (un mois passé, stocké avant A25.b) faisait refuser tout fichier par la fusion, y compris « Remplacer » par sa propre sauvegarde, qui est justement la réparation. Seul un moteur qui se dessine peut maintenant accuser un fichier.
+- **C.** Le coût du contrôle n'avait pas de borne : `parseEngineFile` ne refuse pas plus de 36 mois, il le signale seulement. Un fichier de plus de `MAX_MONTHS` mois est maintenant refusé à la lecture : aucun build n'en écrit autant.
+- **D.** Une remise en place ratée perdait le moteur qu'un « Remplacer » avait écrasé. L'écran « illisible » l'offre maintenant depuis la mémoire. Et `restoreDevice` ne réécrit plus une clé inchangée : un appareil qui refuse les écritures « échouait » sinon une remise en place dont il n'avait pas besoin.
+
+**Ce qui reste, sciemment** :
+- Un brouillon de fiche, déjà effacé par l'import (`dropAllDrafts`), ne revient pas après un retour arrière.
+- Un mois ajouté par la fusion n'est pas filtré à `KNOWN_METRICS` (`merge.ts`, antérieur, A14 T5). Le contrôle à la lecture en rend la conséquence inoffensive.
+- L'entrée d'un moteur sorti de l'index par « Importer » sur l'écran « illisible » reste orpheline : c'est le choix d'A14 T5, ici étendu. Le fichier offert sur le même écran garde ses chiffres.
+- Le texte de l'écran « illisible » reste générique (« Les données … sont illisibles »). Une phrase propre au moteur qui lève pourra venir au prochain bon à tirer.
+
+**Les tests** :
+- `e2e/engine-fallback.spec.ts`, 8 specs : un fichier refusé à la lecture sur un appareil vide (en français) et à côté d'un moteur ; le mai fusionné de la relecture ; une fusion qui lève alors que le fichier se lit seul ; « Remplacer » qui répare un appareil dont le propre moteur a un mois piégé (B) ; un fichier de 37 mois (C) ; le moteur stocké, dans les deux langues ; l'écran de repli, son fichier téléchargé et son autre moteur ouvert.
+- **Non-vacuité, un build par sabotage** :
+
+  | Sabotage | Specs qui tombent |
+  |---|---|
+  | Sans le contrôle à la lecture | les 4 specs de fichier |
+  | Fusion non jugée | la quatrième seule, ce qui prouve que ce fichier se lit seul |
+  | Sans le filet de l'îlot | les 2 du moteur stocké |
+  | Sans `undrawn` | la dernière |
+  | Sans la période d'essai | aucune, comme écrit en tête du fichier |
+  | Sans le filet du panneau | aucune, comme écrit en tête du fichier |
+  | Le moteur de l'appareil peut accuser le fichier (B) | celle de « Remplacer » seule |
+  | Sans le plafond de 36 mois (C) | celle des 37 mois seule |
+
+  **Un sabotage n'a pas compilé** : il ne prouvait donc rien (`TESTING.md` §1.3). Il a été refait.
+- `_engine/__tests__/engine-store.test.ts`, 20 tests sur le store. Seize sabotages, remesurés sur la version finale : chacun fait tomber au moins un test, et les comptes sont en tête du fichier.
+- **Un test a d'abord échoué à cause du plafond lui-même** : sa boucle appelait `fallBack` quatre fois dans la même visite. Le test a été découpé.
+
+**Vérifié, sorties réelles** :
+- `eslint` et `tsc` propres.
+- `vitest run --coverage` : **3 759 sur 3 759** (+20), seuils tenus.
+- Build comme la CI.
+- Playwright, suite complète avec `CI=1` et sans l'émulateur Firestore :
+  - sur le premier jet : **987 passées, 50 sautées, 0 échec**, sur 1 037 ;
+  - sur la version d'avant la contre-relecture : **986 passées, 50 sautées, 0 échec**, sur 1 036 ;
+  - après A à D : les 54 specs du moteur passées (`engine-fallback`, `engine-engines`, `engine-migration`, `engine-collect`), sur 1 038 au total. La suite complète, émulateur compris, est celle de la CI.
+- **À l'écran, à 390 px** : l'écran « illisible » en français, puis avec ses trois boutons et l'autre moteur ; le refus après un import en anglais.
+
 ## A24, REF-4 : les specs Playwright du niveau referral (2026-10-05)
 
 **Livré** (branche `a24-ref-4`, `docs/game/referral.md` §19.12 T4 et `docs/game/construire-un-niveau.md` §21.3 T4), mené par un sous-agent Sonnet depuis la seule spécification : `e2e/game-referral.spec.ts`, **14 specs**, sur le modèle de `e2e/game-level2.spec.ts` et de `e2e/game-activation.spec.ts` (ACT-4). Aucune ligne de code de production, de modèle, de test unitaire ni de copie n'a bougé : l'unité ne touche que ce fichier, cette entrée et un nombre de `CLAUDE.md` (1 042 devient 1 056 specs Playwright ; les tests unitaires, 3 886, et les 8 ignorées par construction sont inchangés). Le niveau 4 est donc fini au sens de §21.7 : jouable derrière le drapeau, ses specs écrites. Restent le bon à tirer (A24.bat), la re-synchro (B18) et la recette d'Antoine.
