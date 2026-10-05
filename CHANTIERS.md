@@ -418,7 +418,7 @@ APP-6, APP-9 et APP-11.
 | APP-1 | les chiffres de l'app : formes, listes, `shapesOf(setup)`, comptes partagés, prose | APP-0 | **Livré le 2026-10-05** ([#348](https://github.com/ScratchMe/tourdegrowth/pull/348)) |
 | APP-2 | la forme affichée et la prose des quinze, les outils | APP-1 | **Livré le 2026-10-05** ([#352](https://github.com/ScratchMe/tourdegrowth/pull/352)) |
 | APP-3 | le calque de copie | APP-2 | **Livré le 2026-10-05** ([#355](https://github.com/ScratchMe/tourdegrowth/pull/355)) |
-| APP-4 | le scénario de l'app et la couture | APP-1 | **Livré le 2026-10-05** |
+| APP-4 | le scénario de l'app et la couture | APP-1 | **Livré le 2026-10-05** ([#359](https://github.com/ScratchMe/tourdegrowth/pull/359)) |
 | APP-5 | le diagnostic de l'app | APP-4 | ☐ |
 | APP-6 | la dérivation, les constats, les contrôles, le peloton | APP-5 | ☐ |
 | APP-7 | la carte de départ, le réglage, les Réglages, l'événement | APP-3, APP-6 | ☐ |

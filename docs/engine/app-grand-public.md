@@ -1223,8 +1223,11 @@ montrés, `app.ret.active-retention`, `app.rev.purchases-per-active`,
 1. `levers = leverViews(state, targets, ctx, appLeverIds(setup))` ; `moved` =
    ceux qui ont une cible, dans cet ordre.
 2. `base = buildScenario(state, plgTargets, ctx)`, où `plgTargets` garde les
-   cibles des leviers de `LEVER_IDS`. Il porte le flux d'abonnements (MRR,
-   nouveau MRR, courbe, NRR, GRR) et le funnel du mois.
+   cibles des leviers de `LEVER_IDS` **que `appLeverIds` rend** : une cible
+   restée sur un chiffre masqué (une façon de gagner décochée, §21.5.5) ne
+   fait pas bouger le funnel. Avec les abonnements, ce sont tous ceux de
+   `LEVER_IDS`. Il porte le flux d'abonnements (MRR, nouveau MRR, courbe, NRR,
+   GRR) et le funnel du mois. *Précisé après APP-4 (#359)*.
 3. **Les nouveaux actifs** : `base.<colonne>.funnel.d30` quand
    `funnel.perHundred` est faux (les installations du mois sont connues),
    `null` sinon. *C'est D9* : le funnel du libre-service fait déjà varier J30
@@ -1280,7 +1283,8 @@ montrés, `app.ret.active-retention`, `app.rev.purchases-per-active`,
    - `actives-follow-d30` : un levier de flux a bougé et l'usage est coché ;
    - `per-active-all-actives` : un revenu par actif a bougé ;
    - `commission-margin-only` : la commission a bougé ;
-   - `same-spend-installs` : `fInstalls ≠ 1` ;
+   - `same-spend-installs` : `fInstalls ≠ 1` et le coût par installation
+     connu (comme `same-spend` demande le CAC ; précisé après APP-4) ;
    - `install-months` : `ltv` est calculée ;
    - `usage-twelve-months` : la courbe d'usage est calculée.
    `ScenarioAssumption` gagne ces six ids ; leur texte est en §21.8.4.
@@ -2491,6 +2495,14 @@ Playwright importe ce fichier). APP-4 les écrit avec les entrées de §21.9.1
 (par `withEntry` et `measured`, sans `exampleEngine`, que l'app n'a pas
 encore) ; APP-10 les fait lire `exampleEngine(…, "consumer-app", …)`.
 
+**Les sources de la colonne « source »**, telles qu'APP-4 les a posées et
+qu'APP-10 les reprend : « produit » est `{ kind: "other" }`, comme
+`exampleMetrics` pour l'événement d'activation ; « data » et « finance » sont
+`{ kind: "person", role: "data" }` et `{ kind: "person", role: "finance" }` ;
+un nom d'outil est `{ kind: "tool", tool: <id> }`. `act.ttv` porte la variante
+`median`. `EXAMPLE_CONSUMER_TARGETS` est posée par APP-4, dans `example.ts`, à
+côté d'`EXAMPLE_CONSUMER_WHATIF` : `consumerState()` en a besoin.
+
 #### 21.9.2 Ce que le moteur doit en sortir
 
 Les chiffres du modèle pur sont épinglés par `app-model.test.ts` ; ceux qui
@@ -2662,7 +2674,7 @@ remboursement, pas de pointillé de 12 mois, pas de tuile de trésorerie).
 | `appShapeShown` qui montre la commission avec la pub seule | les comptes de §21.4.1 | APP-1 |
 | `displayShapeOf` qui copie l'objet au lieu de le rendre pour le SaaS | « même référence » | APP-2 |
 | Une feuille désignée retirée du calque | `engine-copy-consumer.test.ts`, point 1 | APP-3 |
-| `scenarioOf` qui pose `kpis.app` pour le SaaS | l'invariance du SaaS ; golden v2 | APP-4 |
+| `scenarioOf` qui pose `kpis.app` pour le SaaS | l'invariance du SaaS ; golden v2 à partir d'APP-9 (avant, personne n'appelle `scenarioOf`) | APP-4 |
 | Les nouveaux actifs qui ne suivent pas J30 (le funnel d'aujourd'hui en projeté) | la courbe de l'« Et si » de §21.9.2 | APP-4 |
 | `fInstalls` calculé autrement que le funnel | la garde de §21.5.3, point 7 | APP-4 |
 | La part d'usage comptée pour la conversion en payant | le diagnostic de l'exemple (`shared` → `clear`) | APP-5 |
@@ -2958,7 +2970,7 @@ relire" src/`), puis l'ouverture par Antoine.
   `ScenarioKpis.app`, `ScenarioAssumption`, `MONEY_LEVERS`, `LOWER_IS_BETTER`,
   `stepOf`), `app.ts` (nouveau), `scenario-of.ts` (nouveau, sans
   `candidatesFor`, qui vient en APP-5), `example.ts`
-  (`EXAMPLE_CONSUMER_WHATIF`), `__tests__/fixtures.ts`,
+  (`EXAMPLE_CONSUMER_WHATIF`, `EXAMPLE_CONSUMER_TARGETS`), `__tests__/fixtures.ts`,
   `content/engine-copy.ts` (`leverSubject`, `scenario.assumption` : §21.8.4 b),
   `src/lib/engine/__tests__/app.test.ts` (nouveau), `business-type.test.ts`.
 - **Étapes** :
