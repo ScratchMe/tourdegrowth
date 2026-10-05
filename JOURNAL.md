@@ -710,3 +710,27 @@ La production est à revérifier après le déploiement, avec toutes les adresse
 - Build de production comme la CI (`NEXT_PUBLIC_GOATCOUNTER_CODE=e2e-stub ADMIN_DASHBOARD_PASSWORD=e2e-admin GAME_ENABLED=true`) : code de sortie 0.
 - Playwright contre ce build : la spec seule, **12 passées sur 12** ; la suite complète, avec l'émulateur Firestore (jar 1.22.0, SHA-256 vérifié) et `CI=1`, sur la version finale de la spec : **1 022 passées, 7 ignorées par construction, 0 échec**, sur **1 029** comptées par `playwright test --list` (1 017 avant : +12), en 11,2 minutes. Un premier lancement de la suite complète a été interrompu par la limite de temps de l'outil (884 passées, aucune en échec), puis refait en entier.
 - **À l'écran** (leçon nº 1), sur le build, par un script jetable hors du dépôt (`git status` ne montre que les fichiers de l'unité) : le premier écran, la main avec `bundle` et `refuse` cochées (français, 1 280 px), l'année C en anglais à 390 px (la main avec `bundle` et `phone`, la main du T2 avec `banner` cochée et la pastille corail, le bilan du T3 avec l'amende, la main du T4 après le contrôle, décembre), l'année A en français à 1 280 px jusqu'à décembre ; `scrollWidth - clientWidth` à 0 sur les dix captures, aucune erreur de console.
+
+## A22 : §21 complété d'après l'arrêt d'APP-2 (2026-10-05)
+
+**L'arrêt.** Le sous-agent d'APP-2 a tout codé (vitest 3 591 sur 3 591 ; `engine-canary` et `engine-collect` 32 sur 32 ; HTML +5,8 ko gzip en français, +5,3 en anglais), puis s'est arrêté sur la règle 1 de §23.0 : une chaîne exigée manquait dans §21.4.6. Pour `rev.contraction`, la spécification disait seulement « comme `rev.expansion`, ligne « rétrogradation » ». Lu à la lettre, cela donnait un chemin RevenueCat « vers une offre plus chère », une demande « le MRR ajouté par les abonnés déjà là » et une raison sur « la place pour l'expansion », toutes fausses pour une rétrogradation. L'anglais du chemin Stripe de `rev.expansion` manquait aussi. Son travail est commité à part (`1ab3c5f`), avec les chaînes du SaaS en attente, et repris après cette PR.
+
+**La réponse d'Antoine** (2026-10-05, la reco) : les chaînes sont écrites dans §21.4.6.
+- L'anglais du chemin Stripe de l'expansion.
+- Pour la rétrogradation : RevenueCat « vers une offre moins chère », et Stripe ligne « contraction », le nom de la ligne dans Stripe, comme l'entrée du SaaS.
+- La demande et la raison « sans repère » sont recopiées du SaaS, qui n'ont aucun mot propre au SaaS.
+
+Comme toute copie neuve, elles passent au bon à tirer A22.d.
+
+**Ce que le sous-agent a dû deviner, et ce qui est écrit** :
+- **`savedTools(ticked, held, type)`**, extraite de `Setup.tsx` dans `tools.ts`. Vitest ne monte aucun composant : le « test de `Setup` » de §21.6.5 teste cette fonction. La règle va dans §23.8 pour APP-7, dont la fiche demande aussi un test de `Setup`.
+- **Le sixième paramètre de `catalogRules`** (`{ minReferences, carriesPeriod }`). L'app a deux repères et aucun `{period}`.
+
+**Laissé tel quel** :
+- `MetricSheet` garde `shapeOf(id)` et ne lit que le repère par `displayShapeOf`.
+- Le catalogue reste celui du SaaS pour l'exemple, jusqu'à APP-10.
+- L'anglais des réserves de GRR et NRR est remplacé après « approximate: ».
+- Pas de raison « sans repère » exigée pour un chiffre texte ou choix.
+- Une garde de vocabulaire ajoutée au catalogue de l'app : ni « inscrit », ni « client ».
+
+À retenir pour APP-7 : `Setup.start()` écrit encore le type du SaaS et aucune monétisation (§21.6.2).
