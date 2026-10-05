@@ -784,7 +784,7 @@ REF-4 du §21.9).
   `levels/referral.ts` : « in DRAFT (`DraftLevelSlug`): no page, no copy, no
   save yet. » devient « wired on <date> (A24, REF-3): its copy is
   `content/game/referral.ts`, its page `app/[locale]/game/referral/`. ». Et :
-  - `e2e/real-results.ts` : `referralClear: { id: "7d3c9e2a-0b1f-4c5d-8e6f-1a2b3c4d5e09", tone: "neutral", locale: "en", answers: answersFor({ acquisition: 1, activation: 0, retention: 1, referral: 2, revenue: 0 }), total: 54 }`
+  - `e2e/real-results.ts` : `referralClear: { id: "7d3c9e2a-0b1f-4c5d-8e6f-1a2b3c4d5e10", tone: "neutral", locale: "en", answers: answersFor({ acquisition: 1, activation: 0, retention: 1, referral: 2, revenue: 0 }), total: 54 }`
     (le referral seul à 0/20 : un goulot `clear`) ; `e2e/result-real.spec.ts`
     attend `game-entry-cta` vers `/en/game/referral?from=result`, la bande
     `game-entry-band` « Viral coefficient 0.40 », sur une ligne (hauteur ≤ 44 px

@@ -117,18 +117,18 @@ const BUDGETS: { module: string; max: number; why: string }[] = [
   },
   {
     module: "content/game/meta.ts",
-    max: 9,
-    why: "Titres, descriptions, intro des niveaux : le hub, les trois pages de niveau, leurs quatre images OG (chantier G4b), et /llms.txt quand le jeu est ouvert (C27). Pas le sitemap, qui ne lit que des chemins et des dates. 5 avant le niveau 2 (A12.f, 2026-10-01), 7 avant le niveau 3 (A24, ACT-3, 2026-10-05).",
+    max: 11,
+    why: "Titres, descriptions, intro des niveaux : le hub, les quatre pages de niveau, leurs cinq images OG (chantier G4b), et /llms.txt quand le jeu est ouvert (C27). Pas le sitemap, qui ne lit que des chemins et des dates. 5 avant le niveau 2 (A12.f, 2026-10-01), 7 avant le niveau 3 (A24, ACT-3, 2026-10-05), 9 avant le niveau 4 (A24, REF-3, 2026-10-05).",
   },
   {
     module: "content/game/hub.ts",
-    max: 5,
-    why: "Le hub, les trois pages de niveau dont la navigation des zones reprend les cinq questions, et l'image de partage du hub qui dessine les cinq zones (chantier G4b). Écart au plan (qui disait 1) : une seconde copie des zones dériverait. Les images des NIVEAUX ne l'atteignent pas, et ne doivent pas. 4 avant le niveau 3 (A24, ACT-3, 2026-10-05).",
+    max: 6,
+    why: "Le hub, les quatre pages de niveau dont la navigation des zones reprend les cinq questions, et l'image de partage du hub qui dessine les cinq zones (chantier G4b). Écart au plan (qui disait 1) : une seconde copie des zones dériverait. Les images des NIVEAUX ne l'atteignent pas, et ne doivent pas. 4 avant le niveau 3 (A24, ACT-3, 2026-10-05), 5 avant le niveau 4 (A24, REF-3, 2026-10-05).",
   },
   {
     module: "content/game/retention.ts",
-    max: 6,
-    why: "Les 49 Ko de texte du niveau 1 : sa page (îlot, G8a) et son image de partage, qui reprend les libellés du dashboard (G4b) ; et, depuis A12.f (2026-10-01), la page et l'image du niveau 2, dont la copie reprend par référence ce que le niveau 1 dit de toute année (A12.c) ; et, depuis A24 ACT-3 (2026-10-05), la page et l'image du niveau 3, dont la copie reprend le niveau 1 de la même façon (A24 ACT-1). Jamais l'image du hub.",
+    max: 8,
+    why: "Les 49 Ko de texte du niveau 1 : sa page (îlot, G8a) et son image de partage, qui reprend les libellés du dashboard (G4b) ; et, depuis A12.f (2026-10-01), la page et l'image du niveau 2, dont la copie reprend par référence ce que le niveau 1 dit de toute année (A12.c) ; et, depuis A24 ACT-3 (2026-10-05) puis REF-3 (le même jour), la page et l'image du niveau 3 et celles du niveau 4, dont la copie reprend le niveau 1 de la même façon (A24 ACT-1, REF-1). Jamais l'image du hub.",
   },
   {
     module: "content/game/acquisition.ts",
@@ -139,6 +139,11 @@ const BUDGETS: { module: string; max: number; why: string }[] = [
     module: "content/game/activation.ts",
     max: 2,
     why: "Le texte du niveau 3 (A24 ACT-1, branché en ACT-3) : sa page et son image de partage, rien d'autre. Jamais les pages ni les images des autres niveaux, ni le hub (game-level-share-text.ts reçoit le niveau en paramètre).",
+  },
+  {
+    module: "content/game/referral.ts",
+    max: 2,
+    why: "Le texte du niveau 4 (A24 REF-1, branché en REF-3) : sa page et son image de partage, rien d'autre. Jamais les pages ni les images des autres niveaux, ni le hub (game-level-share-text.ts reçoit le niveau en paramètre).",
   },
 ];
 

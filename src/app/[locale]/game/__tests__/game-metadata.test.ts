@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { generateMetadata as hubMetadata } from "../page";
 import { generateMetadata as level2Metadata } from "../acquisition/page";
 import { generateMetadata as level3Metadata } from "../activation/page";
+import { generateMetadata as level4Metadata } from "../referral/page";
 import { generateMetadata as levelMetadata } from "../retention/page";
 import { gameMetadata } from "../game-metadata";
 
@@ -51,6 +52,7 @@ describe("the game pages' generateMetadata (X18)", () => {
     ["level", levelMetadata, "/game/retention"],
     ["level 2", level2Metadata, "/game/acquisition"],
     ["level 3", level3Metadata, "/game/activation"],
+    ["level 4", level4Metadata, "/game/referral"],
   ] as const) {
     it(`${name}: noindex and no hreflang when closed at build`, async () => {
       delete process.env.GAME_ENABLED;
