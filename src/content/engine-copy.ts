@@ -755,9 +755,9 @@ export const ENGINE_COPY = {
     "slg.rev.gross-margin": { fr: "la marge brute de l'assisté", en: "sales-assisted gross margin" },
     "slg.ret.renewal": { fr: "le renouvellement des contrats", en: "contract renewal" },
     // TODO: à relire — copie neuve (convention 6), §21 (A22 APP-1) : les six chiffres propres à l'app. Pas `ret.d30` ni `rev.paid-conversion`, que ses calculés lisent aussi : « il manque » les nomme sans article, comme pour le SaaS.
-    "app.acq.cpi": { fr: "le coût par installation", en: "the cost per install" },
-    "app.rev.gross-margin": { fr: "la marge brute après commission", en: "the gross margin after commission" },
-    "app.rev.commission": { fr: "la commission des stores", en: "the store commission" },
+    "app.acq.cpi": { fr: "le coût par installation", en: "cost per install" },
+    "app.rev.gross-margin": { fr: "la marge brute après commission", en: "gross margin after commission" },
+    "app.rev.commission": { fr: "la commission des stores", en: "store commission" },
     "app.ret.active-retention": { fr: "la rétention des actifs", en: "active retention" },
     "app.rev.purchases-per-active": { fr: "les achats par actif", en: "purchases per active" },
     "app.rev.ads-per-active": { fr: "la publicité par actif", en: "ads per active" },
