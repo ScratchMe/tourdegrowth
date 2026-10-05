@@ -27,6 +27,7 @@ export type GameLevelTable = Partial<Record<Pillar, GameLevelEntry>>;
 /** In AARRR order: the sitemap, /llms.txt and the hub's image list the levels in the order declared here. */
 export const GAME_LEVELS_BY_PILLAR: GameLevelTable = {
   acquisition: { slug: "acquisition", enabled: true },
+  activation: { slug: "activation", enabled: true },
   retention: { slug: "retention", enabled: true },
 };
 
@@ -97,8 +98,8 @@ export function enabledLevelSlugs(levels: GameLevelTable = GAME_LEVELS_BY_PILLAR
  * is the only one open there is none, and the block is not drawn.
  *
  * Pure, and generic over the slug so a table of all five levels can be
- * tested before the three last ones are playable (`LevelSlug` names two;
- * the others are `ModelSlug`s until each one's wiring). No default for the
+ * tested before the last two are playable (`LevelSlug` names three since
+ * A24 ACT-3; the others are `ModelSlug`s until each one's wiring). No default for the
  * table: a default typed `GameLevelTable` would not assign to the generic
  * parameter. « Finished » is whatever the caller says it is — the island
  * passes the endings in the collection (`finishedLevels`), written by

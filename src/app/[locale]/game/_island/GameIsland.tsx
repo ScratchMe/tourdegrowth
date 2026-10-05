@@ -40,6 +40,7 @@ import { TourLoop } from "@/components/game/TourLoop";
 import { VideoCall } from "@/components/game/VideoCall";
 import { GAME_LEVELS_BY_PILLAR, nextLevelFor } from "@/lib/game/levels";
 import { ACQUISITION_LEVEL } from "@/lib/game/levels/acquisition";
+import { ACTIVATION_LEVEL } from "@/lib/game/levels/activation";
 import { RETENTION_LEVEL } from "@/lib/game/levels/retention";
 import { moodNow } from "@/lib/game/model";
 import { actionBarVisible, callViewFor, handHint, handVisible } from "@/lib/game/phases";
@@ -71,6 +72,7 @@ import styles from "./GameIsland.module.css";
 /** The model of each playable level. Data only, a few kilobytes: every level ships in the island's bundle. */
 const LEVELS: { [S in LevelSlug]: LevelDefinition<string> } = {
   acquisition: ACQUISITION_LEVEL,
+  activation: ACTIVATION_LEVEL,
   retention: RETENTION_LEVEL,
 };
 

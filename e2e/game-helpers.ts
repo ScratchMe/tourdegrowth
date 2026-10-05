@@ -3,6 +3,7 @@ import type { Page } from "@playwright/test";
 import { expect } from "./helpers";
 import { playPath, type Path } from "../src/lib/game/__tests__/paths";
 import { ACQUISITION_LEVEL } from "../src/lib/game/levels/acquisition";
+import { ACTIVATION_LEVEL } from "../src/lib/game/levels/activation";
 import { RETENTION_LEVEL } from "../src/lib/game/levels/retention";
 import { GAME_SAVE_KEYS } from "../src/lib/game/storage-keys";
 import type { GameState, LevelSlug } from "../src/lib/game/types";
@@ -20,10 +21,13 @@ import type { GameState, LevelSlug } from "../src/lib/game/types";
 export const LEVEL_PATH = { en: "/en/game/retention", fr: "/fr/game/retention" } as const;
 /** Level 2, « Comment les gens vous trouvent » (A12.f, 2026-10-01). */
 export const LEVEL2_PATH = { en: "/en/game/acquisition", fr: "/fr/game/acquisition" } as const;
+/** Level 3, « Comment ils comprennent ce que vous apportez » (A24, ACT-3, 2026-10-05). */
+export const ACTIVATION_PATH = { en: "/en/game/activation", fr: "/fr/game/activation" } as const;
 
 /** Each level's model version, for a seeded save the island accepts. */
 const MODEL_VERSIONS: Record<LevelSlug, number> = {
   acquisition: ACQUISITION_LEVEL.modelVersion,
+  activation: ACTIVATION_LEVEL.modelVersion,
   retention: RETENTION_LEVEL.modelVersion,
 };
 

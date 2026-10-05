@@ -60,13 +60,14 @@ describe("sitemap and the game's build flag (P27)", () => {
     expect(gameEntries()).toEqual([]);
   });
 
-  it("lists the hub and both levels in both languages when open, dated, below the Tour's own pages", () => {
+  it("lists the hub and the three levels in both languages when open, dated, below the Tour's own pages", () => {
     process.env.GAME_ENABLED = "true";
     const game = gameEntries();
-    expect(game).toHaveLength(3 * LOCALES.length);
+    expect(game).toHaveLength(4 * LOCALES.length);
     for (const locale of LOCALES) {
       expect(game.some((e) => e.url.endsWith(`/${locale}/game`))).toBe(true);
       expect(game.some((e) => e.url.endsWith(`/${locale}/game/acquisition`))).toBe(true);
+      expect(game.some((e) => e.url.endsWith(`/${locale}/game/activation`))).toBe(true);
       expect(game.some((e) => e.url.endsWith(`/${locale}/game/retention`))).toBe(true);
     }
     for (const entry of game) {

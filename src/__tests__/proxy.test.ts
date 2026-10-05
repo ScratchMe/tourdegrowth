@@ -366,6 +366,7 @@ describe("proxy (game flag and owner preview)", () => {
     // isGamePath to known slugs could not open a level by forgetting it.
     const slugs = enabledLevelSlugs();
     expect(slugs).toContain("acquisition");
+    expect(slugs).toContain("activation");
     for (const slug of slugs) {
       for (const locale of ["en", "fr"]) {
         for (const path of [`/${locale}/game/${slug}`, `/${locale}/game/${slug}/opengraph-image/${locale}`]) {

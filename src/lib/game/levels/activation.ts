@@ -1,7 +1,8 @@
 /**
  * The activation level « Comment ils comprennent ce que vous apportez » — its
- * card identifiers and its LevelDefinition, in DRAFT (`DraftLevelSlug`): no
- * page, no copy, no save yet. The spec is `docs/game/activation.md`
+ * card identifiers and its LevelDefinition, wired on 2026-10-05 (A24, ACT-3):
+ * its copy is `content/game/activation.ts`, its page
+ * `app/[locale]/game/activation/`. The spec is `docs/game/activation.md`
  * (GAME-BRIEF §18), written on 2026-10-04 for an agent to build from; every
  * number it quotes is one this file produces, pinned by the fixtures F18.1 to
  * F18.4 of `__tests__/activation.test.ts`.

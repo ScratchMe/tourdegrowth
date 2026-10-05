@@ -232,6 +232,7 @@ test("a share image answers under a language, and a 404 under anything else", as
     "how-it-works/opengraph-image/en",
     "game/opengraph-image/en",
     "game/acquisition/opengraph-image/en",
+    "game/activation/opengraph-image/en",
     "game/retention/opengraph-image/en",
     "aarrr-funnel-template/opengraph-image/en",
   ]) {

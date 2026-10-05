@@ -23,12 +23,18 @@ const RETENTION_CLEAR = resolveBottleneck(SAMPLE_RESULT.pillars);
 const ACQUISITION_CLEAR = board({ acquisition: 2, activation: 13, retention: 13, referral: 16, revenue: 13 });
 const LEVEL = board({ acquisition: 16, activation: 16, retention: 20, referral: 16, revenue: 20 });
 const SHARED_WITH_RETENTION = board({ acquisition: 7, activation: 16, retention: 7, referral: 16, revenue: 20 });
-/** Activation and retention at the bottom: only retention has a level. */
+/** Activation and retention at the bottom: with only retention's level open, retention alone is offered. */
 const SHARED_ONE_LEVEL = board({ acquisition: 16, activation: 7, retention: 7, referral: 16, revenue: 20 });
+const ACTIVATION_CLEAR = board({ acquisition: 13, activation: 2, retention: 13, referral: 16, revenue: 13 });
 
 const open = { access: "open" as const, hasDeepDive: false };
 /** The table as it stood before level 2 (A12.f): the shared-bottleneck rule below is about retention. */
 const RETENTION_ONLY = { retention: { slug: "retention" as const, enabled: true } };
+/** The table of the two first levels: the card for a tie among three stages offers only these two. */
+const ACQUISITION_AND_RETENTION = {
+  acquisition: { slug: "acquisition" as const, enabled: true },
+  retention: { slug: "retention" as const, enabled: true },
+};
 
 describe("resultGameEntry — P23, the sample's own board", () => {
   it("offers the retention level on the sample's clear retention bottleneck", () => {
@@ -87,10 +93,12 @@ describe("resultGameEntry — when there is no card", () => {
     expect(resultGameEntry({ bottleneck: SHARED_WITH_RETENTION, locale: "fr", access: "closed", hasDeepDive: true })).toBeNull();
   });
 
+  // An explicit table, not the real one: activation has had a level since
+  // 2026-10-05 (A24, ACT-3), and each level opened after it would move this.
   it("P24 — offers nothing when the bottleneck's stage has no level", () => {
     const activation = board({ acquisition: 13, activation: 2, retention: 13, referral: 16, revenue: 13 });
     expect(activation.pillars.map((p) => p.pillar)).toEqual(["activation"]);
-    expect(resultGameEntry({ bottleneck: activation, locale: "en", ...open })).toBeNull();
+    expect(resultGameEntry({ bottleneck: activation, locale: "en", ...open, levels: RETENTION_ONLY })).toBeNull();
   });
 
   it("P24 — offers nothing on a level board, even though retention is lowest-but-strong", () => {
@@ -113,7 +121,7 @@ describe("resultGameEntry — orchestrator decision 2, a shared bottleneck", () 
   });
 
   it("a shared bottleneck with ONE stage that has a level is that level's own card", () => {
-    const entry = resultGameEntry({ bottleneck: SHARED_ONE_LEVEL, locale: "fr", ...open })!;
+    const entry = resultGameEntry({ bottleneck: SHARED_ONE_LEVEL, locale: "fr", ...open, levels: RETENTION_ONLY })!;
     expect(entry.levels.map((l) => l.event.detail)).toEqual(["result/retention"]);
     expect(entry.title).toBe("Le côté obscur de la rétention");
   });
@@ -148,11 +156,19 @@ describe("resultGameEntry — C30 Q5, several levels on one card (A12.f.2)", () 
   it("three stages tied, two with a level: the card offers those two, and says « the stages below », not all of them", () => {
     const three = board({ acquisition: 5, activation: 5, retention: 5, referral: 16, revenue: 20 });
     expect(three.pillars.map((p) => p.pillar)).toEqual(["acquisition", "activation", "retention"]);
-    const entry = resultGameEntry({ bottleneck: three, locale: "fr", ...open })!;
+    const entry = resultGameEntry({ bottleneck: three, locale: "fr", ...open, levels: ACQUISITION_AND_RETENTION })!;
     expect(entry.levels.map((l) => l.stage)).toEqual(["Acquisition", "Retention"]);
     // The page above says « 3 étapes te freinent »: the card must not claim a level for each of them.
     expect(entry.body).toContain("ci-dessous");
     expect(entry.body).not.toContain("qui te freinent");
+  });
+
+  it("three stages tied, all three with a level (A24, ACT-3): the card offers the three, in the Tour's order", () => {
+    const three = board({ acquisition: 5, activation: 5, retention: 5, referral: 16, revenue: 20 });
+    const entry = resultGameEntry({ bottleneck: three, locale: "en", ...open })!;
+    expect(entry.levels.map((l) => l.stage)).toEqual(["Acquisition", "Activation", "Retention"]);
+    expect(entry.levels.map((l) => l.event.detail)).toEqual(["result/acquisition", "result/activation", "result/retention"]);
+    expect(entry.title).toBe(GAME_ENTRY_SEVERAL.title.en);
   });
 
   it("never offers the same level twice", () => {
@@ -180,6 +196,27 @@ describe("resultGameEntry — level 2 (A12.f, 2026-10-01)", () => {
     expect(fr.levels[0].metric).not.toMatch(/%|pt/);
     expect(fr.levels[0].event.detail).toBe("deep_dive/acquisition");
     expect(JSON.stringify(GAME_ENTRY_COPY)).not.toMatch(/2[\s ,.]?000/);
+  });
+});
+
+describe("resultGameEntry — level 3 (A24, ACT-3, 2026-10-05)", () => {
+  it("offers the activation level on a clear activation bottleneck, with its own title, button and door", () => {
+    expect(ACTIVATION_CLEAR.pillars.map((p) => p.pillar)).toEqual(["activation"]);
+    const entry = resultGameEntry({ bottleneck: ACTIVATION_CLEAR, locale: "en", ...open })!;
+    expect(entry.levels).toHaveLength(1);
+    expect(entry.levels[0].href).toBe("/en/game/activation?from=result");
+    expect(entry.levels[0].event).toEqual({ name: GAME_ENTRY_EVENT, detail: "result/activation" });
+    expect(entry.title).toBe("The dark side of activation");
+    expect(entry.levels[0].cta).toBe('Play the level "How they understand what you bring"');
+  });
+
+  it("quotes level 3's starting number in its own format — an activation rate to the tenth, never customers", () => {
+    expect(resultGameEntry({ bottleneck: ACTIVATION_CLEAR, locale: "en", ...open })!.levels[0].metric).toBe("Activation 30.0%");
+    const fr = resultGameEntry({ bottleneck: ACTIVATION_CLEAR, locale: "fr", ...open, hasDeepDive: true })!;
+    expect(fr.levels[0].metric).toBe("Activation 30,0\u00a0%");
+    expect(fr.levels[0].metric).not.toMatch(/clients/);
+    expect(fr.levels[0].event.detail).toBe("deep_dive/activation");
+    expect(JSON.stringify(GAME_ENTRY_COPY)).not.toMatch(/30[.,]0/);
   });
 });
 

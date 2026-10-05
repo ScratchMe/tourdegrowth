@@ -47,8 +47,9 @@ const ENDINGS_BY_LEVEL: Partial<Record<LevelSlug, Partial<Record<EndingId, Trans
  * by the level it ANNOUNCES, not the one that shows it, because the block
  * closes a December on whichever level the player has not finished yet
  * (`nextLevelFor`), chosen in the browser. Each level's own December copy
- * used to carry the other's line; these two are those lines, moved as they
- * stood. A level adds its own at the step that makes it a `LevelSlug`.
+ * used to carry the other's line; acquisition's and retention's are those
+ * lines, moved as they stood, and each level since adds its own at the step
+ * that makes it a `LevelSlug` (activation's, at A24 ACT-3).
  *
  * The state of each line (moved, so each keeps the one it had):
  * - `acquisition`, French: the prototype's own French, validated, not marked;
@@ -57,11 +58,18 @@ const ENDINGS_BY_LEVEL: Partial<Record<LevelSlug, Partial<Record<EndingId, Trans
  *   niveau 1 (`retention.ts`).
  * - `retention`, both languages: TODO: à relire — écrites pour A12.c le
  *   2026-10-01, venues du niveau 2 (`acquisition.ts`).
+ * - `activation`, both languages: TODO: à relire — écrites pour A24 ACT-3 le
+ *   2026-10-05, d'après `docs/game/activation.md` §18.11.
  */
 export const LEVEL_TEASERS: Record<LevelSlug, Translatable> = {
   acquisition: t(
     "« Comment les gens vous trouvent » : le compte à rebours, le prix qui gonfle, le faux stock",
     '"How people find you": the countdown timer, the creeping price, the fake stock',
+  ),
+  // TODO: à relire — 2026-10-05 (A24.ACT-3) : l'annonce du niveau 3, d'après docs/game/activation.md §18.11.
+  activation: t(
+    "« Comment ils comprennent ce que vous apportez » : le refus des cookies au bout du parcours, la case cochée d'avance, le numéro demandé pour la sécurité",
+    '"How they understand what you bring": the cookie refusal at the end of the path, the box ticked in advance, the number asked for security',
   ),
   retention: t(
     "« S'ils reviennent » : la pause mise en avant, le bouton enterré, la résiliation par téléphone",
@@ -96,7 +104,8 @@ export const GAME_HUB = {
     },
     activation: {
       question: t("Comment ils comprennent ce que vous apportez", "How they understand what you bring"),
-      company: t("Un outil de planification pour indépendants", "A scheduling tool for freelancers"),
+      // TODO: à relire — 2026-10-05 (A24.ACT-3) : l'entreprise a un nom depuis que le niveau existe, comme Flixo et Pédalix.
+      company: t("Quandi, un outil de planification pour indépendants", "Quandi, a scheduling tool for freelancers"),
     },
     retention: {
       question: t("S'ils reviennent", "If they come back"),
