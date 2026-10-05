@@ -525,3 +525,41 @@ Et des lacunes moins visibles, chacune un piège : un outil de l'app écrit deux
 **Vérifié, sorties réelles** : `diff -rq` entre la copie du script et le dossier du dépôt, vide ; `node board/market-check.mjs`, 37 « ok », code 0 ; `node board/make-copy.mjs` après la correction, `COPY.md` identique (`cmp`). La planche n'a pas été rejouée dans un navigateur : ses mesures sont celles du retour, et la vraie mesure se prend au portage (MKT-7).
 
 **Tranchées le même jour, toutes sur la reco** : C94 à C103, posées une à une à Antoine. Les réponses sont dans `docs/engine/place-de-marche.md` §22.14, l'index dans `docs/decisions.md`, et la section C de `CHANTIERS.md` ne garde qu'un paragraphe. Le texte de §22 ne change pas encore. Il les appliquera avec les fiches de MKT-7 et MKT-8, dans la PR qui suit : C95 aux formes, C97 et C99 à la copie, C98 et C100 aux mots.
+
+## A23 : les fiches MKT-7a, MKT-7b et MKT-8, et §22 sur le retour du brief 10 (2026-10-05)
+
+**Livré** (documentation seule) : §22 applique C94 à C103 et porte le retour du brief 10.
+- **MKT-7 est coupée en deux.** MKT-7a fait les composants : `SideShown`, `SideFunnel`, `SideNote`, les deltas de `MrrCurve` et de `NumberList`, et les jetons. Elle ne lit rien du modèle et peut partir dès MKT-R. MKT-7b fait le tableau. Le total passe de quatorze à quinze unités et de ~31 à ~32,5 jours-agent ; le graphe, le tableau des unités et celui d'A23 dans `CHANTIERS.md` suivent.
+- **MKT-8 fait les slides**, avec `SlideStreams`, le total en registre.
+- Les trois fiches sont au format de §23.4.
+- **Le texte de §22 change ici** :
+  - §22.6.2, le contrat des écrans, est réécrit sur le retour ;
+  - les ★ de l'offre sont posés (C95) ;
+  - « demandes envoyées » remplace « demandes » dans la variante et la phrase du taux de service (C99) ;
+  - `mkt.total.newSum` et `sum12`, deux phrases avec « + » et « = », deviennent les étiquettes `newLabel` et `in12Label` : c'est la forme du retour, une bande et un registre ;
+  - `mkt.money.supplyNone` garde sa première moitié : la seconde est devenue le corps de la note ;
+  - onze feuilles s'ajoutent aux calques à écrire mot pour mot (§22.8.5 c) ;
+  - quarante-cinq clés neuves forment le §22.8.5 k, sur trente-sept lignes ;
+  - les titres de §22.8.5 e passent à MKT-7b, qui en fait le verdict d'un côté et le titre de la bande ;
+  - MKT-R rejoue aussi à blanc les trois fiches neuves.
+
+**Comment les textes ont été triés.** Un sous-agent en lecture seule a rapporté les 193 chaînes de `COPY.md` à §22 : 98 que §22 dit déjà (son texte l'emporte, C98), 40 qu'un calque produit d'une feuille de base (le calque l'emporte), 55 vraiment neuves. Sur les 55 :
+- **Les neuves gardées** passent dans le §22.8.5 k, avec les mots de §22.
+- **Une partie est écartée** :
+  - les phrases d'hypothèses du panneau : les hypothèses restent la liste de §22.5.4 ;
+  - les lignes de calcul de la fuite : la chaîne reste `whatIf.*` ;
+  - les fenêtres dans les noms des chiffres ;
+  - les sources écrites en dur ;
+  - les titres de groupe du panneau, le « Croissance » de base reste ;
+  - la source « Back-office ».
+- **Les numéros de slides** du registre deviennent un gabarit (« slides {from} à {to} ») tiré du deck rendu.
+
+**Ce que la comparaison a corrigé dans le retour**, sans question à Antoine :
+- **Les mots de la place de marché.** « rétrogradation », « expansion » et « facturation mensuelle » n'existent pas sur une place de marché. Les deux définitions du moteur, l'hypothèse de trésorerie, et la tuile et l'hypothèse de la slide d'unit economics ont donc leur texte par côté. « Continue de payer » devient « continue de rapporter ».
+- **Le saut au mois 1** est la part de la projection que les leviers d'argent ajoutent sur la base gardée du mois : `mrr × kept ÷ 100 × (ratio − 1)`, 2 628,29 € pour la commission de l'exemple, « ~2 600 € ». La planche écrit « ~2 700 € » parce qu'elle oublie le churn du mois. Sa phrase couvre aussi la fréquence, le panier et le prix des abonnements (`stepOne`, `stepMany`, `stepSupply`), alors que le retour ne disait que la commission.
+- **L'en-tête du diagnostic** dit le côté dans ses quatre états, pas seulement `clear`.
+- **Un taux de service saisi sans variante** dit « recherches ou demandes envoyées », sans choisir à la place de l'équipe.
+- **Le verdict d'un côté** garde l'accent de `title-accent.ts` (C53). Le rouge reste donc là où l'on ne voit pas, alors que le retour le voulait toujours à l'encre.
+- **Le coût d'un vendeur abonné** perd la clause « un vendeur payant pour 2 actifs », que la fiche aurait dû accorder et arrondir.
+
+**Vérifié** : les tests de budget et de liens des documents.

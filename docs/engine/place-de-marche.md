@@ -10,10 +10,10 @@ le drapeau `ENGINE_TYPES` et le mécanisme du calque de copie, que §21 crée.*
 *C'est une **spécification d'exécution** pour un orchestrateur et des
 sous-agents, selon [`executer-un-type.md`](executer-un-type.md) (§23). Un
 sous-agent lit §22.0, §22.1, la fiche de son unité (§22.12) et ce qu'elle cite.
-**Les écrans du tableau et les slides attendent le retour du brief 10 à Claude
-Design** (C71) : leurs fiches (MKT-7, MKT-8) se complètent après ce retour, par
-une PR de documentation de la session principale ; tout le reste s'exécute
-sans lui. La copie neuve est écrite ici, ou produite par un lexique, et porte
+**Les écrans du tableau et les slides suivent le retour du brief 10** (C71),
+revenu le 2026-10-05 (`design/ds-extension-10-return/`) et tranché le même
+jour (C94 à C103, §22.14) : leurs fiches (MKT-7a, MKT-7b, MKT-8) sont écrites
+sur lui, et le texte de §22 applique ses décisions. La copie neuve est écrite ici, ou produite par un lexique, et porte
 `TODO: à relire` dans le code (convention 6).*
 
 *Vérifié pour ce document : les mêmes modules que §21, plus
@@ -60,9 +60,10 @@ entre eux.
   vendeurs actifs sont nommés, sans montant.
 - **Aucun repère publié** (C73). **Trois termes de glossaire** (GMV, take
   rate, liquidité) dans une unité à part (C72).
-- **Les écrans et les slides passent d'abord par Claude Design** : le brief 10
-  (C71) est écrit, déposé, puis lancé par Antoine ; son retour fixe les
-  composants, puis les fiches MKT-7 et MKT-8 se complètent et s'exécutent.
+- **Les écrans et les slides suivent le retour du brief 10** (C71), revenu le
+  2026-10-05 : quatre composants neufs (`SideShown`, `SideFunnel`, `SideNote`,
+  `SlideStreams`), deux deltas (`MrrCurve`, `NumberList`), aucune couleur
+  neuve ; ses décisions sont C94 à C103 ; MKT-7a, MKT-7b et MKT-8 le portent.
 
 **Les chiffres** : quatorze du premier jet, plus cinq pour les abonnements des
 vendeurs (C93) : **19** avec les abonnements, **14** sans.
@@ -79,8 +80,7 @@ vendeur hors plateforme, la saisonnalité, l'effet de l'offre sur la demande.
 **L'ouverture** : `ENGINE_TYPES=consumer-app,marketplace` (le drapeau de
 §21.3), après le bon à tirer A23.
 
-**L'effort** : quatorze unités (§22.12), ~31 jours-agent, plus l'aller-retour du
-brief 10 (le temps de Claude Design et d'Antoine), puis le bon à tirer.
+**L'effort** : quinze unités (§22.12), ~32,5 jours-agent, puis le bon à tirer.
 
 ---
 
@@ -167,7 +167,9 @@ du catalogue (`ENGINE_CATALOG_MKT_SERVICES`) réécrivent par le lexique de
 écrans (ce que chaque écran doit montrer, dans quel ordre de lecture, avec
 quels chiffres) est fixé ici (§22.6.2, §22.7) ; **la forme** (composants,
 disposition) vient du retour du brief 10. Le modèle, le réglage, la copie et
-l'exemple n'attendent pas.
+l'exemple n'attendent pas. *Le retour est revenu le 2026-10-05 : §22.6.2 et
+les fiches MKT-7a, MKT-7b et MKT-8 le portent ; où ses mots diffèrent de ceux
+de §22, ceux de §22 l'emportent (C98).*
 
 **D14 — Jamais « offre contre demande »**. Aucun gabarit ne compare les deux
 côtés ; un test garde les mots (§22.8.3, point 6).
@@ -301,8 +303,9 @@ export type MotionDerived =
 
 `null` pour `supply` dans `MktTotal` : les vendeurs ne paient pas d'abonnement.
 `TotalView` garde ses `Record<Motion | "total", …>` (le total de l'hybride).
-`DeckModel.byMotion` reste `Record<Motion, …>` : ce que le deck d'une place de
-marché porte par côté vient du retour du brief 10 (MKT-8).
+`DeckModel.byMotion` reste `Record<Motion, …>` : le deck d'une place de marché
+porte son côté sur chaque slide (`DeckSlide.side`, MKT-8), pas dans
+`byMotion`.
 
 #### 22.2.2 `src/lib/engine/setup-type.ts` et `business-type.ts` (MKT-0)
 
@@ -459,7 +462,7 @@ l'unité.
 | `sanity.ts:105` (`addFor(motionOfMetric(shape.id))`) | 3 : `addFor` accepte une `EngineMotion` |
 | `deck.ts:525` | 1 |
 | `EngineWorkbench.tsx:92`, `:423`, `:935` (des comptes par motion) | 2 : `Record<EngineMotion, number>`, l'entrée `mkt` à `0` (un nombre, pas un mot : la règle 2 n'a pas besoin de copie ici) |
-| `BoardNumbers.tsx:73`, `:86` | 1 jusqu'à MKT-7 |
+| `BoardNumbers.tsx:73`, `:86` | 1 jusqu'à MKT-7b |
 
 **Ce que `tsc` ne signale pas** (des comparaisons sur un champ élargi, et des
 boucles sur les deux cases), relevé sur `9a7733d`, avec l'unité qui le traite.
@@ -474,9 +477,9 @@ où elle ne doit pas passer, et à remplacer par `activeMotions` là où elle do
 | `series.ts:245` (boucle sur les deux cases) | la série d'une place de marché vide | `activeMotions(setup)` | MKT-4 |
 | `deck.ts:377` `buildLeak` (`diagnosis.motion === "slg"`) | la fuite d'un côté lue par la chaîne du libre-service | aucune place de marché n'y passe : `buildMarketplaceDeck` construit ses fuites par `mktWhatIf` | MKT-8 |
 | `deck-motions.ts:102`, `deck.ts:1601`, `deck-slg.ts:474`, `deck/SlideMirror.tsx:29`, `deck/SlideVisibility.tsx:54`, `deck/ask-defaults.ts:81` | rien pour une place de marché | `activeMotions` là où le deck de la place de marché les lit | MKT-8 |
-| `Diagnosis.tsx:97`, `:139` ; `deck/SlideWhatIf.tsx:126`, `:137` | un côté lu comme le libre-service | selon le retour du brief 10 | MKT-7, MKT-8 |
+| `Diagnosis.tsx:97`, `:139` ; `deck/SlideWhatIf.tsx:126`, `:137` | un côté lu comme le libre-service | c'est voulu : un côté se lit comme le libre-service (son funnel, sa phrase du haut du funnel, le funnel du mois sur sa slide « Et si »), avec les mots de son côté ; `Diagnosis` ajoute `data-side` | MKT-7b, MKT-8 |
 | `settings-numbers.ts:26`, `TargetsStart.tsx:31`, `:50` | aucune cible proposée | `activeMotions`, puis les candidats d'un côté (§22.6.1) | MKT-6 |
-| `ImportPanel.tsx:209` (la ligne d'aperçu d'un fichier) | aucune ligne pour une place de marché | une ligne par `activeMotions` | MKT-7 |
+| `ImportPanel.tsx:209` (la ligne d'aperçu d'un fichier) | aucune ligne pour une place de marché | une ligne par `activeMotions` | MKT-7b |
 
 **Les lecteurs de `.diagnosis` sur `MotionDerived`** (`tsc` les signale à
 MKT-4, quand la branche `mkt` n'a plus de `diagnosis`) passent par une
@@ -490,7 +493,7 @@ la place de marché, dans cet ordre) :
 | `deck/ask-defaults.ts:45` (`derived.motions.map((m) => m.diagnosis)`) | `derived.motions.flatMap(diagnosesOf)` (deux côtés qui nomment chacun une étape : rien n'est proposé, la règle d'aujourd'hui pour l'hybride) |
 | `deck.ts:669` (`d.diagnosis.blind`) | `derived.motions.flatMap(diagnosesOf).some((d) => d.blind.includes(…))` |
 | `findings.ts:125` (le type du paramètre de `namedFindings`) | `AnyDiagnosis` |
-| `BoardNumbers.tsx:17` `diagnosisOf`, `MetricSheet.tsx:235` | 1 : la garde de type `m.motion !== "mkt"` dans le `find` ; MKT-7 leur donne la lecture par côté |
+| `BoardNumbers.tsx:17` `diagnosisOf`, `MetricSheet.tsx:235` | 1 : la garde de type `m.motion !== "mkt"` dans le `find` ; MKT-7b leur donne la lecture par côté |
 | `golden-v2.test.ts:93` | la même garde dans l'appel (une retouche d'appel, §21.10.1) |
 
 **Le type élargi à travers le code d'A22** (`BusinessType` gagne
@@ -545,7 +548,7 @@ surcharge, comme pour `b2b-saas`) ; `toolFamiliesFor("marketplace")` rend
   grise) et `io.ts#sellsSomehow` refuse une place de marché (un fichier de
   place de marché importé reçoit le refus d'aujourd'hui, celui d'un fichier qui
   ne vend rien) : **aucun état de place de marché n'atteint l'îlot** avant
-  que le tableau existe. MKT-7 la passe à `true` (et ses
+  que le tableau existe. MKT-7b la passe à `true` (et ses
   tests). Un test d'MKT-0 (`business-type.test.ts`) vérifie qu'elle vaut
   `false` ; les captures d'MKT-6 se prennent avec la constante passée à `true`
   **en local seulement**, remise à `false` avant le commit (`git diff` du
@@ -558,8 +561,10 @@ surcharge, comme pour `b2b-saas`) ; `toolFamiliesFor("marketplace")` rend
 #### 22.4.1 La forme (`MKT_METRIC_SHAPES`)
 
 Tous : `scope: "mkt"`, `span: 1`, aucun `benchmark` (D12). Les ★ portent la
-colonne ou la ligne de leur étape côté demande ; l'offre n'en a pas (ses
-colonnes sont décidées par le retour du brief 10). La dernière colonne marque
+colonne ou la ligne de leur étape dans le funnel de leur côté : un par étape
+côté demande ; côté offre, la première vente et le churn des vendeurs, et la
+conversion en abonné avec les abonnements (C95). Un ★ ne change ni l'effort
+d'un chiffre, ni la phrase de la carte de départ, ni le diagnostic. La dernière colonne marque
 les cinq chiffres que montre la case des abonnements (D9, C93).
 
 | Id | Étape | ★ | `side` | `valueKinds` → `unit` | Bornes, montants | `flow` / `window` | Effort | Rôle | `sources` | Glossaire | Tour | Variantes | Réparation | Abonnement |
@@ -569,18 +574,18 @@ les cinq chiffres que montre la case des abonnements (D9, C93).
 | `mkt.sell.cac` | acquisition | | sell | ratio, amount → money | — | month | ask | finance | hubspot, spreadsheet, linkedin-ads | `cac` | — | mêmes | meeting | |
 | `mkt.sell.signup-rate` | acquisition | | sell | ratio, rate → percent | bornée | month | self-5min | marketing | ga4, mixpanel, amplitude, product-db | `acquisition` | — | — | afternoon | ✓ |
 | `mkt.buy.first-order` | activation | ★ | buy | ratio, rate → percent | bornée | cohort / `first-order` | self-1h | data | product-db, amplitude, mixpanel | `activation` | `act-2` | — | sprint | |
-| `mkt.sell.first-sale` | activation | | sell | ratio, rate → percent | bornée | cohort / `first-sale` | self-1h | data | product-db | `activation` | — | — | sprint | |
+| `mkt.sell.first-sale` | activation | ★ | sell | ratio, rate → percent | bornée | cohort / `first-sale` | self-1h | data | product-db | `activation` | — | — | sprint | |
 | `mkt.liq.fill-rate` | activation | | match | ratio, rate → percent | bornée | month | ask | data | product-db, amplitude, mixpanel | `activation` (puis le terme de MKT-G) | — | `requests`, `searches` | sprint | |
 | `mkt.buy.repeat` | retention | ★ | buy | ratio, rate → percent | bornée | cohort / `repeat` | self-1h | data | product-db, amplitude | `retention` | `ret-1` | — | sprint | |
 | `mkt.buy.churn` | retention | | buy | ratio, rate → percent | bornée | month | ask | data | product-db | `churn` | — | — | afternoon | |
-| `mkt.sell.churn` | retention | | sell | ratio, rate → percent | bornée | month | ask | data | product-db | `churn` | — | — | afternoon | |
+| `mkt.sell.churn` | retention | ★ | sell | ratio, rate → percent | bornée | month | ask | data | product-db | `churn` | — | — | afternoon | |
 | `mkt.sell.paid-churn` | retention | | sell | ratio, rate → percent | bornée | month | self-5min | finance | stripe, product-db | `churn` | — | — | afternoon | ✓ |
 | `mkt.buy.referred-share` | referral | ★ | buy | ratio, rate → percent | bornée | cohort | self-1h | marketing | product-db, hubspot | `referral` | — | — | sprint | |
 | `mkt.rev.take-rate` | revenue | ★ | match | ratio, rate → percent | bornée, montants | month | self-5min | finance | stripe, spreadsheet, product-db | `revenue` (puis MKT-G) | — | — | meeting | |
 | `mkt.rev.aov` | revenue | | buy | ratio, amount → money | — | month | self-5min | finance | product-db, stripe | `arpu` | — | — | meeting | |
 | `mkt.rev.frequency` | revenue | | buy | ratio → ratio | non bornée | month | self-1h | data | product-db | `retention` | — | — | afternoon | |
 | `mkt.rev.gross-margin` | revenue | | match | ratio, rate → percent | bornée, montants | month | ask | finance | spreadsheet | `cac-payback` | — | — | meeting | |
-| `mkt.sell.paid-conversion` | revenue | | sell | ratio, rate → percent | bornée | cohort / `first-sale` | self-1h | data | product-db, stripe | `revenue` | — | — | sprint | ✓ |
+| `mkt.sell.paid-conversion` | revenue | ★ | sell | ratio, rate → percent | bornée | cohort / `first-sale` | self-1h | data | product-db, stripe | `revenue` | — | — | sprint | ✓ |
 | `mkt.sell.arpa` | revenue | | sell | ratio, amount → money | — | month | self-5min | finance | stripe, product-db | `arpu` | — | — | meeting | ✓ |
 | `mkt.sell.gross-margin` | revenue | | sell | ratio, rate → percent | bornée, montants | month | ask | finance | spreadsheet | `cac-payback` | — | — | meeting | ✓ |
 
@@ -721,7 +726,7 @@ Les entrées s'ajoutent aux deux records existants, dans un bloc
 - trap : « Écris ce qu'est une demande. Avec des recherches, ne compte que celles où quelqu'un a regardé une annonce : une recherche vide n'est pas une demande. » / "Write down what a request is. With searches, only count those where someone looked at a listing: an empty search isn't a request."
 - request : « le nombre de demandes en {month} ({variant}) et le nombre de celles qui ont abouti à une commande » / "the number of requests in {month} ({variant}) and how many ended in an order"
 - noReferenceReason : « il dépend de ce que tu comptes comme une demande ; c'est le chiffre qui dit si ta place de marché tient sa promesse, suis-le contre ta cible » / "it depends on what you count as a request; it is the number that says whether your marketplace keeps its promise, follow it against your target"
-- variants : `requests` · « Demandes : réservation, devis, mission » / "Requests: booking, quote, job" ; `searches` · « Recherches avec une annonce consultée » / "Searches with a listing viewed"
+- variants : `requests` · « Demandes envoyées : réservation, devis, mission » / "Requests sent: booking, quote, job" (C99) ; `searches` · « Recherches avec une annonce consultée » / "Searches with a listing viewed"
 
 **`mkt.buy.repeat`**
 - name : « Deuxième commande » / "Second order"
@@ -1135,7 +1140,7 @@ dit pourquoi (`mkt.money.supplyNone`, §22.6.2).
 changent pas : `scenarioOf` d'un état de place de marché rend
 `buildScenario`, dont tous les chiffres sont inconnus, sans erreur (la
 barrière de §22.3 garde l'îlot ; les écrans d'une place de marché appellent
-`buildMktScenario`, MKT-7).
+`buildMktScenario`, MKT-7b).
 
 **Les domaines des leviers** (`leverViews(…, ids)`, la fonction existante) :
 la règle d'aujourd'hui ; `mkt.rev.aov` et `mkt.sell.arpa` rejoignent
@@ -1318,7 +1323,7 @@ celui de son chiffre (le côté `match` : la demande).
 #### 22.6.1 La carte de départ, le réglage, les Réglages (MKT-6)
 
 Ils se composent avec les composants existants (le choix, les cases, les
-listes de la carte de réglage) : ils n'attendent pas le brief 10.
+listes de la carte de réglage) : ils n'attendent pas le retour du brief 10.
 
 - **`EngineStart`** : `StartChoice` gagne `"mkt"`, présent si `"marketplace"` est
   ouvert, après `app`. Libellé `start.mkt`, note `start.mktNote`. Avec `mkt`
@@ -1354,29 +1359,72 @@ listes de la carte de réglage) : ils n'attendent pas le brief 10.
 
 #### 22.6.2 Le tableau et les slides : ce qu'ils montrent (le contrat de données du brief 10)
 
-**La forme est celle du retour du brief 10** (D13). Ce qui suit est fixé : ce
-que chaque écran doit permettre de lire, et d'où viennent les chiffres. MKT-7
-et MKT-8 se spécifient sur ce contrat **et** sur le retour.
+**La forme est celle du retour du brief 10** (D13), revenu le 2026-10-05
+(`design/ds-extension-10-return/` : `README.md` répond aux treize questions,
+`INVENTORY.md` dit où va chaque chiffre, `board/` montre chaque état, et
+`components/engine/` donne les composants). Ses décisions sont C94 à C103
+(§22.14) ; où ses mots diffèrent de ceux de §22, ceux de §22 l'emportent
+(C98), et ses textes neufs sont au §22.8.5 k. Ce qui suit est le contrat ; les
+fiches MKT-7a, MKT-7b et MKT-8 (§22.12) disent comment le construire.
 
-- **Le sélecteur « côté affiché »** (`mkt.side.selector` : « Côté affiché » /
-  "Side shown" ; options « Demande » / « Offre »), comme « Moteur affiché » de
-  l'hybride : un côté à la fois, jamais côte à côte en comparaison.
-- **Le total** (commissions + abonnements, `derived.motions[mkt].total`) au-dessus
-  du sélecteur quand les vendeurs paient un abonnement : ce mois-ci, nouveau
-  par mois, dans 12 mois. Sinon, le revenu net seul.
-- **Chaque côté**, dans l'ordre de lecture du libre-service (C54) : son
-  diagnostic (sa fuite, nommée par une cible) ; son argent (demande : revenu
-  net du mois, annualisé, GMV, ce que vaut un acheteur ; offre : MRR des
-  abonnements, annualisé, ce que vaut un vendeur abonné ; sans abonnements, une
-  phrase `mkt.money.supplyNone`) ; son « Et si » (ses leviers, sa courbe) ; son
-  funnel (demande : les deux colonnes sur 100 inscrits, les recommandés, le
-  taux de service ; offre : première vente et conversion en abonné sur 100
-  vendeurs inscrits, les deux churns).
-- **La liste des chiffres** : par étape (C41), une étiquette de côté par ligne
-  (`mkt.side.buy`, `mkt.side.sell`, `mkt.side.match`).
-- **Le deck** : par côté, les slides du libre-service (funnel, fuite, « Et si
-  », économie unitaire), plus une slide du total quand les vendeurs paient ;
-  jamais une slide qui met les deux côtés face à face.
+- **Le tableau, de haut en bas** (l'ordre de l'hybride, gardé) : la barre du
+  moteur ; **la bande du total** (`TotalBand`, inchangé, par ses props), qui
+  est le titre du tableau (`slideTitles.mktTotal`) ; **le prochain pas,
+  partagé** (C94 : `nextStepFor` ne reçoit pas de côté ; quand l'action porte
+  sur un chiffre d'un côté, la phrase le dit par les mots du chiffre) ; puis
+  **le sélecteur « Côté affiché »** (`SideShown` : `mkt.side.selector`, options
+  « Demande » / « Offre », dans cet ordre, sans chiffre ni couleur ; il part
+  sur la demande) ; puis **le côté affiché**, dans l'ordre de lecture du
+  libre-service (C54) : son verdict (le titre de son funnel, à l'encre), son
+  diagnostic, son argent, son « Et si » (la carte et le panneau), son funnel
+  (`SideFunnel`, la seule carte en relief) ; puis **la liste des chiffres,
+  commune**, hors du côté ; puis l'entrée du Tour et celle du tableau, comme
+  aujourd'hui.
+- **La bande du total** : les deux flux dans l'ordre de la somme
+  (`mkt.total.demand`, `mkt.total.supply`), « Total par mois », puis ce qui
+  s'additionne : « Total annualisé », « Nouveau chaque mois », « Dans 12 mois au
+  rythme actuel » ; dès qu'un « Et si » bouge d'un côté ou de l'autre, le
+  dernier devient « Dans 12 mois avec tes « Et si », des deux côtés » et la
+  bande dit le rythme actuel sur sa dernière ligne. **La trésorerie n'y est
+  pas additionnée** (C96) : chaque côté garde la sienne. **Sans abonnements,
+  pas de bande** : un seul flux n'est pas une somme ; le revenu net devient le
+  premier chiffre de l'argent de la demande, et le sélecteur monte d'autant.
+- **Chaque côté**, sous le sélecteur : son diagnostic (sa fuite, nommée par
+  une cible ; en dessous, ses autres étapes sous leur cible, « À côté », à
+  l'encre) ; son argent (`MoneyBlock`, inchangé : demande, le revenu net
+  annualisé, avec le « ? » du revenu net (C101), et le GMV, avec le sien ; ce
+  que vaut un nouvel acheteur ; ce que rapporte un acheteur actif, dit par sa
+  formule ; la trésorerie ; offre, le MRR des abonnements annualisé ; ce que
+  vaut un nouveau vendeur abonné, avec le calcul de son coût ; la trésorerie) ;
+  son « Et si » (`LeverCard` avec le levier de sa fuite, `MrrCurve` et, quand
+  un levier d'argent a bougé, le saut au mois 1 et sa phrase ; le panneau avec
+  ses seuls leviers, 8 et 3) ; son funnel (demande : les inscrits et deux
+  colonnes sur les mêmes 100, les recommandés, la ligne amont, puis la
+  liquidité sur sa propre base de 100 recherches ou demandes envoyées ;
+  offre : les inscrits, la première vente et, avec les abonnements, les
+  abonnés sur les mêmes 100, puis les deux churns en taux mensuels, jamais en
+  colonnes). **Un côté sans argent** (l'offre sans abonnements) dit ses
+  absences en phrases (`SideNote`), jamais par un zéro ; **un côté sans assez
+  de cibles** le dit en pointillés, jamais en rouge.
+- **La liste des chiffres** : par étape (C41), les deux côtés mêlés dans
+  l'ordre de §22.4.1, une étiquette de côté par ligne, en mots, sans couleur
+  (`mkt.side.buy`, `mkt.side.sell`, `mkt.side.match`) ; **sa seule étape
+  signalée est celle que nomme le côté affiché** (C103) ; une phrase sous son
+  titre le dit.
+- **Le deck** (C103) : la slide du total (`SlideStreams`, un registre lu de
+  haut en bas, sans barre, sans part, sans « + ») quand les vendeurs paient ;
+  puis les quatre slides des acheteurs (funnel, fuite, « Et si »,
+  économie unitaire) ; puis celles des vendeurs ; puis les slides communes,
+  comme aujourd'hui. Jamais entrelacées, jamais face à face. Chaque slide d'un
+  côté porte son titre de côté au-dessus du sien (`mkt.side.demandTitle`,
+  `supplyTitle`). Sur la slide de la fuite, les autres étapes sous leur cible
+  sont à l'encre (C102). Sans abonnements : pas de slide du total, et l'offre
+  n'a que son funnel tant qu'il lui manque des cibles.
+- **Jamais de courbe du total** (C103) : sa fin est le « Dans 12 mois » de la
+  bande.
+- **Le montant d'une fuite** s'imprime par la règle du moteur, deux chiffres
+  significatifs et « ~ » (C97) : ~470 €, ~350 €, ~580 € et ~130 € pour
+  l'exemple (§22.10.2 garde les valeurs exactes).
 
 ### 22.7 Le brief 10 (MKT-B)
 
@@ -1390,6 +1438,11 @@ sous-agent) recopie le retour dans `design/ds-extension-10-return/`, pose à
 Antoine les questions qu'il ouvre (format `CHANTIERS.md` C), puis complète les
 fiches MKT-7 et MKT-8 dans une PR de documentation. MKT-B peut partir **dès
 maintenant**, pendant que l'app se code (C74).
+
+**Fait** : MKT-B le 2026-10-04 (#340, le brief déposé par la session) ; le
+retour recopié et C94 à C103 tranchées le 2026-10-05 (#344) ; les fiches
+écrites le même jour, MKT-7 coupée en deux (MKT-7a, les composants ; MKT-7b,
+le tableau).
 
 ### 22.8 La copie
 
@@ -1747,18 +1800,18 @@ les prestataires. » / "A marketplace has two sides: clients and providers.").
 | `mkt.funnel.clauseFirstSale` · `…One` | {a} font une première vente · {a} fait une première vente | {a} make a first sale · {a} makes a first sale |
 | `mkt.funnel.clausePaid` · `…One` | {p} s'abonnent · {p} s'abonne | {p} subscribe · {p} subscribes |
 | `mkt.funnel.unmeasured.first` · `repeat` · `firstSale` · `paid` | la première commande · la deuxième commande · la première vente · la conversion en abonné | first order · second order · first sale · subscription conversion |
-| `mkt.funnel.fillRequests` · `fillSearches` · `fillUnknown` | Taux de service : {fill} des demandes aboutissent à une commande · Taux de service : {fill} des recherches aboutissent à une commande · Taux de service : non mesuré | Fill rate: {fill} of requests end in an order · Fill rate: {fill} of searches end in an order · Fill rate: not measured |
+| `mkt.funnel.fillRequests` · `fillSearches` · `fillUnknown` | Taux de service : {fill} des demandes envoyées aboutissent à une commande · Taux de service : {fill} des recherches aboutissent à une commande · Taux de service : non mesuré | Fill rate: {fill} of requests sent end in an order · Fill rate: {fill} of searches end in an order · Fill rate: not measured |
 | `mkt.funnel.churn` · `paidChurn` | Churn des vendeurs : {c} par mois · Churn des vendeurs abonnés : {c} par mois | Seller churn: {c} a month · Paid seller churn: {c} a month |
 | `mkt.funnel.newBuyers` · `newPaidSellers` | Nouveaux acheteurs · Nouveaux vendeurs abonnés | New buyers · New paid sellers |
 | `mkt.funnel.tableCaption` · `sellerTableCaption` | La demande, en chiffres · L'offre, en chiffres | Demand, in numbers · Supply, in numbers |
 | `mkt.money.gmv` | Volume d'affaires du mois (GMV) | Gross volume this month (GMV) |
 | `mkt.money.perBuyer` · `perSeller` | Revenu net par acheteur actif et par mois · Revenu par vendeur abonné et par mois | Net revenue per active buyer a month · Revenue per paid seller a month |
 | `mkt.money.sellerCost` · `sellerCostNote` | Coût d'un vendeur abonné · Le coût d'un vendeur actif × la première vente ÷ la conversion en abonné, sur la même cohorte. | Cost per paid seller · The cost per active seller × first sale ÷ subscription conversion, on the same cohort. |
-| `mkt.money.supplyNone` | Tes vendeurs ne paient pas d'abonnement : l'offre ne rapporte rien en direct, elle se lit dans le taux de service. | Your sellers pay no subscription: supply brings in nothing directly, it shows in the fill rate. |
+| `mkt.money.supplyNone` | Tes vendeurs ne paient pas d'abonnement : l'offre ne rapporte rien en direct | Your sellers pay no subscription: supply brings in nothing directly |
 | `mkt.total.title` | Deux flux, un total | Two streams, one total |
 | `mkt.total.demand` · `supply` · `sum` · `sumArr` | Commissions (revenu net) · Abonnements des vendeurs · Total par mois · Total annualisé | Commissions (net revenue) · Seller subscriptions · Total a month · Annualised total |
-| `mkt.total.newSum` | Nouveau par mois : {demand} + {supply} = {total} | New a month: {demand} + {supply} = {total} |
-| `mkt.total.sum12` | Dans 12 mois, au rythme actuel : {demand} + {supply} = {total} | In 12 months, at the current pace: {demand} + {supply} = {total} |
+| `mkt.total.newLabel` | Nouveau chaque mois | New a month |
+| `mkt.total.in12Label` | Dans 12 mois au rythme actuel | In 12 months at the current pace |
 | `mkt.total.ofDemand` · `ofSupply` | le revenu net des commissions · le MRR des abonnements | commission net revenue · subscription MRR |
 | `mkt.total.footer` | Revenu net et MRR des abonnements à fin {month} · sources : {tools} | Net revenue and subscription MRR at the end of {month} · sources: {tools} |
 
@@ -1816,6 +1869,42 @@ calque qui les contredit se corrige sur elles.
 | `scenario.kpiPayback` | FR | (la règle ne la désigne pas : « CAC payback ») | Payback |
 | | EN | — | Payback |
 
+**Les feuilles du retour du brief 10** (2026-10-05, C98), à écrire mot pour mot
+dans les calques comme les précédentes, que la règle les désigne ou non :
+l'en-tête du diagnostic dit le côté, pas « le moteur » ; une place de marché
+n'a ni expansion, ni rétrogradation, ni facturation mensuelle ; chaque flux a
+sa marge.
+
+| Feuille | Langue | `demand` | `supply` |
+|---|---|---|---|
+| `diagnosis.clear` | FR | Une étape freine les acheteurs | Une étape freine les vendeurs |
+| | EN | One stage holds the buyers back | One stage holds the sellers back |
+| `diagnosis.shared` | FR | {n} étapes freinent autant l'une que l'autre | {n} étapes freinent autant l'une que l'autre |
+| | EN | {n} stages hold the buyers back about equally | {n} stages hold the sellers back about equally |
+| `diagnosis.level` | FR | Rien ne freine les acheteurs | Rien ne freine les vendeurs |
+| | EN | Nothing holds the buyers back | Nothing holds the sellers back |
+| `diagnosis.notEnough` | FR | Pas assez de cibles pour nommer ce qui freine les acheteurs | Pas assez de cibles pour nommer ce qui freine les vendeurs |
+| | EN | Not enough targets to name what holds the buyers back | Not enough targets to name what holds the sellers back |
+| `money.noMarginNote` | FR | Sans elle, pas de LTV, pas de payback, pas de trésorerie, et jamais la marge des abonnements à sa place : chaque flux a la sienne. | Sans elle, pas de LTV, pas de payback, pas de trésorerie, et jamais la marge des commissions à sa place : chaque flux a la sienne. |
+| | EN | Without it, no LTV, no payback, no cash figure, and never the subscriptions' margin in its place: each stream has its own. | Without it, no LTV, no payback, no cash figure, and never the commissions' margin in its place: each stream has its own. |
+| `scenario.intro` | FR | Bouge un ou plusieurs leviers : le funnel et les chiffres des acheteurs se recalculent ensemble, les effets se cumulent. Les leviers des vendeurs sont de leur côté. | Bouge un ou plusieurs leviers : les abonnements des vendeurs se recalculent, les effets se cumulent. Les leviers des acheteurs sont de leur côté. |
+| | EN | Move one lever or several: the buyers' funnel and figures recompute together, and the effects add up. The sellers' levers are on their side. | Move one lever or several: the sellers' subscriptions recompute, and the effects add up. The buyers' levers are on their side. |
+| `scenario.assumeCash` | FR | Trésorerie immobilisée : la dépense d'acquisition du mois × le payback ÷ 2. La dépense de chaque mois revient régulièrement sur le payback ; le churn, qui la ralentit, n'est pas compté (un plancher). Même dépense avec les « Et si » : plus de nouveaux acheteurs rendent chacun moins cher. | Trésorerie immobilisée : la dépense d'acquisition du mois × le payback ÷ 2. La dépense de chaque mois revient régulièrement sur le payback ; le churn, qui la ralentit, n'est pas compté (un plancher). Même dépense avec les « Et si » : plus de vendeurs abonnés rendent chacun moins cher. |
+| | EN | Cash tied up: the month's acquisition spend × the payback ÷ 2. Each month's spend comes back evenly over the payback; churn, which slows it, is not counted (a floor). The same spend with the what-ifs: more new buyers make each one cheaper. | Cash tied up: the month's acquisition spend × the payback ÷ 2. Each month's spend comes back evenly over the payback; churn, which slows it, is not counted (a floor). The same spend with the what-ifs: more paid sellers make each one cheaper. |
+| `terms.cashTied.definition` | FR | Ce que ton acquisition garde hors de la banque à tout moment. Chaque mois, tu dépenses pour gagner des acheteurs ; chacun te le rembourse sur la durée du payback. À rythme constant, la moitié de la dépense d'un payback est dehors. Un plancher : le churn ralentit le retour. | Ce que ton acquisition garde hors de la banque à tout moment. Chaque mois, tu dépenses pour gagner des vendeurs abonnés ; chacun te le rembourse sur la durée du payback. À rythme constant, la moitié de la dépense d'un payback est dehors. Un plancher : le churn ralentit le retour. |
+| | EN | What your acquisition keeps out of the bank at any time. Each month you spend to win new buyers; each of them pays that back over the payback. At a steady pace, half a payback's worth of spend is out. A floor: churn slows the return. | What your acquisition keeps out of the bank at any time. Each month you spend to win new paid sellers; each of them pays that back over the payback. At a steady pace, half a payback's worth of spend is out. A floor: churn slows the return. |
+| `terms.afterPayback.definition` | FR | Combien de temps un acheteur continue de rapporter une fois son coût d'acquisition remboursé : sa durée de vie moins le payback. Sous zéro, il part avant d'avoir remboursé : c'est la perte, dite en mois. | Combien de temps un vendeur abonné continue de rapporter une fois son coût d'acquisition remboursé : sa durée de vie moins le payback. Sous zéro, il part avant d'avoir remboursé : c'est la perte, dite en mois. |
+| | EN | How long a buyer keeps bringing in margin once its acquisition cost is paid back: its lifetime minus the payback. Below zero, it leaves before paying back: that is the loss, said in months. | How long a paid seller keeps bringing in margin once its acquisition cost is paid back: its lifetime minus the payback. Below zero, it leaves before paying back: that is the loss, said in months. |
+| `slide.unitFloor` | FR | un plancher | un plancher |
+| | EN | a floor | a floor |
+| `slide.unitAssume` | FR | Trésorerie immobilisée : la dépense d'acquisition du mois × le payback ÷ 2 — un plancher. La marge est celle des commissions, jamais celle des abonnements. | Trésorerie immobilisée : la dépense d'acquisition du mois × le payback ÷ 2 — un plancher. La marge est celle des abonnements, jamais celle des commissions. |
+| | EN | Cash tied up: the month's acquisition spend × the payback ÷ 2 — a floor. The margin is the commissions' own, never the subscriptions'. | Cash tied up: the month's acquisition spend × the payback ÷ 2 — a floor. The margin is the subscriptions' own, never the commissions'. |
+
+L'argent de la place de marché n'a qu'une hypothèse de trésorerie, la même
+des deux côtés : `mkt.money.cashAssume` (§22.8.5 k) remplace `money.assumePlg`
+sous un côté (MKT-7b) ; les variantes `…Outpaced` ne s'affichent jamais (la
+trésorerie d'un côté est toujours un plancher, `cashTiedUp(…, false)`, §22.5.3).
+
 **d. Les hypothèses neuves** (MKT-3, sous **`mkt.assumption.<id>`** :
 `scenario.assumption` est un `Record<ScenarioAssumption, …>` fermé, et les ids
 de la place de marché sont un autre type, `MktScenarioAssumption`). Le texte
@@ -1835,7 +1924,7 @@ côté) pour les quatre partagées :
 `signup-same-visitors`, `referral-on-top`, `same-spend` et `twelve-months`
 servent les deux côtés, réécrites par les calques (la règle les désigne).
 
-**e. Les titres neufs des slides** (MKT-8, `slideTitles`, chacun ajouté au
+**e. Les titres neufs des slides** (MKT-7b, qui en fait aussi le verdict d'un côté et le titre de la bande ; `slideTitles`, chacun ajouté au
 `TITLE_CONTRACT` d'`engine-copy.test.ts` et déclenché par le balayage de
 `sentences-guard.test.ts`, §22.11.1) :
 
@@ -1862,9 +1951,9 @@ connue) ; `chainOf` (`peloton.ts`) dit laquelle. `title-accent.ts` : les
 génériques qui ne nomment que des étapes (`leakClearUnpriced`, `leakShared`,
 `leakNotEnoughBelow`, `leakLevel`, `visibility*`, `mirror`, `ask*`, `annex`,
 `evolution*`, `whatIfLeverPlain`, `scenarioPlain`) servent tels quels.
-**Si le retour du brief 10 demande d'autres textes**, la session principale
-les écrit dans la PR de documentation qui complète MKT-7 et MKT-8 (§22.7) :
-un sous-agent n'en écrit jamais.
+**Les textes que demande le retour du brief 10** sont au §22.8.5 k, écrits
+par la session principale avec les fiches MKT-7a, MKT-7b et MKT-8 : un
+sous-agent n'en écrit jamais.
 
 **f. Les sujets des candidats et les deux contrôles neufs** (MKT-4, dans
 `subject` et `sanity`) :
@@ -1942,6 +2031,71 @@ le calque de la demande porte `findings.reconcile` et `findings.reconcileOne`
 mot pour mot comme `sanity.reconcileGap` et `sanity.reconcileGapOne` (§22.8.5
 c : « … ton CAC acheteur en compte {n} … », la source du compte, qui n'est pas
 une facturation).
+
+**k. Les textes du retour du brief 10** (2026-10-05 ; dans `ENGINE_COPY.mkt`,
+chacun « à relire » ; ajoutés par l'unité qui les affiche). Ils viennent de
+`design/ds-extension-10-return/COPY.md`, réécrits avec les mots de §22 et C97 à
+C101. Ce que le retour écrit et que §22 dit déjà (98 chaînes) garde le texte
+de §22 ; ce qu'un calque produit d'une feuille de base (40) garde le calque,
+sauf les feuilles réécrites au §22.8.5 c. **Ce que le retour écrit et qui ne
+sert pas** : ses phrases d'hypothèses du panneau (les hypothèses sont la liste
+de §22.5.4 et du §22.8.5 d), ses lignes de calcul de la fuite (la chaîne de la
+fuite reste `whatIf.*` réécrite par le calque, §22.5.5), ses fenêtres dans les
+noms des chiffres (ce sont des réglages), et ses sources écrites en dur (elles
+viennent des outils). Les mots « services » viennent du lexique de §22.8.4
+(MKT-S) ; `{stage}` est `subject[id]` (§22.8.5 f), `{worth}` la phrase de
+gain du côté (`worth.newMrr` ou `worth.retainedMrr`, réécrite par son calque),
+chaque montant à deux chiffres significatifs avec « ~ » (C97).
+
+| Clé | FR | EN | Unité, où |
+|---|---|---|---|
+| `mkt.next.totalIsSlide` | Le total, ci-dessus, est le titre de ta première slide. | The total above is the title of your first slide. | MKT-7b, le prochain pas, à la place de `next.verdictIsSlide` (avec abonnements) |
+| `mkt.next.buyersIsSlide` | Le verdict des acheteurs, plus bas, est le titre de ta première slide. | Your buyers' verdict, below, is the title of your first slide. | MKT-7b, idem, sans abonnements |
+| `mkt.side.note` | Deux côtés, deux lectures : chacun se lit contre ses propres cibles, jamais contre l'autre. | Two sides, two readings: each is read against its own targets, never against the other. | MKT-7b, `SideShown` (`note`) |
+| `mkt.total.in12Moved` | Dans 12 mois avec tes « Et si », des deux côtés | In 12 months with your what-ifs, both sides | MKT-7b, la bande (dernier chiffre, dès qu'un « Et si » bouge) |
+| `mkt.total.todayLine` | Au rythme actuel : {today} dans 12 mois. Les « Et si » des deux côtés s'additionnent ici, et seulement ici. | At the current pace: {today} in 12 months. The what-ifs of both sides add up here, and only here. | MKT-7b, la bande (sa dernière ligne, idem) |
+| `mkt.diag.aside` | À côté : {stage}, {value} pour une cible de {target}, vaudrait {worth}. | Beside it: {stage}, {value} for a target of {target}, would be worth {worth}. | MKT-7b, le diagnostic d'un côté : une ligne par autre étape sous sa cible, à l'encre |
+| `mkt.diag.asideUnpriced` | À côté : {stage}, {value} pour une cible de {target}, sans montant : l'offre ne se chiffre que par ses abonnements. | Beside it: {stage}, {value} for a target of {target}, with no amount: supply is priced only through its subscriptions. | MKT-7b, idem, pour une étape de l'offre non chiffrée (C67) |
+| `mkt.note.targetsDemand` · `targetsSupply` | Fixe les cibles des acheteurs → · Fixe les cibles des vendeurs → | Set your buyers' targets → · Set your sellers' targets → | MKT-7b, `SideNote` `pending` (son action, vers l'écran « Cibles ») |
+| `mkt.note.moneyBody` | Tout le revenu de la place de marché, ce sont les commissions, côté demande. Ce que font les vendeurs se lit dans le taux de service (plus bas, avec leur funnel). | All of the marketplace's revenue is the commissions, on the demand side. What sellers do shows in the fill rate (below, with their funnel). | MKT-7b, `SideNote` `absent` (son titre est `mkt.money.supplyNone`) |
+| `mkt.note.moneyWhatIf` | Pas d'argent de ce côté, donc pas de « Et si » non plus : les leviers des vendeurs sont ceux de l'abonnement. | No money on this side, so no what-if either: the sellers' levers are the subscription's. | MKT-7b, idem |
+| `mkt.note.moneyAction` | Tes vendeurs paient un abonnement ? Coche-le dans les Réglages | Do your sellers pay a subscription? Tick it in Settings | MKT-7b, idem (son action, vers les Réglages) |
+| `mkt.money.perBuyerNote` · `…Many` | Un acheteur actif rapporte {per} de revenu net par mois : {freq} commande × {aov} × {take} de commission. · Un acheteur actif rapporte {per} de revenu net par mois : {freq} commandes × {aov} × {take} de commission. | One active buyer brings in {per} of net revenue a month: {freq} orders × {aov} × {take} take rate. · (la même) | MKT-7b, l'argent de la demande (sa note) ; `…Many` quand la fréquence vaut 2 ou plus |
+| `mkt.money.sellerCostExplained` | Le coût d'un vendeur abonné est calculé : {cpa} par vendeur actif × {fs} de première vente ÷ {conv} de conversion en abonné = {cost}. | The cost of a paid seller is computed: {cpa} per active seller × {fs} first sale ÷ {conv} subscription conversion = {cost}. | MKT-7b, l'argent de l'offre (sa note) |
+| `mkt.money.cashAssume` | Un plancher : la dépense de chaque mois revient régulièrement sur la durée du payback, la moitié est donc dehors à tout moment ; le churn ralentit le retour et n'est pas compté. | A floor: each month's spend comes back evenly over the payback, so half of it is out at any time; churn slows the return and is not counted. | MKT-7b, l'argent d'un côté (à la place de `money.assumePlg`) |
+| `mkt.curve.stepOne` | Mois 1 : {subject} passe à {to} dès le mois prochain — {step} de revenu net en plus par mois sur les seuls acheteurs d'aujourd'hui. | Month 1: {subject} goes to {to} from next month — {step} more net revenue a month on today's buyers alone. | MKT-7a (le delta), MKT-7b et MKT-8 : la note du saut, un levier d'argent de la demande ; `{subject}` est `leverSubject[id]` |
+| `mkt.curve.stepMany` | Mois 1 : {n} leviers d'argent jouent dès le mois prochain — {step} de revenu net en plus par mois sur les seuls acheteurs d'aujourd'hui. | Month 1: {n} money levers apply from next month — {step} more net revenue a month on today's buyers alone. | idem, plusieurs |
+| `mkt.curve.stepSupply` | Mois 1 : le prix de l'abonnement passe à {to} dès le mois prochain — {step} de MRR des abonnements en plus par mois sur les seuls vendeurs abonnés d'aujourd'hui. | Month 1: the subscription price goes to {to} from next month — {step} more subscription MRR a month on today's paid sellers alone. | idem, le prix des abonnements |
+| `mkt.funnel.title` · `sellerTitle` | Pour 100 inscrits côté acheteurs · Pour 100 vendeurs inscrits | Per 100 buyer sign-ups · Per 100 seller sign-ups | MKT-7b, `SideFunnel` (`title`, l'écran seulement) |
+| `mkt.funnel.liquidity` | Liquidité · sur 100 {kind} | Liquidity · out of 100 {kind} | MKT-7b et MKT-8, la base de la liquidité (avec le « ? » de liquidité) |
+| `mkt.funnel.kindSearches` · `kindRequests` · `kindEither` | recherches · demandes envoyées · recherches ou demandes envoyées | searches · requests sent · searches or requests sent | idem : `{kind}` selon `fillVariant` (C99) ; `kindEither` quand l'entrée n'a pas de variante |
+| `mkt.funnel.otherBase` | Le taux de service se compte sur 100 {kind} : une autre base, pas les mêmes personnes. | The fill rate is counted on 100 {kind}: another base, not the same people. | MKT-7b, la note du funnel de la demande, après `mkt.funnel.sameHundred` |
+| `mkt.funnel.ratesTitle` | Chaque mois | Every month | MKT-7b et MKT-8, les taux de l'offre |
+| `mkt.funnel.churnLabel` · `paidChurnLabel` | Churn des vendeurs · Churn des vendeurs abonnés | Seller churn · Paid seller churn | idem (les deux taux) |
+| `mkt.funnel.rateTarget` | cible {target} | target {target} | idem (la cible d'un taux, à l'encre) |
+| `mkt.funnel.liquidityAside` | Leur travail se lit dans le taux de service, côté demande : {fill} des {kind} aboutissent à une commande. | Their work shows in the fill rate, on the demand side: {fill} of {kind} end in an order. | MKT-7b et MKT-8, le funnel de l'offre sans abonnements (`aside`) |
+| `mkt.list.lead` | Les deux côtés, une liste par étape. L'étape signalée est celle que nomme le côté affiché. | Both sides, one list by stage. The stage flagged is the one the side shown names. | MKT-7b, « Tes chiffres » (`lead`) |
+| `mkt.terms.gmv` | terme : volume d'affaires (GMV) ; définition : La valeur totale des commandes passées sur la place de marché dans le mois, avant ta commission. Ce n'est pas ton revenu : ton revenu, c'est la part que tu gardes, le revenu net (volume d'affaires × commission). | term: GMV (gross merchandise value); definition: The total value of the orders placed on the marketplace in the month, before your commission. It is not your revenue: your revenue is the share you keep, the net revenue (GMV × take rate). | MKT-7b, le « ? » du GMV dans l'argent de la demande |
+| `mkt.terms.takeRate` | terme : commission (take rate) ; définition : La part de chaque commande que la place de marché garde. Volume d'affaires × commission = revenu net : côté demande, il joue le rôle du MRR d'un SaaS. | term: take rate; definition: The share of each order the marketplace keeps. GMV × take rate = net revenue: on the demand side, it plays the part MRR plays in a SaaS. | MKT-7b, le « ? » de la commission, dans `mkt.money.perBuyerNote` |
+| `mkt.terms.liquidity` | terme : liquidité ; définition : La capacité de ta place de marché à faire se rencontrer les deux côtés. Le moteur la lit en un chiffre, le taux de service : la part des recherches (ou des demandes envoyées) qui aboutissent à une commande. Elle se compte côté demande et ne se chiffre que sur les nouveaux acheteurs : sa valeur est un minimum. | term: liquidity; definition: How well your marketplace brings the two sides together. The engine reads it in one figure, the fill rate: the share of searches (or requests sent) that end in an order. It is counted on the demand side and priced on new buyers only, so its worth is a minimum. | MKT-7b, le « ? » de `mkt.funnel.liquidity` |
+| `mkt.terms.netRevenue` | terme : revenu net ; définition : Ce que la place de marché garde des commandes : volume d'affaires × commission, ou acheteurs actifs × ce que rapporte un acheteur actif par mois. Le moteur le projette comme un MRR. | term: net revenue; definition: What the marketplace keeps from the orders: GMV × take rate, or active buyers × what one active buyer brings a month. The engine projects it as it projects an MRR. | MKT-7b, le « ? » de « Revenu net annualisé » (C101) |
+| `mkt.slide.sellerCostTile` | calculé : {cpa} × {fs} ÷ {conv} | computed: {cpa} × {fs} ÷ {conv} | MKT-8, la tuile du coût sur la slide d'économie unitaire de l'offre |
+| `mkt.slide.marginRange` | marge estimée à {range} | margin estimated at {range} | MKT-8, la tuile de la LTV quand la marge est une fourchette |
+| `mkt.total.colMonth` | Ce mois-ci | This month | MKT-8, `SlideStreams` (colonne ; les deux suivantes sont `mkt.total.newLabel` et `in12Label`) |
+| `mkt.total.colIn12Moved` | Dans 12 mois, avec nos « Et si » | In 12 months, with our what-ifs | MKT-8, idem (quatrième colonne, quand un « Et si » a bougé) |
+| `mkt.total.sideDemand` · `…One` | les acheteurs · slides {from} à {to} · les acheteurs · slide {n} | the buyers · slides {from}–{to} · the buyers · slide {n} | MKT-8, `SlideStreams` (sous le nom du flux ; les numéros sont ceux du deck rendu) |
+| `mkt.total.sideSupply` · `…One` | les vendeurs · slides {from} à {to} · les vendeurs · slide {n} | the sellers · slides {from}–{to} · the sellers · slide {n} | idem |
+| `mkt.total.note` | Une somme, jamais une comparaison : chaque flux se lit sur les slides de son côté, contre ses propres cibles. | A sum, never a comparison: each stream is read on its own side's slides, against its own targets. | MKT-8, `SlideStreams` (`note`) |
+
+`mkt.terms.*` a la forme de `terms.*` (`{ term, definition }`, chacun `{ fr,
+en }`) : `EngineTerm` gagne les quatre ids (`gmv`, `takeRate`, `liquidity`,
+`netRevenue`) et les lit dans `strings.mkt.terms` (MKT-7b). Le texte du saut
+(`{step}`) : la part de la projection du mois 1 qui vient des leviers d'argent
+sur la base d'aujourd'hui, `mrr × kept ÷ 100 × (ratio − 1)` (`kept` : le
+pourcentage gardé de `keptPercentOfChurn`, `ratio` : `fA` côté demande, `fPrice`
+côté offre, §22.5.4) ; pour l'exemple, la commission à 13 % : 32 853,60 € × 96 %
+× (13/12 − 1) = 2 628,29 €, imprimé « ~2 600 € » (la planche écrit « ~2 700 € »,
+sans le churn du mois).
 
 ### 22.9 L'analytique (MKT-6)
 
@@ -2097,10 +2251,10 @@ Un test qui rougit hors de cette liste arrête l'unité (§22.13).
 
 | Test | Ce qui change | Unité |
 |---|---|---|
-| `business-type.test.ts` (créé par A22) | `MARKETPLACE_SCREENS_READY` vaut `false` (jusqu'à MKT-7) ; `openTypesWith("consumer-app,marketplace")` rend `["b2b-saas", "consumer-app"]` tant qu'elle vaut `false` ; `BUSINESS_TYPES` à trois ; `motionsAllowed("marketplace")` vide ; `activeMotions` des trois types ; `isSellingMotion` ; `mktSetup` et ses défauts ; le balayage qui refuse `as Motion` (§22.2.5) ; la garde « qui lit le type » de §21.10.1 gagne `isMarketplace` | MKT-0 |
-| `validate.test.ts`, `io.test.ts`, `merge.test.ts`, `series.test.ts` | `validateEngine` : une place de marché valide (avec et sans abonnements, en « services ») ; chaque message de §22.3 déclenché ; un champ de la place de marché sur un SaaS, refusé ; l'app et le SaaS inchangés. `io.ts` : un fichier de place de marché refusé tant que la barrière est fermée (MKT-7 retourne ce test). `mergeRefusal` : abonnements différents → `"motions"` ; une des trois fenêtres différente → `"windows"` ; `offering` différent → fusion. `windowsOf` : les trois fenêtres pour une place de marché, aucune clé neuve pour un SaaS | MKT-0 |
+| `business-type.test.ts` (créé par A22) | `MARKETPLACE_SCREENS_READY` vaut `false` (jusqu'à MKT-7b) ; `openTypesWith("consumer-app,marketplace")` rend `["b2b-saas", "consumer-app"]` tant qu'elle vaut `false` ; `BUSINESS_TYPES` à trois ; `motionsAllowed("marketplace")` vide ; `activeMotions` des trois types ; `isSellingMotion` ; `mktSetup` et ses défauts ; le balayage qui refuse `as Motion` (§22.2.5) ; la garde « qui lit le type » de §21.10.1 gagne `isMarketplace` | MKT-0 |
+| `validate.test.ts`, `io.test.ts`, `merge.test.ts`, `series.test.ts` | `validateEngine` : une place de marché valide (avec et sans abonnements, en « services ») ; chaque message de §22.3 déclenché ; un champ de la place de marché sur un SaaS, refusé ; l'app et le SaaS inchangés. `io.ts` : un fichier de place de marché refusé tant que la barrière est fermée (MKT-7b retourne ce test). `mergeRefusal` : abonnements différents → `"motions"` ; une des trois fenêtres différente → `"windows"` ; `offering` différent → fusion. `windowsOf` : les trois fenêtres pour une place de marché, aucune clé neuve pour un SaaS | MKT-0 |
 | `cohort.test.ts` | les trois fenêtres ; la cohorte par défaut d'une place de marché (mai pour le 24 septembre 2026) | MKT-0 |
-| `catalog-shape.test.ts` | l'ensemble des portées hors `plg`/`slg` vaut `new Set(["link", "app", "mkt"])` (la ligne qu'A22 a passée en ensemble) ; `shapesOf` d'une place de marché : 19, 14 sans abonnements, dans l'ordre de `MKT_METRIC_SHAPES` ; `derivedShapesOf` : 6 ou 3 ; un ★ par étape côté demande ; aucun repère ; les listes de §22.4.3 ; `motionOfMetric("mkt.…") === "mkt"` ; `UNPRICED_CANDIDATES`, `LOWER_IS_BETTER_CANDIDATES` | MKT-1 |
+| `catalog-shape.test.ts` | l'ensemble des portées hors `plg`/`slg` vaut `new Set(["link", "app", "mkt"])` (la ligne qu'A22 a passée en ensemble) ; `shapesOf` d'une place de marché : 19, 14 sans abonnements, dans l'ordre de `MKT_METRIC_SHAPES` ; `derivedShapesOf` : 6 ou 3 ; un ★ par étape côté demande, et côté offre ceux de C95 (trois, deux sans abonnements) ; aucun repère ; les listes de §22.4.3 ; `motionOfMetric("mkt.…") === "mkt"` ; `UNPRICED_CANDIDATES`, `LOWER_IS_BETTER_CANDIDATES` | MKT-1 |
 | `shared-counts.test.ts` | les six comptes partagés de §22.2.4 : la parité des libellés tient d'elle-même (§22.4.4 écrit les mêmes, et aucun libellé de la place de marché ne reprend un libellé du SaaS ou de l'app) ; en MKT-S, la même parité sur le catalogue « services » | MKT-1, MKT-S |
 | `content/__tests__/engine-catalog.test.ts` | couvre les 19 et les 6 ; aucun `benchmarkCaveat`, un `noReferenceReason` chacun ; en MKT-S, les mêmes plafonds sur le catalogue « services » (§22.8.4) | MKT-1, MKT-S |
 | `content/__tests__/engine-copy.test.ts` | `unitInput` couvre les entrées des six calculés (§22.4.3) ; `subject` couvre les candidats de la place de marché ; `TITLE_CONTRACT` gagne les titres de §22.8.5 e | MKT-1, MKT-4, MKT-8 |
@@ -2156,7 +2310,7 @@ et l'e2e l'importent (un e2e importe déjà de `src/`, comme
   - en « services », en plus, aucun mot de `SERVICES_BANNED`.
 
   Exceptions nommées une par une, chacune commentée.
-- **E2E** (dans `e2e/engine-marketplace.spec.ts`) : MKT-7 pose
+- **E2E** (dans `e2e/engine-marketplace.spec.ts`) : MKT-7b pose
   `data-testid="mkt-side"` sur l'élément qui contient tout ce que le sélecteur
   « Côté affiché » gouverne, et `data-testid="mkt-total"` sur le total. Le
   texte visible (`innerText`) :
@@ -2230,7 +2384,7 @@ est rempli, rien ne sort), `engine-deck.spec.ts` (le deck de l'exemple).
 
 ---
 
-### 22.12 L'exécution : quatorze unités
+### 22.12 L'exécution : quinze unités
 
 Le format des fiches, les rôles, le prompt d'une unité et ce que
 l'orchestrateur vérifie avant de merger sont dans
@@ -2253,24 +2407,28 @@ en commun :
 #### Le graphe
 
 ```text
-MKT-B (dès maintenant) ──────────► [retour du brief 10 → PR de documentation : fiches MKT-7, MKT-8] ──────────────┐
+MKT-B ─► [retour du brief 10, C94 à C103, fiches : fait le 2026-10-05] ─────────────────────────────────────────┐
                                                                                                                  │
 A22 ─► MKT-R [relecture à blanc → PR de documentation]                                                           │
          │                                                                                                       │
+         ├─► MKT-7a ─────────────────────────────────────────────────────────────────────────────────────────────┤
          └─► MKT-0 ─► MKT-1 ─┬─► MKT-2 ─► MKT-3 ─► MKT-4 ─┐                                                      │
                              ├─► MKT-5 ─┬─────────────────┴─► MKT-6 ─────────────────────────────────────────────┤
-                             │          └─► MKT-S ───────────────────────────────────────────────────────────────┴─► MKT-7 ─► MKT-8 ─► MKT-9 ─► MKT-10
+                             │          └─► MKT-S ───────────────────────────────────────────────────────────────┴─► MKT-7b ─► MKT-8 ─► MKT-9 ─► MKT-10
                              └─► MKT-G
 ```
 
 Avec une branche imposée, dans l'ordre MKT-R, MKT-0, MKT-1, MKT-2, MKT-3, MKT-4,
-MKT-5, MKT-S, MKT-G, MKT-6, puis MKT-7 à MKT-10 une fois le retour porté dans les
-fiches. **MKT-B ne dépend de rien** : elle part pendant qu'A22 se code (C74).
+MKT-5, MKT-S, MKT-G, MKT-6, MKT-7a, MKT-7b, MKT-8, MKT-9, MKT-10. **MKT-B ne
+dépendait de rien** : elle est partie pendant qu'A22 se codait (C74), et le
+retour du brief 10 est porté dans les fiches (2026-10-05). **MKT-7a** (les
+composants) ne lit rien du modèle de la place de marché : elle peut partir dès
+MKT-R.
 **Points d'arrêt naturels** : après MKT-R (§22 remise d'accord avec le code
 d'après A22), après MKT-1 (les chiffres existent), après MKT-4
 (le modèle est complet, rien d'affiché), après MKT-6 (on crée une place de
-marché ; le tableau attend le brief), après MKT-8 (les écrans et les slides
-sont là), après MKT-10 (fini, reste le bon à tirer).
+marché ; le tableau ne la montre pas encore), après MKT-7b (le tableau est là),
+après MKT-8 (les slides sont là), après MKT-10 (fini, reste le bon à tirer).
 
 | Unité | Ce qu'elle livre | Prérequis | Relecteurs | Jours-agent |
 |---|---|---|---|---|
@@ -2285,13 +2443,13 @@ sont là), après MKT-10 (fini, reste le bon à tirer).
 | MKT-S | les trois calques « services » et le catalogue « services » | MKT-5 | copie | 2 |
 | MKT-G | trois termes de glossaire (GMV, take rate, liquidité) | MKT-1 | copie | 2 |
 | MKT-6 | la carte de départ, le réglage, les cibles, les Réglages, l'analytique | MKT-4, MKT-5 | copie, sécurité | 2 |
-| MKT-7 | le tableau des deux côtés et le total | MKT-6, MKT-S, le retour porté | copie | 3 (à confirmer au retour) |
-| MKT-8 | les slides | MKT-7 | copie | 2,5 (à confirmer au retour) |
+| MKT-7a | les composants du retour 10 : `SideShown`, `SideFunnel`, `SideNote`, les deltas de `MrrCurve` et `NumberList`, les jetons | MKT-R | — | 1,5 |
+| MKT-7b | le tableau : le total, le prochain pas partagé, le sélecteur, le côté affiché, la liste commune, l'écran d'un chiffre ; la barrière levée | MKT-6, MKT-S, MKT-7a | copie | 3 |
+| MKT-8 | les slides : le total en registre (`SlideStreams`), les quatre slides de chaque côté | MKT-7b | copie | 2,5 |
 | MKT-9 | l'exemple et le golden | MKT-8 | copie | 1 |
 | MKT-10 | la garde à l'écran, les e2e, `ci.yml`, la documentation | MKT-9 | copie, sécurité | 2 |
 
-Total ≈ **31 jours-agent**, plus la demi-journée de MKT-R et l'aller-retour du brief 10 (le temps de
-Claude Design et d'Antoine). Puis **A23.d**, le bon à tirer de toute la copie
+Total ≈ **32,5 jours-agent**, plus la demi-journée de MKT-R. Puis **A23.d**, le bon à tirer de toute la copie
 neuve (`/bon-a-tirer`, depuis `grep -rn "TODO: à relire" src/`, en
 « produits » et en « services »), puis l'ouverture par Antoine
 (`ENGINE_TYPES=consumer-app,marketplace` dans Vercel, puis redéployer).
@@ -2335,8 +2493,10 @@ neuve (`/bon-a-tirer`, depuis `grep -rn "TODO: à relire" src/`, en
      les feuilles que la règle de §22.8.3 désigne sur l'`ENGINE_COPY`
      d'après A22 (environ 125 pour les deux côtés, 25 pour l'offre seule, avant
      A22) ; les caractères de `JOURNAL.md` et de `CLAUDE.md` (§23.7, point 6).
-  4. **MKT-0 à MKT-6, MKT-S et MKT-G jouées à blanc**, chacune depuis l'état
-     que laisse la précédente.
+  4. **MKT-0 à MKT-6, MKT-S, MKT-G, MKT-7a, MKT-7b et MKT-8 jouées à blanc**,
+     chacune depuis l'état que laisse la précédente (les trois dernières sont
+     écrites le 2026-10-05 sur le code d'avant A22 : leurs renvois aux
+     fichiers de l'îlot se revérifient).
 - **Le prompt du sous-agent** (l'orchestrateur remplit `<DOSSIER>`, le clone,
   et `<SCRATCH>`, un dossier temporaire hors du dépôt) :
 
@@ -2349,7 +2509,7 @@ Lis, dans l'ordre : CLAUDE.md ; docs/engine/executer-un-type.md (§23) ; docs/en
 1. Pour chaque pièce d'A22 de la liste « Ce qu'elle revérifie », point 1, de la fiche MKT-R : existe-t-elle sous le nom et la signature que §22 écrit ? Sinon, qu'est-ce qui existe à la place, et quelles phrases de §22 sont à reprendre ?
 2. Pour chaque ligne des tables de §22.2.5 : retrouve l'endroit par la fonction ou l'expression citée et donne son fichier:ligne actuel. Cherche les comparaisons === "plg" / === "slg" et les boucles ["plg", "slg"] que le code d'A22 a ajoutées et qu'aucune table ne liste.
 3. Mesure, dans une copie jetable : mkdir -p <SCRATCH>/dryrun22, copie-y src, tsconfig.json, next-env.d.ts et package.json, fais un lien symbolique vers <DOSSIER>/node_modules, puis npx tsc --noEmit -p . après les types de MKT-0, de MKT-1, puis de MKT-3 et MKT-4 (§22.2.1). Par un script dans cette copie, compte les feuilles d'ENGINE_COPY que la règle de §22.8.3 désigne (les deux côtés, l'offre seule), et liste toute feuille désignée qu'aucune exclusion n'écarte et que le lexique de §22.8.2 ne sait pas réécrire sans changer le sens. Supprime ce seul dossier à la fin.
-4. Joue à blanc MKT-0, MKT-1, MKT-2, MKT-3, MKT-4, MKT-5, MKT-S, MKT-6 et MKT-G, chacune depuis l'état que laisse la précédente : chaque étape de sa fiche contre le code réel, comme si tu allais la taper. Les fichiers de sa rubrique « Fichiers » couvrent-ils tout ce que ses étapes obligent à toucher (tests qui rougiront, specs e2e, goldens) ?
+4. Joue à blanc MKT-0, MKT-1, MKT-2, MKT-3, MKT-4, MKT-5, MKT-S, MKT-6, MKT-G, MKT-7a, MKT-7b et MKT-8, chacune depuis l'état que laisse la précédente : chaque étape de sa fiche contre le code réel, comme si tu allais la taper. Les fichiers de sa rubrique « Fichiers » couvrent-ils tout ce que ses étapes obligent à toucher (tests qui rougiront, specs e2e, goldens) ?
 
 Ton compte rendu, en français : une liste numérotée de constats, rangés par unité ; pour chacun, l'endroit de la spécification (section, courte citation), l'endroit du code (fichier:ligne), ce qui manque ou contredit, et l'information exacte qui débloquerait l'exécutant (un nom, une signature, une valeur, une règle, le texte exact) ; chacun classé BLOQUANT (l'exécutant devrait deviner, ou casserait quelque chose), LACUNE (il s'en sortirait mais pourrait se tromper) ou DÉTAIL. Puis la table des renvois de §22.2.5 à jour (ancien renvoi, nouveau). Puis tes mesures. Puis ce que tu as vérifié et trouvé juste. Pas de compliment, pas de résumé de la spécification.
 ```
@@ -2720,60 +2880,413 @@ Ton compte rendu, en français : une liste numérotée de constats, rangés par 
   changer).
 - **Relecteurs** : copie, sécurité (l'analytique).
 - **Pause** : on crée une place de marché derrière le drapeau ; le tableau
-  montre encore ce qu'il montre à un moteur vide. **Point d'arrêt** jusqu'au
-  retour du brief 10.
+  montre encore ce qu'il montre à un moteur vide, jusqu'à MKT-7b.
 
-#### MKT-7 — Le tableau (à compléter au retour du brief 10)
+#### MKT-7a — Les composants du retour 10
 
-- **But** : le tableau d'une place de marché : le total, le sélecteur de côté,
-  et pour chaque côté son diagnostic, son argent, son « Et si » et son funnel ;
-  la liste des chiffres avec son étiquette de côté ; l'écran d'un chiffre.
-- **Prérequis** : MKT-6, MKT-S, et **la PR de documentation qui porte le
-  retour du brief 10 dans cette fiche**.
-- **Contrat** : §22.6.2 et les mots de §22.8.5 b et c. La forme (composants,
-  disposition, états) est celle du retour ; les rubriques « À lire »,
-  « Fichiers », « Étapes » et « Acceptation » s'écrivent alors, au format de
-  §23.4, par la session principale. **Ce qui est déjà fixé**, quel que soit le
-  retour :
-  - MKT-7 passe `MARKETPLACE_SCREENS_READY` à `true` (§22.3) et met à jour ses
-    tests (`business-type.test.ts`, `access.test.ts` pour `openTypesWith`,
-    `io.test.ts` pour `sellsSomehow`) ;
-  - les endroits de §22.2.5 marqués « MKT-7 » : `Diagnosis.tsx`,
-    `ImportPanel.tsx:209`, `BoardNumbers.tsx` et `MetricSheet.tsx` (la
-    lecture par côté) ;
-  - les jeux de mots de chaque écran (§22.8.3, « Les jeux de mots que lit
-    chaque écran ») ;
-  - `data-testid="mkt-side"` et `data-testid="mkt-total"` (§22.11.3).
-  - tout composant neuf exporté de `src/components/` s'épingle dans
-    `componentSrcMap` de `.design-sync/config.json` (sinon la prochaine
-    synchro casse, `.design-sync/NOTES.md`), avec son commentaire de doc
-    juste au-dessus de son `export` (`src/__tests__/component-docs.test.ts`) ;
-    de même en MKT-8.
-- **Arrêt** : tant que cette fiche n'a pas ses rubriques, l'unité ne part pas.
+- **But** : les composants que le tableau et les slides d'une place de marché
+  composent, prêts et testés, sans rien brancher : trois neufs dans
+  `src/components/engine/` (`SideShown`, `SideFunnel`, `SideNote`), les deltas
+  de `MrrCurve` (`step`, `note`) et de `NumberList` (`row.side`, `lead`), et les
+  jetons de la place de marché. Ce qu'ils affichent vient de leurs props : ils
+  n'importent rien de `src/lib/engine/` hors des types (`Interval`), et aucun
+  mot n'y est écrit.
+- **Prérequis** : MKT-R (aucune pièce du modèle de la place de marché).
+- **À lire** : §22.6.2 ; dans `design/ds-extension-10-return/` : `README.md`
+  (« What is in the bundle », les questions 3, 4, 8, 9 et 11, « The contrast,
+  measured »), puis, pour chaque composant, ses quatre fichiers sous
+  `components/engine/<Nom>/` (le `.d.ts` donne les props, le `.js` le balisage,
+  le `.css` les règles, le `.prompt.md` l'usage), `MrrCurve/MrrCurve.delta.md`
+  et `.delta.css`, `NumberList/NumberList.delta.md` et `.delta.css`,
+  `tokens/marketplace.css` ; dans le code : `src/components/engine/TotalBand.tsx`
+  et son test (le modèle d'un composant du moteur : module CSS, commentaire de
+  doc collé à l'`export`), `MrrCurve.tsx` et `src/lib/viz/mrr-curve.ts`
+  (`mrrCurveGeometry`), `NumberList.tsx` (`NumberRow`, `NumberStage`, le rendu
+  d'une ligne et d'une étape), `src/components/viz/DotGrid.tsx` (`DotGrid`,
+  `DotLegend`), `src/components/core/Segmented.tsx`, `Field.tsx`, `Tag.tsx`,
+  `Button.tsx`, `src/styles/tokens/money.css` et ses trois lecteurs
+  (`src/app/globals.css`, `src/__tests__/token-sources.test.ts`,
+  `src/__tests__/type-scale.test.ts`), `.design-sync/config.json`
+  (`componentSrcMap`) et `.design-sync/NOTES.md` (« componentSrcMap »),
+  `src/__tests__/component-docs.test.ts`.
+- **Fichiers** : `src/styles/tokens/marketplace.css` (neuf) et ses lecteurs
+  (`globals.css`, et les deux tests de jetons s'ils listent les fichiers) ;
+  `src/components/engine/SideShown.tsx`, `SideFunnel.tsx`, `SideNote.tsx` et
+  leurs `.module.css` (neufs) ; `MrrCurve.tsx`, `MrrCurve.module.css` ;
+  `NumberList.tsx`, `NumberList.module.css` ; leurs tests sous
+  `src/components/engine/__tests__/` (`side-shown.test.ts`,
+  `side-funnel.test.ts`, `side-note.test.ts`, neufs ; `mrr-curve.test.ts`,
+  `number-list.test.ts`, étendus) ; `.design-sync/config.json` (trois
+  épingles).
+- **Étapes** :
+  1. **Les jetons** : `src/styles/tokens/marketplace.css` recopie
+     `tokens/marketplace.css` du retour (les mêmes noms `--market-*`, les mêmes
+     valeurs), importé dans `globals.css` après `money.css` ; s'ils listent les
+     fichiers de jetons, `token-sources.test.ts` et `type-scale.test.ts` le
+     gagnent. Aucune couleur neuve.
+  2. **`SideShown`** : les props du `.d.ts` (`label`, `sides`, `value`,
+     `onChange`, `title`, `note`, `headingId`, `className`, `data-testid`) ;
+     son type de côté se déclare dans le fichier (`export type Side = "demand"
+     | "supply"`), il ne s'importe pas du moteur. Le balisage du `.js` :
+     `Field` en groupe et `Segmented` (les primitives synchronisées), puis le
+     titre du côté (un `h2` à `headingId`), puis la note ; les options dans
+     l'ordre reçu, sans chiffre ni couleur ; la règle d'ouverture
+     (`--market-side-rule`).
+  3. **`SideFunnel`** : les props du `.d.ts` ; chaque grille est un `DotGrid`
+     (la grille inconnue, la boîte hachurée « ? », comme le peloton) ; la
+     colonne qui freine (`holds`) peint ses points en rouge et porte un `Tag`
+     `tone="alert"`, **une au plus** ; la base de la liquidité (`base`) vient
+     après une règle, sous son propre titre ; les taux (`rates`) sont une
+     liste de lignes (nom, valeur, note), **jamais des grilles** ; un taux qui
+     freine prend le bord du diagnostic, pas le rouge ; `medium="slide"` : pas
+     de carte, les taux à droite des colonnes (`--market-slide-*`) ; la légende
+     par `DotLegend`. À 390 px, la grille à côté de ses mots
+     (`--market-funnel-grid-mobile`), comme le peloton.
+  4. **`SideNote`** : `kind="absent"` sans cadre, à l'encre ; `kind="pending"`
+     le bord en pointillés du système ; **jamais de rouge** ; l'action est un
+     `Button` discret passé par la prop `action`.
+  5. **Le delta de `MrrCurve`** : `step?: boolean` et `note?: ReactNode`,
+     exactement comme `MrrCurve.delta.md` le dit (l'anneau à `x(1)`,
+     `y(mid(whatif[1]))`, rayon 6 et 9 sur une slide, seulement avec `whatif` et
+     `step` ; la note après la légende et avant le résumé masqué) ; les règles
+     de `MrrCurve.delta.css` ajoutées au module. **Sans ces deux props, le rendu
+     ne change pas d'un caractère** (le test le vérifie).
+  6. **Le delta de `NumberList`** : `NumberRow.side?: ReactNode` et
+     `NumberListProps.lead?: ReactNode`, comme `NumberList.delta.md` le dit ;
+     les règles de `NumberList.delta.css`. Même garde : sans elles, le rendu ne
+     change pas.
+  7. **Les tests** (rendus statiques, sur le modèle de `total-band.test.ts`) :
+     `SideShown` rend ses deux options dans l'ordre reçu, celle de `value`
+     sélectionnée, son titre et sa note, et aucun chiffre ; `SideFunnel` rend
+     une grille par colonne et une pour la base, au plus un `Tag` d'alerte,
+     ses taux sans grille, et sans carte en `medium="slide"` ; `SideNote` ne
+     porte jamais le ton d'alerte et ne prend ses pointillés qu'en `pending` ;
+     `MrrCurve` et `NumberList` : le même balisage qu'avant sans les props
+     neuves (comparé à un rendu de référence pris avant le changement, dans le
+     test), l'anneau et la note avec `step`, l'étiquette de côté en tête de
+     ligne et la phrase sous le titre avec `side` et `lead`.
+  8. **La synchro** : les trois composants neufs épinglés dans
+     `componentSrcMap` (`.design-sync/config.json`), chacun avec son
+     commentaire de doc collé à son `export` (`component-docs.test.ts`). Leurs
+     aperçus s'écrivent à la re-synchro (A23.e), pas ici.
+- **Acceptation** : commune ; `npx vitest run` avec les tests neufs ; le build
+  comme la CI, puis `e2e/engine-lever.spec.ts`, `e2e/engine-hybrid.spec.ts`,
+  `e2e/engine-money.spec.ts` et `e2e/accessibility.spec.ts` verts (les deux
+  deltas ne changent rien aux écrans d'aujourd'hui). Pas de capture : rien
+  n'est branché (MKT-7b les prend).
+- **Arrêt** : une prop du retour qui demande une valeur que seul le moteur
+  connaît (un composant n'en calcule pas) ; un delta qui change le rendu
+  d'aujourd'hui ; un contraste du retour qui échoue sur les jetons du dépôt.
+- **Relecteurs** : aucun (aucun mot : tout passe par les props).
+- **Pause** : rien de visible ; trois composants neufs attendent MKT-7b et
+  MKT-8.
 
-#### MKT-8 — Les slides (à compléter au retour du brief 10)
+#### MKT-7b — Le tableau
 
-- **But** : le deck d'une place de marché : par côté, le funnel, la fuite,
-  les « Et si », l'économie unitaire ; la slide du total quand les vendeurs
-  paient ; jamais une slide qui met les deux côtés face à face.
-- **Prérequis** : MKT-7.
-- **Contrat** : §22.6.2 ; les titres de §22.8.5 e ; `buildMarketplaceDeck`
-  dans `src/lib/engine/deck-mkt.ts`, appelé en tête de `deck.ts#buildDeck`
-  (`if (activeMotions(state.setup)[0] === "mkt") return
-  buildMarketplaceDeck(…)`), qui construit chaque slide d'un côté avec les
-  mots de ce côté (§22.8.1) ; chaque slide porte `motion: "mkt"` et son côté ;
-  le balayage de `sentences-guard.test.ts` étendu (§22.11.1). Le reste vient
-  du retour, comme pour MKT-7. **Ce qui est déjà fixé**, quel que soit le
-  retour :
-  - `DeckSlide` (`types.ts`) : `motion?: EngineMotion` (au lieu de `Motion`)
-    et un champ neuf `side?: MktSide` ; une slide d'un côté porte `motion:
-    "mkt"` et son `side`, une slide commune (le titre, le total, l'annexe)
-    aucun des deux ; la garde de §22.11.3 lit `side` ;
-  - les endroits de §22.2.5 marqués « MKT-8 » : `deck.ts:377` (`buildLeak`,
-    où aucune place de marché ne passe), les boucles de `deck-motions.ts`,
-    `deck.ts`, `deck-slg.ts`, `deck/SlideMirror.tsx`,
-    `deck/SlideVisibility.tsx`, `deck/ask-defaults.ts`, et
-    `deck/SlideWhatIf.tsx`.
+- **But** : le tableau d'une place de marché, dans l'ordre de §22.6.2 : la
+  barre, la bande du total, le prochain pas partagé, le sélecteur « Côté
+  affiché », puis le côté affiché (son verdict, son diagnostic, son argent,
+  son « Et si » et son panneau, son funnel), la liste commune avec l'étiquette
+  de côté, et l'écran d'un chiffre lu par son côté ; `MARKETPLACE_SCREENS_READY`
+  passe à `true`.
+- **Prérequis** : MKT-6, MKT-S, MKT-7a.
+- **À lire** : §22.6.2 ; §22.8.3 (« Les jeux de mots que lit chaque écran ») ;
+  §22.8.5 b, c (les feuilles du retour), e et k ; §22.5.2, §22.5.3, §22.5.4 et
+  §22.5.9 (ce que les écrans lisent) ; §22.11.3 ; §22.14 (C94 à C103) ; dans
+  `design/ds-extension-10-return/` : `README.md` (questions 1, 2, 3, 4, 6, 7,
+  8, 9, 11 et 13, et « What the design needs from the data »), `INVENTORY.md`
+  (les tableaux « Demand », « Supply » et « The total » : où va chaque
+  chiffre), `board/screens.js` (les états du tableau et ce que chacun montre) ;
+  dans le code de l'îlot (`src/app/[locale]/aarrr-funnel-template/`) :
+  `_engine/Board.tsx` (la branche de l'hybride, son sélecteur, `plgBody`,
+  `whatIf`, `numbers`), `_engine/BoardHead.tsx` (`boardNextStep`,
+  `BoardNextStep`), `_engine/TotalBand.tsx`, `_engine/BoardMoney.tsx` et
+  `_engine/money-view.ts` (`moneyView`, `leverMoneyView`),
+  `_engine/BoardLever.tsx`, `_engine/WhatIfPanel.tsx`,
+  `_engine/SlgWhatIfPanel.tsx` (le modèle d'un panneau d'une autre motion),
+  `_engine/whatif-figures.ts`, `_engine/Peloton.tsx` et
+  `_engine/visual-model.ts` (la grammaire que `SideFunnel` reprend),
+  `_engine/Diagnosis.tsx`, `_engine/BoardNumbers.tsx` et
+  `_engine/number-list.ts`, `_engine/MetricSheet.tsx`, `_engine/EngineTerm.tsx`,
+  `_engine/ImportPanel.tsx`, et `EngineWorkbench.tsx` (l'état `motionView`, le
+  passage au tableau, l'écran « Cibles » ouvert après le réglage).
+- **Fichiers** : `src/lib/engine/mkt-scenario.ts` (`mktSidePaths`, et son
+  test) ; `src/lib/engine/setup-type.ts` (`MARKETPLACE_SCREENS_READY`) et les
+  tests que la fiche de §22.3 nomme (`business-type.test.ts`,
+  `access.test.ts`, `io.test.ts`) ; dans l'îlot : `_engine/mkt-view.ts` (neuf,
+  pur) et son test, `_engine/MarketSide.tsx` (neuf),
+  `_engine/MktWhatIfPanel.tsx` (neuf), `_engine/Board.tsx`,
+  `_engine/BoardHead.tsx`, `_engine/BoardMoney.tsx`, `_engine/BoardLever.tsx`,
+  `_engine/money-view.ts`, `_engine/Diagnosis.tsx`, `_engine/BoardNumbers.tsx`,
+  `_engine/number-list.ts`, `_engine/MetricSheet.tsx`, `_engine/EngineTerm.tsx`,
+  `_engine/ImportPanel.tsx`, `EngineWorkbench.tsx`, leurs tests ;
+  `src/content/engine-copy.ts` (les clés de §22.8.5 k marquées MKT-7b, et les
+  titres de §22.8.5 e) avec `engine-copy.test.ts` (`TITLE_CONTRACT`) et
+  `title-accent.ts`.
+- **Étapes** :
+  1. **Le côté affiché** : dans `EngineWorkbench.tsx`, un état `sideView`
+     (`MktSide`, `"demand"` au départ, remis à `"demand"` par `resetBoard`),
+     passé au tableau comme `motionView` ; `actions.openMetric` le règle sur le
+     côté du chiffre (§22.8.3 : `"supply"` pour `mkt.sell.*`, `"demand"`
+     sinon). Une action neuve `onTargets` ouvre l'écran « Cibles » comme après
+     le réglage (`setScreen("targets")`, puis le focus de
+     `engine-targets-title`).
+  2. **Les chemins d'un côté** : `mktSidePaths(state, targets, ctx, side): {
+     today: Interval[] | null; projected: Interval[] | null }` dans
+     `mkt-scenario.ts`, les 13 points de `demandPath` ou de `sellerPath` avec
+     les mêmes entrées que `buildMktScenario` (§22.5.4), aujourd'hui et avec
+     les cibles ; son test : le point 12 égale `mrr12` des deux colonnes de
+     `buildMktScenario`, pour chaque côté, sur `marketplaceState()` et
+     `EXAMPLE_MKT_WHATIF`.
+  3. **Les vues** (`_engine/mkt-view.ts`, pures, chacune testée sur
+     `marketplaceState()` et `marketplaceNoSubscriptionsState()`, avec les
+     chiffres de §22.10.2 et d'`INVENTORY.md`) :
+     - `mktTotalView` : les props de `TotalBand` depuis
+       `derived.motions[mkt].total` et `mktTotalPaths` : `engines` les deux
+       flux dans l'ordre de la somme (`mkt.total.demand`, `mkt.total.supply`),
+       `total` (`mkt.total.sum`), `totals` (`mkt.total.sumArr`,
+       `mkt.total.newLabel`, `mkt.total.in12Label`, ou `mkt.total.in12Moved`
+       quand un « Et si » a bougé d'un côté ou de l'autre, alors avec
+       `mkt.total.todayLine` en ligne), `title` le titre
+       `slideTitles.mktTotal` (ou `mktTotalUnknown*`), `eyebrow`
+       `mkt.total.title` ; **aucune trésorerie** (C96) ; `null` sans
+       abonnements.
+     - `mktMoneyView(input, side)` : les props de `MoneyBlock`, `WorthBars` et
+       `CashWarning`, depuis les kpis du côté (`buildMktScenario(…, {}, …,
+       side).today.kpis`). La logique de `money-view.ts#moneyView` qui lit des
+       kpis se sépare dans une fonction qui prend un `MoneyKpis` (le test de
+       `moneyView` ne change pas) et sert les deux. Demande : les chiffres
+       « Revenu net annualisé » (`money.arr` du calque) avec le « ? » du revenu
+       net, et `mkt.money.gmv` avec celui du GMV ; sans abonnements, le revenu
+       net du mois (`money.mrr` du calque) en premier ; la note
+       `mkt.money.perBuyerNote` (ou `…Many`), avec le « ? » de la commission.
+       Offre : « MRR des abonnements annualisé » (`money.arr` du calque) ; la
+       note `mkt.money.sellerCostExplained`. Les deux : l'hypothèse
+       `mkt.money.cashAssume`.
+     - `mktLeverView(input, side, targets)` : les props de `LeverCard` : le
+       levier de la fuite du côté (sinon son premier levier), la courbe de
+       `mktSidePaths`, les deux chiffres dans 12 mois (`scenario.kpiMrr12` et
+       `lever.arr12` du calque), `lever.all` avec 8 ou 3 ; **aucune ligne
+       totale** (le total n'est que dans la bande) ; quand un levier d'argent a
+       bougé (demande : fréquence, panier, commission ; offre : prix), `step`
+       et la note : `mkt.curve.stepOne` (`{subject}` le `leverSubject` du
+       levier), `mkt.curve.stepMany`, ou `mkt.curve.stepSupply` ; `{step}`
+       par la règle de §22.8.5 k (2 628,29 € pour la commission de
+       l'exemple, imprimé « ~2 600 € »).
+     - `mktFunnelView(input, side, medium)` : les props de `SideFunnel` depuis
+       `MktFunnel` : les 100 inscrits puis les colonnes (`columnGrid`,
+       `columnNumeral` de `visual-model.ts`), la ligne amont
+       (`mkt.funnel.upstream` ou `sellerUpstream`), le titre
+       (`mkt.funnel.title` ou `sellerTitle`), la colonne qui freine si le
+       diagnostic du côté la nomme ; demande : les recommandés
+       (`mkt.funnel.legendReferred`), la base de la liquidité (titre
+       `mkt.funnel.liquidity` avec `{kind}` de `fillVariant`, une grille de
+       100 avec le taux de service rempli, la phrase `mkt.funnel.fillRequests`
+       ou `fillSearches`, la colonne qui freine quand le diagnostic nomme le
+       taux de service), la note (`mkt.funnel.sameHundred` puis
+       `mkt.funnel.otherBase`) ; offre : les taux sous `mkt.funnel.ratesTitle`
+       (`churnLabel`, et `paidChurnLabel` avec les abonnements ; la cible par
+       `rateTarget` ; `holds` sur le taux que le diagnostic nomme), la note
+       (`mkt.funnel.sellerSameHundred`), et sans abonnements `aside`
+       (`mkt.funnel.liquidityAside`).
+     - `mktAsideLines(input, side)` : les lignes « À côté » du diagnostic, une
+       par autre étape sous sa cible (`mkt.diag.aside` avec le gain du côté,
+       ou `mkt.diag.asideUnpriced` pour une étape de l'offre sans montant).
+  4. **Le tableau** : dans `Board.tsx`, la branche « place de marché »
+     (`activeMotions(setup)[0] === "mkt"`), dans cet ordre : la barre ; la
+     bande (`TotalBand` de l'îlot avec `mktTotalView`, dans un élément
+     `data-testid="mkt-total"`), sauf sans abonnements ; le prochain pas
+     **partagé** (C94 : `nextStepFor` ne reçoit pas de côté ; sa phrase de la
+     première slide est `mkt.next.totalIsSlide`, ou `mkt.next.buyersIsSlide`
+     sans abonnements, à la place de `next.verdictIsSlide`) ; `SideShown`
+     (`mkt.side.selector`, les options `mkt.side.demand` et `supply`, le titre
+     `mkt.side.demandTitle` ou `supplyTitle`, la note `mkt.side.note`) ; puis
+     `MarketSide` dans un élément `data-testid="mkt-side"` et `data-side={side}`,
+     qui contient tout ce que le sélecteur gouverne ; puis la liste ; puis le
+     Tour, l'entrée du tableau et le lien du deck, comme aujourd'hui. Tout ce
+     qui est dans `mkt-side` lit `stringsForSide(side)` ; tout ce qui est
+     hors de lui lit le jeu neutre (§22.8.3).
+  5. **Le côté** (`MarketSide.tsx`), dans l'ordre de lecture du libre-service
+     (C54) : le verdict (le titre du funnel du côté, `slideTitles.mktFunnel*`
+     ou `mktSupplyFunnel*`, que MKT-7b ajoute, §22.8.5 e : son accent suit
+     `title-accent.ts`, comme le verdict du libre-service) ; `Diagnosis` avec
+     le diagnostic du côté (`derived.motions[mkt].sides[side].diagnosis`) et
+     ses lignes « À côté », à l'encre ; sans assez de cibles, `SideNote`
+     `kind="pending"` (titre `diagnosis.notEnough` du calque, le corps
+     d'aujourd'hui, l'action `mkt.note.targetsDemand` ou `targetsSupply` vers
+     `onTargets`) ; l'argent (`BoardMoney` avec `mktMoneyView`), ou, pour
+     l'offre sans abonnements, `SideNote` `kind="absent"` (l'eyebrow
+     `money.eyebrow`, le titre `mkt.money.supplyNone`, le corps
+     `mkt.note.moneyBody` puis `mkt.note.moneyWhatIf`, l'action
+     `mkt.note.moneyAction` vers les Réglages) ; « Et si » (`BoardLever` avec
+     `mktLeverView`, puis le panneau `MktWhatIfPanel` dans la même
+     `Disclosure` que le libre-service), sauf sans abonnements côté offre ; le
+     funnel (`SideFunnel` avec `mktFunnelView`, dans la carte en relief
+     `data-testid="engine-board-peloton"`).
+  6. **Le panneau** (`MktWhatIfPanel.tsx`, sur le modèle de
+     `SlgWhatIfPanel.tsx`) : les leviers du côté seulement
+     (`buildMktScenario(…).levers`, 8 ou 3), `scenario.intro` du calque, les
+     trois groupes de `WhatIfFigures` (le flux dans 12 mois et nouveau par
+     mois, les nouvelles unités par mois `mkt.funnel.newBuyers` ou
+     `newPaidSellers` ; un nouvel acheteur ou vendeur abonné : coût, LTV,
+     LTV:CAC, l'écart, le payback, les mois après ; la trésorerie), `LeverSum`
+     avec `mktLeverAlone`, et les hypothèses de §22.5.4 dans leur ordre.
+  7. **La liste** (`BoardNumbers`, `number-list.ts`) : les 19 chiffres (14)
+     par étape, dans l'ordre de `MKT_METRIC_SHAPES` ; chaque ligne porte
+     `side` (`mkt.side.buy`, `sell` ou `match`, selon la colonne `side` de
+     §22.4.1) ; `lead` est `mkt.list.lead` ; **l'étape signalée est celle que
+     nomme le diagnostic du côté affiché**, et aucune quand ce côté ne nomme
+     rien (C103).
+  8. **L'écran d'un chiffre** (`MetricSheet.tsx`) lit le diagnostic et les
+     mots du côté du chiffre (§22.8.3) ; `Diagnosis` pose `data-side` ;
+     `ImportPanel.tsx` montre une ligne par `activeMotions` (§22.2.5).
+  9. **Les mots appris** : `EngineTerm` gagne les ids `gmv`, `takeRate`,
+     `liquidity` et `netRevenue`, lus dans `strings.mkt.terms` (§22.8.5 k).
+  10. **La barrière** : `MARKETPLACE_SCREENS_READY = true`, et ses tests.
+  11. **Les captures**, sur un build local ouvert (`ENGINE_TYPES=consumer-app,marketplace`,
+      §23.8), l'état posé par `engineSeed` avec `marketplaceState()` (et
+      `EXAMPLE_MKT_WHATIF` pour le panneau) : le tableau, côté demande et côté
+      offre, FR à 1 280 px et EN à 390 px ; l'offre sans abonnements ; le
+      panneau ouvert côté demande ; l'écran d'un chiffre de chaque côté ; le
+      tableau en « services », FR à 1 280 px. Chacune comparée à l'écran du
+      retour qui lui répond (`board/board.html?screen=…`, `README.md`) ; la
+      densité mesurée par `scripts/engine-density.capture.ts` (des tests
+      « MKT-7b », sur le modèle des tests « brief 10 »), à comparer au
+      tableau « The density » du retour.
+- **Acceptation** : commune ; les tests neufs (`mkt-view.test.ts`,
+  `mktSidePaths`) avec les chiffres de §22.10.2 et d'`INVENTORY.md` : le
+  revenu net annualisé 394 243,20 €, le GMV 273 780 €, ce que rapporte un
+  acheteur actif 2,34 €, le total 58 953,60 € et 707 443,20 €, le saut de la
+  commission 2 628,29 € ; la fuite de la demande s'imprime « ~470 € » (C97) ;
+  la liste n'a qu'une étape signalée, celle du côté affiché ; le build comme
+  la CI et les e2e du moteur verts (le type reste fermé en CI) ; les captures
+  ouvertes par l'orchestrateur.
+- **Arrêt** : un chiffre d'`INVENTORY.md` que ni les modèles de §22.5 ni les
+  vues de cette fiche ne donnent ; une prop de `TotalBand` ou de `MoneyBlock`
+  qui ne reçoit pas ce que §22.6.2 demande sans changer le composant ; un mot
+  que la garde de §22.11.3 attraperait (`mkt-side` côté demande ou offre) et
+  qu'aucune feuille de §22.8.5 ne règle ; un test existant qui rougit hors de
+  ceux que la fiche nomme.
+- **Relecteurs** : copie.
+- **Pause** : en local, le tableau d'une place de marché est complet ; en
+  production, le type reste fermé. Le deck d'une place de marché n'a pas
+  encore ses slides (MKT-8).
+
+#### MKT-8 — Les slides
+
+- **But** : le deck d'une place de marché (C103) : la slide du total en
+  registre quand les vendeurs paient, les quatre slides des acheteurs (funnel,
+  fuite, « Et si », économie unitaire), puis celles des vendeurs, puis les
+  slides communes ; jamais entrelacées, jamais face à face ; chaque slide d'un
+  côté porte son côté.
+- **Prérequis** : MKT-7b.
+- **À lire** : §22.6.2 (le deck) ; §22.8.5 c, e et k (les lignes MKT-8) ;
+  §22.11.1 (`sentences-guard.test.ts`) ; §22.11.3 ; §22.14 (C97, C102, C103) ;
+  dans `design/ds-extension-10-return/` : `README.md` (question 10),
+  `INVENTORY.md` (la colonne « Slides » des trois tableaux),
+  `components/engine/SlideStreams/` (ses quatre fichiers), `board/screens.js`
+  (les états `slide-*`) ; dans le code : `src/lib/engine/deck.ts`
+  (`buildDeck`, `buildMotionsDeck`, le deck à plusieurs motions dont celui-ci
+  suit le modèle, `buildLeak` et sa colonne « À côté », `buildWhatIfSlides`,
+  `slideCurve`, `buildUnitEconomics`), `deck-motions.ts`, `deck-slg.ts`
+  (`buildTotalSlide`, à ne pas reprendre : la slide du total de l'hybride met
+  deux cartes face à face), `deck-unit.ts`, `types.ts` (`SlideId`,
+  `SlgSlideId`, `SLIDE_ORDER`, `DeckSlide`, `DeckModel`) ; dans l'îlot :
+  `_engine/deck/DeckView.tsx`, `SlideFrame.tsx`, `SlideLeak.tsx` et
+  `deck.module.css` (la règle `[data-tone="below"]`), `SlideWhatIf.tsx`,
+  `SlideUnitEconomics.tsx`, `deck-rows.ts` et son test, `export-png.ts`,
+  `ask-defaults.ts`, `SlideMirror.tsx`, `SlideVisibility.tsx`.
+- **Fichiers** : `src/components/engine/SlideStreams.tsx`, son module CSS et
+  son test (neufs, épinglé dans `componentSrcMap`) ; `src/lib/engine/deck-mkt.ts`
+  (neuf : `buildMarketplaceDeck`) et son test `deck-mkt.test.ts` ; `deck.ts`
+  (l'appel en tête de `buildDeck`), `types.ts` (les ids des slides de la place
+  de marché, `DeckSlide.motion?: EngineMotion`, `DeckSlide.side?: MktSide`) ;
+  `deck-motions.ts`, `deck-slg.ts`, `deck/ask-defaults.ts`,
+  `deck/SlideMirror.tsx`, `deck/SlideVisibility.tsx` (les endroits de §22.2.5
+  marqués MKT-8) ; dans l'îlot : `deck/DeckView.tsx`, `deck/SlideFrame.tsx`,
+  `deck/SlideLeak.tsx`, `deck/deck.module.css`, `deck/SlideWhatIf.tsx`,
+  `deck/SlideUnitEconomics.tsx`, `deck/SlideMarketTotal.tsx` et
+  `deck/SlideSideFunnel.tsx` (neufs), `deck/deck-rows.ts` et leurs tests ;
+  `src/content/engine-copy.ts` (les clés de §22.8.5 k marquées MKT-8) ;
+  `sentences-guard.test.ts`.
+- **Étapes** :
+  1. **Les ids** : sur le modèle de `SlgSlideId` et de l'hybride, un id par
+     slide d'un côté (`mktFunnelDemand`, `mktLeakDemand`, `mktUnitDemand`,
+     `mktFunnelSupply`, `mktLeakSupply`, `mktUnitSupply`, et ceux des « Et
+     si » de chaque côté comme l'hybride forme les siens) et `mktTotal` ;
+     `SLIDE_ORDER` et `includeKeyOf` les gagnent ; `DeckSlide` gagne `side` et
+     `motion` devient `EngineMotion`. Une slide d'un côté porte `motion:
+     "mkt"` et son `side` ; la slide du total et les slides communes, aucun
+     des deux.
+  2. **Le deck** (`buildMarketplaceDeck`, appelé en tête de `buildDeck` quand
+     `activeMotions(state.setup)[0] === "mkt"`) : la slide du total (avec
+     abonnements) ; puis, pour chaque côté dans l'ordre demande, offre : le
+     funnel (titre `slideTitles.mktFunnel*` ou `mktSupplyFunnel*`), la fuite
+     (les titres du §22.8.5 c réécrits par le calque, la chaîne de la fuite
+     par `mktWhatIf`, §22.5.5), les « Et si » (un par levier bougé, puis
+     ensemble, comme le libre-service, avec la courbe de `mktSidePaths` et le
+     saut au mois 1), l'économie unitaire ; chaque slide construite avec
+     `marketplaceStrings(…, side)` ; puis les slides communes, comme
+     aujourd'hui. Sans abonnements : pas de slide du total, et l'offre n'a que
+     son funnel tant que son diagnostic manque de cibles (C103).
+  3. **Le côté sur la slide** : `SlideFrame` imprime, au-dessus du titre d'une
+     slide qui a un `side`, son titre de côté (`mkt.side.demandTitle` ou
+     `supplyTitle`), à l'encre ; la ligne d'en-tête ne change pas.
+  4. **La slide du total** (`SlideMarketTotal.tsx`) : le titre
+     `slideTitles.mktTotal`, puis `SlideStreams` : les colonnes
+     `mkt.total.colMonth`, `mkt.total.newLabel`, `mkt.total.in12Label`, et
+     `mkt.total.colIn12Moved` quand un « Et si » a bougé ; les flux
+     `mkt.total.demand` et `supply`, chacun avec la ligne de son côté
+     (`mkt.total.sideDemand` ou `sideSupply`, ou leur `…One`, avec les
+     numéros des slides de ce côté **dans le deck rendu**) ; le total
+     `mkt.total.sum` ; la note `mkt.total.note` ; le pied
+     `mkt.total.footer`. Pas de barre, pas de part, pas de « + » ni de « = ».
+     `SlideStreams` se construit comme les composants de MKT-7a (props du
+     `.d.ts`, balisage du `.js`, règles du `.css`, test, épingle).
+  5. **Le funnel d'un côté** (`SlideSideFunnel.tsx`) : `SideFunnel` en
+     `medium="slide"` avec `mktFunnelView(…, "slide")` ; son titre est celui
+     de la slide (le verdict du côté).
+  6. **La fuite** (`SlideLeak.tsx`, `deck.module.css`) : sur une slide qui a
+     un `side`, les étapes « À côté » sous leur cible sont **à l'encre**
+     (C102) : la règle `[data-tone="below"]` ne s'applique pas sous un
+     `[data-side]` ; le libre-service et l'assisté ne changent pas. Les
+     montants par la règle du moteur (C97).
+  7. **« Et si »** (`SlideWhatIf.tsx`) : une slide `motion: "mkt"` prend la
+     branche du libre-service (le funnel du mois) avec les mots de son côté ;
+     sa courbe porte `step` et la note du saut quand un levier d'argent a
+     bougé.
+  8. **L'économie unitaire** (`SlideUnitEconomics.tsx`) : la slide du
+     libre-service avec les mots du côté ; côté offre, la tuile du coût porte
+     `mkt.slide.sellerCostTile` (jamais « CAC » : il n'est pas saisi) ; quand
+     la marge est une fourchette, la tuile de la LTV porte
+     `mkt.slide.marginRange` ; `PaybackChart` sans repère (`reference: null`,
+     C73) ; les feuilles `slide.unitFloor` et `slide.unitAssume` des calques
+     (§22.8.5 c).
+  9. **`DeckView`** : les groupes de vignettes par côté (`deck-group-demand`,
+     `deck-group-supply`, et le total) ; `deck-rows.ts` gagne les sortes de
+     lignes neuves, chacune exercée par son test ; l'export PNG d'une slide
+     de chaque sorte ; les endroits de §22.2.5 marqués MKT-8 lisent
+     `activeMotions`.
+  10. **Les gardes** : `sentences-guard.test.ts` balaie le deck de
+      `marketplaceState()` et de `marketplaceNoSubscriptionsState()` rendu
+      avec les mots de chaque côté, en « produits » et en « services »
+      (§22.11.1).
+- **Acceptation** : commune ; `deck-mkt.test.ts` : l'ordre (le total, les
+  quatre slides des acheteurs, celles des vendeurs, les communes), un `side`
+  sur chaque slide d'un côté et sur aucune autre, aucune slide sans `side`
+  qui imprime des chiffres d'un seul côté hors du total, sans abonnements
+  ni slide du total ni slide de fuite de l'offre sans cibles, les montants
+  des fuites à « ~ » ; les glyphes des slides dans le contrat des polices
+  (aucune « → », aucun « − ») ; les captures de chaque slide, FR, et du deck
+  à 390 px, EN, ouvertes par l'orchestrateur et comparées aux slides du
+  retour.
+- **Arrêt** : une slide du libre-service qui ne se rend pas avec les mots
+  d'un côté sans changer de gabarit ; un chiffre que les slides du retour
+  montrent et que le modèle ne donne pas ; une slide qui mettrait les deux
+  côtés face à face.
+- **Relecteurs** : copie.
+- **Pause** : en local, le deck d'une place de marché est complet ; le type
+  reste fermé en production.
 
 #### MKT-9 — L'exemple et le golden
 
@@ -2790,7 +3303,7 @@ Ton compte rendu, en français : une liste numérotée de constats, rangés par 
   nommées par le même gabarit), `golden-mkt.test.ts`,
   `golden-mkt-inputs.json`, `golden-mkt.json` (nouveaux).
 - **Étapes** : `exampleEngine(…, "marketplace")` ; l'exemple dans
-  `ExampleView` (le rendu du tableau de MKT-7) ; vérifier §22.10.2 dans les
+  `ExampleView` (le rendu du tableau de MKT-7b) ; vérifier §22.10.2 dans les
   sorties ; **puis seulement** écrire le golden.
 - **Acceptation** : commune ; le golden écrit une fois.
 - **Arrêt** : un nombre de §22.10.2 absent des sorties.
