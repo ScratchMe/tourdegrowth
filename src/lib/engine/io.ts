@@ -110,12 +110,13 @@ const isYearMonth = (v: unknown): boolean => {
 /**
  * At least one month, and every month with what the screens read before
  * anything else (A25): its two months, `referenceMonth` and `cohortMonth`,
- * as `YYYY-MM` (`isYearMonth`), and its `metrics` and `targets` as objects (not lists: the
- * validator already calls a list missing). Without one of them, the import's
- * preview or the board throws, and a state already stored throws at every
- * visit. Measured in a browser on 2026-10-05, field by field: everything
- * else a month holds (`id`, `closedAt`, `windows`, `pipelineOpen`, `base`,
- * two months the same or out of order) opens with the validator's warnings.
+ * as `YYYY-MM` (`isYearMonth`), and its `metrics` and `targets` as objects
+ * (not lists: the validator already calls a list missing). Without one of
+ * them, the import's preview or the board throws, and a state already
+ * stored throws at every visit. Measured in a browser on 2026-10-05, field
+ * by field: everything else a month holds (`id`, `closedAt`, `windows`,
+ * `pipelineOpen`, `base`, two months the same or out of order) opens with
+ * the validator's warnings.
  * Every build wrote these four fields in every month, v1 included, so no
  * file the engine saved is refused. Judged before the migration: v1 and v2
  * months have the same shape.
