@@ -510,7 +510,7 @@ est libre. Le jeu reste fermé (C23).
 | ACT-3 | L'activation : le branchement | **Livré le 2026-10-05** ([#345](https://github.com/ScratchMe/tourdegrowth/pull/345)) |
 | ACT-4 | L'activation : les specs Playwright | **Livré le 2026-10-05** ([#350](https://github.com/ScratchMe/tourdegrowth/pull/350)) ; le niveau activation est fini (§21.7) |
 | REF-1 | Le referral : la copie | **Livré le 2026-10-05** ([#353](https://github.com/ScratchMe/tourdegrowth/pull/353)) |
-| REF-2 | Le referral : le téléphone et sa pastille | À faire |
+| REF-2 | Le referral : le téléphone et sa pastille | **Livré le 2026-10-05** ([#354](https://github.com/ScratchMe/tourdegrowth/pull/354)) |
 | REF-3 | Le referral : le branchement | À faire |
 | REF-4 | Le referral : les specs Playwright | À faire |
 | REV-1 | Le revenue : la copie | À faire |
