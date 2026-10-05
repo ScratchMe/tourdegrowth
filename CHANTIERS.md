@@ -513,7 +513,7 @@ est libre. Le jeu reste fermé (C23).
 | REF-2 | Le referral : le téléphone et sa pastille | **Livré le 2026-10-05** ([#354](https://github.com/ScratchMe/tourdegrowth/pull/354)) |
 | REF-3 | Le referral : le branchement | **Livré le 2026-10-05** ([#358](https://github.com/ScratchMe/tourdegrowth/pull/358)) |
 | REF-4 | Le referral : les specs Playwright | **Livré le 2026-10-05** ([#362](https://github.com/ScratchMe/tourdegrowth/pull/362)) ; le niveau referral est fini (§21.7) |
-| REV-1 | Le revenue : la copie | À faire |
+| REV-1 | Le revenue : la copie | **Livré le 2026-10-05** ([#364](https://github.com/ScratchMe/tourdegrowth/pull/364)) |
 | REV-2 | Le revenue : le téléphone et sa pastille | À faire |
 | REV-3 | Le revenue : le branchement | À faire |
 | REV-4 | Le revenue : les specs Playwright | À faire |
