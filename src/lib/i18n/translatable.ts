@@ -37,6 +37,17 @@ export type Resolved<T> = T extends { en: string; fr: string }
       ? Resolved<U>[]
       : { [K in keyof T]: Resolved<T[K]> };
 
+/**
+ * A copy tree where any branch may be left out: a leaf is still a whole `{ fr, en }`, and an array is replaced whole.
+ * The shape of an overlay on a content tree (the consumer app's words over the engine's, `engine-copy-consumer.ts`);
+ * `resolveTree` resolves it like any other tree, adding no key.
+ */
+export type DeepPartialTranslatable<T> = T extends Translatable
+  ? Translatable
+  : T extends readonly unknown[]
+    ? T
+    : { [K in keyof T]?: DeepPartialTranslatable<T[K]> };
+
 function isTranslatableLeaf(value: object): value is Translatable {
   const record = value as Record<string, unknown>;
   return typeof record.en === "string" && typeof record.fr === "string";

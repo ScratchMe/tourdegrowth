@@ -2,6 +2,7 @@ import { QUESTIONS } from "@/content/copy-library";
 import { ENGINE_CATALOG, ENGINE_DERIVED_CATALOG } from "@/content/engine-catalog";
 import { ENGINE_CATALOG_CONSUMER, ENGINE_DERIVED_CATALOG_CONSUMER, type ConsumerPlgMetricId } from "@/content/engine-catalog-consumer";
 import { ENGINE_COPY } from "@/content/engine-copy";
+import { ENGINE_COPY_CONSUMER } from "@/content/engine-copy-consumer";
 import { displayDerivedShapeOf, displayShapeOf } from "@/lib/engine/business-type";
 import {
   ALL_DERIVED_SHAPES,
@@ -38,7 +39,7 @@ import type { EngineWorkbenchProps } from "./EngineWorkbench";
  * self-serve numbers it shows in its own words, then its six, and its figures.
  * It travels to every visitor, whatever the setup: a static page cannot know
  * which type the browser will hold. A SaaS's `metrics` and `derived` carry none
- * of the app's ids.
+ * of the app's ids. `typeStrings` (§21.8.1), the app's overlay on `strings`, travels the same way.
  *
  * Not the `openTypes` prop (§21.3): it comes from the build's environment, which
  * this function does not read — the page adds it (`openTypesAtBuild()`).
@@ -112,6 +113,8 @@ export function resolveEngineProps(locale: Locale): Omit<EngineWorkbenchProps, "
   return {
     locale,
     strings: resolveTree(ENGINE_COPY, locale),
+    // The app's words over the base's, only the leaves that change (§21.8.1): the island merges them, once, in EngineWorkbench.
+    typeStrings: { "consumer-app": resolveTree(ENGINE_COPY_CONSUMER, locale) },
     metrics,
     derived,
     typeCatalogs: { "consumer-app": { metrics: appMetrics, derived: appDerived } },

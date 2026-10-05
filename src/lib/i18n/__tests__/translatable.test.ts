@@ -1,5 +1,5 @@
 import { describe, expect, expectTypeOf, it } from "vitest";
-import { resolveTree, tc, type Resolved } from "../translatable";
+import { resolveTree, tc, type DeepPartialTranslatable, type Resolved } from "../translatable";
 
 describe("tc", () => {
   it("picks the requested language", () => {
@@ -58,5 +58,44 @@ describe("resolveTree (engine spec §4.4)", () => {
     expectTypeOf(resolved.nested.count).toEqualTypeOf<number>();
     expectTypeOf(resolved.faq).toEqualTypeOf<{ q: string; a: string }[]>();
     expectTypeOf<Resolved<{ en: string; fr: string }[]>>().toEqualTypeOf<string[]>();
+  });
+});
+
+// Non-vacuity, measured on 2026-10-05: `DeepPartialTranslatable` letting a half leaf through (`Partial<Translatable>`) is 4
+// `tsc` errors, among them the two `@ts-expect-error` lines below going unused. `resolveTree` has no sabotage of its own:
+// it is the function the full-tree tests above already hold, and the partial tree goes through the same walk.
+describe("resolveTree on a partial tree — an overlay (engine spec §21.8.1, A22 APP-3)", () => {
+  type Full = {
+    title: { en: string; fr: string };
+    nested: { deep: { en: string; fr: string }; other: { en: string; fr: string } };
+    faq: { q: { en: string; fr: string }; a: { en: string; fr: string } }[];
+  };
+  // Only one leaf of `nested`, nothing of `title`, the whole of `faq`: the shape of an overlay on `Full`.
+  const overlay: DeepPartialTranslatable<Full> = {
+    nested: { deep: { en: "Deeper", fr: "Plus profond" } },
+    faq: [{ q: { en: "Kept?", fr: "Gardé ?" }, a: { en: "Yes.", fr: "Oui." } }],
+  };
+
+  it("resolves the leaves it carries and adds no key — a branch left out stays out", () => {
+    expect(resolveTree(overlay, "fr")).toEqual({
+      nested: { deep: "Plus profond" },
+      faq: [{ q: "Gardé ?", a: "Oui." }],
+    });
+    const en = resolveTree(overlay, "en");
+    expect(Object.keys(en).sort()).toEqual(["faq", "nested"]);
+    expect(Object.keys(en.nested ?? {})).toEqual(["deep"]);
+    expect("title" in en).toBe(false);
+  });
+
+  it("types an overlay by the full tree: a leaf is a whole { en, fr }, a branch may be missing", () => {
+    expectTypeOf<DeepPartialTranslatable<Full>>().toHaveProperty("title");
+    expectTypeOf(overlay.title).toEqualTypeOf<{ en: string; fr: string } | undefined>();
+    expectTypeOf(overlay.nested?.other).toEqualTypeOf<{ en: string; fr: string } | undefined>();
+    // @ts-expect-error a half leaf is no leaf: both languages or none
+    const half: DeepPartialTranslatable<Full> = { title: { fr: "Seulement" } };
+    expect(half).toBeDefined();
+    // @ts-expect-error a key the full tree lacks is an orphan
+    const orphan: DeepPartialTranslatable<Full> = { nowhere: { en: "x", fr: "x" } };
+    expect(orphan).toBeDefined();
   });
 });

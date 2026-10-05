@@ -2142,8 +2142,8 @@ tout le revenu.
 (plus bas), on cherche dans son texte **une fois ses gabarits `{…}` retirés**
 (sinon `{cac}` ou `{arpa}` compteraient) :
 - en français, sans tenir compte de la casse, `inscrit`, `inscription`,
-  `client`, `payant`, `SaaS` ou `visiteur` ; ou, comme mot entier **en
-  respectant la casse**, `ARPA`, `MRR`, `ARR`, `CAC` ou `LTV` ;
+  `client`, `payant`, `SaaS`, `visiteur` ou `payback` ; ou, comme mot entier
+  **en respectant la casse**, `ARPA`, `MRR`, `ARR`, `CAC` ou `LTV` ;
 - en anglais, sans tenir compte de la casse, `sign-up`, `signup`, `signed up`,
   `sign up`, `customer`, `paying`, `SaaS` ou `visitor` ; ou, comme mot entier en
   respectant la casse, `ARPA`, `MRR`, `ARR`, `CAC` ou `LTV`.
@@ -2155,6 +2155,16 @@ mot**, y compris les feuilles d'accord que la règle ne désigne pas (« Activé
 → « Activées ») ; une feuille du calque qui les contredit se corrige sur elles.
 Mesuré le 2026-10-04 avec ces exclusions : **138 feuilles désignées** (un ordre
 de grandeur, pas un critère).
+
+*Corrigé après APP-3 (#355, la relecture copie)* : le lexique fait passer
+« payback » à « remboursement », mais la règle française ne cherchait pas le
+mot. Une feuille l'avait seule, hors exclusions et hors §21.8.4 a :
+`terms.runway.definition` (« le moteur le compare seulement au payback »),
+qu'une app lit dans ses Réglages pendant que son bloc d'argent dit
+« remboursement ». La règle anglaise ne change pas : l'anglais garde
+« payback » (« Install payback »). Les deux autres feuilles françaises qui
+l'ont, `slide.unitAssume` et `slide.unitAssumeOutpaced`, sont la trésorerie
+immobilisée du SaaS : elles passent à la ligne 6.
 
 **Une feuille désignée qui ne se réécrit pas par le lexique sans changer de
 sens** : ne pas s'arrêter. L'ajouter à `APP_OVERLAY_SKIPPED`, une liste
@@ -2201,7 +2211,9 @@ le nom `APP_EXCLUDED`, ligne pour ligne, dans le même ordre.
    `scenario.rowAfter`, `slide.unitFloor*`, `slide.unitBilled*`,
    `slide.unitNotAllBack`, `slide.unitMayNotAllBack`,
    `slide.unitCompanyWide*`, `slide.unitLost*`, `slide.unitLeavesBefore`,
-   `slide.unitMayLeaveBefore`, **toutes les feuilles `slide.chart*` sauf
+   `slide.unitMayLeaveBefore`, `slide.unitAssume` et
+   `slide.unitAssumeOutpaced` (une app imprime `slide.unitAssumeApp`,
+   §21.7.3), **toutes les feuilles `slide.chart*` sauf
    `slide.chartCost`** (le graphique d'une app est `InstallPaybackChart`,
    §21.6.6), `slide.unitRatioReference`, `slide.unitReference`,
    `slide.unitBothReference`, `terms.cashTied`, `terms.afterPayback`.
