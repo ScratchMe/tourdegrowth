@@ -1,5 +1,6 @@
 import type { StoredResult } from "../../quiz/storage";
-import { exampleEngine, exampleMetrics } from "../example";
+import type { AppMonetization } from "../app-model";
+import { EXAMPLE_CONSUMER_TARGETS, exampleEngine, exampleMetrics } from "../example";
 import { previousMonth } from "../cohort";
 import type { CandidateId, EngineState, LeverId, MetricEntry, MetricId, MetricValue, Snapshot, SourceRef, ToolId } from "../types";
 
@@ -184,6 +185,64 @@ export function emptyState(): EngineState {
   state.snapshots[0]!.metrics = {};
   state.snapshots[0]!.targets = {};
   return state;
+}
+
+/** §21.9.1's words for the consumer app (the example's: `example.eventApp`, `channelApp` and `churnCauseApp`, APP-10), in French. */
+const CONSUMER_WORDS = { event: "a terminé une première séance", channel: "Recherche App Store", churnCause: "l'essai se termine avant la troisième séance" };
+
+/**
+ * The consumer app example of §21.9.1 on a monetization: an empty state at the example's setup and months (EUR, the
+ * app's type and monetization), then every entry of the table — the same set whatever the monetization, as a setup
+ * that unticks a way of earning hides its numbers without erasing them (§21.1 D7) — the base counts and the team's
+ * targets. Built by `withEntry` and `measured`, not `exampleEngine`, which has no app yet: APP-10 makes
+ * `consumerState` read it.
+ */
+function consumerEngine(monetization: AppMonetization): EngineState {
+  let state = emptyState();
+  state.setup = { ...state.setup, type: "consumer-app", monetization: { ...monetization } };
+  const snapshot = state.snapshots[0]!;
+  snapshot.base = { monthSignups: 12_000, cohortSignups: 11_500, mrrEnd: 28_800, mrrStart: 28_400, appActives: 15_000 };
+  snapshot.targets = { ...EXAMPLE_CONSUMER_TARGETS };
+  const set = (id: MetricId, entry: MetricEntry) => {
+    state = withEntry(state, id, entry);
+  };
+  const finance: SourceRef = { kind: "person", role: "finance" };
+  set("acq.signup-rate", measured(ratio(12_000, 40_000), tool("app-store-connect")));
+  set("acq.top-channel-share", measured(ratio(5_400, 12_000), tool("app-store-connect"), { label: CONSUMER_WORDS.channel }));
+  set("act.event", measured({ kind: "text", text: CONSUMER_WORDS.event }, { kind: "other" }));
+  set("act.rate", measured(ratio(4_025, 11_500), tool("amplitude")));
+  set("act.ttv", measured({ kind: "duration", value: 3, unit: "hours", statistic: "median" }, tool("amplitude"), { variant: "median" }));
+  set("ret.d30", measured(ratio(1_380, 11_500), tool("amplitude")));
+  set("ret.logo-churn", measured(ratio(315, 4_500), tool("revenuecat")));
+  set("ret.churn-cause", measured({ kind: "text", text: CONSUMER_WORDS.churnCause }, { kind: "person", role: "data" }, { evidence: "data" }));
+  set("ref.mechanism", measured({ kind: "choice", choice: "product" }, { kind: "other" }));
+  set("ref.referred-share", measured(ratio(575, 11_500), tool("product-db")));
+  set("ref.k-factor", { status: "requested", request: { role: "data", requestedAt: "2026-09-20T09:00:00.000Z" }, updatedAt: at });
+  set("rev.paid-conversion", measured(ratio(345, 11_500), tool("revenuecat")));
+  set("rev.arpa", measured(ratio(28_800, 4_500), tool("revenuecat")));
+  set("rev.expansion", measured(ratio(284, 28_400), tool("revenuecat")));
+  set("rev.contraction", measured(ratio(142, 28_400), tool("revenuecat")));
+  set("app.acq.cpi", measured(ratio(18_000, 12_000), tool("appsflyer"), { variant: "media-only" }));
+  set("app.ret.active-retention", measured(ratio(13_500, 15_000), tool("amplitude")));
+  set("app.rev.purchases-per-active", measured(ratio(4_500, 15_000), tool("revenuecat")));
+  set("app.rev.ads-per-active", measured(ratio(6_000, 15_000), finance));
+  set("app.rev.commission", measured(ratio(7_326, 33_300), tool("revenuecat")));
+  set("app.rev.gross-margin", measured(ratio(25_579.2, 31_974), finance));
+  return state;
+}
+
+/**
+ * The consumer app of §21.9.1, earning three ways (subscriptions, in-app purchases, ads): a fictional meditation app,
+ * 12 000 installs in August, 28 800 € of subscriptions and 10 500 € of purchases and ads a month, the team's three
+ * targets and no « Et si » (`EXAMPLE_CONSUMER_WHATIF` is applied on top). A fresh copy each call.
+ */
+export function consumerState(): EngineState {
+  return consumerEngine({ subscriptions: true, purchases: true, ads: true });
+}
+
+/** The same app earning from purchases and ads alone: its subscription numbers stay stored, and hidden. */
+export function consumerUsageOnlyState(): EngineState {
+  return consumerEngine({ subscriptions: false, purchases: true, ads: true });
 }
 
 /**

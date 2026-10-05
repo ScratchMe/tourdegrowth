@@ -180,12 +180,13 @@ choix d'exécution, ce qui est vérifié, avec les chiffres réels des commandes
 remplace dans CLAUDE.md ceux des chiffres de référence (tests unitaires, specs
 Playwright) qui ont changé, sans ajouter de phrase, et coche ton unité dans le
 tableau de <LOT> de CHANTIERS.md (sans numéro de PR : l'orchestrateur
-l'ajoute). Juste avant de pousser : git fetch origin && git merge origin/main
-(un conflit dans JOURNAL.md garde les deux entrées entières, la tienne en
-dernier ; un conflit sur la ligne des chiffres de référence de CLAUDE.md
-prend la ligne d'origin/main et y pose le nombre de tests que vitest rend
-sur l'arbre fusionné ; ailleurs, arrête-toi et rends compte), puis tsc et
-vitest une dernière fois. Commit et pousse ta branche (git push -u origin <BRANCHE> ; sur
+l'ajoute). Commite ton travail, puis, juste avant de pousser : git fetch
+origin && git merge origin/main (git refuse de fusionner sur un arbre modifié
+des deux côtés ; un conflit dans JOURNAL.md garde les deux entrées entières,
+la tienne en dernier ; un conflit sur la ligne des chiffres de référence de
+CLAUDE.md prend la ligne d'origin/main et y pose le nombre de tests que
+vitest rend sur l'arbre fusionné ; ailleurs, arrête-toi et rends compte),
+puis tsc et vitest une dernière fois. Commite la fusion et pousse ta branche (git push -u origin <BRANCHE> ; sur
 une erreur réseau seulement, jusqu'à quatre reprises après 2, 4, 8 et 16 s).
 Tes messages de commit se terminent par ces lignes : <ATTRIBUTION>. N'écris
 aucun identifiant de modèle ailleurs (code, commentaires, journal). N'ouvre
