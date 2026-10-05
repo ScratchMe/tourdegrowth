@@ -506,7 +506,7 @@ est libre. Le jeu reste fermé (C23).
 | U0 | Ce qui change à trois niveaux : le bloc « Niveau suivant » (C75), les bandeaux à l'étape (C76), le budget d'URL des statistiques, le gabarit du hub | **Livré le 2026-10-04** ([#335](https://github.com/ScratchMe/tourdegrowth/pull/335)) |
 | ACT-1 | L'activation : la copie | **Livré le 2026-10-04** ([#338](https://github.com/ScratchMe/tourdegrowth/pull/338)) |
 | ACT-2 | L'activation : le téléphone et sa pastille | **Livré le 2026-10-04** ([#339](https://github.com/ScratchMe/tourdegrowth/pull/339)) |
-| ACT-3 | L'activation : le branchement | À faire |
+| ACT-3 | L'activation : le branchement | **Livré le 2026-10-05** ([#345](https://github.com/ScratchMe/tourdegrowth/pull/345)) |
 | ACT-4 | L'activation : les specs Playwright | À faire |
 | REF-1 | Le referral : la copie | À faire |
 | REF-2 | Le referral : le téléphone et sa pastille | À faire |
