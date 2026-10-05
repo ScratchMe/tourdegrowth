@@ -539,7 +539,7 @@ Et des lacunes moins visibles, chacune un piège : un outil de l'app écrit deux
   - `mkt.total.newSum` et `sum12`, deux phrases avec « + » et « = », deviennent les étiquettes `newLabel` et `in12Label` : c'est la forme du retour, une bande et un registre ;
   - `mkt.money.supplyNone` garde sa première moitié : la seconde est devenue le corps de la note ;
   - onze feuilles s'ajoutent aux calques à écrire mot pour mot (§22.8.5 c) ;
-  - quarante-cinq clés neuves forment le §22.8.5 k, sur trente-sept lignes ;
+  - quarante-cinq clés neuves forment le §22.8.5 k, sur 39 lignes ;
   - les titres de §22.8.5 e passent à MKT-7b, qui en fait le verdict d'un côté et le titre de la bande ;
   - MKT-R rejoue aussi à blanc les trois fiches neuves.
 
@@ -563,3 +563,12 @@ Et des lacunes moins visibles, chacune un piège : un outil de l'app écrit deux
 - **Le coût d'un vendeur abonné** perd la clause « un vendeur payant pour 2 actifs », que la fiche aurait dû accorder et arrondir.
 
 **Vérifié** : les tests de budget et de liens des documents.
+
+**Relu par `relecteur-copie`, dix points, tous corrigés** :
+- l'en-tête « partagé » du diagnostic nomme aussi le côté en français ;
+- la définition des mois après remboursement dit « de la marge » dans les deux langues, et « their » en anglais ;
+- les appels fléchés vers les cibles disent « tes » ;
+- quatre retouches d'anglais : "The buyers' verdict", "cost per paid seller", "on both sides", "brings in" ;
+- la note de l'acheteur actif n'a plus d'accord en anglais (« order frequency {freq} ») ;
+- la ligne de côté du registre a une clé par ligne, sans « · », qui sépare les clés dans les tableaux ;
+- trois feuilles de la demande ne nomment plus les abonnements, qu'un calque ne sait pas cochés : la note sans marge, l'hypothèse de la slide d'unit economics et l'introduction du panneau.
