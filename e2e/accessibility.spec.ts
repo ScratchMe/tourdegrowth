@@ -59,6 +59,7 @@ const PAGES: [name: string, path: string][] = [
   ["game level", "/en/game/retention"],
   ["game level 2 (fr)", "/fr/game/acquisition"],
   ["game level 3 (en)", "/en/game/activation"],
+  ["game level 4 (fr)", "/fr/game/referral"],
 ];
 
 interface ContrastData {

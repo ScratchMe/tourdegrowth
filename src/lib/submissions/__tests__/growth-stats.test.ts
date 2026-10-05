@@ -177,14 +177,16 @@ describe("summarizeSubmissions — results the game card is shown to (GAME-BRIEF
         submission({ id: "acq", pillars: board(2, 16, 16, 16, 16) }),
         // Level 3 (activation) has its card since 2026-10-05 (A24, ACT-3).
         submission({ id: "act", pillars: board(16, 3, 16, 16, 16) }),
-        // Referral has no level yet: no card, so not in the population.
+        // Level 4 (referral) has its card since 2026-10-05 (A24, REF-3).
         submission({ id: "ref", pillars: board(16, 16, 16, 3, 16) }),
+        // Revenue has no level yet: no card, so not in the population.
+        submission({ id: "rev", pillars: board(16, 16, 16, 16, 3) }),
         submission({ id: "level", pillars: board(16, 16, 16, 16, 16) }),
         // A malformed document costs its own count, never the dashboard.
         submission({ id: "odd", pillars: { retention: 0 } as unknown as Submission["pillars"] }),
       ],
       NOW,
     );
-    expect(stats.gameBottleneckResults).toEqual({ allTime: 5, last30Days: 4 });
+    expect(stats.gameBottleneckResults).toEqual({ allTime: 6, last30Days: 5 });
   });
 });

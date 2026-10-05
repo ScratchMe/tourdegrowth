@@ -26,6 +26,7 @@ const SHARED_WITH_RETENTION = board({ acquisition: 7, activation: 16, retention:
 /** Activation and retention at the bottom: with only retention's level open, retention alone is offered. */
 const SHARED_ONE_LEVEL = board({ acquisition: 16, activation: 7, retention: 7, referral: 16, revenue: 20 });
 const ACTIVATION_CLEAR = board({ acquisition: 13, activation: 2, retention: 13, referral: 16, revenue: 13 });
+const REFERRAL_CLEAR = board({ acquisition: 13, activation: 13, retention: 13, referral: 2, revenue: 13 });
 
 const open = { access: "open" as const, hasDeepDive: false };
 /** The table as it stood before level 2 (A12.f): the shared-bottleneck rule below is about retention. */
@@ -217,6 +218,34 @@ describe("resultGameEntry — level 3 (A24, ACT-3, 2026-10-05)", () => {
     expect(fr.levels[0].metric).not.toMatch(/clients/);
     expect(fr.levels[0].event.detail).toBe("deep_dive/activation");
     expect(JSON.stringify(GAME_ENTRY_COPY)).not.toMatch(/30[.,]0/);
+  });
+});
+
+describe("resultGameEntry — level 4 (A24, REF-3, 2026-10-05)", () => {
+  it("offers the referral level on a clear referral bottleneck, with its own title, button and door", () => {
+    expect(REFERRAL_CLEAR.pillars.map((p) => p.pillar)).toEqual(["referral"]);
+    const entry = resultGameEntry({ bottleneck: REFERRAL_CLEAR, locale: "en", ...open })!;
+    expect(entry.levels).toHaveLength(1);
+    expect(entry.levels[0].href).toBe("/en/game/referral?from=result");
+    expect(entry.levels[0].event).toEqual({ name: GAME_ENTRY_EVENT, detail: "result/referral" });
+    expect(entry.title).toBe("The dark side of referral");
+    expect(entry.levels[0].cta).toBe('Play the level "If they recommend you"');
+  });
+
+  it("quotes level 4's starting number in its own format — a viral coefficient to the hundredth, never customers or a percentage", () => {
+    expect(resultGameEntry({ bottleneck: REFERRAL_CLEAR, locale: "en", ...open })!.levels[0].metric).toBe("Viral coefficient 0.40");
+    const fr = resultGameEntry({ bottleneck: REFERRAL_CLEAR, locale: "fr", ...open, hasDeepDive: true })!;
+    expect(fr.levels[0].metric).toBe("Coefficient viral 0,40");
+    expect(fr.levels[0].metric).not.toMatch(/clients|%/);
+    expect(fr.levels[0].event.detail).toBe("deep_dive/referral");
+    expect(JSON.stringify(GAME_ENTRY_COPY)).not.toMatch(/0[.,]40/);
+  });
+
+  it("three stages tied among the four that have a level: the card offers the three, in the Tour's order, referral last", () => {
+    const tie = board({ acquisition: 16, activation: 5, retention: 5, referral: 5, revenue: 20 });
+    expect(tie.pillars.map((p) => p.pillar)).toEqual(["activation", "retention", "referral"]);
+    const entry = resultGameEntry({ bottleneck: tie, locale: "en", ...open })!;
+    expect(entry.levels.map((l) => l.event.detail)).toEqual(["result/activation", "result/retention", "result/referral"]);
   });
 });
 

@@ -23,6 +23,7 @@ const IMAGES = [
   { page: "/game/acquisition", image: (l: string) => `/${l}/game/acquisition/opengraph-image/${l}` },
   { page: "/game/activation", image: (l: string) => `/${l}/game/activation/opengraph-image/${l}` },
   { page: "/game/retention", image: (l: string) => `/${l}/game/retention/opengraph-image/${l}` },
+  { page: "/game/referral", image: (l: string) => `/${l}/game/referral/opengraph-image/${l}` },
 ] as const;
 
 /** The PNG's own header, read rather than trusted from the content type. */

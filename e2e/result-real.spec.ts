@@ -16,7 +16,7 @@ import { EMULATOR_HOST, REAL_DEEP_DIVE, REAL_RESULTS, SENTINEL, SKIP_EMULATOR_RE
 test.skip(!EMULATOR_HOST, SKIP_EMULATOR_REASON);
 
 const GAME_OPEN = process.env.GAME_ENABLED === "true";
-const { clear, shared, level, deep, twoLevels, activationClear } = REAL_RESULTS;
+const { clear, shared, level, deep, twoLevels, activationClear, referralClear } = REAL_RESULTS;
 
 /** Every key of a stored document, nested ones included — the answers map's question ids among them. */
 function keysOf(value: unknown, into = new Set<string>()): Set<string> {
@@ -160,6 +160,23 @@ test.describe("a visitor's view of a clear bottleneck", () => {
     const band = page.getByTestId("game-entry-band");
     await expect(band).toContainText("Activation 30.0%");
     await expect(band).not.toContainText(/customers/i);
+    // The band holds on one line, as the other levels' do.
+    const box = await band.boundingBox();
+    expect(box, "game-entry-band is not on the page").not.toBeNull();
+    expect(box!.height).toBeLessThanOrEqual(44);
+  });
+
+  test("offers level 4 on a referral bottleneck, with the coefficient in its own format on one line (A24, REF-3)", async ({ page }) => {
+    test.skip(!GAME_OPEN, "GAME_ENABLED is not \"true\" for this build: the card only exists with the game open.");
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto(`/r/${referralClear.id}?lang=en`);
+    await expect(page.getByTestId("game-entry")).toBeVisible();
+    await expect(page.getByTestId("game-entry")).toHaveAttribute("data-levels", "1");
+    await expect(page.getByTestId("game-entry-cta")).toHaveAttribute("href", "/en/game/referral?from=result");
+    // Level 4's number is a coefficient, to the hundredth: never a count of customers, never a percentage.
+    const band = page.getByTestId("game-entry-band");
+    await expect(band).toContainText("Viral coefficient 0.40");
+    await expect(band).not.toContainText(/customers|%/i);
     // The band holds on one line, as the other levels' do.
     const box = await band.boundingBox();
     expect(box, "game-entry-band is not on the page").not.toBeNull();

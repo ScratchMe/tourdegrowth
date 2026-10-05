@@ -10,7 +10,7 @@
 import type { Pillar } from "@/lib/scoring/pillars";
 
 /** The levels a player can reach: each has a page, a save, an entry card and its analytics. */
-export type LevelSlug = "acquisition" | "activation" | "retention";
+export type LevelSlug = "acquisition" | "activation" | "referral" | "retention";
 /**
  * A level whose model is written and tested but not yet wired to a page. Kept
  * out of `LevelSlug` on purpose: every record keyed by it (the save, the
@@ -20,9 +20,9 @@ export type LevelSlug = "acquisition" | "activation" | "retention";
  * (« acquisition ») made that move on 2026-10-01 (`CHANTIERS.md` A12.f).
  * The three left since 2026-10-04 (`CHANTIERS.md` A24): activation, referral
  * and revenue, each specified in `docs/game/` and modelled in `levels/`.
- * Activation made the move on 2026-10-05 (A24, ACT-3).
+ * Activation and referral made the move on 2026-10-05 (A24, ACT-3 and REF-3).
  */
-export type DraftLevelSlug = "referral" | "revenue";
+export type DraftLevelSlug = "revenue";
 /** Any level the engine can run: published or still a draft. */
 export type ModelSlug = LevelSlug | DraftLevelSlug;
 export type CardKind = "h" | "d";

@@ -367,6 +367,7 @@ describe("proxy (game flag and owner preview)", () => {
     const slugs = enabledLevelSlugs();
     expect(slugs).toContain("acquisition");
     expect(slugs).toContain("activation");
+    expect(slugs).toContain("referral");
     for (const slug of slugs) {
       for (const locale of ["en", "fr"]) {
         for (const path of [`/${locale}/game/${slug}`, `/${locale}/game/${slug}/opengraph-image/${locale}`]) {
