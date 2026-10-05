@@ -537,6 +537,26 @@ seul l'appareil qui importe est touché.
 |---|---|---|---|
 | A25.a | Reproduire par un test (l'import de `[]`, puis de `[{}]`). Puis faire refuser par `parseEngineFile` un état sans mois, ou dont un mois n'a pas `metrics` et `targets` objets, avec le refus `not-engine` existant (aucune copie neuve) | Session | À faire, avant l'ouverture du moteur |
 
+### A26 — Le proxy lisait le chemin encodé (trouvé et corrigé le 2026-10-05)
+
+La relecture sécurité d'ACT-3 (#345) a soupçonné la faille ; elle a été
+vérifiée en production le même jour. Les gardes du proxy comparaient le
+chemin brut, alors que le routeur le décode : `/en/gam%65/retention` servait
+le jeu fermé, `/en/a%61rrr-funnel-template` le moteur fermé, et
+`/%61dmin/stats` passait la Basic Auth (un 500 l'arrêtait, sans donnée).
+**Corrigé le 2026-10-05** ([#349](https://github.com/ScratchMe/tourdegrowth/pull/349), `gatePath` dans `src/proxy.ts`) : le chemin est
+décodé une fois avant toutes les gardes, et refusé en 400 s'il ne se décode
+pas ou ne se décode pas en un chemin canonique. La relecture sécurité du
+correctif a trouvé, avant sa livraison, une redirection ouverte qu'il
+ouvrait, et deux autres trous en production : `/en%2F%2Fgame/retention` et
+la charge RSC des pages fermées (`/en/game.segments/_full.segment.rsc`,
+`/en/aarrr-funnel-template.segments/…`). Les trois sont fermés dans la même
+PR. La leçon portable est dans `NEXTJS.md` §1.1.
+
+| # | Quoi | Qui | État |
+|---|---|---|---|
+| A26.b | **La défense en profondeur de `/admin`** (relecture sécurité, non bloquant, antérieur) : les pages et la route JSON de `/admin` font entièrement confiance au proxy, et le moindre désaccord entre le proxy et le routeur expose les chiffres Firestore. Vérifier aussi `isAuthorizedForAdmin` côté serveur, dans un `admin/layout.tsx` et dans `admin/stats/json/route.ts` | Session | À faire |
+
 ---
 
 ## B. Design sync

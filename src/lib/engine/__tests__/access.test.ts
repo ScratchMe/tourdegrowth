@@ -26,6 +26,8 @@ describe("isEnginePath", () => {
     // Everything under the page is the engine's — its share image first.
     expect(isEnginePath("/aarrr-funnel-template/opengraph-image/fr")).toBe(true);
     expect(isEnginePath("/aarrr-funnel-template/x")).toBe(true);
+    // The files the build writes beside the page: its RSC payload (2026-10-05).
+    expect(isEnginePath("/aarrr-funnel-template.segments/_full.segment.rsc")).toBe(true);
     expect(isEnginePath("/aarrr-funnel-templates")).toBe(false);
     expect(isEnginePath("/aarrr-vs-okr")).toBe(false);
     expect(isEnginePath("/")).toBe(false);

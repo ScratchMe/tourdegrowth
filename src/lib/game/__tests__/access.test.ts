@@ -23,6 +23,9 @@ describe("isGamePath", () => {
   it("matches the hub and its levels, nothing that merely starts with 'game'", () => {
     expect(isGamePath("/game")).toBe(true);
     expect(isGamePath("/game/retention")).toBe(true);
+    // The files the build writes beside the hub: its RSC payload (2026-10-05).
+    expect(isGamePath("/game.segments/_full.segment.rsc")).toBe(true);
+    expect(isGamePath("/game.rsc")).toBe(true);
     expect(isGamePath("/gamers")).toBe(false);
     expect(isGamePath("/glossary/game")).toBe(false);
     expect(isGamePath("/")).toBe(false);
