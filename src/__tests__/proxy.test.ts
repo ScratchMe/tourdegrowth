@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { resetRateLimitsForTests } from "@/lib/rate-limit";
-import { config, constantTimeEqual, isAuthorizedForAdmin, proxy } from "../proxy";
+import { config, constantTimeEqual, gatePath, isAuthorizedForAdmin, proxy } from "../proxy";
 import { ENGINE_PREVIEW_COOKIE } from "@/lib/engine/access";
 import { GAME_PREVIEW_COOKIE } from "@/lib/game/access";
 import { enabledLevelSlugs } from "@/lib/game/levels";
@@ -555,5 +555,73 @@ describe("proxy (minting the owner preview at /admin/preview)", () => {
     const res = await proxy(request("/admin/preview?game=on&engine=on", { auth }));
     expect(res.status).not.toBe(303);
     expect(setCookies(res)).not.toMatch(/tdg_(game|engine)_preview/);
+  });
+});
+
+/**
+ * Every check reads the path the router matches, decoded once (`gatePath`,
+ * 2026-10-05). Found in production by the security review of A24 ACT-3: the
+ * proxy compared the raw, still percent-encoded path, the router decoded it,
+ * so each of the paths below served a closed page or reached `/admin`
+ * without the Basic Auth. Each was read back from production before the fix.
+ */
+describe("proxy (percent-encoded paths, 2026-10-05)", () => {
+  useFlagEnv();
+  beforeEach(() => resetRateLimitsForTests());
+
+  it("decodes exactly once, like the router, %2F included", () => {
+    expect(gatePath("/en/gam%65/retention")).toBe("/en/game/retention");
+    expect(gatePath("/en/game%2Fretention")).toBe("/en/game/retention");
+    expect(gatePath("/en/gam%2565/retention")).toBe("/en/gam%65/retention");
+    expect(gatePath("/en/game/%E0%A4%A")).toBeNull();
+  });
+
+  it("closes the game under any encoding the router reads as the game", async () => {
+    for (const path of [
+      "/en/gam%65/retention",
+      "/%65n/game/retention",
+      "/en/game%2Fretention",
+      "/en%2Fgame%2Fretention",
+      "/fr/g%61me",
+      "/fr/game/%61ctivation/opengraph-image/fr",
+    ]) {
+      const locale = gatePath(path)!.slice(1, 3);
+      expect(rewriteOf(await proxy(request(path))), path).toBe(`https://tourdegrowth.com/${locale}/game-unavailable`);
+    }
+  });
+
+  it("closes the engine the same way", async () => {
+    for (const path of ["/en/a%61rrr-funnel-template", "/%66r/aarrr-funnel-template", "/fr%2Faarrr-funnel-template"]) {
+      const locale = gatePath(path)!.slice(1, 3);
+      expect(rewriteOf(await proxy(request(path))), path).toBe(`https://tourdegrowth.com/${locale}/engine-unavailable`);
+    }
+  });
+
+  it("asks for the admin password under any encoding of /admin, and mints nothing without it", async () => {
+    for (const path of ["/%61dmin/stats", "/%61dmin/stats/json", "/adm%69n/audit", "/admin%2Fstats"]) {
+      const res = await proxy(request(path));
+      expect(res.status, path).toBe(401);
+      expect(res.headers.get("WWW-Authenticate"), path).toMatch(/^Basic realm=/);
+    }
+    const mint = await proxy(request("/%61dmin/preview?game=on&engine=on", { method: "POST" }));
+    expect(mint.status).toBe(401);
+    expect(setCookies(mint)).toBe("");
+  });
+
+  it("spends the same result-read budget, encoded or not", async () => {
+    const read = (path: string) =>
+      proxy(new NextRequest(`https://tourdegrowth.com${path}`, { headers: { "x-forwarded-for": "203.0.113.9" } }));
+    for (let i = 0; i < 120; i += 1) await read("/r/3f1c2a7e-9b4d-4e21-a8c6-000000000000");
+    expect((await read("/%72/3f1c2a7e-9b4d-4e21-a8c6-000000000001")).status).toBe(429);
+  });
+
+  it("leaves a double-encoded path to the router, which matches nothing with it", async () => {
+    expect(rewriteOf(await proxy(request("/en/gam%2565/retention")))).toBeNull();
+  });
+
+  it("refuses a path that does not decode, before any check", async () => {
+    for (const path of ["/en/game/%E0%A4%A", "/%61dmin%", "/r/%ZZ"]) {
+      expect((await proxy(request(path))).status, path).toBe(400);
+    }
   });
 });

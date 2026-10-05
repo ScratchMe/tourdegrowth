@@ -79,6 +79,26 @@ d'exclure les préchargements par le `matcher` (`missing: [{ type: "header",
 key: "next-router-prefetch" }]`), mais le proxy ne tournerait plus du tout sur
 eux : ni garde d'accès, ni drapeau, ni limite de débit.
 
+**Le proxy voit le chemin encodé, le routeur le décode.**
+`request.nextUrl.pathname` garde l'encodage en pourcent tel que le client
+l'a envoyé (`/en/gam%65/retention`). Le routeur, lui, décode avant de choisir
+une route. Une garde qui compare le chemin brut (`startsWith("/admin")`,
+`isGamePath`) ne voit donc pas la page que le routeur va servir. Mesuré le
+2026-10-05, deux comportements différents :
+- **Sur Vercel**, tout le chemin est décodé, segments statiques et `%2F`
+  compris : `/en/gam%65/retention`, `/en/game%2Fretention`,
+  `/%65n/game/retention` et `/en/a%61rrr-funnel-template` servaient des pages
+  fermées en 200, et `/%61dmin/stats` passait la Basic Auth (un 500 l'arrêtait
+  ensuite, pas la garde).
+- **Sous `next start`**, seuls les segments dynamiques sont décodés :
+  `/%66r/aarrr-funnel-template` y répondait 200, mais `/%61dmin/stats` 404.
+
+Une recette locale ne voit donc qu'une partie de la faille. Les deux ne
+décodent qu'**une fois** : `%2565` reste `%65` et ne sert rien. La règle :
+décoder le chemin une fois (`decodeURIComponent`), refuser en 400 celui qui ne
+se décode pas, et ne faire lire que ce chemin à toutes les gardes (`gatePath`
+dans `src/proxy.ts`).
+
 ### 1.2 Layouts racine : la frontière la plus chère du framework
 
 **Traverser une frontière de layout racine force un chargement de document

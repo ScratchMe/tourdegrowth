@@ -536,6 +536,17 @@ seul l'appareil qui importe est touché.
 |---|---|---|---|
 | A25.a | Reproduire par un test (l'import de `[]`, puis de `[{}]`). Puis faire refuser par `parseEngineFile` un état sans mois, ou dont un mois n'a pas `metrics` et `targets` objets, avec le refus `not-engine` existant (aucune copie neuve) | Session | À faire, avant l'ouverture du moteur |
 
+### A26 — Le proxy lisait le chemin encodé (trouvé et corrigé le 2026-10-05)
+
+La relecture sécurité d'ACT-3 (#345) a soupçonné la faille ; elle a été
+vérifiée en production le même jour. Les gardes du proxy comparaient le
+chemin brut, alors que le routeur le décode : `/en/gam%65/retention` servait
+le jeu fermé, `/en/a%61rrr-funnel-template` le moteur fermé, et
+`/%61dmin/stats` passait la Basic Auth (un 500 l'arrêtait, sans donnée).
+**Corrigé** (PR de ce jour, `gatePath` dans `src/proxy.ts`) : le chemin est
+décodé une fois avant toutes les gardes, et refusé en 400 s'il ne se décode
+pas. La leçon portable est dans `NEXTJS.md` §1.1.
+
 ---
 
 ## B. Design sync

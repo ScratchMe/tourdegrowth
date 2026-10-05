@@ -78,6 +78,28 @@ export function isResultReadPath(pathname: string): boolean {
 }
 
 /**
+ * The path every check below compares: the one the router will match,
+ * decoded once (2026-10-05). `request.nextUrl.pathname` keeps the
+ * percent-encoding the client sent; the router decodes it before matching a
+ * route, `%2F` included. So the raw path let a closed page through in
+ * production: `/en/gam%65/retention`, `/%65n/game/retention` and
+ * `/en/game%2Fretention` all served the closed game, `/en/a%61rrr-funnel-template`
+ * the closed engine, and `/%61dmin/stats` reached the admin routes without
+ * the Basic Auth (they only failed on a 500). Decoding exactly once, like the
+ * router: `%2565` stays `%65`, which the router does not read as `e` either.
+ *
+ * `null` when the path does not decode (a malformed escape): the proxy refuses
+ * the request before any check, rather than guess how the router would read it.
+ */
+export function gatePath(pathname: string): string | null {
+  try {
+    return decodeURIComponent(pathname);
+  } catch {
+    return null;
+  }
+}
+
+/**
  * `Vary: Accept-Language` on the one response the proxy authors itself: the
  * 307 that sends `/` (and the 308 of the pre-R-13 content URLs) to `/en` or
  * `/fr`.
@@ -116,6 +138,10 @@ function tooManyRequestsResponse(retryAfterSeconds: number): NextResponse {
     status: 429,
     headers: { "Retry-After": String(retryAfterSeconds) },
   });
+}
+
+function badRequestResponse(): NextResponse {
+  return new NextResponse("Bad request.", { status: 400 });
 }
 
 function unauthorizedResponse(): NextResponse {
@@ -188,20 +214,24 @@ export const LOCALE_HEADER = "x-tdg-locale";
  * in the same request.
  */
 export async function proxy(request: NextRequest): Promise<NextResponse> {
-  if (request.nextUrl.pathname.startsWith("/admin") && !isAuthorizedForAdmin(request)) {
+  // Every check below reads the decoded path, never `request.nextUrl.pathname`
+  // (`gatePath`).
+  const pathname = gatePath(request.nextUrl.pathname);
+  if (pathname === null) return badRequestResponse();
+
+  if (pathname.startsWith("/admin") && !isAuthorizedForAdmin(request)) {
     return unauthorizedResponse();
   }
 
-  if (request.nextUrl.pathname === OWNER_PREVIEW_PATH && request.method === "POST") {
+  if (pathname === OWNER_PREVIEW_PATH && request.method === "POST") {
     return ownerPreviewResponse(request);
   }
 
-  if (isResultReadPath(request.nextUrl.pathname)) {
+  if (isResultReadPath(pathname)) {
     const verdict = rateLimit(clientKey(request, "result-read"), RESULT_READ_LIMIT);
     if (!verdict.allowed) return tooManyRequestsResponse(verdict.retryAfterSeconds);
   }
 
-  const { pathname } = request.nextUrl;
   const queryLang = request.nextUrl.searchParams.get("lang");
   const fromUrl = splitLocalePath(pathname);
 
