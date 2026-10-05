@@ -544,7 +544,7 @@ vérifiée en production le même jour. Les gardes du proxy comparaient le
 chemin brut, alors que le routeur le décode : `/en/gam%65/retention` servait
 le jeu fermé, `/en/a%61rrr-funnel-template` le moteur fermé, et
 `/%61dmin/stats` passait la Basic Auth (un 500 l'arrêtait, sans donnée).
-**Corrigé** (PR de ce jour, `gatePath` dans `src/proxy.ts`) : le chemin est
+**Corrigé le 2026-10-05** ([#349](https://github.com/ScratchMe/tourdegrowth/pull/349), `gatePath` dans `src/proxy.ts`) : le chemin est
 décodé une fois avant toutes les gardes, et refusé en 400 s'il ne se décode
 pas ou ne se décode pas en un chemin canonique. La relecture sécurité du
 correctif a trouvé, avant sa livraison, une redirection ouverte qu'il
