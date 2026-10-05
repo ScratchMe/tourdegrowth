@@ -1001,7 +1001,7 @@ Le texte, chiffre par chiffre. Les formulations sont un premier jet pour le bon
 
 **`rev.expansion`**
 - oneLiner : « Le revenu que les abonnés déjà là ajoutent dans le mois : passage à l'offre famille ou premium. » / "The revenue existing subscribers add in the month: moving to a family or premium plan."
-- where : 1. revenuecat · « RevenueCat » · « les changements de produit du mois vers une offre plus chère, dans les événements d'abonnement » / "the month's product changes to a dearer plan, in the subscription events" ; 2. stripe · « Stripe » · « pour le web : les mouvements de MRR du mois, ligne « expansion » »
+- where : 1. revenuecat · « RevenueCat » · « les changements de produit du mois vers une offre plus chère, dans les événements d'abonnement » / "the month's product changes to a dearer plan, in the subscription events" ; 2. stripe · « Stripe » · « pour le web : les mouvements de MRR du mois, ligne « expansion » » / "for the web: the month's MRR movements, the \"expansion\" line"
 - trap : « Les nouveaux abonnés ne sont pas de l'expansion. Et passer d'un abonnement mensuel à un annuel moins cher par mois fait baisser le MRR : c'est une rétrogradation, pas une expansion. » / "New subscribers aren't expansion. And moving from a monthly plan to an annual one that costs less per month lowers the MRR: that is contraction, not expansion."
 - request : « le MRR au 1er {month} et le MRR ajouté par les abonnés déjà là, sans les nouveaux » / "the MRR at the start of {month} and the MRR added by existing subscribers, without new ones"
 - noReferenceReason : « la place pour l'expansion dépend de ta gamme : forte avec une offre famille, nulle avec un seul plan » / "the room for expansion depends on your range: large with a family plan, none with a single plan"
@@ -1009,9 +1009,11 @@ Le texte, chiffre par chiffre. Les formulations sont un premier jet pour le bon
 
 **`rev.contraction`**
 - oneLiner : « Le revenu que les abonnés qui restent retirent dans le mois : offre moins chère, passage à l'annuel. » / "The revenue staying subscribers take away in the month: a cheaper plan, a move to annual."
-- where, request : comme `rev.expansion`, ligne « rétrogradation » / "contraction".
+- where : 1. revenuecat · « RevenueCat » · « les changements de produit du mois vers une offre moins chère, dans les événements d'abonnement » / "the month's product changes to a cheaper plan, in the subscription events" ; 2. stripe · « Stripe » · « pour le web : les mouvements de MRR du mois, ligne « contraction » » / "for the web: the month's MRR movements, the \"contraction\" line" (« contraction » est le nom de la ligne dans Stripe, comme dans l'entrée du SaaS)
+- request : recopier celle du SaaS (« le MRR au 1er {month} et le MRR perdu en rétrogradations pendant le mois, sans les résiliations »), qui n'a aucun mot propre au SaaS.
 - trap : « Un abonné parti n'est pas une rétrogradation : il est dans le churn. » / "A subscriber who left isn't contraction: they're in the churn."
-- noReferenceReason : comme `rev.expansion` ; naReasons : `not-subscription` · « Un seul plan ».
+- noReferenceReason : recopier celle du SaaS (« elle dépend du modèle de prix autant que du produit… ») ; naReasons : `not-subscription` · « Un seul plan ».
+- *Écrit le 2026-10-05, d'après l'arrêt d'APP-2 et la réponse d'Antoine* : « comme `rev.expansion` », lu à la lettre, donnait un chemin RevenueCat « vers une offre plus chère », une demande « le MRR ajouté » et une raison sur « la place pour l'expansion », toutes fausses pour une rétrogradation.
 
 **Les deux calculés** (`ENGINE_DERIVED_CATALOG_CONSUMER`) : recopier `rev.grr`
 et `rev.nrr` du SaaS en remplaçant, dans leurs réserves, « le churn logo tient
@@ -1799,7 +1801,9 @@ export function teamTools(tools: readonly ToolId[] | undefined, type: BusinessTy
   « gardé » **et** comme coché, s'écrirait deux fois, et `validate.ts`
   refuserait le réglage (« a tool listed twice »). Un test de `Setup` le
   garde : une app avec `tools: ["revenuecat"]` enregistrée sans changement
-  garde `["revenuecat"]`. `setup.toolFamily.mobile` :
+  garde `["revenuecat"]`. Vitest ne monte aucun composant (§23.8) : le calcul
+  sort de `Setup.tsx` en une fonction pure, `savedTools(ticked, held, type)`
+  de `tools.ts`, et c'est elle que `tools.test.ts` teste. `setup.toolFamily.mobile` :
   « Stores et abonnements » / "Stores and subscriptions". `tools.test.ts`
   garde ses deux tests et en gagne un : les familles de l'app, et
   `teamTools(["revenuecat", "chargebee"], "consumer-app")` vaut
@@ -2863,7 +2867,9 @@ relire" src/`), puis l'ouverture par Antoine.
      catalogue de l'app les règles d'`engine-catalog.test.ts`. Ces règles
      sont écrites au niveau du module sur `ENGINE_CATALOG` et
      `ALL_*_SHAPES` : **les extraire** en une fonction
-     `catalogRules(name, catalog, derivedCatalog, shapes, derivedShapes)`
+     `catalogRules(name, catalog, derivedCatalog, shapes, derivedShapes,
+     options)` (`options` : `{ minReferences, carriesPeriod }`, le compte de
+     repères exigé et la présence de `{period}`, que l'app n'a pas)
      dans `src/content/__tests__/engine-test-helpers.ts` (qui déclare ses
      `describe` et ses `it`), qu'`engine-catalog.test.ts` appelle avec le
      catalogue du SaaS (ses tests gardent leurs noms et leurs assertions :

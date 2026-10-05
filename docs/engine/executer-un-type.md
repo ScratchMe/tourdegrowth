@@ -303,6 +303,10 @@ Les pièges déjà rencontrés sur ce moteur, chacun au moins une relecture :
   le SaaS B2B ne doit pas changer.
 - **Un compteur d'une liste fermée** (les événements GoatCounter, les ids de
   slides) : l'ajouter à la liste ET à son test, jamais l'un sans l'autre.
+- **Vitest ne monte aucun composant** (environnement `node`, seuls les
+  `*.test.ts`) : un « test de `Setup` » ou d'un autre composant teste une
+  fonction pure extraite du composant, dans le module de logique voisin
+  (A22 APP-2 : `savedTools` dans `tools.ts`).
 - **Recopier par script, jamais retaper** (le pilote U0 du jeu) : les
   fichiers de copie contiennent déjà des U+00A0 invisibles ; une chaîne
   existante retapée à la main n'est plus la même, et un remplacement qui la
