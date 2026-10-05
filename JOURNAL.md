@@ -560,3 +560,28 @@ Et des lacunes moins visibles, chacune un piège : un outil de l'app écrit deux
 **À savoir pour ACT-4** : `ACTIVATION_PATH` est dans `e2e/game-helpers.ts` ; la table de décembre des niveaux ouverts est `acquisition`, `activation`, `retention` : le décembre de l'activation vise la rétention sans collection (`/fr/game/retention?from=other_level`, titre `LEVEL_TEASERS.retention`) et l'acquisition avec la fin de la rétention semée, comme le dit §18.12 ; `game-activation.spec.ts` n'existe pas encore. Le bandeau `nudged` n'est atteint qu'avec `banner` coché : l'état corail de P5 se joue dans l'année C, au T2 (l'e2e jetable l'a vu : `data-alert="true"`, « 3 clics · … »).
 
 **Relecture de copie (relance de correction)** : le relecteur copie a trouvé six imprécisions, toutes dans des commentaires, corrigées sans toucher une chaîne visible ni un marqueur « à relire » : les deux lignes de `updated-at.ts` (`/game/retention` dit que « Niveau suivant » peut viser l'activation, `/game` que la zone nomme Quandi), l'en-tête d'`entry.ts` (la carte du niveau 3 est recopiée de `docs/game/activation.md` §18.11) et la doc de `band.metric` (le taux d'activation s'ajoute), l'en-tête de `hub.ts` (les lignes de Pédalix et de Quandi viennent de leur spécification) et le commentaire de `shareImageAlt` dans `meta.ts` (« deux » à deux niveaux ouverts, « trois » depuis l'activation). Vérifié : `tsc --noEmit` propre, `vitest run` **3 481 tests sur 3 481** (266 fichiers, inchangés, `claude-md-budget.test.ts` compris) ; ni build ni Playwright, le diff ne portant que des commentaires.
+
+## A26 : le proxy lit le chemin décodé, comme le routeur (2026-10-05)
+
+**Trouvé** par la relecture sécurité d'ACT-3 (#345), qui le donnait comme une piste non vérifiée, puis **vérifié en production** par l'orchestrateur, en lecture seule. Les gardes du proxy comparaient `request.nextUrl.pathname`, qui garde l'encodage en pourcent, alors que le routeur le décode avant de choisir une route. Relevé le même jour en production :
+- `/en/gam%65/retention`, `/en/game%2Fretention`, `/en%2Fgame%2Fretention` et `/%65n/game/retention` répondaient 200 avec le jeu fermé (`x-matched-path: /en/game/retention`, `noindex` gardé) ;
+- `/en/a%61rrr-funnel-template` servait le moteur fermé ;
+- `/%61dmin/stats`, `/%61dmin/stats/json`, `/%61dmin/audit` et `/%61dmin/preview` passaient la Basic Auth et tombaient sur un 500 sans aucune donnée : c'est le routage qui les arrêtait, pas la garde.
+
+Le double encodage (`/en/gam%2565/retention`) répondait 404 : le routeur ne décode qu'une fois. Les autres formes essayées (double barre, barre finale, `/./`, majuscules, `;`) étaient déjà redirigées ou en 404.
+
+**Deux routeurs, deux décodages** (la leçon portable est dans `NEXTJS.md` §1.1). Sur Vercel, tout le chemin est décodé, `%2F` compris. Sous `next start`, seuls les segments dynamiques le sont : sur le build de `main`, `/%66r/aarrr-funnel-template` répondait 200, mais `/%61dmin/stats` répondait 404. Une recette locale ne voit donc qu'une partie de la faille.
+
+**Le correctif** (`src/proxy.ts`) : `gatePath` décode le chemin une fois (`decodeURIComponent`, `%2F` compris) et rend `null` s'il ne se décode pas. Le proxy répond alors 400 avant toute garde. La garde de `/admin`, l'aperçu `POST /admin/preview`, le budget de lectures de `/r/<id>`, `splitLocalePath` et les drapeaux du jeu et du moteur ne lisent plus que ce chemin. La redirection des anciennes adresses de contenu aussi, `URL.pathname` ré-encodant ce qu'il faut.
+
+**Les tests** :
+- **Unitaires** : sept tests dans `src/__tests__/proxy.test.ts`, chaque chemin relevé en production compris. **Non-vacuité** : avec `gatePath` ramené au chemin brut (l'ancien comportement), six des sept rougissent. Le septième épingle le décodage unique (`%2565` laissé au routeur) et passe dans les deux cas, voulu.
+- **e2e** : `e2e/encoded-paths.spec.ts` tourne contre le vrai routeur, avec trois specs. Le moteur fermé répond 404 sous trois encodages. `/admin` encodé répond 401 avec son défi. Un chemin indécodable répond 400. **Reproduit avant le correctif** contre le build de `main` (`next start`) : les trois specs rougissent, avec 200 pour `/%66r/…`, 404 au lieu de 401 pour l'admin, et 500 au lieu de 400 pour le chemin indécodable. Le jeu étant ouvert en CI, son côté fermé n'est tenu que par les tests unitaires.
+
+**Vérifié, sorties réelles** :
+- `tsc` et `eslint` propres ;
+- `vitest run --coverage` : **3 488 sur 3 488** (+7), seuils tenus ;
+- build comme la CI ;
+- Playwright, suite complète, avec l'émulateur Firestore et `CI=1` : **1 009 passées, 7 ignorées par construction, 0 échec**, sur 1 016 (+3).
+
+La production est à revérifier après le déploiement, avec les mêmes adresses.
