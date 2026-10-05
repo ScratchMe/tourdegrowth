@@ -1,0 +1,45 @@
+/* SideShown — extension 10. The side selector opens the side's part of the
+ * board: a hard rule above it (the shared part ends), the selector, then
+ * the side's name. */
+
+.SideShown_root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  max-width: var(--engine-measure);
+  padding-top: var(--space-10);
+  border-top: var(--market-side-rule);
+}
+
+.SideShown_control {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-7);
+}
+
+.SideShown_label {
+  font: var(--title-card);
+  color: var(--text-body);
+}
+
+.SideShown_title {
+  margin: var(--space-5) 0 0;
+  font: var(--display-section);
+  letter-spacing: var(--display-letter-spacing);
+  color: var(--text-body);
+}
+
+.SideShown_note {
+  margin: 0;
+  max-width: var(--measure-read);
+  font: var(--body-sm);
+  color: var(--text-muted);
+}
+
+@media (max-width: 760px) {
+  .SideShown_control {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

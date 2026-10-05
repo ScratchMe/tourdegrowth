@@ -1,0 +1,27 @@
+/* NumberList — extension 10 delta: a row's side (`row.side`). Added to
+ * NumberList.module.css; nothing changed. Plain words, never a Tag: in this
+ * list a Tag is a status (estimated, asked), and a side is not one. */
+
+.NumberList_side {
+  flex: 0 0 var(--market-side-tag-width);
+  font: var(--meta-2xs);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+@media (max-width: 760px) {
+  /* A phone: the side on its own line, above the name. */
+  .NumberList_side {
+    flex-basis: 100%;
+  }
+}
+
+/* `lead`: one line under the title (the marketplace says the list holds
+ * both sides, and that its one red follows the side shown). */
+.NumberList_lead {
+  margin: calc(-1 * var(--space-6)) 0 0;
+  max-width: var(--measure-read);
+  font: var(--body-sm);
+  color: var(--text-muted);
+}

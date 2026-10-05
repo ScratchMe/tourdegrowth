@@ -1,0 +1,45 @@
+/* tokens/marketplace.css — design system extension 10: the marketplace.
+ *
+ * Built on the live system (tokens, the engine's and the money's, synced on
+ * 2026-10-04). No new colour: the marketplace adds no meaning to colour —
+ * the two sides share every colour, so nothing tells them apart but their
+ * words (C70: never compared). Red stays the leak's (one per side). The
+ * values below are measures.
+ *
+ * Paper only, like the engine: nothing under [data-world=night].
+ */
+
+:root {
+  /* SideShown: the rule that opens the side's part of the board. Solid ink,
+   * the system's hard edge: the shared part ends here (the board's other
+   * rules are dashed dividers). */
+  --market-side-rule: var(--border-solid);
+
+  /* SideFunnel: room for a column's head — its figure and a label of up to
+   * three lines ("Deuxième réservation sous 90 jours"), or the liquidity
+   * base's heading, figure, label and tag — so every grid starts on one
+   * line. */
+  --market-funnel-head: 150px;
+  /* A column's widest: the peloton's, four to the 1 040px card. */
+  --market-funnel-col: 232px;
+  /* The grid's column on a phone, beside its words (the peloton's 118px). */
+  --market-funnel-grid-mobile: 118px;
+  /* The same on a slide (the deck's 1 920 canvas): a column, its head. */
+  --market-slide-col: 300px;
+  --market-slide-head: 172px;
+  /* The liquidity base on a slide: wide enough for its sentence in two
+   * lines. */
+  --market-slide-base: 460px;
+
+  /* NumberList (delta): the side tag's column, so the names align
+   * ("Acheteurs", "Vendeurs", "Liquidité"; "Prestataires" the longest). */
+  --market-side-tag-width: 9.5em;
+
+  /* MrrCurve (delta): the ring on the what-if line at month 1 (the jump). */
+  --market-step-ring: var(--border-width-stamp);
+
+  /* SlideStreams: the ledger's name column; the total's rule, solid ink,
+   * as a sum is ruled (no "+" or "=": a disclosure's glyphs). */
+  --market-ledger-name: 520px;
+  --market-ledger-rule: var(--border-width-stamp) solid var(--border-hard);
+}

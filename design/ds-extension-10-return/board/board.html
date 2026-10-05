@@ -1,0 +1,35 @@
+<!-- @dsCard group="Extension 10 · proposal" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The marketplace · states</title>
+<!-- Everything here is source: no build step, no CDN. Serve the folder over
+     http (ES modules do not load from file://). The project's own fonts: this
+     folder lives at design/ds-extension-10-return/. -->
+<link rel="stylesheet" href="../../../fonts/fonts.css">
+<!-- The live system, as synced on 2026-10-04 (_ds_bundle.css): tokens and
+     every component's rules, the engine's and the money's included. -->
+<link rel="stylesheet" href="system-snapshot.css">
+<!-- Extension 10: the marketplace's tokens, its new components, and the
+     two synced components' deltas (rules added, none changed). -->
+<link rel="stylesheet" href="../tokens/marketplace.css">
+<link rel="stylesheet" href="../components/engine/SideShown/SideShown.css">
+<link rel="stylesheet" href="../components/engine/SideFunnel/SideFunnel.css">
+<link rel="stylesheet" href="../components/engine/SideNote/SideNote.css">
+<link rel="stylesheet" href="../components/engine/SlideStreams/SlideStreams.css">
+<link rel="stylesheet" href="../components/engine/MrrCurve/MrrCurve.delta.css">
+<link rel="stylesheet" href="../components/engine/NumberList/NumberList.delta.css">
+<link rel="stylesheet" href="board.css">
+<!-- The components import React from "react" and the system from
+     "tour-de-growth". On the board those are react-lite.js and sys/ (the
+     synced components' markup and class names); in the app, the real ones. -->
+<script type="importmap">{ "imports": { "react": "./react-lite.js", "tour-de-growth": "./sys/index.js" } }</script>
+</head>
+<body>
+<div id="root"></div>
+<noscript>The board draws its states with a small script (react-lite.js + board.js), from the components' own files.</noscript>
+<script type="module" src="board.js"></script>
+</body>
+</html>
