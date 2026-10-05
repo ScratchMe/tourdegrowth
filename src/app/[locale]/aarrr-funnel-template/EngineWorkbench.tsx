@@ -6,7 +6,7 @@ import { Card } from "@/components/core/Card";
 import { EngineStart, type StartMotion } from "@/components/engine/EngineStart";
 import { EngineTermScope } from "./_engine/EngineTerm";
 import { motionOfMetric, motionShapes, shapeOf } from "@/lib/engine/catalog-shape";
-import type { EngineStrings, ResolvedBridge, ResolvedDerived, ResolvedMetric } from "@/lib/engine/strings";
+import { mergeStrings, type DeepPartial, type EngineStrings, type ResolvedBridge, type ResolvedDerived, type ResolvedMetric } from "@/lib/engine/strings";
 import { MAX_ENGINES, type BusinessType, type EngineCalcContext, type EngineDerived, type EngineSetup, type EngineState, type LeverId, type MetricEntry, type MetricId, type Motion, type MotionDerived, type RoleId, type SlideTitle, type Snapshot, type YearMonth } from "@/lib/engine/types";
 import type { Locale } from "@/lib/i18n/locale";
 import { Board } from "./_engine/Board";
@@ -57,6 +57,11 @@ export interface EngineWorkbenchProps {
   locale: Locale;
   /** `ENGINE_COPY` resolved (§14). */
   strings: EngineStrings;
+  /**
+   * The consumer app's overlay on `strings` (§21.8.1): only the leaves whose words change, resolved. Merged ONCE, here, by
+   * `stringsFor`; a screen below receives the merged `strings` and never this field (`engine-boundary.test.ts`).
+   */
+  typeStrings: { "consumer-app": DeepPartial<EngineStrings> };
   /** The seventeen numbers' prose, in catalogue order (`METRIC_SHAPES`). */
   metrics: ResolvedMetric[];
   /** The three computed figures (§5.7). */
@@ -90,6 +95,19 @@ export interface EngineWorkbenchProps {
 // `steps` until A18 T3.b: the step-by-step, folded into the board since (« Enregistre et continue »).
 // `asks` since A18 T3.c: the requests, one screen (AskList), in place of « À aller chercher » on the board.
 type Screen = "board" | "number" | "asks" | "targets" | "deck" | "import" | "erase" | "settings" | "example" | "new" | "new-settings" | "delete";
+
+/**
+ * `mergeStrings` (§21.8.1) memoised on the identity of its two inputs, so a re-render gets the very tree it had: the
+ * engine's `useMemo`s depend on `strings`. The props are stable for the page's life; a new base starts a new merge.
+ */
+const merges = new WeakMap<object, { base: EngineStrings; merged: EngineStrings }>();
+function mergedStrings(base: EngineStrings, overlay: DeepPartial<EngineStrings>): EngineStrings {
+  const known = merges.get(overlay);
+  if (known && known.base === base) return known.merged;
+  const merged = mergeStrings(base, overlay);
+  merges.set(overlay, { base, merged });
+  return merged;
+}
 
 // Once per page session, not per mount (§11.6: "first view of the island in the session").
 let openedTracked = false;
@@ -138,7 +156,7 @@ function withSnapshot(state: EngineState, change: (snapshot: Snapshot) => Snapsh
  * way back — never on first paint.
  */
 export function EngineWorkbench(props: EngineWorkbenchProps) {
-  const { locale, strings, bridges } = props;
+  const { locale, bridges } = props;
   const snap = useSyncExternalStore(subscribe, getClientSnapshot, getServerSnapshot);
   const [screen, setScreen] = useState<Screen>("board");
   // The number whose own screen is open (A18 T2.b): opened from its row in « Tes chiffres », the next step, or the collect list.
@@ -189,6 +207,11 @@ export function EngineWorkbench(props: EngineWorkbenchProps) {
   // The prose the engine on screen reads (§21.4.7): its type's. With none yet (the start card, its example, a file's
   // preview) the SaaS's, as before APP-7 and APP-10 give those screens the type of the choice in progress.
   const engineType = state?.setup.type ?? "b2b-saas";
+  // The words of that type (§21.8.1): the base's, or the base's with the type's overlay on top. One merge, here; every
+  // screen below gets `strings` and never asks which type it is on.
+  const stringsFor = (type: BusinessType): EngineStrings =>
+    type === "consumer-app" ? mergedStrings(props.strings, props.typeStrings["consumer-app"]) : props.strings;
+  const strings = stringsFor(engineType);
   const metrics = metricsFor(props, engineType);
   const derivedCopy = derivedFor(props, engineType);
   const openedAt = snap?.openedAt ?? null;
