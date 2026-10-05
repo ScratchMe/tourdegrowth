@@ -16,7 +16,7 @@ import { EMULATOR_HOST, REAL_DEEP_DIVE, REAL_RESULTS, SENTINEL, SKIP_EMULATOR_RE
 test.skip(!EMULATOR_HOST, SKIP_EMULATOR_REASON);
 
 const GAME_OPEN = process.env.GAME_ENABLED === "true";
-const { clear, shared, level, deep, twoLevels } = REAL_RESULTS;
+const { clear, shared, level, deep, twoLevels, activationClear } = REAL_RESULTS;
 
 /** Every key of a stored document, nested ones included — the answers map's question ids among them. */
 function keysOf(value: unknown, into = new Set<string>()): Set<string> {
@@ -147,6 +147,23 @@ test.describe("a visitor's view of a clear bottleneck", () => {
     await expect(page.getByTestId("game-entry-cta")).toHaveAttribute("href", "/en/game/acquisition?from=deep_dive");
     // Level 2's number in level 2's format: new customers, never a percentage.
     await expect(page.getByTestId("game-entry-band")).toContainText("New customers 2,000");
+  });
+
+  test("offers level 3 on an activation bottleneck, with the rate in its own format on one line (A24, ACT-3)", async ({ page }) => {
+    test.skip(!GAME_OPEN, "GAME_ENABLED is not \"true\" for this build: the card only exists with the game open.");
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto(`/r/${activationClear.id}?lang=en`);
+    await expect(page.getByTestId("game-entry")).toBeVisible();
+    await expect(page.getByTestId("game-entry")).toHaveAttribute("data-levels", "1");
+    await expect(page.getByTestId("game-entry-cta")).toHaveAttribute("href", "/en/game/activation?from=result");
+    // Level 3's number is a rate, to the tenth: never a count of customers.
+    const band = page.getByTestId("game-entry-band");
+    await expect(band).toContainText("Activation 30.0%");
+    await expect(band).not.toContainText(/customers/i);
+    // The band holds on one line, as the other levels' do.
+    const box = await band.boundingBox();
+    expect(box, "game-entry-band is not on the page").not.toBeNull();
+    expect(box!.height).toBeLessThanOrEqual(44);
   });
 
   test("offers BOTH levels on one card when acquisition and retention tie at the bottom (C30 Q5)", async ({ page }) => {

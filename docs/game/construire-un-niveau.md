@@ -368,7 +368,7 @@ nouveau niveau aussi :
 | `src/lib/game/levels.ts` | `<pilier>: { slug: "<niveau>", enabled: true }` dans `GAME_LEVELS_BY_PILLAR`, à sa place dans l'ordre AARRR |
 | `src/lib/game/events.ts` | le slug dans `GAME_LEVEL_SLUGS` (gardé par `GameLevelsCovered`), et `"result/<niveau>"`, `"deep_dive/<niveau>"` dans `GAME_ENTRY_DETAILS` |
 | `src/content/game/entry.ts` | `GAME_ENTRY_COPY.<niveau>` : l'encart du résultat (titre, corps, bouton, bande), depuis la spécification |
-| `src/content/game/hub.ts` | `zones.<pilier>.company` (le nom de l'entreprise, depuis la spécification), la ligne du niveau dans `LEVEL_TEASERS` (section .11), et dans `ENDINGS_BY_LEVEL` le libellé de la fin `fine` du niveau |
+| `src/content/game/hub.ts` | `zones.<pilier>.company` (le nom de l'entreprise, depuis la spécification), la ligne du niveau dans `LEVEL_TEASERS` (section .11), et dans `ENDINGS_BY_LEVEL` le libellé de la fin `fine` du niveau **si la section .11 en donne un** : « aucune entrée » quand celui du niveau 1 (« le contrôle et l'amende ») est juste (l'activation et le referral ; ACT-3) |
 | `src/app/[locale]/game/_island/sides.tsx` | `IslandCopies.<niveau>` et `ISLAND_SIDES.<niveau>` |
 | `src/app/[locale]/game/_island/GameIsland.tsx`, `useGame.ts` | ce que le compilateur demande (le modèle du niveau, sa copie) |
 | `src/app/[locale]/game/<niveau>/page.tsx` | sur le modèle d'`acquisition/page.tsx` : l'intro, les deux mots du glossaire (dans la spécification), la copie, l'îlot, `nextLevels={nextLevelLinks(locale, SLUG)}` (T0) |
@@ -377,7 +377,7 @@ nouveau niveau aussi :
 | `src/app/(app)/r/[id]/game-entry.ts` | `LEVEL_MODELS.<niveau>: <NIVEAU>_LEVEL` (le chiffre de la bande) ; le détail `${from}/${slug}` compile une fois `GAME_ENTRY_DETAILS` complété (`events.ts`). Jamais de cast |
 | `e2e/game-helpers.ts` | `MODEL_VERSIONS.<niveau>` (tsc l'exige) et `<NIVEAU>_PATH = { en: "/en/game/<niveau>", fr: "/fr/game/<niveau>" }`, comme `LEVEL2_PATH` |
 | `src/lib/game/types.ts` | au dernier X-3, `DraftLevelSlug` devient `never`, comme l'a fait #247 |
-| `src/content/updated-at.ts` | la date des pages touchées, comme A12.f.1, dont `/game` (sa zone devient jouable, et le texte de son image dit un niveau ouvert de plus) |
+| `src/content/updated-at.ts` | la date des pages touchées, comme A12.f.1, dont `/game` (sa zone devient jouable, et le texte de son image dit un niveau ouvert de plus) et les pages des niveaux déjà ouverts (leur navigation des zones lie le nouveau, et leur bloc « Niveau suivant » peut le viser ; ACT-3) |
 
 Puis les tests que le niveau 2 a dû toucher, à étendre au nouveau niveau :
 `src/__tests__/content-fan-in.test.ts` (un plafond par page, chacun avec sa
@@ -404,7 +404,9 @@ les deux langues, sans gabarit ni `undefined`, le chiffre dans son unité).
 `game-entry.test.ts`, `growth-stats.test.ts`) passe à une étape encore fermée,
 ou à une table `levels` explicite où elle est `enabled: false` ; on ne
 supprime jamais le cas (au dernier X-3, il n'y a plus d'étape sans niveau :
-la table explicite est la seule voie).
+la table explicite est la seule voie). **Préférer la table explicite**
+(ACT-3 : `RETENTION_ONLY`, `ACQUISITION_AND_RETENTION`) : une étape encore
+fermée ne l'est plus au X-3 suivant, qui refait le travail.
 
 Côté e2e, les specs communes que le niveau 2 a touchées : `game-flag`,
 `game-endings`, `game-share-images`, `share-previews`, `accessibility`,
@@ -546,6 +548,21 @@ Tous vécus sur les niveaux 1 et 2 ; chacun a coûté au moins une relecture.
 - **Les années de référence se jouent à l'interface** dans les specs e2e, en
   cliquant ce que la table dit, carte par carte : le moteur est déjà tenu par
   les tests unitaires, les specs tiennent l'écran.
+- **Un volume du journal par période, après chaque fusion de `main`**
+  (2026-10-04) : d'autres sessions (A22, A23) mergent le même jour, et un
+  sous-agent et une autre session ont archivé en parallèle les mêmes entrées
+  de `JOURNAL.md` dans deux volumes de `docs/journal/`. Après
+  `git merge origin/main`, `ls docs/journal/` : deux volumes qui couvrent la
+  même période, on garde celui de `main` et on retire l'autre (sa ligne de
+  table comprise).
+- **X-3 est l'unité la plus lourde d'un niveau** (la page, la route d'image,
+  la suite Playwright complète, la mesure du poids avant le merge) : compter
+  environ 1 h 15 entre le lancement du sous-agent et le merge. L'orchestrateur
+  n'en lance pas une si la pause qu'on lui a donnée tombe avant.
+- **`npm ci` peut réécrire `package-lock.json`** (ACT-3 : npm 10.9.4 en
+  retire des champs `libc`) : un artefact d'outil, jamais un changement de
+  l'unité. `git checkout -- package-lock.json` avant le commit ; un lockfile
+  dans le diff fait aussi tomber la barrière de `/livrer` §0.
 
 ## 21.6 Vérifier avant de pousser
 
@@ -594,9 +611,10 @@ merge livré : `git show --stat <sha>` (convention 1).
   niveau suivant ouvert.
 - Toute chaîne neuve porte « à relire » ; l'item du bon à tirer existe dans
   `CHANTIERS.md` A24, celui de la re-synchro dans la section B.
-- L'entrée du journal de chaque PR, et, dans la même PR, ceux des deux
-  nombres des chiffres de référence de `CLAUDE.md` qui ont changé (tests
-  unitaires, specs Playwright). L'état du jeu dans `CLAUDE.md` change à X-3 et à X-4.
+- L'entrée du journal de chaque PR, et, dans la même PR, ceux des nombres
+  des chiffres de référence de `CLAUDE.md` qui ont changé (tests unitaires,
+  specs Playwright, specs ignorées par construction). L'état du jeu dans
+  `CLAUDE.md` change à X-3 (la ligne `src/lib/game/` de la carte du repo) et à X-4.
 
 ## 21.8 Questions communes aux trois niveaux
 
@@ -729,9 +747,11 @@ l'émulateur) vont hors du dépôt, dans un dossier temporaire.
 Avant de pousser, fais passer les vérifications du §21.6 qui concernent ton
 unité, ajoute l'entrée de ton unité à la fin de JOURNAL.md (ce qui est livré,
 les choix d'exécution, ce qui est vérifié, avec les chiffres réels des
-commandes), remplace dans CLAUDE.md ceux des deux nombres des chiffres de
-référence (tests unitaires, specs Playwright) qui ont changé, sans ajouter de
-phrase (il reste moins de 1 200 caractères de marge). Juste avant de pousser,
+commandes), remplace dans CLAUDE.md ceux des nombres des chiffres de
+référence (tests unitaires, specs Playwright, specs ignorées par construction)
+qui ont changé, et, à X-3, l'état du niveau dans la ligne src/lib/game/ de la
+carte du repo, sans ajouter de phrase (il reste moins de 1 200 caractères de
+marge). Juste avant de pousser,
 git fetch origin && git merge origin/main (§21.6 : un conflit dans JOURNAL.md
 garde les deux entrées, la tienne en dernier ; ailleurs, arrête-toi), puis tsc
 et vitest une dernière fois. Commit et pousse ta branche (git push -u origin

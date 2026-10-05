@@ -31,7 +31,8 @@ export const GAME_META = {
     ),
     breadcrumb: t("Le jeu", "The game"),
     // TODO: à relire — 2026-10-04 (A24.T0) : le nombre de niveaux ouverts devient un gabarit, {open}, rempli
-    // par l'image du hub avec GAME_OPEN_COUNT_WORDS (le texte, lui, ne change pas tant que deux niveaux sont ouverts).
+    // par l'image du hub avec GAME_OPEN_COUNT_WORDS (« deux » à deux niveaux ouverts, « trois » depuis l'activation,
+    // A24 ACT-3).
     // Quand les cinq niveaux seront ouverts, la phrase dira « les cinq étapes du Tour, dont cinq sont ouvertes » :
     // formulation à trancher au bon à tirer.
     shareImageAlt: t(

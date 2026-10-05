@@ -34,7 +34,7 @@ describe("gameSitemapPaths", () => {
   });
 
   it("lists the hub and every enabled level when open", () => {
-    expect(gameSitemapPaths(true)).toEqual(["/game", "/game/acquisition", "/game/retention"]);
+    expect(gameSitemapPaths(true)).toEqual(["/game", "/game/acquisition", "/game/activation", "/game/retention"]);
   });
 
   it("never lists a level that is not enabled", () => {

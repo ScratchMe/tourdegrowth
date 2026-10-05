@@ -25,9 +25,10 @@ export const CONTENT_UPDATED_AT: Record<string, string> = {
   "/aarrr-vs-heart": "2026-09-25", // ce que les deux acronymes partagent (revue adversariale R11)
   // Le jeu (GAME-BRIEF 9.3). Listed in the sitemap only when the game is
   // open at build (lib/game/build-flag.ts); dated here like every other page.
-  "/game": "2026-10-01", // le niveau 2 ouvert : sa zone devient jouable (A12.f)
-  "/game/acquisition": "2026-10-04", // le bandeau dit l'étape, sans numéro (C76, A24.T0) ; created 2026-10-01 (A12.f)
-  "/game/retention": "2026-10-04", // le bandeau dit l'étape, sans numéro (C76, A24.T0) ; le bloc « Niveau suivant » devient un lien vers le niveau 2 le 2026-10-01 (C31)
+  "/game": "2026-10-05", // le niveau 3 ouvert : sa zone devient jouable et nomme Quandi, et l'image dit trois niveaux ouverts (A24, ACT-3) ; avant, le niveau 2 le 2026-10-01 (A12.f)
+  "/game/acquisition": "2026-10-05", // la zone de l'activation devient un lien, et le bloc « Niveau suivant » peut la viser (A24, ACT-3) ; avant, le bandeau dit l'étape, sans numéro (C76, A24.T0) ; created 2026-10-01 (A12.f)
+  "/game/activation": "2026-10-05", // created (A24, ACT-3)
+  "/game/retention": "2026-10-05", // la zone de l'activation devient un lien, et le bloc « Niveau suivant » peut la viser (A24, ACT-3) ; avant, le bandeau dit l'étape, sans numéro (C76, A24.T0) ; le bloc « Niveau suivant » devient un lien vers le niveau 2 le 2026-10-01 (C31)
   // Le moteur de growth (engine spec §11.1). Same rule as the game: in the
   // sitemap only when ENGINE_ENABLED is open at build (app/sitemap.ts).
   "/aarrr-funnel-template": "2026-10-03", // A20.d T6 (C52) : la promesse dit ce que rapporte chaque nouveau client, et le board ou les investisseurs à côté du CODIR ; avant, A18 T5 : la FAQ de la vente assistée ne dit plus « côte à côte » ; A18 T4 : la promesse en une ligne pour un lecteur qui revient (page.promiseLine), « Combien de temps ça prend » sous l'outil ; avant, A18 T3.b : la durée ne promet plus que « le pas à pas garde ta place » (page.durationReady) ; avant, A7.3.c S3 : la promesse, la durée et le catalogue comptent les deux motions ; S2 : la sixième question de la FAQ, la vente assistée ; avant, A7.1 (C1) : la promesse, la FAQ et les réserves des repères, qui ne désignent plus

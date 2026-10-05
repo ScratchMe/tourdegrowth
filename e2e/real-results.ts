@@ -46,8 +46,8 @@ export interface RealResult {
 }
 
 /**
- * One board per state of the bottleneck block (`resolveBottleneck`), two for
- * the game's card (a Deep dive, two levels on one card), one with every stage
+ * One board per state of the bottleneck block (`resolveBottleneck`), three for
+ * the game's card (a Deep dive, two levels on one card, level 3's stage), one with every stage
  * at its weakest (`low`), and the result header at its widest (`roastDeep`).
  * The totals are what `computeScore` gives for these answers; the spec checks
  * the page shows them, so a scoring change announces itself here.
@@ -120,6 +120,18 @@ export const REAL_RESULTS = {
     tone: "roast",
     locale: "fr",
     answers: answersFor({ acquisition: 1, activation: 0, retention: 2, referral: 0, revenue: 1 }),
+    total: 54,
+  },
+  /**
+   * Activation alone at 0/20: a `clear` bottleneck on level 3's stage (A24,
+   * ACT-3, 2026-10-05) — the card offers « Comment ils comprennent ce que
+   * vous apportez », and its band quotes the activation rate, not a count.
+   */
+  activationClear: {
+    id: "7d3c9e2a-0b1f-4c5d-8e6f-1a2b3c4d5e08",
+    tone: "neutral",
+    locale: "en",
+    answers: answersFor({ acquisition: 0, activation: 2, retention: 1, referral: 1, revenue: 0 }),
     total: 54,
   },
 } as const satisfies Record<string, RealResult>;

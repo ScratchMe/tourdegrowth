@@ -14,6 +14,7 @@ import {
 } from "./game-helpers";
 import { PATH_A, PATH_C, PATH_D, playPath, type Path } from "../src/lib/game/__tests__/paths-acquisition";
 import { GAME_SAVE_KEYS } from "../src/lib/game/storage-keys";
+import { LEVEL_TEASERS } from "../src/content/game/hub";
 
 /**
  * Level 2, « Comment les gens vous trouvent » (Pédalix), played through the
@@ -131,7 +132,7 @@ test.describe("P5 — the phone and the basket follow the ticks", () => {
 test.describe("a whole year of level 2 through the interface", () => {
   test.slow();
 
-  test("path A (fr): three orders refused, December applauds, and the other level is one click away", async ({ page }) => {
+  test("path A (fr): three orders refused, December applauds, and the next level is one click away", async ({ page }) => {
     await page.goto(LEVEL2_PATH.fr);
     for (let q = 1; q <= 4; q++) {
       await expect(page.getByTestId("game-call")).toHaveAttribute("data-mood", A.moods[q - 1]!);
@@ -157,11 +158,15 @@ test.describe("a whole year of level 2 through the interface", () => {
     await expect(page.getByTestId("game-chart-metric")).not.toContainText("%");
     // An honest year used no trick.
     await expect(page.getByTestId("game-catalogue").locator("[data-group='used']")).toHaveCount(0);
-    // C31, C75 — the block that closes December leads to level 1, « jouable ».
+    // C31, C75 — the block that closes December leads to the next open level
+    // the player has not finished, « jouable »: activation since level 3 opened
+    // (A24, ACT-3), written out here as `nextLevelFor` gives it on the table of
+    // the three open levels (acquisition, activation, retention).
     const next = page.getByTestId("game-next-level");
     await expect(next).toContainText("Niveau suivant");
     await expect(next).toContainText("jouable");
-    await expect(page.getByTestId("game-next-level-link")).toHaveAttribute("href", "/fr/game/retention?from=other_level");
+    await expect(page.getByTestId("game-next-level-link")).toHaveAttribute("href", "/fr/game/activation?from=other_level");
+    await expect(next).toContainText(LEVEL_TEASERS.activation.fr);
 
     const events = await trackedEvents(page);
     expect(events).toContain("game_started/acquisition/direct");

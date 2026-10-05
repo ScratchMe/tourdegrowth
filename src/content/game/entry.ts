@@ -13,8 +13,10 @@ import type { Translatable } from "@/lib/i18n/translatable";
  * (`content/game/retention.ts`, `dashboard.churn` and
  * `dashboard.notOnDashboard`). Level 2's card (2026-10-01, A12.f) is new copy
  * written by the code session on the model of level 1's, the two openings
- * and the mention shared; so is the card offering several levels
- * (`GAME_ENTRY_SEVERAL`, A12.f.2), with its own title, body and mention.
+ * and the mention shared; level 3's (2026-10-05, A24 ACT-3) is copied from
+ * `docs/game/activation.md` §18.11, written there on the same model; so is
+ * the card offering several levels (`GAME_ENTRY_SEVERAL`, A12.f.2), with its
+ * own title, body and mention.
  *
  * Its own module, and only the result page imports it: the level's text
  * (`retention.ts`, ~800 lines) must not ride into the result page's server
@@ -43,9 +45,9 @@ export interface GameEntryCopy {
    * The night band across the top of the card: the object of the game in one
    * glance — the one number the CEO watches, and the one that is missing from
    * his dashboard. `{metric}` is the level's starting number (churn, new
-   * customers), formatted by the caller from the level model rather than
-   * written here, so the card cannot quote a number the game does not start
-   * from.
+   * customers, activation rate), formatted by the caller from the level model
+   * rather than written here, so the card cannot quote a number the game does
+   * not start from.
    */
   band: {
     metric: Translatable;
@@ -76,6 +78,22 @@ export const GAME_ENTRY_COPY = {
     meta: META,
     band: {
       metric: t("Nouveaux clients {metric}", "New customers {metric}"),
+      trust: TRUST,
+      notOnDashboard: NOT_ON_DASHBOARD,
+    },
+  },
+  // TODO: à relire — 2026-10-05 (A24.ACT-3) : toute la carte du niveau 3, d'après docs/game/activation.md §18.11.
+  activation: {
+    title: t("Le côté obscur de l'activation", "The dark side of activation"),
+    opening: OPENING,
+    body: t(
+      "Voici ce qu'il ne faut pas faire : joue une année comme PM growth d'un outil de planification pour indépendants, un DG qui veut des inscrits activés, et huit astuces que tu reconnaîtras ensuite partout.",
+      "Here is what not to do: play a year as the growth PM of a scheduling tool for freelancers, with a CEO who wants activated sign-ups, and eight tricks you will recognise everywhere afterwards.",
+    ),
+    cta: t("Jouer le niveau « Comment ils comprennent ce que vous apportez »", 'Play the level "How they understand what you bring"'),
+    meta: META,
+    band: {
+      metric: t("Activation {metric}", "Activation {metric}"),
       trust: TRUST,
       notOnDashboard: NOT_ON_DASHBOARD,
     },
