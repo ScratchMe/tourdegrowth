@@ -6,6 +6,7 @@ import { metricFormat } from "@/lib/game/format";
 import { gameEntriesFor, GAME_LEVELS_BY_PILLAR, type BottleneckLike, type GameLevelTable } from "@/lib/game/levels";
 import { ACQUISITION_LEVEL } from "@/lib/game/levels/acquisition";
 import { ACTIVATION_LEVEL } from "@/lib/game/levels/activation";
+import { REFERRAL_LEVEL } from "@/lib/game/levels/referral";
 import { RETENTION_LEVEL } from "@/lib/game/levels/retention";
 import type { LevelDefinition, LevelSlug } from "@/lib/game/types";
 import type { Locale } from "@/lib/i18n/locale";
@@ -37,6 +38,7 @@ const LEVEL_MODELS: Record<LevelSlug, Pick<LevelDefinition<string>, "constants" 
   acquisition: ACQUISITION_LEVEL,
   activation: ACTIVATION_LEVEL,
   retention: RETENTION_LEVEL,
+  referral: REFERRAL_LEVEL,
 };
 
 function startingMetric(slug: LevelSlug, locale: Locale): string {

@@ -9,10 +9,11 @@ import type { Translatable } from "@/lib/i18n/translatable";
  *
  * **TODO: à relire** (convention 6). The five zone questions are the
  * prototype's own French (its `<nav class="tour">`); their English, the
- * company lines (from GAME-BRIEF 11.1-11.4; Pédalix's and Quandi's from
- * their level's specification, `docs/game/niveau-2.md` §17 and
- * `docs/game/activation.md` §18.11), the ending labels and every
- * other string are new copy written by the code session. One exception
+ * company lines (from GAME-BRIEF 11.1-11.4; Pédalix's, Quandi's and Partix's
+ * from their level's specification, `docs/game/niveau-2.md` §17,
+ * `docs/game/activation.md` §18.11 and `docs/game/referral.md` §19.11), the
+ * ending labels and every other string are new copy written by the code
+ * session. One exception
  * besides the zone questions: `LEVEL_TEASERS.acquisition` in French is the
  * prototype's too (`design/game/prototype-s-ils-reviennent.html`), hence
  * validated — see the state of each `LEVEL_TEASERS` line below.
@@ -51,7 +52,8 @@ const ENDINGS_BY_LEVEL: Partial<Record<LevelSlug, Partial<Record<EndingId, Trans
  * (`nextLevelFor`), chosen in the browser. Each level's own December copy
  * used to carry the other's line; acquisition's and retention's are those
  * lines, moved as they stood, and each level since adds its own at the step
- * that makes it a `LevelSlug` (activation's, at A24 ACT-3).
+ * that makes it a `LevelSlug` (activation's, at A24 ACT-3; referral's, at
+ * A24 REF-3).
  *
  * The state of each line (moved, so each keeps the one it had):
  * - `acquisition`, French: the prototype's own French, validated, not marked;
@@ -62,6 +64,8 @@ const ENDINGS_BY_LEVEL: Partial<Record<LevelSlug, Partial<Record<EndingId, Trans
  *   2026-10-01, venues du niveau 2 (`acquisition.ts`).
  * - `activation`, both languages: TODO: à relire — écrites pour A24 ACT-3 le
  *   2026-10-05, d'après `docs/game/activation.md` §18.11.
+ * - `referral`, both languages: TODO: à relire — écrites pour A24 REF-3 le
+ *   2026-10-05, d'après `docs/game/referral.md` §19.11.
  */
 export const LEVEL_TEASERS: Record<LevelSlug, Translatable> = {
   acquisition: t(
@@ -76,6 +80,11 @@ export const LEVEL_TEASERS: Record<LevelSlug, Translatable> = {
   retention: t(
     "« S'ils reviennent » : la pause mise en avant, le bouton enterré, la résiliation par téléphone",
     '"If they come back": the pause pushed up front, the buried button, cancelling by phone',
+  ),
+  // TODO: à relire — 2026-10-05 (A24.REF-3) : l'annonce du niveau 4, d'après docs/game/referral.md §19.11.
+  referral: t(
+    "« S'ils vous recommandent » : les invitations envoyées pour toi, le carnet aspiré, le bonus aux conditions introuvables",
+    '"If they recommend you": invitations sent for you, the scraped address book, the bonus with conditions nowhere to be found',
   ),
 };
 
@@ -115,7 +124,8 @@ export const GAME_HUB = {
     },
     referral: {
       question: t("S'ils vous recommandent", "If they recommend you"),
-      company: t("Une appli de partage de dépenses entre amis", "An app for splitting costs with friends"),
+      // TODO: à relire — 2026-10-05 (A24.REF-3) : l'entreprise a un nom depuis que le niveau existe, comme Flixo, Pédalix et Quandi.
+      company: t("Partix, une appli de partage de dépenses entre amis", "Partix, an app for splitting costs with friends"),
     },
     revenue: {
       question: t("Comment vous gagnez de l'argent", "How you make money"),

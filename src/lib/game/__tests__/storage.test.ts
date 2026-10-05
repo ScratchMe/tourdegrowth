@@ -236,9 +236,10 @@ describe("finishedLevels (C75, A24.T0)", () => {
 });
 
 describe("one save per level (A12.f, 2026-10-01)", () => {
-  it("gives levels 2 and 3 their own keys, apart from level 1's and from the collection", () => {
+  it("gives levels 2, 3 and 4 their own keys, apart from level 1's and from the collection", () => {
     expect(GAME_SAVE_KEYS.acquisition).toBe("tdg.game.acquisition.v1");
     expect(GAME_SAVE_KEYS.activation).toBe("tdg.game.activation.v1");
+    expect(GAME_SAVE_KEYS.referral).toBe("tdg.game.referral.v1");
     const keys = [...Object.values(GAME_SAVE_KEYS), GAME_COLLECTION_KEY];
     expect(new Set(keys).size).toBe(keys.length);
   });

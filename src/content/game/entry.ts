@@ -13,10 +13,11 @@ import type { Translatable } from "@/lib/i18n/translatable";
  * (`content/game/retention.ts`, `dashboard.churn` and
  * `dashboard.notOnDashboard`). Level 2's card (2026-10-01, A12.f) is new copy
  * written by the code session on the model of level 1's, the two openings
- * and the mention shared; level 3's (2026-10-05, A24 ACT-3) is copied from
- * `docs/game/activation.md` §18.11, written there on the same model; so is
- * the card offering several levels (`GAME_ENTRY_SEVERAL`, A12.f.2), with its
- * own title, body and mention.
+ * and the mention shared; level 3's and level 4's (2026-10-05, A24 ACT-3 and
+ * REF-3) are copied from `docs/game/activation.md` §18.11 and
+ * `docs/game/referral.md` §19.11, written there on the same model; so is the
+ * card offering several levels (`GAME_ENTRY_SEVERAL`, A12.f.2), with its own
+ * title, body and mention.
  *
  * Its own module, and only the result page imports it: the level's text
  * (`retention.ts`, ~800 lines) must not ride into the result page's server
@@ -45,9 +46,9 @@ export interface GameEntryCopy {
    * The night band across the top of the card: the object of the game in one
    * glance — the one number the CEO watches, and the one that is missing from
    * his dashboard. `{metric}` is the level's starting number (churn, new
-   * customers, activation rate), formatted by the caller from the level model
-   * rather than written here, so the card cannot quote a number the game does
-   * not start from.
+   * customers, activation rate, viral coefficient), formatted by the caller
+   * from the level model rather than written here, so the card cannot quote a
+   * number the game does not start from.
    */
   band: {
     metric: Translatable;
@@ -109,6 +110,22 @@ export const GAME_ENTRY_COPY = {
     meta: META,
     band: {
       metric: t("Résiliations {metric}", "Churn {metric}"),
+      trust: TRUST,
+      notOnDashboard: NOT_ON_DASHBOARD,
+    },
+  },
+  // TODO: à relire — 2026-10-05 (A24.REF-3) : toute la carte du niveau 4, d'après docs/game/referral.md §19.11.
+  referral: {
+    title: t("Le côté obscur du referral", "The dark side of referral"),
+    opening: OPENING,
+    body: t(
+      "Voici ce qu'il ne faut pas faire : joue une année comme PM growth d'une appli de partage de dépenses, un DG qui veut que chaque utilisateur en amène d'autres, et huit astuces que tu reconnaîtras ensuite partout.",
+      "Here is what not to do: play a year as the growth PM of an expense-sharing app, with a CEO who wants every user to bring in more, and eight tricks you will recognise everywhere afterwards.",
+    ),
+    cta: t("Jouer le niveau « S'ils vous recommandent »", 'Play the level "If they recommend you"'),
+    meta: META,
+    band: {
+      metric: t("Coefficient viral {metric}", "Viral coefficient {metric}"),
       trust: TRUST,
       notOnDashboard: NOT_ON_DASHBOARD,
     },

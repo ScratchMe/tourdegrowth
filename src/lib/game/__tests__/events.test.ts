@@ -26,7 +26,7 @@ describe("game analytics vocabulary (plan §3.8)", () => {
     }
   });
 
-  it("has the four entry doors the brief names (G7's source list), level 2's and level 3's result doors, then the landing strip's and the band's (A7.9), then the compact header's race (extension 08)", () => {
+  it("has the four entry doors the brief names (G7's source list), level 2's, level 3's and level 4's result doors, then the landing strip's and the band's (A7.9), then the compact header's race (extension 08)", () => {
     expect(GAME_ENTRY_DETAILS.map((d) => `${GAME_ENTRY_EVENT}/${d}`)).toEqual([
       "game_entry_clicked/result/acquisition",
       "game_entry_clicked/deep_dive/acquisition",
@@ -34,6 +34,8 @@ describe("game analytics vocabulary (plan §3.8)", () => {
       "game_entry_clicked/deep_dive/activation",
       "game_entry_clicked/result/retention",
       "game_entry_clicked/deep_dive/retention",
+      "game_entry_clicked/result/referral",
+      "game_entry_clicked/deep_dive/referral",
       "game_entry_clicked/footer",
       "game_entry_clicked/hub",
       "game_entry_clicked/home_strip",
@@ -45,7 +47,7 @@ describe("game analytics vocabulary (plan §3.8)", () => {
   it("includes the resume answer (orchestrator decision 5) and every start origin", () => {
     const paths = gameEventPaths();
     expect(paths).toEqual(expect.arrayContaining(["game_resume/resume", "game_resume/restart"]));
-    for (const slug of ["acquisition", "activation", "retention"]) {
+    for (const slug of ["acquisition", "activation", "retention", "referral"]) {
       for (const from of GAME_START_FROM) expect(paths).toContain(`game_started/${slug}/${from}`);
     }
     // The link one level's page makes to the other (C31, A12.f).
@@ -58,6 +60,7 @@ describe("game analytics vocabulary (plan §3.8)", () => {
       expect(paths).toContain(`game_ending/acquisition/${ending}`);
       expect(paths).toContain(`game_ending/activation/${ending}`);
       expect(paths).toContain(`game_ending/retention/${ending}`);
+      expect(paths).toContain(`game_ending/referral/${ending}`);
       expect(paths).not.toContain(`game_ending/${ending}`);
     }
     expect(gameEndingDetail("acquisition", "fine")).toBe("acquisition/fine");

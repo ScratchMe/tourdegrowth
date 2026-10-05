@@ -234,6 +234,7 @@ test("a share image answers under a language, and a 404 under anything else", as
     "game/acquisition/opengraph-image/en",
     "game/activation/opengraph-image/en",
     "game/retention/opengraph-image/en",
+    "game/referral/opengraph-image/en",
     "aarrr-funnel-template/opengraph-image/en",
   ]) {
     for (const first of ["xx", "EN", "en-US"]) {
