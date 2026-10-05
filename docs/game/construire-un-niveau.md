@@ -316,7 +316,8 @@ reco).
   jamais un hexadécimal dans le module** (`game-no-hex.test.ts` refuse toute
   couleur littérale sous `src/components/game/`) : la spécification donne son
   nom et sa valeur, à ajouter dans `src/styles/tokens/game.css` (bloc `:root`,
-  juste après `--shop-brand`), avec sa ligne dans les `PAIRS` de
+  après le dernier jeton de marque des téléphones, `--shop-brand`, puis
+  `--planner-brand`… dans l'ordre de construction ; REF-2), avec sa ligne dans les `PAIRS` de
   `src/__tests__/game-token-contrast.test.ts` (sinon « measures every color
   token » rougit) ; le module pose `--phone-brand: var(--<nom>-brand)`, comme
   `ShopPhone.module.css`. Les identifiants de test, la clé de l'éclair et
