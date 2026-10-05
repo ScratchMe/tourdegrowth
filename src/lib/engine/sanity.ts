@@ -158,7 +158,7 @@ function selfServeChecks(state: EngineState, ctx: EngineCalcContext, words: Unit
   const margin = knownValue(state, marginId, ctx);
   if (margin && (margin.lo > MARGIN_ODD.hi || margin.hi < MARGIN_ODD.lo)) add("margin-odd", [marginId]);
 
-  // The stores' commission past a third of what they bill is rarely the commission alone: VAT or payment fees ride along (§21.5.5).
+  // A commission above COMMISSION_HIGH_PERCENT (30 %) is rarely the stores' commission alone: VAT or payment fees ride along (§21.5.5).
   const commission = app && reads("app.rev.commission") ? knownValue(state, "app.rev.commission", ctx) : null;
   if (commission && commission.lo > COMMISSION_HIGH_PERCENT) add("commission-high", ["app.rev.commission"]);
 
