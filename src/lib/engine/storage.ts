@@ -491,7 +491,8 @@ export function restoreDevice(copy: Record<string, string>): SaveResult {
       if (key !== null && isEngineKey(key)) now.push(key);
     }
     for (const key of now) if (!Object.hasOwn(copy, key)) store.removeItem(key);
-    for (const [key, value] of Object.entries(copy)) store.setItem(key, value);
+    // An item already as it was is left alone: a device refusing writes would otherwise fail a restore it needs not.
+    for (const [key, value] of Object.entries(copy)) if (store.getItem(key) !== value) store.setItem(key, value);
   } catch (err) {
     return { ok: false, error: isQuota(err) ? "quota" : "unavailable" };
   }

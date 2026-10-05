@@ -69,11 +69,13 @@ type ImportPanelProps = Parameters<typeof ImportPanelBody>[0];
 /**
  * The file, and the device's engine merged with it when the merge is offered: each computed as the board would
  * (A25.b). The merge is checked here because it is the one choice that writes the file into someone's own engine.
+ * Only a device's engine that draws can accuse a file: one that does not (stored before A25.b, a month in its past)
+ * would refuse every file, « Remplacer » by its own saved copy — the repair — included.
  */
 function drawnWith(file: EngineState, device: EngineState | null, drawable: (state: EngineState) => boolean): boolean {
   try {
     if (!drawable(file)) return false;
-    if (!device || mergeRefusal(device, file) !== null) return true;
+    if (!device || mergeRefusal(device, file) !== null || !drawable(device)) return true;
     const merged = mergeEngines(device, file);
     return merged.kind !== "ok" || drawable(merged.state);
   } catch {

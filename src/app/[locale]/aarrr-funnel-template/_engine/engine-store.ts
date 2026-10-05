@@ -107,6 +107,7 @@ export function commit(state: EngineState, options: { fresh?: boolean; overUnrea
   // engine has not filled keys its draft `id@new` too, and would come back
   // pre-filled with the other company's figures.
   if (options.fresh || options.overUnreadable) dropAllDrafts();
+  retries = 0;
   const current = getClientSnapshot();
   if (options.probation) probation = { copy: deviceCopy(), before: current };
   snapshot = { ...current, result: { kind: "ok", state }, returningFrom: options.fresh ? null : current.returningFrom, undrawn: null };
@@ -135,6 +136,7 @@ function relist(): void {
 export function switchEngine(id: string): CommitResult {
   const result = setActiveEngine(id);
   if (!result.ok) return result;
+  retries = 0;
   dropAllDrafts();
   reload();
   return result;
@@ -148,6 +150,7 @@ export function switchEngine(id: string): CommitResult {
 export function removeEngine(id: string): CommitResult {
   const result = deleteEngine(id);
   if (!result.ok) return result;
+  retries = 0;
   dropAllDrafts();
   reload();
   return result;
@@ -174,8 +177,9 @@ let retries = 0;
 let fileRefused = false;
 
 /**
- * Fall-backs that are not an import's, per page load: past them, the error goes to the page's boundary. An error
- * raised once a screen has committed (an effect, a timer) would otherwise loop — fall back, draw, throw again.
+ * Fall-backs that are not an import's, since the person last acted (a write, a switch, a deletion, « Tout effacer »):
+ * past them, the error goes to the page's boundary. An error raised once a screen has committed (an effect, a timer)
+ * would otherwise loop — fall back, draw, throw again — and no effect of the island writes, so no loop resets it.
  */
 const MAX_RETRIES = 3;
 
@@ -196,8 +200,8 @@ export function drawn(board: boolean): void {
  * 1. An import the board has not drawn yet: the device is put back as it
  *    was before the click (`restoreDevice`), the screen too, and the import
  *    screen says the file is refused (`refusedFilePending`). Should the
- *    device refuse to be put back, it still holds the file: the screen says
- *    so, as 3. does.
+ *    device refuse to be put back, it still holds the file: the « illisible »
+ *    screen says so, and offers the engine held before, from memory.
  * 2. Otherwise, once more, from the board: the screen that threw may not be
  *    the board, and the board may draw.
  * 3. The board threw again: the engine on screen is shown as unreadable, on
@@ -214,7 +218,11 @@ export function fallBack(): boolean {
       notify();
       return true;
     }
-    return showUnreadable();
+    // The device would not be put back: it still holds the file. The engine it held before — the one « Remplacer »
+    // wrote over — is offered from memory on the « illisible » screen, the one copy of it left.
+    snapshot = { ...getClientSnapshot(), result: { kind: "unreadable" }, undrawn: before.result.kind === "ok" ? before.result.state : null };
+    notify();
+    return true;
   }
   if (retries >= MAX_RETRIES) return false;
   retries += 1;
@@ -244,6 +252,7 @@ export function clearRefusedFile(): void {
 
 /** "Erase everything": the device and the screen, together. */
 export function erase(): void {
+  retries = 0;
   clearEngine();
   dropAllDrafts();
   const current = getClientSnapshot();

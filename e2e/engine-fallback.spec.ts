@@ -148,6 +148,43 @@ test("a file whose merge into the device's engine throws is refused as it is rea
   expect(await engineItems(page)).toEqual(before);
 });
 
+test("a device whose own engine does not draw a past month still takes a good file: « Remplacer » by a saved copy repairs it", async ({ page }) => {
+  // Stored before A25.b: a May the board's first drawing does not read. It must not get every file refused.
+  const device = withJuly(exampleState());
+  const may: Snapshot = { ...structuredClone(device.snapshots[0]!), id: "may", referenceMonth: "2026-05", cohortMonth: "2026-04", closedAt: "2026-06-01T00:00:00.000Z" };
+  may.metrics["act.rate"] = POISON;
+  await seedOnce(page, { ...device, snapshots: [may, ...device.snapshots] });
+  await page.goto("/en/aarrr-funnel-template");
+  await expect(page.getByTestId("engine-board")).toBeVisible();
+
+  const saved = withJuly(exampleState());
+  await importBeside(page, saved);
+  await expect(page.getByTestId("engine-import-preview")).toBeVisible();
+  await page.getByRole("radio", { name: /^Replace/ }).check();
+  await page.getByTestId("engine-import-open").click();
+  await expect(page.getByTestId("engine-board")).toBeVisible();
+  const stored = await engineItems(page);
+  const entry = Object.entries(stored).find(([key]) => key.startsWith("tdg.engine.v3."))![1]!;
+  expect((JSON.parse(entry) as { state: EngineState }).state.snapshots.map((s) => s.referenceMonth)).toEqual(["2026-07", "2026-08"]);
+});
+
+test("a file with more months than an engine holds is refused as it is read: never written by a build, and no bound to its cost", async ({ page }) => {
+  const file = exampleState();
+  const august = file.snapshots[0]!;
+  // Thirty-seven months, August 2023 to August 2026, each closed but the last: one more than `MAX_MONTHS`.
+  const months: Snapshot[] = Array.from({ length: 37 }, (_, i) => {
+    const date = new Date(Date.UTC(2023, 7 + i, 1));
+    const month = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
+    const next = new Date(Date.UTC(2023, 8 + i, 1)).toISOString();
+    return { ...structuredClone(august), id: `m${i}`, referenceMonth: month, cohortMonth: month, ...(i < 36 ? { closedAt: next } : {}) };
+  });
+  await page.goto("/en/aarrr-funnel-template");
+  await page.getByTestId("engine-start-import").click();
+  await page.getByTestId("engine-import-file").setInputFiles(asFile({ ...file, snapshots: months }));
+  await expectRefused(page, "en");
+  expect(await engineItems(page)).toEqual({});
+});
+
 test("an engine stored with a number the board cannot draw opens on the « illisible » screen, in both languages, and the device keeps it", async ({ page }) => {
   await seedOnce(page, poisoned());
   await page.goto("/fr/aarrr-funnel-template");

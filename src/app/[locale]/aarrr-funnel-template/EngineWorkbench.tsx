@@ -7,7 +7,7 @@ import { EngineStart, type StartMotion } from "@/components/engine/EngineStart";
 import { EngineTermScope } from "./_engine/EngineTerm";
 import { motionOfMetric, motionShapes, shapeOf } from "@/lib/engine/catalog-shape";
 import { mergeStrings, type DeepPartial, type EngineStrings, type ResolvedBridge, type ResolvedDerived, type ResolvedMetric } from "@/lib/engine/strings";
-import { MAX_ENGINES, type BusinessType, type EngineCalcContext, type EngineDerived, type EngineSetup, type EngineState, type LeverId, type MetricEntry, type MetricId, type Motion, type MotionDerived, type RoleId, type SlideTitle, type Snapshot, type YearMonth } from "@/lib/engine/types";
+import { MAX_ENGINES, MAX_MONTHS, type BusinessType, type EngineCalcContext, type EngineDerived, type EngineSetup, type EngineState, type LeverId, type MetricEntry, type MetricId, type Motion, type MotionDerived, type RoleId, type SlideTitle, type Snapshot, type YearMonth } from "@/lib/engine/types";
 import type { Locale } from "@/lib/i18n/locale";
 import { Board } from "./_engine/Board";
 import type { SeriesControls } from "./_engine/BoardHead";
@@ -257,6 +257,8 @@ function Workbench(props: EngineWorkbenchProps) {
    * merged into the past would otherwise be kept, and throw the day someone opens it.
    */
   function drawable(candidate: EngineState): boolean {
+    // More months than an engine ever holds (§19.2): never written by a build, and a cost with no bound to compute.
+    if (candidate.snapshots.length > MAX_MONTHS) return false;
     const type = candidate.setup.type;
     const input = { today: new Date(openedAt ?? Date.now()), locale, tourResults: tourResults ?? [], bridges, strings: stringsFor(type), metrics: metricsFor(props, type), derivedCopy: derivedFor(props, type) };
     try {

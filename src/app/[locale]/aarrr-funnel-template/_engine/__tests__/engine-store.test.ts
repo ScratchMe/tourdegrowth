@@ -16,14 +16,17 @@ import { ENGINE_ENTRY_PREFIX, ENGINE_INDEX_KEY, ENGINE_SCHEMA_VERSION, LEGACY_ST
  *
  * Non-vacuity, measured on 2026-10-05 on the final version, one sabotage at
  * a time in `engine-store.ts` or `storage.ts`, then restored (failing tests
- * in brackets): no second chance from the board (6); no cap on the
- * fall-backs (1: « gives up past three »); `drawn` not counting afresh (3);
+ * in brackets): no second chance from the board (7); no cap on the
+ * fall-backs (1: « gives up past three »); the budget kept spent past a
+ * switch (1: « gives the budget back »); `drawn` not counting afresh (4);
  * `drawn(true)` leaving the probation (1: « a file the board has drawn is
  * kept »); any screen ending it (1: « a screen other than the board »); the
  * device copy not put back (6); its result ignored (1: « a device that
- * refuses »); the screen not put back (5); the import screen not told (4);
- * the probation never taken (7); the undrawn engine not kept (2), or kept
- * past a switch (1); the copy not limited to the engine's items (1).
+ * refuses »); a failed restore offering the file rather than the engine held
+ * before (1: the same); the screen not put back (5); the import screen not
+ * told (4); the probation never taken (7); the undrawn engine not kept (1),
+ * or kept past a switch (1); the copy not limited to the engine's items (1);
+ * a restore rewriting items already as they were (1: « no false failure »).
  */
 
 type FakeStore = Storage & { map: Map<string, string> };
@@ -114,6 +117,20 @@ describe("a render that throws on the engine on screen", () => {
     expect(island.fallBack()).toBe(false);
   });
 
+  it("gives the budget back once the person acts: opening a second engine that throws still ends on « illisible »", () => {
+    seed(fullState(), other("b"));
+    island.fallBack();
+    island.fallBack();
+    island.drawn(false);
+    island.fallBack();
+    island.drawn(false);
+    // Spent; then « Ouvrir » on the other engine, a person's action, and it throws in its turn.
+    island.switchEngine("b");
+    expect(island.fallBack()).toBe(true);
+    expect(island.fallBack()).toBe(true);
+    expect(island.getClientSnapshot().result).toEqual({ kind: "unreadable" });
+  });
+
   it("keeps the engine it could not draw, for the « illisible » screen's file and the device's other engines", () => {
     seed(fullState(), other("b"));
     island.fallBack();
@@ -185,7 +202,7 @@ describe("a file on probation", () => {
     expect(items()).toEqual(stored);
   });
 
-  it("a device that refuses to be put back still holds the file: the screen says so, rather than show what is gone", () => {
+  it("a device that refuses to be put back still holds the file: the screen says so, and offers the engine held before", () => {
     seed(fullState());
     island.commit({ ...other("x"), id: fullState().id }, { fresh: true, probation: true });
     const setItem = store.setItem;
@@ -198,7 +215,8 @@ describe("a file on probation", () => {
       store.setItem = setItem;
     }
     expect(island.getClientSnapshot().result).toEqual({ kind: "unreadable" });
-    expect(island.getClientSnapshot().undrawn?.setup.companyLabel).toBe("Other x");
+    // The engine « Remplacer » wrote over: no longer on the device, its one copy left is this one, to save.
+    expect(island.getClientSnapshot().undrawn).toEqual(fullState());
     expect(island.refusedFilePending()).toBe(false);
   });
 
@@ -227,5 +245,14 @@ describe("the device copy", () => {
     expect(restoreDevice(copy)).toEqual({ ok: true });
 
     expect(items()).toEqual({ ...copy, "tdg.results.v1": "the Tour, written since" });
+  });
+
+  it("puts back a device that refuses writes when nothing it holds has changed: no false failure", () => {
+    seed(fullState());
+    const copy = deviceCopy()!;
+    store.setItem = () => {
+      throw new Error("storage refused");
+    };
+    expect(restoreDevice(copy)).toEqual({ ok: true });
   });
 });
