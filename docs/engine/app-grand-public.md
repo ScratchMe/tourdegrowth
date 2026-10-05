@@ -1416,14 +1416,21 @@ rendre argent ? { gap: sub.gap, mrr: argent } : sub.gap ? { gap: sub.gap } : {}
   `app.rev.install-value`, même règle) ; `streams`, depuis `kpis` et
   `kpis.app` d'aujourd'hui, par la règle de `total.ts` (une part connue, ou
   incalculable avec ce qui lui manque ; un total seulement si toutes ses parts
-  cochées sont connues, S9). Parts : `now` (le point 0 de chaque courbe ;
+  cochées sont connues, S9). Parts : `now` (le revenu du mois de chaque
+  flux : le MRR des abonnements, et pour l'usage `usageToday` de §21.5.3,
+  point 5 ; c'est le point 0 de chaque courbe quand les installations du mois
+  sont connues, et le total reste égal à `kpis.mrr` quand elles manquent ;
   confiance `solid` pour les abonnements si `mrrEnd` est saisi, pour l'usage si
   `appActives` est saisi et chaque revenu par actif coché saisi en comptes ;
   `approximate` sinon) ; `newPerMonth` (`newSubscriptions`, `newUsage`) et
-  `in12Months` (le point 12) toujours `approximate`. Manques : abonnements
-  `["rev.arpa"]`, `["rev.arpa", "rev.paid-conversion"]`, `["rev.arpa",
-  "rev.paid-conversion", "ret.logo-churn"]` ; usage : les revenus par actif
-  cochés, puis `ret.d30`, puis `app.ret.active-retention`.
+  `in12Months` (le point 12) toujours `approximate`. Manques, par niveaux
+  cumulés, une liste par part (`now`, `newPerMonth`, `in12Months`) :
+  abonnements `["rev.arpa"]`, `["rev.arpa", "rev.paid-conversion"]`,
+  `["rev.arpa", "rev.paid-conversion", "ret.logo-churn"]` ; usage les revenus
+  par actif cochés, puis `+ ret.d30`, puis `+ app.ret.active-retention`.
+  Un chiffre incalculable dont toutes les entrées sont connues (le
+  remboursement d'une installation qui ne se rembourse jamais : l'app sans
+  abonnements de §21.9.2) a `missing: []`. *Précisé après APP-6 (#363)*.
 - **`peloton.ts#buildPeloton`** : les colonnes sont celles de
   `PELOTON_METRICS` **montrées** par `shapesOf(setup)` (deux pour une app sans
   abonnements) ; `chainOf` porte sur elles. Le commentaire « always 3 »
@@ -1447,7 +1454,10 @@ rendre argent ? { gap: sub.gap, mrr: argent } : sub.gap ? { gap: sub.gap } : {}
   - `sanity.ts#selfServeChecks` ne lance un contrôle que si tous les ids
     qu'il lit sont dans `shapesOf(setup)` (sans abonnements,
     `paid-gt-retained` et le `churn-high` de `ret.logo-churn` ne partent
-    plus, même si leurs chiffres restent stockés) ;
+    plus, même si leurs chiffres restent stockés). **Sauf
+    `cohort-mismatch`**, qui compare les colonnes du peloton : il compare
+    les colonnes montrées et ne nomme qu'elles, comme le peloton qui n'en a
+    que deux sans abonnements (précisé après APP-6) ;
   - `peloton.ts#cohortIsSmall(snapshot, setup?)` gagne un second paramètre
     facultatif : avec une app, il ne regarde que les ids de `COHORT_SIZED`
     montrés par `shapesOf(setup)`. Ses deux appelants le lui passent
@@ -1709,9 +1719,14 @@ qui change pour une app :
   `payback`, `value12`) inconnue d'une app dont `activesMissing` est vrai dit
   « il manque » suivi de ses entrées manquantes **puis**
   `io.sharedCount.appActives` (« les actifs du mois »), joints par `joinList`
-  ; sans entrée manquante, les actifs seuls. Une fonction de
+  ; sans entrée manquante, les actifs seuls. **Sans entrée manquante ni
+  actifs manquants** (un `uncomputable` à `missing: []`, le remboursement
+  d'une installation qui ne se rembourse jamais : §21.5.5), elle n'écrit
+  jamais « il manque » sur une liste vide : elle rend `unknownStep`, comme
+  le SaaS (`scenario-view.ts:183`), et le bloc de l'argent n'écrit rien pour
+  une perte (plus bas). Une fonction de
   `scenario-view.ts`, `appMissingPhrase(absent, activesMissing, strings,
-  metrics)`, le fait pour les quatre. Les actifs se saisissent dans les
+  metrics)`, le fait pour les quatre (relevé par APP-6). Les actifs se saisissent dans les
   Réglages (§21.6.2), même quand un seul chiffre les porte.
 - **Les types** : `MoneyKpisWithBase` (`money-view.ts:43`) et `Kpis`
   (`whatif-figures.ts:62`) gagnent `app?: AppKpis`.
@@ -3082,7 +3097,9 @@ relire" src/`), puis l'ouverture par Antoine.
     "consumer-app"`, qui fait lire à `sweep()` les props de l'app
     (`strings: mergeStrings(p.strings, p.typeStrings["consumer-app"])`,
     `metrics: p.typeCatalogs["consumer-app"].metrics`, `derived:
-    p.typeCatalogs["consumer-app"].derived`), et `deck?: false`, qui lui
+    p.typeCatalogs["consumer-app"].derived`, et la requête de `buildRequest`
+    sur `shapesOf(state.setup)` au lieu de `METRIC_SHAPES`, que le catalogue
+    de l'app ne résout pas : `acq.cac`), et `deck?: false`, qui lui
     fait sauter `buildDeck` et `deckMarkdown` (le deck d'une app casserait
     avant APP-9 : `deck.ts:476` et `pelotonTitle`) ; les trois scénarios de
     l'app portent `deck: false`, qu'APP-9 retire. Le test « fires every
