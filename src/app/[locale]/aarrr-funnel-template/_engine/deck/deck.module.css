@@ -1204,8 +1204,10 @@
   color: var(--text-muted);
 }
 
-/* The long-payback warning: the advice's dashed edge (CashWarning), at the slide's scale. */
-.unitWarning {
+/* The long-payback warning: the advice's dashed edge (CashWarning), at the slide's scale.
+   Qualified by the slide: a bare class ties with CashWarning's `.root` in another module, and the winner
+   then depends on the order the build emits the two sheets. */
+[data-slide] .unitWarning {
   max-width: none;
   padding-left: 20px;
   font: var(--slide-body-xs);
