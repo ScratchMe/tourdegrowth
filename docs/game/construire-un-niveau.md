@@ -451,6 +451,24 @@ cellule et la courbe de décembre (`game-dash-metric`, `game-chart-metric`…),
 pas les lignes d'effet qui disent « +{pct} % » ; et les cases du P5 et leurs
 textes attendus sont ceux de la spécification, pas ceux du niveau 2.
 
+**Ce que REF-4 a dû deviner, et qui vaut pour REV-4** (2026-10-05) :
+- **Le tampon d'une sanction** (`news.stamps.fine`) ne se lit que sur l'écran
+  des nouvelles (`EventClipping`). La spec lance le trimestre, feuillette les
+  cartes (marche bornée) jusqu'au tampon, le lit, ferme avec Échap et retrouve
+  le bilan.
+- **« Le premier chiffre du bilan »** est la première figure de
+  `[class*='__figures'] > div`, et sa valeur se lit dans
+  `[class*='__figureValue']`.
+- **Les graduations de la courbe** se lisent dans `[class$='__tick']`, qui
+  exclut les copies `__tickSizer`. Un `not.toContainText` sur plusieurs
+  éléments échoue en mode strict : il se pose sur le cadre entier.
+- **« Jamais « % » ni « pt »** se teste avec `/%|\bpts?\b/`, sans quoi
+  « sept. » de la frise compte comme « pt ».
+- **Une case du P5 de plus que de cartes par trimestre** : décocher, vérifier
+  que l'écran est revenu à son état de départ, puis cocher la suivante.
+- **Une forme anglaise donnée entre parenthèses** dans un premier écran
+  français se lit dans un second P1, en anglais.
+
 ### T5 — Ce qui n'est pas à l'agent
 
 - **La re-synchro avec Claude Design** (les composants neufs et changés) :
