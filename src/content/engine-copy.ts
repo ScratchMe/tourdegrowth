@@ -3102,6 +3102,8 @@ export const ENGINE_COPY = {
       fr: "Les données enregistrées sur cet appareil sont illisibles. Reprends depuis un fichier sauvegardé.",
       en: "The data saved on this device can't be read. Start again from a saved file.",
     },
+    // TODO: à relire (convention 6) — neuf le 2026-10-05 (A25.b) : au-dessus des autres moteurs de l'appareil, sur l'écran « illisible ».
+    others: { fr: "Les autres moteurs de cet appareil :", en: "The other engines on this device:" },
   },
   // TODO: à relire (convention 6) — neuf le 2026-10-01 (A14 T5, §19.1.5) : plusieurs moteurs sur un appareil. `{name}` : le nom de l'entreprise, sinon `unnamed`.
   engines: {
