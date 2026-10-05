@@ -42,6 +42,7 @@ export interface IslandSide<C> {
 /** The copy each playable level hands its island: its whole copy but the footer, which the page renders. */
 export interface IslandCopies {
   acquisition: Omit<AcquisitionCopy, "footer">;
+  activation: Omit<ActivationCopy, "footer">;
   retention: Omit<RetentionCopy, "footer">;
 }
 
@@ -143,7 +144,7 @@ export function cookieSentence(copy: ActivationSideCopy, r: ReturnType<typeof co
   return r.alert ? `${copy.cookies.hidden} · ${copy.cookies.lawSuffix}` : copy.cookies.easy;
 }
 
-/** Quandi's phone and its cookie pill (GAME-BRIEF §18.7). Not in `ISLAND_SIDES` until the level is wired (ACT-3). */
+/** Quandi's phone and its cookie pill (GAME-BRIEF §18.7). */
 export const ACTIVATION_SIDE: IslandSide<ActivationSideCopy> = {
   render: ({ ids, copy }) => {
     const r = cookieRefusal(ids);
@@ -168,5 +169,6 @@ export const ACTIVATION_SIDE: IslandSide<ActivationSideCopy> = {
 /** Each playable level's side, keyed by its slug: a level added to `LevelSlug` does not compile without one. */
 export const ISLAND_SIDES: { [S in LevelSlug]: IslandSide<IslandCopies[S]> } = {
   acquisition: ACQUISITION_SIDE,
+  activation: ACTIVATION_SIDE,
   retention: RETENTION_SIDE,
 };

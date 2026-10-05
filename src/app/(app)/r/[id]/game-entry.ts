@@ -5,6 +5,7 @@ import { GAME_ENTRY_EVENT, type GameEntryDetail } from "@/lib/game/events";
 import { metricFormat } from "@/lib/game/format";
 import { gameEntriesFor, GAME_LEVELS_BY_PILLAR, type BottleneckLike, type GameLevelTable } from "@/lib/game/levels";
 import { ACQUISITION_LEVEL } from "@/lib/game/levels/acquisition";
+import { ACTIVATION_LEVEL } from "@/lib/game/levels/activation";
 import { RETENTION_LEVEL } from "@/lib/game/levels/retention";
 import type { LevelDefinition, LevelSlug } from "@/lib/game/types";
 import type { Locale } from "@/lib/i18n/locale";
@@ -34,6 +35,7 @@ import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
  */
 const LEVEL_MODELS: Record<LevelSlug, Pick<LevelDefinition<string>, "constants" | "display">> = {
   acquisition: ACQUISITION_LEVEL,
+  activation: ACTIVATION_LEVEL,
   retention: RETENTION_LEVEL,
 };
 

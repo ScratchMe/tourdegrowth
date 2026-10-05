@@ -58,6 +58,7 @@ const PAGES: [name: string, path: string][] = [
   ["game hub (fr)", "/fr/game"],
   ["game level", "/en/game/retention"],
   ["game level 2 (fr)", "/fr/game/acquisition"],
+  ["game level 3 (en)", "/en/game/activation"],
 ];
 
 interface ContrastData {

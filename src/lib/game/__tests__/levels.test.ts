@@ -17,13 +17,14 @@ const RETENTION_ONLY: GameLevelTable = { retention: { slug: "retention", enabled
 const LEVEL = board({ acquisition: 16, activation: 16, retention: 20, referral: 16, revenue: 20 });
 
 describe("GAME_LEVELS_BY_PILLAR (GAME-BRIEF.md 13.4)", () => {
-  it("ships with two levels, acquisition and retention, enabled, in AARRR order", () => {
+  it("ships with three levels, acquisition, activation and retention, enabled, in AARRR order", () => {
     expect(GAME_LEVELS_BY_PILLAR).toEqual({
       acquisition: { slug: "acquisition", enabled: true },
+      activation: { slug: "activation", enabled: true },
       retention: { slug: "retention", enabled: true },
     });
     // The sitemap, /llms.txt and the hub's image list the levels in this order.
-    expect(enabledLevelSlugs()).toEqual(["acquisition", "retention"]);
+    expect(enabledLevelSlugs()).toEqual(["acquisition", "activation", "retention"]);
   });
 
   it("an enabled: false level is not playable", () => {
@@ -47,9 +48,16 @@ describe("gameEntriesFor", () => {
     expect(gameEntriesFor({ bottleneck: ACQUISITION_CLEAR, access: "open" })).toEqual([{ pillar: "acquisition", slug: "acquisition" }]);
   });
 
+  it("offers the activation level when activation is the clear bottleneck (level 3, A24 ACT-3)", () => {
+    expect(ACTIVATION_CLEAR.sharpness).toBe("clear");
+    expect(gameEntriesFor({ bottleneck: ACTIVATION_CLEAR, access: "open" })).toEqual([{ pillar: "activation", slug: "activation" }]);
+  });
+
+  // An explicit table, not the real one: a stage with no level is, level by
+  // level, a moving target (activation had none until A24 ACT-3).
   it("offers nothing for a pillar with no level", () => {
     expect(ACTIVATION_CLEAR.sharpness).toBe("clear");
-    expect(gameEntriesFor({ bottleneck: ACTIVATION_CLEAR, access: "open" })).toEqual([]);
+    expect(gameEntriesFor({ bottleneck: ACTIVATION_CLEAR, access: "open", levels: RETENTION_ONLY })).toEqual([]);
   });
 
   it("offers nothing on a level board — no stage is named, so no stage is sold", () => {
@@ -83,7 +91,7 @@ describe("gameEntriesFor, shared bottleneck (X16)", () => {
     const shared = board({ acquisition: 16, activation: 5, retention: 16, referral: 7, revenue: 20 });
     expect(shared.sharpness).toBe("shared");
     expect(shared.pillars.map((p) => p.pillar)).toEqual(["activation", "referral"]);
-    expect(gameEntriesFor({ bottleneck: shared, access: "open" })).toEqual([]);
+    expect(gameEntriesFor({ bottleneck: shared, access: "open", levels: RETENTION_ONLY })).toEqual([]);
   });
 
   // C30 Q5 (Antoine, 2026-10-01): every stage of the group that has a level,
@@ -111,7 +119,7 @@ describe("gameEntriesFor, shared bottleneck (X16)", () => {
 // The block that closes December (C31, then C75, A24.T0): the first open level
 // the player has not finished, in the Tour's order, wrapping round.
 describe("nextLevelFor (C75)", () => {
-  /** `LevelSlug` names two levels until the first X-3: the five-level tables are declared on the model slugs. */
+  /** `LevelSlug` names three levels until the next X-3: the five-level tables are declared on the model slugs. */
   type FiveLevels = Partial<Record<Pillar, { slug: ModelSlug; enabled: boolean }>>;
   const open = (slug: ModelSlug) => ({ slug, enabled: true });
   const FIVE: FiveLevels = {
@@ -124,10 +132,21 @@ describe("nextLevelFor (C75)", () => {
   const done = (...slugs: ModelSlug[]): ReadonlySet<string> => new Set(slugs);
 
   it("with two levels open, each one points at the other, finished or not (C31 holds)", () => {
+    const two: FiveLevels = { acquisition: open("acquisition"), retention: open("retention") };
     for (const finished of [done(), done("acquisition"), done("retention"), done("acquisition", "retention")]) {
-      expect(nextLevelFor("acquisition", finished, GAME_LEVELS_BY_PILLAR)).toBe("retention");
-      expect(nextLevelFor("retention", finished, GAME_LEVELS_BY_PILLAR)).toBe("acquisition");
+      expect(nextLevelFor("acquisition", finished, two)).toBe("retention");
+      expect(nextLevelFor("retention", finished, two)).toBe("acquisition");
     }
+  });
+
+  it("with the three levels the game ships (A24 ACT-3): the next in the Tour's order, then the one not finished", () => {
+    expect(nextLevelFor("acquisition", done(), GAME_LEVELS_BY_PILLAR)).toBe("activation");
+    expect(nextLevelFor("activation", done(), GAME_LEVELS_BY_PILLAR)).toBe("retention");
+    expect(nextLevelFor("retention", done(), GAME_LEVELS_BY_PILLAR)).toBe("acquisition");
+    // Activation finished: acquisition leads on to retention, never back to it.
+    expect(nextLevelFor("acquisition", done("activation"), GAME_LEVELS_BY_PILLAR)).toBe("retention");
+    // Everything else finished: the next one in the order, as with five.
+    expect(nextLevelFor("acquisition", done("activation", "retention"), GAME_LEVELS_BY_PILLAR)).toBe("activation");
   });
 
   it("with five levels open and nothing finished, the next one in the Tour's order, wrapping round", () => {

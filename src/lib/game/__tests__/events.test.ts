@@ -26,10 +26,12 @@ describe("game analytics vocabulary (plan §3.8)", () => {
     }
   });
 
-  it("has the four entry doors the brief names (G7's source list), level 2's result doors, then the landing strip's and the band's (A7.9), then the compact header's race (extension 08)", () => {
+  it("has the four entry doors the brief names (G7's source list), level 2's and level 3's result doors, then the landing strip's and the band's (A7.9), then the compact header's race (extension 08)", () => {
     expect(GAME_ENTRY_DETAILS.map((d) => `${GAME_ENTRY_EVENT}/${d}`)).toEqual([
       "game_entry_clicked/result/acquisition",
       "game_entry_clicked/deep_dive/acquisition",
+      "game_entry_clicked/result/activation",
+      "game_entry_clicked/deep_dive/activation",
       "game_entry_clicked/result/retention",
       "game_entry_clicked/deep_dive/retention",
       "game_entry_clicked/footer",
@@ -43,7 +45,7 @@ describe("game analytics vocabulary (plan §3.8)", () => {
   it("includes the resume answer (orchestrator decision 5) and every start origin", () => {
     const paths = gameEventPaths();
     expect(paths).toEqual(expect.arrayContaining(["game_resume/resume", "game_resume/restart"]));
-    for (const slug of ["acquisition", "retention"]) {
+    for (const slug of ["acquisition", "activation", "retention"]) {
       for (const from of GAME_START_FROM) expect(paths).toContain(`game_started/${slug}/${from}`);
     }
     // The link one level's page makes to the other (C31, A12.f).
@@ -54,6 +56,7 @@ describe("game analytics vocabulary (plan §3.8)", () => {
     const paths = gameEventPaths();
     for (const ending of GAME_ENDINGS) {
       expect(paths).toContain(`game_ending/acquisition/${ending}`);
+      expect(paths).toContain(`game_ending/activation/${ending}`);
       expect(paths).toContain(`game_ending/retention/${ending}`);
       expect(paths).not.toContain(`game_ending/${ending}`);
     }
