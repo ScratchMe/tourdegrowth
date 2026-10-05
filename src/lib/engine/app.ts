@@ -181,7 +181,10 @@ export function buildAppScenario(state: EngineState, targets: Partial<Record<Lev
     const usage = usageTicked ? usagePath(inputs.actives, newActives, retention, perToday, per) : null;
 
     const mrrPath = appRevenuePath(m, b.kpis.mrrPath, usage);
-    const mrr = appRevenueToday(m, base.today.kpis.mrr, usage?.[0] ?? null);
+    // The month's revenue is the actives × what one brings: it needs no installs (the curve and the new revenue do),
+    // as the SaaS's MRR needs no sign-ups. With the installs known this is `usage[0]`, bit for bit.
+    const usageToday = inputs.actives && perToday ? mul(inputs.actives, perToday) : null;
+    const mrr = appRevenueToday(m, base.today.kpis.mrr, usageToday);
     const newUsage = newActives && per ? mul(newActives, per) : null;
     const newMrr = appRevenueToday(m, b.kpis.newMrr, newUsage);
     const mrr12 = mrrPath?.[12] ?? null;

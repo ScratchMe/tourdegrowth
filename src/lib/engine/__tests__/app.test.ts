@@ -24,7 +24,7 @@ import { CTX_FR } from "./props";
  * - the loss read over 12 months instead of 36 (D10): « paid back in 13,01 months » falls (1); the 36-month value
  *   counted over 12 falls five;
  * - the usage curve started from the what-if's revenue per active instead of today's: the per-active case falls (1);
- *   the month's revenue without the usage stream's first point falls five;
+ *   the month's revenue without the usage stream falls seven (five, and the two cases of a month with no installs typed);
  * - a lever's step: the cent dropped falls two, the commission as a higher-is-better lever one, the revenues per
  *   active as plain rates two;
  * - a usage-only app keeping every self-serve rule falls two, an app with subscriptions keeping the CAC's rule one;
@@ -34,7 +34,11 @@ import { CTX_FR } from "./props";
  *   subscriptions-only app one;
  * - NRR and GRR shown without subscriptions falls one; the first month's margin without its usage part, two; the
  *   payback read without the actives' retention, six; an install's day-30 share read from today's input instead of
- *   the funnel, two; the spend following the projected cost, one.
+ *   the funnel, two; the spend following the projected cost, one;
+ * - the month's revenue read from the usage curve's first point (`usage?.[0] ?? null`, the first text of §21.5.3 point 5)
+ *   instead of the actives × what one brings, with no installs typed: the app with its three streams and the one without
+ *   subscriptions fall (2); this file, `business-type.test.ts`, `scenario.test.ts` and the two goldens run, the rest stays
+ *   green (measured on the relaunch of the same day, after Antoine's decision).
  */
 
 const r2 = (v: number) => Math.round(v * 100) / 100;
@@ -375,10 +379,10 @@ describe("a cost per install that may be too high to be paid back (§21.5.3 poin
   });
 });
 
-describe("a month whose installs are not typed (§21.5.3 points 3 and 7)", () => {
+describe("a month whose installs are not typed (§21.5.3 points 3, 5 and 7)", () => {
   /** The install rate as a bare 30 % (no counts), the channel's share and the cost per install without them: no count of installs anywhere. */
-  function noInstalls() {
-    let state = consumerState();
+  function noInstalls(from = consumerState()) {
+    let state = from;
     state = withEntry(state, "acq.signup-rate", estimated(30, 30));
     state = withEntry(state, "acq.top-channel-share", undefined);
     state = withEntry(state, "app.acq.cpi", { status: "measured", value: { kind: "amount", amount: 1.5 }, source: { kind: "person", role: "finance" }, updatedAt: "2026-09-20T10:00:00.000Z" });
@@ -386,15 +390,29 @@ describe("a month whose installs are not typed (§21.5.3 points 3 and 7)", () =>
     return state;
   }
 
-  it("reads the funnel on 100 installs, and cannot count the new actives: no usage stream, no month's revenue", () => {
+  it("reads the funnel on 100 installs and cannot count the new actives, yet knows the month's revenue: no usage curve, no new revenue, no revenue in twelve months", () => {
     const { today } = buildAppScenario(noInstalls(), {}, CTX_FR);
     expect(today.funnel.perHundred).toBe(true);
     expect(today.kpis.app!.usagePath).toBeNull();
-    expect(today.kpis.mrr).toBeNull();
+    // The month's revenue is the actives × what one brings (+ the subscriptions' MRR): it needs no installs (2026-10-05).
+    expect(only(today.kpis.mrr)).toBeCloseTo(39_300, 6);
+    expect(today.kpis.newMrr).toBeNull();
+    expect(today.kpis.mrr12).toBeNull();
+    expect(today.kpis.mrrPath).toBeNull();
     expect(today.kpis.spend).toBeNull();
     // An install's economics read rates, not counts: they stay.
     expect(r4(only(today.kpis.ltv))).toBe(2.1809);
     expect(only(today.kpis.cac)).toBeCloseTo(1.5, 9);
+  });
+
+  it("knows the month's revenue of an app without subscriptions too: 15 000 actives × 0,70 € = 10 500 €, and nothing after it", () => {
+    const { today } = buildAppScenario(noInstalls(consumerUsageOnlyState()), {}, CTX_FR);
+    expect(today.funnel.perHundred).toBe(true);
+    expect(only(today.kpis.mrr)).toBeCloseTo(10_500, 6);
+    expect(today.kpis.app!.usagePath).toBeNull();
+    expect(today.kpis.newMrr).toBeNull();
+    expect(today.kpis.mrr12).toBeNull();
+    expect(today.kpis.mrrPath).toBeNull();
   });
 
   it("still lowers the cost per install with the installs the funnel adds: 100 on 100 keeps the ratio right", () => {
