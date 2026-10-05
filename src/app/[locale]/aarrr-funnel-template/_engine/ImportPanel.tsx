@@ -4,13 +4,14 @@ import { useId, useState } from "react";
 import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
 import { Choices } from "@/components/core/Choices";
-import { shapeOf } from "@/lib/engine/catalog-shape";
+import { METRIC_SHAPES, shapeOf, shapesOf } from "@/lib/engine/catalog-shape";
 import { formatInterval, formatNumber } from "@/lib/engine/format";
 import { mergeEngines, mergeRefusal, type MergeChange } from "@/lib/engine/merge";
 import type { EngineStrings, ResolvedMetric } from "@/lib/engine/strings";
 import { MAX_ENGINES, MAX_MONTHS, type EngineCalcContext, type EngineState, type Motion, type Snapshot } from "@/lib/engine/types";
 import { coverage, motionCoverage } from "@/lib/engine/coverage";
 import { parseEngineFile } from "@/lib/engine/io";
+import { isApp } from "@/lib/engine/setup-type";
 import { displayInterval, entryText } from "./display";
 import { fill, formatDate, formatMonth, metricById } from "./text";
 import { Field } from "@/components/core/Field";
@@ -75,7 +76,8 @@ export function ImportPanel({
 
   const state = parsed?.state ?? null;
   const snapshot = state?.snapshots[state.snapshots.length - 1];
-  const cov = snapshot ? coverage(snapshot) : null;
+  // « n sur 17 » counts the self-serve list; an app counts what its setup shows (§21.5.5).
+  const cov = snapshot ? coverage(snapshot, state && isApp(state.setup) ? shapesOf(state.setup) : METRIC_SHAPES) : null;
   const refusal = state && device ? mergeRefusal(device.state, state) : null;
   // « Ajouter » by default (§19.7): the choice that loses nothing; then the merge, which only adds; never « Remplacer » unasked.
   const choice: ImportChoice | null = picked ?? (device?.canAdd ? "add" : refusal === null ? "merge" : null);

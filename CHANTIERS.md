@@ -420,7 +420,7 @@ APP-6, APP-9 et APP-11.
 | APP-3 | le calque de copie | APP-2 | **Livré le 2026-10-05** ([#355](https://github.com/ScratchMe/tourdegrowth/pull/355)) |
 | APP-4 | le scénario de l'app et la couture | APP-1 | **Livré le 2026-10-05** ([#359](https://github.com/ScratchMe/tourdegrowth/pull/359)) |
 | APP-5 | le diagnostic de l'app | APP-4 | **Livré le 2026-10-05** ([#361](https://github.com/ScratchMe/tourdegrowth/pull/361)) |
-| APP-6 | la dérivation, les constats, les contrôles, le peloton | APP-5 | ☐ |
+| APP-6 | la dérivation, les constats, les contrôles, le peloton | APP-5 | **Livré le 2026-10-05** |
 | APP-7 | la carte de départ, le réglage, les Réglages, l'événement | APP-3, APP-6 | ☐ |
 | APP-8 | les écrans de l'argent, la bande des deux flux, la courbe de remboursement | APP-7 | ☐ |
 | APP-9 | les slides | APP-8 | ☐ |

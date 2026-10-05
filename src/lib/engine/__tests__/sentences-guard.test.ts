@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CANDIDATE_IDS, METRIC_SHAPES, shapeOf } from "../catalog-shape";
+import { CANDIDATE_IDS, METRIC_SHAPES, shapeOf, shapesOf } from "../catalog-shape";
 import { buildDeck, chainLine, comparatorText, deckMarkdown, renderTitle, targetPhrase } from "../deck";
 import { deriveEngine } from "../derive";
 import { comparatorOf, impactTarget } from "../diagnose";
@@ -10,9 +10,10 @@ import { buildRequest } from "../request";
 import { findingText, sanityText } from "../sentences";
 import { SLIDE_ORDER } from "../types";
 import type { EngineState, FindingKind, MetricEntry, SanityId, SlideTitleKey, SourceRef, ToolId } from "../types";
+import { mergeStrings } from "../strings";
 import { knownIn } from "../values";
 import { CTX_EN, CTX_FR, EN, FR } from "./props";
-import { emptyState, estimated, exampleState, filmState, hybridLossState, hybridNoMarginState, hybridState, noMarginState, measured, missing, ratio, salesAssistedState, tourResult, withEntry, withMonthBefore, withTarget, withoutTargets } from "./fixtures";
+import { consumerState, consumerUsageOnlyState, emptyState, estimated, exampleState, filmState, hybridLossState, hybridNoMarginState, hybridState, noMarginState, measured, missing, ratio, salesAssistedState, tourResult, withEntry, withMonthBefore, withTarget, withoutTargets } from "./fixtures";
 
 /**
  * The guard: every sentence the engine can produce, read as a reader would.
@@ -116,7 +117,19 @@ function withWhatIf(state: EngineState, targets: EngineState["whatIf"]): EngineS
 
 const TOUR_ANSWERS = { "acq-1": 0, "acq-3": 2, "act-1": 0, "act-2": 1, "ret-1": 0, "ret-3": 2, "ref-3": 0, "rev-2": 0 } as const;
 
-const SCENARIOS: { name: string; build: () => { state: EngineState; result?: ReturnType<typeof tourResult> } }[] = [
+/**
+ * `type: "consumer-app"` reads an app's resolved copy (the overlay merged over the engine's strings, and the app's own
+ * catalogue prose), as the island does; `deck: false` leaves the deck and its text export out — an app's deck waits for
+ * its slides (APP-9, §21.7), and `buildDeck` throws on one before them. APP-9 removes the flag.
+ */
+interface ScenarioDef {
+  name: string;
+  build: () => { state: EngineState; result?: ReturnType<typeof tourResult> };
+  type?: "consumer-app";
+  deck?: false;
+}
+
+const SCENARIOS: ScenarioDef[] = [
   { name: "§6.0 example", build: () => ({ state: exampleState() }) },
   // The example without its margin, as before C50 (A20.d T6): what the engine says when it can't price a customer.
   { name: "§6.0 example without its margin", build: () => ({ state: noMarginState() }) },
@@ -391,6 +404,16 @@ const SCENARIOS: { name: string; build: () => { state: EngineState; result?: Ret
       }),
     }),
   },
+  // The consumer app (A22 APP-6, §21.5.5): its derivation, findings and checks, in its own words. No deck until APP-9.
+  { name: "the consumer app (§21.9)", type: "consumer-app", deck: false, build: () => ({ state: consumerState() }) },
+  { name: "the consumer app without subscriptions (§21.9)", type: "consumer-app", deck: false, build: () => ({ state: consumerUsageOnlyState() }) },
+  {
+    // 11 655 € of 33 300 € billed: 35 %, past the 30 % that rarely is the commission alone.
+    name: "the consumer app, commission at 35 %",
+    type: "consumer-app",
+    deck: false,
+    build: () => ({ state: withEntry(consumerState(), "app.rev.commission", measured(ratio(11_655, 33_300), tool("revenuecat"))) }),
+  },
 ];
 
 // --- The sweep ---------------------------------------------------------------
@@ -410,78 +433,85 @@ function sweep(): Sweep {
   for (const scenario of SCENARIOS) {
     for (const locale of ["fr", "en"] as const) {
       const p = props[locale];
+      // An app reads the copy as the island resolves it: the overlay merged over the engine's strings, its own catalogue prose.
+      const app = scenario.type === "consumer-app";
+      const strings = app ? mergeStrings(p.strings, p.typeStrings["consumer-app"]) : p.strings;
+      const metrics = app ? p.typeCatalogs["consumer-app"].metrics : p.metrics;
+      const proseDerived = app ? p.typeCatalogs["consumer-app"].derived : p.derived;
       const { state: raw, result } = scenario.build();
       const state = includeAll(raw);
       const add = (where: string, text: string | null | undefined, slide: boolean) => {
         if (text !== null && text !== undefined) out.samples.push({ scenario: scenario.name, locale, where, text, slide });
       };
-      const derived = deriveEngine(state, p.ctx, result ?? null, p.bridges, p.strings.units);
+      const derived = deriveEngine(state, p.ctx, result ?? null, p.bridges, strings.units);
 
       // The deck: every title, every printed field of every line, every note, the footer, and the text export.
-      const deck = buildDeck(state, derived, p.strings, p.metrics, p.ctx, { derived: p.derived, bridges: p.bridges });
-      for (const slide of deck.slides) {
-        if (!slide.present) continue;
-        out.titleKeys.add(slide.title.key);
-        add(`${slide.id} title`, renderTitle(slide.title, p.strings), true);
-        slide.lines.forEach((line, i) => {
-          for (const [key, value] of Object.entries(line)) if (!MACHINE_KEYS.has(key) && value !== "") add(`${slide.id} line ${i} ${line.row}.${key}`, value, true);
-        });
-        slide.notes.forEach((note, i) => add(`${slide.id} note ${i}`, note, true));
+      if (scenario.deck !== false) {
+        const deck = buildDeck(state, derived, strings, metrics, p.ctx, { derived: proseDerived, bridges: p.bridges });
+        for (const slide of deck.slides) {
+          if (!slide.present) continue;
+          out.titleKeys.add(slide.title.key);
+          add(`${slide.id} title`, renderTitle(slide.title, strings), true);
+          slide.lines.forEach((line, i) => {
+            for (const [key, value] of Object.entries(line)) if (!MACHINE_KEYS.has(key) && value !== "") add(`${slide.id} line ${i} ${line.row}.${key}`, value, true);
+          });
+          slide.notes.forEach((note, i) => add(`${slide.id} note ${i}`, note, true));
+        }
+        add("footer", deck.footer.text, true);
+        add("markdown", deckMarkdown(deck, strings), true);
       }
-      add("footer", deck.footer.text, true);
-      add("markdown", deckMarkdown(deck, p.strings), true);
 
       // What the board and the "to check" list print.
       for (const f of derived.findings) {
         out.findingKinds.add(f.kind);
-        add(`finding ${f.kind}`, findingText(f, state, p.strings, p.metrics, p.derived, locale), false);
+        add(`finding ${f.kind}`, findingText(f, state, strings, metrics, proseDerived, locale), false);
       }
       for (const c of derived.sanity) {
         out.sanityIds.add(c.id);
-        add(`check ${c.id}`, sanityText(c, p.strings, locale), false);
+        add(`check ${c.id}`, sanityText(c, strings, locale), false);
       }
 
       // The board's diagnosis block.
       const d = derived.diagnosis;
-      add("diagnosis blind", blindSentence(d.blind, p.strings, p.metrics), false);
-      add("diagnosis not-enough", notEnoughBelowSentence(d, p.strings, p.metrics), false);
-      add("diagnosis unpriced", unpricedSentence(d, p.strings, p.metrics), false);
+      add("diagnosis blind", blindSentence(d.blind, strings, metrics), false);
+      add("diagnosis not-enough", notEnoughBelowSentence(d, strings, metrics), false);
+      add("diagnosis unpriced", unpricedSentence(d, strings, metrics), false);
       for (const id of d.state === "clear" || d.state === "shared" ? d.named : []) {
         const comparator = d.positions[id]!.comparator;
         const known = knownIn(state, id, p.ctx);
         if (!comparator || known.kind !== "known") continue;
-        const value = formatInterval(known.value, shapeOf(id).unit, p.ctx, p.strings.units);
-        add(`diagnosis named ${id}`, behindSentence(comparator, value, comparatorText(state, id, p.strings, p.ctx), p.strings), false);
+        const value = formatInterval(known.value, shapeOf(id).unit, p.ctx, strings.units);
+        add(`diagnosis named ${id}`, behindSentence(comparator, value, comparatorText(state, id, strings, p.ctx), strings), false);
       }
 
       // The "what if" drawer, for every stage that has a comparator — the leak slide only shows the named one.
       for (const id of CANDIDATE_IDS) {
         const comparator = comparatorOf(state, id);
         if (!comparator) continue;
-        const impact = whatIf(state, id, impactTarget(comparator), p.ctx, p.strings.units);
+        const impact = whatIf(state, id, impactTarget(comparator), p.ctx, strings.units);
         if (!impact) continue;
-        const target = targetPhrase(comparator, id, state, p.strings, p.ctx);
-        for (const line of impact.lines) add(`what-if ${id} ${line.key}`, chainLine(line, impact, subjectOf(id, p.strings, p.metrics), target, p.strings, locale).text, false);
+        const target = targetPhrase(comparator, id, state, strings, p.ctx);
+        for (const line of impact.lines) add(`what-if ${id} ${line.key}`, chainLine(line, impact, subjectOf(id, strings, metrics), target, strings, locale).text, false);
       }
 
-      // The request a reader copies to a colleague: every number at once.
-      add("request", buildRequest("data", METRIC_SHAPES.map((s) => s.id), p.strings, p.metrics, state, p.ctx), false);
+      // The request a reader copies to a colleague: every number at once — an app's, the ones its setup shows.
+      add("request", buildRequest("data", (app ? shapesOf(state.setup) : METRIC_SHAPES).map((s) => s.id), strings, metrics, state, p.ctx), false);
 
       // The sheet: each number's recipe filled with THIS state's month, cohort, window and event.
-      for (const m of p.metrics) {
-        const fills = catalogueValues(state, m.id, p.strings, p.metrics, p.ctx);
+      for (const m of metrics) {
+        const fills = catalogueValues(state, m.id, strings, metrics, p.ctx);
         for (const [key, value] of Object.entries({ formula: m.formula, request: m.request })) add(`sheet ${m.id}.${key}`, fillTemplate(value, fills), false);
         for (const w of m.where) add(`sheet ${m.id}.where`, fillTemplate(w.path, fills), false);
       }
 
       // The static catalogue page (once per language: it has no state).
       if (scenario === SCENARIOS[0]) {
-        const fills = staticCatalogueValues(p.strings);
-        for (const m of p.metrics) {
+        const fills = staticCatalogueValues(strings);
+        for (const m of metrics) {
           for (const [key, value] of Object.entries({ formula: m.formula, trap: m.trap, oneLiner: m.oneLiner, request: m.request })) add(`catalogue ${m.id}.${key}`, fillTemplate(value, fills), false);
           for (const w of m.where) add(`catalogue ${m.id}.where`, fillTemplate(w.path, fills), false);
         }
-        for (const x of p.derived) add(`catalogue ${x.id}.formula`, fillTemplate(x.formula, fills), false);
+        for (const x of proseDerived) add(`catalogue ${x.id}.formula`, fillTemplate(x.formula, fills), false);
       }
     }
   }
@@ -639,7 +669,7 @@ describe("the sweep reaches every sentence it claims to", () => {
   it("fires every finding kind and every sanity check", () => {
     const kinds: FindingKind[] = ["chain-break", "no-definition", "blind-spot", "below-comparator", "conflict", "unit-econ-uncomputable", "reconcile-gap", "small-cohort", "hidden-knowledge"];
     expect(kinds.filter((k) => !SWEEP.findingKinds.has(k))).toEqual([]);
-    const ids: SanityId[] = ["num-gt-den", "retained-gt-activated", "paid-gt-retained", "churn-high", "margin-odd", "ttv-mean", "cohort-mismatch", "reconcile-gap"];
+    const ids: SanityId[] = ["num-gt-den", "retained-gt-activated", "paid-gt-retained", "churn-high", "margin-odd", "commission-high", "ttv-mean", "cohort-mismatch", "reconcile-gap"];
     expect(ids.filter((k) => !SWEEP.sanityIds.has(k))).toEqual([]);
   });
 

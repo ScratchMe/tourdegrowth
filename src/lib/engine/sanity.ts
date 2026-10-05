@@ -1,5 +1,6 @@
 import {
   CHURN_HIGH_PERCENT,
+  COMMISSION_HIGH_PERCENT,
   MARGIN_ODD,
   PELOTON_METRICS,
   RECONCILE_BAND,
@@ -13,6 +14,7 @@ import type { MetricShape } from "./catalog-shape";
 import { periodOf } from "./cohort";
 import { formatCountInterval, formatInterval, formatMonth, formatNumber, type UnitWords } from "./format";
 import { mapBounds } from "./interval";
+import { isApp } from "./setup-type";
 import type { EngineCalcContext, EngineState, Interval, MetricEntry, MetricId, MetricValue, Motion, SanityCheck } from "./types";
 import { countsOf, currentSnapshot, entryOf, knownIn } from "./values";
 
@@ -135,26 +137,41 @@ export function twoToolsOf(entry: Pick<MetricEntry, "status" | "value" | "source
 
 function selfServeChecks(state: EngineState, ctx: EngineCalcContext, words: UnitWords, add: Add): void {
   const snapshot = currentSnapshot(state);
+  // A number hidden by what an app earns from stays stored and is never read (§21.5.5, D7): a check that reads one does not run.
+  // A SaaS shows every self-serve number, so for it nothing is ever hidden.
+  const app = isApp(state.setup);
+  const shown = new Set<MetricId>(app ? shapesOf(state.setup).map((s) => s.id) : []);
+  const reads = (...ids: MetricId[]) => !app || ids.every((id) => shown.has(id));
+
   const activated = knownValue(state, "act.rate", ctx);
   const d30 = knownValue(state, "ret.d30", ctx);
-  const paid = knownValue(state, "rev.paid-conversion", ctx);
+  const paid = reads("rev.paid-conversion") ? knownValue(state, "rev.paid-conversion", ctx) : null;
   // The three columns count the same 100 sign-ups, so each one can only shrink from the last.
   if (activated && d30 && d30.lo > activated.hi) add("retained-gt-activated", ["ret.d30", "act.rate"]);
   if (d30 && paid && paid.lo > d30.hi) add("paid-gt-retained", ["rev.paid-conversion", "ret.d30"]);
 
-  const churn = knownValue(state, "ret.logo-churn", ctx);
+  const churn = reads("ret.logo-churn") ? knownValue(state, "ret.logo-churn", ctx) : null;
   if (churn && churn.lo > CHURN_HIGH_PERCENT) add("churn-high", ["ret.logo-churn"]);
 
-  const margin = knownValue(state, "rev.gross-margin", ctx);
-  if (margin && (margin.lo > MARGIN_ODD.hi || margin.hi < MARGIN_ODD.lo)) add("margin-odd", ["rev.gross-margin"]);
+  // An app's margin is its own number (net of the stores' commission), checked by the same rule.
+  const marginId = app ? "app.rev.gross-margin" : "rev.gross-margin";
+  const margin = knownValue(state, marginId, ctx);
+  if (margin && (margin.lo > MARGIN_ODD.hi || margin.hi < MARGIN_ODD.lo)) add("margin-odd", [marginId]);
+
+  // The stores' commission past a third of what they bill is rarely the commission alone: VAT or payment fees ride along (§21.5.5).
+  const commission = app && reads("app.rev.commission") ? knownValue(state, "app.rev.commission", ctx) : null;
+  if (commission && commission.lo > COMMISSION_HIGH_PERCENT) add("commission-high", ["app.rev.commission"]);
 
   // A mean time-to-value flatters itself as the stragglers give up: the statistic is on the value, or declared as the variant of an estimate.
   if (knownValue(state, "act.ttv", ctx) && isMeanDuration(entryOf(snapshot, "act.ttv"))) add("ttv-mean", ["act.ttv"]);
 
-  const periods = PELOTON_METRICS.filter((id) => knownValue(state, id, ctx)).map((id) => periodOf(shapeOf(id), entryOf(snapshot, id), snapshot));
-  if (new Set(periods).size > 1) add("cohort-mismatch", [...PELOTON_METRICS]);
+  // The peloton's columns the setup shows: an app without subscriptions has two, and the hidden one's month is nobody's business.
+  const columns = PELOTON_METRICS.filter((id) => reads(id));
+  const periods = columns.filter((id) => knownValue(state, id, ctx)).map((id) => periodOf(shapeOf(id), entryOf(snapshot, id), snapshot));
+  if (new Set(periods).size > 1) add("cohort-mismatch", [...columns]);
 
-  const r = reconcile(state, ctx);
+  // It reads the CAC's billed count, which an app does not have: the check never runs for one.
+  const r = reads("acq.signup-rate", "rev.paid-conversion", "acq.cac") ? reconcile(state, ctx) : null;
   if (r && (r.ratio.hi < RECONCILE_BAND.lo || r.ratio.lo > RECONCILE_BAND.hi)) {
     // « ~1 nouveau payant », « ~12 nouveaux payants »: the noun follows the predicted count as printed (rounded).
     add(

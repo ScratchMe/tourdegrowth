@@ -1,16 +1,22 @@
 import { describe, expect, it } from "vitest";
-import { appCandidates, appInputs, appInputsOf, appLeverAlone, appLeverIds, appRankingImpact, appRules, buildAppScenario } from "../app";
+import { appCandidates, appDerived, appInputs, appInputsOf, appLeverAlone, appLeverIds, appRankingImpact, appRules, appUnitEconomics, buildAppScenario } from "../app";
 import type { AppMonetization } from "../app-model";
-import { APP_LEVER_IDS, CANDIDATE_IDS, LEVER_IDS, SLG_CANDIDATE_IDS, candidatesOf, shapesOf } from "../catalog-shape";
+import { APP_LEVER_IDS, CANDIDATE_IDS, LEVER_IDS, SLG_CANDIDATE_IDS, candidatesOf, derivedShapesOf, shapesOf } from "../catalog-shape";
+import { deriveEngine } from "../derive";
 import { diagnose } from "../diagnose";
 import { EXAMPLE_CONSUMER_WHATIF } from "../example";
 import { rankingImpact } from "../impact";
+import { buildPeloton } from "../peloton";
 import { isCandidate, notEnoughBelowSentence, notEnoughBelowValues } from "../phrases";
+import { sanityChecks } from "../sanity";
 import { buildScenario, leverViews } from "../scenario";
 import { candidatesFor, leverAloneOf, leverIdsOf, scenarioOf } from "../scenario-of";
 import { deriveSeries } from "../series";
-import type { AppDerivedId, Diagnosis, Interval, LeverId, MetricId, SelfServeCandidateId } from "../types";
-import { consumerState, consumerUsageOnlyState, estimated, exampleState, hybridState, measured, ratio, withEntry, withMonthBefore, withTarget, withoutTargets } from "./fixtures";
+import { findingText, sanityText } from "../sentences";
+import { mergeStrings } from "../strings";
+import type { AppDerivedId, Diagnosis, EngineState, Interval, LeverId, MetricEntry, MetricId, SelfServeCandidateId } from "../types";
+import { unitEconomics } from "../unit-economics";
+import { consumerState, consumerUsageOnlyState, estimated, exampleState, hybridState, measured, missing, ratio, tourResult, withEntry, withMonthBefore, withTarget, withoutTargets } from "./fixtures";
 import { CTX_EN, CTX_FR, EN, FR } from "./props";
 
 /**
@@ -1074,5 +1080,527 @@ describe("the monthly series of an app compares the numbers it shows (§21.5.4)"
     expect(motion.previousLeak).toEqual(["ret.d30", "rev.paid-conversion", ACTIVE]);
     expect(735).toBeGreaterThan(828 / 1.25);
     expect(motion.leakChanged).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------------------------------------------
+// The derivation of an app (engine spec §21.5.5, A22 APP-6)
+//
+// The figures are §21.9.2's, which `docs/engine/reference/app-example.mjs` prints without any engine code. What these
+// tests pin is the WIRING: `deriveEngine` giving an app its per-install economics, its two streams, its peloton (two
+// columns without subscriptions), its findings and its checks, and never reading a number the setup hides (D7).
+//
+// Non-vacuity, measured on 2026-10-05 (each sabotage applied alone, `src/lib/engine`, `src/content`, `src/app` and
+// `src/__tests__` run, then restored; the count is the tests that fall):
+// - the install's value read over 12 months where it is set against the cost (§21.10.4: the loss read on 12 months, D10):
+//   the example's « no loss », its 36-month value, the app without subscriptions' wording and two more fall (6);
+// - the subscribers' column kept without subscriptions (§21.10.4): the two-column peloton, its chain, and the missing number
+//   that must raise no chain break fall (4);
+// - a hidden number read by a check (§21.10.4): `paid-gt-retained` reading the stored paid conversion (1) and `churn-high` the
+//   stored churn (1) fall the same test, which asserts both; `commission-high` reading a commission the setup hides (1) or
+//   running for a SaaS (1); `reconcile-gap` allowed for an app (1); `cohort-mismatch` comparing the hidden column (1);
+//   `cohortIsSmall` counting a hidden cohort (1); `margin-odd` reading the SaaS margin (1);
+// - the threshold 30 → 40 falls 6: five here, and the sweep's « fires every sanity check » (the 35 % scenario no longer
+//   raises it); that scenario removed from the sweep, the same test falls alone (1); the commission's French wording with a
+//   plain space for the no-break one falls two (the exact sentence here, the sweep's French typography rule);
+// - the mirror keeping the bridges of numbers an app does not have (2); the findings looking for a definition or a conflict on
+//   the SaaS list (2); the loss set against the CAC (3); the payback finding naming the CAC's payback (1);
+// - `deriveEngine` giving an app the customer's economics (14); an `app` key for every type (8: here, `findings.test.ts`'s
+//   « composes every derived shape », and the six inputs of golden v2 — which does see the key);
+// - the month's revenue of a stream read from its curve instead of its own revenue, with no installs typed (1 each for the
+//   usage and the subscriptions); a total that passes the known part off (4); every figure « solid » (3); every input named
+//   as missing (5); the motion's coverage ignoring the setup (2); GRR and NRR taken without subscriptions (1).
+// ---------------------------------------------------------------------------------------------------------------
+
+const NB = " ";
+const revenuecat = { kind: "tool", tool: "revenuecat" } as const;
+const finance = { kind: "person", role: "finance" } as const;
+const APP_STRINGS = { fr: mergeStrings(FR.strings, FR.typeStrings["consumer-app"]), en: mergeStrings(EN.strings, EN.typeStrings["consumer-app"]) };
+const PROSE = { fr: FR, en: EN };
+
+/** `deriveEngine` as the island calls it: no Tour link, the copy's units. */
+function derive(state: EngineState, locale: "fr" | "en" = "fr", tour: ReturnType<typeof tourResult> | null = null) {
+  const p = PROSE[locale];
+  return deriveEngine(state, locale === "fr" ? CTX_FR : CTX_EN, tour, p.bridges, p.strings.units);
+}
+const sanityIds = (state: EngineState) => derive(state).sanity.map((c) => c.id);
+const findingKinds = (state: EngineState) => derive(state).findings.map((f) => f.kind);
+/** A finding's sentence in an app's own words. */
+function sentence(state: EngineState, kind: string, locale: "fr" | "en" = "fr"): string {
+  const f = derive(state, locale).findings.find((x) => x.kind === kind);
+  expect(f, kind).toBeDefined();
+  const p = PROSE[locale];
+  return findingText(f!, state, APP_STRINGS[locale], p.typeCatalogs["consumer-app"].metrics, p.typeCatalogs["consumer-app"].derived, locale);
+}
+/** A figure known, as a number; fails with the figure otherwise. */
+function figure(v: { kind: string } & Partial<{ value: Interval }>): number {
+  expect(v.kind).toBe("known");
+  return only(v.value);
+}
+
+describe("the example, derived (§21.9.2)", () => {
+  const d = derive(consumerState());
+
+  it("counts 21 numbers: 20 found, none approximate, none missing, 1 in progress (requested) — for the app and for its motion", () => {
+    const expected = { denominator: 21, found: 20, approximate: 0, missing: 0, inProgress: 1, requested: 1, todo: 0 };
+    expect(d.coverage).toEqual(expected);
+    expect(d.motions).toHaveLength(1);
+    expect(d.motions[0]!.motion).toBe("plg");
+    expect(d.motions[0]!.coverage).toEqual(expected);
+  });
+
+  it("reads the peloton on 100 installs: ~333 store page visitors, 5 referred, 35 activated, 12 active at day 30, 3 subscribed — three columns, complete", () => {
+    const { peloton } = d;
+    expect(Math.round(only(peloton.visitorsPerHundred))).toBe(333);
+    expect(only(peloton.referredPerHundred)).toBe(5);
+    expect(peloton.columns.map((c) => [c.metric, only(c.perHundred)])).toEqual([
+      ["act.rate", 35],
+      ["ret.d30", 12],
+      ["rev.paid-conversion", 3],
+    ]);
+    expect(peloton.chain).toBe("complete");
+    expect(peloton.smallCohort).toBe(false);
+  });
+
+  it("names day 30 then the paid conversion, shared, and keeps the peloton, the diagnosis and the economics at the top and in the motion", () => {
+    expect(d.diagnosis.state).toBe("shared");
+    expect(d.diagnosis).toEqual(diagnose(consumerState(), CTX_FR));
+    const plg = d.motions[0]!;
+    expect(plg.motion === "plg" && plg.peloton).toBe(d.peloton);
+    expect(plg.diagnosis).toBe(d.diagnosis);
+    expect(plg.unit).toBe(d.unit);
+  });
+
+  it("raises one finding per stage named — below its target — and no loss, no missing figure", () => {
+    expect(d.findings.map((f) => [f.kind, f.metrics])).toEqual([
+      ["below-comparator", ["ret.d30"]],
+      ["below-comparator", ["rev.paid-conversion"]],
+    ]);
+  });
+
+  it("raises no check at all", () => {
+    expect(d.sanity).toEqual([]);
+  });
+
+  it("values an install at 2,1809 € over 36 months and 1,4318 € over 12, pays it back in 13,01 months, and brings back 0,95 times its cost in a year", () => {
+    const { unit, app } = d;
+    expect(r4(figure(unit.ltv))).toBe(2.1809);
+    expect(r4(figure(app!.value12))).toBe(1.4318);
+    expect(r4(figure(unit.payback))).toBe(13.0132);
+    expect(r2(figure(unit.ltvCac))).toBe(0.95);
+    expect(unit.cacVariant).toBe("media-only");
+  });
+
+  it("keeps the subscriptions' GRR 92,5 % and NRR 93,5 %, approximate, as the self-serve engine has them", () => {
+    expect(d.unit.grr).toEqual({ kind: "known", value: { lo: 92.5, hi: 92.5 }, confidence: "approximate" });
+    expect(d.unit.nrr).toEqual({ kind: "known", value: { lo: 93.5, hi: 93.5 }, confidence: "approximate" });
+  });
+
+  it("is approximate wherever a number comes from a person's estimate (the margin and the ads per active are finance's)", () => {
+    for (const v of [d.unit.ltv, d.unit.payback, d.unit.ltvCac, d.app!.value12]) expect(v.kind === "known" && v.confidence).toBe("approximate");
+  });
+
+  it("carries the two streams: 28 800 € of subscriptions and 10 500 € of purchases and ads — 39 300 € — then 2 304 € + 1 008 € a month, then 32 479,21 € + 10 198,62 € in twelve months", () => {
+    const { streams, monetization } = d.app!;
+    expect(monetization).toEqual({ subscriptions: true, purchases: true, ads: true });
+    expect([figure(streams.now.subscriptions!), figure(streams.now.usage!), figure(streams.now.total)].map((v) => r2(v))).toEqual([28_800, 10_500, 39_300]);
+    expect([figure(streams.newPerMonth.subscriptions!), figure(streams.newPerMonth.usage!), figure(streams.newPerMonth.total)].map((v) => r2(v))).toEqual([2_304, 1_008, 3_312]);
+    expect([figure(streams.in12Months.subscriptions!), figure(streams.in12Months.usage!), figure(streams.in12Months.total)].map((v) => r2(v))).toEqual([32_479.21, 10_198.62, 42_677.83]);
+  });
+
+  it("is exact where the amounts are typed as counts (the MRR, the actives and both revenues per active) and a model's estimate where they are projected", () => {
+    const { streams } = d.app!;
+    for (const v of [streams.now.subscriptions!, streams.now.usage!, streams.now.total]) expect(v.kind === "known" && v.confidence).toBe("solid");
+    for (const row of [streams.newPerMonth, streams.in12Months]) for (const v of [row.subscriptions!, row.usage!, row.total]) expect(v.kind === "known" && v.confidence).toBe("approximate");
+  });
+
+  it("adds up to the scenario's own revenue: the month's, the new a month and in twelve months", () => {
+    const { kpis } = buildAppScenario(consumerState(), {}, CTX_FR).today;
+    const { streams } = d.app!;
+    expect(streams.now.total).toMatchObject({ kind: "known", value: kpis.mrr });
+    expect(streams.newPerMonth.total).toMatchObject({ kind: "known", value: kpis.newMrr });
+    expect(streams.in12Months.total).toMatchObject({ kind: "known", value: kpis.mrr12 });
+  });
+
+  it("is the same object whether read through deriveEngine or through the two functions", () => {
+    expect(d.unit).toEqual(appUnitEconomics(consumerState(), CTX_FR));
+    expect(d.app).toEqual(appDerived(consumerState(), CTX_FR));
+  });
+
+  it("has an `app` key for an app and for no other type — the SaaS derives exactly what it did", () => {
+    expect("app" in d).toBe(true);
+    for (const state of [exampleState(), hybridState()]) expect("app" in derive(state)).toBe(false);
+  });
+});
+
+describe("the app without subscriptions, derived (§21.9.2)", () => {
+  const state = consumerUsageOnlyState();
+  const d = derive(state);
+
+  it("counts 16 numbers: 15 found, 1 in progress", () => {
+    const expected = { denominator: 16, found: 15, approximate: 0, missing: 0, inProgress: 1, requested: 1, todo: 0 };
+    expect(d.coverage).toEqual(expected);
+    expect(d.motions[0]!.coverage).toEqual(expected);
+  });
+
+  it("has a peloton of two columns — activated 35 and active at day 30 12 — and no subscribers' column to chase", () => {
+    expect(d.peloton.columns.map((c) => [c.metric, only(c.perHundred)])).toEqual([
+      ["act.rate", 35],
+      ["ret.d30", 12],
+    ]);
+    expect(d.peloton.columns).toHaveLength(2);
+    expect(d.peloton.chain).toBe("complete");
+  });
+
+  it("names day 30 and the actives' retention, shared", () => {
+    expect(d.diagnosis.state).toBe("shared");
+    expect(d.diagnosis.state === "shared" && d.diagnosis.named).toEqual(["ret.d30", ACTIVE]);
+  });
+
+  it("values an install at 0,5949 € over 36 months for a cost of 1,50 €: a loss, no payback, and no GRR or NRR to show", () => {
+    expect(r4(figure(d.unit.ltv))).toBe(0.5949);
+    expect(r2(only(buildAppScenario(state, {}, CTX_FR).today.kpis.cac))).toBe(1.5);
+    expect(buildAppScenario(state, {}, CTX_FR).today.kpis.loss?.verdict).toBe("loss");
+    // Not paid back at all: nothing to name as missing — every input is known, the verdict is the loss.
+    expect(d.unit.payback).toEqual({ kind: "uncomputable", missing: [] });
+    expect(d.unit.grr).toEqual({ kind: "uncomputable", missing: [] });
+    expect(d.unit.nrr).toEqual({ kind: "uncomputable", missing: [] });
+  });
+
+  it("raises the loss as a finding on the install's value and cost — rank 1 — and a below-comparator per stage named", () => {
+    const loss = d.findings.find((f) => f.kind === "unit-econ-loss")!;
+    expect(loss.rank).toBe(1);
+    expect(loss.metrics).toEqual(["app.rev.install-ltv", "app.acq.cpi"]);
+    expect(d.findings.filter((f) => f.kind === "below-comparator").map((f) => f.metrics)).toEqual([["ret.d30"], [ACTIVE]]);
+    expect(d.findings.map((f) => f.kind)).not.toContain("unit-econ-loss-maybe");
+  });
+
+  it("says the loss in the app's words, in both languages", () => {
+    expect(sentence(state, "unit-econ-loss")).toBe(`Chaque installation coûte 1,50${NB}€ et rapporte ~0,59${NB}€ de marge en 36${NB}mois${NB}: tu perds ~0,91${NB}€ sur chacune.`);
+    expect(sentence(state, "unit-econ-loss", "en")).toBe("Each install costs €1.50 and brings back ~€0.59 of margin over 36 months: you lose ~€0.91 on each one.");
+  });
+
+  it("has a single stream: 10 500 € a month, 1 008 € of new revenue, 10 198,62 € in twelve months — and no subscriptions part", () => {
+    const { streams, monetization } = d.app!;
+    expect(monetization).toEqual({ subscriptions: false, purchases: true, ads: true });
+    for (const row of [streams.now, streams.newPerMonth, streams.in12Months]) {
+      expect(row.subscriptions).toBeNull();
+      expect(row.total).toEqual(row.usage);
+    }
+    expect([figure(streams.now.total), figure(streams.newPerMonth.total), figure(streams.in12Months.total)].map((v) => r2(v))).toEqual([10_500, 1_008, 10_198.62]);
+  });
+
+  it("raises no check", () => {
+    expect(d.sanity).toEqual([]);
+  });
+});
+
+describe("an app earning from subscriptions alone is derived as the self-serve engine derives it, plus its per-install economics", () => {
+  const state = withMonetization(SUBSCRIPTIONS);
+  const d = derive(state);
+
+  it("has a single stream and its three-column peloton", () => {
+    expect(d.peloton.columns).toHaveLength(3);
+    expect(d.app!.streams.now.usage).toBeNull();
+    expect(d.app!.streams.now.total).toEqual(d.app!.streams.now.subscriptions);
+    expect(r2(figure(d.app!.streams.in12Months.total))).toBe(32_479.21);
+  });
+
+  it("has the GRR and the NRR the self-serve engine computes from the same numbers", () => {
+    expect(d.unit.grr.kind).toBe("known");
+    expect(d.unit.grr).toEqual(unitEconomics(state, CTX_FR).grr);
+    expect(d.unit.nrr).toEqual(unitEconomics(state, CTX_FR).nrr);
+  });
+});
+
+describe("a month whose installs are not typed: the month's revenue is still known, the rest of the streams are not (§21.5.3 point 5)", () => {
+  function noInstalls() {
+    let state = consumerState();
+    state = withEntry(state, "acq.signup-rate", estimated(30, 30));
+    state = withEntry(state, "acq.top-channel-share", undefined);
+    state = withEntry(state, "app.acq.cpi", measured({ kind: "amount", amount: 1.5 }, finance));
+    delete state.snapshots[0]!.base!.monthSignups;
+    return state;
+  }
+  const { app } = derive(noInstalls());
+
+  it("keeps the month's revenue of each stream — 28 800 €, 10 500 €, 39 300 € — as the scenario does", () => {
+    expect([figure(app!.streams.now.subscriptions!), figure(app!.streams.now.usage!), figure(app!.streams.now.total)].map((v) => r2(v))).toEqual([28_800, 10_500, 39_300]);
+    expect(app!.streams.now.total).toMatchObject({ kind: "known", value: buildAppScenario(noInstalls(), {}, CTX_FR).today.kpis.mrr });
+  });
+
+  it("cannot say the new revenue or the revenue in twelve months, and names no total", () => {
+    for (const row of [app!.streams.newPerMonth, app!.streams.in12Months]) {
+      expect(row.usage!.kind).toBe("uncomputable");
+      expect(row.total.kind).toBe("uncomputable");
+    }
+  });
+});
+
+describe("a stream with a number missing leaves the total unknown, naming what it lacks (S9)", () => {
+  /** The ads per active were looked for and not found: the usage stream cannot be priced, the subscriptions can. */
+  const state = withEntry(consumerState(), "app.rev.ads-per-active", missing("not-tracked", "meeting"));
+  const { app } = derive(state);
+
+  it("keeps the subscriptions' part known and names the ads for the usage part, at every horizon", () => {
+    for (const row of [app!.streams.now, app!.streams.newPerMonth, app!.streams.in12Months]) {
+      expect(row.subscriptions!.kind).toBe("known");
+      expect(row.usage).toEqual({ kind: "uncomputable", missing: expect.arrayContaining(["app.rev.ads-per-active"]) });
+    }
+  });
+
+  it("never passes the known part off as the total", () => {
+    for (const row of [app!.streams.now, app!.streams.newPerMonth, app!.streams.in12Months]) {
+      expect(row.total).toEqual({ kind: "uncomputable", missing: row.usage!.kind === "uncomputable" ? row.usage!.missing : [] });
+    }
+  });
+
+  it("names the inputs the usage part lacks, cumulatively: the per-active revenues, then day 30, then the actives' retention", () => {
+    const bare = withEntry(withEntry(withEntry(consumerState(), "app.rev.purchases-per-active", undefined), "ret.d30", undefined), ACTIVE, undefined);
+    const usage = derive(bare).app!.streams;
+    expect(usage.now.usage).toEqual({ kind: "uncomputable", missing: ["app.rev.purchases-per-active"] });
+    expect(usage.newPerMonth.usage).toEqual({ kind: "uncomputable", missing: ["app.rev.purchases-per-active", "ret.d30"] });
+    expect(usage.in12Months.usage).toEqual({ kind: "uncomputable", missing: ["app.rev.purchases-per-active", "ret.d30", ACTIVE] });
+  });
+
+  it("names the subscriptions' inputs the same way: the ARPA, then the paid conversion, then the churn", () => {
+    const bare = withEntry(withEntry(withEntry(consumerState(), "rev.arpa", undefined), "rev.paid-conversion", undefined), "ret.logo-churn", undefined);
+    delete bare.snapshots[0]!.base!.mrrEnd;
+    const subs = derive(bare).app!.streams;
+    expect(subs.now.subscriptions).toEqual({ kind: "uncomputable", missing: ["rev.arpa"] });
+    expect(subs.newPerMonth.subscriptions).toEqual({ kind: "uncomputable", missing: ["rev.arpa", "rev.paid-conversion"] });
+    expect(subs.in12Months.subscriptions).toEqual({ kind: "uncomputable", missing: ["rev.arpa", "rev.paid-conversion", "ret.logo-churn"] });
+  });
+});
+
+describe("the per-install figures name what they lack, and say how sure they are (§21.5.5)", () => {
+  it("the payback and the ratio name the cost per install when it is missing; the value does not need it", () => {
+    const { unit } = derive(withEntry(consumerState(), "app.acq.cpi", missing("not-tracked", "meeting")));
+    expect(unit.payback).toEqual({ kind: "uncomputable", missing: ["app.acq.cpi"] });
+    expect(unit.ltvCac).toEqual({ kind: "uncomputable", missing: ["app.acq.cpi"] });
+    expect(unit.ltv.kind).toBe("known");
+    expect(unit.cacVariant).toBeNull();
+  });
+
+  it("the three figures name the commission when it is missing", () => {
+    const { unit, app } = derive(withEntry(consumerState(), "app.rev.commission", missing("no-definition", "meeting")));
+    for (const v of [unit.ltv, unit.payback, unit.ltvCac, app!.value12]) expect(v).toEqual({ kind: "uncomputable", missing: ["app.rev.commission"] });
+  });
+
+  it("names only the inputs the monetization reads: day 30 and the actives' retention only with purchases or ads", () => {
+    const subscriptionsOnly = derive(withEntry(withEntry(withMonetization(SUBSCRIPTIONS), ACTIVE, undefined), "ret.d30", undefined));
+    expect(subscriptionsOnly.unit.ltv.kind).toBe("known");
+    const ads = derive(withEntry(withMonetization(ADS), "app.rev.ads-per-active", undefined));
+    expect(ads.unit.ltv).toEqual({ kind: "uncomputable", missing: ["app.rev.ads-per-active"] });
+  });
+
+  it("is solid only when every input it reads is a solid known number", () => {
+    // Every input of an app earning from subscriptions alone is a tool's measurement, but the margin is finance's: approximate.
+    expect(derive(withMonetization(SUBSCRIPTIONS)).unit.ltv).toMatchObject({ kind: "known", confidence: "approximate" });
+    const tooled = withEntry(withMonetization(SUBSCRIPTIONS), "app.rev.gross-margin", measured(ratio(25_579.2, 31_974), revenuecat));
+    expect(derive(tooled).unit.ltv).toMatchObject({ kind: "known", confidence: "solid" });
+    expect(derive(tooled).unit.payback).toMatchObject({ kind: "known", confidence: "solid" });
+  });
+
+  it("is approximate as soon as one input is an estimate", () => {
+    const tooled = withEntry(withMonetization(SUBSCRIPTIONS), "app.rev.gross-margin", measured(ratio(25_579.2, 31_974), revenuecat));
+    expect(derive(withEntry(tooled, "rev.arpa", estimated(6, 7))).unit.ltv).toMatchObject({ kind: "known", confidence: "approximate" });
+  });
+
+  it("reads an install's value over 36 months, never over 12, when it sets it against the cost (D10)", () => {
+    // 1,4318 € over 12 months is under the 1,50 € it costs; over 36 months it is 2,1809 €: not a loss.
+    const { unit, app, findings } = derive(consumerState());
+    expect(figure(app!.value12)).toBeLessThan(1.5);
+    expect(figure(unit.ltv)).toBeGreaterThan(1.5);
+    expect(findings.map((f) => f.kind)).not.toContain("unit-econ-loss");
+    expect(findings.map((f) => f.kind)).not.toContain("unit-econ-loss-maybe");
+  });
+});
+
+describe("the findings of an app (§21.5.5)", () => {
+  it("says a loss may be there when the cost per install is a range that reaches the value", () => {
+    const state = withEntry(consumerState(), "app.acq.cpi", estimated(1.8, 2.6));
+    const f = derive(state).findings.find((x) => x.kind === "unit-econ-loss-maybe")!;
+    expect(f.rank).toBe(2);
+    expect(f.metrics).toEqual(["app.rev.install-ltv", "app.acq.cpi"]);
+    expect(sentence(state, "unit-econ-loss-maybe", "en")).toBe("An install costs ~€1.80–€2.60 and brings back ~€2.20 of margin over 36 months: it may not pay back what it costs.");
+  });
+
+  it("raises the payback as a finding once the cost per install was looked for and not found, naming it", () => {
+    const state = withEntry(consumerState(), "app.acq.cpi", missing("not-tracked", "meeting"));
+    const f = derive(state).findings.find((x) => x.kind === "unit-econ-uncomputable")!;
+    expect(f.metrics).toEqual(["app.rev.install-payback", "app.acq.cpi"]);
+    expect(sentence(state, "unit-econ-uncomputable")).toBe("Impossible de dire en combien de mois une installation rembourse son coût d'acquisition. Il manque le coût par installation.");
+    expect(sentence(state, "unit-econ-uncomputable", "en")).toBe("We can't say how many months an install takes to pay back its acquisition cost. Missing: cost per install.");
+  });
+
+  it("raises nothing about a payback that is not paid back at all: that is the loss's to say, with nothing missing", () => {
+    expect(findingKinds(consumerUsageOnlyState())).not.toContain("unit-econ-uncomputable");
+  });
+
+  it("looks for a missing definition on the app's own numbers, which the self-serve list does not hold", () => {
+    const state = withEntry(consumerState(), "app.rev.commission", missing("no-definition", "meeting"));
+    const f = derive(state).findings.find((x) => x.kind === "no-definition")!;
+    expect(f.metrics).toEqual(["app.rev.commission"]);
+    expect(sentence(state, "no-definition", "en")).toBe("Store commission: no shared definition. Any number given for it would be someone's opinion.");
+  });
+
+  it("looks for a conflict on the app's own numbers too, and not on one the setup hides", () => {
+    const conflicting = (a: [number, number], b: [number, number]): MetricEntry => ({
+      status: "conflicting",
+      conflict: { a: { value: ratio(...a), source: amplitude }, b: { value: ratio(...b), source: finance } },
+      updatedAt: "2026-09-20T10:00:00.000Z",
+    });
+    const shown = derive(withEntry(consumerState(), ACTIVE, conflicting([13_500, 15_000], [12_900, 15_000])));
+    expect(shown.findings.find((f) => f.kind === "conflict")?.metrics).toEqual([ACTIVE]);
+    // Two ARPAs that disagree: raised with subscriptions, a number nobody is looking at without.
+    const arpas = conflicting([28_800, 4_500], [30_600, 4_500]);
+    expect(findingKinds(withEntry(consumerState(), "rev.arpa", arpas))).toContain("conflict");
+    expect(findingKinds(withEntry(consumerUsageOnlyState(), "rev.arpa", arpas))).not.toContain("conflict");
+  });
+
+  it("raises no chain break for the subscribers' column an app without subscriptions does not have", () => {
+    const state = withEntry(consumerUsageOnlyState(), "rev.paid-conversion", missing("not-tracked", "sprint"));
+    expect(findingKinds(state)).not.toContain("chain-break");
+    // With subscriptions, the same missing number breaks the chain: the column is there.
+    expect(findingKinds(withEntry(consumerState(), "rev.paid-conversion", missing("not-tracked", "sprint")))).toContain("chain-break");
+  });
+});
+
+describe("the checks of an app (§21.5.5)", () => {
+  const commission = (percent: number) => withEntry(consumerState(), "app.rev.commission", measured(ratio(percent * 333, 33_300), revenuecat));
+
+  it("raises commission-high past 30 % — 35 % does, 30 % and 22 % do not", () => {
+    expect(sanityIds(commission(35))).toEqual(["commission-high"]);
+    expect(sanityIds(commission(30))).toEqual([]);
+    expect(sanityIds(consumerState())).toEqual([]);
+  });
+
+  it("raises it on the commission only, as a self-serve check that never blocks", () => {
+    const check = derive(commission(35)).sanity[0]!;
+    expect(check).toMatchObject({ id: "commission-high", motion: "plg", blocking: false, metrics: ["app.rev.commission"], values: {} });
+  });
+
+  it("raises it only when the whole range is past the threshold", () => {
+    expect(sanityIds(withEntry(consumerState(), "app.rev.commission", estimated(25, 40)))).toEqual([]);
+    expect(sanityIds(withEntry(consumerState(), "app.rev.commission", estimated(31, 40)))).toEqual(["commission-high"]);
+  });
+
+  it("does not read a commission the setup hides: ads alone are billed by no store", () => {
+    const hidden = withEntry(withMonetization(ADS), "app.rev.commission", measured(ratio(11_655, 33_300), revenuecat));
+    expect(sanityIds(hidden)).toEqual([]);
+    expect(sanityIds(withEntry(withMonetization(PURCHASES), "app.rev.commission", measured(ratio(11_655, 33_300), revenuecat)))).toEqual(["commission-high"]);
+  });
+
+  it("is an app's check: a commission typed in a SaaS file is nobody's", () => {
+    expect(sanityIds(withEntry(exampleState(), "app.rev.commission", measured(ratio(11_655, 33_300), revenuecat)))).toEqual([]);
+  });
+
+  it("says it in the copy's words, in both languages", () => {
+    const check = derive(commission(35)).sanity[0]!;
+    expect(sanityText(check, APP_STRINGS.fr, "fr")).toBe(`Au-delà de 30${NB}%, la TVA ou des frais de paiement sont souvent comptés avec la commission${NB}: vérifie.`);
+    expect(sanityText(check, APP_STRINGS.en, "en")).toBe("Above 30%, VAT or payment fees are often counted in with the commission: check.");
+  });
+
+  it("checks an app's margin by the same rule as the SaaS's: past 95 % or under 0 %", () => {
+    const odd = withEntry(consumerState(), "app.rev.gross-margin", measured(ratio(99, 100), finance));
+    const check = derive(odd).sanity.find((c) => c.id === "margin-odd")!;
+    expect(check.metrics).toEqual(["app.rev.gross-margin"]);
+    // The SaaS margin an app does not show is not read: a stored 99 % there raises nothing.
+    expect(sanityIds(withEntry(consumerState(), "rev.gross-margin", measured(ratio(99, 100), revenuecat)))).toEqual([]);
+  });
+
+  it("never raises reconcile-gap: it reads the CAC's billed count, which an app does not have", () => {
+    // The billing counts far fewer payers than the chain predicts — the SaaS's very case — typed in an app file.
+    const stored = withEntry(consumerState(), "acq.cac", measured(ratio(21_000, 10), finance));
+    expect(sanityIds(stored)).toEqual([]);
+    expect(sanityIds(withEntry(exampleState(), "acq.cac", measured(ratio(21_000, 10), finance)))).toContain("reconcile-gap");
+  });
+});
+
+describe("a number the setup hides is not read (§21.5.5, D7)", () => {
+  /** 43 % of the cohort subscribe — more than the 12 % still active at day 30 — and 44 % of the subscribers leave a month. */
+  const stored = (state: EngineState) =>
+    withEntry(withEntry(state, "rev.paid-conversion", measured(ratio(5_000, 11_500), revenuecat)), "ret.logo-churn", measured(ratio(2_000, 4_500), revenuecat));
+
+  it("raises paid-gt-retained and churn-high with subscriptions ticked...", () => {
+    expect(sanityIds(stored(consumerState()))).toEqual(expect.arrayContaining(["paid-gt-retained", "churn-high"]));
+  });
+
+  it("...and neither without, though both numbers are still stored", () => {
+    const state = stored(consumerUsageOnlyState());
+    expect(state.snapshots[0]!.metrics["rev.paid-conversion"]).toBeDefined();
+    expect(sanityIds(state)).toEqual([]);
+  });
+
+  it("does not look at the hidden column's month for cohort-mismatch, and names the columns it compared", () => {
+    const june = measured(ratio(345, 11_500), revenuecat, { cohortMonth: "2026-06" });
+    const withSubscriptions = derive(withEntry(consumerState(), "rev.paid-conversion", june)).sanity.find((c) => c.id === "cohort-mismatch");
+    expect(withSubscriptions?.metrics).toEqual(["act.rate", "ret.d30", "rev.paid-conversion"]);
+    expect(sanityIds(withEntry(consumerUsageOnlyState(), "rev.paid-conversion", june))).toEqual([]);
+    const own = derive(withEntry(consumerUsageOnlyState(), "act.rate", measured(ratio(4_025, 11_500), amplitude, { cohortMonth: "2026-06" }))).sanity.find((c) => c.id === "cohort-mismatch");
+    expect(own?.metrics).toEqual(["act.rate", "ret.d30"]);
+  });
+
+  it("does not count a hidden cohort as small", () => {
+    const tiny = (state: EngineState) => withEntry(state, "rev.paid-conversion", measured(ratio(3, 80), revenuecat));
+    expect(buildPeloton(tiny(consumerState()), CTX_FR).smallCohort).toBe(true);
+    expect(buildPeloton(tiny(consumerUsageOnlyState()), CTX_FR).smallCohort).toBe(false);
+    expect(findingKinds(tiny(consumerUsageOnlyState()))).not.toContain("small-cohort");
+    expect(findingKinds(tiny(consumerState()))).toContain("small-cohort");
+  });
+
+  it("sizes a small cohort by the numbers an app shows, as the SaaS does by all four", () => {
+    const small = withEntry(consumerUsageOnlyState(), "act.rate", measured(ratio(14, 80), amplitude));
+    expect(buildPeloton(small, CTX_FR).smallCohort).toBe(true);
+  });
+});
+
+describe("the peloton of an app (§21.5.5, D12)", () => {
+  it("has the columns the setup shows: three with subscriptions, two without — never an unknown column for the one it does not have", () => {
+    expect(buildPeloton(consumerState(), CTX_FR).columns).toHaveLength(3);
+    expect(buildPeloton(consumerUsageOnlyState(), CTX_FR).columns.map((c) => c.metric)).toEqual(["act.rate", "ret.d30"]);
+  });
+
+  it("is chained over its two columns: a missing day 30 breaks it at the tail", () => {
+    const peloton = buildPeloton(withEntry(consumerUsageOnlyState(), "ret.d30", undefined), CTX_FR);
+    expect(peloton.columns.map((c) => c.perHundred !== null)).toEqual([true, false]);
+    expect(peloton.chain).toBe("tail-break");
+    expect(buildPeloton(withEntry(withEntry(consumerUsageOnlyState(), "ret.d30", undefined), "act.rate", undefined), CTX_FR).chain).toBe("empty");
+  });
+
+  it("is the SaaS's three columns, whichever motions are ticked", () => {
+    for (const state of [exampleState(), hybridState()]) expect(buildPeloton(state, CTX_FR).columns.map((c) => c.metric)).toEqual(["act.rate", "ret.d30", "rev.paid-conversion"]);
+  });
+});
+
+describe("the Tour's mirror of an app skips the bridges of numbers it does not have (§21.5.5)", () => {
+  const answers = { "acq-1": 0, "acq-3": 0, "act-1": 0, "act-2": 1, "ret-1": 0, "ret-3": 2, "ref-3": 0, "rev-2": 0 } as const;
+  const linked = (state: EngineState) => {
+    const result = tourResult(answers);
+    return derive({ ...state, tourLink: { resultId: result.id, linkedAt: "2026-09-20T10:00:00.000Z" } }, "fr", result).mirror!;
+  };
+
+  it("drops the CAC and the LTV, and keeps the six that an app has", () => {
+    const rows = linked(consumerState()).rows.map((r) => r.metric);
+    expect(rows).toEqual(["acq.top-channel-share", "act.event", "act.rate", "ret.d30", "ret.churn-cause", "ref.k-factor"]);
+  });
+
+  it("only mirrors numbers the setup shows, with or without subscriptions", () => {
+    for (const state of [consumerState(), consumerUsageOnlyState()]) {
+      const shown = new Set<string>([...shapesOf(state.setup), ...derivedShapesOf(state.setup)].map((s) => s.id));
+      for (const row of linked(state).rows) expect(shown.has(row.metric), row.metric).toBe(true);
+    }
+  });
+
+  it("is the SaaS's eight, untouched", () => {
+    expect(linked(exampleState()).rows.map((r) => r.metric)).toEqual(["acq.top-channel-share", "acq.cac", "act.event", "act.rate", "ret.d30", "ret.churn-cause", "ref.k-factor", "rev.ltv"]);
+  });
+});
+
+describe("the sanity checks of an app, called on their own", () => {
+  it("are the ones `deriveEngine` carries", () => {
+    const state = withEntry(consumerState(), "app.rev.commission", measured(ratio(11_655, 33_300), revenuecat));
+    expect(sanityChecks(state, CTX_FR, FR.strings.units)).toEqual(derive(state).sanity);
   });
 });
