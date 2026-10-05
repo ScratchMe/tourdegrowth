@@ -41,7 +41,10 @@ export function resolveGameAccess({
 /**
  * Whether a locale-less path (`rest` from `splitLocalePath`) is one of the
  * game's pages: `/game` (the hub) and `/game/<level>`. `/gamers` is not.
+ * Nor the files the build writes beside the hub, `/game.segments/…` (its RSC
+ * payload, `_full.segment.rsc`): Vercel served them for the closed game until
+ * 2026-10-05 (security review of `gatePath`).
  */
 export function isGamePath(rest: string): boolean {
-  return rest === "/game" || rest.startsWith("/game/");
+  return rest === "/game" || rest.startsWith("/game/") || rest.startsWith("/game.");
 }

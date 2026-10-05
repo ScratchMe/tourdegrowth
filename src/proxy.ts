@@ -70,11 +70,50 @@ export function isAuthorizedForAdmin(request: NextRequest): boolean {
  * share. A budget tight enough to feel like protection would 429 the very
  * crawler the growth loop depends on. `/r/sample` reads no Firestore and is
  * not counted.
+ *
+ * Compared lower-cased (2026-10-05): the `next.config` rewrites ignore case,
+ * so `/R/<id>/opengraph-image` reached the image route, and its Firestore
+ * read, past a budget that only counted `/r/` (`/R/sample/opengraph-image`
+ * answered 200 in production).
  */
 const RESULT_READ_LIMIT = { limit: 120, windowSeconds: 10 * 60 };
 
 export function isResultReadPath(pathname: string): boolean {
-  return pathname.startsWith("/r/") && !pathname.startsWith("/r/sample");
+  const path = pathname.toLowerCase();
+  return path.startsWith("/r/") && !path.startsWith("/r/sample");
+}
+
+/**
+ * The path every check below compares: the one the router will match,
+ * decoded once (2026-10-05). `request.nextUrl.pathname` keeps the
+ * percent-encoding the client sent; the router decodes it before matching a
+ * route, `%2F` included. So the raw path let a closed page through in
+ * production: `/en/gam%65/retention`, `/%65n/game/retention` and
+ * `/en/game%2Fretention` all served the closed game, `/en/a%61rrr-funnel-template`
+ * the closed engine, and `/%61dmin/stats` reached the admin routes without
+ * the Basic Auth (they only failed on a 500). Decoding exactly once, like the
+ * router: `%2565` stays `%65`, which the router does not read as `e` either.
+ *
+ * `null`, and the proxy answers 400 before any check, when the path does not
+ * decode (a malformed escape) or decodes to a path that is not canonical: an
+ * empty segment (`//`), a `.` or `..` segment, a backslash, a control
+ * character, or a `%` left over from a double encoding. Each is a path a
+ * router may still rewrite after the proxy has judged it: Vercel served the
+ * closed game for `/en%2F%2Fgame/retention`, and the 308 below, built from
+ * `/glossary/..%2F..%2F%2Fevil.com`, would have sent the reader off the site
+ * (the security review of this fix, before it shipped). No page of the site
+ * has one in its address.
+ */
+export function gatePath(pathname: string): string | null {
+  let decoded: string;
+  try {
+    decoded = decodeURIComponent(pathname);
+  } catch {
+    return null;
+  }
+  if (/[\\%\u0000-\u001f\u007f]/.test(decoded)) return null;
+  if (decoded.includes("//") || /(^|\/)\.{1,2}(\/|$)/.test(decoded)) return null;
+  return decoded;
 }
 
 /**
@@ -116,6 +155,10 @@ function tooManyRequestsResponse(retryAfterSeconds: number): NextResponse {
     status: 429,
     headers: { "Retry-After": String(retryAfterSeconds) },
   });
+}
+
+function badRequestResponse(): NextResponse {
+  return new NextResponse("Bad request.", { status: 400 });
 }
 
 function unauthorizedResponse(): NextResponse {
@@ -188,20 +231,24 @@ export const LOCALE_HEADER = "x-tdg-locale";
  * in the same request.
  */
 export async function proxy(request: NextRequest): Promise<NextResponse> {
-  if (request.nextUrl.pathname.startsWith("/admin") && !isAuthorizedForAdmin(request)) {
+  // Every check below reads the decoded path, never `request.nextUrl.pathname`
+  // (`gatePath`).
+  const pathname = gatePath(request.nextUrl.pathname);
+  if (pathname === null) return badRequestResponse();
+
+  if (pathname.startsWith("/admin") && !isAuthorizedForAdmin(request)) {
     return unauthorizedResponse();
   }
 
-  if (request.nextUrl.pathname === OWNER_PREVIEW_PATH && request.method === "POST") {
+  if (pathname === OWNER_PREVIEW_PATH && request.method === "POST") {
     return ownerPreviewResponse(request);
   }
 
-  if (isResultReadPath(request.nextUrl.pathname)) {
+  if (isResultReadPath(pathname)) {
     const verdict = rateLimit(clientKey(request, "result-read"), RESULT_READ_LIMIT);
     if (!verdict.allowed) return tooManyRequestsResponse(verdict.retryAfterSeconds);
   }
 
-  const { pathname } = request.nextUrl;
   const queryLang = request.nextUrl.searchParams.get("lang");
   const fromUrl = splitLocalePath(pathname);
 
@@ -222,7 +269,10 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
   // and Google has already treated them that way since R-13.
   if (!fromUrl && isLocalizableContentPath(pathname)) {
     const target = request.nextUrl.clone();
-    target.pathname = localePath(locale, pathname);
+    // Judged on the decoded path, built from the raw one, which the URL
+    // parser has already normalized: nothing the setter could resolve
+    // differently (security review of `gatePath`, 2026-10-05).
+    target.pathname = localePath(locale, request.nextUrl.pathname);
     const redirect = NextResponse.redirect(target, pathname === "/" ? 307 : 308);
     // Where it lands depends on the browser's language (absent `?lang=` or
     // a cookie): say so, for Google and for any cache on the way.

@@ -624,6 +624,45 @@ Et des lacunes moins visibles, chacune un piège : un outil de l'app écrit deux
 
 **Laissé tel quel** : `shapesOf` d'une app sans `plg` rend une liste vide (un réglage invalide) ; l'ordre de `TOOL_SET` ; le type de `UNIT_INPUT_IDS`.
 
+## A26 : le proxy lit le chemin décodé, comme le routeur (2026-10-05)
+
+**Trouvé** par la relecture sécurité d'ACT-3 (#345), qui le donnait comme une piste non vérifiée, puis **vérifié en production** par l'orchestrateur, en lecture seule. Les gardes du proxy comparaient `request.nextUrl.pathname`, qui garde l'encodage en pourcent, alors que le routeur le décode avant de choisir une route. Relevé le même jour en production :
+- `/en/gam%65/retention`, `/en/game%2Fretention`, `/en%2Fgame%2Fretention` et `/%65n/game/retention` répondaient 200 avec le jeu fermé (`x-matched-path: /en/game/retention`, `noindex` gardé) ;
+- `/en/a%61rrr-funnel-template` servait le moteur fermé ;
+- `/%61dmin/stats`, `/%61dmin/stats/json`, `/%61dmin/audit` et `/%61dmin/preview` passaient la Basic Auth et tombaient sur un 500 sans aucune donnée : c'est le routage qui les arrêtait, pas la garde.
+
+Le double encodage (`/en/gam%2565/retention`) répondait 404 : le routeur ne décode qu'une fois. Les formes brutes (double barre, barre finale, `/./`, majuscules, `;`) étaient déjà redirigées ou en 404.
+
+**Deux routeurs, deux décodages** (la leçon portable est dans `NEXTJS.md` §1.1). Sur Vercel, tout le chemin est décodé, `%2F` compris. Sous `next start`, seuls les segments dynamiques le sont : sur le build de `main`, `/%66r/aarrr-funnel-template` répondait 200, mais `/%61dmin/stats` répondait 404. Une recette locale ne voit donc qu'une partie de la faille.
+
+**Trois relectures sécurité, quatre trous de plus.** La première version (`decodeURIComponent` seul) a été relue avant toute PR. Ce que les relectures ont trouvé, puis ce que l'orchestrateur a vérifié en production :
+- **une redirection ouverte, ouverte par le correctif lui-même** et jamais livrée : le 308 des anciennes adresses, construit depuis le chemin décodé, envoyait `/glossary/..%2F..%2F%2Fevil.com` vers `//evil.com`, le setter de `URL.pathname` résolvant les `..` ;
+- `/en%2F%2Fgame/retention` servait le jeu fermé (Vercel normalise le `//` après le proxy) ;
+- `/en/game.segments/_full.segment.rsc` (31 Ko) et `/en/aarrr-funnel-template.segments/_full.segment.rsc` (237 Ko) servaient la charge RSC entière des pages fermées : `isGamePath` et `isEnginePath` ne reconnaissaient pas ces fichiers frères ;
+- `/R/sample/opengraph-image` répondait 200 : les réécritures de `next.config` ignorent la casse, et le budget de lectures de `/r/<id>` (R2-19) ne comptait que `/r/`.
+
+Ont été sondés sans rien trouver : les exclusions du `matcher` (`/_next/static%2F..%2F..%2Fen%2Fabout`, `/favicon.ico%2F..%2F…`), la casse des pages et de `/admin`, l'Unicode pleine chasse, `%3F`, `%23` et `;`, tous en 404.
+
+**Le correctif** :
+- **`gatePath`** (`src/proxy.ts`) décode le chemin une fois, `%2F` compris. Il rend `null`, donc un 400 avant toute garde, si le chemin ne se décode pas, ou s'il se décode en un chemin non canonique : `//`, segment `.` ou `..`, `\`, caractère de contrôle, `%` restant. Aucune adresse du site n'en contient : pages, `/r/<id>`, images, badges, `llms*.txt`, `/.well-known/…`.
+- **Ce chemin seul est lu** par la garde de `/admin`, l'aperçu `POST /admin/preview`, le budget de `/r/`, `splitLocalePath` et les drapeaux. La cible du 308 se construit depuis le chemin brut, déjà normalisé par l'analyseur d'URL.
+- **`isGamePath` et `isEnginePath`** couvrent `/game.` et `/aarrr-funnel-template.`.
+- **`isResultReadPath`** compare en minuscules.
+- **A26.b** est ouvert dans `CHANTIERS.md` : les pages de `/admin` ne font confiance qu'au proxy.
+
+**Les tests** :
+- **Unitaires** : dix tests neufs dans `src/__tests__/proxy.test.ts`, et des cas ajoutés aux deux `access.test.ts`. Chaque chemin relevé en production y est, avec les quatre formes de redirection ouverte de la relecture.
+- **Non-vacuité** : chaque garde a été défaite à son tour (`gatePath` réduit au décodage, puis au chemin brut ; les fichiers frères ; les minuscules). Chaque fois, ses tests rougissent : six sur sept pour le chemin brut, puis sept, puis un. Le reste passe.
+- **e2e** : `e2e/encoded-paths.spec.ts` tourne contre le vrai routeur, avec quatre specs. Le moteur fermé, langue encodée, répond 404. `/admin` encodé répond 401 avec son défi. Le 308 encodé répond 400, sans `Location`. Un chemin indécodable répond 400. **Contre le build de `main`**, les quatre rougissent. Une cinquième spec, sur la charge RSC, a été retirée : `next start` ne sert pas ces fichiers et répond 404 avec ou sans le correctif (convention 5). Le test unitaire la tient.
+
+**Vérifié, sorties réelles** :
+- `tsc` et `eslint` propres ;
+- `vitest run --coverage` : **3 491 sur 3 491** (+10), seuils tenus ;
+- build comme la CI ;
+- Playwright, suite complète, avec l'émulateur Firestore et `CI=1`, sur la version finale : **1 010 passées, 7 ignorées par construction, 0 échec**, sur 1 017 (+4). L'avant-dernière version donnait 1 011 sur 1 018, avec la spec retirée depuis.
+
+La production est à revérifier après le déploiement, avec toutes les adresses ci-dessus.
+
 ## A22, APP-1 : les chiffres de l'app (2026-10-05)
 
 **Livré** (branche `claude/adoring-rubin-e98d58`, menée par un sous-agent depuis la seule spécification, `docs/engine/app-grand-public.md` §21.2.3, §21.2.4, §21.4.1, §21.4.2, §21.4.4, §21.4.5 et §21.6.5, puis reprise par un second après l'arrêt dit plus bas). Rien d'affiché ne change pour le SaaS, sauf la liste « Autres outils » d'une fiche, qui propose RevenueCat, AppsFlyer et Adjust (accepté par Antoine le 2026-10-05, §21.0) ; aucun écran n'appelle encore le type, et les props du SaaS ne gagnent rien. Aucun modèle pur n'a bougé : `git diff origin/main --stat` est vide sur `stream.ts`, `app-model.ts`, `mkt-model.ts`, `golden-v1.json`, `golden-v2.json` et `golden-projection.ts`.
