@@ -317,7 +317,9 @@ export type PlgLeverId =
  * whole count, never a percent — and the link is never a candidate.
  */
 export type SlgLeverId = "slg.acq.lead-to-opp" | "slg.ref.referred-share" | "slg.rev.win-rate" | "slg.ret.renewal" | "slg.rev.acv" | "link.pql-handoff";
-export type LeverId = PlgLeverId | SlgLeverId;
+/** The consumer app's levers (§21.5.3), after the self-serve ones in panel order. */
+export type AppLeverId = "app.ret.active-retention" | "app.rev.purchases-per-active" | "app.rev.ads-per-active" | "app.rev.commission";
+export type LeverId = PlgLeverId | SlgLeverId | AppLeverId;
 
 export interface EngineSetup {
   type: BusinessType;

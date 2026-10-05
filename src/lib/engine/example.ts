@@ -1,4 +1,4 @@
-import { ENGINE_SCHEMA_VERSION, type EngineState, type MetricEntry, type MetricId, type MetricValue, type Motion, type SharedCount, type SourceRef, type ToolId } from "./types";
+import { ENGINE_SCHEMA_VERSION, type EngineState, type LeverId, type MetricEntry, type MetricId, type MetricValue, type Motion, type SharedCount, type SourceRef, type ToolId } from "./types";
 
 /**
  * The engine spec's §6.0 example — a fictional self-serve SaaS, reference
@@ -111,6 +111,19 @@ export const EXAMPLE_SLG_TARGETS: Partial<Record<MetricId, number>> = { "slg.acq
 
 /** The three sales-assisted counts, typed once (S6). */
 export const EXAMPLE_SLG_BASE: Partial<Record<SharedCount, number>> = { slgOppsCreated: 130, slgDealsWon: 18, slgCustomers: 100 };
+
+/**
+ * The fictional consumer app's own targets (§21.9.1): day-30 retention 15 %, subscriber conversion 4 %, the actives'
+ * retention 92 %. Only a team target names the stage that holds the engine back (C1), as for the SaaS above.
+ */
+export const EXAMPLE_CONSUMER_TARGETS: Partial<Record<MetricId, number>> = { "ret.d30": 15, "rev.paid-conversion": 4, "app.ret.active-retention": 92 };
+
+/**
+ * The consumer app example's « Et si » (§21.9.1): day-30 retention at 15 % and the stores' commission at 15 % (the
+ * reduced-rate program). A constant, never put in the example's state: the tests and the golden apply it with
+ * `{ ...consumerState(), whatIf: EXAMPLE_CONSUMER_WHATIF }`, or as the scenario's targets.
+ */
+export const EXAMPLE_CONSUMER_WHATIF: Partial<Record<LeverId, number>> = { "ret.d30": 15, "app.rev.commission": 15 };
 
 /**
  * A fresh copy each call: callers may change it (the example's own slide
