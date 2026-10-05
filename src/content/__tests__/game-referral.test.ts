@@ -409,7 +409,7 @@ describe("C12 · French numbers do not break", () => {
     expect(PLAIN_SPACE_IN_NUMBER.test("214 contacts sélectionnés")).toBe(false);
   });
 
-  it("writes the one number of the level that has a digit group, the group's total, with a no-break space", () => {
+  it("writes the group's total on the phone, the level's own digit group, with a no-break space", () => {
     expect(REFERRAL_CONTENT.phone.group.fr).toContain(`1${NBSP}284${NBSP}€`);
     expect(REFERRAL_CONTENT.phone.group.en).toContain("€1,284");
   });
