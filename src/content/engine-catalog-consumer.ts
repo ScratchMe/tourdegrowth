@@ -611,7 +611,6 @@ export const ENGINE_CATALOG_CONSUMER: Record<ConsumerPlgMetricId, EngineCatalogE
     },
   },
   "rev.expansion": {
-    // APP-2 GAP (spec 21.4.6): the Stripe place's path has no English in the spec. Stand-in: the SaaS entry's English.
     name: { fr: "Expansion mensuelle", en: "Monthly expansion" },
     oneLiner: {
       fr: "Le revenu que les abonnés déjà là ajoutent dans le mois : passage à l'offre famille ou premium.",
@@ -639,7 +638,7 @@ export const ENGINE_CATALOG_CONSUMER: Record<ConsumerPlgMetricId, EngineCatalogE
         label: { fr: "Stripe", en: "Stripe" },
         path: {
           fr: "pour le web : les mouvements de MRR du mois, ligne « expansion »",
-          en: "the Billing overview page: the month's MRR movements, the \"expansion\" line",
+          en: "for the web: the month's MRR movements, the \"expansion\" line",
         },
       },
     ],
@@ -660,8 +659,6 @@ export const ENGINE_CATALOG_CONSUMER: Record<ConsumerPlgMetricId, EngineCatalogE
     ],
   },
   "rev.contraction": {
-    // APP-2 GAP (spec 21.4.6): the spec only says « comme rev.expansion, ligne « rétrogradation » / "contraction" » for `where` and
-    // `request`. Stand-in: the SaaS entry's own strings. To be replaced by the spec's text once it gives it.
     name: { fr: "Rétrogradation mensuelle", en: "Monthly contraction" },
     oneLiner: {
       fr: "Le revenu que les abonnés qui restent retirent dans le mois : offre moins chère, passage à l'annuel.",
@@ -680,16 +677,16 @@ export const ENGINE_CATALOG_CONSUMER: Record<ConsumerPlgMetricId, EngineCatalogE
         source: tool("revenuecat"),
         label: { fr: "RevenueCat", en: "RevenueCat" },
         path: {
-          fr: "la page Billing overview : les mouvements de MRR du mois, ligne « contraction »",
-          en: "the Billing overview page: the month's MRR movements, the \"contraction\" line",
+          fr: "les changements de produit du mois vers une offre moins chère, dans les événements d'abonnement",
+          en: "the month's product changes to a cheaper plan, in the subscription events",
         },
       },
       {
         source: tool("stripe"),
         label: { fr: "Stripe", en: "Stripe" },
         path: {
-          fr: "la page Billing overview : les mouvements de MRR du mois, ligne « contraction »",
-          en: "the Billing overview page: the month's MRR movements, the \"contraction\" line",
+          fr: "pour le web : les mouvements de MRR du mois, ligne « contraction »",
+          en: "for the web: the month's MRR movements, the \"contraction\" line",
         },
       },
     ],
@@ -702,8 +699,8 @@ export const ENGINE_CATALOG_CONSUMER: Record<ConsumerPlgMetricId, EngineCatalogE
       en: "the MRR at the start of {month} and the MRR lost to downgrades during the month, without cancellations",
     },
     noReferenceReason: {
-      fr: "la place pour l'expansion dépend de ta gamme : forte avec une offre famille, nulle avec un seul plan",
-      en: "the room for expansion depends on your range: large with a family plan, none with a single plan",
+      fr: "elle dépend du modèle de prix autant que du produit : aucun ordre de grandeur ne vaut pour tous",
+      en: "it depends on the pricing model as much as on the product: no order of magnitude fits everyone",
     },
     naReasons: [
       { id: "not-subscription", label: { fr: "Un seul plan", en: "A single plan" } },
