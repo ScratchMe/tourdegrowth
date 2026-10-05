@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
+import { coverage } from "../coverage";
 import { engineFileName, parseEngineFile, serializeEngine } from "../io";
-import type { EngineState } from "../types";
+import type { EngineState, Snapshot } from "../types";
+import { currentSnapshot } from "../values";
 import { fullState, toV1 } from "./storage-fixtures";
 
 /**
@@ -14,6 +16,14 @@ import { fullState, toV1 } from "./storage-fixtures";
  * newer-version branch fails "a newer schema version is refused…" (the file
  * then reads as `not-engine`); returning `state: null` on validation errors
  * fails "a half-filled file is opened…".
+ *
+ * The months' refusal (A25), measured the same way on 2026-10-05: without
+ * `readableMonths`, the 16 tests of the refusal fall and its companion
+ * ("everything else a month holds opens…") passes, as it must in both states.
+ * Each piece of the check fails its own: the length 2, `referenceMonth` 5,
+ * `cohortMonth` 3, `metrics` 3, `targets` 3, a list taken for an object 2,
+ * and the type check before the pattern 1 (a list reads as its text in a
+ * pattern, so only `referenceMonth: ["2026-08"]` sees it).
  */
 
 /** The same state with its keys inserted in reverse order, deep. */
@@ -144,6 +154,85 @@ describe("a v1 file and the v2 setup (engine spec §18.3.2)", () => {
     expect(parsed.refusal).toBeUndefined();
     expect(parsed.migratedFrom).toBeUndefined();
     expect(parsed.errors).toEqual([]);
+  });
+});
+
+describe("a month the screens cannot read is refused (A25)", () => {
+  /** `fullState`'s file with its months replaced, as a file on disk would carry them. */
+  const withMonths = (snapshots: unknown[], base: Record<string, unknown> = JSON.parse(serializeEngine(fullState()))): string => JSON.stringify({ ...base, snapshots });
+  const month = (): Record<string, unknown> => JSON.parse(serializeEngine(fullState())).snapshots[0];
+  const without = (key: string): Record<string, unknown> => {
+    const m = month();
+    delete m[key];
+    return m;
+  };
+  /** The month before `month()`, closed when the next one started: a two-month file as the engine writes it. */
+  const july = (): Record<string, unknown> => ({ ...month(), id: "july", referenceMonth: "2026-07", cohortMonth: "2026-06", closedAt: "2026-08-01T00:00:00.000Z" });
+  const REFUSED = { state: null, errors: ["snapshots: no month, or a month the screens cannot read"], refusal: "not-engine" };
+
+  it("no month at all is refused, where it used to open and then throw at every visit", () => {
+    // Why (measured in a browser, 2026-10-05): the board's first read of an opened state is its current month.
+    expect(() => currentSnapshot({ ...fullState(), snapshots: [] })).toThrow();
+    expect(parseEngineFile(withMonths([]))).toEqual(REFUSED);
+  });
+
+  it("a month that is not an object, or empty, is refused: the import's own preview reads its numbers", () => {
+    // Why: the preview counts the last month's numbers (`coverage`), which an empty month does not hold.
+    expect(() => coverage({} as Snapshot)).toThrow();
+    for (const broken of [{}, null, 1, "2026-08", []]) expect(parseEngineFile(withMonths([broken])), JSON.stringify(broken)).toEqual(REFUSED);
+  });
+
+  it.each<[string, unknown]>([
+    ["without its metrics", without("metrics")],
+    ["without its targets", without("targets")],
+    ["with its metrics null", { ...month(), metrics: null }],
+    // A list where the validator wants an object: what `validateEngine` already calls missing.
+    ["with its metrics a list", { ...month(), metrics: [] }],
+    ["with its targets a list", { ...month(), targets: [] }],
+    ["without its month", without("referenceMonth")],
+    ["with a month that is not YYYY-MM", { ...month(), referenceMonth: "août" }],
+    ["with a thirteenth month", { ...month(), referenceMonth: "2026-13" }],
+    ["with its month as a number", { ...month(), referenceMonth: 202608 }],
+    // A list reads as its text in a pattern (`"2026-08"`), then has no `split`: only the type check refuses it.
+    ["with its month as a list", { ...month(), referenceMonth: ["2026-08"] }],
+    ["without its cohort month", without("cohortMonth")],
+    ["with a cohort month that is not YYYY-MM", { ...month(), cohortMonth: "2026-13" }],
+  ])("a month %s is refused", (_, broken) => {
+    expect(parseEngineFile(withMonths([broken]))).toEqual(REFUSED);
+  });
+
+  it("one broken month refuses the file, wherever it sits: the series and the merge read every month", () => {
+    expect(parseEngineFile(withMonths([{}, month()]))).toEqual(REFUSED);
+    expect(parseEngineFile(withMonths([july(), without("targets")]))).toEqual(REFUSED);
+    expect(parseEngineFile(withMonths([without("cohortMonth"), month()]))).toEqual(REFUSED);
+    // The same file with both months whole opens, without a warning: the refusal is the broken month's.
+    expect(parseEngineFile(withMonths([july(), month()]))).toMatchObject({ errors: [], state: { snapshots: [{ id: "july" }, {}] } });
+  });
+
+  it("an older file is refused the same way: its months have the same shape, and the check runs before the migration", () => {
+    expect(parseEngineFile(withMonths([], toV1(fullState())))).toEqual(REFUSED);
+    expect(parseEngineFile(withMonths([{}], toV1(fullState())))).toEqual(REFUSED);
+    expect(parseEngineFile(withMonths([], { ...JSON.parse(serializeEngine(fullState())), schemaVersion: 2 }))).toEqual(REFUSED);
+  });
+
+  it("everything else a month holds opens WITH its warnings: the screens show it, so the file is not refused", () => {
+    // Each of these opened and showed its board in a browser (2026-10-05): the validator speaks, nothing is lost.
+    for (const months of [
+      [without("id")],
+      [without("createdAt")],
+      [{ ...month(), closedAt: "x" }],
+      [{ ...month(), windows: "x" }],
+      [{ ...month(), pipelineOpen: "x" }],
+      [{ ...month(), base: "x" }],
+      [{ ...july(), closedAt: undefined }, month()],
+      [july(), { ...month(), referenceMonth: "2026-07" }],
+      [{ ...july(), referenceMonth: "2026-09" }, month()],
+    ]) {
+      const parsed = parseEngineFile(withMonths(months));
+      expect(parsed.refusal, JSON.stringify(months).slice(0, 120)).toBeUndefined();
+      expect(parsed.state).not.toBeNull();
+      expect(parsed.errors.length).toBeGreaterThan(0);
+    }
   });
 });
 

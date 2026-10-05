@@ -31,7 +31,8 @@ import type {
 /** v1 holds exactly one snapshot; the array is there for the monthly series (v2), and the latest is the one in use. */
 export function currentSnapshot(state: EngineState): Snapshot {
   const snapshot = state.snapshots[state.snapshots.length - 1];
-  if (!snapshot) throw new Error("An engine state always holds at least one snapshot (validateEngine refuses an empty one).");
+  // validateEngine only reports an empty list: the import refuses it (`parseEngineFile`, A25), and no screen makes one.
+  if (!snapshot) throw new Error("An engine state always holds at least one snapshot (parseEngineFile refuses a file without one).");
   return snapshot;
 }
 
