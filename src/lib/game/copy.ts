@@ -27,6 +27,7 @@ import type { AcquisitionCardId, AcquisitionDarkId } from "./levels/acquisition"
 import type { ActivationCardId, ActivationDarkId } from "./levels/activation";
 import type { ReferralCardId, ReferralDarkId } from "./levels/referral";
 import type { RetentionCardId, RetentionDarkId } from "./levels/retention";
+import type { RevenueCardId, RevenueDarkId } from "./levels/revenue";
 import type { EndingId } from "./types";
 
 /**
@@ -670,6 +671,95 @@ export type ReferralCopy = LevelCopy<ReferralCardId, ReferralDarkId, ReferralOrd
   sent: SentPillCopy;
 };
 
+/** The CEO only ever asks for these five on the revenue level (GAME-BRIEF §20.5). */
+export type RevenueOrderId = Extract<RevenueDarkId, "addon" | "trial" | "lootbox" | "hiddensub" | "renewal">;
+
+/**
+ * Gainix's app, from the plans screen to the gem shop and the account's
+ * renewal line (GAME-BRIEF §20.7) — a drawn app, fictional brand, fictional
+ * plan and outfit. Each string is one line the phone shows when the card it
+ * belongs to is in production or picked; the phone composes them, the copy
+ * never does. The doc-comment of a field says what shows it.
+ */
+export interface RevenuePhoneCopy {
+  /** Always: the line over the phone. */
+  caption: string;
+  /** `appBar`. */
+  appName: string;
+  /** `appBar`. */
+  time: string;
+  /** `offer`, without `trial`. */
+  offerBase: string;
+  /** `offer.trial`. */
+  offerTrial: string;
+  /** `offer.trial`, in small print. */
+  offerTrialSmall: string;
+  /** `offer.fullPrice`, shown first. */
+  fullPrice: string;
+  /** `plans`. */
+  plansTitle: string;
+  /** `plans`, without `personal`. */
+  monthly: string;
+  /** `plans.personal`. */
+  monthlyPersonal: string;
+  /** `plans.addon`. */
+  addon: string;
+  /** `trialReminder`. */
+  trialReminder: string;
+  /** `programme`. */
+  programme: string;
+  /** `programme`, in small print. */
+  programmeSmall: string;
+  /** `coaching`. */
+  coaching: string;
+  /** `downgrade`. */
+  downgrade: string;
+  /** `shop`. */
+  shopTitle: string;
+  /** `shop`. */
+  shopItem: string;
+  /** `shop`, without `odd`. */
+  packsRound: string;
+  /** `shop.odd`. */
+  packsOdd: string;
+  /** `shop.euros`. */
+  euros: string;
+  /** `chest`. */
+  chest: string;
+  /** `express`. */
+  express: string;
+  /** `renewal`, plain. */
+  renewalPlain: string;
+  /** `renewal`, silent. */
+  renewalSilent: string;
+  /** `renewal`, notice. */
+  renewalNotice: string;
+  /** `checkoutQuestion`. */
+  checkoutQuestion: string;
+  /** `checkoutQuestion`: three answers as bullets, the first two quoted by `events.surveyAnswers`. */
+  checkoutAnswers: readonly string[];
+}
+
+/**
+ * The pill under Gainix's phone: what the end of the trial will charge, and
+ * whether anything announces it (GAME-BRIEF §20.7). A measurable fact, never a
+ * judgement — level 1's « N clics pour résilier ». No French text requires a
+ * reminder before a trial ends, so the copy never says a law was broken.
+ */
+export interface ChargePillCopy {
+  /** « Prélevé à la fin de l'essai : {amount} ». `{amount}` arrives formatted (`formatEuros`), currency included. */
+  amount: string;
+  /** `silent`, after `amount`: a trial that charges with no reminder. */
+  silentSuffix: string;
+  /** `addon`, after `amount` (and `silentSuffix`): an option ticked in advance is part of the charge. */
+  addonSuffix: string;
+}
+
+export type RevenueCopy = LevelCopy<RevenueCardId, RevenueDarkId, RevenueOrderId> & {
+  phone: RevenuePhoneCopy;
+  charge: ChargePillCopy;
+};
+
 /**
  * Every template, and the placeholders the island supplies for it. A dotted
  * path; `*` stands for any key of a record. A template may use a subset of
@@ -750,6 +840,12 @@ export const ACTIVATION_COPY_TEMPLATES: Readonly<Record<string, readonly string[
 export const REFERRAL_COPY_TEMPLATES: Readonly<Record<string, readonly string[]>> = {
   ...LEVEL_COPY_TEMPLATES,
   "sent.some": ["n"],
+};
+
+/** The revenue level's own template: the pill's amount. The phone carries none. */
+export const REVENUE_COPY_TEMPLATES: Readonly<Record<string, readonly string[]>> = {
+  ...LEVEL_COPY_TEMPLATES,
+  "charge.amount": ["amount"],
 };
 
 function isTranslatable(value: object): value is Translatable {

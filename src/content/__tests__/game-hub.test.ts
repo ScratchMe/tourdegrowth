@@ -2,7 +2,15 @@ import { describe, expect, it } from "vitest";
 import { generateImageMetadata } from "@/app/[locale]/game/opengraph-image";
 import { enabledLevelSlugs } from "@/lib/game/levels";
 import { GAME_HUB, LEVEL_TEASERS } from "../game/hub";
-import { ACQUISITION_INTRO, ACTIVATION_INTRO, GAME_META, GAME_OPEN_COUNT_WORDS, REFERRAL_INTRO, RETENTION_INTRO } from "../game/meta";
+import {
+  ACQUISITION_INTRO,
+  ACTIVATION_INTRO,
+  GAME_META,
+  GAME_OPEN_COUNT_WORDS,
+  REFERRAL_INTRO,
+  RETENTION_INTRO,
+  REVENUE_INTRO,
+} from "../game/meta";
 import { LOCALES } from "@/lib/i18n/locale";
 import { PILLARS } from "@/lib/scoring/pillars";
 
@@ -33,6 +41,7 @@ const ALL = (() => {
   translatables(ACQUISITION_INTRO, "ACQUISITION_INTRO", out);
   translatables(ACTIVATION_INTRO, "ACTIVATION_INTRO", out);
   translatables(REFERRAL_INTRO, "REFERRAL_INTRO", out);
+  translatables(REVENUE_INTRO, "REVENUE_INTRO", out);
   return out;
 })();
 
@@ -71,6 +80,7 @@ describe("game hub and metadata copy", () => {
     expect(ACQUISITION_INTRO.steps).toHaveLength(3);
     expect(ACTIVATION_INTRO.steps).toHaveLength(3);
     expect(REFERRAL_INTRO.steps).toHaveLength(3);
+    expect(REVENUE_INTRO.steps).toHaveLength(3);
   });
 
   /**
@@ -80,7 +90,14 @@ describe("game hub and metadata copy", () => {
    * get cut in results; descriptions outside 70-160 get rewritten by Google.
    */
   it("keeps titles to 60 characters and descriptions within 70-160, in both languages", () => {
-    for (const page of [GAME_META.hub, GAME_META.retention, GAME_META.acquisition, GAME_META.activation, GAME_META.referral]) {
+    for (const page of [
+      GAME_META.hub,
+      GAME_META.retention,
+      GAME_META.acquisition,
+      GAME_META.activation,
+      GAME_META.referral,
+      GAME_META.revenue,
+    ]) {
       for (const locale of LOCALES) {
         const title = page.title[locale];
         const description = page.description[locale];

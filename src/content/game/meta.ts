@@ -91,6 +91,19 @@ export const GAME_META = {
       "A year at Partix: a viral coefficient of 0.40, user trust and the regulator's radar missing from the dashboard.",
     ),
   },
+  // TODO: à relire — 2026-10-05 (A24.REV-1) : le niveau revenue, tout le bloc.
+  revenue: {
+    title: t("Gainix : le jeu du revenue — Tour de Growth", "Gainix: the revenue game — Tour de Growth"),
+    description: t(
+      "Joue une année comme PM growth d'une appli de sport : un DG qui veut 6 € de revenu par utilisateur, et huit astuces à reconnaître.",
+      "Play a year as the growth PM of a fitness app: a CEO who wants €6 of revenue per user, and eight tricks to learn to spot.",
+    ),
+    breadcrumb: t("Une année chez Gainix", "A year at Gainix"),
+    shareImageAlt: t(
+      "Une année chez Gainix : 4,00 € de revenu par utilisateur, la confiance et le radar DGCCRF absents du dashboard.",
+      "A year at Gainix: €4.00 of revenue per user, user trust and the regulator's radar missing from the dashboard.",
+    ),
+  },
 } as const satisfies Record<string, Record<string, Translatable>>;
 
 /**
@@ -192,6 +205,23 @@ export const REFERRAL_INTRO = {
   lead: t(
     "Ton DG dirige maintenant Partix, une appli de partage de dépenses entre amis, et il t'a emmené avec lui comme PM growth. Un million d'utilisateurs, et chaque nouveau en amène 0,40 autre en moyenne par ses invitations : c'est le coefficient viral. Le board veut 0,60 d'ici décembre. Chaque trimestre, le DG t'appelle en visio, puis tu as droit à deux actions, nommées comme on les nomme en réunion. Tu ne sauras ce qu'elles valent qu'une fois le trimestre passé. Le DG, lui, sait déjà ce qu'il veut.",
     "Your CEO now runs Partix, an app for splitting costs with friends, and he brought you along as growth PM. A million users, and each new one brings in 0.40 more on average through their invitations: that's the viral coefficient. The board wants 0.60 by December. Every quarter the CEO calls you on video, then you get two actions, named the way they are named in meetings. You will only learn what they are worth once the quarter is over. The CEO already knows what he wants.",
+  ),
+  stepsTitle: RETENTION_INTRO.stepsTitle,
+  steps: RETENTION_INTRO.steps,
+  glossaryLead: RETENTION_INTRO.glossaryLead,
+} as const;
+
+// TODO: à relire — 2026-10-05 (A24.REV-1) : le bandeau, le titre et le chapeau.
+/**
+ * The revenue level's intro (GAME-BRIEF §20). The three steps and the glossary
+ * lead say how any year plays, so they are level 1's own objects.
+ */
+export const REVENUE_INTRO = {
+  eyebrow: t("Le côté obscur · revenue", "The dark side · revenue"),
+  title: t("Une année chez Gainix", "A year at Gainix"),
+  lead: t(
+    "Ton DG dirige maintenant Gainix, une appli de sport avec abonnement et monnaie virtuelle, et il t'a emmené avec lui comme PM growth. 200 000 utilisateurs actifs, qui rapportent 4 € chacun par mois. Le board veut 6 € d'ici décembre. Chaque trimestre, le DG t'appelle en visio, puis tu as droit à deux actions, nommées comme on les nomme en réunion. Tu ne sauras ce qu'elles valent qu'une fois le trimestre passé. Le DG, lui, sait déjà ce qu'il veut.",
+    "Your CEO now runs Gainix, a fitness app with a subscription and a virtual currency, and he brought you along as growth PM. 200,000 active users, who bring in €4 each a month. The board wants €6 by December. Every quarter the CEO calls you on video, then you get two actions, named the way they are named in meetings. You will only learn what they are worth once the quarter is over. The CEO already knows what he wants.",
   ),
   stepsTitle: RETENTION_INTRO.stepsTitle,
   steps: RETENTION_INTRO.steps,
