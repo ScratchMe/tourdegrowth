@@ -8,7 +8,7 @@ question tranchée plus tard y gagne sa ligne, dans le même format.*
 C1 à C22 ont été tranchées dans la séance du 2026-09-29. Les questions de
 design y ont été posées avec des captures du vrai écran : un build local avec
 le jeu et le moteur ouverts, et, pour la vue propriétaire, un build jetable
-jamais commité. C23 à C29 l'ont été le 2026-09-30, C30 à C33 le 2026-10-01, C34 à C44 le 2026-10-02, C45 à C55 le 2026-10-03, C56 à C74, C92 et C93 le 2026-10-04 (l'app grand public et la place de marché ; C92 et C93 sont deux questions de suivi, numérotées après C75 à C91, ouvertes le même jour pour le jeu), et C75 à C91 le même jour (les trois derniers niveaux du jeu).
+jamais commité. C23 à C29 l'ont été le 2026-09-30, C30 à C33 le 2026-10-01, C34 à C44 le 2026-10-02, C45 à C55 le 2026-10-03, C94 à C103 le 2026-10-05 (nées du retour du brief 10, toutes sur la reco), C56 à C74, C92 et C93 le 2026-10-04 (l'app grand public et la place de marché ; C92 et C93 sont deux questions de suivi, numérotées après C75 à C91, ouvertes le même jour pour le jeu), et C75 à C91 le même jour (les trois derniers niveaux du jeu).
 Les questions encore ouvertes sont dans `CHANTIERS.md`, section C.
 
 | # | Sujet | Réponse | Écrit dans | Suite |
@@ -106,3 +106,13 @@ Les questions encore ouvertes sont dans `CHANTIERS.md`, section C.
 | C91 | Revenue : la bande de l'encart du résultat (2026-10-04) | **« Revenu par utilisateur {metric} »**, remplacée par « ARPU {metric} » si la spec la voit passer à la ligne (la reco) | `docs/game/revenue.md` §20.10, Q5 | A24, REV-3 et REV-4 |
 | C92 | L'app : le modèle de revenu (suivi de C56) | **Deux flux** : les abonnements (MRR) et les achats et la pub sur les actifs du mois, chacun par la boucle du MRR ; unit economics par installation ; un réglage de monétisation (la reco) | `docs/engine/app-grand-public.md` §21.13 | A22, réécriture de §21 |
 | C93 | La place de marché : les abonnements des vendeurs (suivi de C64) | **La proposition, avec une marge par flux** : cinq chiffres de plus côté offre, un flux récurrent, les unit economics de l'offre, le total commissions + abonnements | `docs/engine/place-de-marche.md` §22.14 | A23, réécriture de §22 |
+| C94 | La place de marché : le prochain pas (née du retour 10, 2026-10-05) | **Partagé, au-dessus du sélecteur « Côté affiché »** (la reco) | `docs/engine/place-de-marche.md` §22.14 | A23, MKT-7 |
+| C95 | La place de marché : les ★ de l'offre (2026-10-05) | **Première vente, churn des vendeurs, conversion en abonné** (la reco) ; efforts inchangés | `docs/engine/place-de-marche.md` §22.14 | A23, MKT-1 |
+| C96 | La place de marché : la trésorerie et la bande du total (2026-10-05) | **Hors de la bande** : chaque côté garde la sienne (la reco) | `docs/engine/place-de-marche.md` §22.14 | A23, MKT-7 |
+| C97 | La place de marché : le montant d'une fuite (2026-10-05) | **« ~470 € »**, la règle du moteur pour une projection (la reco) | `docs/engine/place-de-marche.md` §22.14 | A23, MKT-5, MKT-7, MKT-8 |
+| C98 | La place de marché : les mots du retour 10 contre ceux de §22 (2026-10-05) | **§22 l'emporte** où il a ses mots (« vendeur abonné », les noms de §22.4.4) ; le retour fournit le reste (la reco) | `docs/engine/place-de-marche.md` §22.14 | A23, MKT-7, MKT-8 |
+| C99 | La place de marché : le taux de service sur des demandes (2026-10-05) | **« Demandes envoyées »** / "requests sent", dans les deux vocabulaires (la reco) | `docs/engine/place-de-marche.md` §22.14 | A23, MKT-1, MKT-5 |
+| C100 | La place de marché : le premier jalon d'un prestataire (2026-10-05) | **« Première réservation reçue »** (§22.8.4, la reco) | `docs/engine/place-de-marche.md` §22.14 | A23, MKT-S |
+| C101 | La place de marché : un « ? » pour le revenu net (2026-10-05) | **Oui, un « ? » du moteur seul**, sans page de glossaire (la reco) | `docs/engine/place-de-marche.md` §22.14 | A23, MKT-7 |
+| C102 | La place de marché : les autres étapes sous leur cible sur la slide de la fuite (2026-10-05) | **À l'encre, la place de marché seule** ; le libre-service et l'assisté inchangés (la reco) | `docs/engine/place-de-marche.md` §22.14 | A23, MKT-8 |
+| C103 | La place de marché : la liste, la courbe du total, l'ordre du deck (2026-10-05) | **Oui aux trois** : une étape signalée, celle du côté affiché ; aucune courbe du total ; le total, puis les acheteurs, puis les vendeurs (la reco) | `docs/engine/place-de-marche.md` §22.14 | A23, MKT-7, MKT-8 |

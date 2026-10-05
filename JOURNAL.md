@@ -523,3 +523,5 @@ Et des lacunes moins visibles, chacune un piège : un outil de l'app écrit deux
 - **Deux choix du retour sont gardés sans question** : sans abonnements, pas de bande du total (§22.6.2 dit « le revenu net seul »), et le sélecteur part sur la demande, comme le brief le recommandait.
 
 **Vérifié, sorties réelles** : `diff -rq` entre la copie du script et le dossier du dépôt, vide ; `node board/market-check.mjs`, 37 « ok », code 0 ; `node board/make-copy.mjs` après la correction, `COPY.md` identique (`cmp`). La planche n'a pas été rejouée dans un navigateur : ses mesures sont celles du retour, et la vraie mesure se prend au portage (MKT-7).
+
+**Tranchées le même jour, toutes sur la reco** : C94 à C103, posées une à une à Antoine. Les réponses sont dans `docs/engine/place-de-marche.md` §22.14, l'index dans `docs/decisions.md`, et la section C de `CHANTIERS.md` ne garde qu'un paragraphe. Le texte de §22 ne change pas encore. Il les appliquera avec les fiches de MKT-7 et MKT-8, dans la PR qui suit : C95 aux formes, C97 et C99 à la copie, C98 et C100 aux mots.
