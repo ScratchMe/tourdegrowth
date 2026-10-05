@@ -527,9 +527,12 @@ Tous vécus sur les niveaux 1 et 2 ; chacun a coûté au moins une relecture.
   contiennent déjà des U+00A0 invisibles ; une chaîne existante retapée à la
   main n'est plus la même, et un remplacement qui la cherche échoue ou, pire,
   la change. Lire la chaîne dans le fichier (ou `git show origin/main:…`) et la
-  recopier par script. **L'outil Write remplace une U+00A0 tapée par une
-  espace ordinaire** (ACT-1) : dans du code écrit à la main, l'échappement
-  `\u00a0`, jamais l'insécable littérale.
+  recopier par script. **L'outil Write ne garde pas ce qu'on tape** : il a
+  remplacé une U+00A0 tapée par une espace ordinaire (ACT-1), puis un
+  échappement `\u00a0` tapé par une insécable littérale (ACT-4). Dans du code
+  écrit à la main, l'échappement `\u00a0`, posé par un script (`chr(92)`), et
+  vérifié après l'écriture : `grep -c $'\u00a0'` sur le fichier, et le nombre
+  d'échappements attendu.
 - **Une chaîne du prototype qui change de fichier garde sa garde** (U0) : C11
   (`game-retention.test.ts`) ne parcourt que `RETENTION_CONTENT` et ce qu'il
   nomme. Une ligne validée déplacée ailleurs se vérifie par son nom, et le
@@ -614,7 +617,9 @@ merge livré : `git show --stat <sha>` (convention 1).
 - L'entrée du journal de chaque PR, et, dans la même PR, ceux des nombres
   des chiffres de référence de `CLAUDE.md` qui ont changé (tests unitaires,
   specs Playwright, specs ignorées par construction). L'état du jeu dans
-  `CLAUDE.md` change à X-3 (la ligne `src/lib/game/` de la carte du repo) et à X-4.
+  `CLAUDE.md` ne change qu'à X-3 (la ligne `src/lib/game/` de la carte du
+  repo) ; à X-4, seuls les nombres bougent, et le niveau fini se lit dans
+  A24 de `CHANTIERS.md` (ACT-4).
 
 ## 21.8 Questions communes aux trois niveaux
 
