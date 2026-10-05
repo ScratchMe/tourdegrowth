@@ -44,7 +44,7 @@ import { TargetsStart } from "./_engine/TargetsStart";
 import { continueFrom, nextSelfNumber, type Continuation } from "./_engine/next-step";
 import { seedAskDraft } from "./_engine/sheet-drafts";
 import { domId, fill, formatMonth } from "./_engine/text";
-import type { EngineActions, EngineView } from "./_engine/view";
+import { derivedFor, metricsFor, type EngineActions, type EngineView } from "./_engine/view";
 import screens from "./_engine/Screens.module.css";
 
 /**
@@ -61,6 +61,12 @@ export interface EngineWorkbenchProps {
   metrics: ResolvedMetric[];
   /** The three computed figures (§5.7). */
   derived: ResolvedDerived[];
+  /**
+   * The consumer app's prose (§21.4.7), resolved like `metrics` and `derived`: its fifteen self-serve numbers in its own
+   * words, then its six, and its figures. The SaaS's props carry none of the app's ids. A screen reads the catalogue of
+   * its engine's type through `metricsFor` / `derivedFor` (`_engine/view.ts`), never this field directly.
+   */
+  typeCatalogs: { "consumer-app": { metrics: ResolvedMetric[]; derived: ResolvedDerived[] } };
   /** The eight Tour bridges, question text and options in the Tour's order (§6.11). */
   bridges: ResolvedBridge[];
   /**
@@ -131,7 +137,8 @@ function withSnapshot(state: EngineState, change: (snapshot: Snapshot) => Snapsh
  * heading when its screen opens, back to its row in « Tes chiffres » on the
  * way back — never on first paint.
  */
-export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy, bridges }: EngineWorkbenchProps) {
+export function EngineWorkbench(props: EngineWorkbenchProps) {
+  const { locale, strings, bridges } = props;
   const snap = useSyncExternalStore(subscribe, getClientSnapshot, getServerSnapshot);
   const [screen, setScreen] = useState<Screen>("board");
   // The number whose own screen is open (A18 T2.b): opened from its row in « Tes chiffres », the next step, or the collect list.
@@ -179,6 +186,11 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
   }, [known]);
 
   const state = snap?.result.kind === "ok" ? snap.result.state : null;
+  // The prose the engine on screen reads (§21.4.7): its type's. With none yet (the start card, its example, a file's
+  // preview) the SaaS's, as before APP-7 and APP-10 give those screens the type of the choice in progress.
+  const engineType = state?.setup.type ?? "b2b-saas";
+  const metrics = metricsFor(props, engineType);
+  const derivedCopy = derivedFor(props, engineType);
   const openedAt = snap?.openedAt ?? null;
   const tourResults = snap?.tourResults;
   const computed = useMemo(() => {
@@ -194,7 +206,7 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
     // the screen and the slide cannot word one engine two ways.
     const verdict = verdictOf(lens.state, derived, strings, metrics, ctx);
     // The team's tools, when ticked (§19.5.2): « À faire toi-même » by tool, with each number's `where` in the catalogue's order.
-    const selected = teamTools(lens.state.setup.tools);
+    const selected = teamTools(lens.state.setup.tools, lens.state.setup.type);
     const citedBy = (id: MetricId) =>
       (metrics.find((m) => m.id === id)?.where ?? []).flatMap((w) => (w.source.kind === "tool" ? [w.source.tool] : []));
     const plan = collectPlan(lastSnapshot(lens.state), ctx.today, motionShapes(lens.state.setup), { selected, citedBy });
@@ -637,7 +649,8 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
 
   if (screen === "example") {
     return shell(
-      <ExampleView locale={locale} strings={strings} metrics={metrics} derivedCopy={derivedCopy} bridges={bridges} motions={current.setup.motions} onBack={openBoard} />,
+      // The SaaS's example, whatever the engine on screen is, until APP-10 gives the app its own (§21.4.7).
+      <ExampleView locale={locale} strings={strings} metrics={metricsFor(props, "b2b-saas")} derivedCopy={derivedFor(props, "b2b-saas")} bridges={bridges} motions={current.setup.motions} onBack={openBoard} />,
     );
   }
 

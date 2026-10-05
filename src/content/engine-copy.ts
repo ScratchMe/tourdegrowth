@@ -306,6 +306,8 @@ export const ENGINE_COPY = {
       en: "Optional. Tick the ones your team uses: the sheet offers them first, and \"To do yourself\" is grouped by tool.",
     },
     toolFamily: {
+      // TODO: à relire (convention 6) — neuf le 2026-10-05 (A22 APP-2, §21.6.5) : toolFamily.mobile, the consumer app's first family.
+      mobile: { fr: "Stores et abonnements", en: "Stores and subscriptions" },
       analytics: { fr: "Analytics produit", en: "Product analytics" },
       billing: { fr: "Facturation", en: "Billing" },
       crm: { fr: "CRM", en: "CRM" },

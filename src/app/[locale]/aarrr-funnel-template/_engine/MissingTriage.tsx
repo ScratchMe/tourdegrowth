@@ -8,6 +8,7 @@ import { NumberField } from "@/components/core/NumberField";
 import { Select } from "@/components/core/Select";
 import { TextField } from "@/components/core/TextField";
 import { TEXT_LIMITS, type MetricShape } from "@/lib/engine/catalog-shape";
+import { displayShapeOf } from "@/lib/engine/business-type";
 import { CAUSE_KEY, REPAIR_KEY, ROLE_KEY, type ResolvedMetric } from "@/lib/engine/strings";
 import type { RepairScale, RoleId } from "@/lib/engine/types";
 import {
@@ -208,7 +209,8 @@ function ReadingFields({
   const locale = view.ctx.locale;
   const w = strings.workbench;
   const set = (patch: Partial<ReadingDraft>) => onChange({ ...reading, ...patch });
-  const src = sourceOptions(shape, strings, teamTools(view.state.setup.tools));
+  const type = view.state.setup.type;
+  const src = sourceOptions(displayShapeOf(shape.id, type), strings, teamTools(view.state.setup.tools, type));
   const shortcut = shape.valueKinds.includes("rate") ? "rate" : shape.valueKinds.includes("amount") ? "amount" : null;
   const money = shape.unit === "money";
 

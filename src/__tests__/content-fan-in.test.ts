@@ -82,6 +82,11 @@ const BUDGETS: { module: string; max: number; why: string }[] = [
     why: "La prose des dix-sept chiffres : seule /{locale}/aarrr-funnel-template la rend.",
   },
   {
+    module: "content/engine-catalog-consumer.ts",
+    max: 1,
+    why: "La prose des quinze chiffres du moteur dans les mots d'une app (A22 APP-2, §21.4.6) : seule /{locale}/aarrr-funnel-template la rend, avec engine-catalog.ts, pour `typeCatalogs`.",
+  },
+  {
     module: "content/engine-copy.ts",
     max: 2,
     why: "Toute la copie d'interface du moteur : sa page la résout, et /llms.txt lit son titre et sa description quand le moteur est ouvert au build (C27).",
