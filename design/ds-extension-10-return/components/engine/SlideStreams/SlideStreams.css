@@ -1,0 +1,84 @@
+/* SlideStreams — extension 10. A ledger on the deck's 1 920 canvas: one
+ * face and one size for every figure; the total's row heavier and ruled. */
+
+.SlideStreams_root {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin: 0;
+}
+
+.SlideStreams_table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  color: var(--text-body);
+}
+
+.SlideStreams_corner {
+  width: var(--market-ledger-name);
+}
+
+.SlideStreams_col {
+  padding: 0 0 14px 24px;
+  font: var(--slide-meta);
+  letter-spacing: var(--slide-tracking);
+  text-transform: uppercase;
+  text-align: right;
+  vertical-align: bottom;
+  color: var(--text-muted);
+  border-bottom: var(--border-rule);
+}
+
+.SlideStreams_name {
+  padding: 22px 0;
+  text-align: left;
+  font-weight: inherit;
+  vertical-align: baseline;
+}
+
+.SlideStreams_label {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 4px;
+  font: var(--slide-body-sm);
+  font-weight: 600;
+}
+
+.SlideStreams_side {
+  font: var(--slide-meta);
+  color: var(--text-muted);
+}
+
+.SlideStreams_value {
+  padding: 22px 0 22px 24px;
+  text-align: right;
+  vertical-align: baseline;
+  font: var(--slide-label);
+  font-variant-numeric: var(--tabular);
+}
+
+.SlideStreams_stream + .SlideStreams_stream th,
+.SlideStreams_stream + .SlideStreams_stream td {
+  border-top: var(--border-rule);
+}
+
+.SlideStreams_total th,
+.SlideStreams_total td {
+  border-top: var(--market-ledger-rule);
+}
+
+.SlideStreams_total .SlideStreams_value {
+  font: var(--slide-label-xl);
+}
+
+.SlideStreams_total .SlideStreams_label {
+  font: var(--slide-body);
+  font-weight: 700;
+}
+
+.SlideStreams_note {
+  font: var(--slide-note);
+  color: var(--text-muted);
+  max-width: 64em;
+}
