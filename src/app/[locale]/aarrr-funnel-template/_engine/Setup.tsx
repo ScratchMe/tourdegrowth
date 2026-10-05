@@ -6,7 +6,7 @@ import { Card } from "@/components/core/Card";
 import { METRIC_SHAPES, SLG_METRIC_SHAPES, TEXT_LIMITS, shapeOf } from "@/lib/engine/catalog-shape";
 import type { EngineStrings } from "@/lib/engine/strings";
 import type { Currency, EngineSetup, MetricId, Motion, SharedCount, ToolId, YearMonth } from "@/lib/engine/types";
-import { SETUP_TOOLS, TOOL_FAMILIES, teamTools } from "@/lib/engine/tools";
+import { savedTools, teamTools, toolFamiliesFor } from "@/lib/engine/tools";
 import { SETUP_V2_DEFAULTS } from "@/lib/engine/types";
 import type { StoredResult } from "@/lib/quiz/storage";
 import { defaultReferenceMonth, defaultSpanEnd, matureCohortMonth, monthsBefore, nextMonth } from "@/lib/engine/cohort";
@@ -144,8 +144,9 @@ export function Setup({
   // against it, and against the 30-month floor without it. Per company: both motions face the same runway.
   const [runway, setRunway] = useState<number | null>(initial?.setup.runwayMonths ?? null);
   // The team's tools (§19.5.1, A14 T4), optional; a tool the setup doesn't offer that a file brought is kept, unread.
-  const [tools, setTools] = useState<ToolId[]>(() => teamTools(initial?.setup.tools));
-  const keptTools = (initial?.setup.tools ?? []).filter((t) => !SETUP_TOOLS.includes(t));
+  // Offered by the engine's type (§21.6.5): an engine's own, or a SaaS's before one exists (the type is chosen at the start card from APP-7).
+  const type = initial?.setup.type ?? SETUP_V2_DEFAULTS.type;
+  const [tools, setTools] = useState<ToolId[]>(() => teamTools(initial?.setup.tools, type));
   // A new engine offers the link ticked; the settings open on what is (C8).
   const [linkTour, setLinkTour] = useState(editing ? Boolean(linked) : true);
   const [tried, setTried] = useState(false);
@@ -215,6 +216,7 @@ export function Setup({
       ...(quarterTarget !== null && quarterTarget > 0 ? { quarterTarget } : {}),
       ...(threshold !== null && threshold > 0 ? { threshold } : {}),
     };
+    const toolsToSave = savedTools(tools, initial?.setup.tools, type);
     onStart({
       setup: {
         type: SETUP_V2_DEFAULTS.type,
@@ -227,7 +229,7 @@ export function Setup({
         goLiveWindowDays: goLive,
         ...(company.trim() ? { companyLabel: company.trim() } : {}),
         // The tools ticked here, plus any a file brought that the setup doesn't offer: never dropped (§19.5).
-        ...(tools.length + keptTools.length > 0 ? { tools: [...teamTools(tools), ...keptTools] } : {}),
+        ...(toolsToSave.length > 0 ? { tools: toolsToSave } : {}),
         ...(Object.keys(pipeline).length > 0 ? { pipeline } : {}),
         // Kept across a save: the setup is rebuilt here, and a runway left out would be erased.
         ...(runway !== null ? { runwayMonths: runway } : {}),
@@ -564,7 +566,7 @@ export function Setup({
       {/* The team's tools (§19.5.1): optional and folded — nothing ticked changes nothing. */}
       <Disclosure summary={s.tools} size="sm" data-testid="engine-setup-tools">
         <p className={styles.periodsLine}>{s.toolsHint}</p>
-        {TOOL_FAMILIES.map(({ family, tools: offered }) => (
+        {toolFamiliesFor(type).map(({ family, tools: offered }) => (
           <fieldset key={family} className={styles.toolFamily}>
             <legend className={styles.toolFamilyTitle}>{s.toolFamily[family]}</legend>
             {offered.map((tool) => (

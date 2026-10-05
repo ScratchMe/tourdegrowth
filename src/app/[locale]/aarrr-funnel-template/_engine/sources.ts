@@ -45,6 +45,10 @@ export const ALL_TOOLS = Object.keys(TOOL_ORDER) as ToolId[];
  * With the team's tools ticked (§19.5.2, A14 T4), THEY come first — the
  * usual ones for this number among them first — and every other tool goes
  * under « Autres outils ». Nothing ticked, the list is the one above.
+ *
+ * `shape` is the shape as the engine's TYPE displays it (`displayShapeOf`,
+ * §21.4.3): an app's number is usually found in the stores and the mobile
+ * tools, not in a SaaS's billing. The callers pass that, never `shapeOf`.
  */
 export function sourceOptions(
   shape: MetricShape,

@@ -16,6 +16,7 @@ import { TrapNote } from "@/components/engine/TrapNote";
 import { WhereToFind } from "@/components/engine/WhereToFind";
 import { isUnreadableNumber } from "@/lib/forms/number";
 import { TEXT_LIMITS, motionOfMetric, shapeOf, shapesOf, type MetricShape } from "@/lib/engine/catalog-shape";
+import { displayShapeOf } from "@/lib/engine/business-type";
 import { BASIS_KEY, EFFORT_KEY, ROLE_KEY, SHEET_BASES, type ResolvedMetric } from "@/lib/engine/strings";
 import type { CandidateId, Interval, MetricEntry, MetricId, RoleId } from "@/lib/engine/types";
 import { isImmature, nextMonth, periodRangeOf, windowDaysOf } from "@/lib/engine/cohort";
@@ -245,7 +246,8 @@ export function MetricSheet({
   const otherMargin = id === "rev.gross-margin" ? snapshot.metrics["slg.rev.gross-margin"] : snapshot.metrics["rev.gross-margin"];
   const companyWideElsewhere = companyWide(otherMargin);
   const target = snapshot.targets[id];
-  const bench = shape.benchmark;
+  // The reference the engine's type shows (§21.4.3): an app has the retention's and none of the SaaS ones.
+  const bench = displayShapeOf(id, state.setup.type).benchmark;
 
   // Which months to count: the denominator's hint when it is a cohort, a line otherwise (design system extension 07).
   const period = range
@@ -277,7 +279,7 @@ export function MetricSheet({
   const stale = isRequestStale(entry, ctx.today);
 
   // Where to find it: the catalogue's places, the tool named once; the team's own tools first.
-  const team = teamTools(state.setup.tools);
+  const team = teamTools(state.setup.tools, state.setup.type);
   const places = metric.where.map((w) => ({
     tool: w.label || sourceLabel(w.source, strings),
     path: fillCatalog(w.path),

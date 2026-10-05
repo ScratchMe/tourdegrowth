@@ -1012,7 +1012,7 @@ Le texte, chiffre par chiffre. Les formulations sont un premier jet pour le bon
 - where : 1. revenuecat · « RevenueCat » · « les changements de produit du mois vers une offre moins chère, dans les événements d'abonnement » / "the month's product changes to a cheaper plan, in the subscription events" ; 2. stripe · « Stripe » · « pour le web : les mouvements de MRR du mois, ligne « contraction » » / "for the web: the month's MRR movements, the \"contraction\" line" (« contraction » est le nom de la ligne dans Stripe, comme dans l'entrée du SaaS)
 - request : recopier celle du SaaS (« le MRR au 1er {month} et le MRR perdu en rétrogradations pendant le mois, sans les résiliations »), qui n'a aucun mot propre au SaaS.
 - trap : « Un abonné parti n'est pas une rétrogradation : il est dans le churn. » / "A subscriber who left isn't contraction: they're in the churn."
-- noReferenceReason : recopier celle du SaaS (« elle dépend du modèle de prix autant que du produit… ») ; naReasons : `not-subscription` · « Un seul plan ».
+- noReferenceReason : recopier celle du SaaS (« elle dépend du modèle de prix autant que du produit… ») ; naReasons : `not-subscription` · « Un seul plan » / "A single plan".
 - *Écrit le 2026-10-05, d'après l'arrêt d'APP-2 et la réponse d'Antoine* : « comme `rev.expansion` », lu à la lettre, donnait un chemin RevenueCat « vers une offre plus chère », une demande « le MRR ajouté » et une raison sur « la place pour l'expansion », toutes fausses pour une rétrogradation.
 
 **Les deux calculés** (`ENGINE_DERIVED_CATALOG_CONSUMER`) : recopier `rev.grr`
