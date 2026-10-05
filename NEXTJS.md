@@ -277,6 +277,15 @@ plus bas dans le même fichier** par un prop qui n'existait pas encore.
 
 ### 1.9 Petits pièges qui coûtent une demi-heure chacun
 
+- **Deux classes de modules CSS différents, de même spécificité, sur le même
+  élément : le gagnant dépend de l'ordre dans lequel le build émet les
+  feuilles**, et cet ordre change quand une route s'ajoute ailleurs. Le
+  2026-10-05 (A24, REF-3), une page de jeu de plus a séparé la feuille de
+  `CashWarning` de celle du deck du moteur. `.unitWarning` a perdu contre
+  `.root`, et l'avertissement de la diapositive est passé de 18 à 15 px. Le
+  correctif tient à la spécificité, pas à l'ordre : qualifier la règle qui doit
+  gagner par son contexte (`[data-slide] .unitWarning`). Même piège déjà vécu
+  avec `.navLink` (`docs/journal/02-premiere-revue.md`).
 - **Un dossier de route commençant par `_` est privé** : il n'est jamais
   routé, et rien ne le dit — la route répond simplement 404.
 - **CSS Modules n'émet pas une classe qui n'a plus aucune règle.**

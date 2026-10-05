@@ -785,7 +785,7 @@ REV-4 du §21.9).
   (`DraftLevelSlug`): no page, no copy, no save yet. » devient « wired on
   <date> (A24, REV-3): its copy is `content/game/revenue.ts`, its page
   `app/[locale]/game/revenue/`. ». Et :
-  - `e2e/real-results.ts` : `revenueClear: { id: "7d3c9e2a-0b1f-4c5d-8e6f-1a2b3c4d5e10", tone: "neutral", locale: "fr", answers: answersFor({ acquisition: 1, activation: 0, retention: 1, referral: 0, revenue: 2 }), total: 54 }`
+  - `e2e/real-results.ts` : `revenueClear: { id: "7d3c9e2a-0b1f-4c5d-8e6f-1a2b3c4d5e11", tone: "neutral", locale: "fr", answers: answersFor({ acquisition: 1, activation: 0, retention: 1, referral: 0, revenue: 2 }), total: 54 }`
     (le revenue seul à 0/20 : un goulot `clear`) ; dans
     `e2e/result-real.spec.ts`, à 1 280 px en `?lang=fr`, `game-entry-cta` vers
     `/fr/game/revenue?from=result`, et `game-entry-band` contient « Revenu par
