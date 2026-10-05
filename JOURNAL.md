@@ -607,3 +607,19 @@ Et des lacunes moins visibles, chacune un piège : un outil de l'app écrit deux
 - la note de l'acheteur actif n'a plus d'accord en anglais (« order frequency {freq} ») ;
 - la ligne de côté du registre a une clé par ligne, sans « · », qui sépare les clés dans les tableaux ;
 - trois feuilles de la demande ne nomment plus les abonnements, qu'un calque ne sait pas cochés : la note sans marge, l'hypothèse de la slide d'unit economics et l'introduction du panneau.
+
+## A22 : §21 et §23 corrigés d'après l'arrêt d'APP-1 (2026-10-05)
+
+**L'arrêt.** Le sous-agent d'APP-1 s'est arrêté avant de pousser, sur une condition de §23.6 : trois e2e du moteur rougissaient (`engine-canary.spec.ts:41` et `:235`, `engine-collect.spec.ts:119`). §21.2.4 ajoute `app.acq.cpi` au compte partagé `monthSignups`. L'étape 6 de la fiche retire les chiffres `app.*` des props du SaaS. Or la ligne sous les cases d'une fiche (`MetricSheet.tsx#sharedSides`) nomme chaque chiffre du groupe par `metricById`. La fiche d'`acq.signup-rate` d'un SaaS levait donc une erreur, et l'îlot tombait sur sa page d'erreur. Aucun test unitaire ne couvre cette ligne. Son travail (32 fichiers, vitest 3 491 sur 3 491) est commité à part, `2d9c6b5`, et repris après cette PR.
+
+**Les réponses d'Antoine** (2026-10-05, les deux recos) :
+- **La ligne partagée** ne nomme que les chiffres que la vue sait nommer, par `sharedWith(id, side, named)` dans `shared-counts.ts` (§21.2.4). On ne filtre pas par `shapesOf(setup)`, qui ôterait `link.pql-handoff` de la ligne de l'assisté. APP-1 gagne `MetricSheet.tsx` et `engine-props.test.ts`, qui tient la ligne du SaaS inchangée, chiffre par chiffre. APP-2 vérifie la ligne d'une app.
+- **« Autres outils »** propose RevenueCat, AppsFlyer et Adjust au SaaS aussi, par la règle d'A14 T0 (tout outil y est proposé). C'est la seule exception au « le SaaS ne bouge pas d'un caractère » (§21.0, §21.6.5).
+
+**Ce que le sous-agent a dû deviner, et ce qui est corrigé** :
+- **Libellés de sources sans anglais** : les libellés composés de `where` (« AppsFlyer ou Adjust », « Amplitude ou Mixpanel », « Ton suivi des revenus », « Base produit ou outil de parrainage ») n'avaient pas d'anglais dans §21.4. Ils l'ont désormais, repris de ses traductions, et passent au bon à tirer comme toute copie neuve.
+- **§23.8, typographie** : l'espace insécable entre un nombre et son unité (« 12 mois »), comme `engine-catalog.ts`.
+- **§23.8, guillemets** : des guillemets droits échappés suivent le fichier qui le fait déjà.
+- **§23.8, e2e** : une unité sans écran fait quand même tourner `engine-canary` et `engine-collect` contre le build de la CI. La règle « une unité sans écran saute Playwright » aurait laissé passer ce bug.
+
+**Laissé tel quel** : `shapesOf` d'une app sans `plg` rend une liste vide (un réglage invalide) ; l'ordre de `TOOL_SET` ; le type de `UNIT_INPUT_IDS`.
