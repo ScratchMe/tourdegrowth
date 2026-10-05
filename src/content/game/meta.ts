@@ -78,6 +78,19 @@ export const GAME_META = {
       "A year at Quandi: 30.0% activation, user trust and the regulator's radar missing from the dashboard.",
     ),
   },
+  // TODO: à relire — 2026-10-05 (A24.REF-1) : le niveau referral, tout le bloc.
+  referral: {
+    title: t("Partix : le jeu du referral — Tour de Growth", "Partix: the referral game — Tour de Growth"),
+    description: t(
+      "Joue une année comme PM growth d'une appli de partage de dépenses : un DG qui veut un coefficient viral de 0,60, et huit astuces à reconnaître.",
+      "Play a year as the growth PM of an expense-sharing app: a CEO who wants a viral coefficient of 0.60, and eight tricks to learn to spot.",
+    ),
+    breadcrumb: t("Une année chez Partix", "A year at Partix"),
+    shareImageAlt: t(
+      "Une année chez Partix : un coefficient viral de 0,40, la confiance et le radar CNIL absents du dashboard.",
+      "A year at Partix: a viral coefficient of 0.40, user trust and the regulator's radar missing from the dashboard.",
+    ),
+  },
 } as const satisfies Record<string, Record<string, Translatable>>;
 
 /**
@@ -162,6 +175,23 @@ export const ACTIVATION_INTRO = {
   lead: t(
     "Ton DG dirige maintenant Quandi, un outil de planification en ligne pour indépendants, et il t'a emmené avec lui comme PM growth. 10 000 inscriptions par mois, et 30 % seulement publient un premier planning dans la semaine. Le board en veut 45 % d'ici décembre. Chaque trimestre, le DG t'appelle en visio, puis tu as droit à deux actions, nommées comme on les nomme en réunion. Tu ne sauras ce qu'elles valent qu'une fois le trimestre passé. Le DG, lui, sait déjà ce qu'il veut.",
     "Your CEO now runs Quandi, an online scheduling tool for freelancers, and he brought you along as growth PM. 10,000 sign-ups a month, and only 30% publish a first schedule within the week. The board wants 45% by December. Every quarter the CEO calls you on video, then you get two actions, named the way they are named in meetings. You will only learn what they are worth once the quarter is over. The CEO already knows what he wants.",
+  ),
+  stepsTitle: RETENTION_INTRO.stepsTitle,
+  steps: RETENTION_INTRO.steps,
+  glossaryLead: RETENTION_INTRO.glossaryLead,
+} as const;
+
+// TODO: à relire — 2026-10-05 (A24.REF-1) : le bandeau, le titre et le chapeau.
+/**
+ * The referral level's intro (GAME-BRIEF §19). The three steps and the glossary
+ * lead say how any year plays, so they are level 1's own objects.
+ */
+export const REFERRAL_INTRO = {
+  eyebrow: t("Le côté obscur · referral", "The dark side · referral"),
+  title: t("Une année chez Partix", "A year at Partix"),
+  lead: t(
+    "Ton DG dirige maintenant Partix, une appli de partage de dépenses entre amis, et il t'a emmené avec lui comme PM growth. Un million d'utilisateurs, et chaque nouveau en amène 0,40 autre en moyenne par ses invitations : c'est le coefficient viral. Le board veut 0,60 d'ici décembre. Chaque trimestre, le DG t'appelle en visio, puis tu as droit à deux actions, nommées comme on les nomme en réunion. Tu ne sauras ce qu'elles valent qu'une fois le trimestre passé. Le DG, lui, sait déjà ce qu'il veut.",
+    "Your CEO now runs Partix, an app for splitting costs with friends, and he brought you along as growth PM. A million users, and each new one brings in 0.40 more on average through their invitations: that's the viral coefficient. The board wants 0.60 by December. Every quarter the CEO calls you on video, then you get two actions, named the way they are named in meetings. You will only learn what they are worth once the quarter is over. The CEO already knows what he wants.",
   ),
   stepsTitle: RETENTION_INTRO.stepsTitle,
   steps: RETENTION_INTRO.steps,

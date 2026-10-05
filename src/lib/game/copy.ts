@@ -25,6 +25,7 @@ import type { Translatable } from "../i18n/translatable";
 import { tc } from "../i18n/translatable";
 import type { AcquisitionCardId, AcquisitionDarkId } from "./levels/acquisition";
 import type { ActivationCardId, ActivationDarkId } from "./levels/activation";
+import type { ReferralCardId, ReferralDarkId } from "./levels/referral";
 import type { RetentionCardId, RetentionDarkId } from "./levels/retention";
 import type { EndingId } from "./types";
 
@@ -573,6 +574,102 @@ export type ActivationCopy = LevelCopy<ActivationCardId, ActivationDarkId, Activ
   cookies: CookiePillCopy;
 };
 
+/** The CEO only ever asks for these five on the referral level (GAME-BRIEF §19.5). */
+export type ReferralOrderId = Extract<ReferralDarkId, "contacts" | "autoinvite" | "bigshare" | "fakeinvite" | "bonus">;
+
+/**
+ * Partix's app, on both sides of an invitation (GAME-BRIEF §19.7) — a drawn
+ * app, fictional brand, fictional people: Thomas invites, Léa receives. Each
+ * string is one line the phone shows when the card it belongs to is in
+ * production or picked; the phone composes them, the copy never does. The
+ * doc-comment of a field says what shows it.
+ */
+export interface ReferralPhoneCopy {
+  /** Always: the line over the phone. */
+  caption: string;
+  /** `appBar`. */
+  appName: string;
+  /** `appBar`. */
+  time: string;
+  /** `group`: the group and its total. */
+  group: string;
+  /** `continue`: the expense just added. */
+  continueExpense: string;
+  /** `continue`: the big button. */
+  continueButton: string;
+  /** `continue`: the small line under the button. */
+  continueFine: string;
+  /** `continue`: the grey link. */
+  continueSkip: string;
+  /** `bonus`, loud: the offer. */
+  bonusLoud: string;
+  /** `bonus`, loud: the small mention under it. */
+  bonusLoudFine: string;
+  /** `bonus`, clear: the offer. */
+  bonusClear: string;
+  /** `bonus`, clear: its terms, in small print. */
+  bonusClearTerms: string;
+  /** `locked`: the features that unlock at three friends, with a padlock drawn in CSS. */
+  locked: string;
+  /** `invite`: the screen's title. */
+  inviteTitle: string;
+  /** `invite`, without `preselected` or `chosen`. */
+  inviteBase: string;
+  /** `invite.preselected`: every contact ticked. */
+  invitePreselected: string;
+  /** `invite.chosen`: contacts picked one by one. */
+  inviteChosen: string;
+  /** `invite.groupLink`. */
+  groupLink: string;
+  /** `autoSent`: what went out on its own. */
+  autoSent: string;
+  /** `review`: the question. */
+  reviewQuestion: string;
+  /** `review`: the first answer, towards the store's rating. */
+  reviewYes: string;
+  /** `review`: the second answer, towards an internal form. */
+  reviewNo: string;
+  /** `recap`: the readable recap. */
+  recap: string;
+  /** `guestDivider`: the line that opens Léa's half. */
+  guestDivider: string;
+  /** `guestMessage`: Léa's bubble, with no sender and no time. */
+  guestMessage: string;
+  /** `guestMessage.personalised`: replaces `guestMessage`. */
+  guestMessagePersonalised: string;
+  /** `guestShadow`: what the app already knows about Léa. */
+  guestShadow: string;
+  /** `guestPage`: the group without installing. */
+  guestPage: string;
+  /** `guestQuestion`: the question to guests who don't join. */
+  guestQuestion: string;
+  /** `guestQuestion`: three answers as bullets, the first two quoted by `events.surveyAnswers`. */
+  guestAnswers: readonly string[];
+  /** `noBook`: the promise at the foot of the phone. */
+  noBook: string;
+  /** `noBook.numbers`: its second sentence, only without `shadow`. */
+  noBookNumbers: string;
+}
+
+/**
+ * The pill under Partix's phone: how many messages went out in Thomas's name
+ * that he did not write (GAME-BRIEF §19.7). A fact the law frames (marketing by
+ * message without consent), never a judgement — level 1's « N clics pour résilier ».
+ */
+export interface SentPillCopy {
+  /** Nothing automatic went out: « 0 message envoyé au nom de Thomas ». */
+  none: string;
+  /** « {n} messages envoyés au nom de Thomas ». `{n}` arrives formatted. */
+  some: string;
+  /** What he did not do, after `some`: « des messages qu'il n'a pas écrits ». */
+  suffix: string;
+}
+
+export type ReferralCopy = LevelCopy<ReferralCardId, ReferralDarkId, ReferralOrderId> & {
+  phone: ReferralPhoneCopy;
+  sent: SentPillCopy;
+};
+
 /**
  * Every template, and the placeholders the island supplies for it. A dotted
  * path; `*` stands for any key of a record. A template may use a subset of
@@ -647,6 +744,12 @@ export const ACQUISITION_COPY_TEMPLATES: Readonly<Record<string, readonly string
  */
 export const ACTIVATION_COPY_TEMPLATES: Readonly<Record<string, readonly string[]>> = {
   ...LEVEL_COPY_TEMPLATES,
+};
+
+/** The referral level's own template: the pill's count of messages. The phone carries none. */
+export const REFERRAL_COPY_TEMPLATES: Readonly<Record<string, readonly string[]>> = {
+  ...LEVEL_COPY_TEMPLATES,
+  "sent.some": ["n"],
 };
 
 function isTranslatable(value: object): value is Translatable {
