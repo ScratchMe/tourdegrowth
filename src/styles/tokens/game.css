@@ -108,6 +108,13 @@
    * (--app-on-brand).
    */
   --planner-brand: #6a4bd8; /* 5.82 as text on white, and white on it */
+  /*
+   * Partix's app (referral level, GAME-BRIEF §19.7): a burnt orange, foreign
+   * to Tour de Growth and to the other apps' blue, green and violet. It
+   * passes 4.5:1 on white both ways: as text, and as the ground of its big
+   * button under white (--app-on-brand).
+   */
+  --split-brand: #b04f12; /* 5.29 as text on white, and white on it */
 
   /* The bezel is 1.06:1 against --night-0: its outline carries the edge. */
   --phone-bezel: #0b0907;

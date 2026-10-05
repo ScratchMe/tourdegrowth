@@ -4,12 +4,15 @@ import { ClickPill } from "@/components/game/ClickPill";
 import { CookiePill } from "@/components/game/CookiePill";
 import { PhoneMock } from "@/components/game/PhoneMock";
 import { PlannerPhone } from "@/components/game/PlannerPhone";
+import { SentPill } from "@/components/game/SentPill";
 import { ShopPhone } from "@/components/game/ShopPhone";
-import type { AcquisitionCopy, ActivationCopy, RetentionCopy } from "@/lib/game/copy";
+import { SplitPhone } from "@/components/game/SplitPhone";
+import type { AcquisitionCopy, ActivationCopy, ReferralCopy, RetentionCopy } from "@/lib/game/copy";
 import { fill, formatEur, formatInt } from "@/lib/game/format";
 import { RETENTION_LEVEL, type RetentionCardId } from "@/lib/game/levels/retention";
 import { cookieRefusal, plannerPhoneView } from "@/lib/game/planner-phone";
 import { basketFor, shopPhoneView, type Basket } from "@/lib/game/shop-phone";
+import { sentInYourName, splitPhoneView } from "@/lib/game/split-phone";
 import type { LevelSlug } from "@/lib/game/types";
 import { clicksFor, clicksOverLaw, phoneView } from "@/lib/game/view";
 import type { Locale } from "@/lib/i18n/locale";
@@ -17,8 +20,9 @@ import type { Locale } from "@/lib/i18n/locale";
 /**
  * What only one level has: its phone, and the pill under it — Flixo's
  * cancellation screen and its clicks, Pédalix's path to the basket and what
- * the basket adds, Quandi's arrival and the clicks to refuse its cookies
- * (GAME-BRIEF §5.9, §17.7, §18.7). The island is the same for every
+ * the basket adds, Quandi's arrival and the clicks to refuse its cookies,
+ * Partix's invitation from both sides and the messages sent in Thomas's name
+ * (GAME-BRIEF §5.9, §17.7, §18.7, §19.7). The island is the same for every
  * level (`island-view.ts`); each level brings this, and nothing else of its
  * own but its copy and its formats (CHANTIERS.md A12.d).
  *
@@ -163,6 +167,37 @@ export const ACTIVATION_SIDE: IslandSide<ActivationSideCopy> = {
     const was = cookieRefusal(before);
     const now = cookieRefusal(after);
     return was.clicks === now.clicks ? null : cookieSentence(copy, now);
+  },
+};
+
+// -------------------------------------------------------------- referral ---
+
+type ReferralSideCopy = Pick<ReferralCopy, "phone" | "sent">;
+
+/** The pill's sentence: the messages sent in Thomas's name, and that he didn't write them. */
+export function sentSentence(copy: ReferralSideCopy, locale: Locale, r: ReturnType<typeof sentInYourName>): string {
+  return r.alert ? `${fill(copy.sent.some, { n: formatInt(locale, r.messages) })} · ${copy.sent.suffix}` : copy.sent.none;
+}
+
+/** Partix's phone and its pill of messages sent in Thomas's name (GAME-BRIEF §19.7). */
+export const REFERRAL_SIDE: IslandSide<ReferralSideCopy> = {
+  render: ({ ids, copy, locale }) => {
+    const r = sentInYourName(ids);
+    return (
+      <>
+        <SplitPhone items={splitPhoneView(ids)} labels={copy.phone} />
+        <SentPill count={formatInt(locale, r.messages)} alert={r.alert} labels={copy.sent} announce={false} />
+      </>
+    );
+  },
+  pill: ({ ids, copy, locale }) => {
+    const r = sentInYourName(ids);
+    return { text: r.alert ? fill(copy.sent.some, { n: formatInt(locale, r.messages) }) : copy.sent.none, alert: r.alert };
+  },
+  announce: ({ before, after, copy, locale }) => {
+    const was = sentInYourName(before);
+    const now = sentInYourName(after);
+    return was.messages === now.messages ? null : sentSentence(copy, locale, now);
   },
 };
 

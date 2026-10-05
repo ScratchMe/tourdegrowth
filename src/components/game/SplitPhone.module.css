@@ -1,0 +1,239 @@
+/*
+ * Partix's phone: the contents of its screen. The frame — caption, bezel,
+ * screen, app bar, flash — is PhoneFrame.module.css, shared with the other
+ * levels' phones. The screen is another company's app: it reads only the
+ * --app-* island and its own brand orange (--split-brand, game.css). Every
+ * text pairing below is one game-token-contrast.test.ts measures: the orange
+ * as text on --app-bg (the loud offer, the group link, « Voir le groupe… »)
+ * and white on the orange (the big button), and the --app-* pairs already
+ * there. The orange is never read on --app-modal-bg, which is not measured.
+ */
+
+/* Partix's brand, for the frame's dot. */
+.split {
+  --phone-brand: var(--split-brand);
+}
+
+.group {
+  font-weight: 700;
+}
+
+/* After each expense: the big button, the reason in small print, the way out in grey. */
+.continue {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.expense {
+  font: var(--app-text-sm);
+  color: var(--app-muted);
+}
+
+/* A span styled as the app's button: drawn, never pressable (plan R14). */
+.button {
+  display: block;
+  padding: var(--space-6) var(--space-5);
+  border-radius: var(--radius-panel);
+  background: var(--split-brand);
+  color: var(--app-on-brand);
+  text-align: center;
+  font-weight: 700;
+}
+
+.fine {
+  font: var(--app-text-link);
+  color: var(--app-muted);
+  text-align: center;
+}
+
+.skip {
+  align-self: center;
+  font: var(--app-text-link);
+  color: var(--app-muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* A block of the screen: a hairline card on the app's light ground. */
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5);
+  border: var(--border-width-hairline) solid var(--app-line);
+  border-radius: var(--radius-panel);
+  background: var(--app-modal-bg);
+}
+
+.offer {
+  font-weight: 600;
+}
+
+.small {
+  font: var(--app-text-link);
+  color: var(--app-muted);
+}
+
+/* The offer shouted: big letters in the brand's orange, the conditions in small print under it. */
+.loud {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.loudOffer {
+  font: var(--app-text-price);
+  color: var(--split-brand);
+}
+
+.locked {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  border: var(--border-width-hairline) solid var(--app-line);
+  border-radius: var(--radius-panel);
+  background: var(--app-modal-bg);
+  font: var(--app-text-sm);
+}
+
+/* A padlock drawn in CSS — a body and a shackle above it; no string, decorative. */
+.padlock {
+  flex: none;
+  position: relative;
+  width: 14px;
+  height: 10px;
+  margin-top: var(--space-3);
+  border-radius: 2px;
+  background: var(--app-muted);
+}
+
+.padlock::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  bottom: 100%;
+  width: 6px;
+  height: 6px;
+  border: var(--border-width) solid var(--app-muted);
+  border-bottom: 0;
+  border-radius: var(--radius-tag) var(--radius-tag) 0 0;
+}
+
+.invite {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.inviteTitle {
+  font-weight: 700;
+}
+
+.line {
+  font: var(--app-text-sm);
+}
+
+/* Contacts ticked, by the app or by hand: a filled square in front, drawn in CSS. */
+.ticked {
+  font: var(--app-text-sm);
+}
+
+.ticked::before {
+  content: "";
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  margin-right: var(--space-3);
+  border-radius: var(--radius-mark);
+  background: var(--split-brand);
+  vertical-align: -1px;
+}
+
+.link {
+  font: var(--app-text-sm);
+  color: var(--split-brand);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.question {
+  font: var(--app-text-sm);
+  font-weight: 600;
+}
+
+.answer {
+  font: var(--app-text-sm);
+  color: var(--app-muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Léa's half opens on a rule with its title in the middle. */
+.divider {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin: var(--space-3) 0;
+  font: var(--app-text-sm);
+  color: var(--app-muted);
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  height: var(--border-width-hairline);
+  background: var(--app-line);
+}
+
+/* A message as it arrives: no sender, no time. */
+.bubble {
+  align-self: flex-start;
+  max-width: 90%;
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-panel) var(--radius-panel) var(--radius-panel) var(--space-1);
+  background: var(--app-social-bg);
+  color: var(--app-social-text);
+  font: var(--app-text-sm);
+}
+
+.shadow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-panel);
+  background: var(--app-social-bg);
+  color: var(--app-social-text);
+  font: var(--app-text-sm);
+}
+
+.avatar {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-round);
+  background: var(--app-social-avatar);
+}
+
+.bullets {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding-left: var(--space-6);
+  font: var(--app-text-sm);
+  color: var(--app-muted);
+}
+
+/* The promise at the foot of the phone, under a rule: it is about the app, not said to Léa. */
+.noBook {
+  margin: auto 0 0;
+  padding-top: var(--space-5);
+  border-top: var(--border-width-hairline) solid var(--app-line);
+  font: var(--app-text-sm);
+  color: var(--app-muted);
+  text-align: center;
+}
