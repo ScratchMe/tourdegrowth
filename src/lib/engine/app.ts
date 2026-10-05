@@ -24,12 +24,29 @@ import { APP_LEVER_IDS, CANDIDATE_IDS, LEVER_IDS, LTV_CAP_MONTHS, appShapeShown,
 import { isFlow, rankingImpact } from "./impact";
 import { add, div, mul, point, scale } from "./interval";
 import { acquisitionSpend, arrOf, paybackLimit } from "./money";
-import { buildScenario, leverViews, valueOf, type AppKpis, type Scenario, type ScenarioAssumption, type ScenarioFunnel, type ScenarioKpis } from "./scenario";
+import { buildScenario, leverViews, mrrToday, valueOf, type AppKpis, type Scenario, type ScenarioAssumption, type ScenarioFunnel, type ScenarioKpis } from "./scenario";
 import type { PanelLeverId } from "./scenario-of"; // type only: scenario-of.ts imports this module
 import { DEFAULT_APP_MONETIZATION, monetizationOf } from "./setup-type";
 import { knownSharedCount } from "./shared-counts";
-import type { AppCandidateId, AppDerivedId, EngineCalcContext, EngineSetup, EngineState, Interval, LeverId, MetricId, SelfServeCandidateId, SharedCount } from "./types";
-import { currentSnapshot, knownIn } from "./values";
+import { sumParts } from "./total";
+import type {
+  AppCandidateId,
+  AppDerived,
+  AppDerivedId,
+  Confidence,
+  DerivedValue,
+  EngineCalcContext,
+  EngineSetup,
+  EngineState,
+  Interval,
+  LeverId,
+  MetricId,
+  SelfServeCandidateId,
+  SharedCount,
+  UnitEconomics,
+} from "./types";
+import { unitEconomics } from "./unit-economics";
+import { countsOf, currentSnapshot, entryOf, knownIn } from "./values";
 
 /**
  * app.ts — a consumer app's model, wired to the engine (engine spec §21.5,
@@ -344,4 +361,106 @@ export function appRankingImpact(state: EngineState, id: SelfServeCandidateId, t
   const money = appRankingGain(m, subscriptionsPart, usagePart);
   if (money) return { ...(sub.gap ? { gap: sub.gap } : {}), mrr: money };
   return sub.gap ? { gap: sub.gap } : {};
+}
+
+// --- The derivation of an app (§21.5.5, APP-6) ------------------------------------
+
+/**
+ * One of the app's per-install figures: known when the scenario computed it — `solid` if every input it reads under
+ * this monetization (`appInputsOf`) is known and solid, `approximate` otherwise — else uncomputable, naming the
+ * inputs that are not known. A figure whose inputs are all known and that is still null (an install that never pays
+ * its cost back) names nothing: it is a verdict, not a missing number.
+ */
+function installFigure(state: EngineState, ctx: EngineCalcContext, id: AppDerivedId, m: AppMonetization, value: Interval | null): DerivedValue {
+  const inputs = appInputsOf(id, m);
+  const knowns = inputs.map((input) => knownIn(state, input, ctx));
+  if (value) return { kind: "known", value, confidence: knowns.every((k) => k.kind === "known" && k.confidence === "solid") ? "solid" : "approximate" };
+  return { kind: "uncomputable", missing: inputs.filter((_, i) => knowns[i]!.kind !== "known") };
+}
+
+/**
+ * What an app derives in place of `unitEconomics` (§21.5.5): the value of an install over 36 months (`ltv`), its
+ * payback and its twelve-month value ÷ its cost (`ltvCac`), from `buildAppScenario(…).today.kpis` — called directly:
+ * going through `scenarioOf` would make this module import `scenario-of.ts`, which imports it. `grr` and `nrr` are the
+ * self-serve engine's own with subscriptions, and never shown without them (§21.6, §21.7). The cost per install's
+ * variant travels with the result, as the CAC's does.
+ */
+export function appUnitEconomics(state: EngineState, ctx: EngineCalcContext): UnitEconomics {
+  const m = monetizationFor(state.setup);
+  const kpis = buildAppScenario(state, {}, ctx).today.kpis;
+  const retention = m.subscriptions ? unitEconomics(state, ctx) : null;
+  return {
+    cacVariant: currentSnapshot(state).metrics["app.acq.cpi"]?.variant ?? null,
+    ltv: installFigure(state, ctx, "app.rev.install-ltv", m, kpis.ltv),
+    payback: installFigure(state, ctx, "app.rev.install-payback", m, kpis.payback),
+    ltvCac: installFigure(state, ctx, "app.rev.value-to-cost", m, kpis.ltvCac),
+    grr: retention?.grr ?? { kind: "uncomputable", missing: [] },
+    nrr: retention?.nrr ?? { kind: "uncomputable", missing: [] },
+  };
+}
+
+/**
+ * A stream's share of the total: known, or uncomputable naming the inputs it lacks — the unknown ones first, else the
+ * first one (`total.ts#part`, which is private to the hybrid).
+ */
+function streamPart(state: EngineState, ctx: EngineCalcContext, value: Interval | null, confidence: Exclude<Confidence, "unknown">, inputs: MetricId[]): DerivedValue {
+  if (value) return { kind: "known", value, confidence };
+  const unknown = inputs.filter((id) => knownIn(state, id, ctx).kind !== "known");
+  return { kind: "uncomputable", missing: unknown.length > 0 ? unknown : inputs.slice(0, 1) };
+}
+
+/**
+ * The app's two streams and their total, three ways (§21.5.5): this month, new a month, in twelve months. A part is
+ * `null` when its stream is not ticked; a total exists only when every ticked part does (S9, `total.ts#sumParts`).
+ * This month is each stream's revenue of the month — the first point of its curve when the curve exists, and still
+ * known when it does not (the installs of the month missing: §21.5.3 point 5, decided on 2026-10-05).
+ */
+function appStreams(state: EngineState, ctx: EngineCalcContext, inputs: AppInputs, app: AppKpis): AppDerived["streams"] {
+  const { m } = inputs;
+  const snapshot = currentSnapshot(state);
+  const usageTicked = hasUsageStream(m);
+
+  // Typed as counts, the month's revenue is exact (« 28 800 € »); a rate or an estimate makes it a model's.
+  const subscriptionsTyped = knownSharedCount(snapshot, "mrrEnd") !== null;
+  const perActive = [m.purchases ? "app.rev.purchases-per-active" : null, m.ads ? "app.rev.ads-per-active" : null].filter((id): id is MetricId => id !== null);
+  const usageTyped = knownSharedCount(snapshot, "appActives") !== null && perActive.every((id) => countsOf(entryOf(snapshot, id)) !== null);
+
+  const per = usageTicked ? revenuePerActive(m, inputs.purchases, inputs.ads) : null;
+  const usageToday = inputs.actives && per ? mul(inputs.actives, per) : null;
+
+  const subscriptionInputs: MetricId[] = ["rev.arpa", "rev.paid-conversion", "ret.logo-churn"];
+  const usageInputs: MetricId[] = [...perActive, "ret.d30", "app.ret.active-retention"];
+  const part = (ticked: boolean, value: Interval | null, confidence: Exclude<Confidence, "unknown">, missing: MetricId[]) =>
+    ticked ? streamPart(state, ctx, value, confidence, missing) : null;
+  const sum = (subscriptions: DerivedValue | null, usage: DerivedValue | null): DerivedValue =>
+    [subscriptions, usage].filter((p): p is DerivedValue => p !== null).reduce(sumParts);
+
+  const now = {
+    subscriptions: part(m.subscriptions, mrrToday(state, ctx), subscriptionsTyped ? "solid" : "approximate", subscriptionInputs.slice(0, 1)),
+    usage: part(usageTicked, usageToday, usageTyped ? "solid" : "approximate", perActive),
+  };
+  const newPerMonth = {
+    subscriptions: part(m.subscriptions, app.newSubscriptions, "approximate", subscriptionInputs.slice(0, 2)),
+    usage: part(usageTicked, app.newUsage, "approximate", usageInputs.slice(0, perActive.length + 1)),
+  };
+  const in12Months = {
+    subscriptions: part(m.subscriptions, app.subscriptionsPath?.[12] ?? null, "approximate", subscriptionInputs),
+    usage: part(usageTicked, app.usagePath?.[12] ?? null, "approximate", usageInputs),
+  };
+  return {
+    now: { ...now, total: sum(now.subscriptions, now.usage) },
+    newPerMonth: { ...newPerMonth, total: sum(newPerMonth.subscriptions, newPerMonth.usage) },
+    in12Months: { ...in12Months, total: sum(in12Months.subscriptions, in12Months.usage) },
+  };
+}
+
+/** What only an app derives (§21.5.5): the twelve-month value of an install and the two streams. */
+export function appDerived(state: EngineState, ctx: EngineCalcContext): AppDerived {
+  const inputs = appInputs(state, ctx);
+  const app = buildAppScenario(state, {}, ctx).today.kpis.app!;
+  return {
+    monetization: inputs.m,
+    value12: installFigure(state, ctx, "app.rev.install-value", inputs.m, app.value12),
+    streams: appStreams(state, ctx, inputs, app),
+  };
 }

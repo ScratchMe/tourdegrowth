@@ -1,13 +1,15 @@
-import { METRIC_SHAPES, SLG_METRIC_SHAPES, shapeOf } from "./catalog-shape";
+import { METRIC_SHAPES, SLG_METRIC_SHAPES, shapeOf, shapesOf } from "./catalog-shape";
 import type { MetricShape } from "./catalog-shape";
 import { formatApproxMoneyInterval, formatInterval, formatNumber, roundDisplay, type UnitWords } from "./format";
 import { point, sub } from "./interval";
 import { lossCheck } from "./money";
 import type { PelotonMetric } from "./peloton";
 import { slgNoDecimals, smallestSample } from "./relays";
+import { isApp } from "./setup-type";
 import type {
   CandidateId,
   Comparator,
+  DerivedId,
   DerivedValue,
   EngineCalcContext,
   EngineDerived,
@@ -154,13 +156,19 @@ function conflictFindings(state: EngineState, shapes: readonly MetricShape[], ct
   }
 }
 
+/** The cost an LTV is set against, per type: the customer's CAC, the sales-assisted CAC, an app's cost per install. */
+type CostId = "acq.cac" | "slg.acq.cac" | "app.acq.cpi";
+const LTV_OF: Record<CostId, DerivedId> = { "acq.cac": "rev.ltv", "slg.acq.cac": "slg.rev.ltv", "app.acq.cpi": "app.rev.install-ltv" };
+
 /**
  * The loss (§20.4, C48), on today's LTV and CAC of one motion — never summed
  * across motions. Arithmetic on the team's own numbers: no reference enters
  * it, so it names no stage. The CAC prints as typed (to the unit, or its
- * range), the LTV and the gap as the estimates they are (« ~1 500 € »).
+ * range), the LTV and the gap as the estimates they are (« ~1 500 € »). An
+ * app's pair is its install's 36-month value and its cost per install
+ * (§21.5.5, D10).
  */
-function lossFinding(state: EngineState, ltv: DerivedValue, cacId: "acq.cac" | "slg.acq.cac", ctx: EngineCalcContext, words: UnitWords, add: Add): void {
+function lossFinding(state: EngineState, ltv: DerivedValue, cacId: CostId, ctx: EngineCalcContext, words: UnitWords, add: Add): void {
   const cacKnown = knownIn(state, cacId, ctx);
   if (ltv.kind !== "known" || cacKnown.kind !== "known") return;
   const loss = lossCheck(ltv.value, cacKnown.value);
@@ -168,7 +176,7 @@ function lossFinding(state: EngineState, ltv: DerivedValue, cacId: "acq.cac" | "
   const currency = state.setup.currency;
   const cac = cacKnown.value;
   const shortfall = sub(cac, ltv.value);
-  add(loss.verdict === "loss" ? "unit-econ-loss" : "unit-econ-loss-maybe", [cacId === "acq.cac" ? "rev.ltv" : "slg.rev.ltv", cacId], {
+  add(loss.verdict === "loss" ? "unit-econ-loss" : "unit-econ-loss-maybe", [LTV_OF[cacId], cacId], {
     cac: cac.lo === cac.hi ? formatInterval(cac, "money", ctx, words, { currency }) : formatApproxMoneyInterval(cac, currency, ctx, words),
     ltv: formatApproxMoneyInterval(ltv.value, currency, ctx, words),
     gap: formatApproxMoneyInterval({ lo: Math.max(0, shortfall.lo), hi: Math.max(0, shortfall.hi) }, currency, ctx, words),
@@ -176,7 +184,7 @@ function lossFinding(state: EngineState, ltv: DerivedValue, cacId: "acq.cac" | "
 }
 
 /** The payback can't be computed, and at least one of its inputs was looked for and not found. */
-function paybackFinding(payback: DerivedValue, id: "rev.cac-payback" | "slg.rev.cac-payback", add: Add, missing: (id: MetricId) => boolean): void {
+function paybackFinding(payback: DerivedValue, id: "rev.cac-payback" | "slg.rev.cac-payback" | "app.rev.install-payback", add: Add, missing: (id: MetricId) => boolean): void {
   if (payback.kind === "uncomputable" && payback.missing.some(missing)) add("unit-econ-uncomputable", [id, ...payback.missing]);
 }
 
@@ -191,6 +199,9 @@ function selfServeFindings(
 ): void {
   const snapshot = currentSnapshot(state);
   const eventMissing = missing("act.event");
+  // An app is read on the numbers its setup shows (§21.5.5): its own list, and its cost per install in place of the CAC.
+  const app = isApp(state.setup);
+  const shapes = app ? shapesOf(state.setup).filter((s) => s.scope === "plg" || s.scope === "app") : METRIC_SHAPES;
 
   // 1 — a ★ of the peloton that nobody could pull. The activation column breaks too when its EVENT is
   // missing: nobody can count activations of an action nobody has named, and it is said once (§5.3).
@@ -201,7 +212,7 @@ function selfServeFindings(
   }
 
   // 2 — no shared definition. Not raised on the rate when its event is already the finding.
-  for (const shape of METRIC_SHAPES) {
+  for (const shape of shapes) {
     if (shape.id === "act.rate" && eventMissing) continue;
     if (entryOf(snapshot, shape.id)?.missing?.cause === "no-definition" && missing(shape.id)) add("no-definition", [shape.id]);
   }
@@ -210,9 +221,9 @@ function selfServeFindings(
   namedFindings(state, m.diagnosis, ctx, words, add, () => false);
 
   // 3
-  conflictFindings(state, METRIC_SHAPES, ctx, words, add);
-  paybackFinding(m.unit.payback, "rev.cac-payback", add, missing);
-  lossFinding(state, m.unit.ltv, "acq.cac", ctx, words, add);
+  conflictFindings(state, shapes, ctx, words, add);
+  paybackFinding(m.unit.payback, app ? "app.rev.install-payback" : "rev.cac-payback", add, missing);
+  lossFinding(state, m.unit.ltv, app ? "app.acq.cpi" : "acq.cac", ctx, words, add);
 
   // 3 — the chain and the billing don't describe the same population.
   const gap = derived.sanity.find((c) => c.id === "reconcile-gap");

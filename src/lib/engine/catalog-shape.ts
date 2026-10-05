@@ -1130,6 +1130,8 @@ export const REMIND_AFTER_DAYS = 5;
 export const RECONCILE_BAND = { lo: 0.67, hi: 1.5 } as const;
 /** A monthly churn above this is probably an annual figure (§6.9). */
 export const CHURN_HIGH_PERCENT = 30;
+/** A stores' commission above this is probably counting VAT or payment fees with it (§21.5.5, A22). */
+export const COMMISSION_HIGH_PERCENT = 30;
 /** A gross margin outside this is probably counting the wrong costs (§6.9). */
 export const MARGIN_ODD = { lo: 0, hi: 95 } as const;
 /** A median sales cycle past the three-month window: the quarter's CAC divides by customers of earlier spend (§18.5.7). */

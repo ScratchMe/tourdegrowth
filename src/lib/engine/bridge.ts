@@ -1,5 +1,6 @@
 import type { StoredResult } from "@/lib/quiz/storage";
-import { ALL_DERIVED_SHAPES, motionOfMetric } from "./catalog-shape";
+import { ALL_DERIVED_SHAPES, derivedShapesOf, motionOfMetric, shapesOf } from "./catalog-shape";
+import { isApp } from "./setup-type";
 import type { ResolvedBridge } from "./strings";
 import type { BridgeRow, DerivedId, EngineState, MetricId, MetricStatus, Mirror, MirrorVerdict, TrackingLevel } from "./types";
 import { currentSnapshot, statusOf } from "./values";
@@ -76,14 +77,19 @@ function isDerived(id: MetricId | DerivedId): id is DerivedId {
  * hybrid, a question bridged in both motions gives two rows, and the counts
  * count rows. A motion unticked is not mirrored — its numbers stay in the
  * file but nobody reads them (§18.1.2). Rows keep the bridges' order, which
- * lists self-serve's before sales-assisted's.
+ * lists self-serve's before sales-assisted's. An app (§21.5.5) skips the
+ * bridges of numbers it does not show — the CAC and the LTV, which it replaces
+ * with a cost and a value per install: the Tour asked about a number this
+ * engine does not have, and `Mirror.tsx` would print the bare id.
  */
 export function buildMirror(state: EngineState, result: StoredResult, bridges: ResolvedBridge[]): Mirror {
   const counts: Record<MirrorVerdict, number> = { coherent: 0, "blind-spot": 0, "blind-spot-light": 0, better: 0, "known-gap": 0 };
   const rows: BridgeRow[] = [];
+  const shown = isApp(state.setup) ? new Set<MetricId | DerivedId>([...shapesOf(state.setup), ...derivedShapesOf(state.setup)].map((s) => s.id)) : null;
   for (const bridge of bridges) {
     const motion = motionOfMetric(bridge.metric);
     if (!state.setup.motions[motion]) continue;
+    if (shown !== null && !shown.has(bridge.metric)) continue;
     const index = result.answers?.[bridge.questionId];
     const option = index === undefined ? undefined : bridge.options[index];
     if (!option) continue; // an unanswered question declares nothing

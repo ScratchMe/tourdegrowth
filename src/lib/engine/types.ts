@@ -626,7 +626,7 @@ export interface Peloton {
   /** Source and month of the upstream line (acq.signup-rate). */
   upstreamSource: SourceRef | null;
   upstreamPeriod: YearMonth | null;
-  columns: PelotonColumn[]; // always 3, act → ret → rev
+  columns: PelotonColumn[]; // 3, act → ret → rev; 2 for an app without subscriptions (§21 D12)
   chain: "complete" | "gap" | "tail-break" | "empty";
   /** The cohort's size is under SMALL_COHORT_SIZE: rates lose their decimals. */
   smallCohort: boolean;
@@ -729,6 +729,8 @@ export type SanityId =
   | "paid-gt-retained"
   | "churn-high"
   | "margin-odd"
+  // A consumer app's own (§21.5.5): the stores' commission looks too high.
+  | "commission-high"
   | "ttv-mean"
   | "cohort-mismatch"
   | "reconcile-gap"
@@ -1080,6 +1082,19 @@ export interface Series {
   motions: MotionSeries[];
 }
 
+/** What only an app derives (§21.5.5). Absent for every other type: the goldens never see the key. */
+export interface AppDerived {
+  monetization: AppMonetization;
+  /** The value of an install over twelve months — the ratio's numerator (C92). */
+  value12: DerivedValue;
+  /** The two streams and their total: this month, new a month, in twelve months (the board's band, §21.6.4). */
+  streams: {
+    now: { subscriptions: DerivedValue | null; usage: DerivedValue | null; total: DerivedValue };
+    newPerMonth: { subscriptions: DerivedValue | null; usage: DerivedValue | null; total: DerivedValue };
+    in12Months: { subscriptions: DerivedValue | null; usage: DerivedValue | null; total: DerivedValue };
+  };
+}
+
 /**
  * Everything the board renders, computed in one pass from the state.
  *
@@ -1104,5 +1119,7 @@ export interface EngineDerived {
   mirror: Mirror | null;
   /** The last two months side by side (§19.2.5): absent while the engine holds one month, so a v1 or v2 file derives as it did. */
   series?: Series;
+  /** Consumer app only (§21.5.5). */
+  app?: AppDerived;
 }
 

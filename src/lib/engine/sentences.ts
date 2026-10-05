@@ -142,6 +142,7 @@ const SANITY_KEY: Record<Exclude<SanityId, "reconcile-gap" | "two-tools">, keyof
   "paid-gt-retained": "paidGtRetained",
   "churn-high": "churnHigh",
   "margin-odd": "marginOdd",
+  "commission-high": "commissionHigh",
   "ttv-mean": "ttvMean",
   "cohort-mismatch": "cohortMismatch",
   "slg-cycle-long": "slgCycleLong",

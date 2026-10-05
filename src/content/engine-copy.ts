@@ -2900,6 +2900,11 @@ export const ENGINE_COPY = {
     },
     churnHigh: { fr: "C'est bien un churn mensuel, et pas annuel ?", en: "Is that really a monthly churn, not an annual one?" },
     marginOdd: { fr: "Vérifie ce qui est compté dans les coûts directs.", en: "Check what's counted in direct costs." },
+    // TODO: à relire (convention 6) — neuf le 2026-10-05 (A22 APP-6, §21.5.5) : commissionHigh, le contrôle propre à une app.
+    commissionHigh: {
+      fr: "Au-delà de 30 %, la TVA ou des frais de paiement sont souvent comptés avec la commission : vérifie.",
+      en: "Above 30%, VAT or payment fees are often counted in with the commission: check.",
+    },
     ttvMean: {
       fr: "Une moyenne baisse quand les traînards abandonnent : prends la médiane.",
       en: "An average drops when stragglers give up: use the median.",
