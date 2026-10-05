@@ -13,8 +13,10 @@ import { expect, test } from "./helpers";
  * closed on the server these specs run against (`ENGINE_ENABLED` unset, as in
  * `engine-flag.spec.ts`), and `/admin` fails closed with or without
  * `ADMIN_DASHBOARD_PASSWORD`. The game is open in CI, so its closed side is
- * held by `proxy.test.ts` alone. The status the server really answers, with
- * no redirect followed.
+ * held by `proxy.test.ts` alone, as are the closed pages' RSC payloads
+ * (`/en/game.segments/_full.segment.rsc`): only Vercel serves them, `next
+ * start` answers 404 with or without the fix, so a spec here would pass for
+ * nothing. The status the server really answers, with no redirect followed.
  */
 const get = (request: import("@playwright/test").APIRequestContext, path: string) =>
   request.get(path, { maxRedirects: 0, failOnStatusCode: false });
@@ -24,10 +26,6 @@ test("the closed engine is a 404 when its language is encoded — the segment ne
   // path served the closed engine before the fix. Vercel decodes every
   // segment, which `proxy.test.ts` holds.
   expect((await get(request, "/%66r/aarrr-funnel-template")).status()).toBe(404);
-});
-
-test("the closed engine's RSC payload, beside its page, is a 404 too", async ({ request }) => {
-  expect((await get(request, "/en/aarrr-funnel-template.segments/_full.segment.rsc")).status()).toBe(404);
 });
 
 test("an encoded legacy address never redirects off the site", async ({ request }) => {

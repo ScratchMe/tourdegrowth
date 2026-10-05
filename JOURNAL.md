@@ -568,20 +568,34 @@ Et des lacunes moins visibles, chacune un piège : un outil de l'app écrit deux
 - `/en/a%61rrr-funnel-template` servait le moteur fermé ;
 - `/%61dmin/stats`, `/%61dmin/stats/json`, `/%61dmin/audit` et `/%61dmin/preview` passaient la Basic Auth et tombaient sur un 500 sans aucune donnée : c'est le routage qui les arrêtait, pas la garde.
 
-Le double encodage (`/en/gam%2565/retention`) répondait 404 : le routeur ne décode qu'une fois. Les autres formes essayées (double barre, barre finale, `/./`, majuscules, `;`) étaient déjà redirigées ou en 404.
+Le double encodage (`/en/gam%2565/retention`) répondait 404 : le routeur ne décode qu'une fois. Les formes brutes (double barre, barre finale, `/./`, majuscules, `;`) étaient déjà redirigées ou en 404.
 
 **Deux routeurs, deux décodages** (la leçon portable est dans `NEXTJS.md` §1.1). Sur Vercel, tout le chemin est décodé, `%2F` compris. Sous `next start`, seuls les segments dynamiques le sont : sur le build de `main`, `/%66r/aarrr-funnel-template` répondait 200, mais `/%61dmin/stats` répondait 404. Une recette locale ne voit donc qu'une partie de la faille.
 
-**Le correctif** (`src/proxy.ts`) : `gatePath` décode le chemin une fois (`decodeURIComponent`, `%2F` compris) et rend `null` s'il ne se décode pas. Le proxy répond alors 400 avant toute garde. La garde de `/admin`, l'aperçu `POST /admin/preview`, le budget de lectures de `/r/<id>`, `splitLocalePath` et les drapeaux du jeu et du moteur ne lisent plus que ce chemin. La redirection des anciennes adresses de contenu aussi, `URL.pathname` ré-encodant ce qu'il faut.
+**Trois relectures sécurité, quatre trous de plus.** La première version (`decodeURIComponent` seul) a été relue avant toute PR. Ce que les relectures ont trouvé, puis ce que l'orchestrateur a vérifié en production :
+- **une redirection ouverte, ouverte par le correctif lui-même** et jamais livrée : le 308 des anciennes adresses, construit depuis le chemin décodé, envoyait `/glossary/..%2F..%2F%2Fevil.com` vers `//evil.com`, le setter de `URL.pathname` résolvant les `..` ;
+- `/en%2F%2Fgame/retention` servait le jeu fermé (Vercel normalise le `//` après le proxy) ;
+- `/en/game.segments/_full.segment.rsc` (31 Ko) et `/en/aarrr-funnel-template.segments/_full.segment.rsc` (237 Ko) servaient la charge RSC entière des pages fermées : `isGamePath` et `isEnginePath` ne reconnaissaient pas ces fichiers frères ;
+- `/R/sample/opengraph-image` répondait 200 : les réécritures de `next.config` ignorent la casse, et le budget de lectures de `/r/<id>` (R2-19) ne comptait que `/r/`.
+
+Ont été sondés sans rien trouver : les exclusions du `matcher` (`/_next/static%2F..%2F..%2Fen%2Fabout`, `/favicon.ico%2F..%2F…`), la casse des pages et de `/admin`, l'Unicode pleine chasse, `%3F`, `%23` et `;`, tous en 404.
+
+**Le correctif** :
+- **`gatePath`** (`src/proxy.ts`) décode le chemin une fois, `%2F` compris. Il rend `null`, donc un 400 avant toute garde, si le chemin ne se décode pas, ou s'il se décode en un chemin non canonique : `//`, segment `.` ou `..`, `\`, caractère de contrôle, `%` restant. Aucune adresse du site n'en contient : pages, `/r/<id>`, images, badges, `llms*.txt`, `/.well-known/…`.
+- **Ce chemin seul est lu** par la garde de `/admin`, l'aperçu `POST /admin/preview`, le budget de `/r/`, `splitLocalePath` et les drapeaux. La cible du 308 se construit depuis le chemin brut, déjà normalisé par l'analyseur d'URL.
+- **`isGamePath` et `isEnginePath`** couvrent `/game.` et `/aarrr-funnel-template.`.
+- **`isResultReadPath`** compare en minuscules.
+- **A26.b** est ouvert dans `CHANTIERS.md` : les pages de `/admin` ne font confiance qu'au proxy.
 
 **Les tests** :
-- **Unitaires** : sept tests dans `src/__tests__/proxy.test.ts`, chaque chemin relevé en production compris. **Non-vacuité** : avec `gatePath` ramené au chemin brut (l'ancien comportement), six des sept rougissent. Le septième épingle le décodage unique (`%2565` laissé au routeur) et passe dans les deux cas, voulu.
-- **e2e** : `e2e/encoded-paths.spec.ts` tourne contre le vrai routeur, avec trois specs. Le moteur fermé répond 404 sous trois encodages. `/admin` encodé répond 401 avec son défi. Un chemin indécodable répond 400. **Reproduit avant le correctif** contre le build de `main` (`next start`) : les trois specs rougissent, avec 200 pour `/%66r/…`, 404 au lieu de 401 pour l'admin, et 500 au lieu de 400 pour le chemin indécodable. Le jeu étant ouvert en CI, son côté fermé n'est tenu que par les tests unitaires.
+- **Unitaires** : dix tests neufs dans `src/__tests__/proxy.test.ts`, et des cas ajoutés aux deux `access.test.ts`. Chaque chemin relevé en production y est, avec les quatre formes de redirection ouverte de la relecture.
+- **Non-vacuité** : chaque garde a été défaite à son tour (`gatePath` réduit au décodage, puis au chemin brut ; les fichiers frères ; les minuscules). Chaque fois, ses tests rougissent : six sur sept pour le chemin brut, puis sept, puis un. Le reste passe.
+- **e2e** : `e2e/encoded-paths.spec.ts` tourne contre le vrai routeur, avec quatre specs. Le moteur fermé, langue encodée, répond 404. `/admin` encodé répond 401 avec son défi. Le 308 encodé répond 400, sans `Location`. Un chemin indécodable répond 400. **Contre le build de `main`**, les quatre rougissent. Une cinquième spec, sur la charge RSC, a été retirée : `next start` ne sert pas ces fichiers et répond 404 avec ou sans le correctif (convention 5). Le test unitaire la tient.
 
 **Vérifié, sorties réelles** :
 - `tsc` et `eslint` propres ;
-- `vitest run --coverage` : **3 488 sur 3 488** (+7), seuils tenus ;
+- `vitest run --coverage` : **3 491 sur 3 491** (+10), seuils tenus ;
 - build comme la CI ;
-- Playwright, suite complète, avec l'émulateur Firestore et `CI=1` : **1 009 passées, 7 ignorées par construction, 0 échec**, sur 1 016 (+3).
+- Playwright, suite complète, avec l'émulateur Firestore et `CI=1`, sur l'avant-dernière version (la seule différence est la mise en minuscules et la spec retirée) : voir le compte de la PR.
 
-La production est à revérifier après le déploiement, avec les mêmes adresses.
+La production est à revérifier après le déploiement, avec toutes les adresses ci-dessus.

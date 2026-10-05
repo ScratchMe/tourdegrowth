@@ -70,11 +70,17 @@ export function isAuthorizedForAdmin(request: NextRequest): boolean {
  * share. A budget tight enough to feel like protection would 429 the very
  * crawler the growth loop depends on. `/r/sample` reads no Firestore and is
  * not counted.
+ *
+ * Compared lower-cased (2026-10-05): the `next.config` rewrites ignore case,
+ * so `/R/<id>/opengraph-image` reached the image route, and its Firestore
+ * read, past a budget that only counted `/r/` (`/R/sample/opengraph-image`
+ * answered 200 in production).
  */
 const RESULT_READ_LIMIT = { limit: 120, windowSeconds: 10 * 60 };
 
 export function isResultReadPath(pathname: string): boolean {
-  return pathname.startsWith("/r/") && !pathname.startsWith("/r/sample");
+  const path = pathname.toLowerCase();
+  return path.startsWith("/r/") && !path.startsWith("/r/sample");
 }
 
 /**

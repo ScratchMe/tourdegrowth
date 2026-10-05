@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { resetRateLimitsForTests } from "@/lib/rate-limit";
-import { config, constantTimeEqual, gatePath, isAuthorizedForAdmin, proxy } from "../proxy";
+import { config, constantTimeEqual, gatePath, isAuthorizedForAdmin, isResultReadPath, proxy } from "../proxy";
 import { ENGINE_PREVIEW_COOKIE } from "@/lib/engine/access";
 import { GAME_PREVIEW_COOKIE } from "@/lib/game/access";
 import { enabledLevelSlugs } from "@/lib/game/levels";
@@ -620,6 +620,15 @@ describe("proxy (percent-encoded paths, 2026-10-05)", () => {
       proxy(new NextRequest(`https://tourdegrowth.com${path}`, { headers: { "x-forwarded-for": "203.0.113.9" } }));
     for (let i = 0; i < 120; i += 1) await read("/r/3f1c2a7e-9b4d-4e21-a8c6-000000000000");
     expect((await read("/%72/3f1c2a7e-9b4d-4e21-a8c6-000000000001")).status).toBe(429);
+  });
+
+  it("spends it whatever the case: the image rewrites ignore case, and reached Firestore", async () => {
+    const read = (path: string) =>
+      proxy(new NextRequest(`https://tourdegrowth.com${path}`, { headers: { "x-forwarded-for": "203.0.113.9" } }));
+    for (let i = 0; i < 120; i += 1) await read("/R/3f1c2a7e-9b4d-4e21-a8c6-000000000000/opengraph-image");
+    expect((await read("/r/3f1c2a7e-9b4d-4e21-a8c6-000000000001")).status).toBe(429);
+    // …and the sample, which reads nothing, stays uncounted in any case.
+    expect(isResultReadPath("/R/SAMPLE/opengraph-image")).toBe(false);
   });
 
   it("refuses a path that does not decode, or does not decode to a canonical one, before any check", async () => {
