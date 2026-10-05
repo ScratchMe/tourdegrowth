@@ -39,9 +39,10 @@ import { LEVEL_TEASERS } from "../src/content/game/hub";
  * complaints name the CNIL from the second quarter on, so no spec asserts the
  * absence of « CNIL » before December — the inspection is read in the third
  * quarter's report by « administrative fine », and in neither of the first
- * two. And « never a % » only watches the figures of the metric (the tile, the
- * ending's first number, December's cell and curve): the effect lines of a
- * report say « +{pct} % ».
+ * two. The rule that replaces level 2's « never a % » is « the rate shows with
+ * its % and is never a count of « clients » »: it watches the figures of the
+ * metric (the tile, December's cell, curve and ending), not the lines of a
+ * report, which say « +{pct} % ».
  *
  * Non-vacuity, measured (`TESTING.md` §1.1): each change below was made in the
  * production code, the site rebuilt (the build's exit code read before the
@@ -61,8 +62,8 @@ import { LEVEL_TEASERS } from "../src/content/game/hub";
  * - the model: the CEO's T2 and T3 orders swapped: 1 (path A; path C passes,
  *   its three orders come out the same under both schedules); the monthly
  *   price 5 to 6: 3 (P1, A, C); `fireBelow` 25 to 5: 1 (path D).
- * Not tried: the 390 px overflow count, axe, and P2's « nothing on a card says
- * what it pays ».
+ * Not tried: the 390 px overflow count, axe, P2's « nothing on a card says what
+ * it pays », and the « never clients » negatives.
  */
 test.skip(process.env.GAME_ENABLED !== "true", "GAME_ENABLED is not \"true\" for this run — the level page is closed.");
 test.use({ contextOptions: { reducedMotion: "reduce" } });
@@ -258,6 +259,8 @@ test.describe("a whole year of level 3 through the interface", () => {
     const ending = page.getByTestId("game-ending");
     await expect(ending).toHaveAttribute("data-win", "true");
     await expect(ending).toContainText("Activation à 45,0\u00a0% en décembre, 71\u00a0887 utilisateurs actifs");
+    await expect(page.getByTestId("game-reveal-metric")).toContainText("Activation en décembre");
+    await expect(page.getByTestId("game-reveal-metric")).toContainText("45,0\u00a0%");
     await expect(page.getByTestId("game-reveal-trust")).toContainText("83 / 100");
     await expect(page.getByTestId("game-reveal-radar")).toContainText("0 / 100");
     await expect(page.getByTestId("game-dash-trust")).toHaveAttribute("data-state", "known");
@@ -265,6 +268,9 @@ test.describe("a whole year of level 3 through the interface", () => {
     const curve = page.getByTestId("game-chart-metric").getByRole("img");
     await expect(curve).toHaveAttribute("aria-label", /\S/);
     await expect(page.getByTestId("game-chart-metric")).toContainText("Activation par mois");
+    for (const id of ["game-reveal-metric", "game-chart-metric", "game-ending"]) {
+      await expect(page.getByTestId(id)).not.toContainText("clients");
+    }
     // An honest year used no trick.
     await expect(page.getByTestId("game-catalogue").locator("[data-group='used']")).toHaveCount(0);
     // C31, C75 — the block that closes December: see « the block that closes December » below.
@@ -363,6 +369,8 @@ test.describe("a whole year of level 3 through the interface", () => {
     await expect(ending).toContainText("Here is what you did.");
     await expect(ending).toContainText("the fine landed");
     await expect(ending).toContainText("Activation at 14.5% in December");
+    await expect(page.getByTestId("game-reveal-metric")).toContainText("Activation in December");
+    await expect(page.getByTestId("game-reveal-metric")).toContainText("14.5%");
     await expect(page.getByTestId("game-reveal-trust")).toContainText("27 / 100");
     await expect(page.getByTestId("game-reveal-radar")).toContainText("1 / 100");
     const used = page.getByTestId("game-catalogue").locator("[data-group='used']");
