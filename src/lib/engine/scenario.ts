@@ -85,6 +85,30 @@ export interface ScenarioFunnel {
   paying: Interval | null;
 }
 
+/**
+ * What only an app's scenario carries (engine spec §21.1 D5). Never set by
+ * `buildScenario`: the SaaS goldens never see the key.
+ */
+export interface AppKpis {
+  /** The subscriptions' MRR month by month (13 points), null when unticked. */
+  subscriptionsPath: Interval[] | null;
+  /** Purchases and ads month by month (13 points), null when neither is ticked. */
+  usagePath: Interval[] | null;
+  newSubscriptions: Interval | null;
+  newUsage: Interval | null;
+  /** An install's margin over its first twelve months (C92's numerator). */
+  value12: Interval | null;
+  /** The payback chart's curve: 37 points, months 0 to 36 (`installCumulative`). */
+  curve: { lo: number[]; hi: number[] } | null;
+  /** The worst case isn't paid back within 36 months: the payback's high bound reads the cap. */
+  paybackBeyondCap: boolean;
+  /**
+   * The usage stream is ticked and the month's actives are not known (an estimated per-active revenue, no count typed):
+   * every « il manque » of a usage figure then ends with `io.sharedCount.appActives` (§21.6.4). False without usage.
+   */
+  activesMissing: boolean;
+}
+
 /** The growth figures a leadership meeting asks about. Rates in percent, money in the engine's currency. The money of §20 comes with them (`MoneyKpis`). */
 export interface ScenarioKpis extends MoneyKpis {
   /** MRR at the end of the month the engine reads. */
@@ -100,6 +124,8 @@ export interface ScenarioKpis extends MoneyKpis {
   ltv: Interval | null;
   /** Months of gross margin to pay the CAC back. */
   payback: Interval | null;
+  /** A consumer app's own figures (`app.ts`, §21.5.3). Declared here, set only there. */
+  app?: AppKpis;
 }
 
 export type ScenarioAssumption =
@@ -112,7 +138,14 @@ export type ScenarioAssumption =
   | "expansion-unknown"
   | "contraction-unknown"
   | "same-spend"
-  | "twelve-months";
+  | "twelve-months"
+  // A consumer app's own rules (§21.5.3, `app.ts`).
+  | "actives-follow-d30"
+  | "per-active-all-actives"
+  | "commission-margin-only"
+  | "same-spend-installs"
+  | "install-months"
+  | "usage-twelve-months";
 
 export interface Scenario {
   levers: LeverView[];
@@ -124,9 +157,9 @@ export interface Scenario {
   assumptions: ScenarioAssumption[];
 }
 
-/** The levers priced in the engine's currency: what new customers pay, what a new contract is worth. */
-const MONEY_LEVERS: readonly LeverId[] = ["rev.arpa", "slg.rev.acv"];
-const LOWER_IS_BETTER: readonly LeverId[] = ["ret.logo-churn", "rev.contraction"];
+/** The levers priced in the engine's currency: what new customers pay, what a new contract is worth, what an active brings. */
+const MONEY_LEVERS: readonly LeverId[] = ["rev.arpa", "slg.rev.acv", "app.rev.purchases-per-active", "app.rev.ads-per-active"];
+const LOWER_IS_BETTER: readonly LeverId[] = ["ret.logo-churn", "rev.contraction", "app.rev.commission"];
 
 function known(state: EngineState, id: MetricId, ctx: EngineCalcContext): Interval | null {
   const k = knownIn(state, id, ctx);
@@ -140,8 +173,9 @@ const clampHi = (i: Interval, cap: Interval | number): Interval => {
 const nonNegative = (i: Interval): Interval => mapBounds(i, (v) => Math.max(0, v));
 const round = (v: number, step: number) => Math.round(v / step) * step;
 
-/** The slider's step: a tenth of a point under 10 %, a point above; 1 € under 100 € of ARPA (or ACV), 5 € above. */
+/** The slider's step: a tenth of a point under 10 %, a point above; 1 € under 100 € of ARPA (or ACV), 5 € above; a cent for what an active brings. */
 function stepOf(id: LeverId, mid: number): number {
+  if (id === "app.rev.purchases-per-active" || id === "app.rev.ads-per-active") return 0.01;
   if (MONEY_LEVERS.includes(id)) return mid >= 100 ? 5 : 1;
   return mid >= 10 ? 1 : 0.1;
 }
@@ -167,7 +201,8 @@ function domain(id: LeverId, today: Interval): { min: number; max: number; step:
  * Every lever with its value today and the target under test. A target on an
  * unknown lever is ignored — there is nothing to move from. `ids` defaults to
  * self-serve's; sales-assisted passes its own rate and money levers
- * (`slg-scenario.ts`), and builds the link's itself.
+ * (`slg-scenario.ts`), and builds the link's itself; a consumer app passes
+ * the ones its monetization shows (`app.ts#appLeverIds`).
  */
 export function leverViews(
   state: EngineState,

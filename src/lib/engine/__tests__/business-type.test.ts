@@ -16,9 +16,13 @@ import {
   setupToolsFor,
 } from "../business-type";
 import type { AppMonetization } from "../app-model";
-import { ALL_DERIVED_SHAPES, ALL_METRIC_SHAPES, APP_REPLACED, METRIC_SHAPES, derivedShapeOf, shapeOf } from "../catalog-shape";
+import { ALL_DERIVED_SHAPES, ALL_METRIC_SHAPES, APP_REPLACED, LEVER_IDS, METRIC_SHAPES, derivedShapeOf, shapeOf } from "../catalog-shape";
+import { buildScenario, leverAlone } from "../scenario";
+import { leverAloneOf, leverIdsOf, scenarioOf } from "../scenario-of";
 import { APP_TOOL_FAMILIES, SETUP_TOOLS } from "../tools";
-import type { PlgMetricId, ToolId } from "../types";
+import type { EngineState, LeverId, MetricEntry, PlgMetricId, ToolId } from "../types";
+import { exampleState, hybridState, withEntry } from "./fixtures";
+import { CTX_FR } from "./props";
 
 /**
  * The type of business (engine spec §21.1 D1, D7, D8; §21.2.2, §21.3; A22 APP-0): the list of types, the one
@@ -308,5 +312,142 @@ describe("every read of a shape's display fields goes through displayShapeOf (§
     const readers = scanned.filter((f) => READ.test(stripComments(f.source))).map((f) => f.path);
     for (const path of POINTS) expect(readers, `${path} is a reader the spec lists`).toContain(path);
     expect(readers.filter((path) => !POINTS.includes(path) && !EXEMPT.includes(path))).toEqual([]);
+  });
+});
+
+/**
+ * Who may read the engine's type (engine spec §21.1 D4, §21.10.1 guard 3, A22 APP-4). A calculation or a screen asks
+ * `isApp(setup)` or `monetizationOf(setup)`; only the modules that are about the type itself compare it: the leaf
+ * that defines it, the display layer, the seam that picks a model, and the three that validate, open and merge a file
+ * (plus `migrate.ts` and the example, which build a setup). A comparison anywhere else is a model branching on the
+ * type behind the seam's back, and the SaaS goldens would be the last to know.
+ *
+ * Non-vacuity, measured on 2026-10-05 (each sabotage applied alone, this file run, then restored; the count is the
+ * tests that fall): `setup.type === "consumer-app"` added to `deck.ts` falls the scan (1), as does `.type !==
+ * "consumer-app"` added to `app.ts` (1); taking `scenario-of.ts` out of the list of readers falls it too (1) — which
+ * is also the proof that the pattern sees the read that module makes.
+ */
+describe("who reads the type of an engine (§21.10.1, guard 3)", () => {
+  const READERS = [
+    "lib/engine/setup-type.ts",
+    "lib/engine/business-type.ts",
+    "lib/engine/scenario-of.ts",
+    "lib/engine/validate.ts",
+    "lib/engine/io.ts",
+    "lib/engine/merge.ts",
+    "lib/engine/migrate.ts",
+    "lib/engine/example.ts",
+  ];
+  /** `setup.type ===` (or `!==`, with `state.setup`, `a.setup`…), and `.type === "consumer-app"` on any object. */
+  const READS_THE_TYPE = /\bsetup\??\.type\s*[!=]==|\.type\s*[!=]==\s*["']consumer-app["']|["']consumer-app["']\s*[!=]==\s*[\w.?]*\.type\b/;
+
+  it("is read by the eight modules about the type, and by nothing else in src/", () => {
+    const scanned = FILES.filter((f) => !f.path.includes("/__tests__/") && !/\.test\.tsx?$/.test(f.path));
+    // The scan looked at something: the whole tree, the eight modules, and the pattern finds the reads it exists for.
+    expect(scanned.length).toBeGreaterThan(300);
+    for (const path of READERS) expect(BY_PATH.get(path), `${path} exists where the spec puts it`).toBeDefined();
+    for (const path of ["lib/engine/setup-type.ts", "lib/engine/scenario-of.ts", "lib/engine/validate.ts"]) {
+      expect(READS_THE_TYPE.test(stripComments(BY_PATH.get(path)!)), `${path} reads the type, and the pattern sees it`).toBe(true);
+    }
+    const offenders = scanned.filter((f) => !READERS.includes(f.path) && READS_THE_TYPE.test(stripComments(f.source))).map((f) => f.path);
+    expect(offenders, "ask isApp(setup) or monetizationOf(setup) instead").toEqual([]);
+  });
+});
+
+/**
+ * The SaaS does not move by a bit (engine spec §21.10.1, guard 4, A22 APP-4): for the §6.0 example, the §18.9 hybrid
+ * and 200 SaaS states drawn at random (a fixed seed: the same 200 on every run), the seam answers exactly what the
+ * self-serve engine does — `scenarioOf` is `buildScenario`, `leverAloneOf` is `leverAlone`, `leverIdsOf` is the very
+ * `LEVER_IDS` — and never carries the app's key: `toEqual` does not see a key that holds `undefined`, so its absence
+ * is asserted with `in`.
+ *
+ * Non-vacuity, measured on 2026-10-05 (each sabotage applied alone, this file, `app.test.ts`, `scenario.test.ts` and
+ * the two goldens run, then restored; the count is the tests that fall): `scenarioOf` sending a SaaS to
+ * `buildAppScenario` falls the two groups below (2), as does `leverAloneOf` sending it to `appLeverAlone` (2) and
+ * `scenarioOf` posting a real `kpis.app` on the SaaS (2); posting `app: undefined` falls them too (2) — through the
+ * `in` assertions alone, `toEqual` passing; `leverIdsOf` copying the list (`[...LEVER_IDS]`) falls the two groups and
+ * `app.test.ts`'s `toBe` (3). The goldens fall in none of them: nothing calls `scenarioOf` before APP-8 and APP-9
+ * move the screens and the deck onto it, so §21.10.4's « golden v2 » column is only reachable from then on. The draw
+ * reaches the model: the counts it asserts were 190 states with a lever moved, 108 with a twelve-month projection and
+ * 535 single-lever slides on that date.
+ */
+describe("the SaaS through the seam is the SaaS (§21.10.1, guard 4)", () => {
+  /** mulberry32, so the draw is the same on every run. */
+  function seeded(seed: number): () => number {
+    let a = seed;
+    return () => {
+      a = (a + 0x6d2b79f5) | 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  const RATES = ["acq.signup-rate", "ref.referred-share", "act.rate", "ret.d30", "rev.paid-conversion", "ret.logo-churn", "rev.contraction", "rev.expansion", "rev.gross-margin"] as const;
+  const AT = "2026-09-20T10:00:00.000Z";
+
+  function drawState(rand: () => number): { state: EngineState; targets: Partial<Record<LeverId, number>> } {
+    const int = (lo: number, hi: number) => lo + Math.floor(rand() * (hi - lo + 1));
+    const ratio = (n: number, d: number): MetricEntry["value"] => ({ kind: "ratio", numerator: n, denominator: d });
+    const entry = (value: MetricEntry["value"]): MetricEntry => ({ status: "measured", value, source: { kind: "other" }, updatedAt: AT });
+    let state = exampleState();
+    const set = (id: PlgMetricId, e: MetricEntry | undefined) => {
+      state = withEntry(state, id, e);
+    };
+    for (const id of RATES) {
+      const roll = rand();
+      if (roll < 0.15) set(id, undefined);
+      else if (roll < 0.25) set(id, { status: "missing", missing: { cause: "not-tracked", repair: "sprint" }, updatedAt: AT });
+      else if (roll < 0.5) {
+        const low = rand() * 40;
+        set(id, { status: "estimated", estimate: { low, high: low + rand() * 20, basis: "team-hunch" }, updatedAt: AT });
+      } else if (roll < 0.6) set(id, entry({ kind: "rate", percent: rand() * 50 }));
+      else {
+        const den = int(100, 40_000);
+        set(id, entry(ratio(int(0, Math.floor(den / 2)), den)));
+      }
+    }
+    set("rev.arpa", rand() < 0.2 ? undefined : entry(ratio(int(1_000, 200_000), int(10, 3_000))));
+    set("acq.cac", rand() < 0.4 ? undefined : entry(ratio(int(1_000, 100_000), int(5, 500))));
+    const targets: Partial<Record<LeverId, number>> = {};
+    for (const id of LEVER_IDS) if (rand() < 0.4) targets[id] = id === "rev.arpa" ? Math.round(rand() * 2990 + 10) / 10 : Math.round(rand() * 1000) / 10;
+    state.whatIf = { ...targets };
+    return { state, targets };
+  }
+
+  function expectSame(state: EngineState, targets: Partial<Record<LeverId, number>>) {
+    const through = scenarioOf(state, targets, CTX_FR);
+    expect(through).toEqual(buildScenario(state, targets, CTX_FR));
+    expect("app" in through.today.kpis, "no `app` key on today").toBe(false);
+    expect("app" in through.projected.kpis, "no `app` key on the projection").toBe(false);
+    for (const id of LEVER_IDS) expect(leverAloneOf(state, id, CTX_FR), id).toEqual(leverAlone(state, id, CTX_FR));
+    expect(leverIdsOf(state.setup)).toBe(LEVER_IDS);
+    return through;
+  }
+
+  it("holds for the §6.0 example and the §18.9 hybrid, with and without what-ifs", () => {
+    const targets: Partial<Record<LeverId, number>> = { "act.rate": 24, "ret.logo-churn": 1.5, "rev.arpa": 150, "ret.d30": 40 };
+    for (const make of [exampleState, hybridState]) {
+      expectSame(make(), {});
+      const moved = expectSame({ ...make(), whatIf: targets }, targets);
+      expect(moved.moved.length, "the what-ifs move something").toBeGreaterThan(0);
+    }
+  });
+
+  it("holds for 200 SaaS states drawn at random, and the draw reaches the model", () => {
+    const rand = seeded(20_261_005);
+    let withMoves = 0;
+    let withTwelveMonths = 0;
+    let aloneSlides = 0;
+    for (let n = 0; n < 200; n++) {
+      const { state, targets } = drawState(rand);
+      const through = expectSame(state, targets);
+      if (through.moved.length > 0) withMoves++;
+      if (through.projected.kpis.mrr12 !== null) withTwelveMonths++;
+      aloneSlides += LEVER_IDS.filter((id) => leverAloneOf(state, id, CTX_FR) !== null).length;
+    }
+    // The draw is not a dead letter: many states move a lever, many have the money, and the slides exist.
+    expect(withMoves).toBeGreaterThan(150); // 190 on 2026-10-05
+    expect(withTwelveMonths).toBeGreaterThan(60); // 108
+    expect(aloneSlides).toBeGreaterThan(300); // 535
   });
 });

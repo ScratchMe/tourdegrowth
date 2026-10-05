@@ -1596,6 +1596,11 @@ export const ENGINE_COPY = {
     "slg.ret.renewal": { fr: "le renouvellement", en: "renewals" },
     "slg.rev.acv": { fr: "l'ACV des nouveaux contrats", en: "new contracts' ACV" },
     "link.pql-handoff": { fr: "le nombre d'opportunités venues du libre-service", en: "the number of opportunities from self-serve" },
+    // TODO: à relire — copie neuve (convention 6), §21 (A22 APP-4) : les quatre leviers propres à l'app, sujets de phrase avec leur article.
+    "app.ret.active-retention": { fr: "la rétention des actifs", en: "active retention" },
+    "app.rev.purchases-per-active": { fr: "les achats par actif", en: "purchases per active" },
+    "app.rev.ads-per-active": { fr: "la publicité par actif", en: "ads per active" },
+    "app.rev.commission": { fr: "la commission des stores", en: "the store commission" },
   } satisfies Record<LeverId, Translatable>,
   /**
    * TODO: à relire — nouveau (2026-09-26). « Et si » cumulés : the panel
@@ -1737,6 +1742,13 @@ export const ENGINE_COPY = {
       "contraction-unknown": { fr: "La rétrogradation n'est pas renseignée : comptée à 0.", en: "Contraction isn't entered: counted as 0." },
       "expansion-unknown": { fr: "L'expansion n'est pas renseignée : comptée à 0.", en: "Expansion isn't entered: counted as 0." },
       "twelve-months": { fr: "Sur 12 mois, au rythme de ce mois : la base retenue à la NRR chaque mois, plus le nouveau MRR du mois. Ni saisonnalité, ni saturation.", en: "Over 12 months, at this month's pace: the base retained at NRR each month, plus the month's new MRR. No seasonality, no saturation." },
+      // TODO: à relire — copie neuve (convention 6), §21 (A22 APP-4) : les six hypothèses propres à l'app (§21.5.3), imprimées seulement quand elles ont servi.
+      "actives-follow-d30": { fr: "Les nouveaux actifs suivent les installations encore là à J30 : ils bougent avec l'installation, la recommandation, l'activation et J30, comme les abonnés.", en: "New actives follow the installs still there at day 30: they move with installs, referral, activation and day 30, like subscribers." },
+      "per-active-all-actives": { fr: "Un revenu par actif qui change joue sur tous les actifs, dès le mois suivant.", en: "A change in revenue per active applies to every active, from the next month." },
+      "commission-margin-only": { fr: "La commission ne change aucun revenu : seulement ce qu'il en reste, donc la valeur d'une installation et son remboursement.", en: "The commission changes no revenue: only what is left of it, so an install's value and its payback." },
+      "same-spend-installs": { fr: "À dépense égale : plus d'installations font baisser le coût par installation dans la même proportion.", en: "Same spend: more installs lower the cost per install in the same proportion." },
+      "install-months": { fr: "Une installation : sa marge baisse chaque mois avec les départs (le churn des abonnés, la rétention des actifs, selon ce qu'elle rapporte), sur 36 mois au plus.", en: "An install: its margin falls every month as people leave (subscriber churn, active retention, depending on what it earns from), over 36 months at most." },
+      "usage-twelve-months": { fr: "Sur 12 mois, les actifs gardés à leur rétention chaque mois, plus les nouveaux actifs du mois, chacun au revenu par actif.", en: "Over 12 months, the actives kept at their retention each month, plus the month's new actives, each at the revenue per active." },
     } satisfies Record<ScenarioAssumption, Translatable>,
     /**
      * TODO: à relire (convention 6) — neuf le 2026-10-01 (A7.3.c S2, ENGINE.md §18.5.5, C25 Q7) :
