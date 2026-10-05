@@ -24,7 +24,7 @@ import {
 /**
  * GAME-BRIEF.md §7.1, série C — the content of the revenue level « Comment
  * vous gagnez de l'argent » (§20, `docs/game/revenue.md`), under level 1's
- * rules (`game-copy-checks.ts`), as levels 2 to 5 are.
+ * rules (`game-copy-checks.ts`), as levels 2 to 4 are.
  *
  * Three things differ from level 2, all by the spec (§20.12). C1 cites an
  * article of the Consumer Code or of the Internal Security Code (a loot box is
