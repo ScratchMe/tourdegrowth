@@ -61,7 +61,8 @@ describe("keys the code reads by id", () => {
   });
 
   it("gives every candidate a subject phrase, lower-case, since no template starts a sentence with it", () => {
-    expect(Object.keys(ENGINE_COPY.subject).sort()).toEqual([...CANDIDATE_IDS, ...SLG_CANDIDATE_IDS].sort());
+    // The SaaS's six, the five sales-assisted, and the app's own (the actives' retention, A22 APP-5).
+    expect(Object.keys(ENGINE_COPY.subject).sort()).toEqual([...CANDIDATE_IDS, ...SLG_CANDIDATE_IDS, "app.ret.active-retention"].sort());
     for (const phrase of Object.values(ENGINE_COPY.subject))
       for (const l of LOCALES) expect(phrase[l], phrase[l]).toMatch(/^[a-zà-ÿ]/);
   });

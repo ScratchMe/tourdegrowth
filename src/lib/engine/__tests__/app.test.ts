@@ -1,13 +1,17 @@
 import { describe, expect, it } from "vitest";
-import { appInputs, appInputsOf, appLeverAlone, appLeverIds, buildAppScenario } from "../app";
+import { appCandidates, appInputs, appInputsOf, appLeverAlone, appLeverIds, appRankingImpact, appRules, buildAppScenario } from "../app";
 import type { AppMonetization } from "../app-model";
-import { APP_LEVER_IDS, LEVER_IDS } from "../catalog-shape";
+import { APP_LEVER_IDS, CANDIDATE_IDS, LEVER_IDS, SLG_CANDIDATE_IDS, candidatesOf, shapesOf } from "../catalog-shape";
+import { diagnose } from "../diagnose";
 import { EXAMPLE_CONSUMER_WHATIF } from "../example";
+import { rankingImpact } from "../impact";
+import { isCandidate, notEnoughBelowSentence, notEnoughBelowValues } from "../phrases";
 import { buildScenario, leverViews } from "../scenario";
-import { leverAloneOf, leverIdsOf, scenarioOf } from "../scenario-of";
-import type { AppDerivedId, Interval, LeverId, MetricId } from "../types";
-import { consumerState, consumerUsageOnlyState, estimated, exampleState, withEntry } from "./fixtures";
-import { CTX_FR } from "./props";
+import { candidatesFor, leverAloneOf, leverIdsOf, scenarioOf } from "../scenario-of";
+import { deriveSeries } from "../series";
+import type { AppDerivedId, Diagnosis, Interval, LeverId, MetricId, SelfServeCandidateId } from "../types";
+import { consumerState, consumerUsageOnlyState, estimated, exampleState, hybridState, measured, ratio, withEntry, withMonthBefore, withTarget, withoutTargets } from "./fixtures";
+import { CTX_EN, CTX_FR, EN, FR } from "./props";
 
 /**
  * A consumer app's scenario (engine spec §21.5.1 to §21.5.3, A22 APP-4), on the example of §21.9.1: a meditation app,
@@ -635,5 +639,440 @@ describe("a scenario routed through the seam is the app's own", () => {
     const state = consumerState();
     expect(scenarioOf(state, { "ret.d30": 15 }, CTX_FR)).toEqual(buildAppScenario(state, { "ret.d30": 15 }, CTX_FR));
     expect(leverIdsOf(state.setup)).toEqual(appLeverIds(state.setup));
+  });
+});
+
+// ---------------------------------------------------------------------------------------------------------------
+// The diagnosis of an app (engine spec §21.5.4, A22 APP-5)
+//
+// The example's figures are §21.9.2's (828 € / 768 € / 210 €; 252 € / 210 € without subscriptions), which the independent
+// script `docs/engine/reference/app-example.mjs` also prints (« Classement »); the other prices are written from the
+// closed forms of D9 in the tests themselves.
+//
+// Non-vacuity, measured on 2026-10-05 (each sabotage applied alone, `src/lib/engine`, `src/content` and `src/app` run, then
+// restored; the count is the tests that fall):
+// - the usage stream counted for the paid conversion (§21.10.4): the example's diagnosis falls three (shared → clear
+//   among them), the conversion's price one, the usage-less price one, the series' previous leak one (6);
+// - `retentions` forgetting the actives' retention (§21.10.4): its price read as new revenue instead of retained revenue
+//   falls one, the rules' own list one (2) — the relative-gap branch cannot see it, `appRankingImpact` returns it no gap;
+// - the usage stream counted for churn: 1; `diagnose` running the SaaS's rules for an app: 15;
+// - `isCandidate` without the actives' retention: 2; `notEnoughBelowValues` walking the motion's list again: 1;
+// - the series comparing the SaaS's numbers for an app: 4; its candidates without the actives' retention: 1;
+// - `candidatesFor` answering `candidatesOf` for an app: 3; `appCandidates` keeping the hidden candidates: 3, or the
+//   actives' retention when hidden: 3;
+// - `blindWatch` without the actives' retention: 2, with churn when subscriptions are unticked: 2;
+// - the actives' retention priced without the month's actives: 2.
+// ---------------------------------------------------------------------------------------------------------------
+
+const ACTIVE = "app.ret.active-retention" as const;
+const amplitude = { kind: "tool", tool: "amplitude" } as const;
+
+/**
+ * The example whose month's actives are typed nowhere: the actives' retention and both revenues per active as ranges
+ * (their counts are the actives), and no base count. The same recipe as the « actives are not typed » case above.
+ */
+function noActivesState() {
+  let state = consumerState();
+  state = withEntry(state, ACTIVE, estimated(89, 91));
+  state = withEntry(state, "app.rev.purchases-per-active", estimated(0.2, 0.4));
+  state = withEntry(state, "app.rev.ads-per-active", estimated(0.3, 0.5));
+  delete state.snapshots[0]!.base!.appActives;
+  return state;
+}
+
+/** What a stage is worth a month in the diagnosis, as a single number (the example is all measured). */
+function worth(d: Diagnosis<SelfServeCandidateId>, id: SelfServeCandidateId): number {
+  return only(d.positions[id]?.impact?.mrrPerMonth);
+}
+
+describe("the diagnosis of the example (§21.9.2): shared, in money, between day 30 and the paid conversion", () => {
+  const d = diagnose(consumerState(), CTX_FR);
+
+  it("names the two flows behind their target and ranks them in money, nothing left unpriced and nothing blind", () => {
+    expect(d.state).toBe("shared");
+    expect(d.basis).toBe("mrr");
+    expect(d.named).toEqual(["ret.d30", "rev.paid-conversion"]);
+    expect(d.belowUnpriced).toEqual([]);
+    expect(d.blind).toEqual([]);
+  });
+
+  it("prices day-30 retention at 828 € a month (576 € of subscriptions + 252 € of usage), the paid conversion at 768 €", () => {
+    expect(worth(d, "ret.d30")).toBeCloseTo(828, 9);
+    expect(worth(d, "rev.paid-conversion")).toBeCloseTo(768, 9);
+    // The pieces, from the closed forms: 360 new subscribers and 1 440 new actives a month, a gap of 15/12 − 1, 6,40 € and 0,70 €.
+    expect(360 * (15 / 12 - 1) * 6.4 + 1_440 * (15 / 12 - 1) * 0.7).toBeCloseTo(828, 9);
+    expect(360 * (4 / 3 - 1) * 6.4).toBeCloseTo(768, 9);
+  });
+
+  it("leaves the actives' retention out of the group: below its target of 92 %, worth 210 € a month, 828 < 768 × 1,25", () => {
+    const at = d.positions[ACTIVE];
+    expect(at?.position).toBe("below");
+    expect(at?.comparator).toEqual({ lo: 92, hi: 92, direction: "higher" });
+    expect(worth(d, ACTIVE)).toBeCloseTo(210, 9);
+    expect(d.named).not.toContain(ACTIVE);
+    // Not clear (828 does not clear 768 × 1,25 = 960), and the group stops where 828 ÷ 1,25 = 662,4 no longer clears the price.
+    expect(828).toBeLessThan(768 * 1.25);
+    expect(828 / 1.25).toBeGreaterThan(210);
+  });
+
+  it("reads the actives' retention as retained revenue, like churn, and the two flows as new revenue", () => {
+    expect(d.positions[ACTIVE]?.impact?.kind).toBe("retained-mrr");
+    expect(d.positions["ret.d30"]?.impact?.kind).toBe("new-mrr");
+    expect(d.positions["rev.paid-conversion"]?.impact?.kind).toBe("new-mrr");
+  });
+
+  it("positions the seven candidates of an app with three streams, in the rules' order, the numbers without a target apart", () => {
+    expect(Object.keys(d.positions)).toEqual(["acq.signup-rate", "act.rate", "ret.d30", "rev.paid-conversion", "ref.referred-share", "ret.logo-churn", ACTIVE]);
+    expect(d.positions["acq.signup-rate"]?.position).toBe("no-comparator");
+    expect(d.positions["ret.logo-churn"]?.position).toBe("no-comparator");
+  });
+
+  it("positions the actives' retention « no comparator » without a target of its own: nothing but the team's target names a stage (C1)", () => {
+    const state = consumerState();
+    delete state.snapshots[0]!.targets[ACTIVE];
+    const noActiveTarget = diagnose(state, CTX_FR);
+    expect(noActiveTarget.positions[ACTIVE]).toEqual({ position: "no-comparator" });
+    expect(noActiveTarget.state).toBe("shared");
+    expect(noActiveTarget.named).toEqual(["ret.d30", "rev.paid-conversion"]);
+  });
+});
+
+describe("the app without subscriptions (§21.9.2): 252 € and 210 €, shared", () => {
+  const state = consumerUsageOnlyState();
+  const d = diagnose(state, CTX_FR);
+
+  it("keeps a target typed on a number it no longer shows out of the ranking: no paid conversion, no churn among the candidates", () => {
+    // The target of the paid conversion is still stored (4 %), and the entry too: both are hidden, neither is read.
+    expect(state.snapshots[0]!.targets["rev.paid-conversion"]).toBe(4);
+    expect(state.snapshots[0]!.metrics["rev.paid-conversion"]).toBeDefined();
+    expect(Object.keys(d.positions)).toEqual(["acq.signup-rate", "act.rate", "ret.d30", "ref.referred-share", ACTIVE]);
+  });
+
+  it("is shared between day 30 (252 € of usage) and the actives' retention (210 €): 252 < 210 × 1,25 = 262,5", () => {
+    expect(d.state).toBe("shared");
+    expect(d.basis).toBe("mrr");
+    expect(d.named).toEqual(["ret.d30", ACTIVE]);
+    expect(worth(d, "ret.d30")).toBeCloseTo(252, 9);
+    expect(worth(d, ACTIVE)).toBeCloseTo(210, 9);
+    expect(252).toBeLessThan(210 * 1.25);
+    expect(d.blind).toEqual([]);
+  });
+});
+
+describe("an app earning from subscriptions alone is ranked as the SaaS is (§21.5.4)", () => {
+  const state = withMonetization(SUBSCRIPTIONS);
+  const d = diagnose(state, CTX_FR);
+
+  it("positions the six self-serve candidates and no more: the actives' retention is not shown, its target stays stored", () => {
+    expect(state.snapshots[0]!.targets[ACTIVE]).toBe(92);
+    expect(Object.keys(d.positions)).toEqual([...CANDIDATE_IDS]);
+  });
+
+  it("prices every candidate exactly as the self-serve engine does", () => {
+    for (const id of CANDIDATE_IDS) expect(appRankingImpact(state, id, 20, CTX_FR), id).toEqual(rankingImpact(state, id, 20, CTX_FR));
+  });
+
+  it("names the paid conversion, clear: 768 € against 576 € × 1,25 = 720 €", () => {
+    expect(d.state).toBe("clear");
+    expect(d.named).toEqual(["rev.paid-conversion"]);
+    expect(worth(d, "ret.d30")).toBeCloseTo(576, 9);
+    expect(worth(d, "rev.paid-conversion")).toBeCloseTo(768, 9);
+  });
+});
+
+describe("appRankingImpact — each candidate, on the example's three streams (§21.5.4)", () => {
+  const state = consumerState();
+  const impact = (id: SelfServeCandidateId, target: number) => appRankingImpact(state, id, target, CTX_FR);
+  /** 360 new subscribers at 6,40 €, 1 440 new actives at 0,70 €, 4 500 subscribers, 15 000 actives. */
+  const flow = (gap: number) => 360 * gap * 6.4 + 1_440 * gap * 0.7;
+
+  it("the install rate (30 %): subscriptions and usage grow by the same relative gap", () => {
+    const r = impact("acq.signup-rate", 33);
+    expect(only(r.gap)).toBeCloseTo(0.1, 9);
+    expect(only(r.mrr)).toBeCloseTo(flow(33 / 30 - 1), 9);
+  });
+
+  it("activation (35 %)", () => {
+    const r = impact("act.rate", 40);
+    expect(only(r.gap)).toBeCloseTo(40 / 35 - 1, 9);
+    expect(only(r.mrr)).toBeCloseTo(flow(40 / 35 - 1), 9);
+  });
+
+  it("day-30 retention (12 %): 576 € + 252 € = 828 €", () => {
+    const r = impact("ret.d30", 15);
+    expect(only(r.gap)).toBeCloseTo(0.25, 9);
+    expect(only(r.mrr)).toBeCloseTo(828, 9);
+  });
+
+  it("the paid conversion (3 %): the subscriptions only — the usage stream, point(0), is not touched by who pays", () => {
+    const r = impact("rev.paid-conversion", 4);
+    expect(only(r.gap)).toBeCloseTo(1 / 3, 9);
+    expect(only(r.mrr)).toBeCloseTo(768, 9);
+    // The same number the SaaS prices: nothing of the usage stream is added.
+    expect(only(r.mrr)).toBeCloseTo(only(rankingImpact(state, "rev.paid-conversion", 4, CTX_FR).mrr), 9);
+  });
+
+  it("the referred share (5 %): the referred come on top, both streams grow by (10 − 5) ÷ (100 − 10)", () => {
+    const r = impact("ref.referred-share", 10);
+    const gap = (10 - 5) / (100 - 10);
+    expect(only(r.gap)).toBeCloseTo(gap, 9);
+    expect(only(r.mrr)).toBeCloseTo(flow(gap), 9);
+  });
+
+  it("churn (7 %): the subscriptions' base only, 4 500 × 2 points × 6,40 € = 576 €, no relative gap — and none of the usage", () => {
+    const r = impact("ret.logo-churn", 5);
+    expect(r.gap).toBeUndefined();
+    expect(only(r.mrr)).toBeCloseTo(4_500 * 0.02 * 6.4, 9);
+  });
+
+  it("the actives' retention (90 %): 15 000 actives × 2 points × 0,70 € = 210 €, kept a month, and nothing for the subscriptions", () => {
+    const r = impact(ACTIVE, 92);
+    expect(r.gap).toBeUndefined();
+    expect(only(r.mrr)).toBeCloseTo(15_000 * 0.02 * 0.7, 9);
+  });
+
+  it("a target already met is worth nothing, never a loss", () => {
+    expect(only(impact(ACTIVE, 85).mrr)).toBe(0);
+    expect(only(impact("ret.d30", 10).mrr)).toBe(0);
+  });
+
+  it("without an ARPA, the subscriptions' gain is unknown and so is the money: the flows keep their relative gap only", () => {
+    const noArpa = withEntry(state, "rev.arpa", undefined);
+    const r = appRankingImpact(noArpa, "ret.d30", 15, CTX_FR);
+    expect(only(r.gap)).toBeCloseTo(0.25, 9);
+    expect(r.mrr).toBeUndefined();
+    // The actives' retention does not need it: it only reads the actives and what one brings.
+    expect(only(appRankingImpact(noArpa, ACTIVE, 92, CTX_FR).mrr)).toBeCloseTo(210, 9);
+  });
+
+  it("without the month's actives, the actives' retention is not priced; the flows are (their usage reads the new actives, 1 440 a month)", () => {
+    const noActives = noActivesState();
+    expect(appRankingImpact(noActives, ACTIVE, 92, CTX_FR)).toEqual({});
+    // 576 € of subscriptions + 1 440 new actives × 0,25 × (0,50 to 0,90 €) of usage.
+    const r = appRankingImpact(noActives, "ret.d30", 15, CTX_FR);
+    expect(r.mrr!.lo).toBeCloseTo(576 + 1_440 * 0.25 * 0.5, 9);
+    expect(r.mrr!.hi).toBeCloseTo(576 + 1_440 * 0.25 * 0.9, 9);
+  });
+
+  it("without the usage numbers, a flow's usage gain is unknown: relative gap only; the actives' retention is not priced", () => {
+    const noPerActive = withEntry(state, "app.rev.ads-per-active", undefined);
+    const flowOnly = appRankingImpact(noPerActive, "ret.d30", 15, CTX_FR);
+    expect(only(flowOnly.gap)).toBeCloseTo(0.25, 9);
+    expect(flowOnly.mrr).toBeUndefined();
+    expect(appRankingImpact(noPerActive, ACTIVE, 92, CTX_FR)).toEqual({});
+    // The paid conversion's usage part is point(0) whatever is missing there: its money stays.
+    expect(only(appRankingImpact(noPerActive, "rev.paid-conversion", 4, CTX_FR).mrr)).toBeCloseTo(768, 9);
+  });
+
+  it("is {} for the actives' retention when the monetization doesn't show it", () => {
+    expect(appRankingImpact(withMonetization(SUBSCRIPTIONS), ACTIVE, 92, CTX_FR)).toEqual({});
+  });
+
+  it("without the month's installs, the new actives are unknown: a flow's usage gain, and with it its money, is", () => {
+    const noInstalls = withEntry(withEntry(withEntry(consumerState(), "acq.signup-rate", estimated(30, 30)), "acq.top-channel-share", undefined), "app.acq.cpi", undefined);
+    delete noInstalls.snapshots[0]!.base!.monthSignups;
+    const r = appRankingImpact(noInstalls, "ret.d30", 15, CTX_FR);
+    expect(only(r.gap)).toBeCloseTo(0.25, 9);
+    expect(r.mrr).toBeUndefined();
+  });
+});
+
+describe("what the diagnosis can say when a piece of money is missing (§21.5.4)", () => {
+  it("without an ARPA the flows rank by relative gap, and the actives' retention stands apart as below but unpriced in the ranking", () => {
+    const d = diagnose(withEntry(consumerState(), "rev.arpa", undefined), CTX_FR);
+    expect(d.basis).toBe("relative-gap");
+    // 1/3 against 0,25 × 1,25 = 0,3125: the paid conversion is clearly ahead.
+    expect(d.state).toBe("clear");
+    expect(d.named).toEqual(["rev.paid-conversion"]);
+    expect(d.belowUnpriced).toEqual([ACTIVE]);
+    expect(d.positions[ACTIVE]?.position).toBe("below");
+    // Its price is still attached to its position: the screens that list what each leak is worth read it.
+    expect(worth(d, ACTIVE)).toBeCloseTo(210, 9);
+  });
+
+  it("without the month's actives, the actives' retention is below but unpriced; the ranking in money is the flows'", () => {
+    const d = diagnose(noActivesState(), CTX_FR);
+    expect(d.basis).toBe("mrr");
+    expect(d.belowUnpriced).toEqual([ACTIVE]);
+    expect(d.named).not.toContain(ACTIVE);
+    expect(d.named).toContain("rev.paid-conversion");
+    expect(d.positions[ACTIVE]?.position).toBe("below");
+    expect(d.positions[ACTIVE]?.impact).toBeUndefined();
+  });
+
+  it("is clear on the actives' retention alone when it is the only flow-or-retention below its target", () => {
+    const state = withTarget(withTarget(withoutTargets(consumerState()), ACTIVE, 92), "ret.d30", 10);
+    const d = diagnose(state, CTX_FR);
+    expect(d.state).toBe("clear");
+    expect(d.named).toEqual([ACTIVE]);
+    expect(d.basis).toBe("mrr");
+  });
+
+  it("is level when every target is met, and not-enough with a single target", () => {
+    expect(diagnose(withTarget(withTarget(withTarget(consumerState(), "ret.d30", 10), "rev.paid-conversion", 2), ACTIVE, 85), CTX_FR).state).toBe("level");
+    expect(diagnose(withTarget(withoutTargets(consumerState()), ACTIVE, 92), CTX_FR).state).toBe("not-enough");
+  });
+
+  it("watches for the ★ and the retentions it shows: an unknown actives' retention may hide the real bottleneck", () => {
+    expect(diagnose(withEntry(consumerState(), ACTIVE, undefined), CTX_FR).blind).toEqual([ACTIVE]);
+    expect(diagnose(withEntry(consumerState(), "ret.logo-churn", undefined), CTX_FR).blind).toEqual(["ret.logo-churn"]);
+    // A number the monetization hides is never a blind spot, though it is unknown.
+    expect(diagnose(withEntry(withMonetization(SUBSCRIPTIONS), ACTIVE, undefined), CTX_FR).blind).toEqual([]);
+    expect(diagnose(withEntry(consumerUsageOnlyState(), "ret.logo-churn", undefined), CTX_FR).blind).toEqual([]);
+    expect(diagnose(withEntry(consumerUsageOnlyState(), "rev.paid-conversion", undefined), CTX_FR).blind).toEqual([]);
+  });
+});
+
+describe("notEnoughBelowValues names the actives' retention when it is the only stage below its target (§21.5.4)", () => {
+  const only92 = withTarget(withoutTargets(consumerState()), ACTIVE, 92);
+
+  it("in both languages, from the keys of the diagnosis rather than a motion's list", () => {
+    const d = diagnose(only92, CTX_FR);
+    expect(d.state).toBe("not-enough");
+    expect(Object.keys(d.positions)).toContain(ACTIVE);
+    expect(notEnoughBelowValues(d, FR.strings, FR.metrics)).toEqual({ stage: "La rétention des actifs", side: "sous la cible" });
+    expect(notEnoughBelowValues(diagnose(only92, CTX_EN), EN.strings, EN.metrics)).toEqual({ stage: "Active retention", side: "below the target" });
+    expect(notEnoughBelowSentence(d, FR.strings, FR.metrics)).not.toBeNull();
+  });
+
+  it("says nothing when the actives' retention is not below, and the SaaS's stage still comes out of its own diagnosis", () => {
+    expect(notEnoughBelowValues(diagnose(withTarget(withoutTargets(consumerState()), ACTIVE, 85), CTX_FR), FR.strings, FR.metrics)).toBeNull();
+    const saas = withTarget(withoutTargets(exampleState()), "act.rate", 50);
+    expect(notEnoughBelowValues(diagnose(saas, CTX_FR), FR.strings, FR.metrics)).toEqual({ stage: "L'activation", side: "sous la cible" });
+  });
+
+  it("reads the actives' retention as a candidate (isCandidate), so its target can be entered and it can be named", () => {
+    expect(isCandidate(ACTIVE)).toBe(true);
+    // Its neighbours of the app are numbers, not candidates.
+    expect(isCandidate("app.rev.commission")).toBe(false);
+    expect(isCandidate("app.acq.cpi")).toBe(false);
+    expect(FR.strings.subject[ACTIVE]).toBe("la rétention des actifs");
+    expect(EN.strings.subject[ACTIVE]).toBe("active retention");
+  });
+});
+
+describe("candidatesFor — the candidates a setup offers a target on (§21.5.1)", () => {
+  it("is the SaaS's own list for a SaaS, for each motion", () => {
+    const { setup } = exampleState();
+    expect(candidatesFor(setup, "plg")).toEqual(candidatesOf("plg"));
+    expect(candidatesFor(setup, "slg")).toEqual(candidatesOf("slg"));
+    expect(candidatesFor(setup, "plg")).not.toContain(ACTIVE);
+  });
+
+  it("is appCandidates for an app's self-serve: the shown candidates, then its own", () => {
+    const full = consumerState().setup;
+    expect(candidatesFor(full, "plg")).toEqual(appCandidates(full));
+    expect(candidatesFor(full, "plg")).toEqual([...CANDIDATE_IDS, ACTIVE]);
+    expect(candidatesFor(consumerUsageOnlyState().setup, "plg")).toEqual(["acq.signup-rate", "act.rate", "ret.d30", "ref.referred-share", ACTIVE]);
+    expect(candidatesFor(withMonetization(SUBSCRIPTIONS).setup, "plg")).toEqual([...CANDIDATE_IDS]);
+    expect(candidatesFor(withMonetization(ADS).setup, "plg")).toEqual(["acq.signup-rate", "act.rate", "ret.d30", "ref.referred-share", ACTIVE]);
+  });
+
+  it("is the diagnosis' own list: the keys it positions, whatever the monetization", () => {
+    for (const m of [SUBSCRIPTIONS, PURCHASES, ADS, { subscriptions: true, purchases: true, ads: false }, { subscriptions: false, purchases: true, ads: true }]) {
+      const state = withMonetization(m);
+      expect(Object.keys(diagnose(state, CTX_FR).positions), JSON.stringify(m)).toEqual([...candidatesFor(state.setup, "plg")]);
+    }
+  });
+
+  it("only lists what the monetization shows", () => {
+    const shown = new Set<MetricId>(shapesOf(withMonetization(PURCHASES).setup).map((s) => s.id));
+    for (const id of candidatesFor(withMonetization(PURCHASES).setup, "plg")) expect(shown.has(id), id).toBe(true);
+  });
+});
+
+describe("appRules — the rules the one diagnosis function runs on (§21.5.4)", () => {
+  it("is self-serve's motion, with the app's candidates and its own price", () => {
+    const rules = appRules(consumerState().setup);
+    expect(rules.motion).toBe("plg");
+    expect(rules.candidates).toEqual([...CANDIDATE_IDS, ACTIVE]);
+    expect(rules.price).toBe(appRankingImpact);
+  });
+
+  it("takes the actives' retention for a retention (ranked in money only) and churn with it; it is no flow", () => {
+    const rules = appRules(consumerState().setup);
+    expect(rules.retentions).toEqual(["ret.logo-churn", ACTIVE]);
+    expect(rules.isFlow(ACTIVE)).toBe(false);
+    expect(rules.isFlow("ret.logo-churn")).toBe(false);
+    for (const flow of ["acq.signup-rate", "act.rate", "ret.d30", "ref.referred-share", "rev.paid-conversion"] as const) expect(rules.isFlow(flow), flow).toBe(true);
+  });
+
+  it("watches the shown ★, then churn with the subscriptions, then the actives' retention when shown", () => {
+    const stars = ["acq.signup-rate", "act.rate", "ret.d30", "ref.referred-share"];
+    expect(appRules(consumerState().setup).blindWatch).toEqual([...stars, "rev.paid-conversion", "ret.logo-churn", ACTIVE]);
+    expect(appRules(consumerUsageOnlyState().setup).blindWatch).toEqual([...stars, ACTIVE]);
+    expect(appRules(withMonetization(SUBSCRIPTIONS).setup).blindWatch).toEqual([...stars, "rev.paid-conversion", "ret.logo-churn"]);
+  });
+
+  it("reads a malformed stored monetization as the subscriptions-only default, like the rest of the app", () => {
+    const setup = { ...consumerState().setup, monetization: { subscriptions: "yes" } as unknown as AppMonetization };
+    expect(appCandidates(setup)).toEqual([...CANDIDATE_IDS]);
+  });
+});
+
+describe("the SaaS is diagnosed as it was (§21.5.4)", () => {
+  it("positions the six candidates and not the app's, and the hybrid's sales-assisted five apart", () => {
+    expect(Object.keys(diagnose(exampleState(), CTX_FR).positions)).toEqual([...CANDIDATE_IDS]);
+    expect(Object.keys(diagnose(hybridState(), CTX_FR).positions)).toEqual([...CANDIDATE_IDS]);
+    expect(Object.keys(diagnose(hybridState(), CTX_FR, "slg").positions)).toEqual([...SLG_CANDIDATE_IDS]);
+  });
+
+  it("ignores an app's target left in a SaaS file: the actives' retention is not one of its candidates", () => {
+    const d = diagnose(withTarget(exampleState(), ACTIVE, 99), CTX_FR);
+    expect(d.positions[ACTIVE]).toBeUndefined();
+    expect(d).toEqual(diagnose(exampleState(), CTX_FR));
+  });
+});
+
+describe("the monthly series of an app compares the numbers it shows (§21.5.4)", () => {
+  /** July is August with the actives' retention at 85 %: it got closer to the 92 % target since. */
+  const state = withMonthBefore(consumerState(), (july) => {
+    july.metrics[ACTIVE] = measured(ratio(12_750, 15_000), amplitude);
+  });
+  const series = deriveSeries(state, CTX_FR)!;
+  const rows = series.motions[0]!.rows;
+  const ids = rows.map((r) => r.metric);
+
+  it("has one motion, self-serve's", () => {
+    expect(series.motions.map((m) => m.motion)).toEqual(["plg"]);
+  });
+
+  it("compares the app's own numbers and none of the two it replaces", () => {
+    for (const id of ["app.acq.cpi", "app.rev.gross-margin", "app.rev.commission", ACTIVE, "app.rev.purchases-per-active", "app.rev.ads-per-active"] as const) expect(ids, id).toContain(id);
+    expect(ids).not.toContain("acq.cac");
+    expect(ids).not.toContain("rev.gross-margin");
+  });
+
+  it("compares nothing the setup does not show — and everything it shows is a catalogue number of the setup", () => {
+    const shown = new Set<MetricId>(shapesOf(state.setup).map((s) => s.id));
+    for (const id of ids) expect(shown.has(id), id).toBe(true);
+  });
+
+  it("takes a step toward the 92 % target for the actives' retention, as it does for any candidate", () => {
+    const row = rows.find((r) => r.metric === ACTIVE)!;
+    expect(row.delta).toEqual({ kind: "points", change: 5 });
+    expect(row.towardTarget).toBe(true);
+    // A number that is no candidate has no « toward »: the cost per install has no target direction.
+    expect(rows.find((r) => r.metric === "app.acq.cpi")!.towardTarget).toBe(false);
+  });
+
+  it("compares only the shown numbers of an app without subscriptions", () => {
+    const usageOnly = deriveSeries(
+      withMonthBefore(consumerUsageOnlyState(), (july) => {
+        july.metrics[ACTIVE] = measured(ratio(12_750, 15_000), amplitude);
+      }),
+      CTX_FR,
+    )!;
+    const usageIds = usageOnly.motions[0]!.rows.map((r) => r.metric);
+    for (const hidden of ["rev.arpa", "ret.logo-churn", "rev.paid-conversion", "rev.expansion", "rev.contraction", "acq.cac", "rev.gross-margin"] as const) expect(usageIds, hidden).not.toContain(hidden);
+    expect(usageIds).toContain(ACTIVE);
+  });
+
+  it("remembers the leak of the month before from the app's own diagnosis, the actives' retention included", () => {
+    // July: 15 000 actives × 7 points × 0,70 € = 735 €, which clears the group (828 ÷ 1,25 = 662,4); August: 210 €, which doesn't.
+    const motion = series.motions[0]!;
+    expect(motion.previousLeak).toEqual(["ret.d30", "rev.paid-conversion", ACTIVE]);
+    expect(735).toBeGreaterThan(828 / 1.25);
+    expect(motion.leakChanged).toBe(true);
   });
 });

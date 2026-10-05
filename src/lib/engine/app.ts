@@ -1,4 +1,7 @@
+import type { MotionRules } from "./diagnose";
 import {
+  activeRetentionGain,
+  appRankingGain,
   hasUsageStream,
   installCumulative,
   installLossCheck,
@@ -10,19 +13,22 @@ import {
   INSTALL_VALUE_MONTHS,
   appRevenuePath,
   appRevenueToday,
+  newActivesPerMonth,
   revenuePerActive,
+  usageFlowGain,
   usagePath,
   valueToCost,
   type AppMonetization,
 } from "./app-model";
-import { APP_LEVER_IDS, LEVER_IDS, LTV_CAP_MONTHS, appShapeShown, derivedShapeOf, shapesOf } from "./catalog-shape";
+import { APP_LEVER_IDS, CANDIDATE_IDS, LEVER_IDS, LTV_CAP_MONTHS, appShapeShown, derivedShapeOf, shapesOf, type MetricShape } from "./catalog-shape";
+import { isFlow, rankingImpact } from "./impact";
 import { add, div, mul, point, scale } from "./interval";
 import { acquisitionSpend, arrOf, paybackLimit } from "./money";
 import { buildScenario, leverViews, valueOf, type AppKpis, type Scenario, type ScenarioAssumption, type ScenarioFunnel, type ScenarioKpis } from "./scenario";
 import type { PanelLeverId } from "./scenario-of"; // type only: scenario-of.ts imports this module
 import { DEFAULT_APP_MONETIZATION, monetizationOf } from "./setup-type";
 import { knownSharedCount } from "./shared-counts";
-import type { AppDerivedId, EngineCalcContext, EngineSetup, EngineState, Interval, LeverId, MetricId, SharedCount } from "./types";
+import type { AppCandidateId, AppDerivedId, EngineCalcContext, EngineSetup, EngineState, Interval, LeverId, MetricId, SelfServeCandidateId, SharedCount } from "./types";
 import { currentSnapshot, knownIn } from "./values";
 
 /**
@@ -122,8 +128,13 @@ export function appInputsOf(id: AppDerivedId, m: AppMonetization): MetricId[] {
  * day 30), then whatever the usage streams call for.
  */
 export function appLeverIds(setup: Pick<EngineSetup, "monetization">): readonly PanelLeverId[] {
-  const shown = new Set<MetricId>(shapesOf({ type: "consumer-app", motions: { plg: true, slg: false }, monetization: monetizationFor(setup) }).map((s) => s.id));
+  const shown = new Set<MetricId>(shownShapes(setup).map((s) => s.id));
   return [...LEVER_IDS, ...APP_LEVER_IDS].filter((id) => shown.has(id));
+}
+
+/** The numbers an app of this monetization shows: `shapesOf` on the app's own self-serve setup, with the guarded monetization. */
+function shownShapes(setup: Pick<EngineSetup, "monetization">): MetricShape[] {
+  return shapesOf({ type: "consumer-app", motions: { plg: true, slg: false }, monetization: monetizationFor(setup) });
 }
 
 /** A share of a whole, in percent: how the self-serve funnel's people become the rates an install's margin is built on. */
@@ -269,4 +280,68 @@ export function appLeverAlone(state: EngineState, id: LeverId, ctx: EngineCalcCo
   if (target === undefined) return null;
   const scenario = buildAppScenario(state, { [id]: target }, ctx);
   return scenario.moved.includes(id) ? scenario : null;
+}
+
+// --- The diagnosis of an app (§21.5.4, APP-5) ------------------------------------
+
+/** The actives' retention: the app's one candidate of its own, priced in money only, like churn. */
+const ACTIVE_RETENTION: AppCandidateId = "app.ret.active-retention";
+
+/**
+ * The candidates an app's diagnosis positions, in order: the self-serve ones whose number it shows (without
+ * subscriptions: no paid conversion and no churn), then the actives' retention when purchases or ads are ticked.
+ */
+export function appCandidates(setup: Pick<EngineSetup, "monetization">): SelfServeCandidateId[] {
+  const shown = new Set<MetricId>(shownShapes(setup).map((s) => s.id));
+  return [...CANDIDATE_IDS.filter((id) => shown.has(id)), ...(shown.has(ACTIVE_RETENTION) ? [ACTIVE_RETENTION] : [])];
+}
+
+/**
+ * The self-serve rules, on an app's candidates (`diagnose.ts#diagnoseWith` is the one function that names a stage).
+ * Churn and the actives' retention are priced on a base, so they rank only in money; the ★ the diagnosis watches
+ * for blindness are the shown ones, then the churn (with subscriptions) and the actives' retention (when shown).
+ */
+export function appRules(setup: Pick<EngineSetup, "monetization">): MotionRules<SelfServeCandidateId> {
+  const shapes = shownShapes(setup);
+  const shown = new Set<MetricId>(shapes.map((s) => s.id));
+  const blindWatch: MetricId[] = shapes.filter((s) => s.primary).map((s) => s.id);
+  if (monetizationFor(setup).subscriptions) blindWatch.push("ret.logo-churn");
+  if (shown.has(ACTIVE_RETENTION)) blindWatch.push(ACTIVE_RETENTION);
+  return {
+    motion: "plg",
+    candidates: appCandidates(setup),
+    price: appRankingImpact,
+    // `isFlow` takes the SaaS's candidates only: the comparison narrows the id to them.
+    isFlow: (id) => id !== ACTIVE_RETENTION && isFlow(id),
+    retentions: ["ret.logo-churn", ACTIVE_RETENTION],
+    blindWatch,
+  };
+}
+
+/**
+ * What closing a gap to `target` is worth a month on the app's two streams, exact and unrounded, for the ranking.
+ * The subscriptions are the self-serve engine's own pricing (`rankingImpact`); the usage stream gains from the flows
+ * that bring installs to day 30 (D9: installs, activation, day 30, the referred share) and from the actives' retention;
+ * the paid conversion and the subscribers' churn don't touch the actives. A ticked stream whose gain is unknown leaves
+ * the money unknown — the ranking then falls back to the relative gap, as self-serve does without ARPA.
+ */
+export function appRankingImpact(state: EngineState, id: SelfServeCandidateId, target: number, ctx: EngineCalcContext): { gap?: Interval; mrr?: Interval } {
+  const inputs = appInputs(state, ctx);
+  const { m } = inputs;
+  const perActive = revenuePerActive(m, inputs.purchases, inputs.ads);
+  if (id === ACTIVE_RETENTION) {
+    if (inputs.activeRetention && inputs.actives && perActive) return { mrr: activeRetentionGain(inputs.actives, inputs.activeRetention, target, perActive) };
+    return {};
+  }
+  const sub = rankingImpact(state, id, target, ctx);
+  const subscriptionsPart = m.subscriptions ? (sub.mrr ?? null) : point(0);
+  let usagePart: Interval | null;
+  if (!hasUsageStream(m) || id === "rev.paid-conversion" || id === "ret.logo-churn") usagePart = point(0);
+  else {
+    const newActives = newActivesPerMonth(inputs.installs, inputs.d30);
+    usagePart = sub.gap && newActives && perActive ? usageFlowGain(newActives, sub.gap, perActive) : null;
+  }
+  const money = appRankingGain(m, subscriptionsPart, usagePart);
+  if (money) return { ...(sub.gap ? { gap: sub.gap } : {}), mrr: money };
+  return sub.gap ? { gap: sub.gap } : {};
 }

@@ -22,10 +22,10 @@ describe("the §18.9.4 example", () => {
 
   it("names the win rate, clear: ~4 000 € a month against 2 400 and 600", () => {
     expect(d).toMatchObject({ motion: "slg", state: "clear", named: ["slg.rev.win-rate"], basis: "mrr", belowUnpriced: [], blind: ["slg.act.go-live"] });
-    expect(d.positions["slg.rev.win-rate"].impact!.mrrPerMonth!.lo).toBeCloseTo(4_000, 9);
-    expect(d.positions["slg.acq.lead-to-opp"].impact!.mrrPerMonth!.lo).toBeCloseTo(2_400, 9);
-    expect(d.positions["slg.ret.renewal"].impact!.mrrPerMonth!.lo).toBeCloseTo(600, 9);
-    expect(d.positions["slg.ret.renewal"].impact!.kind).toBe("retained-mrr");
+    expect(d.positions["slg.rev.win-rate"]!.impact!.mrrPerMonth!.lo).toBeCloseTo(4_000, 9);
+    expect(d.positions["slg.acq.lead-to-opp"]!.impact!.mrrPerMonth!.lo).toBeCloseTo(2_400, 9);
+    expect(d.positions["slg.ret.renewal"]!.impact!.mrrPerMonth!.lo).toBeCloseTo(600, 9);
+    expect(d.positions["slg.ret.renewal"]!.impact!.kind).toBe("retained-mrr");
   });
 
   it("positions its five candidates and nothing else — no self-serve stage, no NRR, no link", () => {
@@ -36,7 +36,7 @@ describe("the §18.9.4 example", () => {
 
   it("the bound: a win-rate target of 30 % makes it shared with lead → opportunity, the renewal out of the group", () => {
     const at30 = diagnose(withTarget(hybridState(), "slg.rev.win-rate", 30), CTX_FR, "slg");
-    expect(at30.positions["slg.rev.win-rate"].impact!.mrrPerMonth!.lo).toBeCloseTo(3_000, 9);
+    expect(at30.positions["slg.rev.win-rate"]!.impact!.mrrPerMonth!.lo).toBeCloseTo(3_000, 9);
     expect(at30).toMatchObject({ state: "shared", named: ["slg.rev.win-rate", "slg.acq.lead-to-opp"], basis: "mrr" });
   });
 });
@@ -47,9 +47,9 @@ describe("the rules, sales-assisted", () => {
     s = withTarget(withTarget(s, "slg.act.go-live", 80), "slg.ref.referred-share", 30);
     const d = diagnose(s, CTX_FR, "slg");
     expect(d.positions["slg.act.go-live"]).toMatchObject({ position: "below" });
-    expect(d.positions["slg.act.go-live"].impact).toBeUndefined();
+    expect(d.positions["slg.act.go-live"]!.impact).toBeUndefined();
     // 18 × (30 − 20)/(100 − 30) × 24 000 € ÷ 36 = ~1 714 € a month, under the win rate's 4 000 €.
-    expect(d.positions["slg.ref.referred-share"].impact?.mrrPerMonth?.lo).toBeCloseTo((18 * 10 * 24_000) / 70 / 36);
+    expect(d.positions["slg.ref.referred-share"]!.impact?.mrrPerMonth?.lo).toBeCloseTo((18 * 10 * 24_000) / 70 / 36);
     expect(d.belowUnpriced).toEqual(["slg.act.go-live"]);
     expect(d.named).toEqual(["slg.rev.win-rate"]);
     // Past a 50 % target, the referred share stands apart too, and the others still rank in money.
@@ -78,6 +78,6 @@ describe("the rules, sales-assisted", () => {
 
   it("every candidate reads « higher is better »: a value above its target is `above`, never a leak", () => {
     const d = diagnose(withTarget(hybridState(), "slg.ret.renewal", 80), CTX_FR, "slg");
-    expect(d.positions["slg.ret.renewal"].position).toBe("above");
+    expect(d.positions["slg.ret.renewal"]!.position).toBe("above");
   });
 });

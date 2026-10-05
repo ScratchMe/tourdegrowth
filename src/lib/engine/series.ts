@@ -1,6 +1,7 @@
-import { CANDIDATE_IDS, METRIC_SHAPES, SLG_CANDIDATE_IDS, SLG_METRIC_SHAPES, shapeOf, type MetricShape } from "./catalog-shape";
+import { CANDIDATE_IDS, METRIC_SHAPES, SLG_CANDIDATE_IDS, SLG_METRIC_SHAPES, shapeOf, shapesOf, type MetricShape } from "./catalog-shape";
 import { defaultReferenceMonth, nextMonth, windowDaysOf } from "./cohort";
 import { comparatorOf, diagnose } from "./diagnose";
+import { isApp } from "./setup-type";
 import { MAX_MONTHS } from "./types";
 import type {
   CandidateId,
@@ -217,7 +218,7 @@ export function towardTarget(before: number, now: number, comparator: Comparator
 // --- The series of an engine --------------------------------------------------------
 
 const SHAPES: Record<Motion, readonly MetricShape[]> = { plg: METRIC_SHAPES, slg: SLG_METRIC_SHAPES };
-const CANDIDATES: ReadonlySet<string> = new Set<string>([...CANDIDATE_IDS, ...SLG_CANDIDATE_IDS]);
+const CANDIDATES: ReadonlySet<string> = new Set<string>([...CANDIDATE_IDS, ...SLG_CANDIDATE_IDS, "app.ret.active-retention"]);
 const isCandidate = (id: MetricId): id is CandidateId => CANDIDATES.has(id);
 
 /** The stage(s) a diagnosis names, when it names one. */
@@ -245,7 +246,8 @@ export function deriveSeries(state: EngineState, ctx: EngineCalcContext): Series
   for (const motion of ["plg", "slg"] as const) {
     if (!state.setup.motions[motion]) continue;
     const rows: SeriesRow[] = [];
-    for (const shape of SHAPES[motion]) {
+    // An app compares the numbers it shows (D1: its only motion is "plg"): the CAC and the margin are not among them.
+    for (const shape of isApp(state.setup) ? shapesOf(state.setup) : SHAPES[motion]) {
       const comparison = comparable({ entry: before.metrics[shape.id], setup: view.state.setup }, { entry: now.metrics[shape.id], setup: state.setup }, shape);
       if (!comparison) continue;
       if (!comparison.comparable) {

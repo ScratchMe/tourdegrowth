@@ -447,7 +447,7 @@ function sweep(): Sweep {
       add("diagnosis not-enough", notEnoughBelowSentence(d, p.strings, p.metrics), false);
       add("diagnosis unpriced", unpricedSentence(d, p.strings, p.metrics), false);
       for (const id of d.state === "clear" || d.state === "shared" ? d.named : []) {
-        const comparator = d.positions[id].comparator;
+        const comparator = d.positions[id]!.comparator;
         const known = knownIn(state, id, p.ctx);
         if (!comparator || known.kind !== "known") continue;
         const value = formatInterval(known.value, shapeOf(id).unit, p.ctx, p.strings.units);
