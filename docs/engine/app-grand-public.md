@@ -1315,8 +1315,12 @@ pur sont déjà épinglés par `app-model.test.ts`.
   dans `numericImpact`). Le SaaS ne change pas (goldens).
 - **`appCandidates(setup): SelfServeCandidateId[]`** (`app.ts`) : les
   `CANDIDATE_IDS` dont le chiffre est montré, dans leur ordre, puis
-  `app.ret.active-retention` s'il est montré.
-- **`appRules(setup): MotionRules<SelfServeCandidateId>`** (`app.ts`) :
+  `app.ret.active-retention` s'il est montré. `setup` est un
+  `Pick<EngineSetup, "monetization">`, comme pour `appLeverIds`, lu par la
+  même aide que lui (les chiffres montrés passent par `monetizationOf` : une
+  monétisation mal formée se lit comme celle par défaut). *Précisé après
+  APP-5 (#361)*.
+- **`appRules(setup: Pick<EngineSetup, "monetization">): MotionRules<SelfServeCandidateId>`** (`app.ts`) :
   `motion: "plg"` ; `candidates: appCandidates(setup)` ; `price:
   appRankingImpact` ; `isFlow: (id) => id !== "app.ret.active-retention" &&
   isFlow(id)` (celui d'`impact.ts`, inchangé, enveloppé : il ne prend qu'un
@@ -2581,7 +2585,7 @@ journal. « Les goldens inchangés » veut dire leurs sorties JSON et
 | `cohort.test.ts:93`, `cohort.ts:110` | **rien** : `defaultMonths` est construit sur `METRIC_SHAPES` et n'a pas de clé `app.*` | — |
 | `io.test.ts:107-114` (et des cas neufs dans `validate.test.ts`) | l'app s'ouvre avec sa monétisation ; la place de marché reste refusée ; une app avec l'assisté est refusée ; une app sans monétisation s'ouvre, avec l'erreur `setup.monetization` (§21.6.3). `validate.test.ts:123` ne change pas | APP-0 |
 | `_engine/__tests__/collect.test.ts`, `csv.test.ts`, `next-step.test.ts`, `annex-pages.test.ts:90` | l'appel : `shapesOf` / `motionShapes` reçoivent un réglage ; mêmes résultats | APP-1 |
-| `diagnose.test.ts` (21 lignes), `diagnose-slg.test.ts` (8), `phrases.test.ts` (4), `sentences-guard.test.ts` (1), `deck/__tests__/ask-defaults.test.ts:49` (1) | `positions` devient `Partial` : un `!` là où le test lit une position qu'il sait présente ; mêmes valeurs | APP-5 |
+| `diagnose.test.ts` (21 lignes), `diagnose-slg.test.ts` (8), `phrases.test.ts` (3 : `tsc` n'en signale que trois, relevé par APP-5), `sentences-guard.test.ts` (1), `deck/__tests__/ask-defaults.test.ts:49` (1, en position de type : `NonNullable<…>`, pas un `!`) | `positions` devient `Partial` : un `!` là où le test lit une position qu'il sait présente ; mêmes valeurs | APP-5 |
 | `_engine/__tests__/start.test.ts:20-24, 37-41` | `startPlan(setup)` ; `typeOf` ; les comptes du SaaS inchangés ; l'app à 18 (abonnements seuls) | APP-7 |
 | `tools.test.ts` | ses deux tests inchangés ; un troisième (§21.6.5) | APP-2 |
 | `sentences-guard.test.ts:634-644` | APP-6 : le balayage gagne trois scénarios d'app (`consumerState()`, `consumerUsageOnlyState()`, l'app à commission 35 %), avec `type: "consumer-app"` et `deck: false` (§21.11, APP-6) ; « every finding kind and every sanity check » gagne `commission-high`. APP-9 : les trois scénarios perdent `deck: false`, et « fires every slide title template » voit `pelotonCompleteTwo` et `whatIfLeverMargin` | APP-6, APP-9 |
