@@ -14,14 +14,16 @@ import { ENGINE_ENTRY_PREFIX, ENGINE_INDEX_KEY, ENGINE_SCHEMA_VERSION, LEGACY_ST
  * The store keeps module state on purpose (its header), so every test reads
  * a fresh module. Same in-memory `window` fake as `lib/engine/__tests__/storage.test.ts`.
  *
- * Non-vacuity, measured on 2026-10-05, one sabotage at a time, then
- * restored (failing tests in brackets): no second chance from the board (4:
- * the first, second, fourth and fifth of the first block); `shown()` leaving
- * the probation (1: « a file the board has drawn is kept »); the device copy
- * not put back (4: the undo tests); the screen not put back (5: those four
- * and « without storage »); the import screen not told (4: the undo tests);
- * the probation never taken (5: the undo tests and « without storage »); the
- * copy not limited to the engine's items (1: the last test).
+ * Non-vacuity, measured on 2026-10-05 on the final version, one sabotage at
+ * a time in `engine-store.ts` or `storage.ts`, then restored (failing tests
+ * in brackets): no second chance from the board (6); no cap on the
+ * fall-backs (1: « gives up past three »); `drawn` not counting afresh (3);
+ * `drawn(true)` leaving the probation (1: « a file the board has drawn is
+ * kept »); any screen ending it (1: « a screen other than the board »); the
+ * device copy not put back (6); its result ignored (1: « a device that
+ * refuses »); the screen not put back (5); the import screen not told (4);
+ * the probation never taken (7); the undrawn engine not kept (2), or kept
+ * past a switch (1); the copy not limited to the engine's items (1).
  */
 
 type FakeStore = Storage & { map: Map<string, string> };
@@ -92,12 +94,36 @@ describe("a render that throws on the engine on screen", () => {
     expect(island.fallBack()).toBe(false);
   });
 
-  it("counts afresh once the board has been drawn", () => {
+  it.each([
+    ["the board", true],
+    ["any other screen", false],
+  ])("counts afresh once %s has been drawn", (_, board) => {
     seed(fullState());
     island.fallBack();
-    island.shown();
+    island.drawn(board);
     expect(island.fallBack()).toBe(true);
     expect(island.getClientSnapshot().result.kind).toBe("ok");
+  });
+
+  it("gives up past three fall-backs in one page load: an error raised after each drawing must not loop", () => {
+    seed(fullState());
+    for (let i = 0; i < 3; i++) {
+      expect(island.fallBack()).toBe(true);
+      island.drawn(true);
+    }
+    expect(island.fallBack()).toBe(false);
+  });
+
+  it("keeps the engine it could not draw, for the « illisible » screen's file and the device's other engines", () => {
+    seed(fullState(), other("b"));
+    island.fallBack();
+    island.fallBack();
+    expect(island.getClientSnapshot().undrawn).toEqual(fullState());
+    expect(island.getClientSnapshot().engines?.map((e) => e.id)).toEqual([fullState().id, "b"]);
+    // Switching to another engine, or any write, leaves that screen: nothing undrawn any more.
+    island.switchEngine("b");
+    expect(island.getClientSnapshot().undrawn).toBeNull();
+    expect(island.getClientSnapshot().result).toMatchObject({ kind: "ok", state: { id: "b" } });
   });
 
   it("on an empty device has nothing to fall back on but the second chance", () => {
@@ -134,7 +160,7 @@ describe("a file on probation", () => {
   it("a file the board has drawn is kept: a later failure is the engine's, not the file's", () => {
     seed(fullState());
     island.commit(other("c"), { fresh: true, add: true, probation: true });
-    island.shown();
+    island.drawn(true);
     const kept = items();
     expect(island.fallBack()).toBe(true);
     expect(items()).toEqual(kept);
@@ -147,6 +173,32 @@ describe("a file on probation", () => {
     const saved = items();
     expect(island.fallBack()).toBe(true);
     expect(items()).toEqual(saved);
+    expect(island.refusedFilePending()).toBe(false);
+  });
+
+  it("a screen other than the board does not end the probation: the file is still undone", () => {
+    seed(fullState());
+    const stored = items();
+    island.commit(other("c"), { fresh: true, add: true, probation: true });
+    island.drawn(false);
+    expect(island.fallBack()).toBe(true);
+    expect(items()).toEqual(stored);
+  });
+
+  it("a device that refuses to be put back still holds the file: the screen says so, rather than show what is gone", () => {
+    seed(fullState());
+    island.commit({ ...other("x"), id: fullState().id }, { fresh: true, probation: true });
+    const setItem = store.setItem;
+    store.setItem = () => {
+      throw new Error("storage refused");
+    };
+    try {
+      expect(island.fallBack()).toBe(true);
+    } finally {
+      store.setItem = setItem;
+    }
+    expect(island.getClientSnapshot().result).toEqual({ kind: "unreadable" });
+    expect(island.getClientSnapshot().undrawn?.setup.companyLabel).toBe("Other x");
     expect(island.refusedFilePending()).toBe(false);
   });
 

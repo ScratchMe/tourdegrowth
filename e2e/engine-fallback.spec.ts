@@ -1,7 +1,8 @@
+import { readFile } from "node:fs/promises";
 import type { Page } from "@playwright/test";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import { exampleState } from "../src/lib/engine/__tests__/fixtures";
-import type { EngineState, MetricEntry } from "../src/lib/engine/types";
+import type { EngineState, MetricEntry, Snapshot } from "../src/lib/engine/types";
 import { engineSeed, openEngineMenu } from "./engine-helpers";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
 
@@ -12,26 +13,33 @@ test.beforeEach(async ({ context }) => {
 });
 
 /**
- * The island's net (CHANTIERS.md A25.b): an engine the board cannot draw
- * never takes the page down, and never costs the device what it holds.
+ * An engine the board cannot draw (CHANTIERS.md A25.b): it never takes the
+ * page down, and never costs the device what it holds.
  *
- * - Stored on the device (written before A25, or by anything the import does
- *   not judge): the « illisible » screen, the device left as it was.
- * - Opened, added, replacing or merged from a file: the file is refused on the
- *   import screen, with the refusal that already exists, and the device is
- *   put back exactly as it was before the click.
- * - A file whose own preview throws: the same refusal, the device untouched.
+ * - A file: refused as it is read, with the refusal that already exists,
+ *   before anything is written — every one of its months computed as the
+ *   board would, and the device's engine merged with it. A month the board's
+ *   first drawing does not read (the security review's merged May) included.
+ * - Stored on the device (written before A25.b): the « illisible » screen,
+ *   the device left as it was, with the engine's file to save and the
+ *   device's other engines to open — « Tout effacer » is never the only way on.
  *
  * The poison is the security review's (2026-10-05): a « conflicting » number
- * without its two readings, which the validator reports and the board's first
- * derivation throws on (`values.ts`, `entry.conflict.a`).
+ * without its two readings, which the validator reports and the board's
+ * first derivation throws on (`values.ts`, `entry.conflict.a`).
+ *
+ * What no spec here reaches, held by `engine-store.test.ts`: the probation
+ * that undoes a written import, and the import panel's own boundary. Both
+ * are nets under the check at the reading — no known file gets past it to
+ * them. They stay for a throw the check does not compute: a component's own.
  *
  * Non-vacuity, measured on 2026-10-05, one sabotage per build: without the
- * island's boundary, the five tests where the board throws fall (the stored
- * engine, the empty device, add, replace, the merge of a month only in the
- * file) and the two where the import's preview throws pass, held by the
- * panel's own; without the panel's boundary, those two fall alone; with the
- * probation never taken, the four imports the board throws on fall.
+ * check at the reading (`drawnWith` always true), the four file tests fall
+ * and the two stored-engine tests pass; with the merge left unchecked, the
+ * fourth falls alone — so that file does read alone; without the island's
+ * boundary, the two stored-engine tests fall; without the « illisible »
+ * screen's file and engines (`undrawn`), the last falls alone. Without the
+ * probation, or without the panel's boundary, nothing here falls, as said.
  */
 const POISON = { status: "conflicting", conflict: {}, updatedAt: "2026-09-30T10:00:00.000Z" } as unknown as MetricEntry;
 const CLOCK = new Date(2026, 8, 24, 12);
@@ -40,6 +48,13 @@ function poisoned(): EngineState {
   const state = exampleState();
   state.snapshots[0]!.metrics["act.rate"] = POISON;
   return state;
+}
+
+/** The example with a month before its own, closed when the next began: the device of the merge tests. */
+function withJuly(state: EngineState): EngineState {
+  const august = state.snapshots[0]!;
+  const july: Snapshot = { ...structuredClone(august), id: "july", referenceMonth: "2026-07", cohortMonth: "2026-06", closedAt: "2026-08-01T00:00:00.000Z" };
+  return { ...state, snapshots: [july, august] };
 }
 
 function asFile(state: unknown) {
@@ -67,6 +82,72 @@ async function seedOnce(page: Page, ...states: EngineState[]): Promise<void> {
   }, engineSeed(...states));
 }
 
+async function importBeside(page: Page, file: unknown): Promise<void> {
+  await openEngineMenu(page);
+  await page.getByTestId("engine-import-open-screen").click();
+  await page.getByTestId("engine-import-file").setInputFiles(asFile(file));
+}
+
+async function expectRefused(page: Page, locale: "en" | "fr"): Promise<void> {
+  await expect(page.getByTestId("engine-import-refused")).toHaveText(ENGINE_COPY.io.notEngine[locale]);
+  await expect(page.getByTestId("engine-import-open")).toHaveCount(0);
+  await expect(page.getByTestId("engine-import-preview")).toHaveCount(0);
+}
+
+test("a file the board cannot draw is refused as it is read on an empty device, in French: nothing is stored", async ({ page }) => {
+  await page.goto("/fr/aarrr-funnel-template");
+  await page.getByTestId("engine-start-import").click();
+  await page.getByTestId("engine-import-file").setInputFiles(asFile(poisoned()));
+  await expectRefused(page, "fr");
+  expect(await engineItems(page)).toEqual({});
+  await page.reload();
+  await expect(page.getByTestId("engine-start")).toBeVisible();
+});
+
+test("a file the board cannot draw is refused as it is read beside an engine: no choice is offered, the device is untouched", async ({ page }) => {
+  await seedOnce(page, exampleState());
+  await page.goto("/en/aarrr-funnel-template");
+  await expect(page.getByTestId("engine-board")).toBeVisible();
+  const before = await engineItems(page);
+  await importBeside(page, poisoned());
+  await expectRefused(page, "en");
+  await expect(page.getByTestId("engine-import-choices")).toHaveCount(0);
+  await page.getByTestId("engine-import-cancel").click();
+  await expect(page.getByTestId("engine-board")).toBeVisible();
+  expect(await engineItems(page)).toEqual(before);
+});
+
+test("a past month the board's first drawing would not read is judged too: the security review's merged May is refused", async ({ page }) => {
+  await seedOnce(page, withJuly(exampleState()));
+  await page.goto("/en/aarrr-funnel-template");
+  await expect(page.getByTestId("engine-board")).toBeVisible();
+  const before = await engineItems(page);
+
+  // Same setup as the device, a May only in the file carrying the poison: merged, it would sit two months before the
+  // one on screen, which the board draws without reading — kept, then thrown on the day someone opens May.
+  const file = exampleState();
+  const august = file.snapshots[0]!;
+  const may: Snapshot = { ...structuredClone(august), id: "may", referenceMonth: "2026-05", cohortMonth: "2026-04", closedAt: "2026-06-01T00:00:00.000Z" };
+  may.metrics["act.rate"] = POISON;
+  await importBeside(page, { ...file, snapshots: [may, august] });
+  await expectRefused(page, "en");
+  expect(await engineItems(page)).toEqual(before);
+});
+
+test("a file whose merge into the device's engine throws is refused as it is read, though it reads alone", async ({ page }) => {
+  await seedOnce(page, exampleState());
+  await page.goto("/en/aarrr-funnel-template");
+  await expect(page.getByTestId("engine-board")).toBeVisible();
+  const before = await engineItems(page);
+
+  // A month only in the file, with a number set to null: the merge counts its numbers (`merge.ts`, `hasReading`).
+  const file = withJuly(exampleState());
+  (file.snapshots[0]!.metrics as Record<string, unknown>)["act.rate"] = null;
+  await importBeside(page, file);
+  await expectRefused(page, "en");
+  expect(await engineItems(page)).toEqual(before);
+});
+
 test("an engine stored with a number the board cannot draw opens on the « illisible » screen, in both languages, and the device keeps it", async ({ page }) => {
   await seedOnce(page, poisoned());
   await page.goto("/fr/aarrr-funnel-template");
@@ -76,7 +157,7 @@ test("an engine stored with a number the board cannot draw opens on the « illis
 
   await page.goto("/en/aarrr-funnel-template");
   await expect(page.getByTestId("engine-unreadable")).toContainText(ENGINE_COPY.storage.unreadable.en);
-  // Shown twice, written never: the numbers stay on the device for a build that can read them.
+  // Shown twice, written never: the numbers stay on the device.
   expect(await engineItems(page)).toEqual(stored);
 
   // The way out the screen already offered: a saved file.
@@ -86,88 +167,20 @@ test("an engine stored with a number the board cannot draw opens on the « illis
   await expect(page.getByTestId("engine-board")).toBeVisible();
 });
 
-test("a file the board cannot draw is refused on an empty device: nothing is stored, and the next visit opens on the start", async ({ page }) => {
-  await page.goto("/fr/aarrr-funnel-template");
-  await page.getByTestId("engine-start-import").click();
-  await page.getByTestId("engine-import-file").setInputFiles(asFile(poisoned()));
-  // Its preview reads: the file is only refused once the board has tried to draw it.
-  await page.getByTestId("engine-import-open").click();
-  await expect(page.getByTestId("engine-import-refused")).toHaveText(ENGINE_COPY.io.notEngine.fr);
-  await expect(page.getByTestId("engine-import-open")).toHaveCount(0);
-  expect(await engineItems(page)).toEqual({});
-  await page.reload();
-  await expect(page.getByTestId("engine-start")).toBeVisible();
-});
-
-for (const choice of ["add", "replace", "merge"] as const) {
-  test(`a file the board cannot draw is refused beside an engine (${choice}), and the device is put back as it was`, async ({ page }) => {
-    await seedOnce(page, exampleState());
-    await page.goto("/en/aarrr-funnel-template");
-    await expect(page.getByTestId("engine-board")).toBeVisible();
-    const before = await engineItems(page);
-
-    await openEngineMenu(page);
-    await page.getByTestId("engine-import-open-screen").click();
-    await page.getByTestId("engine-import-file").setInputFiles(asFile(poisoned()));
-    if (choice === "replace") await page.getByRole("radio", { name: /^Replace/ }).check();
-    // A click, not `check()`: a merge's preview already throws on the poisoned number (its « replaced » line), and the
-    // panel is drawn again on its refusal, without the choice to check.
-    if (choice === "merge") await page.getByRole("radio", { name: /^Merge into/ }).click();
-    if (choice !== "merge") await page.getByTestId("engine-import-open").click();
-
-    await expect(page.getByTestId("engine-import-refused")).toHaveText(ENGINE_COPY.io.notEngine.en);
-    expect(await engineItems(page)).toEqual(before);
-    await page.getByTestId("engine-import-cancel").click();
-    await expect(page.getByTestId("engine-board")).toBeVisible();
-    await page.reload();
-    await expect(page.getByTestId("engine-board")).toBeVisible();
-    expect(await engineItems(page)).toEqual(before);
-  });
-}
-
-test("a merge whose preview reads, of a month only in the file, is undone once the board throws on it", async ({ page }) => {
-  await seedOnce(page, exampleState());
+test("the « illisible » screen saves that engine's file as it is, and opens the device's other engines", async ({ page }) => {
+  const healthy: EngineState = { ...exampleState(), id: "9b2f4c1e-3a5d-4e6f-8a7b-1c2d3e4f5a6b", setup: { ...exampleState().setup, companyLabel: "Healthy Co" } };
+  await seedOnce(page, poisoned(), healthy);
   await page.goto("/en/aarrr-funnel-template");
+  await expect(page.getByTestId("engine-unreadable")).toBeVisible();
+
+  const download = page.waitForEvent("download");
+  await page.getByTestId("engine-unreadable-save").click();
+  const saved = JSON.parse(await readFile((await (await download).path())!, "utf8"));
+  // The engine as the device holds it, poison and all: nothing is lost, and a later build may read it.
+  expect(saved).toEqual(JSON.parse(JSON.stringify(poisoned())));
+
+  await expect(page.getByTestId("engine-unreadable-others")).toContainText("Healthy Co");
+  await page.getByTestId(`engine-switch-${healthy.id}`).click();
   await expect(page.getByTestId("engine-board")).toBeVisible();
-  const before = await engineItems(page);
-
-  // The security review's case: a later month, only in the file, carrying the poison. The merge's preview only counts
-  // its numbers, so it reads, and the merge would write the poison into the device's own engine.
-  const file = exampleState();
-  const august = { ...file.snapshots[0]!, closedAt: "2026-09-01T00:00:00.000Z" };
-  const september = { ...structuredClone(file.snapshots[0]!), id: "september", referenceMonth: "2026-09", cohortMonth: "2026-08" };
-  september.metrics["act.rate"] = POISON;
-  await openEngineMenu(page);
-  await page.getByTestId("engine-import-open-screen").click();
-  await page.getByTestId("engine-import-file").setInputFiles(asFile({ ...file, snapshots: [august, september] }));
-  await page.getByRole("radio", { name: /^Merge into/ }).check();
-  await expect(page.getByTestId("engine-import-merge")).toBeVisible();
-  await page.getByTestId("engine-import-open").click();
-
-  await expect(page.getByTestId("engine-import-refused")).toHaveText(ENGINE_COPY.io.notEngine.en);
-  await expect(page.locator("#engine-import-title")).toBeFocused();
-  expect(await engineItems(page)).toEqual(before);
-  await page.getByTestId("engine-import-cancel").click();
-  await expect(page.getByTestId("engine-board")).toBeVisible();
-});
-
-test("a file whose own preview throws is refused, and the device is untouched", async ({ page }) => {
-  await seedOnce(page, exampleState());
-  await page.goto("/en/aarrr-funnel-template");
-  await expect(page.getByTestId("engine-board")).toBeVisible();
-  const before = await engineItems(page);
-
-  // A month only in the file, with a number set to null: the merge's preview counts its numbers (`merge.ts`, `hasReading`).
-  const file = exampleState();
-  const august = file.snapshots[0]!;
-  const july = { ...structuredClone(august), id: "july", referenceMonth: "2026-07", cohortMonth: "2026-06", closedAt: "2026-08-01T00:00:00.000Z", metrics: { ...august.metrics, "act.rate": null } };
-  await openEngineMenu(page);
-  await page.getByTestId("engine-import-open-screen").click();
-  await page.getByTestId("engine-import-file").setInputFiles(asFile({ ...file, snapshots: [july, august] }));
-  // A click, not `check()`: the panel is drawn again on its refusal, without the choice to check.
-  await page.getByRole("radio", { name: /^Merge into/ }).click();
-
-  await expect(page.getByTestId("engine-import-refused")).toHaveText(ENGINE_COPY.io.notEngine.en);
-  await expect(page.getByTestId("engine-import-open")).toHaveCount(0);
-  expect(await engineItems(page)).toEqual(before);
+  await expect(page.getByTestId("engine-bar-line")).toContainText("Healthy Co");
 });

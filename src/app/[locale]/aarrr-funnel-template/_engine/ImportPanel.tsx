@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId, useRef, useState } from "react";
 import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
 import { Choices } from "@/components/core/Choices";
@@ -40,15 +40,21 @@ type Parsed = ReturnType<typeof parseEngineFile>;
  * would lose the half that is there.
  *
  * A file the engine cannot draw (A25.b) gets the refusal of a file that
- * isn't an engine: when its own preview throws, the panel is drawn again
- * with it; when the board throws on it once opened, the device is put back
- * and the island opens here again with `refused`.
+ * isn't an engine, before anything is written: when one of its months, or
+ * the device's engine merged with it, throws as the board computes it
+ * (`drawable`, at the reading); when its preview throws, the panel being
+ * drawn again with it; and when the board still throws on it once opened,
+ * the device is put back and the island opens here again with `refused`.
  */
 export function ImportPanel(props: ImportPanelProps) {
   const [refusals, setRefusals] = useState(props.refused ? 1 : 0);
+  // A panel that throws whatever the file (a bug, not a file): past a few, the error goes to the island's net.
+  const crashes = useRef(0);
   return (
     <EngineBoundary
       onError={() => {
+        crashes.current += 1;
+        if (crashes.current > 3) return false;
         setRefusals((n) => n + 1);
         return true;
       }}
@@ -59,6 +65,21 @@ export function ImportPanel(props: ImportPanelProps) {
 }
 
 type ImportPanelProps = Parameters<typeof ImportPanelBody>[0];
+
+/**
+ * The file, and the device's engine merged with it when the merge is offered: each computed as the board would
+ * (A25.b). The merge is checked here because it is the one choice that writes the file into someone's own engine.
+ */
+function drawnWith(file: EngineState, device: EngineState | null, drawable: (state: EngineState) => boolean): boolean {
+  try {
+    if (!drawable(file)) return false;
+    if (!device || mergeRefusal(device, file) !== null) return true;
+    const merged = mergeEngines(device, file);
+    return merged.kind !== "ok" || drawable(merged.state);
+  } catch {
+    return false;
+  }
+}
 
 /** The refusal a file the engine cannot draw gets: no state, so no preview and no button to open it. */
 const REFUSED: Parsed = { state: null, errors: [], refusal: "not-engine" };
@@ -71,6 +92,7 @@ function ImportPanelBody({
   onOpen,
   onCancel,
   refused = false,
+  drawable,
 }: {
   strings: EngineStrings;
   locale: "en" | "fr";
@@ -82,6 +104,8 @@ function ImportPanelBody({
   onCancel: () => void;
   /** The file just chosen could not be drawn (A25.b): the panel opens on its refusal, until another file is read. */
   refused?: boolean;
+  /** Whether the board can compute every month of a state (A25.b): a file it cannot is refused as it is read. */
+  drawable?: (state: EngineState) => boolean;
 }) {
   const inputId = useId();
   const [parsed, setParsed] = useState<Parsed | null>(refused ? REFUSED : null);
@@ -98,7 +122,8 @@ function ImportPanelBody({
       setParsed({ state: null, errors: [], refusal: "unreadable" });
       return;
     }
-    setParsed(parseEngineFile(text));
+    const result = parseEngineFile(text);
+    setParsed(result.state && drawable && !drawnWith(result.state, device?.state ?? null, drawable) ? REFUSED : result);
   }
 
   const state = parsed?.state ?? null;

@@ -14,6 +14,7 @@ import type { SeriesControls } from "./_engine/BoardHead";
 import { DeckView } from "./_engine/deck/DeckView";
 import { collectPlan } from "./_engine/collect";
 import { latestTourWithAnswers } from "@/lib/engine/bridge";
+import type { StoredResult } from "@/lib/quiz/storage";
 import { pelotonTitle } from "@/lib/engine/deck";
 import { relaysTitle, totalTitle } from "@/lib/engine/deck-motions";
 import { deriveEngine } from "@/lib/engine/derive";
@@ -27,7 +28,7 @@ import { requestPersistence } from "@/lib/engine/storage";
 import { newEngineState } from "@/lib/engine/validate";
 import { propagateFrom, withSettingsNumbers } from "@/lib/engine/shared-counts";
 import { engineSetupDetail, engineStageDetail, trackEngine, type EngineStageDetail } from "./_engine/engine-events";
-import { clearRefusedFile, commit, erase, fallBack, getClientSnapshot, getServerSnapshot, refusedFilePending, removeEngine, shown, subscribe, switchEngine, type CommitResult } from "./_engine/engine-store";
+import { clearRefusedFile, commit, drawn, erase, fallBack, getClientSnapshot, getServerSnapshot, refusedFilePending, removeEngine, subscribe, switchEngine, type CommitResult } from "./_engine/engine-store";
 import { EngineBoundary } from "./_engine/EngineBoundary";
 import { tableTemplate, type TablePreview } from "./_engine/csv";
 import { DeleteEngineDialog } from "./_engine/DeleteEngineDialog";
@@ -234,36 +235,37 @@ function Workbench(props: EngineWorkbenchProps) {
   const derivedCopy = derivedFor(props, engineType);
   const openedAt = snap?.openedAt ?? null;
   const tourResults = snap?.tourResults;
-  const computed = useMemo(() => {
-    if (!state || !openedAt) return null;
-    // A past month is read as it was seen (§19.2.3): the months up to it, its windows, the day it was closed.
-    // Every screen below reads the LAST month of the state it gets, so the past month is simply that state's last.
-    const month = monthIndex !== null && monthIndex < state.snapshots.length - 1 ? monthIndex : null;
-    const lens = month === null ? { state, today: new Date(openedAt) } : monthView(state, month, new Date(openedAt));
-    const ctx = { today: lens.today, locale };
-    const tourResult = state.tourLink ? (tourResults?.find((r) => r.id === state.tourLink?.resultId) ?? null) : null;
-    const derived = deriveEngine(lens.state, ctx, tourResult, bridges, strings.units);
-    // The board's title is its first slide's title, from the same function (§7 E2, §9.3, §18.8):
-    // the screen and the slide cannot word one engine two ways.
-    const verdict = verdictOf(lens.state, derived, strings, metrics, ctx);
-    // The team's tools, when ticked (§19.5.2): « À faire toi-même » by tool, with each number's `where` in the catalogue's order.
-    const selected = teamTools(lens.state.setup.tools, lens.state.setup.type);
-    const citedBy = (id: MetricId) =>
-      (metrics.find((m) => m.id === id)?.where ?? []).flatMap((w) => (w.source.kind === "tool" ? [w.source.tool] : []));
-    const plan = collectPlan(lastSnapshot(lens.state), ctx.today, motionShapes(lens.state.setup), { selected, citedBy });
-    const deviceTour = latestTourWithAnswers(tourResults ?? []);
-    const tourOnDevice = deviceTour !== null;
-    const view: EngineView = { state: lens.state, derived, strings, metrics, derivedCopy, bridges, ctx, tourResult, tourOnDevice, deviceTour };
-    return { view, verdict, plan, month };
-  }, [state, openedAt, tourResults, locale, bridges, strings, metrics, derivedCopy, monthIndex]);
+  const computed = useMemo(
+    () =>
+      state && openedAt
+        ? boardOf(state, { monthIndex, today: new Date(openedAt), locale, tourResults: tourResults ?? [], bridges, strings, metrics, derivedCopy })
+        : null,
+    [state, openedAt, tourResults, locale, bridges, strings, metrics, derivedCopy, monthIndex],
+  );
 
-  // The board has been drawn (A25.b): a file just opened is kept, and the net counts its failures afresh. An effect
-  // runs only once the render has committed, so a board that threw never reaches it.
+  // A screen has been drawn (A25.b): the net counts its failures afresh, and once it is the board, a file just opened
+  // is kept. An effect runs only once a render has committed, so a screen that threw never reaches it.
   useEffect(() => {
-    if (computed && screen === "board") shown();
-  }, [computed, screen]);
+    drawn(computed !== null && screen === "board");
+  });
 
   const focus = (id: string) => setFocusRequest((current) => ({ id, n: (current?.n ?? 0) + 1 }));
+
+  /**
+   * A file, every one of its months computed as the board computes it (A25.b): false when one throws, and the
+   * import refuses the file before anything is written. Every month, not only the two the board first reads: a month
+   * merged into the past would otherwise be kept, and throw the day someone opens it.
+   */
+  function drawable(candidate: EngineState): boolean {
+    const type = candidate.setup.type;
+    const input = { today: new Date(openedAt ?? Date.now()), locale, tourResults: tourResults ?? [], bridges, strings: stringsFor(type), metrics: metricsFor(props, type), derivedCopy: derivedFor(props, type) };
+    try {
+      candidate.snapshots.forEach((_, monthIndex) => boardOf(candidate, { ...input, monthIndex }));
+      return true;
+    } catch {
+      return false;
+    }
+  }
 
   function persist(next: EngineState, options: { fresh?: boolean; stamp?: boolean; overUnreadable?: boolean; add?: boolean; probation?: boolean } = {}): CommitResult {
     const stamped = options.stamp === false ? next : { ...next, updatedAt: new Date().toISOString() };
@@ -355,6 +357,7 @@ function Workbench(props: EngineWorkbenchProps) {
           metrics={metrics}
           device={null}
           refused={refusedFilePending()}
+          drawable={drawable}
           onOpen={(imported) => {
             // Over an unreadable store the device refuses to write (it will not overwrite what it
             // can't read). Choosing a file here IS the confirmed way past it, so clear first.
@@ -384,12 +387,21 @@ function Workbench(props: EngineWorkbenchProps) {
           />,
         );
       }
+      // An engine the board threw on (A25.b): its numbers are intact on the device. Its file can be saved as it is,
+      // and the device's other engines opened — « Tout effacer » is never the only way on.
+      const undrawn = snap.undrawn;
+      const others = undrawn ? (snap.engines ?? []).filter((listing) => listing.id !== undrawn.id) : [];
       return shell(
         <Card elevation="flat" className={screens.panel} data-testid="engine-unreadable">
           <p className={screens.notice} role="alert">
             {strings.storage.unreadable}
           </p>
           <div className={screens.panelActions}>
+            {undrawn ? (
+              <Button variant="secondary" onClick={() => download(serializeEngine(undrawn), engineFileName(undrawn, strings.io))} data-testid="engine-unreadable-save">
+                {strings.actions.save}
+              </Button>
+            ) : null}
             <Button variant="secondary" onClick={() => setScreen("import")}>
               {strings.actions.import}
             </Button>
@@ -397,6 +409,22 @@ function Workbench(props: EngineWorkbenchProps) {
               {strings.actions.erase}
             </Button>
           </div>
+          {others.length > 0 ? <p className={screens.tablePreviewTitle}>{strings.storage.others}</p> : null}
+          {others.length > 0 ? (
+            <ul className={screens.switcherList} data-testid="engine-unreadable-others">
+              {others.map((listing) => {
+                const name = engineName(listing, strings, locale);
+                return (
+                  <li key={listing.id} className={screens.switcherItem}>
+                    <span className={screens.switcherName}>{name}</span>
+                    <Button variant="quiet" size="sm" onClick={() => switchEngine(listing.id)} aria-label={`${strings.engines.open} — ${name}`} data-testid={`engine-switch-${listing.id}`}>
+                      {strings.engines.open}
+                    </Button>
+                  </li>
+                );
+              })}
+            </ul>
+          ) : null}
         </Card>,
       );
     }
@@ -541,6 +569,7 @@ function Workbench(props: EngineWorkbenchProps) {
         metrics={metrics}
         device={{ state: current, name: currentName, canAdd: engines.length < MAX_ENGINES }}
         refused={refusedFilePending()}
+        drawable={drawable}
         onOpen={(imported, choice: ImportChoice | null) => {
           // Each on probation (A25.b): a file the board then cannot draw is refused, and the device put back as it was.
           if (choice === "merge") {
@@ -933,6 +962,44 @@ function Workbench(props: EngineWorkbenchProps) {
  * « Commencer », as the setup's box was ticked by default (C8); the Settings
  * and the board's mirror unlink or link it.
  */
+/** What the board draws from: the month on screen (null: the month being filled), and everything else it reads. */
+interface BoardInput {
+  monthIndex: number | null;
+  today: Date;
+  locale: Locale;
+  tourResults: readonly StoredResult[];
+  bridges: ResolvedBridge[];
+  strings: EngineStrings;
+  metrics: ResolvedMetric[];
+  derivedCopy: ReturnType<typeof derivedFor>;
+}
+
+/**
+ * The board's computation (§7 E2), for the engine on screen and for a file before it is written (A25.b,
+ * `drawable`): one function, so the check and the board cannot disagree on what throws.
+ */
+function boardOf(state: EngineState, { monthIndex, today, locale, tourResults, bridges, strings, metrics, derivedCopy }: BoardInput) {
+  // A past month is read as it was seen (§19.2.3): the months up to it, its windows, the day it was closed.
+  // Every screen below reads the LAST month of the state it gets, so the past month is simply that state's last.
+  const month = monthIndex !== null && monthIndex < state.snapshots.length - 1 ? monthIndex : null;
+  const lens = month === null ? { state, today } : monthView(state, month, today);
+  const ctx = { today: lens.today, locale };
+  const tourResult = state.tourLink ? (tourResults.find((r) => r.id === state.tourLink?.resultId) ?? null) : null;
+  const derived = deriveEngine(lens.state, ctx, tourResult, bridges, strings.units);
+  // The board's title is its first slide's title, from the same function (§7 E2, §9.3, §18.8):
+  // the screen and the slide cannot word one engine two ways.
+  const verdict = verdictOf(lens.state, derived, strings, metrics, ctx);
+  // The team's tools, when ticked (§19.5.2): « À faire toi-même » by tool, with each number's `where` in the catalogue's order.
+  const selected = teamTools(lens.state.setup.tools, lens.state.setup.type);
+  const citedBy = (id: MetricId) =>
+    (metrics.find((m) => m.id === id)?.where ?? []).flatMap((w) => (w.source.kind === "tool" ? [w.source.tool] : []));
+  const plan = collectPlan(lastSnapshot(lens.state), ctx.today, motionShapes(lens.state.setup), { selected, citedBy });
+  const deviceTour = latestTourWithAnswers([...tourResults]);
+  const tourOnDevice = deviceTour !== null;
+  const view: EngineView = { state: lens.state, derived, strings, metrics, derivedCopy, bridges, ctx, tourResult, tourOnDevice, deviceTour };
+  return { view, verdict, plan, month };
+}
+
 function startCopy(strings: EngineStrings, locale: Locale, motion: StartMotion, today: Date) {
   const st = strings.start;
   const motions = motionsOf(motion);
