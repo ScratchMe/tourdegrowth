@@ -87,6 +87,11 @@ const BUDGETS: { module: string; max: number; why: string }[] = [
     why: "La prose des quinze chiffres du moteur dans les mots d'une app (A22 APP-2, §21.4.6) : seule /{locale}/aarrr-funnel-template la rend, avec engine-catalog.ts, pour `typeCatalogs`.",
   },
   {
+    module: "content/engine-copy-consumer.ts",
+    max: 1,
+    why: "Les mots du moteur d'une app, posés sur ceux d'engine-copy.ts (A22 APP-3, §21.8) : seule /{locale}/aarrr-funnel-template le rend, pour `typeStrings`. Ni /llms.txt (il ne lit que le titre et la description, que le calque n'a pas), ni l'image de partage.",
+  },
+  {
     module: "content/engine-copy.ts",
     max: 2,
     why: "Toute la copie d'interface du moteur : sa page la résout, et /llms.txt lit son titre et sa description quand le moteur est ouvert au build (C27).",

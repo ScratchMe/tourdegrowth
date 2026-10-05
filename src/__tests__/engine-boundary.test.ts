@@ -504,6 +504,20 @@ describe("growth engine boundary (engine spec §11.4)", () => {
     expect(spelled).toEqual([]);
   });
 
+  // §21.8.3, A22 APP-3: the consumer app's words are laid over the base's ONCE, in the island's root, and every screen
+  // below receives the merged strings. A second reader of `typeStrings` would be a second merge, and the day they
+  // disagreed a screen would word an app's engine two ways. `engine-props.ts` names it too, but on the server: not in the
+  // island's walk, which is how the scan is shown to see a file that does name it. Non-vacuity, measured on 2026-10-05:
+  // `typeStrings` written in code in `_engine/view.ts` fails it (two files named); the word only in a comment does not.
+  it("one file of the island names typeStrings: EngineWorkbench merges, nothing below it does", () => {
+    const walk = reachable(ISLAND);
+    const named = [...walk].filter((m) => /\btypeStrings\b/.test(stripComments(BY_PATH.get(m)!)));
+    expect(named).toEqual([ISLAND]);
+    const props = "app/[locale]/aarrr-funnel-template/engine-props.ts";
+    expect(walk.has(props), "engine-props.ts is server code: the island never reaches it").toBe(false);
+    expect(stripComments(BY_PATH.get(props)!)).toMatch(/\btypeStrings\b/);
+  });
+
   it("the flag has one reader: only lib/engine/access.ts reads ENGINE_ENABLED", () => {
     const readers = FILES.filter(
       (f) => !f.path.includes("__tests__/") && /process\.env\.ENGINE_ENABLED|process\.env\[["']ENGINE_ENABLED["']\]/.test(f.source),

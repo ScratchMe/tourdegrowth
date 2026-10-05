@@ -30,6 +30,33 @@ export type { Resolved };
 /** `ENGINE_COPY` resolved to one language: every `{ en, fr }` leaf is a string. */
 export type EngineStrings = Resolved<typeof ENGINE_COPY>;
 
+/** `T` with any branch left out; a leaf is still a whole string and an array is replaced whole (§21.8.1). */
+export type DeepPartial<T> = T extends string ? T : T extends readonly unknown[] ? T : { [K in keyof T]?: DeepPartial<T[K]> };
+
+/**
+ * The base with every leaf the overlay carries replaced; arrays replaced whole. Never mutates either, and returns the
+ * very branches of `base` the overlay does not touch. A key the overlay has and the base lacks is ignored: the type
+ * forbids it, and `engine-copy-consumer.test.ts` holds that none exists.
+ *
+ * The one merge of the engine's island (`EngineWorkbench`): a type's words are the base's with the type's overlay on
+ * top (§21.8.1), so a screen or a slide reads one `EngineStrings` and never asks which type it is on.
+ */
+export function mergeStrings<T>(base: T, overlay: DeepPartial<NoInfer<T>> | undefined): T {
+  if (overlay === undefined) return base;
+  if (!isBranch(base) || !isBranch(overlay)) return overlay as T;
+  const over = overlay as Record<string, unknown>;
+  const out: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(base)) {
+    out[key] = key in over && over[key] !== undefined ? mergeStrings(value, over[key] as DeepPartial<typeof value>) : value;
+  }
+  return out as T;
+}
+
+/** A plain object: neither a leaf (string, number…) nor an array, which an overlay replaces whole. */
+function isBranch(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
 /** One of the seventeen numbers, its prose resolved (§4.4). Placeholders ({month}, {cohort}, {n}, {event}, {variant}) are still raw. */
 export interface ResolvedMetric {
   id: MetricId;
