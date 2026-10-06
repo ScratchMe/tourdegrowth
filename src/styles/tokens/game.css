@@ -115,6 +115,13 @@
    * button under white (--app-on-brand).
    */
   --split-brand: #b04f12; /* 5.29 as text on white, and white on it */
+  /*
+   * Gainix's app (revenue level, GAME-BRIEF §20.7): a deep water green,
+   * foreign to Tour de Growth and to the other apps' blue, green, violet and
+   * orange. It passes 4.5:1 on white both ways: as text, and as the ground of
+   * its buttons under white (--app-on-brand).
+   */
+  --fit-brand: #0b7a73; /* 5.19 as text on white, and white on it */
 
   /* The bezel is 1.06:1 against --night-0: its outline carries the edge. */
   --phone-bezel: #0b0907;

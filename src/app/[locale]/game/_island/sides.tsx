@@ -1,14 +1,17 @@
 import type { ReactNode } from "react";
 import { BasketPill } from "@/components/game/BasketPill";
+import { ChargePill } from "@/components/game/ChargePill";
 import { ClickPill } from "@/components/game/ClickPill";
 import { CookiePill } from "@/components/game/CookiePill";
+import { FitPhone } from "@/components/game/FitPhone";
 import { PhoneMock } from "@/components/game/PhoneMock";
 import { PlannerPhone } from "@/components/game/PlannerPhone";
 import { SentPill } from "@/components/game/SentPill";
 import { ShopPhone } from "@/components/game/ShopPhone";
 import { SplitPhone } from "@/components/game/SplitPhone";
-import type { AcquisitionCopy, ActivationCopy, ReferralCopy, RetentionCopy } from "@/lib/game/copy";
-import { fill, formatEur, formatInt } from "@/lib/game/format";
+import type { AcquisitionCopy, ActivationCopy, ReferralCopy, RetentionCopy, RevenueCopy } from "@/lib/game/copy";
+import { fitPhoneView, trialCharge, type TrialCharge } from "@/lib/game/fit-phone";
+import { fill, formatEur, formatEuros, formatInt } from "@/lib/game/format";
 import { RETENTION_LEVEL, type RetentionCardId } from "@/lib/game/levels/retention";
 import { cookieRefusal, plannerPhoneView } from "@/lib/game/planner-phone";
 import { basketFor, shopPhoneView, type Basket } from "@/lib/game/shop-phone";
@@ -21,8 +24,9 @@ import type { Locale } from "@/lib/i18n/locale";
  * What only one level has: its phone, and the pill under it — Flixo's
  * cancellation screen and its clicks, Pédalix's path to the basket and what
  * the basket adds, Quandi's arrival and the clicks to refuse its cookies,
- * Partix's invitation from both sides and the messages sent in Thomas's name
- * (GAME-BRIEF §5.9, §17.7, §18.7, §19.7). The island is the same for every
+ * Partix's invitation from both sides and the messages sent in Thomas's name,
+ * Gainix's plans, shop and renewal and what the end of the trial will charge
+ * (GAME-BRIEF §5.9, §17.7, §18.7, §19.7, §20.7). The island is the same for every
  * level (`island-view.ts`); each level brings this, and nothing else of its
  * own but its copy and its formats (CHANTIERS.md A12.d).
  *
@@ -199,6 +203,40 @@ export const REFERRAL_SIDE: IslandSide<ReferralSideCopy> = {
     const was = sentInYourName(before);
     const now = sentInYourName(after);
     return was.messages === now.messages ? null : sentSentence(copy, locale, now);
+  },
+};
+
+// --------------------------------------------------------------- revenue ---
+
+type RevenueSideCopy = Pick<RevenueCopy, "phone" | "charge">;
+
+/** The pill's sentence: what the trial's end charges, and why it is a problem. */
+export function chargeSentence(copy: RevenueSideCopy, locale: Locale, c: TrialCharge): string {
+  let text = fill(copy.charge.amount, { amount: formatEuros(locale, c.amount) });
+  if (c.silent) text += ` · ${copy.charge.silentSuffix}`;
+  if (c.addon) text += ` · ${copy.charge.addonSuffix}`;
+  return text;
+}
+
+/** Gainix's phone and its pill of what the trial's end charges (GAME-BRIEF §20.7). */
+export const REVENUE_SIDE: IslandSide<RevenueSideCopy> = {
+  render: ({ ids, copy, locale }) => {
+    const c = trialCharge(ids);
+    return (
+      <>
+        <FitPhone items={fitPhoneView(ids)} labels={copy.phone} />
+        <ChargePill amount={formatEuros(locale, c.amount)} silent={c.silent} addon={c.addon} labels={copy.charge} announce={false} />
+      </>
+    );
+  },
+  pill: ({ ids, copy, locale }) => {
+    const c = trialCharge(ids);
+    return { text: fill(copy.charge.amount, { amount: formatEuros(locale, c.amount) }), alert: c.silent || c.addon };
+  },
+  announce: ({ before, after, copy, locale }) => {
+    const was = trialCharge(before);
+    const now = trialCharge(after);
+    return was.amount === now.amount && was.silent === now.silent && was.addon === now.addon ? null : chargeSentence(copy, locale, now);
   },
 };
 
