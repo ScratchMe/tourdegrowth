@@ -107,6 +107,7 @@ const PAIRS: Pair[] = [
   { fg: "shop-brand", bg: "app-bg", stated: 6.47, role: "text", why: "Pédalix's green as text, the guide's link" },
   { fg: "planner-brand", bg: "app-bg", stated: 5.82, role: "text", why: "Quandi's violet as text, and under white on its buttons" },
   { fg: "split-brand", bg: "app-bg", stated: 5.29, role: "text", why: "Partix's orange as text, and under white on its big button" },
+  { fg: "fit-brand", bg: "app-bg", stated: 5.19, role: "text", why: "Gainix's teal as text, and under white on its buttons" },
   { fg: "app-danger-text", bg: "app-danger-bg", stated: 5.93, role: "text", why: "danger notice" },
   { fg: "app-warn-text", bg: "app-warn-bg", stated: 6.53, role: "text", why: "warn notice" },
   { fg: "#8a5f00", bg: "app-warn-bg", stated: 5.33, role: "text", why: "the prototype's warn: keepable, replaced anyway" },

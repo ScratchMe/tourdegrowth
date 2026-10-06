@@ -1,0 +1,88 @@
+/*
+ * Gainix's phone: the contents of its screen. The frame — caption, bezel,
+ * screen, app bar, flash — is PhoneFrame.module.css, shared with the other
+ * levels' phones. The screen is another company's app: it reads only the
+ * --app-* island and its own brand teal (--fit-brand, game.css), which paints
+ * the frame's dot. Every text pairing below is one game-token-contrast.test.ts
+ * measures: the --app-* pairs already there, and the ok text on its ground.
+ * Nothing here is in the alert colours: the pill under the phone carries the
+ * problem (§20.7).
+ */
+
+/* Gainix's brand, for the frame's dot. */
+.fit {
+  --phone-brand: var(--fit-brand);
+}
+
+/* The offer: the sentence the app leads with, its small print under it. */
+.offer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.headline {
+  font-weight: 700;
+}
+
+.line {
+  font: var(--app-text-sm);
+}
+
+/* The « small » lines: the print under a price, the account's renewal line. */
+.meta {
+  font: var(--app-text-sm);
+  color: var(--app-muted);
+}
+
+.title {
+  font-weight: 700;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+/* A block of the screen: a hairline card on the app's light ground. */
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5);
+  border: var(--border-width-hairline) solid var(--app-line);
+  border-radius: var(--radius-panel);
+  background: var(--app-modal-bg);
+}
+
+.notice {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-panel);
+  font: var(--app-text-sm);
+}
+
+.ok {
+  background: var(--app-ok-bg);
+  color: var(--app-ok-text);
+}
+
+.good {
+  font: var(--app-text-sm);
+  color: var(--app-ok-text);
+}
+
+.question {
+  font: var(--app-text-sm);
+  font-weight: 600;
+}
+
+.bullets {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding-left: var(--space-6);
+  font: var(--app-text-sm);
+  color: var(--app-muted);
+}
