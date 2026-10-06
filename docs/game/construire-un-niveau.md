@@ -552,6 +552,9 @@ Tous vécus sur les niveaux 1 et 2 ; chacun a coûté au moins une relecture.
   écrit à la main, l'échappement `\u00a0`, posé par un script (`chr(92)`), et
   vérifié après l'écriture : `grep -c $'\u00a0'` sur le fichier, et le nombre
   d'échappements attendu.
+  **Jamais dans un attribut JSX entre guillemets** (REV-2) : `amount="7,99\u00a0€"`
+  affiche l'échappement tel quel ; il faut une expression,
+  `amount={"7,99\u00a0€"}`.
 - **Une chaîne du prototype qui change de fichier garde sa garde** (U0) : C11
   (`game-retention.test.ts`) ne parcourt que `RETENTION_CONTENT` et ce qu'il
   nomme. Une ligne validée déplacée ailleurs se vérifie par son nom, et le
