@@ -40,8 +40,8 @@ export const States = () => (
 /** French runs longer; on a phone the pill wraps rather than overflowing the sticky bar. */
 export const French = () => (
   <NightSurface as="div" style={{ ...col, maxWidth: 300 }}>
-    <ChargePill amount="7,99\u00a0€" silent={false} addon={false} labels={FR} />
-    <ChargePill amount="62,98\u00a0€" silent addon labels={FR} />
+    <ChargePill amount={"7,99\u00a0€"} silent={false} addon={false} labels={FR} />
+    <ChargePill amount={"62,98\u00a0€"} silent addon labels={FR} />
   </NightSurface>
 );
 
