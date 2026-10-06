@@ -9,9 +9,10 @@ import type { Translatable } from "@/lib/i18n/translatable";
  *
  * **TODO: à relire** (convention 6). The five zone questions are the
  * prototype's own French (its `<nav class="tour">`); their English, the
- * company lines (from GAME-BRIEF 11.1-11.4; Pédalix's, Quandi's and Partix's
- * from their level's specification, `docs/game/niveau-2.md` §17,
- * `docs/game/activation.md` §18.11 and `docs/game/referral.md` §19.11), the
+ * company lines (from GAME-BRIEF 11.1-11.4; Pédalix's, Quandi's, Partix's and
+ * Gainix's from their level's specification, `docs/game/niveau-2.md` §17,
+ * `docs/game/activation.md` §18.11, `docs/game/referral.md` §19.11 and
+ * `docs/game/revenue.md` §20.11), the
  * ending labels and every other string are new copy written by the code
  * session. One exception
  * besides the zone questions: `LEVEL_TEASERS.acquisition` in French is the

@@ -131,7 +131,7 @@ export const GAME_ENTRY_COPY = {
       notOnDashboard: NOT_ON_DASHBOARD,
     },
   },
-  // TODO: à relire — 2026-10-06 (A24.REV-3) : toute la carte du niveau 5, d'après docs/game/revenue.md §20.11.
+  // TODO: à relire — 2026-10-06 (A24.REV-3) : toute la carte du niveau 5, d'après docs/game/revenue.md §20.11 ; band.metric par le repli C91.
   revenue: {
     title: t("Le côté obscur du revenue", "The dark side of revenue"),
     opening: OPENING,
