@@ -272,6 +272,11 @@ describe("fetchFunnelWindow (GoatCounter API — /admin/stats funnel section)", 
       "game_entry_clicked/deep_dive/referral",
       "game_started/referral/other_level",
       "game_ending/referral/fine",
+      // Level 5 (A24, REV-3, 2026-10-06): the same, under its own name.
+      "game_entry_clicked/result/revenue",
+      "game_entry_clicked/deep_dive/revenue",
+      "game_started/revenue/other_level",
+      "game_ending/revenue/fine",
     ]) {
       expect(paths).toContain(path);
     }
@@ -283,7 +288,8 @@ describe("fetchFunnelWindow (GoatCounter API — /admin/stats funnel section)", 
     // proxies' limit) so the three last levels fit — about 520 characters
     // each, 5 160 expected at five levels. Measured at three levels open
     // (activation wired, A24 ACT-3, 2026-10-05): 4 151; at four (referral
-    // wired, A24 REF-3, 2026-10-05): 4 659.
+    // wired, A24 REF-3, 2026-10-05): 4 659; at five (revenue wired, A24 REV-3,
+    // 2026-10-06): 5 175, under the 6 000.
     expect(requested.toString().length).toBeLessThan(MAX_URL);
   });
 
@@ -300,6 +306,7 @@ describe("fetchFunnelWindow (GoatCounter API — /admin/stats funnel section)", 
           { path: "game_started/acquisition/other_level", count: 1, event: true },
           { path: "game_started/activation/hub", count: 2, event: true },
           { path: "game_started/referral/other_level", count: 3, event: true },
+          { path: "game_started/revenue/hub", count: 5, event: true },
           { path: "game_quarter/1", count: 9, event: true },
           { path: "game_quarter/4", count: 3, event: true },
           { path: "game_hangup/2", count: 5, event: true },
@@ -307,6 +314,7 @@ describe("fetchFunnelWindow (GoatCounter API — /admin/stats funnel section)", 
           { path: "game_ending/acquisition/fine", count: 1, event: true },
           { path: "game_ending/activation/fine", count: 3, event: true },
           { path: "game_ending/referral/fine", count: 4, event: true },
+          { path: "game_ending/revenue/fine", count: 6, event: true },
           { path: "game_order/refused", count: 1, event: true },
           { path: "game_voice/angry", count: 4, event: true },
           { path: "game_resume/restart", count: 2, event: true },
@@ -323,10 +331,11 @@ describe("fetchFunnelWindow (GoatCounter API — /admin/stats funnel section)", 
     expect(game.entries).toEqual({
       "result/acquisition": 0, "deep_dive/acquisition": 0, "result/activation": 0, "deep_dive/activation": 0,
       "result/retention": 7, "deep_dive/retention": 0, "result/referral": 0, "deep_dive/referral": 0,
+      "result/revenue": 0, "deep_dive/revenue": 0,
       footer: 2, hub: 0, home_strip: 0, space_band: 0, space_band_compact: 0,
     });
-    expect(game.started).toEqual({ direct: 4, result: 6, deep_dive: 0, hub: 2, other_level: 4 });
-    expect(game.startedByLevel).toEqual({ acquisition: 1, activation: 2, retention: 10, referral: 3 });
+    expect(game.started).toEqual({ direct: 4, result: 6, deep_dive: 0, hub: 7, other_level: 4 });
+    expect(game.startedByLevel).toEqual({ acquisition: 1, activation: 2, retention: 10, referral: 3, revenue: 5 });
     expect(game.quartersRun).toEqual([9, 0, 0, 3]);
     expect(game.hangups).toEqual([0, 5, 0, 0]);
     expect(game.endings.retention.firedDark).toBe(2);
@@ -335,6 +344,7 @@ describe("fetchFunnelWindow (GoatCounter API — /admin/stats funnel section)", 
     expect(game.endings.acquisition.fine).toBe(1);
     expect(game.endings.activation.fine).toBe(3);
     expect(game.endings.referral.fine).toBe(4);
+    expect(game.endings.revenue.fine).toBe(6);
     expect(game.endings.retention.fine).toBe(0);
     expect(game.orders).toEqual({ obeyed: 0, refused: 1 });
     expect(game.voices.angry).toBe(4);

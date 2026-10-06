@@ -30,6 +30,7 @@ export const GAME_LEVELS_BY_PILLAR: GameLevelTable = {
   activation: { slug: "activation", enabled: true },
   retention: { slug: "retention", enabled: true },
   referral: { slug: "referral", enabled: true },
+  revenue: { slug: "revenue", enabled: true },
 };
 
 /** The level a result page may point to — resolved into copy and an href by the caller (G5b). */
@@ -99,8 +100,8 @@ export function enabledLevelSlugs(levels: GameLevelTable = GAME_LEVELS_BY_PILLAR
  * is the only one open there is none, and the block is not drawn.
  *
  * Pure, and generic over the slug so a table of all five levels can be
- * tested before the last one is playable (`LevelSlug` names four since
- * A24 REF-3; the other is a `ModelSlug` until its wiring). No default for the
+ * tested whatever the order the levels were opened in (`LevelSlug` names all
+ * five since A24 REV-3; the tests keep tables of their own). No default for the
  * table: a default typed `GameLevelTable` would not assign to the generic
  * parameter. « Finished » is whatever the caller says it is — the island
  * passes the endings in the collection (`finishedLevels`), written by

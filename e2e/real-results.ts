@@ -46,9 +46,9 @@ export interface RealResult {
 }
 
 /**
- * One board per state of the bottleneck block (`resolveBottleneck`), four for
+ * One board per state of the bottleneck block (`resolveBottleneck`), five for
  * the game's card (a Deep dive, two levels on one card, level 3's stage,
- * level 4's stage), one with every stage
+ * level 4's stage, level 5's stage), one with every stage
  * at its weakest (`low`), and the result header at its widest (`roastDeep`).
  * The totals are what `computeScore` gives for these answers; the spec checks
  * the page shows them, so a scoring change announces itself here.
@@ -145,6 +145,20 @@ export const REAL_RESULTS = {
     tone: "neutral",
     locale: "en",
     answers: answersFor({ acquisition: 1, activation: 0, retention: 1, referral: 2, revenue: 0 }),
+    total: 54,
+  },
+  /**
+   * Revenue alone at 0/20: a `clear` bottleneck on level 5's stage (A24,
+   * REV-3, 2026-10-06) — the card offers « Comment vous gagnez de l'argent »,
+   * and its band quotes the revenue per user in euros to the cent, not a
+   * count, a rate or a coefficient. In French, the language whose band is
+   * the longest (« Revenu par utilisateur 4,00 € », C91).
+   */
+  revenueClear: {
+    id: "7d3c9e2a-0b1f-4c5d-8e6f-1a2b3c4d5e11",
+    tone: "neutral",
+    locale: "fr",
+    answers: answersFor({ acquisition: 1, activation: 0, retention: 1, referral: 0, revenue: 2 }),
     total: 54,
   },
 } as const satisfies Record<string, RealResult>;

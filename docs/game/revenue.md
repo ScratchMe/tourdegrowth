@@ -720,7 +720,7 @@ Les questions communes sont au §21.8.
 | `entry.ts` | `GAME_ENTRY_COPY.revenue.title` | Le côté obscur du revenue | The dark side of revenue |
 | `entry.ts` | `…body` | Voici ce qu'il ne faut pas faire : joue une année comme PM growth d'une appli de sport, un DG qui veut du revenu par utilisateur, et huit astuces que tu reconnaîtras ensuite partout. | Here is what not to do: play a year as the growth PM of a fitness app, with a CEO who wants revenue per user, and eight tricks you will recognise everywhere afterwards. |
 | `entry.ts` | `…cta` | Jouer le niveau « Comment vous gagnez de l'argent » | Play the level "How you make money" |
-| `entry.ts` | `…band.metric` | Revenu par utilisateur {metric} | Revenue per user {metric} |
+| `entry.ts` | `…band.metric` | ARPU {metric} *(repli C91, appliqué par REV-3 le 2026-10-06 : « Revenu par utilisateur {metric} » passait à la ligne à 1 280 px)* | ARPU {metric} |
 | `entry.ts` | `…opening`, `meta`, `band.trust`, `band.notOnDashboard` | *(les constantes partagées du fichier)* | |
 | `hub.ts` | `zones.revenue.company` | Gainix, une appli de sport avec abonnement | Gainix, a fitness app with a subscription |
 | `hub.ts` | `ENDINGS_BY_LEVEL.revenue` | `{ fine: « le contrôle, la transaction et l'amende » }` | `{ fine: "the inspection, the settlement and the fine" }` |

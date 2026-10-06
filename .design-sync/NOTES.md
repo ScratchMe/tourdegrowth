@@ -577,10 +577,11 @@ alone because both previews pass the literal shape (`{ pillar, score }`,
 so the agent has the shape from the code that actually runs. Hand-writing the
 bodies would duplicate the contract and silently rot.
 
-Eight components **are** pinned in `cfg.dtsPropsFor`: `NotFoundScreen`
+Eleven components **are** pinned in `cfg.dtsPropsFor`: `NotFoundScreen`
 (below), `ProseText`, `ProseActions`, `StatTile` (a union of known / unknown /
 hidden), `Sparkline`, `EventClipping` (a discriminated union on `kind`),
-`PhoneMock` and `ShopPhone` (both phones' element unions live in `lib/game/`).
+`PhoneMock`, `ShopPhone`, `PlannerPhone`, `SplitPhone` and `FitPhone` (the five
+phones' element unions live in `lib/game/`).
 Other named object types (`HandCard`, `DashboardMetricTile`,
 `DataTableColumn`, `ChartLegendItem`, `TypingPace`, …) still print as bare
 names; their previews pass the literal shape. Each pin is a drift risk.
@@ -1157,7 +1158,7 @@ project's cards share).
   build change, spot-check that
   `ds-bundle/components/brand/ContentHeader/ContentHeader.d.ts` says
   `locale: "en" | "fr"` and not `locale: Locale`.
-- **The eight `cfg.dtsPropsFor` entries are hand-written** and will not follow
+- **The eleven `cfg.dtsPropsFor` entries are hand-written** and will not follow
   their components. If one gains or renames a prop, update the config entry
   or the contract lies.
 - **`componentSrcMap` is the component list** (see above). `check-inventory`

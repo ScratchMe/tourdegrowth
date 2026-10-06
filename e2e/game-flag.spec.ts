@@ -55,7 +55,7 @@ test.describe("P26 — the owner preview", () => {
 });
 
 test.describe("X17 — the locale-less addresses", () => {
-  for (const path of ["/game", "/game/acquisition", "/game/activation", "/game/retention", "/game/referral"]) {
+  for (const path of ["/game", "/game/acquisition", "/game/activation", "/game/retention", "/game/referral", "/game/revenue"]) {
     test(`${path} redirects to its localized form, query intact`, async ({ request }) => {
       const res = await request.get(`${path}?from=share`, {
         maxRedirects: 0,
@@ -77,18 +77,18 @@ test.describe("P27 — discovery follows the flag at build", () => {
     }
   });
 
-  test("the sitemap lists the hub and the four levels, once per language", async ({ request }) => {
+  test("the sitemap lists the hub and the five levels, once per language", async ({ request }) => {
     const xml = await (await request.get("/sitemap.xml")).text();
     for (const path of [
       "/en/game", "/fr/game", "/en/game/acquisition", "/fr/game/acquisition", "/en/game/activation", "/fr/game/activation",
-      "/en/game/retention", "/fr/game/retention", "/en/game/referral", "/fr/game/referral",
+      "/en/game/retention", "/fr/game/retention", "/en/game/referral", "/fr/game/referral", "/en/game/revenue", "/fr/game/revenue",
     ]) {
       const matches = xml.match(new RegExp(`<loc>https://(www\\.)?tourdegrowth\\.com${path}</loc>`, "g"));
       expect(matches, path).toHaveLength(1);
     }
   });
 
-  for (const path of ["/game", "/game/acquisition", "/game/activation", "/game/retention", "/game/referral"]) {
+  for (const path of ["/game", "/game/acquisition", "/game/activation", "/game/retention", "/game/referral", "/game/revenue"]) {
     test(`${path} is indexable and declares its hreflang set`, async ({ page }) => {
       await page.goto(`/fr${path}`);
       await expect(page.locator("html")).toHaveAttribute("lang", "fr");
@@ -111,16 +111,16 @@ test.describe("X19 — the hub", () => {
 
     // Only the enabled levels are links — acquisition since level 2 (A12.f),
     // activation since level 3 (A24, ACT-3), referral since level 4 (A24,
-    // REF-3), and retention — and the one other says "soon" in words.
+    // REF-3), revenue since level 5 (A24, REV-3), and retention: all five
+    // zones are playable, so none says "soon" any more.
     const links = page.getByTestId("game-hub-zones").getByRole("link");
-    await expect(links).toHaveCount(4);
+    await expect(links).toHaveCount(5);
     await expect(links.nth(0)).toHaveAttribute("href", "/en/game/acquisition?from=hub");
     await expect(links.nth(1)).toHaveAttribute("href", "/en/game/activation?from=hub");
     await expect(links.nth(2)).toHaveAttribute("href", "/en/game/retention?from=hub");
     await expect(links.nth(3)).toHaveAttribute("href", "/en/game/referral?from=hub");
-    for (const pillar of PILLAR_ORDER.filter((p) => p !== "retention" && p !== "acquisition" && p !== "activation" && p !== "referral")) {
-      await expect(page.getByTestId(`game-hub-zone-${pillar}`)).toContainText(/Soon/i);
-    }
+    await expect(links.nth(4)).toHaveAttribute("href", "/en/game/revenue?from=hub");
+    await expect(page.getByTestId("game-hub-zones")).not.toContainText(/Soon/i);
   });
 
   test("names each zone by the Tour's pillar and the game's question, in French too", async ({ page }) => {
@@ -156,7 +156,7 @@ test.describe("X19 — the hub", () => {
     await expect(page.getByTestId("game-hub-last-ending-retention")).toContainText("20 septembre 2026");
   });
 
-  test("each level names its own ending — a settlement at Pédalix, a fine at Quandi, at Flixo and at Partix", async ({ page }) => {
+  test("each level names its own ending — a settlement at Pédalix, a fine at Quandi, at Flixo and at Partix, a settlement and a fine at Gainix", async ({ page }) => {
     await page.goto("/fr/game");
     await page.evaluate(() =>
       localStorage.setItem(
@@ -168,6 +168,7 @@ test.describe("X19 — the hub", () => {
             activation: { id: "fine", at: "2026-10-05T10:00:00.000Z" },
             retention: { id: "fine", at: "2026-09-20T10:00:00.000Z" },
             referral: { id: "fine", at: "2026-10-05T11:00:00.000Z" },
+            revenue: { id: "fine", at: "2026-10-06T10:00:00.000Z" },
           },
         }),
       ),
@@ -179,6 +180,8 @@ test.describe("X19 — the hub", () => {
     await expect(page.getByTestId("game-hub-last-ending-retention")).toContainText("le contrôle et l'amende");
     // Same for the CNIL's fine at Partix: no ending label of its own (A24, REF-3).
     await expect(page.getByTestId("game-hub-last-ending-referral")).toContainText("le contrôle et l'amende");
+    // Gainix's inspection ends in two procedures, a settlement and a fine: its own label (A24, REV-3).
+    await expect(page.getByTestId("game-hub-last-ending-revenue")).toContainText("le contrôle, la transaction et l'amende");
   });
 });
 
@@ -220,8 +223,16 @@ test.describe("the level page", () => {
     await expect(page.locator('a[href="/fr/glossary/viral-coefficient"]')).toHaveCount(1);
   });
 
-  test("the four open levels' zones link to each other, counted as the other-level door", async ({ page }) => {
-    const levels = ["acquisition", "activation", "retention", "referral"] as const;
+  test("level 5 has the same page: Gainix's intro, its first call, and its own glossary words (A24, REV-3)", async ({ page }) => {
+    await page.goto("/fr/game/revenue");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Une année chez Gainix");
+    await expect(page.getByTestId("game-call")).toHaveAttribute("data-state", "open");
+    await expect(page.locator('a[href="/fr/glossary/revenue"]')).toHaveCount(1);
+    await expect(page.locator('a[href="/fr/glossary/arpu"]')).toHaveCount(1);
+  });
+
+  test("the five open levels' zones link to each other, counted as the other-level door", async ({ page }) => {
+    const levels = ["acquisition", "activation", "retention", "referral", "revenue"] as const;
     for (const from of levels) {
       await page.goto(`/en/game/${from}`);
       const nav = page.getByTestId("game-zone-nav");

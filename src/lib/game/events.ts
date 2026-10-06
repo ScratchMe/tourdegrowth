@@ -21,7 +21,7 @@ import type { EndingId, LevelSlug, Mood } from "./types";
 type AssertNever<T extends never> = T;
 
 /** The levels the vocabulary covers. Adding a level adds its paths here, and the dashboard follows. */
-export const GAME_LEVEL_SLUGS = ["acquisition", "activation", "retention", "referral"] as const satisfies readonly LevelSlug[];
+export const GAME_LEVEL_SLUGS = ["acquisition", "activation", "retention", "referral", "revenue"] as const satisfies readonly LevelSlug[];
 
 /**
  * `satisfies` checks that every listed slug is a level, not that every level
@@ -41,6 +41,7 @@ export const GAME_ENTRY_EVENT = "game_entry_clicked";
 export const GAME_ENTRY_DETAILS = [
   "result/acquisition", "deep_dive/acquisition", "result/activation", "deep_dive/activation",
   "result/retention", "deep_dive/retention", "result/referral", "deep_dive/referral",
+  "result/revenue", "deep_dive/revenue",
   "footer", "hub", "home_strip", "space_band", "space_band_compact",
 ] as const;
 export type GameEntryDetail = (typeof GAME_ENTRY_DETAILS)[number];

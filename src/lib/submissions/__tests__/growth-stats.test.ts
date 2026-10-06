@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { GAME_LEVELS_BY_PILLAR } from "@/lib/game/levels";
 import { summarizeSubmissions } from "../growth-stats";
 import type { DeepDiveResult, Submission } from "../types";
 
@@ -179,7 +180,7 @@ describe("summarizeSubmissions — results the game card is shown to (GAME-BRIEF
         submission({ id: "act", pillars: board(16, 3, 16, 16, 16) }),
         // Level 4 (referral) has its card since 2026-10-05 (A24, REF-3).
         submission({ id: "ref", pillars: board(16, 16, 16, 3, 16) }),
-        // Revenue has no level yet: no card, so not in the population.
+        // Level 5 (revenue) has its card since 2026-10-06 (A24, REV-3): every stage has one now.
         submission({ id: "rev", pillars: board(16, 16, 16, 16, 3) }),
         submission({ id: "level", pillars: board(16, 16, 16, 16, 16) }),
         // A malformed document costs its own count, never the dashboard.
@@ -187,6 +188,22 @@ describe("summarizeSubmissions — results the game card is shown to (GAME-BRIEF
       ],
       NOW,
     );
-    expect(stats.gameBottleneckResults).toEqual({ allTime: 6, last30Days: 5 });
+    expect(stats.gameBottleneckResults).toEqual({ allTime: 7, last30Days: 6 });
+  });
+
+  // Every stage has a level since A24 REV-3, so the case « a stage without one »
+  // closes one on the real table for the length of the call (`summarizeSubmissions`
+  // takes no table of its own) and puts it back.
+  it("does not count a clear bottleneck on a stage whose level is closed", () => {
+    const open = GAME_LEVELS_BY_PILLAR.revenue;
+    const revenueOnly = [submission({ id: "rev", pillars: board(16, 16, 16, 16, 3) })];
+    expect(summarizeSubmissions(revenueOnly, NOW).gameBottleneckResults).toEqual({ allTime: 1, last30Days: 1 });
+    GAME_LEVELS_BY_PILLAR.revenue = { slug: "revenue", enabled: false };
+    try {
+      expect(summarizeSubmissions(revenueOnly, NOW).gameBottleneckResults).toEqual({ allTime: 0, last30Days: 0 });
+    } finally {
+      GAME_LEVELS_BY_PILLAR.revenue = open;
+    }
+    expect(summarizeSubmissions(revenueOnly, NOW).gameBottleneckResults).toEqual({ allTime: 1, last30Days: 1 });
   });
 });

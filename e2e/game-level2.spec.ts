@@ -161,7 +161,7 @@ test.describe("a whole year of level 2 through the interface", () => {
     // C31, C75 — the block that closes December leads to the next open level
     // the player has not finished, « jouable »: activation since level 3 opened
     // (A24, ACT-3), written out here as `nextLevelFor` gives it on the table of
-    // the four open levels (acquisition, activation, retention, referral).
+    // the five open levels (acquisition, activation, retention, referral, revenue).
     const next = page.getByTestId("game-next-level");
     await expect(next).toContainText("Niveau suivant");
     await expect(next).toContainText("jouable");

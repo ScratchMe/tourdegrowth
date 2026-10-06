@@ -13,20 +13,22 @@ const RETENTION_CLEAR = board({ acquisition: 18, activation: 12, retention: 8, r
 const ACQUISITION_CLEAR = board({ acquisition: 2, activation: 13, retention: 13, referral: 16, revenue: 13 });
 const ACTIVATION_CLEAR = board({ acquisition: 13, activation: 2, retention: 13, referral: 16, revenue: 13 });
 const REFERRAL_CLEAR = board({ acquisition: 13, activation: 13, retention: 13, referral: 2, revenue: 13 });
+const REVENUE_CLEAR = board({ acquisition: 13, activation: 13, retention: 13, referral: 13, revenue: 2 });
 /** The table as it stood before level 2 (A12.f): the shared-bottleneck rules below are about retention. */
 const RETENTION_ONLY: GameLevelTable = { retention: { slug: "retention", enabled: true } };
 const LEVEL = board({ acquisition: 16, activation: 16, retention: 20, referral: 16, revenue: 20 });
 
 describe("GAME_LEVELS_BY_PILLAR (GAME-BRIEF.md 13.4)", () => {
-  it("ships with four levels, acquisition, activation, retention and referral, enabled, in AARRR order", () => {
+  it("ships with five levels, acquisition, activation, retention, referral and revenue, enabled, in AARRR order", () => {
     expect(GAME_LEVELS_BY_PILLAR).toEqual({
       acquisition: { slug: "acquisition", enabled: true },
       activation: { slug: "activation", enabled: true },
       retention: { slug: "retention", enabled: true },
       referral: { slug: "referral", enabled: true },
+      revenue: { slug: "revenue", enabled: true },
     });
     // The sitemap, /llms.txt and the hub's image list the levels in this order.
-    expect(enabledLevelSlugs()).toEqual(["acquisition", "activation", "retention", "referral"]);
+    expect(enabledLevelSlugs()).toEqual(["acquisition", "activation", "retention", "referral", "revenue"]);
   });
 
   it("an enabled: false level is not playable", () => {
@@ -60,9 +62,14 @@ describe("gameEntriesFor", () => {
     expect(gameEntriesFor({ bottleneck: REFERRAL_CLEAR, access: "open" })).toEqual([{ pillar: "referral", slug: "referral" }]);
   });
 
+  it("offers the revenue level when revenue is the clear bottleneck (level 5, A24 REV-3)", () => {
+    expect(REVENUE_CLEAR.sharpness).toBe("clear");
+    expect(gameEntriesFor({ bottleneck: REVENUE_CLEAR, access: "open" })).toEqual([{ pillar: "revenue", slug: "revenue" }]);
+  });
+
   // An explicit table, not the real one: a stage with no level is, level by
   // level, a moving target (activation had none until A24 ACT-3, referral
-  // none until A24 REF-3).
+  // none until A24 REF-3, revenue none until A24 REV-3).
   it("offers nothing for a pillar with no level", () => {
     expect(ACTIVATION_CLEAR.sharpness).toBe("clear");
     expect(gameEntriesFor({ bottleneck: ACTIVATION_CLEAR, access: "open", levels: RETENTION_ONLY })).toEqual([]);
@@ -127,7 +134,7 @@ describe("gameEntriesFor, shared bottleneck (X16)", () => {
 // The block that closes December (C31, then C75, A24.T0): the first open level
 // the player has not finished, in the Tour's order, wrapping round.
 describe("nextLevelFor (C75)", () => {
-  /** `LevelSlug` names four levels until the last X-3: the five-level tables are declared on the model slugs. */
+  /** Tables declared on the model slugs, so the tests can open the levels in any order (`LevelSlug` names all five since A24 REV-3). */
   type FiveLevels = Partial<Record<Pillar, { slug: ModelSlug; enabled: boolean }>>;
   const open = (slug: ModelSlug) => ({ slug, enabled: true });
   const FIVE: FiveLevels = {
@@ -158,22 +165,45 @@ describe("nextLevelFor (C75)", () => {
     expect(nextLevelFor("acquisition", done("activation", "retention"), three)).toBe("activation");
   });
 
-  it("with the four levels the game ships (A24 REF-3): the next in the Tour's order, referral after retention, then the one not finished", () => {
+  it("with the first four levels (A24 REF-3, on an explicit table now that a fifth is open): the next in the Tour's order, referral after retention, then the one not finished", () => {
+    const four: FiveLevels = {
+      acquisition: open("acquisition"),
+      activation: open("activation"),
+      retention: open("retention"),
+      referral: open("referral"),
+    };
+    expect(nextLevelFor("acquisition", done(), four)).toBe("activation");
+    expect(nextLevelFor("activation", done(), four)).toBe("retention");
+    expect(nextLevelFor("retention", done(), four)).toBe("referral");
+    // Revenue is not open in this table: referral wraps round to acquisition.
+    expect(nextLevelFor("referral", done(), four)).toBe("acquisition");
+    // Retention finished: activation leads on to referral, not back to it.
+    expect(nextLevelFor("activation", done("retention"), four)).toBe("referral");
+    // Activation and retention finished: acquisition's December goes to referral.
+    expect(nextLevelFor("acquisition", done("activation", "retention"), four)).toBe("referral");
+    // Referral finished too: the next one in the order, as with five.
+    expect(nextLevelFor("acquisition", done("activation", "retention", "referral"), four)).toBe("activation");
+    // Referral's own December, with everything else finished: the next in the order, wrapping.
+    expect(nextLevelFor("referral", done("acquisition", "activation", "retention"), four)).toBe("acquisition");
+    expect(nextLevelFor("referral", done("activation"), four)).toBe("acquisition");
+    expect(nextLevelFor("referral", done("acquisition"), four)).toBe("activation");
+  });
+
+  it("with the five levels the game ships (A24 REV-3): revenue closes the Tour, and its December wraps round to acquisition", () => {
     expect(nextLevelFor("acquisition", done(), GAME_LEVELS_BY_PILLAR)).toBe("activation");
     expect(nextLevelFor("activation", done(), GAME_LEVELS_BY_PILLAR)).toBe("retention");
     expect(nextLevelFor("retention", done(), GAME_LEVELS_BY_PILLAR)).toBe("referral");
-    // Revenue is not open: referral wraps round to acquisition.
-    expect(nextLevelFor("referral", done(), GAME_LEVELS_BY_PILLAR)).toBe("acquisition");
-    // Retention finished: activation leads on to referral, not back to it.
-    expect(nextLevelFor("activation", done("retention"), GAME_LEVELS_BY_PILLAR)).toBe("referral");
-    // Activation and retention finished: acquisition's December goes to referral.
-    expect(nextLevelFor("acquisition", done("activation", "retention"), GAME_LEVELS_BY_PILLAR)).toBe("referral");
-    // Referral finished too: the next one in the order, as with five.
-    expect(nextLevelFor("acquisition", done("activation", "retention", "referral"), GAME_LEVELS_BY_PILLAR)).toBe("activation");
-    // Referral's own December, with everything else finished: the next in the order, wrapping.
-    expect(nextLevelFor("referral", done("acquisition", "activation", "retention"), GAME_LEVELS_BY_PILLAR)).toBe("acquisition");
-    expect(nextLevelFor("referral", done("activation"), GAME_LEVELS_BY_PILLAR)).toBe("acquisition");
-    expect(nextLevelFor("referral", done("acquisition"), GAME_LEVELS_BY_PILLAR)).toBe("activation");
+    // Referral now leads on to revenue; before it opened, referral wrapped to acquisition.
+    expect(nextLevelFor("referral", done(), GAME_LEVELS_BY_PILLAR)).toBe("revenue");
+    expect(nextLevelFor("revenue", done(), GAME_LEVELS_BY_PILLAR)).toBe("acquisition");
+    // Revenue finished: referral wraps round past it, to acquisition.
+    expect(nextLevelFor("referral", done("revenue"), GAME_LEVELS_BY_PILLAR)).toBe("acquisition");
+    // Acquisition finished: revenue's December goes to the next one not finished, activation.
+    expect(nextLevelFor("revenue", done("acquisition"), GAME_LEVELS_BY_PILLAR)).toBe("activation");
+    // Every other level finished: the next one in the order.
+    expect(nextLevelFor("revenue", done("acquisition", "activation", "retention", "referral"), GAME_LEVELS_BY_PILLAR)).toBe("acquisition");
+    // Retention and referral finished: activation's December goes on to revenue.
+    expect(nextLevelFor("activation", done("retention", "referral"), GAME_LEVELS_BY_PILLAR)).toBe("revenue");
   });
 
   it("with five levels open and nothing finished, the next one in the Tour's order, wrapping round", () => {
