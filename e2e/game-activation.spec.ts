@@ -425,9 +425,9 @@ test.describe("level 3 keeps its own year", () => {
  * player has not finished, in the order of the Tour from the next stage on,
  * looping. Both targets are computed here with `nextLevelFor` on the real
  * table, not written out: which levels are open depends on the order the
- * levels were built, and each new one moves them (acquisition, activation,
- * retention and referral are open today: with nothing finished the block
- * leads to the retention, with that one finished to the referral).
+ * levels were built, and each new one moves them (the five levels are open
+ * today: with nothing finished the block leads to the retention, with that
+ * one finished to the referral).
  */
 test.describe("the block that closes December (C75)", () => {
   const unfinished = nextLevelFor<LevelSlug>("activation", new Set(), GAME_LEVELS_BY_PILLAR);

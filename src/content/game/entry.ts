@@ -13,9 +13,10 @@ import type { Translatable } from "@/lib/i18n/translatable";
  * (`content/game/retention.ts`, `dashboard.churn` and
  * `dashboard.notOnDashboard`). Level 2's card (2026-10-01, A12.f) is new copy
  * written by the code session on the model of level 1's, the two openings
- * and the mention shared; level 3's and level 4's (2026-10-05, A24 ACT-3 and
- * REF-3) are copied from `docs/game/activation.md` §18.11 and
- * `docs/game/referral.md` §19.11, written there on the same model; so is the
+ * and the mention shared; level 3's, level 4's and level 5's (2026-10-05 and
+ * 2026-10-06, A24 ACT-3, REF-3 and REV-3) are copied from
+ * `docs/game/activation.md` §18.11, `docs/game/referral.md` §19.11 and
+ * `docs/game/revenue.md` §20.11, written there on the same model; so is the
  * card offering several levels (`GAME_ENTRY_SEVERAL`, A12.f.2), with its own
  * title, body and mention.
  *
@@ -46,7 +47,7 @@ export interface GameEntryCopy {
    * The night band across the top of the card: the object of the game in one
    * glance — the one number the CEO watches, and the one that is missing from
    * his dashboard. `{metric}` is the level's starting number (churn, new
-   * customers, activation rate, viral coefficient), formatted by the caller
+   * customers, activation rate, viral coefficient, revenue per user), formatted by the caller
    * from the level model rather than written here, so the card cannot quote a
    * number the game does not start from.
    */
@@ -126,6 +127,24 @@ export const GAME_ENTRY_COPY = {
     meta: META,
     band: {
       metric: t("Coefficient viral {metric}", "Viral coefficient {metric}"),
+      trust: TRUST,
+      notOnDashboard: NOT_ON_DASHBOARD,
+    },
+  },
+  // TODO: à relire — 2026-10-06 (A24.REV-3) : toute la carte du niveau 5, d'après docs/game/revenue.md §20.11.
+  revenue: {
+    title: t("Le côté obscur du revenue", "The dark side of revenue"),
+    opening: OPENING,
+    body: t(
+      "Voici ce qu'il ne faut pas faire : joue une année comme PM growth d'une appli de sport, un DG qui veut du revenu par utilisateur, et huit astuces que tu reconnaîtras ensuite partout.",
+      "Here is what not to do: play a year as the growth PM of a fitness app, with a CEO who wants revenue per user, and eight tricks you will recognise everywhere afterwards.",
+    ),
+    cta: t("Jouer le niveau « Comment vous gagnez de l'argent »", 'Play the level "How you make money"'),
+    meta: META,
+    band: {
+      // « Revenu par utilisateur {metric} » passait sur deux lignes à 1 280 px (56 px pour 44 permis, mesuré par
+      // result-real, C91) : « ARPU », le mot du glossaire, dans les deux langues, comme la spécification le prévoit.
+      metric: t("ARPU {metric}", "ARPU {metric}"),
       trust: TRUST,
       notOnDashboard: NOT_ON_DASHBOARD,
     },

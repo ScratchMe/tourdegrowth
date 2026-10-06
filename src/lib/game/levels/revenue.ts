@@ -1,9 +1,10 @@
 /**
  * The revenue level « Comment vous gagnez de l'argent » — its card
- * identifiers and its LevelDefinition, in DRAFT (`DraftLevelSlug`): no page,
- * no copy, no save yet. The spec is `docs/game/revenue.md` (GAME-BRIEF §20),
- * written on 2026-10-04 for an agent to build from; every number it quotes
- * is one this file produces, pinned by the fixtures F20.1 to F20.4 of
+ * identifiers and its LevelDefinition, wired on 2026-10-06 (A24, REV-3): its
+ * copy is `content/game/revenue.ts`, its page `app/[locale]/game/revenue/`.
+ * The spec is `docs/game/revenue.md` (GAME-BRIEF §20), written on 2026-10-04
+ * for an agent to build from; every number it quotes is one this file
+ * produces, pinned by the fixtures F20.1 to F20.4 of
  * `__tests__/revenue.test.ts`.
  *
  * A fitness app with a subscription and a virtual currency: the board wants

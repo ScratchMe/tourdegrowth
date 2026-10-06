@@ -37,11 +37,15 @@ export interface HubZone {
 /**
  * Where a level names an ending differently: at Pédalix the inspection ends
  * in a criminal settlement with the prosecutor's agreement, never a fine
- * (GAME-BRIEF §17.9, test C14). The hub merges these over `GAME_HUB.endings`.
+ * (GAME-BRIEF §17.9, test C14); at Gainix it ends in two procedures, a
+ * settlement and a fine (`docs/game/revenue.md` §20.3). The hub merges these
+ * over `GAME_HUB.endings`.
  * TODO: à relire — nouveau (2026-10-01, CHANTIERS.md A12.f).
  */
 const ENDINGS_BY_LEVEL: Partial<Record<LevelSlug, Partial<Record<EndingId, Translatable>>>> = {
   acquisition: { fine: t("le contrôle et la transaction", "the inspection and the settlement") },
+  // TODO: à relire — 2026-10-06 (A24.REV-3) : la fin « fine » du niveau 5, d'après docs/game/revenue.md §20.11 (deux procédures, une transaction et une amende).
+  revenue: { fine: t("le contrôle, la transaction et l'amende", "the inspection, the settlement and the fine") },
 };
 
 /**
@@ -53,7 +57,7 @@ const ENDINGS_BY_LEVEL: Partial<Record<LevelSlug, Partial<Record<EndingId, Trans
  * used to carry the other's line; acquisition's and retention's are those
  * lines, moved as they stood, and each level since adds its own at the step
  * that makes it a `LevelSlug` (activation's, at A24 ACT-3; referral's, at
- * A24 REF-3).
+ * A24 REF-3; revenue's, at A24 REV-3).
  *
  * The state of each line (moved, so each keeps the one it had):
  * - `acquisition`, French: the prototype's own French, validated, not marked;
@@ -66,6 +70,8 @@ const ENDINGS_BY_LEVEL: Partial<Record<LevelSlug, Partial<Record<EndingId, Trans
  *   2026-10-05, d'après `docs/game/activation.md` §18.11.
  * - `referral`, both languages: TODO: à relire — écrites pour A24 REF-3 le
  *   2026-10-05, d'après `docs/game/referral.md` §19.11.
+ * - `revenue`, both languages: TODO: à relire — écrites pour A24 REV-3 le
+ *   2026-10-06, d'après `docs/game/revenue.md` §20.11.
  */
 export const LEVEL_TEASERS: Record<LevelSlug, Translatable> = {
   acquisition: t(
@@ -85,6 +91,11 @@ export const LEVEL_TEASERS: Record<LevelSlug, Translatable> = {
   referral: t(
     "« S'ils vous recommandent » : les invitations envoyées pour toi, le carnet aspiré, le bonus aux conditions introuvables",
     '"If they recommend you": invitations sent for you, the scraped address book, the bonus with conditions nowhere to be found',
+  ),
+  // TODO: à relire — 2026-10-06 (A24.REV-3) : l'annonce du niveau 5, d'après docs/game/revenue.md §20.11.
+  revenue: t(
+    "« Comment vous gagnez de l'argent » : l'essai qui se change en abonnement, l'option cochée d'avance, le coffre au hasard",
+    '"How you make money": the trial that turns into a subscription, the pre-ticked add-on, the random chest',
   ),
 };
 
@@ -129,7 +140,8 @@ export const GAME_HUB = {
     },
     revenue: {
       question: t("Comment vous gagnez de l'argent", "How you make money"),
-      company: t("Une appli de sport avec abonnement", "A fitness app with a subscription"),
+      // TODO: à relire — 2026-10-06 (A24.REV-3) : l'entreprise a un nom depuis que le niveau existe, comme Flixo, Pédalix, Quandi et Partix.
+      company: t("Gainix, une appli de sport avec abonnement", "Gainix, a fitness app with a subscription"),
     },
   } satisfies Record<Pillar, HubZone>,
 

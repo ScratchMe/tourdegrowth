@@ -30,6 +30,8 @@ export const GAME_SAVE_KEYS = {
   retention: "tdg.game.retention.v2",
   /** Level 4, 2026-10-05 (A24, REF-3): born with the v2 state shape too. */
   referral: "tdg.game.referral.v1",
+  /** Level 5, 2026-10-06 (A24, REV-3): born with the v2 state shape too. */
+  revenue: "tdg.game.revenue.v1",
 } as const satisfies Record<LevelSlug, string>;
 
 /**

@@ -6,6 +6,7 @@ import { ACQUISITION_LEVEL } from "../src/lib/game/levels/acquisition";
 import { ACTIVATION_LEVEL } from "../src/lib/game/levels/activation";
 import { REFERRAL_LEVEL } from "../src/lib/game/levels/referral";
 import { RETENTION_LEVEL } from "../src/lib/game/levels/retention";
+import { REVENUE_LEVEL } from "../src/lib/game/levels/revenue";
 import { GAME_SAVE_KEYS } from "../src/lib/game/storage-keys";
 import type { GameState, LevelSlug } from "../src/lib/game/types";
 
@@ -26,6 +27,8 @@ export const LEVEL2_PATH = { en: "/en/game/acquisition", fr: "/fr/game/acquisiti
 export const ACTIVATION_PATH = { en: "/en/game/activation", fr: "/fr/game/activation" } as const;
 /** Level 4, « S'ils vous recommandent » (A24, REF-3, 2026-10-05). */
 export const REFERRAL_PATH = { en: "/en/game/referral", fr: "/fr/game/referral" } as const;
+/** Level 5, « Comment vous gagnez de l'argent » (A24, REV-3, 2026-10-06). */
+export const REVENUE_PATH = { en: "/en/game/revenue", fr: "/fr/game/revenue" } as const;
 
 /** Each level's model version, for a seeded save the island accepts. */
 const MODEL_VERSIONS: Record<LevelSlug, number> = {
@@ -33,6 +36,7 @@ const MODEL_VERSIONS: Record<LevelSlug, number> = {
   activation: ACTIVATION_LEVEL.modelVersion,
   retention: RETENTION_LEVEL.modelVersion,
   referral: REFERRAL_LEVEL.modelVersion,
+  revenue: REVENUE_LEVEL.modelVersion,
 };
 
 /**

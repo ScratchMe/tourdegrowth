@@ -27,6 +27,7 @@ const SHARED_WITH_RETENTION = board({ acquisition: 7, activation: 16, retention:
 const SHARED_ONE_LEVEL = board({ acquisition: 16, activation: 7, retention: 7, referral: 16, revenue: 20 });
 const ACTIVATION_CLEAR = board({ acquisition: 13, activation: 2, retention: 13, referral: 16, revenue: 13 });
 const REFERRAL_CLEAR = board({ acquisition: 13, activation: 13, retention: 13, referral: 2, revenue: 13 });
+const REVENUE_CLEAR = board({ acquisition: 13, activation: 13, retention: 13, referral: 13, revenue: 2 });
 
 const open = { access: "open" as const, hasDeepDive: false };
 /** The table as it stood before level 2 (A12.f): the shared-bottleneck rule below is about retention. */
@@ -246,6 +247,34 @@ describe("resultGameEntry — level 4 (A24, REF-3, 2026-10-05)", () => {
     expect(tie.pillars.map((p) => p.pillar)).toEqual(["activation", "retention", "referral"]);
     const entry = resultGameEntry({ bottleneck: tie, locale: "en", ...open })!;
     expect(entry.levels.map((l) => l.event.detail)).toEqual(["result/activation", "result/retention", "result/referral"]);
+  });
+});
+
+describe("resultGameEntry — level 5 (A24, REV-3, 2026-10-06)", () => {
+  it("offers the revenue level on a clear revenue bottleneck, with its own title, button and door", () => {
+    expect(REVENUE_CLEAR.pillars.map((p) => p.pillar)).toEqual(["revenue"]);
+    const entry = resultGameEntry({ bottleneck: REVENUE_CLEAR, locale: "en", ...open })!;
+    expect(entry.levels).toHaveLength(1);
+    expect(entry.levels[0].href).toBe("/en/game/revenue?from=result");
+    expect(entry.levels[0].event).toEqual({ name: GAME_ENTRY_EVENT, detail: "result/revenue" });
+    expect(entry.title).toBe("The dark side of revenue");
+    expect(entry.levels[0].cta).toBe('Play the level "How you make money"');
+  });
+
+  it("quotes level 5's starting number in its own format — euros to the cent, never customers or a percentage", () => {
+    expect(resultGameEntry({ bottleneck: REVENUE_CLEAR, locale: "en", ...open })!.levels[0].metric).toBe("ARPU €4.00");
+    const fr = resultGameEntry({ bottleneck: REVENUE_CLEAR, locale: "fr", ...open, hasDeepDive: true })!;
+    expect(fr.levels[0].metric).toBe("ARPU 4,00\u00a0€");
+    expect(fr.levels[0].metric).not.toMatch(/clients|%|\bpts?\b/);
+    expect(fr.levels[0].event.detail).toBe("deep_dive/revenue");
+    expect(JSON.stringify(GAME_ENTRY_COPY)).not.toMatch(/4[.,]00/);
+  });
+
+  it("three stages tied among the five that have a level: the card offers the three, in the Tour's order, revenue last", () => {
+    const tie = board({ acquisition: 16, activation: 16, retention: 5, referral: 5, revenue: 5 });
+    expect(tie.pillars.map((p) => p.pillar)).toEqual(["retention", "referral", "revenue"]);
+    const entry = resultGameEntry({ bottleneck: tie, locale: "en", ...open })!;
+    expect(entry.levels.map((l) => l.event.detail)).toEqual(["result/retention", "result/referral", "result/revenue"]);
   });
 });
 

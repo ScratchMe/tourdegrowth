@@ -132,10 +132,10 @@ describe("the hub image's alt text (A24.T0)", () => {
     }
   });
 
-  it("reads « quatre » / « four » while four levels are open — the whole sentence, written out in both languages (A24, ACT-3, then REF-3)", async () => {
-    expect(enabledLevelSlugs()).toHaveLength(4);
-    expect(await altOf("fr")).toBe("Le côté obscur de Tour de Growth\u00a0: les cinq étapes du Tour, dont quatre sont ouvertes.");
-    expect(await altOf("en")).toBe("The dark side of Tour de Growth: the five stages of the Tour, four of them open.");
+  it("reads « cinq » / « five » while five levels are open — the whole sentence, written out in both languages (A24, ACT-3, REF-3, then REV-3)", async () => {
+    expect(enabledLevelSlugs()).toHaveLength(5);
+    expect(await altOf("fr")).toBe("Le côté obscur de Tour de Growth\u00a0: les cinq étapes du Tour, dont cinq sont ouvertes.");
+    expect(await altOf("en")).toBe("The dark side of Tour de Growth: the five stages of the Tour, five of them open.");
   });
 
   it("has a word for every count from two to five, and a template that takes exactly one placeholder", () => {
@@ -146,14 +146,16 @@ describe("the hub image's alt text (A24.T0)", () => {
 
 describe("LEVEL_TEASERS (C75, A24.T0)", () => {
   it("announces each level once, by the line its December neighbour used to carry", () => {
-    expect(Object.keys(LEVEL_TEASERS).sort()).toEqual(["acquisition", "activation", "referral", "retention"]);
+    expect(Object.keys(LEVEL_TEASERS).sort()).toEqual(["acquisition", "activation", "referral", "retention", "revenue"]);
     expect(LEVEL_TEASERS.acquisition.fr).toContain("Comment les gens vous trouvent");
     expect(LEVEL_TEASERS.activation.fr).toContain("Comment ils comprennent ce que vous apportez");
     expect(LEVEL_TEASERS.retention.fr).toContain("S'ils reviennent");
     expect(LEVEL_TEASERS.referral.fr).toContain("S'ils vous recommandent");
+    expect(LEVEL_TEASERS.revenue.fr).toContain("Comment vous gagnez de l'argent");
     expect(LEVEL_TEASERS.acquisition.en).toContain("How people find you");
     expect(LEVEL_TEASERS.activation.en).toContain("How they understand what you bring");
     expect(LEVEL_TEASERS.retention.en).toContain("If they come back");
     expect(LEVEL_TEASERS.referral.en).toContain("If they recommend you");
+    expect(LEVEL_TEASERS.revenue.en).toContain("How you make money");
   });
 });

@@ -16,7 +16,7 @@ import { EMULATOR_HOST, REAL_DEEP_DIVE, REAL_RESULTS, SENTINEL, SKIP_EMULATOR_RE
 test.skip(!EMULATOR_HOST, SKIP_EMULATOR_REASON);
 
 const GAME_OPEN = process.env.GAME_ENABLED === "true";
-const { clear, shared, level, deep, twoLevels, activationClear, referralClear } = REAL_RESULTS;
+const { clear, shared, level, deep, twoLevels, activationClear, referralClear, revenueClear } = REAL_RESULTS;
 
 /** Every key of a stored document, nested ones included — the answers map's question ids among them. */
 function keysOf(value: unknown, into = new Set<string>()): Set<string> {
@@ -178,6 +178,23 @@ test.describe("a visitor's view of a clear bottleneck", () => {
     await expect(band).toContainText("Viral coefficient 0.40");
     await expect(band).not.toContainText(/customers|%/i);
     // The band holds on one line, as the other levels' do.
+    const box = await band.boundingBox();
+    expect(box, "game-entry-band is not on the page").not.toBeNull();
+    expect(box!.height).toBeLessThanOrEqual(44);
+  });
+
+  test("offers level 5 on a revenue bottleneck, with the revenue per user in euros on one line (A24, REV-3, C91)", async ({ page }) => {
+    test.skip(!GAME_OPEN, "GAME_ENABLED is not \"true\" for this build: the card only exists with the game open.");
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto(`/r/${revenueClear.id}?lang=fr`);
+    await expect(page.getByTestId("game-entry")).toBeVisible();
+    await expect(page.getByTestId("game-entry")).toHaveAttribute("data-levels", "1");
+    await expect(page.getByTestId("game-entry-cta")).toHaveAttribute("href", "/fr/game/revenue?from=result");
+    // Level 5's number is euros to the cent: never a count of customers, never a percentage.
+    const band = page.getByTestId("game-entry-band");
+    await expect(band).toContainText("ARPU 4,00\u00a0€");
+    await expect(band).not.toContainText(/clients|%/i);
+    // The band holds on one line: « Revenu par utilisateur 4,00 € » took two (56 px for 44), so `band.metric` is « ARPU {metric} » (C91).
     const box = await band.boundingBox();
     expect(box, "game-entry-band is not on the page").not.toBeNull();
     expect(box!.height).toBeLessThanOrEqual(44);

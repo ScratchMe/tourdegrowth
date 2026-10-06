@@ -43,6 +43,7 @@ import { ACQUISITION_LEVEL } from "@/lib/game/levels/acquisition";
 import { ACTIVATION_LEVEL } from "@/lib/game/levels/activation";
 import { REFERRAL_LEVEL } from "@/lib/game/levels/referral";
 import { RETENTION_LEVEL } from "@/lib/game/levels/retention";
+import { REVENUE_LEVEL } from "@/lib/game/levels/revenue";
 import { moodNow } from "@/lib/game/model";
 import { actionBarVisible, callViewFor, handHint, handVisible } from "@/lib/game/phases";
 import { finishedLevels, loadCollection } from "@/lib/game/storage";
@@ -76,6 +77,7 @@ const LEVELS: { [S in LevelSlug]: LevelDefinition<string> } = {
   activation: ACTIVATION_LEVEL,
   retention: RETENTION_LEVEL,
   referral: REFERRAL_LEVEL,
+  revenue: REVENUE_LEVEL,
 };
 
 /**

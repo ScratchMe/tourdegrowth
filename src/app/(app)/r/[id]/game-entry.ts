@@ -8,6 +8,7 @@ import { ACQUISITION_LEVEL } from "@/lib/game/levels/acquisition";
 import { ACTIVATION_LEVEL } from "@/lib/game/levels/activation";
 import { REFERRAL_LEVEL } from "@/lib/game/levels/referral";
 import { RETENTION_LEVEL } from "@/lib/game/levels/retention";
+import { REVENUE_LEVEL } from "@/lib/game/levels/revenue";
 import type { LevelDefinition, LevelSlug } from "@/lib/game/types";
 import type { Locale } from "@/lib/i18n/locale";
 import { localePath } from "@/lib/i18n/routes";
@@ -39,6 +40,7 @@ const LEVEL_MODELS: Record<LevelSlug, Pick<LevelDefinition<string>, "constants" 
   activation: ACTIVATION_LEVEL,
   retention: RETENTION_LEVEL,
   referral: REFERRAL_LEVEL,
+  revenue: REVENUE_LEVEL,
 };
 
 function startingMetric(slug: LevelSlug, locale: Locale): string {
