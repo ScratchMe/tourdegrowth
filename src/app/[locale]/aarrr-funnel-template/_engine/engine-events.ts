@@ -23,7 +23,7 @@ import {
  * a name typed here and not there is an event counted and never shown (R-11).
  *
  * Typed so a caller cannot pass anything else: the name is one of eight
- * constants, the detail of `engine_setup` one of three motion sets (Q14),
+ * constants, the detail of `engine_setup` one of four setups (the three motion sets, Q14, and a consumer app),
  * of `engine_stage_saved` a stage (sales-assisted's prefixed) and of
  * `engine_exported` one of six formats (the deck's three, the backup's
  * `json`, a reminder's `ics`, the template's `csv`). Never a diagnosis state, a status,

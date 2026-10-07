@@ -4,7 +4,7 @@ import { useEffect, useId, useState } from "react";
 import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
 import type { AppMonetization } from "@/lib/engine/app-model";
-import { METRIC_SHAPES, SLG_METRIC_SHAPES, TEXT_LIMITS, shapeOf, shapesOf } from "@/lib/engine/catalog-shape";
+import { METRIC_SHAPES, SLG_METRIC_SHAPES, TEXT_LIMITS, shapeOf } from "@/lib/engine/catalog-shape";
 import { BUSINESS_TYPES, DEFAULT_APP_MONETIZATION, isApp, monetizationOf } from "@/lib/engine/setup-type";
 import type { EngineStrings } from "@/lib/engine/strings";
 import type { BusinessType, Currency, EngineSetup, MetricId, Motion, SharedCount, ToolId, YearMonth } from "@/lib/engine/types";
@@ -28,6 +28,7 @@ import { monthsEndingAt } from "@/lib/forms/date";
 import { isUnreadableNumber } from "@/lib/forms/number";
 import { moneyUnit, percentUnit, wordUnit } from "./sources";
 import { DEFAULT_CURRENCY, DEFAULT_WINDOWS, setupOfCard } from "./start";
+import { streamChanges } from "./stream-lines";
 import { EngineTerm } from "./EngineTerm";
 import styles from "./Screens.module.css";
 
@@ -304,23 +305,14 @@ export function Setup({
         })
       : [];
   // What ticking or unticking a way of earning does, said BEFORE the save (§21.6.2), on the same pattern: nothing is lost.
-  // The numbers each side hides or shows are read off the lists of numbers (`shapesOf`) the engine shows before and after.
+  // Each line counts as if its way changed alone (`streamChanges`), so two ways changed at once say two counts.
   const streamLines =
     editing && initial && app
-      ? (() => {
-          const was = monetizationOf(initial.setup) ?? DEFAULT_APP_MONETIZATION;
-          const listed = (m: AppMonetization) => shapesOf({ type, motions: APP_MOTIONS, monetization: m }).map((shape) => shape.id);
-          const before = listed(was);
-          const after = listed(monetization);
-          const hidden = (existing?.enteredIds ?? []).filter((metric) => before.includes(metric) && !after.includes(metric)).length;
-          const shown = after.filter((metric) => !before.includes(metric)).length;
-          return STREAMS.flatMap((stream) => {
-            if (was[stream] === monetization[stream]) return [];
-            const subject = { stream: st.streamSubject[stream] };
-            if (was[stream]) return [hidden === 0 ? fill(st.streamOffNone, subject) : fill(hidden === 1 ? st.streamOffOne : st.streamOff, { ...subject, n: hidden })];
-            return [shown === 1 ? fill(st.streamOnOne, subject) : fill(st.streamOn, { ...subject, n: shown })];
-          });
-        })()
+      ? streamChanges(type, monetizationOf(initial.setup) ?? DEFAULT_APP_MONETIZATION, monetization, existing?.enteredIds ?? []).map(({ stream, ticked, n }) => {
+          const subject = { stream: st.streamSubject[stream] };
+          if (!ticked) return n === 0 ? fill(st.streamOffNone, subject) : fill(n === 1 ? st.streamOffOne : st.streamOff, { ...subject, n });
+          return n === 1 ? fill(st.streamOnOne, subject) : fill(st.streamOn, { ...subject, n });
+        })
       : [];
   const resets = editing && initial
     ? [
@@ -410,7 +402,9 @@ export function Setup({
       {editing ? (
         // The type is fixed at creation (D7, C61): a line of text under the group's legend, not a `Choices`, which would
         // draw the type the engine has as « plus tard ».
-        <Field group id={`${id}-type`} label={s.companyType} hint={s.typeFixed}>
+        // The hint only when another type could be chosen: with the SaaS alone open, « crée un nouveau moteur » would
+        // promise a type nobody can pick (§21.6.2, decided on 2026-10-07).
+        <Field group id={`${id}-type`} label={s.companyType} hint={openTypes.length > 1 ? s.typeFixed : undefined}>
           {() => (
             <p className={styles.typeFixed} data-testid="engine-setup-type-fixed">
               {app ? s.types.consumerApp : s.types.b2bSaas}
@@ -453,10 +447,10 @@ export function Setup({
                     label={strings.start.appEarns[stream]}
                     checked={monetization[stream]}
                     onChange={(on) => setMonetization((was) => ({ ...was, [stream]: on }))}
-                    // In the settings, the last way ticked can't be unticked (the motions' pattern): the sentence the card
-                    // says when nothing is ticked is also its reason.
+                    // In the settings, the last way ticked can't be unticked (the motions' pattern), with its own reason:
+                    // `start.appEarnsNone` is an order, read badly under a box already ticked.
                     disabled={editing && monetization[stream] && earning.length === 1}
-                    disabledReason={strings.start.appEarnsNone}
+                    disabledReason={st.streamLast}
                     describedBy={describedBy}
                     data-testid={`engine-setup-earns-${stream}`}
                   />

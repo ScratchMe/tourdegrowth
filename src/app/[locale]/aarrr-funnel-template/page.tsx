@@ -263,7 +263,7 @@ export default async function EnginePage({ params }: PageProps) {
             {t.reserve}
           </p>
           {/* The types this BUILD opens (§21.3, ENGINE_TYPES): read here, on the server, and handed down as a prop —
-              the island never reads the environment. Nothing reads it yet: the start card does, from APP-7. */}
+              the island never reads the environment. The start card and the settings read it (APP-7). */}
           <EngineWorkbench {...props} openTypes={openTypesAtBuild()} />
         </section>
 

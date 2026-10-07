@@ -3081,6 +3081,8 @@ export const ENGINE_COPY = {
     },
     streamOnOne: { fr: "{stream} : 1 chiffre de plus à remplir.", en: "{stream}: 1 more number to fill in." },
     streamOn: { fr: "{stream} : {n} chiffres de plus à remplir.", en: "{stream}: {n} more numbers to fill in." },
+    // TODO: à relire (convention 6) — neuf le 2026-10-07 (A22 APP-7, §21.6.2, décidé par Antoine le même jour) : la raison sous la dernière façon cochée, sur le motif de `motionLast`.
+    streamLast: { fr: "Il faut au moins une façon de gagner de l'argent.", en: "You need at least one way of making money." },
     /**
      * Validé au bon à tirer nº10 (2026-10-04), sauf `runwayHint`, réécrite et marquée plus bas — neuf le 2026-10-03 (A20.d T5, C49, le retour du brief 09 : `settings.cash`,
      * `settings.runway`, `settings.runwayHint`, `settings.months`) : le runway, facultatif, dans les Réglages. Le mot
