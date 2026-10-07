@@ -17,8 +17,11 @@
  * 3 more calls.
  */
 export const GEMINI_MODEL_CANDIDATES = [
-  "gemini-3.8-flash",
   "gemini-3.7-flash",
+  // Second, not first (Antoine, 2026-10-07): on the live probe 3.8 took
+  // 21-34s per generation where 3.7 took 8-15s, the slowest 11s under the
+  // per-attempt ceiling. It is the first fallback, not the daily driver.
+  "gemini-3.8-flash",
   "gemini-3.6-flash",
   "gemini-3.5-flash",
   "gemini-flash-latest",
