@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { resetPendingEventsForTests, trackEvent } from "../goatcounter";
+import { ENGINE_SETUP_DETAILS, engineSetupDetail, resetPendingEventsForTests, trackEvent } from "../goatcounter";
 
 describe("trackEvent (SPEC.md §8: GoatCounter custom events)", () => {
   const originalWindow = (globalThis as { window?: unknown }).window;
@@ -144,5 +144,36 @@ describe("trackEvent — events fired before the script has loaded", () => {
     trackEvent("quiz_started");
 
     expect(count).toHaveBeenCalledWith({ path: "quiz_started", event: true });
+  });
+});
+
+/**
+ * `engine_setup/<detail>` (engine spec §11.6, A22 APP-7): the motions an engine is set up with, and `app` for a consumer
+ * app, whose motions are not a choice. The type decides before the boxes do.
+ *
+ * Non-vacuity, measured on 2026-10-07 (each sabotage alone, then put back; the count is the tests that fall): reading
+ * the boxes alone (an app is self-serve, so `plg`) falls 2 here; `app` left out of `ENGINE_SETUP_DETAILS` falls 3, this
+ * file's second test, the paths test of `goatcounter-api.test.ts` and the closed-vocabulary rule of
+ * `engine-boundary.test.ts` among them.
+ */
+describe("engineSetupDetail (engine spec §11.6, §21.6.2)", () => {
+  const both = { plg: true, slg: true };
+  it("is `app` for a consumer app, whatever its boxes say, and the motions for a SaaS", () => {
+    expect(engineSetupDetail({ type: "consumer-app", motions: { plg: true, slg: false } })).toBe("app");
+    expect(engineSetupDetail({ type: "consumer-app", motions: both })).toBe("app");
+    expect(engineSetupDetail({ type: "b2b-saas", motions: { plg: true, slg: false } })).toBe("plg");
+    expect(engineSetupDetail({ type: "b2b-saas", motions: { plg: false, slg: true } })).toBe("slg");
+    expect(engineSetupDetail({ type: "b2b-saas", motions: both })).toBe("hybrid");
+  });
+
+  it("every detail it can answer is in the closed list the dashboard asks GoatCounter for", () => {
+    const answers = [
+      engineSetupDetail({ type: "consumer-app", motions: both }),
+      engineSetupDetail({ type: "b2b-saas", motions: { plg: true, slg: false } }),
+      engineSetupDetail({ type: "b2b-saas", motions: { plg: false, slg: true } }),
+      engineSetupDetail({ type: "b2b-saas", motions: both }),
+    ];
+    for (const answer of answers) expect(ENGINE_SETUP_DETAILS).toContain(answer);
+    expect(new Set(answers).size).toBe(ENGINE_SETUP_DETAILS.length);
   });
 });

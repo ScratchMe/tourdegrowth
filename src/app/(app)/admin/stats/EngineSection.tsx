@@ -42,7 +42,8 @@ function EngineCard({ window }: { window: FunnelWindow }) {
           {engine.entries.space_band_compact}
         </li>
         <li data-testid="admin-engine-setup">
-          Set up — self-serve {engine.setup.plg}, sales-assisted {engine.setup.slg}, both {engine.setup.hybrid}
+          Set up — self-serve {engine.setup.plg}, sales-assisted {engine.setup.slg}, both {engine.setup.hybrid}, consumer app{" "}
+          {engine.setup.app}
         </li>
         {ENGINE_STAGES.map((stage) => (
           <li key={stage}>

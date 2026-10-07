@@ -9,6 +9,7 @@ import { motionShapes, shapeOf } from "@/lib/engine/catalog-shape";
 import { periodRangeOf } from "@/lib/engine/cohort";
 import { formatMonthRange, joinList } from "@/lib/engine/format";
 import { nextMonthOf } from "@/lib/engine/series";
+import { isApp } from "@/lib/engine/setup-type";
 import type { EngineListing } from "@/lib/engine/storage";
 import { ROLE_KEY } from "@/lib/engine/strings";
 import { MAX_MONTHS, type EngineState, type MetricId, type RoleId } from "@/lib/engine/types";
@@ -103,7 +104,13 @@ export function BoardBar({
   // What the eyebrow said, minus the cohort — said where it is used, the denominator of a cohort's number.
   // Sales-assisted alone reads three months of flows (C25 Q2); the hybrid, the flows' month.
   const flows = periodRangeOf(shapeOf("slg.rev.win-rate"), undefined, snapshot, state.setup, ctx.today);
-  const model = !slg ? strings.workbench.modelShort.selfserve : plg ? strings.workbench.modelShort.hybrid : strings.workbench.modelShort.salesAssisted;
+  const model = isApp(state.setup)
+    ? strings.workbench.modelShort.app
+    : !slg
+      ? strings.workbench.modelShort.selfserve
+      : plg
+        ? strings.workbench.modelShort.hybrid
+        : strings.workbench.modelShort.salesAssisted;
   const month = slg && !plg && flows ? formatMonthRange(flows, ctx.locale, strings.units) : formatMonth(snapshot.referenceMonth, ctx.locale);
   const name = state.setup.companyLabel?.trim() || b.unnamed;
   const line = fill(past ? (correcting ? b.lineCorrecting : b.lineReadOnly) : b.line, { name, model, month });

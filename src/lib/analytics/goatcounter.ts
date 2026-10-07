@@ -11,6 +11,9 @@
  * forget for that reason — this module just enforces the same rule.
  */
 
+import { isApp } from "@/lib/engine/setup-type";
+import type { BusinessType } from "@/lib/engine/types";
+
 interface GoatCounterCountArgs {
   path: string;
   title?: string;
@@ -251,7 +254,7 @@ export type TourEntryDetail = (typeof TOUR_ENTRY_DETAILS)[number];
  * ---------------------------------------------------------------------------
  *
  *   engine_opened                               the island's first view in a session
- *   engine_setup/<plg|slg|hybrid>               the motions ticked when the engine is created, or changed (Q14)
+ *   engine_setup/<plg|slg|hybrid|app>           the motions ticked when the engine is created, or changed (Q14); a consumer app, `app` (§21.6.2)
  *   engine_stage_saved/<stage>                  first number saved in that stage, once a session;
  *                                               sales-assisted's stages prefixed: slg-revenue (Q14)
  *   engine_month_started                        the next month was started: the one sign of repeated use (§19.12)
@@ -331,14 +334,17 @@ export function engineStageDetail(stage: (typeof ENGINE_STAGES)[number], motion:
 
 /**
  * `engine_setup/<motions>` — which motions the engine was set up with (C25
- * Q14): a box ticked, never a number nor a word anyone typed (D16).
+ * Q14): a box ticked, never a number nor a word anyone typed (D16). A consumer
+ * app is `app` (§21.6.2): its motions are not a choice, its type is.
  */
 export const ENGINE_SETUP_EVENT = "engine_setup";
-export const ENGINE_SETUP_DETAILS = ["plg", "slg", "hybrid"] as const;
+export const ENGINE_SETUP_DETAILS = ["plg", "slg", "hybrid", "app"] as const;
 export type EngineSetupDetail = (typeof ENGINE_SETUP_DETAILS)[number];
 
-/** The detail for a setup's two boxes. */
-export function engineSetupDetail(motions: { plg: boolean; slg: boolean }): EngineSetupDetail {
+/** The detail for a setup: its type for an app, else its two motion boxes. */
+export function engineSetupDetail(setup: { type: BusinessType; motions: { plg: boolean; slg: boolean } }): EngineSetupDetail {
+  const { motions } = setup;
+  if (isApp(setup)) return "app";
   return motions.plg && motions.slg ? "hybrid" : motions.slg ? "slg" : "plg";
 }
 

@@ -200,6 +200,29 @@ export const ENGINE_COPY = {
     saNote: { fr: "Un commercial signe les contrats (SLG).", en: "A salesperson signs the deals (SLG)." },
     both: { fr: "Les deux", en: "Both" },
     bothNote: { fr: "Deux moteurs, un total.", en: "Two engines, one total." },
+    // TODO: à relire (convention 6) — neuf le 2026-10-07 (A22 APP-7, §21.6.1) : la carte de départ quand le type « app » est ouvert
+    // (`ENGINE_TYPES`, §21.3) — sa légende, les trois façons de vendre du SaaS avec leur type, l'app et ses trois façons de gagner de l'argent.
+    legendTypes: { fr: "Qu'est-ce que tu fais tourner ?", en: "What are you running?" },
+    ssTyped: { fr: "SaaS B2B, en libre-service", en: "B2B SaaS, self-serve" },
+    saTyped: { fr: "SaaS B2B, en vente assistée", en: "B2B SaaS, sales-assisted" },
+    bothTyped: { fr: "SaaS B2B, les deux", en: "B2B SaaS, both" },
+    app: { fr: "App grand public", en: "Consumer app" },
+    appNote: {
+      fr: "Abonnements, achats intégrés ou pub, sur l'App Store ou Google Play.",
+      en: "Subscriptions, in-app purchases or ads, on the App Store or Google Play.",
+    },
+    appEarnsLegend: { fr: "Elle gagne de l'argent par", en: "It makes money through" },
+    appEarns: {
+      subscriptions: { fr: "Des abonnements", en: "Subscriptions" },
+      purchases: { fr: "Des achats intégrés", en: "In-app purchases" },
+      ads: { fr: "De la publicité", en: "Ads" },
+    },
+    /** Under the three boxes after a click on « Commence » with none ticked (the pattern of `setup.motionsRequired`); also what the settings say under the last box, which can't be unticked. */
+    appEarnsNone: { fr: "Coche au moins une façon de gagner de l'argent.", en: "Tick at least one way of making money." },
+    defaultsApp: {
+      fr: "Réglé pour une app grand public, en euros. Mois des chiffres : {month} ; installations suivies : {cohort}.",
+      en: "Set for a consumer app, in euros, on {month}'s figures and {cohort}'s installs.",
+    },
     plan: {
       fr: "{n} chiffres : {quick} se lisent en cinq minutes, {hour} demandent environ une heure chacun, {ask} sont à demander à quelqu'un.",
       en: "{n} numbers: {quick} take five minutes, {hour} about an hour each, {ask} come from someone else.",
@@ -296,6 +319,12 @@ export const ENGINE_COPY = {
       en: "Both? Tick both: you get two engines and their total, never one against the other.",
     },
     motionsRequired: { fr: "Coche au moins une façon de vendre.", en: "Tick at least one way you sell." },
+    // TODO: à relire (convention 6) — neuf le 2026-10-07 (A22 APP-7, §21.6.2) : la carte de réglage d'une app.
+    appSells: { fr: "Une app grand public se vend en libre-service.", en: "A consumer app sells self-serve." },
+    appEarnsLegend: { fr: "Comment l'app gagne de l'argent", en: "How the app makes money" },
+    /** In the settings, in the type's place: the type is fixed at creation (D7, C61). */
+    typeFixed: { fr: "Pour changer de type, crée un nouveau moteur.", en: "To change type, create a new engine." },
+    companyLabelApp: { fr: "Nom de ton app", en: "Your app's name" },
     /**
      * TODO: à relire (convention 6) — neuf le 2026-10-01 (A14 T4, §19.5.1, C32 Q9) : tools, toolsHint, toolFamily.
      * Optional, folded: nothing ticked changes nothing. The tools' own names are `tools`.
@@ -1195,6 +1224,8 @@ export const ENGINE_COPY = {
       // TODO: à relire (convention 6) — neuf le 2026-10-01 (A7.3.c S2, §18.7).
       salesAssisted: { fr: "assisté", en: "sales-assisted" },
       hybrid: { fr: "libre-service et assisté", en: "self-serve and sales-assisted" },
+      // TODO: à relire (convention 6) — neuf le 2026-10-07 (A22 APP-7, §21.6.2).
+      app: { fr: "App grand public", en: "Consumer app" },
     },
     /** The mark on the comparison strip's target line, written beside the track, never inside it (§8.3). */
     targetMark: { fr: "ta cible", en: "your target" },
@@ -3029,6 +3060,29 @@ export const ENGINE_COPY = {
     // TODO: à relire (convention 6) — neuf le 2026-10-03 (A18 T6, le retour 07 : `settings.windowHint`), sous la fenêtre d'activation.
     windowHint: { fr: "La fenêtre : le nombre de jours qu'a un inscrit pour que ça compte.", en: "The window: how many days a sign-up has for it to count." },
     wholeCount: { fr: "Un nombre entier plus grand que zéro.", en: "A whole number above zero." },
+    /**
+     * TODO: à relire (convention 6) — neuf le 2026-10-07 (A22 APP-7, §21.6.2) : cocher ou décocher une façon de gagner
+     * de l'argent après coup, sur le motif de `motionOff*` : rien n'est effacé. `{stream}` : `streamSubject`, avec son
+     * article ; `{n}` : les chiffres saisis qui se masquent, ou ceux qui apparaissent.
+     */
+    streamSubject: {
+      subscriptions: { fr: "Les abonnements", en: "Subscriptions" },
+      purchases: { fr: "Les achats intégrés", en: "In-app purchases" },
+      ads: { fr: "La publicité", en: "Ads" },
+    },
+    streamOffNone: { fr: "{stream} : rien n'est saisi, rien ne se perd.", en: "{stream}: nothing is entered, nothing is lost." },
+    streamOffOne: {
+      fr: "{stream} : 1 chiffre saisi se masque ; il revient si tu recoches.",
+      en: "{stream}: 1 entered number is hidden; it comes back if you tick it again.",
+    },
+    streamOff: {
+      fr: "{stream} : {n} chiffres saisis se masquent ; ils reviennent si tu recoches.",
+      en: "{stream}: {n} entered numbers are hidden; they come back if you tick it again.",
+    },
+    streamOnOne: { fr: "{stream} : 1 chiffre de plus à remplir.", en: "{stream}: 1 more number to fill in." },
+    streamOn: { fr: "{stream} : {n} chiffres de plus à remplir.", en: "{stream}: {n} more numbers to fill in." },
+    // TODO: à relire (convention 6) — neuf le 2026-10-07 (A22 APP-7, §21.6.2, décidé par Antoine le même jour) : la raison sous la dernière façon cochée, sur le motif de `motionLast`.
+    streamLast: { fr: "Il faut au moins une façon de gagner de l'argent.", en: "You need at least one way of making money." },
     /**
      * Validé au bon à tirer nº10 (2026-10-04), sauf `runwayHint`, réécrite et marquée plus bas — neuf le 2026-10-03 (A20.d T5, C49, le retour du brief 09 : `settings.cash`,
      * `settings.runway`, `settings.runwayHint`, `settings.months`) : le runway, facultatif, dans les Réglages. Le mot

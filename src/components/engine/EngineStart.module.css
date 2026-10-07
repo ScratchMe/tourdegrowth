@@ -19,6 +19,13 @@
   outline: none;
 }
 
+/* The app's three ways of earning (§21.6.1): the rows of the setup card's motion group. */
+.earns {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
 .plan {
   font: var(--body-md);
   color: var(--text-body);

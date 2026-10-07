@@ -278,9 +278,18 @@ describe("the consumer app's counts (engine spec §21.2.4, A22 APP-1)", () => {
       ["monthSignups", ["acq.signup-rate", "acq.top-channel-share", "app.acq.cpi"]],
       ["appActives", ["app.rev.purchases-per-active", "app.rev.ads-per-active"]],
     ]);
-    // One of the two per-active revenues alone (purchases or ads ticked, not both): a count one number carries is not shared.
-    const purchasesOnly = shapesOf({ type: "consumer-app", motions: { plg: true, slg: false }, monetization: { subscriptions: false, purchases: true, ads: false } }).map((s) => s.id);
-    expect(settingsSharedCounts(purchasesOnly).map(({ count }) => count)).not.toContain("appActives");
+    // One of the two per-active revenues alone (purchases or ads ticked, not both): the actives are offered all the same
+    // (§21.6.2, APP-7), so the estimate of the revenue per active has its actives; every other count one number carries is not.
+    const only = (monetization: { subscriptions: boolean; purchases: boolean; ads: boolean }) =>
+      shapesOf({ type: "consumer-app", motions: { plg: true, slg: false }, monetization }).map((s) => s.id);
+    const appActives = (monetization: { subscriptions: boolean; purchases: boolean; ads: boolean }) =>
+      settingsSharedCounts(only(monetization)).filter(({ count }) => count === "appActives");
+    expect(appActives({ subscriptions: false, purchases: true, ads: false }).map(({ slots }) => slots.map((slot) => slot.metric))).toEqual([["app.rev.purchases-per-active"]]);
+    expect(appActives({ subscriptions: false, purchases: false, ads: true }).map(({ slots }) => slots.map((slot) => slot.metric))).toEqual([["app.rev.ads-per-active"]]);
+    // No usage ticked: no per-active revenue, so no actives to offer.
+    expect(appActives({ subscriptions: true, purchases: false, ads: false })).toEqual([]);
+    // Only the actives get the exception: the opportunities one number carries stay out of a sales-assisted engine's list.
+    expect(settingsSharedCounts(shapesOf({ type: "b2b-saas", motions: { plg: false, slg: true } }).map((s) => s.id)).map(({ count }) => count)).not.toContain("slgOppsCreated");
     const saas = shapesOf({ type: "b2b-saas", motions: { plg: true, slg: false } }).map((s) => s.id);
     expect(settingsSharedCounts(saas).map(({ count, slots }) => [count, slots.length])).toEqual([["cohortSignups", 5], ["monthSignups", 2]]);
   });

@@ -1058,11 +1058,14 @@ aujourd'hui `metrics` et `derivedCopy`. **Quel type, écran par écran** :
 - l'exemple (`ExampleView`) : `"b2b-saas"` jusqu'à APP-10, puis le type de
   l'exemple ouvert (APP-10, §21.9) ;
 - la carte de réglage (`Setup`) et la carte de départ, avant qu'un moteur
-  existe : le type du choix en cours ; `EngineWorkbench` leur passe une
-  fonction `metricsOf: (type: BusinessType) => ResolvedMetric[]` (fermée sur
-  ses props) au lieu d'un tableau (APP-7) ;
-- l'aperçu d'un fichier importé (`ImportPanel`) : le type du fichier lu,
-  par la même fonction `metricsOf` (APP-7).
+  existe : elles ne lisent aucun catalogue ; leurs textes passent par
+  `stringsFor(type)` (APP-7) ;
+- l'aperçu d'un fichier importé (`ImportPanel`) : il ne lit `metrics` que
+  pour une fusion, dont le moteur a le type du fichier (deux types différents
+  sont refusés) : le catalogue du moteur à l'écran suffit.
+  *Corrigé après APP-7* : la première lettre prévoyait une fonction
+  `metricsOf(type)` pour ces deux cas ; aucun ne lit un catalogue d'un autre
+  type que celui du moteur, elle n'a pas été écrite.
 
 **Le poids.** Ces props voyagent dans le HTML de la page, prérendu. APP-2 et
 APP-3 le mesurent avant et après, et l'écrivent dans l'entrée du journal :
@@ -1583,7 +1586,16 @@ rendre argent ? { gap: sub.gap, mrr: argent } : sub.gap ? { gap: sub.gap } : {}
   légende que le groupe, qui dit le type (`setup.types.b2bSaas` ou
   `.consumerApp`), avec `setup.typeFixed` en `hint` ; `data-testid`
   `engine-setup-type-fixed`. Pour le SaaS aussi (une ligne de texte de plus :
-  rien ne change dans ce qu'on peut faire).
+  rien ne change dans ce qu'on peut faire). **L'indication `setup.typeFixed`
+  ne s'affiche que si `openTypes` compte plus d'un type** : tant que seul le
+  SaaS est ouvert, « crée un nouveau moteur » promettrait un autre type
+  qu'on ne peut pas choisir. Le type, lui, s'écrit toujours. *Décidé par
+  Antoine le 2026-10-07, sur la relecture copie d'APP-7 (#369)*.
+- **Changer de type sur la carte complète** (à la création) retire les outils
+  que le nouveau type ne propose pas (`teamTools(…, type)`) : un moteur d'app
+  n'écrit jamais un outil du SaaS (précisé après APP-7). Les `data-testid` de
+  la carte d'une app : `engine-setup-app-sells`, `engine-setup-earns`,
+  `engine-setup-earns-<façon>`, sur le modèle d'`engine-setup-motions`.
 - **`Setup.start()`** reconstruit le réglage de zéro (`Setup.tsx:219`,
   `type: SETUP_V2_DEFAULTS.type`) : il écrit maintenant `type` (l'état) et,
   pour une app, `monetization` (l'état des trois cases).
@@ -1603,10 +1615,19 @@ rendre argent ? { gap: sub.gap, mrr: argent } : sub.gap ? { gap: sub.gap } : {}
   façon décochée, `settings.streamOffNone` / `streamOffOne` / `streamOff`
   (« {n} » = les chiffres saisis qui se masquent : ceux
   d'`existing.enteredIds` qui sont dans `shapesOf(avant)` et pas dans
-  `shapesOf(après)`) ; pour chaque façon cochée, `settings.streamOnOne` /
-  `streamOn` (« {n} » = les chiffres qui apparaissent : `shapesOf(après)`
-  moins `shapesOf(avant)`). Rien n'est effacé ; une dernière
-  façon cochée ne se décoche pas (le motif de `motionLast`).
+  `shapesOf(avant, cette seule façon décochée)`) ; pour chaque façon cochée,
+  `settings.streamOnOne` / `streamOn` (« {n} » = les chiffres qui
+  apparaissent : `shapesOf(avant, cette seule façon cochée)` moins
+  `shapesOf(avant)`). **Chaque ligne compte comme si sa façon changeait
+  seule** : décocher les achats et la publicité d'un coup donne deux lignes,
+  chacune avec son propre compte ; un chiffre que seules les deux ensemble
+  masquent (la rétention des actifs) n'est compté sur aucune. *Décidé par
+  Antoine le 2026-10-07* : la première lettre (avant contre après, le réglage
+  entier) mettait le total sur chaque ligne (relevé par APP-7, #369). Rien
+  n'est effacé ; une dernière façon cochée ne se décoche pas, avec la raison
+  `settings.streamLast` sous sa case (le motif de `motionLast` ; décidé le
+  2026-10-07 : `start.appEarnsNone`, un ordre, se lisait mal sous une case
+  déjà cochée).
 - **Les actifs du mois dans les Réglages** : `shared-counts.ts#settingsSharedCounts`
   propose un compte partagé quand au moins deux chiffres montrés le portent ;
   il propose **aussi `appActives` quand un seul le porte** (une app avec les
@@ -2418,6 +2439,7 @@ les affiche pas). Chaque unité ajoute celles qu'elle utilise.
 | APP-7 | `setup.appSells` | Une app grand public se vend en libre-service. | A consumer app sells self-serve. |
 | APP-7 | `setup.appEarnsLegend` | Comment l'app gagne de l'argent | How the app makes money |
 | APP-7 | `setup.typeFixed` | Pour changer de type, crée un nouveau moteur. | To change type, create a new engine. |
+| APP-7 | `settings.streamLast` | Il faut au moins une façon de gagner de l'argent. | You need at least one way of making money. |
 | APP-7 | `setup.companyLabelApp` | Nom de ton app | Your app's name |
 | APP-7 | `settings.streamSubject.subscriptions` · `purchases` · `ads` | Les abonnements · Les achats intégrés · La publicité | Subscriptions · In-app purchases · Ads |
 | APP-7 | `settings.streamOffNone` | {stream} : rien n'est saisi, rien ne se perd. | {stream}: nothing is entered, nothing is lost. |
@@ -2595,6 +2617,7 @@ journal. « Les goldens inchangés » veut dire leurs sorties JSON et
 | `content/__tests__/engine-catalog.test.ts` | couvre les six chiffres et les quatre calculés de l'app (les records les contiennent) ; aucun `benchmarkCaveat` pour eux ; le `it.each` du plafond gagne `app.rev.install-ltv` | APP-1 |
 | `shared-counts.test.ts:15-43` (la parité des libellés) | les places `app.*` d'un groupe se comparent au **catalogue de l'app** : en APP-1, la boucle saute les places `app.*` (une exemption nommée, commentée « catalogue de l'app : APP-2 »), **et saute un groupe dont il ne reste aucune place** (`appActives`, sinon `labels.size` vaut 0) ; en APP-2, un second bloc compare, pour chaque groupe qui contient une place `app.*`, ses libellés lus dans le catalogue de l'app (`ENGINE_CATALOG_CONSUMER` pour les quinze, `ENGINE_CATALOG` pour les `app.*`) : « Installations en {month} » trois fois pour `monthSignups`, « Actifs en {month} » deux fois pour `appActives` | APP-1, APP-2 |
 | `shared-counts.test.ts:138` | l'appel `shapesOf({ type: "b2b-saas", motions: { plg, slg } })` | APP-1 |
+| `shared-counts.test.ts` (« un compte qu'un seul chiffre porte n'est pas proposé ») | ne vaut plus pour `appActives`, que `settingsSharedCounts` propose aussi quand un seul chiffre le porte (§21.6.2) | APP-7 |
 | `shared-counts.test.ts` (nouveau bloc), `engine-props.test.ts` (nouveau) | `sharedWith` (§21.2.4) avec et sans `app.acq.cpi` nommé ; la ligne partagée du SaaS inchangée, chiffre par chiffre | APP-1 |
 | `golden-v2.test.ts:94` | l'appel `motionShapes(state.setup)` ; la sortie JSON inchangée | APP-1 |
 | `cohort.test.ts:93`, `cohort.ts:110` | **rien** : `defaultMonths` est construit sur `METRIC_SHAPES` et n'a pas de clé `app.*` | — |

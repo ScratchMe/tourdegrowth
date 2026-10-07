@@ -201,6 +201,13 @@
   gap: var(--space-5);
 }
 
+/* The settings' type, fixed at creation (§21.6.2): a line of text under the group's legend. */
+.typeFixed {
+  font: var(--body-md);
+  color: var(--text-body);
+  margin: 0;
+}
+
 .motion {
   display: flex;
   flex-direction: column;
