@@ -3,10 +3,12 @@
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
-import { EngineStart, type StartMotion } from "@/components/engine/EngineStart";
+import { EngineStart, type StartChoice } from "@/components/engine/EngineStart";
 import { EngineTermScope } from "./_engine/EngineTerm";
 import { motionOfMetric, motionShapes, shapeOf } from "@/lib/engine/catalog-shape";
 import { mergeStrings, type DeepPartial, type EngineStrings, type ResolvedBridge, type ResolvedDerived, type ResolvedMetric } from "@/lib/engine/strings";
+import type { AppMonetization } from "@/lib/engine/app-model";
+import { DEFAULT_APP_MONETIZATION } from "@/lib/engine/setup-type";
 import { MAX_ENGINES, MAX_MONTHS, type BusinessType, type EngineCalcContext, type EngineDerived, type EngineSetup, type EngineState, type LeverId, type MetricEntry, type MetricId, type Motion, type MotionDerived, type RoleId, type SlideTitle, type Snapshot, type YearMonth } from "@/lib/engine/types";
 import type { Locale } from "@/lib/i18n/locale";
 import { Board } from "./_engine/Board";
@@ -41,7 +43,7 @@ import { AskScreen } from "./_engine/AskScreen";
 import { NumberScreen } from "./_engine/NumberScreen";
 import { Setup, type SetupChoice } from "./_engine/Setup";
 import { settingsNumbers } from "./_engine/settings-numbers";
-import { motionsOf, startDefaults, startPlan } from "./_engine/start";
+import { motionsOf, startCopy, typeOf, type StartEarnsCopy } from "./_engine/start";
 import { TargetsStart } from "./_engine/TargetsStart";
 import { continueFrom, nextSelfNumber, type Continuation } from "./_engine/next-step";
 import { seedAskDraft } from "./_engine/sheet-drafts";
@@ -78,7 +80,7 @@ export interface EngineWorkbenchProps {
   bridges: ResolvedBridge[];
   /**
    * The business types this build opens (§21.3, `ENGINE_TYPES`): b2b-saas always, then the ones the variable lists.
-   * Read by the page at build, never by the island. Read by no screen yet: the start card's choice does, from APP-7.
+   * Read by the page at build, never by the island. The start card and the setup card offer the app only when it is one.
    */
   openTypes: BusinessType[];
 }
@@ -183,8 +185,12 @@ function Workbench(props: EngineWorkbenchProps) {
   const [motionView, setMotionView] = useState<Motion | null>(null);
   // The motions the start screen had chosen when « Voir un exemple rempli » was pressed (§18.7).
   const [exampleMotions, setExampleMotions] = useState<Record<Motion, boolean>>({ plg: true, slg: false });
-  // The start screen's one question (A18 T3.a): kept while the person looks at the example or the full card.
-  const [startMotion, setStartMotion] = useState<StartMotion>("ss");
+  // The start screen's one question (A18 T3.a): kept while the person looks at the example or the full card. With the app
+  // type open it has a fourth answer, and the app's three ways of earning (§21.6.1) are kept with it.
+  const [startChoice, setStartChoice] = useState<StartChoice>("ss");
+  const [monetization, setMonetization] = useState<AppMonetization>(DEFAULT_APP_MONETIZATION);
+  // « Commence » pressed with the app chosen and nothing ticked: the message shows until the choice or a box changes.
+  const [startTried, setStartTried] = useState(false);
   const [writeFailed, setWriteFailed] = useState(false);
   // The monthly series (§19.2.4): the month on screen — null, the month being filled — and whether a past one is being corrected.
   const [monthIndex, setMonthIndex] = useState<number | null>(null);
@@ -224,7 +230,8 @@ function Workbench(props: EngineWorkbenchProps) {
 
   const state = snap?.result.kind === "ok" ? snap.result.state : null;
   // The prose the engine on screen reads (§21.4.7): its type's. With none yet (the start card, its example, a file's
-  // preview) the SaaS's, as before APP-7 and APP-10 give those screens the type of the choice in progress.
+  // preview) the SaaS's: the setup card takes the type of the choice in progress through `stringsFor` (APP-7), and the
+  // example its own type at APP-10.
   const engineType = state?.setup.type ?? "b2b-saas";
   // The words of that type (§21.8.1): the base's, or the base's with the type's overlay on top. One merge, here; every
   // screen below gets `strings` and never asks which type it is on.
@@ -309,7 +316,7 @@ function Workbench(props: EngineWorkbenchProps) {
     const created = newEngineState(choice.setup, nowIso, { referenceMonth: choice.referenceMonth, cohortMonth: choice.cohortMonth });
     persist({ ...created, tourLink: choice.tourResultId ? { resultId: choice.tourResultId, linkedAt: nowIso } : null }, { fresh: true, stamp: false, add });
     // Which motions (Q14): a choice, never a number or a word typed.
-    const motions = engineSetupDetail(choice.setup.motions);
+    const motions = engineSetupDetail(choice.setup);
     trackEngine({ name: "engine_setup", detail: motions });
     if (choice.tourResultId) trackEngine({ name: "engine_tour_linked" });
     resetBoard();
@@ -321,6 +328,26 @@ function Workbench(props: EngineWorkbenchProps) {
     if (motions) setExampleMotions(motions);
     setScreen("example");
     focus("engine-example-title");
+  }
+
+  /** The start card's radio: another answer takes the message of the last click away. */
+  function changeStartChoice(next: StartChoice) {
+    setStartChoice(next);
+    setStartTried(false);
+  }
+
+  /** The app's three boxes (§21.6.1) with their two functions and, after a click on « Commence » with none ticked, the message. */
+  const startEarnsNothing = startChoice === "app" && !monetization.subscriptions && !monetization.purchases && !monetization.ads;
+  function startEarns(copy: StartEarnsCopy | undefined) {
+    if (!copy) return undefined;
+    return {
+      ...copy,
+      onChange: (next: AppMonetization) => {
+        setMonetization(next);
+        setStartTried(false);
+      },
+      ...(startTried && startEarnsNothing ? { error: strings.start.appEarnsNone } : {}),
+    };
   }
 
   const hydrated = snap !== null;
@@ -435,10 +462,14 @@ function Workbench(props: EngineWorkbenchProps) {
       return shell(
         <Setup
           strings={strings}
+          stringsFor={stringsFor}
           locale={locale}
           today={new Date(snap.openedAt)}
           tour={tour}
-          startMotions={motionsOf(startMotion)}
+          openTypes={props.openTypes}
+          startType={typeOf(startChoice)}
+          startMonetization={monetization}
+          startMotions={motionsOf(startChoice)}
           onCancel={() => {
             setScreen("board");
             focus("engine-start-title");
@@ -447,18 +478,23 @@ function Workbench(props: EngineWorkbenchProps) {
         />,
       );
     }
-    const start = startCopy(strings, locale, startMotion, new Date(snap.openedAt));
+    const start = startCopy(strings, locale, startChoice, new Date(snap.openedAt), props.openTypes, monetization);
     return shell(
       <EngineStart
         {...start.props}
-        onMotionChange={setStartMotion}
+        onMotionChange={changeStartChoice}
+        earns={startEarns(start.props.earns)}
         onChange={() => {
           setScreen("settings");
           focus("engine-setup-title");
         }}
-        onStart={() => createEngine({ ...start.defaults, tourResultId: tour?.id ?? null })}
+        onStart={() => {
+          if (startEarnsNothing) setStartTried(true);
+          else createEngine({ ...start.defaults, tourResultId: tour?.id ?? null });
+        }}
         exampleLabel={strings.start.example}
-        onExample={() => openExample(motionsOf(startMotion))}
+        // The SaaS's example, whatever is chosen, until APP-10 gives the app its own (§21.6.1).
+        onExample={() => openExample(motionsOf(startChoice))}
         importLabel={strings.start.import}
         onImport={() => {
           setScreen("import");
@@ -596,16 +632,20 @@ function Workbench(props: EngineWorkbenchProps) {
 
   if (screen === "new") {
     // Another engine (§19.1.5): the start screen, and « Annuler » back to the engine on screen.
-    const start = startCopy(strings, locale, startMotion, new Date(snap.openedAt));
+    const start = startCopy(strings, locale, startChoice, new Date(snap.openedAt), props.openTypes, monetization);
     return shell(
       <EngineStart
         {...start.props}
-        onMotionChange={setStartMotion}
+        onMotionChange={changeStartChoice}
+        earns={startEarns(start.props.earns)}
         onChange={() => {
           setScreen("new-settings");
           focus("engine-setup-title");
         }}
-        onStart={() => createEngine({ ...start.defaults, tourResultId: view.deviceTour?.id ?? null }, true)}
+        onStart={() => {
+          if (startEarnsNothing) setStartTried(true);
+          else createEngine({ ...start.defaults, tourResultId: view.deviceTour?.id ?? null }, true);
+        }}
         cancelLabel={strings.settings.cancel}
         onCancel={openBoard}
         data-testid="engine-start"
@@ -617,10 +657,14 @@ function Workbench(props: EngineWorkbenchProps) {
     return shell(
       <Setup
         strings={strings}
+        stringsFor={stringsFor}
         locale={locale}
         today={new Date(snap.openedAt)}
         tour={view.deviceTour}
-        startMotions={motionsOf(startMotion)}
+        openTypes={props.openTypes}
+        startType={typeOf(startChoice)}
+        startMonetization={monetization}
+        startMotions={motionsOf(startChoice)}
         onCancel={() => {
           setScreen("new");
           focus("engine-start-title");
@@ -687,8 +731,10 @@ function Workbench(props: EngineWorkbenchProps) {
     return shell(
       <Setup
         strings={strings}
+        stringsFor={stringsFor}
         locale={locale}
         today={view.ctx.today}
+        openTypes={props.openTypes}
         tour={view.deviceTour}
         linked={current.tourLink !== null}
         after={current.snapshots[current.snapshots.length - 2]?.referenceMonth}
@@ -700,6 +746,7 @@ function Workbench(props: EngineWorkbenchProps) {
           goLive: snapshot.metrics["slg.act.go-live"] !== undefined,
           any: Object.keys(snapshot.metrics).length > 0,
           entered: enteredCounts(snapshot),
+          enteredIds: enteredIds(snapshot),
         }}
         focusCompany={renaming}
         numbers={settingsNumbers(current, metrics, strings, locale, view.ctx.today)}
@@ -721,8 +768,9 @@ function Workbench(props: EngineWorkbenchProps) {
           const result = persist({ ...settled, tourLink });
           if (result.ok && linking) trackEngine({ name: "engine_tour_linked" });
           // A motion ticked or unticked after the fact is a new choice of motions (Q14).
-          const changed = engineSetupDetail(choice.setup.motions);
-          if (result.ok && changed !== engineSetupDetail(current.setup.motions)) trackEngine({ name: "engine_setup", detail: changed });
+          // The app, once, in the same vocabulary (§21.6.2): a change of what it earns from is no new choice.
+          const changed = engineSetupDetail(choice.setup);
+          if (result.ok && changed !== engineSetupDetail(current.setup)) trackEngine({ name: "engine_setup", detail: changed });
           openBoard();
         }}
       />,
@@ -929,7 +977,8 @@ function Workbench(props: EngineWorkbenchProps) {
               onNew: () => {
                 resetBoard();
                 // The question starts from its default, not from the last engine's answer.
-                setStartMotion("ss");
+                setStartChoice("ss");
+                setStartTried(false);
                 setScreen("new");
                 focus("engine-start-title");
               },
@@ -957,13 +1006,6 @@ function Workbench(props: EngineWorkbenchProps) {
   );
 }
 
-/**
- * The start screen's words and defaults (design system extension 07, A18
- * T3.a): how the company sells, the plan its answer means, and every other
- * default in one sentence. A Tour with answers on this device is linked at
- * « Commencer », as the setup's box was ticked by default (C8); the Settings
- * and the board's mirror unlink or link it.
- */
 /** What the board draws from: the month on screen (null: the month being filled), and everything else it reads. */
 interface BoardInput {
   monthIndex: number | null;
@@ -1000,28 +1042,6 @@ function boardOf(state: EngineState, { monthIndex, today, locale, tourResults, b
   const tourOnDevice = deviceTour !== null;
   const view: EngineView = { state: lens.state, derived, strings, metrics, derivedCopy, bridges, ctx, tourResult, tourOnDevice, deviceTour };
   return { view, verdict, plan, month };
-}
-
-function startCopy(strings: EngineStrings, locale: Locale, motion: StartMotion, today: Date) {
-  const st = strings.start;
-  const motions = motionsOf(motion);
-  const defaults = startDefaults(motions, today);
-  const props = {
-    title: strings.setup.title,
-    legend: st.legend,
-    options: [
-      { value: "ss" as const, label: st.ss, note: st.ssNote },
-      { value: "sa" as const, label: st.sa, note: st.saNote },
-      { value: "both" as const, label: st.both, note: st.bothNote },
-    ],
-    motion,
-    plan: fill(st.plan, startPlan(motions)),
-    // Sales-assisted alone follows no self-serve cohort (D7): its three months are in the settings.
-    defaults: fill(motions.plg ? st.defaults : st.defaultsSlg, { month: formatMonth(defaults.referenceMonth, locale), cohort: formatMonth(defaults.cohortMonth, locale) }),
-    changeLabel: st.change,
-    startLabel: st.go,
-  };
-  return { props, defaults };
 }
 
 /**
@@ -1063,6 +1083,11 @@ function verdictOf(state: EngineState, derived: EngineDerived, strings: EngineSt
   const relays = derived.motions.find((m): m is Extract<MotionDerived, { motion: "slg" }> => m.motion === "slg");
   if (!plg && relays) return relaysTitle(state, relays.relays, strings, metrics, ctx);
   return pelotonTitle(state, derived.peloton, strings, metrics, ctx);
+}
+
+/** The numbers already entered (anything but « à faire »): what unticking a way of earning would hide (§21.6.2). */
+function enteredIds(snapshot: Snapshot): MetricId[] {
+  return (Object.entries(snapshot.metrics) as [MetricId, MetricEntry | undefined][]).flatMap(([id, entry]) => (entry && entry.status !== "todo" ? [id] : []));
 }
 
 /** The numbers already entered on each side (anything but « à faire »): what the settings say a motion keeps (§18.1.2). */

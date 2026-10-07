@@ -173,12 +173,15 @@ export function offBase(snapshot: Snapshot, count: SharedCount): MetricId[] {
  * with the figure it belongs to. A count only one shown number carries is
  * not shared: it is typed on that number's screen, whose own line says
  * nothing of others (sales-assisted alone: the opportunities created, whose
- * second number is the hybrid's link).
+ * second number is the hybrid's link). One exception, an app's actives
+ * (`appActives`, §21.6.2): with the purchases alone, or the ads alone, one
+ * number carries them, and they are offered all the same, so the estimate of
+ * its revenue per active has its actives to stand on (§21.4.1).
  */
 export function settingsSharedCounts(shown: readonly MetricId[]): { count: SharedCount; slots: SharedSlot[] }[] {
   return WHOLE_SHARED_COUNTS.flatMap((count) => {
     const slots = SHARED_COUNTS[count].filter((slot) => shown.includes(slot.metric));
-    return slots.length > 1 ? [{ count, slots }] : [];
+    return slots.length > 1 || (count === "appActives" && slots.length === 1) ? [{ count, slots }] : [];
   });
 }
 

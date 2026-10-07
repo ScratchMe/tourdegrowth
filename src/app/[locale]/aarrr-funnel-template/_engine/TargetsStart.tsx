@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
-import { candidatesOf } from "@/lib/engine/catalog-shape";
+import { candidatesFor } from "@/lib/engine/scenario-of";
 import { isUnreadableNumber } from "@/lib/forms/number";
 import { TargetInput } from "./TargetInput";
 import { domId } from "./text";
@@ -28,7 +28,7 @@ export function TargetsStart({ view, actions, onNext }: { view: EngineView; acti
   const t = view.strings.targetsStart;
   const motions = view.state.setup.motions;
   const hybrid = motions.plg && motions.slg;
-  const ids = (["plg", "slg"] as const).filter((m) => motions[m]).flatMap((m) => candidatesOf(m));
+  const ids = (["plg", "slg"] as const).filter((m) => motions[m]).flatMap((m) => candidatesFor(view.state.setup, m));
 
   function next() {
     const unread = ids
@@ -52,7 +52,7 @@ export function TargetsStart({ view, actions, onNext }: { view: EngineView; acti
         .map((m) => (
           <div key={m} className={styles.targets} data-testid={`engine-targets-start-${m}`}>
             {hybrid ? <h3 className={styles.groupTitle}>{view.strings.hybrid.motionName[m]}</h3> : null}
-            {candidatesOf(m).map((id) => (
+            {candidatesFor(view.state.setup, m).map((id) => (
               <TargetInput key={id} id={id} view={view} actions={actions} />
             ))}
           </div>

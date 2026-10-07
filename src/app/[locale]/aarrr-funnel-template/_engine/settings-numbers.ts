@@ -1,5 +1,6 @@
-import { candidatesOf, shapesOf } from "@/lib/engine/catalog-shape";
+import { shapesOf } from "@/lib/engine/catalog-shape";
 import { joinList } from "@/lib/engine/format";
+import { candidatesFor } from "@/lib/engine/scenario-of";
 import { knownSharedCount, settingsSharedCounts } from "@/lib/engine/shared-counts";
 import type { EngineStrings, ResolvedMetric } from "@/lib/engine/strings";
 import type { EngineState } from "@/lib/engine/types";
@@ -21,15 +22,15 @@ export function settingsNumbers(state: EngineState, metrics: ResolvedMetric[], s
   const snapshot = state.snapshots[state.snapshots.length - 1]!;
   const { motions } = state.setup;
   const hybrid = motions.plg && motions.slg;
-  // The SaaS list, until APP-7 passes an app's numbers through the settings (§21.11).
-  const shown = shapesOf({ type: "b2b-saas", motions }).map((shape) => shape.id);
+  // The numbers the engine shows (§21.6.2): a SaaS's by its motions, an app's by what it earns from.
+  const shown = shapesOf(state.setup).map((shape) => shape.id);
   return {
     targets: (["plg", "slg"] as const)
       .filter((m) => motions[m])
       .map((motion) => ({
         motion,
         title: hybrid ? strings.hybrid.motionName[motion] : null,
-        boxes: candidatesOf(motion).map((id) => {
+        boxes: candidatesFor(state.setup, motion).map((id) => {
           const metric = metricById(metrics, id);
           return { id, label: metric.name, hint: metric.oneLiner, value: snapshot.targets[id] ?? null };
         }),

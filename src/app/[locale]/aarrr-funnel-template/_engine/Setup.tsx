@@ -3,9 +3,11 @@
 import { useEffect, useId, useState } from "react";
 import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
-import { METRIC_SHAPES, SLG_METRIC_SHAPES, TEXT_LIMITS, shapeOf } from "@/lib/engine/catalog-shape";
+import type { AppMonetization } from "@/lib/engine/app-model";
+import { METRIC_SHAPES, SLG_METRIC_SHAPES, TEXT_LIMITS, shapeOf, shapesOf } from "@/lib/engine/catalog-shape";
+import { BUSINESS_TYPES, DEFAULT_APP_MONETIZATION, isApp, monetizationOf } from "@/lib/engine/setup-type";
 import type { EngineStrings } from "@/lib/engine/strings";
-import type { Currency, EngineSetup, MetricId, Motion, SharedCount, ToolId, YearMonth } from "@/lib/engine/types";
+import type { BusinessType, Currency, EngineSetup, MetricId, Motion, SharedCount, ToolId, YearMonth } from "@/lib/engine/types";
 import { savedTools, teamTools, toolFamiliesFor } from "@/lib/engine/tools";
 import { SETUP_V2_DEFAULTS } from "@/lib/engine/types";
 import type { StoredResult } from "@/lib/quiz/storage";
@@ -25,7 +27,7 @@ import { TextField } from "@/components/core/TextField";
 import { monthsEndingAt } from "@/lib/forms/date";
 import { isUnreadableNumber } from "@/lib/forms/number";
 import { moneyUnit, percentUnit, wordUnit } from "./sources";
-import { DEFAULT_CURRENCY, DEFAULT_WINDOWS } from "./start";
+import { DEFAULT_CURRENCY, DEFAULT_WINDOWS, setupOfCard } from "./start";
 import { EngineTerm } from "./EngineTerm";
 import styles from "./Screens.module.css";
 
@@ -33,6 +35,10 @@ const CURRENCIES: readonly Currency[] = ["EUR", "USD", "GBP", "CHF"];
 const WINDOWS = [30, 60, 90] as const;
 type Window = (typeof WINDOWS)[number];
 const MOTIONS: readonly Motion[] = ["plg", "slg"];
+/** A consumer app sells self-serve only (§21.1 D1): its motions are never a choice. */
+const APP_MOTIONS: Record<Motion, boolean> = { plg: true, slg: false };
+/** The app's three ways of earning, in the order the card lists them. */
+const STREAMS = ["subscriptions", "purchases", "ads"] as const;
 
 export interface SetupChoice {
   setup: EngineSetup;
@@ -76,11 +82,15 @@ export interface SettingsNumbers {
  * result's id is stored, and a Tour erased later simply unlinks.
  */
 export function Setup({
-  strings,
+  strings: baseStrings,
+  stringsFor,
   locale,
   today,
   tour,
   onStart,
+  openTypes,
+  startType,
+  startMonetization,
   startMotions,
   initial,
   existing,
@@ -91,10 +101,21 @@ export function Setup({
   numbers,
 }: {
   strings: EngineStrings;
+  /**
+   * The words of a type (§21.8.1): the card reads `stringsFor(type)` for every text, the type being the one it shows now, so
+   * choosing the app on the full card puts its words on the card at once. Absent: `strings`, as before the app.
+   */
+  stringsFor?: (type: BusinessType) => EngineStrings;
   locale: "en" | "fr";
   today: Date;
   tour: StoredResult | null;
   onStart: (choice: SetupChoice) => void;
+  /** The business types this build opens (§21.3): the app is chosen on the card only when it is one of them. */
+  openTypes: readonly BusinessType[];
+  /** Before an engine exists: the type the start screen had chosen, which the card opens on (`b2b-saas` absent). */
+  startType?: BusinessType;
+  /** Before an engine exists: what the app earns from, as the start screen had it (the subscriptions alone absent). */
+  startMonetization?: AppMonetization;
   /** Before an engine exists: the answer the start screen had chosen, which the card opens on. */
   startMotions?: Record<Motion, boolean>;
   /**
@@ -104,7 +125,16 @@ export function Setup({
    */
   initial?: { setup: EngineSetup; referenceMonth: YearMonth; cohortMonth: YearMonth };
   /** Which numbers a change of window would send back to "to fill in", and how many each motion keeps (§18.1.2). */
-  existing?: { activation: boolean; paid: boolean; qualification: boolean; goLive: boolean; any: boolean; entered: Record<Motion, number> };
+  existing?: {
+    activation: boolean;
+    paid: boolean;
+    qualification: boolean;
+    goLive: boolean;
+    any: boolean;
+    entered: Record<Motion, number>;
+    /** The numbers entered, anything but « à faire » (§21.6.2): what unticking a way of earning would hide. */
+    enteredIds: readonly MetricId[];
+  };
   /** In the settings: whether the engine is linked to a Tour now — the box opens on it (C8). */
   linked?: boolean;
   /**
@@ -118,9 +148,14 @@ export function Setup({
   /** In the settings (A18 T3.d): the targets and the shared counts, saved with the rest, dropped by « Annuler ». */
   numbers?: SettingsNumbers;
 }) {
-  const s = strings.setup;
   const editing = Boolean(initial);
   const id = useId();
+  // The type the card shows (§21.6.2): an engine's own in the settings, where it is fixed (D7); on a new engine's card, the
+  // start screen's choice, changed here. Every text below is its type's.
+  const [type, setType] = useState<BusinessType>(initial?.setup.type ?? startType ?? SETUP_V2_DEFAULTS.type);
+  const app = isApp({ type });
+  const strings = stringsFor ? stringsFor(type) : baseStrings;
+  const s = strings.setup;
   // On arrival: neither changes while the card is on screen, so the person's one move is made once.
   useEffect(() => {
     if (focusCompany) document.getElementById(`${id}-company`)?.focus();
@@ -131,7 +166,11 @@ export function Setup({
   const [activation, setActivation] = useState<EngineSetup["activationWindowDays"]>(initial?.setup.activationWindowDays ?? DEFAULT_WINDOWS.activationWindowDays);
   const [paid, setPaid] = useState<EngineSetup["paidWindowDays"]>(initial?.setup.paidWindowDays ?? DEFAULT_WINDOWS.paidWindowDays);
   // Before an engine exists, the start screen's answer (self-serve by default, C25 Q16: the v1 behaviour).
-  const [motions, setMotions] = useState<Record<Motion, boolean>>(() => ({ ...(initial?.setup.motions ?? startMotions ?? SETUP_V2_DEFAULTS.motions) }));
+  const [chosenMotions, setMotions] = useState<Record<Motion, boolean>>(() => ({ ...(initial?.setup.motions ?? startMotions ?? SETUP_V2_DEFAULTS.motions) }));
+  // What the app earns from (§21.6.2): the saved engine's, else the start screen's, else the subscriptions alone.
+  const [monetization, setMonetization] = useState<AppMonetization>(() => ({
+    ...((initial ? monetizationOf(initial.setup) : null) ?? startMonetization ?? DEFAULT_APP_MONETIZATION),
+  }));
   const [qualification, setQualification] = useState<Window>(initial?.setup.qualificationWindowDays ?? SETUP_V2_DEFAULTS.qualificationWindowDays);
   const [goLive, setGoLive] = useState<Window>(initial?.setup.goLiveWindowDays ?? SETUP_V2_DEFAULTS.goLiveWindowDays);
   const [referenceMonth, setReferenceMonth] = useState<YearMonth>(initial?.referenceMonth ?? lastClosed);
@@ -144,8 +183,7 @@ export function Setup({
   // against it, and against the 30-month floor without it. Per company: both motions face the same runway.
   const [runway, setRunway] = useState<number | null>(initial?.setup.runwayMonths ?? null);
   // The team's tools (§19.5.1, A14 T4), optional; a tool the setup doesn't offer that a file brought is kept, unread.
-  // Offered by the engine's type (§21.6.5): an engine's own, or a SaaS's before one exists (the type is chosen at the start card from APP-7).
-  const type = initial?.setup.type ?? SETUP_V2_DEFAULTS.type;
+  // Offered by the card's type (§21.6.5): the tools the type does not offer are never ticked here.
   const [tools, setTools] = useState<ToolId[]>(() => teamTools(initial?.setup.tools, type));
   // A new engine offers the link ticked; the settings open on what is (C8).
   const [linkTour, setLinkTour] = useState(editing ? Boolean(linked) : true);
@@ -162,11 +200,21 @@ export function Setup({
   const companyTooLong = company.length > TEXT_LIMITS.companyLabel;
   // validate.ts's guard, said in the box: above 0, up to twenty years.
   const runwayOut = runway !== null && (runway <= 0 || runway > RUNWAY_MAX_MONTHS);
+  // An app's motions are not a choice: it sells self-serve (D1). A SaaS's are the two boxes, at least one.
+  const motions = app ? APP_MOTIONS : chosenMotions;
   const noMotion = !motions.plg && !motions.slg;
   const ticked = MOTIONS.filter((m) => motions[m]);
+  const earning = STREAMS.filter((stream) => monetization[stream]);
+  const noEarning = app && earning.length === 0;
 
   function setMotion(motion: Motion, on: boolean) {
     setMotions((was) => ({ ...was, [motion]: on }));
+  }
+
+  function changeType(next: BusinessType) {
+    setType(next);
+    // The tools ticked under the other type that this one does not offer are dropped from the card, not carried unread.
+    setTools((was) => teamTools(was, next));
   }
 
   function start() {
@@ -174,6 +222,10 @@ export function Setup({
     // The group's message, focused at the send (R-19): the first box, so the error is read with its group.
     if (noMotion) {
       document.getElementById(`${id}-motion-plg`)?.focus();
+      return;
+    }
+    if (noEarning) {
+      document.getElementById(`${id}-earns-${STREAMS[0]}`)?.focus();
       return;
     }
     if (companyTooLong) return;
@@ -212,28 +264,23 @@ export function Setup({
         return n !== null && n !== c.value ? [[c.count, n]] : [];
       }),
     ) as Partial<Record<SharedCount, number>>;
-    const pipeline = {
-      ...(quarterTarget !== null && quarterTarget > 0 ? { quarterTarget } : {}),
-      ...(threshold !== null && threshold > 0 ? { threshold } : {}),
-    };
-    const toolsToSave = savedTools(tools, initial?.setup.tools, type);
     onStart({
-      setup: {
-        type: SETUP_V2_DEFAULTS.type,
-        // A copy: the state's object is never the card's.
-        motions: { ...motions },
+      setup: setupOfCard({
+        type,
+        motions,
+        monetization,
         currency,
         activationWindowDays: activation,
         paidWindowDays: paid,
         qualificationWindowDays: qualification,
         goLiveWindowDays: goLive,
-        ...(company.trim() ? { companyLabel: company.trim() } : {}),
+        company,
         // The tools ticked here, plus any a file brought that the setup doesn't offer: never dropped (§19.5).
-        ...(toolsToSave.length > 0 ? { tools: toolsToSave } : {}),
-        ...(Object.keys(pipeline).length > 0 ? { pipeline } : {}),
-        // Kept across a save: the setup is rebuilt here, and a runway left out would be erased.
-        ...(runway !== null ? { runwayMonths: runway } : {}),
-      },
+        tools: savedTools(tools, initial?.setup.tools, type),
+        quarterTarget,
+        threshold,
+        runway,
+      }),
       referenceMonth,
       cohortMonth,
       tourResultId: tour && linkTour ? tour.id : null,
@@ -256,9 +303,29 @@ export function Setup({
           return [fill(m === "slg" ? st.motionOnSlg : st.motionOnPlg, { n: (m === "slg" ? SLG_METRIC_SHAPES : METRIC_SHAPES).length })];
         })
       : [];
+  // What ticking or unticking a way of earning does, said BEFORE the save (§21.6.2), on the same pattern: nothing is lost.
+  // The numbers each side hides or shows are read off the lists of numbers (`shapesOf`) the engine shows before and after.
+  const streamLines =
+    editing && initial && app
+      ? (() => {
+          const was = monetizationOf(initial.setup) ?? DEFAULT_APP_MONETIZATION;
+          const listed = (m: AppMonetization) => shapesOf({ type, motions: APP_MOTIONS, monetization: m }).map((shape) => shape.id);
+          const before = listed(was);
+          const after = listed(monetization);
+          const hidden = (existing?.enteredIds ?? []).filter((metric) => before.includes(metric) && !after.includes(metric)).length;
+          const shown = after.filter((metric) => !before.includes(metric)).length;
+          return STREAMS.flatMap((stream) => {
+            if (was[stream] === monetization[stream]) return [];
+            const subject = { stream: st.streamSubject[stream] };
+            if (was[stream]) return [hidden === 0 ? fill(st.streamOffNone, subject) : fill(hidden === 1 ? st.streamOffOne : st.streamOff, { ...subject, n: hidden })];
+            return [shown === 1 ? fill(st.streamOnOne, subject) : fill(st.streamOn, { ...subject, n: shown })];
+          });
+        })()
+      : [];
   const resets = editing && initial
     ? [
         ...motionLines,
+        ...streamLines,
         motions.plg && activation !== initial.setup.activationWindowDays && existing?.activation ? fill(st.activationReset, { n: activation }) : null,
         motions.plg && paid !== initial.setup.paidWindowDays && existing?.paid ? fill(st.paidReset, { n: paid }) : null,
         motions.slg && qualification !== initial.setup.qualificationWindowDays && existing?.qualification ? fill(st.qualificationReset, { n: qualification }) : null,
@@ -297,6 +364,42 @@ export function Setup({
     n: cohortWindow,
   });
 
+  // Self-serve's two windows (activation, payment): under its box for a SaaS, on their own for an app, which sells nothing else (§21.6.2).
+  const selfServeWindows = (
+    <>
+      {/* « fenêtre »'s « ? » under the first window it names (A18 T6): in the hint, never in the group's label. */}
+      <Field
+        group
+        label={s.activationWindow}
+        hint={
+          <>
+            {st.windowHint}
+            <EngineTerm id="window" strings={strings} />
+          </>
+        }
+      >
+        {({ labelId }) => (
+          <Segmented
+            labelledBy={labelId}
+            value={String(activation) as "7" | "14" | "30"}
+            options={([7, 14, 30] as const).map((n) => ({ id: String(n) as "7" | "14" | "30", label: fill(s.windowDays, { n }) }))}
+            onChange={(v) => setActivation(Number(v) as EngineSetup["activationWindowDays"])}
+          />
+        )}
+      </Field>
+      <Field group label={s.paidWindow}>
+        {({ labelId }) => (
+          <Segmented
+            labelledBy={labelId}
+            value={String(paid) as "30" | "60" | "90"}
+            options={WINDOWS.map((n) => ({ id: String(n) as "30" | "60" | "90", label: fill(s.windowDays, { n }) }))}
+            onChange={(v) => setPaid(Number(v) as EngineSetup["paidWindowDays"])}
+          />
+        )}
+      </Field>
+    </>
+  );
+
   return (
     <Card elevation="flat" className={styles.setup} data-testid={editing ? "engine-settings" : "engine-setup"}>
       <h2 id="engine-setup-title" className={styles.panelTitle} tabIndex={-1}>
@@ -304,124 +407,138 @@ export function Setup({
       </h2>
       {editing ? <p className={styles.lead}>{st.lead}</p> : null}
 
-      <Choices
-        id={`${id}-type`}
-        legend={s.companyType}
-        value="b2b-saas"
-        onChange={() => undefined}
-        options={[
-          { value: "b2b-saas", label: s.types.b2bSaas },
-          // Shown, not hidden: saying which funnels are coming tells a consumer app why
-          // the numbers below won't fit it yet. Dashed and at full contrast, never faded
-          // (design system extension 04, Q18). « Plus tard », never « Bientôt » (C25 Q16).
-          { value: "consumer-app", label: s.types.consumerApp, disabledNote: s.typeLater, disabled: true },
-          { value: "marketplace", label: s.types.marketplace, disabledNote: s.typeLater, disabled: true },
-        ]}
-      />
+      {editing ? (
+        // The type is fixed at creation (D7, C61): a line of text under the group's legend, not a `Choices`, which would
+        // draw the type the engine has as « plus tard ».
+        <Field group id={`${id}-type`} label={s.companyType} hint={s.typeFixed}>
+          {() => (
+            <p className={styles.typeFixed} data-testid="engine-setup-type-fixed">
+              {app ? s.types.consumerApp : s.types.b2bSaas}
+            </p>
+          )}
+        </Field>
+      ) : (
+        <Choices<"b2b-saas" | "consumer-app" | "marketplace">
+          id={`${id}-type`}
+          legend={s.companyType}
+          value={type}
+          onChange={(next) => {
+            if ((BUSINESS_TYPES as readonly string[]).includes(next)) changeType(next as BusinessType);
+          }}
+          options={[
+            { value: "b2b-saas", label: s.types.b2bSaas },
+            // Shown, not hidden: saying which funnels are coming tells a person why the numbers below won't fit
+            // their business yet. Dashed and at full contrast, never faded (design system extension 04, Q18).
+            // « Plus tard », never « Bientôt » (C25 Q16). The app is open only when this build opens it (§21.3).
+            { value: "consumer-app", label: s.types.consumerApp, disabledNote: s.typeLater, disabled: !openTypes.includes("consumer-app") },
+            { value: "marketplace", label: s.types.marketplace, disabledNote: s.typeLater, disabled: true },
+          ]}
+        />
+      )}
 
-      {/* How the company sells (§18.1.1): two boxes, at least one. Each motion's own settings unfold under its
-          box; unticked, they are hidden, never reset. In the settings, the last box ticked can't be unticked. */}
-      <Field group label={s.motions} hint={s.motionsHint} error={!editing && tried && noMotion ? s.motionsRequired : null}>
-        {({ describedBy }) => (
-          <div className={styles.motions} data-testid="engine-setup-motions">
-            <div className={styles.motion}>
-              <Checkbox
-                id={`${id}-motion-plg`}
-                label={s.motionPlg}
-                checked={motions.plg}
-                onChange={(on) => setMotion("plg", on)}
-                disabled={editing && motions.plg && ticked.length === 1}
-                disabledReason={st.motionLast}
-                describedBy={describedBy}
-                data-testid="engine-motion-plg"
-              />
-              {motions.plg ? (
-                <div className={styles.motionSettings}>
-                  {/* « fenêtre »'s « ? » under the first window it names (A18 T6): in the hint, never in the group's label. */}
-                  <Field
-                    group
-                    label={s.activationWindow}
-                    hint={
-                      <>
-                        {st.windowHint}
-                        <EngineTerm id="window" strings={strings} />
-                      </>
-                    }
-                  >
-                    {({ labelId }) => (
-                      <Segmented
-                        labelledBy={labelId}
-                        value={String(activation) as "7" | "14" | "30"}
-                        options={([7, 14, 30] as const).map((n) => ({ id: String(n) as "7" | "14" | "30", label: fill(s.windowDays, { n }) }))}
-                        onChange={(v) => setActivation(Number(v) as EngineSetup["activationWindowDays"])}
-                      />
-                    )}
-                  </Field>
-                  <Field group label={s.paidWindow}>
-                    {({ labelId }) => (
-                      <Segmented
-                        labelledBy={labelId}
-                        value={String(paid) as "30" | "60" | "90"}
-                        options={WINDOWS.map((n) => ({ id: String(n) as "30" | "60" | "90", label: fill(s.windowDays, { n }) }))}
-                        onChange={(v) => setPaid(Number(v) as EngineSetup["paidWindowDays"])}
-                      />
-                    )}
-                  </Field>
+      {app ? (
+        <>
+          {/* A consumer app sells self-serve (D1): one line says so, then the two windows, then what it earns from (§21.6.2). */}
+          <p className={styles.periodsLine} data-testid="engine-setup-app-sells">
+            {s.appSells}
+          </p>
+          <div className={styles.motions}>{selfServeWindows}</div>
+          <Field group label={s.appEarnsLegend} error={!editing && tried && noEarning ? strings.start.appEarnsNone : null}>
+            {({ describedBy }) => (
+              <div className={styles.motions} data-testid="engine-setup-earns">
+                {STREAMS.map((stream) => (
+                  <Checkbox
+                    key={stream}
+                    id={`${id}-earns-${stream}`}
+                    label={strings.start.appEarns[stream]}
+                    checked={monetization[stream]}
+                    onChange={(on) => setMonetization((was) => ({ ...was, [stream]: on }))}
+                    // In the settings, the last way ticked can't be unticked (the motions' pattern): the sentence the card
+                    // says when nothing is ticked is also its reason.
+                    disabled={editing && monetization[stream] && earning.length === 1}
+                    disabledReason={strings.start.appEarnsNone}
+                    describedBy={describedBy}
+                    data-testid={`engine-setup-earns-${stream}`}
+                  />
+                ))}
+              </div>
+            )}
+          </Field>
+        </>
+      ) : (
+        <>
+          {/* How the company sells (§18.1.1): two boxes, at least one. Each motion's own settings unfold under its
+              box; unticked, they are hidden, never reset. In the settings, the last box ticked can't be unticked. */}
+          <Field group label={s.motions} hint={s.motionsHint} error={!editing && tried && noMotion ? s.motionsRequired : null}>
+            {({ describedBy }) => (
+              <div className={styles.motions} data-testid="engine-setup-motions">
+                <div className={styles.motion}>
+                  <Checkbox
+                    id={`${id}-motion-plg`}
+                    label={s.motionPlg}
+                    checked={motions.plg}
+                    onChange={(on) => setMotion("plg", on)}
+                    disabled={editing && motions.plg && ticked.length === 1}
+                    disabledReason={st.motionLast}
+                    describedBy={describedBy}
+                    data-testid="engine-motion-plg"
+                  />
+                  {motions.plg ? <div className={styles.motionSettings}>{selfServeWindows}</div> : null}
                 </div>
-              ) : null}
-            </div>
-            <div className={styles.motion}>
-              <Checkbox
-                id={`${id}-motion-slg`}
-                label={s.motionSlg}
-                checked={motions.slg}
-                onChange={(on) => setMotion("slg", on)}
-                disabled={editing && motions.slg && ticked.length === 1}
-                disabledReason={st.motionLast}
-                describedBy={describedBy}
-                data-testid="engine-motion-slg"
-              />
-              {motions.slg ? (
-                <div className={styles.motionSettings}>
-                  {windowChoice(s.qualificationWindow, qualification, setQualification)}
-                  {windowChoice(s.goLiveWindow, goLive, setGoLive)}
-                  {/* Pipeline coverage (§19.4): in the settings only, where the relays' card sends the reader. */}
-                  {editing ? (
-                    <>
-                      <NumberField
-                        size="sm"
-                        id={`${id}-pipeline-target`}
-                        data-testid="engine-setup-pipeline-target"
-                        label={strings.pipeline.targetLabel}
-                        optional={strings.workbench.optional}
-                        value={quarterTarget}
-                        onChange={setQuarterTarget}
-                        locale={locale}
-                        {...moneyUnit(currency, locale)}
-                        parseError={strings.workbench.notANumber}
-                      />
-                      <NumberField
-                        size="sm"
-                        id={`${id}-pipeline-threshold`}
-                        data-testid="engine-setup-pipeline-threshold"
-                        label={strings.pipeline.thresholdLabel}
-                        hint={strings.pipeline.thresholdHint}
-                        optional={strings.workbench.optional}
-                        value={threshold}
-                        onChange={setThreshold}
-                        locale={locale}
-                        suffix={strings.pipeline.ratio.replace("{n}", "").trim()}
-                        unitName={strings.pipeline.thresholdUnit}
-                        parseError={strings.workbench.notANumber}
-                      />
-                    </>
+                <div className={styles.motion}>
+                  <Checkbox
+                    id={`${id}-motion-slg`}
+                    label={s.motionSlg}
+                    checked={motions.slg}
+                    onChange={(on) => setMotion("slg", on)}
+                    disabled={editing && motions.slg && ticked.length === 1}
+                    disabledReason={st.motionLast}
+                    describedBy={describedBy}
+                    data-testid="engine-motion-slg"
+                  />
+                  {motions.slg ? (
+                    <div className={styles.motionSettings}>
+                      {windowChoice(s.qualificationWindow, qualification, setQualification)}
+                      {windowChoice(s.goLiveWindow, goLive, setGoLive)}
+                      {/* Pipeline coverage (§19.4): in the settings only, where the relays' card sends the reader. */}
+                      {editing ? (
+                        <>
+                          <NumberField
+                            size="sm"
+                            id={`${id}-pipeline-target`}
+                            data-testid="engine-setup-pipeline-target"
+                            label={strings.pipeline.targetLabel}
+                            optional={strings.workbench.optional}
+                            value={quarterTarget}
+                            onChange={setQuarterTarget}
+                            locale={locale}
+                            {...moneyUnit(currency, locale)}
+                            parseError={strings.workbench.notANumber}
+                          />
+                          <NumberField
+                            size="sm"
+                            id={`${id}-pipeline-threshold`}
+                            data-testid="engine-setup-pipeline-threshold"
+                            label={strings.pipeline.thresholdLabel}
+                            hint={strings.pipeline.thresholdHint}
+                            optional={strings.workbench.optional}
+                            value={threshold}
+                            onChange={setThreshold}
+                            locale={locale}
+                            suffix={strings.pipeline.ratio.replace("{n}", "").trim()}
+                            unitName={strings.pipeline.thresholdUnit}
+                            parseError={strings.workbench.notANumber}
+                          />
+                        </>
+                      ) : null}
+                    </div>
                   ) : null}
                 </div>
-              ) : null}
-            </div>
-          </div>
-        )}
-      </Field>
+              </div>
+            )}
+          </Field>
+        </>
+      )}
 
       <div className={styles.setupGrid}>
         <DateField
@@ -554,7 +671,7 @@ export function Setup({
 
       <TextField
         id={`${id}-company`}
-        label={s.companyLabel}
+        label={app ? s.companyLabelApp : s.companyLabel}
         optional={strings.workbench.optional}
         hint={s.companyHint}
         value={company}
