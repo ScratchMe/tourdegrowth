@@ -17,6 +17,7 @@
  * 3 more calls.
  */
 export const GEMINI_MODEL_CANDIDATES = [
+  "gemini-3.8-flash",
   "gemini-3.7-flash",
   "gemini-3.6-flash",
   "gemini-3.5-flash",
@@ -40,7 +41,7 @@ const RETRIABLE_STATUSES = [404, 429, 500, 503];
  * parallel (two tones x two languages); without it they would fail together
  * and retry together, in lockstep, against an API that is already struggling.
  *
- * Bounded on purpose: at most ~6s added across the whole chain in the worst
+ * Bounded on purpose: at most ~8s added across the whole chain in the worst
  * case, inside a route that already allows 120s.
  */
 const RETRY_BASE_MS = 500;

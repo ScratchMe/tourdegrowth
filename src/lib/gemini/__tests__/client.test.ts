@@ -59,7 +59,7 @@ describe("callGeminiWithFallback", () => {
     expect(attempt).toBe(2);
   });
 
-  it("exhausts all 4 candidates and throws when every one is retriable-failing", async () => {
+  it("exhausts every candidate and throws when every one is retriable-failing", async () => {
     const fetchImpl = async () => textResponse(429, "rate limited");
 
     await expect(callGeminiWithFallback("prompt", "key", { fetchImpl, sleepImpl: noSleep })).rejects.toThrow(
@@ -78,8 +78,8 @@ describe("callGeminiWithFallback", () => {
       /Gemini API error \(400\)/,
     );
     // Regression guard: the ported reference implementation had a bug where
-    // this threw-and-was-immediately-caught, silently looping through all 4
-    // models anyway. Only 1 call means the fix holds.
+    // this threw-and-was-immediately-caught, silently looping through every
+    // model anyway. Only 1 call means the fix holds.
     expect(calls).toBe(1);
   });
 
@@ -176,7 +176,7 @@ describe("callGeminiWithFallback — backoff between attempts", () => {
       }),
     ).rejects.toThrow(/All Gemini model candidates failed/);
 
-    // Four candidates, so three pauses — never before the first attempt.
+    // One pause between two candidates — never before the first attempt.
     expect(waits).toHaveLength(GEMINI_MODEL_CANDIDATES.length - 1);
     for (const ms of waits) expect(ms).toBeGreaterThanOrEqual(0);
     // Full jitter, so each wait is a random point BELOW a growing ceiling:

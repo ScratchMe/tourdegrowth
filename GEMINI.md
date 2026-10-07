@@ -202,8 +202,8 @@ de repli ne la contourne pas (§1.2) — toutes les générations cassent d'un c
 
 ## 2. Propre à Tour de Growth
 
-- **Chaîne de repli** : `gemini-3.7-flash → 3.6 → 3.5 → gemini-flash-latest`
-  (non négociable, `CLAUDE.md`). `REQUEST_TIMEOUT_MS` 45 s,
+- **Chaîne de repli** : `gemini-3.8-flash → 3.7 → 3.6 → 3.5 → gemini-flash-latest`
+  (non négociable, `CLAUDE.md` ; 3.8 en tête depuis le 2026-10-07). `REQUEST_TIMEOUT_MS` 45 s,
   `CHAIN_BUDGET_MS` 100 s sous un `maxDuration` de 120 s.
 - **Un seul appel Gemini dans tout le produit** : `lib/gemini/deep-dive.ts`,
   utilisé par la route **et** par la sonde. Le mode Quick n'appelle plus rien
