@@ -18,6 +18,10 @@
  */
 export const GEMINI_MODEL_CANDIDATES = [
   "gemini-3.7-flash",
+  // Second, not first (Antoine, 2026-10-07): on the live probe 3.8 took
+  // 21-34s per generation where 3.7 took 8-15s, the slowest 11s under the
+  // per-attempt ceiling. It is the first fallback, not the daily driver.
+  "gemini-3.8-flash",
   "gemini-3.6-flash",
   "gemini-3.5-flash",
   "gemini-flash-latest",
@@ -40,7 +44,7 @@ const RETRIABLE_STATUSES = [404, 429, 500, 503];
  * parallel (two tones x two languages); without it they would fail together
  * and retry together, in lockstep, against an API that is already struggling.
  *
- * Bounded on purpose: at most ~6s added across the whole chain in the worst
+ * Bounded on purpose: at most ~8s added across the whole chain in the worst
  * case, inside a route that already allows 120s.
  */
 const RETRY_BASE_MS = 500;
@@ -190,10 +194,17 @@ export async function callGeminiWithFallback(
             // header is the supported alternative and leaks nowhere.
             "x-goog-api-key": apiKey,
           },
+          // No sampling parameters and no thinking setting, on purpose
+          // (Google's deprecation notice, 2026-10-07). Since 3.6 Flash,
+          // temperature/topP/topK are ignored, and upcoming models will
+          // answer them with a 400 — non-retriable here, so one stale field
+          // would break every Deep dive. Same for `thinkingBudget`, which
+          // is going away. Its replacement, `thinkingLevel`, is left unset
+          // too: the levels a model accepts vary, and one value has to hold
+          // for every candidate in the chain, the alias included.
           body: JSON.stringify({
             contents: [{ parts: [{ text: prompt }] }],
             generationConfig: {
-              temperature: 0.3,
               responseMimeType: "application/json",
               maxOutputTokens: MAX_OUTPUT_TOKENS,
               ...(responseSchema ? { responseSchema } : {}),

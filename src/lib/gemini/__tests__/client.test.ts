@@ -59,7 +59,7 @@ describe("callGeminiWithFallback", () => {
     expect(attempt).toBe(2);
   });
 
-  it("exhausts all 4 candidates and throws when every one is retriable-failing", async () => {
+  it("exhausts every candidate and throws when every one is retriable-failing", async () => {
     const fetchImpl = async () => textResponse(429, "rate limited");
 
     await expect(callGeminiWithFallback("prompt", "key", { fetchImpl, sleepImpl: noSleep })).rejects.toThrow(
@@ -78,8 +78,8 @@ describe("callGeminiWithFallback", () => {
       /Gemini API error \(400\)/,
     );
     // Regression guard: the ported reference implementation had a bug where
-    // this threw-and-was-immediately-caught, silently looping through all 4
-    // models anyway. Only 1 call means the fix holds.
+    // this threw-and-was-immediately-caught, silently looping through every
+    // model anyway. Only 1 call means the fix holds.
     expect(calls).toBe(1);
   });
 
@@ -176,7 +176,7 @@ describe("callGeminiWithFallback — backoff between attempts", () => {
       }),
     ).rejects.toThrow(/All Gemini model candidates failed/);
 
-    // Four candidates, so three pauses — never before the first attempt.
+    // One pause between two candidates — never before the first attempt.
     expect(waits).toHaveLength(GEMINI_MODEL_CANDIDATES.length - 1);
     for (const ms of waits) expect(ms).toBeGreaterThanOrEqual(0);
     // Full jitter, so each wait is a random point BELOW a growing ceiling:
@@ -282,6 +282,28 @@ describe("callGeminiWithFallback — request shape", () => {
     const body = JSON.parse(init.body as string);
     expect(body.generationConfig.maxOutputTokens).toBeGreaterThan(0);
     expect(body.generationConfig.responseMimeType).toBe("application/json");
+  });
+
+  /**
+   * Google's deprecation notice of 2026-10-07: upcoming models answer these
+   * with a 400, which this client treats as non-retriable — one of them left
+   * in the body would fail every Deep dive on the first model that refuses it.
+   */
+  it("sends no sampling parameter and no thinking budget", async () => {
+    let body: { generationConfig: Record<string, unknown> } | undefined;
+    const fetchImpl = (async (_url: string | URL | Request, init?: RequestInit) => {
+      body = JSON.parse(init?.body as string);
+      return new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: "{}" }] } }] }), { status: 200 });
+    }) as unknown as typeof fetch;
+
+    await callGeminiWithFallback("prompt", "k", { fetchImpl, sleepImpl: noSleep, responseSchema: { type: "OBJECT" } });
+
+    const config = body!.generationConfig;
+    for (const key of ["temperature", "topP", "topK", "top_p", "top_k", "thinkingBudget", "thinking_budget"]) {
+      expect(key in config, key).toBe(false);
+    }
+    const thinking = config.thinkingConfig as Record<string, unknown> | undefined;
+    expect(thinking && ("thinkingBudget" in thinking || "thinking_budget" in thinking)).toBeFalsy();
   });
 
   /** REVIEW.md R-25 — the schema travels in `generationConfig`, and only when asked for. */
