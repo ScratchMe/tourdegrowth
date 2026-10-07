@@ -190,10 +190,17 @@ export async function callGeminiWithFallback(
             // header is the supported alternative and leaks nowhere.
             "x-goog-api-key": apiKey,
           },
+          // No sampling parameters and no thinking setting, on purpose
+          // (Google's deprecation notice, 2026-10-07). Since 3.6 Flash,
+          // temperature/topP/topK are ignored, and upcoming models will
+          // answer them with a 400 — non-retriable here, so one stale field
+          // would break every Deep dive. Same for `thinkingBudget`, which
+          // is going away. Its replacement, `thinkingLevel`, is left unset
+          // too: the levels a model accepts vary, and one value has to hold
+          // for every candidate in the chain, the alias included.
           body: JSON.stringify({
             contents: [{ parts: [{ text: prompt }] }],
             generationConfig: {
-              temperature: 0.3,
               responseMimeType: "application/json",
               maxOutputTokens: MAX_OUTPUT_TOKENS,
               ...(responseSchema ? { responseSchema } : {}),

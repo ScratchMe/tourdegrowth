@@ -284,6 +284,28 @@ describe("callGeminiWithFallback — request shape", () => {
     expect(body.generationConfig.responseMimeType).toBe("application/json");
   });
 
+  /**
+   * Google's deprecation notice of 2026-10-07: upcoming models answer these
+   * with a 400, which this client treats as non-retriable — one of them left
+   * in the body would fail every Deep dive on the first model that refuses it.
+   */
+  it("sends no sampling parameter and no thinking budget", async () => {
+    let body: { generationConfig: Record<string, unknown> } | undefined;
+    const fetchImpl = (async (_url: string | URL | Request, init?: RequestInit) => {
+      body = JSON.parse(init?.body as string);
+      return new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: "{}" }] } }] }), { status: 200 });
+    }) as unknown as typeof fetch;
+
+    await callGeminiWithFallback("prompt", "k", { fetchImpl, sleepImpl: noSleep, responseSchema: { type: "OBJECT" } });
+
+    const config = body!.generationConfig;
+    for (const key of ["temperature", "topP", "topK", "top_p", "top_k", "thinkingBudget", "thinking_budget"]) {
+      expect(key in config, key).toBe(false);
+    }
+    const thinking = config.thinkingConfig as Record<string, unknown> | undefined;
+    expect(thinking && ("thinkingBudget" in thinking || "thinking_budget" in thinking)).toBeFalsy();
+  });
+
   /** REVIEW.md R-25 — the schema travels in `generationConfig`, and only when asked for. */
   it("sends a response schema when given one, and no schema key at all otherwise", async () => {
     const bodies: Record<string, { generationConfig: Record<string, unknown> }> = {};

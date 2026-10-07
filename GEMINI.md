@@ -180,6 +180,24 @@ est un choix** (générer plusieurs variantes d'avance), et c'est le seul levier
 si le coût devient un sujet ; et le **plafond d'abus est borné par la limite de
 débit**, qu'un plafond de dépense mensuel referme complètement.
 
+### 1.11 Un paramètre de génération se périme aussi
+
+Un avis du fournisseur (2026-10-07) : depuis une version, les paramètres
+d'échantillonnage (`temperature`, `topP`, `topK`) étaient **déjà ignorés**
+sans erreur, et les prochains modèles les refuseront par un **400**. Même
+chose pour un budget de réflexion chiffré (`thinkingBudget`), remplacé par un
+niveau nommé. Un champ qui ne fait plus rien n'est donc pas inoffensif : le
+jour où il devient une erreur, c'est une erreur **non retriable**, et la chaîne
+de repli ne la contourne pas (§1.2) — toutes les générations cassent d'un coup.
+
+- **N'envoyer que ce qui a un effet mesurable.** Un réglage « au cas où »
+  est une dette qui se déclenche au prochain modèle.
+- **Un réglage doit valoir pour tous les candidats de la chaîne**, l'alias
+  compris. Les niveaux de réflexion acceptés varient d'un modèle à l'autre :
+  en l'absence d'un besoin prouvé, laisser le défaut du modèle.
+- **Un test fige le corps de la requête** contre le retour des champs retirés,
+  puisque aucun test hors ligne ne verra le 400 (§1.6).
+
 ---
 
 ## 2. Propre à Tour de Growth
@@ -198,6 +216,12 @@ débit**, qu'un plafond de dépense mensuel referme complètement.
   laissé à l'appréciation du modèle (non négociable). Il vise la stratégie ou
   l'auto-évaluation, **jamais la personne**.
 - **Palier payant** depuis le 2026-09-07, avec plafond de dépense.
+- **Le corps de la requête n'envoie ni échantillonnage ni réglage de
+  réflexion** depuis le 2026-10-07 (`client.ts`, §1.11) : la `temperature: 0.3`
+  qu'on envoyait était ignorée depuis 3.6 Flash. Un test l'interdit. L'API
+  `generateContent` est dite « legacy » depuis le même avis, au profit de
+  l'API Interactions, mais reste pleinement supportée : la migration attend un
+  déclencheur (`CHANTIERS.md` E).
 - **Avant tout changement à `lib/gemini/deep-dive.ts` ou `client.ts`** :
   relancer `verify-live.yml` sur la branche, cible `gemini`. C'est la
   convention nº4 de `CLAUDE.md`.
