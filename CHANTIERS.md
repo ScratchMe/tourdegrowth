@@ -516,7 +516,7 @@ est libre. Le jeu reste fermé (C23).
 | REV-1 | Le revenue : la copie | **Livré le 2026-10-05** ([#364](https://github.com/ScratchMe/tourdegrowth/pull/364)) |
 | REV-2 | Le revenue : le téléphone et sa pastille | **Livré le 2026-10-06** ([#365](https://github.com/ScratchMe/tourdegrowth/pull/365)) |
 | REV-3 | Le revenue : le branchement | **Livré le 2026-10-06** ([#366](https://github.com/ScratchMe/tourdegrowth/pull/366)) |
-| REV-4 | Le revenue : les specs Playwright | À faire |
+| REV-4 | Le revenue : les specs Playwright | **Livré le 2026-10-07** ([#367](https://github.com/ScratchMe/tourdegrowth/pull/367)) ; le niveau revenue est fini (§21.7), et les treize unités d'A24 sont livrées |
 | A24.bat | Le bon à tirer de chaque niveau construit (`/bon-a-tirer`, par Antoine), puis la recette avec les niveaux 1 et 2 (D9) | Après chaque X-4 ; un bon à tirer qui réécrit une chaîne du téléphone ou de la pastille fait régénérer leurs aperçus `.design-sync` (rien ne le signale) |
 | A24.sync | La re-synchro des composants neufs (`PlannerPhone`, `CookiePill`, `SplitPhone`, `SentPill`, `FitPhone`, `ChargePill`, `NextLevel`) | Après chaque X-3, section B |
 
