@@ -1621,7 +1621,10 @@ rendre argent ? { gap: sub.gap, mrr: argent } : sub.gap ? { gap: sub.gap } : {}
   `shapesOf(avant)`). **Chaque ligne compte comme si sa façon changeait
   seule** : décocher les achats et la publicité d'un coup donne deux lignes,
   chacune avec son propre compte ; un chiffre que seules les deux ensemble
-  masquent (la rétention des actifs) n'est compté sur aucune. *Décidé par
+  masquent (la rétention des actifs) n'est compté sur aucune. À l'inverse,
+  cocher les deux d'un coup fait apparaître ce chiffre sur chaque ligne,
+  puisque chacune seule le montre (précisé après APP-7, #369 : c'est la
+  lettre, appliquée et testée). *Décidé par
   Antoine le 2026-10-07* : la première lettre (avant contre après, le réglage
   entier) mettait le total sur chaque ligne (relevé par APP-7, #369). Rien
   n'est effacé ; une dernière façon cochée ne se décoche pas, avec la raison
