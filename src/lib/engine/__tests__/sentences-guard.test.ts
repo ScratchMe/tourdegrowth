@@ -415,6 +415,25 @@ const SCENARIOS: ScenarioDef[] = [
     type: "consumer-app",
     build: () => ({ state: withWhatIf(consumerUsageOnlyState(), { "ret.d30": 15, "app.ret.active-retention": 95 }) }),
   },
+  // The gain on the actives is under one (§21.7.2): « Moins d'un actif de plus par mois », and the one that keeps.
+  {
+    name: "the consumer app without subscriptions, three installs a month (a gain under one new active)",
+    type: "consumer-app",
+    build: () => {
+      const state = consumerUsageOnlyState();
+      state.snapshots[0]!.base = { ...state.snapshots[0]!.base, monthSignups: 3, cohortSignups: 3 };
+      return { state };
+    },
+  },
+  {
+    name: "the consumer app, five actives (a gain under one active kept)",
+    type: "consumer-app",
+    build: () => {
+      const state = consumerState();
+      state.snapshots[0]!.base = { ...state.snapshots[0]!.base, appActives: 5 };
+      return { state };
+    },
+  },
   {
     // 11 655 € of 33 300 € billed: 35 %, past the 30 % that rarely is the commission alone.
     name: "the consumer app, commission at 35 %",
@@ -465,7 +484,7 @@ function sweep(): Sweep {
         // The picture's own words: its labels and the sentence that describes it (an app's `installChart`).
         if (slide.installChart) {
           for (const [key, value] of Object.entries(slide.installChart.labels)) if (value !== "") add(`${slide.id} installChart.labels.${key}`, value, true);
-          add(`${slide.id} installChart.summary`, slide.installChart.summary, true);
+          if (slide.installChart.summary !== undefined) add(`${slide.id} installChart.summary`, slide.installChart.summary, true);
         }
       }
       add("footer", deck.footer.text, true);
@@ -684,6 +703,15 @@ describe("the sweep reaches every sentence it claims to", () => {
     expect(kinds.filter((k) => !SWEEP.findingKinds.has(k))).toEqual([]);
     const ids: SanityId[] = ["num-gt-den", "retained-gt-activated", "paid-gt-retained", "churn-high", "margin-odd", "commission-high", "ttv-mean", "cohort-mismatch", "reconcile-gap"];
     expect(ids.filter((k) => !SWEEP.sanityIds.has(k))).toEqual([]);
+  });
+
+  it("and reaches the app's « less than one active » sentences, in both languages", () => {
+    const all = SWEEP.samples.map((s) => s.text).join("\n");
+    for (const needle of [
+      "Moins d'un actif de plus par mois.", "Moins d'un actif gardé de plus par mois.", "Less than one more active a month.", "Less than one more active kept a month.",
+      "moins d'un actif de plus par mois", "moins d'un actif gardé de plus par mois", "less than one more active a month", "less than one more active kept a month",
+    ])
+      expect(all, needle).toContain(needle);
   });
 
   it("and reaches the forms the rules are about", () => {

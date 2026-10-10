@@ -876,6 +876,11 @@ export const ENGINE_COPY = {
     perHundredRenewalOne: { fr: "{n} contrat gardé de plus pour 100 contrats échus", en: "{n} more contract kept per 100 up for renewal" },
     lessThanOneQuarter: { fr: "moins d'un client de plus par trimestre", en: "less than one more customer a quarter" },
     lessThanOneKept: { fr: "moins d'un contrat gardé de plus par trimestre", en: "less than one more contract kept a quarter" },
+    /**
+     * TODO: à relire (convention 6) — copie neuve, §21.7.2 (A22 APP-9, décidé par Antoine le 2026-10-10) : what `worthOf` says of a gain of less than one active; the app's overlay never has to rewrite it.
+     */
+    lessThanOneActive: { fr: "moins d'un actif de plus par mois", en: "less than one more active a month" },
+    lessThanOneActiveKept: { fr: "moins d'un actif gardé de plus par mois", en: "less than one more active kept a month" },
   },
 
   // --- Closed vocabularies (§14.4) -----------------------------------------
@@ -1576,7 +1581,8 @@ export const ENGINE_COPY = {
     lessThanOne: { fr: "Moins d'un client de plus par mois.", en: "Less than one more customer a month." },
     /**
      * TODO: à relire — copie neuve (convention 6), §21.7.2 (A22 APP-9) : the chain of an app's usage stream (purchases and ads
-     * on the month's actives) and its sum with the subscriptions. `{perActive}`: the revenue per active; `{base}`: the actives.
+     * on the month's actives), its sum with the subscriptions, and the chain of the actives' retention (`todayActives` to
+     * `timesActives`). `{perActive}`: the revenue per active; `{base}`: the actives.
      */
     todayActives: {
       fr: "{retention} des actifs gardés d'un mois sur l'autre, sur {base} actifs",
@@ -1622,6 +1628,12 @@ export const ENGINE_COPY = {
       fr: "Soit {amount} de revenu de plus au bout d'un an, départs compris.",
       en: "That's {amount} more revenue after a year, departures included.",
     },
+    /**
+     * TODO: à relire (convention 6) — copie neuve, §21.7.2 (A22 APP-9, décidé par Antoine le 2026-10-10) : the « less than one » line of an app's chains on the actives, which never says « abonné »;
+     * `chainTemplate` reads `lessThanOneActive` for the flow chain and `lessThanOneActiveKept` for the retention chain.
+     */
+    lessThanOneActive: { fr: "Moins d'un actif de plus par mois.", en: "Less than one more active a month." },
+    lessThanOneActiveKept: { fr: "Moins d'un actif gardé de plus par mois.", en: "Less than one more active kept a month." },
     targetTeam: { fr: "{value} (cible de l'équipe)", en: "{value} (team target)" },
   },
   /**

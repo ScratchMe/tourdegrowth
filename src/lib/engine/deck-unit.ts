@@ -288,11 +288,10 @@ export function appUnitMoney(input: {
         paysBack: story === "pays-back" && k.payback ? fillTemplate(w.installChartPaysBack, { payback: months(k.payback) }) : "",
         loss: story === "loss" && gap ? fillTemplate(w.installChartLoss, { gap: approx(gap) }) : "",
       },
-      summary:
-        story === "pays-back"
-          ? fillTemplate(w.installChartSummaryHealthy, { cpi: cost, payback: months(k.payback!) })
-          : fillTemplate(w.installChartSummaryLoss, { cpi: cost, ltv: k.ltv ? approx(k.ltv) : "", gap: gap ? approx(gap) : "" }),
     };
+    // The words of a picture, never a sentence with a hole (§21.6.6): a loss with no `{ltv}` or no `{gap}` has no summary.
+    if (story === "pays-back") chart.summary = fillTemplate(w.installChartSummaryHealthy, { cpi: cost, payback: months(k.payback!) });
+    else if (k.ltv && gap) chart.summary = fillTemplate(w.installChartSummaryLoss, { cpi: cost, ltv: approx(k.ltv), gap: approx(gap) });
   }
 
   // --- What the picture assumes, printed with it ---

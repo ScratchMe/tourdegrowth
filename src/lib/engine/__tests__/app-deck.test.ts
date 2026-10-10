@@ -2,9 +2,11 @@ import { describe, expect, it } from "vitest";
 import { appWhatIf } from "../app";
 import { buildDeck, chainLine, pelotonTitle, renderTitle } from "../deck";
 import { deriveEngine } from "../derive";
+import { appUnitMoney } from "../deck-unit";
+import { scenarioOf } from "../scenario-of";
 import { EXAMPLE_CONSUMER_WHATIF } from "../example";
 import { impactHeadline } from "../impact";
-import { chainTemplate, subjectOf } from "../phrases";
+import { chainTemplate, subjectOf, worthOf } from "../phrases";
 import { mergeStrings } from "../strings";
 import type { DeckModel, DeckSlide, EngineState, Impact, ImpactLine, LeverId, MetricId, SelfServeCandidateId } from "../types";
 import { consumerState, consumerUsageOnlyState, exampleState, withEntry } from "./fixtures";
@@ -155,6 +157,69 @@ describe("appWhatIf: the other chains", () => {
     expect(chainOf(consumerState(), "app.ret.active-retention", 88).impact).toBeNull();
     // Past 50 %, the referred share isn't priced (§19.3.2).
     expect(chainOf(consumerState(), "ref.referred-share", 60).impact).toBeNull();
+  });
+});
+
+describe("less than one active: the actives' chains never say « abonné » (§21.7.2, decided 2026-10-10)", () => {
+  /** Three installs a month: the day-30 flow brings fewer than one new active. */
+  const fewInstalls = () => {
+    const state = consumerUsageOnlyState();
+    state.snapshots[0]!.base = { ...state.snapshots[0]!.base, monthSignups: 3, cohortSignups: 3 };
+    return state;
+  };
+  /** Five actives: 2 points of retention keep fewer than one. */
+  const fewActives = () => {
+    const state = consumerState();
+    state.snapshots[0]!.base = { ...state.snapshots[0]!.base, appActives: 5 };
+    return state;
+  };
+  const SUBSCRIBER = /abonn|subscriber/i;
+  const cases = [
+    { name: "flow", state: fewInstalls, id: "ret.d30", target: 15, chain: "actives-flow", leaf: "lessThanOneActive" },
+    { name: "retention", state: fewActives, id: "app.ret.active-retention", target: 92, chain: "actives-retention", leaf: "lessThanOneActiveKept" },
+  ] as const;
+  const SAYS = {
+    fr: { lessThanOneActive: "Moins d'un actif de plus par mois.", lessThanOneActiveKept: "Moins d'un actif gardé de plus par mois." },
+    en: { lessThanOneActive: "Less than one more active a month.", lessThanOneActiveKept: "Less than one more active kept a month." },
+  } as const;
+  const WORTH = {
+    fr: { lessThanOneActive: "moins d'un actif de plus par mois", lessThanOneActiveKept: "moins d'un actif gardé de plus par mois" },
+    en: { lessThanOneActive: "less than one more active a month", lessThanOneActiveKept: "less than one more active kept a month" },
+  } as const;
+
+  for (const locale of ["fr", "en"] as const) {
+    for (const c of cases) {
+      it(`${c.name}, in ${locale}: the chain ends on the actives' sentence and worthOf says the same, no subscriber anywhere`, () => {
+        const { impact, keys, texts } = chainOf(c.state(), c.id, c.target, locale);
+        expect(impact!.appChain).toBe(c.chain);
+        expect(keys.at(-1)).toBe("less-than-one");
+        expect(texts.at(-1)).toBe(SAYS[locale][c.leaf]);
+        for (const text of texts) expect(text).not.toMatch(SUBSCRIBER);
+        const worth = worthOf(impact!, inputOf(c.state(), locale).strings, locale);
+        expect(worth).toBe(WORTH[locale][c.leaf]);
+        expect(worth).not.toMatch(SUBSCRIBER);
+      });
+    }
+
+    it(`the four leaves, in ${locale}, name an active and never a subscriber`, () => {
+      const { whatIf, worth } = inputOf(consumerState(), locale).strings;
+      for (const text of [whatIf.lessThanOneActive, whatIf.lessThanOneActiveKept, worth.lessThanOneActive, worth.lessThanOneActiveKept]) {
+        expect(text).toMatch(/actif|active/);
+        expect(text).not.toMatch(SUBSCRIBER);
+      }
+    });
+  }
+
+  it("the subscriptions' chain and the SaaS keep `lessThanOne`, in the template and in the worth phrase", () => {
+    const w = FR.strings.whatIf;
+    const line: ImpactLine = { key: "less-than-one", values: {} };
+    expect(chainTemplate(line, { metric: "ret.d30", kind: "customers", appChain: "subscriptions" }, w, "fr").template).toBe(w.lessThanOne);
+    expect(chainTemplate(line, { metric: "ret.d30", kind: "customers" }, w, "fr").template).toBe(w.lessThanOne);
+    expect(chainTemplate(line, { metric: "ret.d30", kind: "customers", appChain: "actives-flow" }, w, "fr").template).toBe(w.lessThanOneActive);
+    expect(chainTemplate(line, { metric: "app.ret.active-retention", kind: "customers", appChain: "actives-retention" }, w, "fr").template).toBe(w.lessThanOneActiveKept);
+    const small = (appChain?: Impact["appChain"]): Impact => ({ metric: "ret.d30", kind: "customers", from: { lo: 12, hi: 12 }, to: 15, lines: [line], ...(appChain ? { appChain } : {}) });
+    expect(worthOf(small("subscriptions"), FR.strings, "fr")).toBe(FR.strings.worth.lessThanOne);
+    expect(worthOf(small(), FR.strings, "fr")).toBe(FR.strings.worth.lessThanOne);
   });
 });
 
@@ -329,6 +394,22 @@ describe("the unit-economics slide of an app (§21.7.3)", () => {
     const payback = rowsOf(unit, "payback")[0]!;
     expect(payback.value).toBe("");
     expect(payback.note).toBe(chart.labels.loss);
+  });
+
+  it("a loss writes the picture's summary only when its sentence has its figures: no `{ltv}` or no `{gap}` leaves it out, never a hole", () => {
+    const state = consumerUsageOnlyState();
+    const i = inputOf(state);
+    const derived = deriveEngine(state, i.ctx, null, i.bridges, i.strings.units);
+    const today = scenarioOf(state, {}, i.ctx).today.kpis;
+    const chartOf = (k: typeof today) => appUnitMoney({ state, k, unit: derived.unit, subscriptions: false, strings: i.strings, metrics: i.metrics, ctx: i.ctx }).chart!;
+    const whole = chartOf(today);
+    expect(whole.story).toBe("loss");
+    expect(whole.summary).toContain(`en 36${N}mois, elle rapporte ~0,59${N}€, ~0,91${N}€ de moins que ses 1,50${N}€.`);
+    for (const without of [{ ...today, ltv: null }, { ...today, loss: null }]) {
+      const chart = chartOf(without);
+      expect(chart.story).toBe("loss");
+      expect("summary" in chart).toBe(false);
+    }
   });
 
   it("in English", () => {

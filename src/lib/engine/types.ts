@@ -1016,8 +1016,8 @@ export interface SlideInstallChart {
     /** « pas remboursée en 36 mois, il manque ~0,70 € ». */
     loss: string;
   };
-  /** The chart in words, for a screen reader. */
-  summary: string;
+  /** The chart in words, for a screen reader; absent when its sentence would have a hole (a loss with no value or no gap). */
+  summary?: string;
 }
 export interface SlideLeverSumRow {
   id: string;

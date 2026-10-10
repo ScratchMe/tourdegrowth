@@ -317,7 +317,12 @@ export function worthOf(impact: Impact, strings: Words, locale: Locale): string 
   // Sales-assisted counts a quarter (§18.5.3); its money is said a month, like self-serve's.
   const slg = motionOfMetric(impact.metric) === "slg";
   const renewal = impact.metric === "slg.ret.renewal";
-  if (impact.lines.some((l) => l.key === "less-than-one")) return slg ? (renewal ? w.lessThanOneKept : w.lessThanOneQuarter) : w.lessThanOne;
+  if (impact.lines.some((l) => l.key === "less-than-one")) {
+    // An app's chains on the actives say « actif », never « abonné » (§21.7.2); its subscriptions chain keeps `lessThanOne`.
+    if (impact.appChain === "actives-flow") return w.lessThanOneActive;
+    if (impact.appChain === "actives-retention") return w.lessThanOneActiveKept;
+    return slg ? (renewal ? w.lessThanOneKept : w.lessThanOneQuarter) : w.lessThanOne;
+  }
   const head = impactHeadline(impact);
   if (head.amount) return fillTemplate(impact.kind === "retained-mrr" ? w.retainedMrr : w.newMrr, { amount: head.amount });
   if (!head.n) return null;
@@ -418,7 +423,8 @@ function activesChainTemplate(
     case "annual":
       return { label: null, template: words.annualApp };
     case "less-than-one":
-      return { label: null, template: words.lessThanOne };
+      // « abonné » would be false for an active: the app's overlay rewrites `lessThanOne`, and these two never say it.
+      return { label: null, template: retention ? words.lessThanOneActiveKept : words.lessThanOneActive };
     case "usage-then":
     case "usage-times":
     case "sum":
