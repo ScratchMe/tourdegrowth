@@ -423,7 +423,7 @@ APP-6, APP-9 et APP-11.
 | APP-6 | la dérivation, les constats, les contrôles, le peloton | APP-5 | **Livré le 2026-10-05** ([#363](https://github.com/ScratchMe/tourdegrowth/pull/363)) |
 | APP-7 | la carte de départ, le réglage, les Réglages, l'événement | APP-3, APP-6 | **Livré le 2026-10-07** ([#369](https://github.com/ScratchMe/tourdegrowth/pull/369)) |
 | APP-8 | les écrans de l'argent, la bande des deux flux | APP-7 | **Livré le 2026-10-10** ([#371](https://github.com/ScratchMe/tourdegrowth/pull/371)) |
-| APP-9 | les slides, la courbe de remboursement | APP-8 | **Livré le 2026-10-10** |
+| APP-9 | les slides, la courbe de remboursement | APP-8 | **Livré le 2026-10-10** ([#372](https://github.com/ScratchMe/tourdegrowth/pull/372)) |
 | APP-10 | l'exemple et le golden | APP-9 | ☐ |
 | APP-11 | la phrase de la page, les e2e, la documentation | APP-10 | ☐ |
 
