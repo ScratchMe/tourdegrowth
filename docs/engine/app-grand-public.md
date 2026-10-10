@@ -1751,7 +1751,11 @@ qui change pour une app :
   `joinList` ; sans entrée manquante, les actifs seuls. Les autres (`newMrr`,
   `ltv`, `payback`, `value12`) ne nomment que leurs entrées manquantes, même
   quand les actifs manquent : les nommer indiquerait une saisie qui ne
-  débloque pas le chiffre regardé (décidé par Antoine le 2026-10-10). **Sans entrée manquante ni
+  débloque pas le chiffre regardé (décidé par Antoine le 2026-10-10).
+  Aujourd'hui, seul `mrr12` écrit un tel « il manque » (`kpiRows`, et le
+  revenu annualisé dans 12 mois de `leverMoneyView`) : `kpiRows` n'a pas de
+  ligne `mrr`, le bloc de l'argent ne rend pas ses chiffres sans `mrr`, et la
+  bande des deux flux écrit `slide.noNumber` (relevé par la relance d'APP-8). **Sans entrée manquante ni
   actifs manquants** (un `uncomputable` à `missing: []`, le remboursement
   d'une installation qui ne se rembourse jamais : §21.5.5), elle n'écrit
   jamais « il manque » sur une liste vide : elle rend `unknownStep`, comme
