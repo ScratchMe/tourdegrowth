@@ -27,8 +27,8 @@ export const ENGINE_CATALOG_CONSUMER: Record<ConsumerPlgMetricId, EngineCatalogE
       en: "The share of your store page's visitors who install the app.",
     },
     formula: {
-      fr: "premières installations du mois ÷ visiteurs uniques de ta fiche App Store ou Google Play du mois",
-      en: "first-time installs in the month ÷ unique visitors to your App Store or Google Play page in the month",
+      fr: "premières installations du mois ÷ visiteurs uniques de la fiche App Store ou Google Play du mois",
+      en: "first-time installs in the month ÷ unique visitors to the App Store or Google Play page in the month",
     },
     inputs: {
       numerator: { fr: "Installations en {month}", en: "Installs in {month}" },
