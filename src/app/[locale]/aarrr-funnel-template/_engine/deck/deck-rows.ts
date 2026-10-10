@@ -41,7 +41,7 @@ export interface DeckRows {
    */
   column: { id: string; label: string; value: string; source: string; text: string };
   // Slide 2 — the leak
-  /** A step of the "what if" chain: `key` is today / if / then / times / annual / less-than-one. */
+  /** A step of the "what if" chain: `key` is today / if / then / times / annual / less-than-one; an app's two streams add usage-then / usage-times / sum. */
   calc: { key: string; label: string; text: string };
   /** Replaces the deck's common footer on its slide; it carries the assumptions (§9.3) — the leak's, and each what-if slide's. */
   footer: { text: string };
@@ -56,6 +56,8 @@ export interface DeckRows {
   // Slide 4 — unit economics (`value` is "" when the figure can't be computed)
   cac: { id: string; label: string; value: string; variant: string; text: string };
   payback: { id: string; label: string; value: string; note: string; text: string };
+  /** A consumer app's install value over 12 months (§21.7.3): the ratio's numerator, between the cost and the 36-month value. */
+  value12: { id: string; label: string; value: string; note: string; text: string };
   ltv: { id: string; label: string; value: string; note: string; text: string };
   ltvCac: { id: string; label: string; value: string; note: string; text: string };
   /**
@@ -151,6 +153,7 @@ export const ROW_FIELDS: { readonly [K in RowKind]: readonly (keyof DeckRows[K])
   missing: ["id", "label", "repair", "text"],
   cac: ["id", "label", "value", "variant", "text"],
   payback: ["id", "label", "value", "note", "text"],
+  value12: ["id", "label", "value", "note", "text"],
   ltv: ["id", "label", "value", "note", "text"],
   ltvCac: ["id", "label", "value", "note", "text"],
   after: ["id", "label", "value", "note", "text"],

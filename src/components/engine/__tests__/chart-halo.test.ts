@@ -11,7 +11,7 @@ const read = (...p: string[]) => readFileSync(join(process.cwd(), ...p), "utf8")
 const deck = read("src/app/[locale]/aarrr-funnel-template/_engine/deck/deck.module.css");
 
 describe("the charts' halo follows their ground", () => {
-  it.each(["MrrCurve", "PaybackChart"])("%s strokes its labels with --chart-halo, the page's paper by default", (name) => {
+  it.each(["MrrCurve", "PaybackChart", "InstallPaybackChart"])("%s strokes its labels with --chart-halo, the page's paper by default", (name) => {
     expect(read("src/components/engine", `${name}.module.css`)).toMatch(/\.halo \{[^}]*stroke: var\(--chart-halo, var\(--surface-page\)\);/);
   });
 

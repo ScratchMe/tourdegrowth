@@ -1,11 +1,8 @@
 import {
   ALL_DERIVED_SHAPES,
-  CANDIDATE_IDS,
-  LEVER_IDS,
   LINK_METRIC_SHAPES,
   METRIC_SHAPES,
   PELOTON_METRICS,
-  SLG_CANDIDATE_IDS,
   SLG_METRIC_SHAPES,
   REFERRAL_CANDIDATES,
   REFERRAL_PRICING_CEILING,
@@ -13,6 +10,7 @@ import {
   motionOfMetric,
   motionShapes,
   shapeOf,
+  shapesOf,
 } from "./catalog-shape";
 import { nextMonth, currentMonth, monthsBefore, periodOf, periodRangeOf, windowDaysOf } from "./cohort";
 import { comparatorOf, impactTarget } from "./diagnose";
@@ -40,6 +38,7 @@ import {
   roundDisplay,
   roundSignificant,
 } from "./format";
+import { appWhatIf } from "./app";
 import { impactHeadline, whatIf } from "./impact";
 import { mapBounds, point } from "./interval";
 import {
@@ -61,9 +60,10 @@ import {
 import { annexPages, type AnnexCells } from "./annex-pages";
 import { buildEvolutionSlide, seasonalNote } from "./deck-series";
 import { buildRelaysSlide, buildSlgWhatIfSlides, buildTotalSlide, buildUnitBoth, buildUnitSlg, motionOf } from "./deck-slg";
-import { unitMoney } from "./deck-unit";
+import { appUnitMoney, unitMoney } from "./deck-unit";
 import { linkSentence } from "./deck-motions";
-import { buildScenario, leverAlone } from "./scenario";
+import { leverAloneOf, leverIdsOf, scenarioOf } from "./scenario-of";
+import { isApp, monetizationOf } from "./setup-type";
 import { renewalTermOf, slgWhatIf } from "./slg-impact";
 import { slgLeverAlone } from "./slg-scenario";
 import type { MoneyKpis } from "./money";
@@ -78,6 +78,7 @@ import type {
   DeckModel,
   DeckSlide,
   DerivedId,
+  DerivedValue,
   EngineCalcContext,
   EngineDerived,
   EngineState,
@@ -92,10 +93,12 @@ import type {
   Peloton,
   Position,
   RepairScale,
+  SelfServeCandidateId,
   FixedSlideId,
   SlideId,
   SlgCandidateId,
   SlideCurve,
+  SlideInstallChart,
   SlideLeverSum,
   SlidePaybackChart,
   SlideTitle,
@@ -258,11 +261,12 @@ export function slideGlyphs(text: string): string {
 
 // --- Slide 1: the peloton ----------------------------------------------------
 
-const CLAUSES = [
-  ["clauseActivated", "a"],
-  ["clauseD30", "r"],
-  ["clausePaid", "p"],
-] as const;
+/** Each peloton column's clause and its placeholder, read by the column's number — an app without subscriptions has two (§21.7.1). */
+const CLAUSES = {
+  "act.rate": ["clauseActivated", "a"],
+  "ret.d30": ["clauseD30", "r"],
+  "rev.paid-conversion": ["clausePaid", "p"],
+} as const;
 
 /**
  * The peloton's verdict title (§9.3 slide 1) — the same function for the
@@ -272,19 +276,25 @@ const CLAUSES = [
  * each clause's verb agrees with its own printed count (« 1 paie »).
  */
 export function pelotonTitle(state: EngineState, peloton: Peloton, strings: Words, metrics: ResolvedMetric[], ctx: EngineCalcContext): SlideTitle {
-  const clauses = PELOTON_METRICS.map((id, i) => {
+  // The columns the setup shows (§21.7.1): all three, or for an app without subscriptions the first two.
+  const shown = peloton.columns.map((c) => c.metric);
+  const clauses = shown.map((id) => {
     const k = knownIn(state, id, ctx);
     if (k.kind !== "known") return null;
     // As printed: under half a person the count reads "fewer than 1", which French agrees in the singular.
     const printed = k.value.hi > 0 && k.value.hi < 0.5 ? point(0) : mapBounds(k.value, Math.round);
-    const [key, placeholder] = CLAUSES[i]!;
+    const [key, placeholder] = CLAUSES[id];
     return fillTemplate(strings.peloton[numbered(key, printed, ctx.locale)], { [placeholder]: formatPerHundredCount(k.value, ctx, strings.units) });
   });
-  if (peloton.chain === "complete") return { key: "pelotonComplete", values: { activated: clauses[0]!, d30: clauses[1]!, paid: clauses[2]! } };
+  if (peloton.chain === "complete") {
+    const clause = (id: (typeof PELOTON_METRICS)[number]) => clauses[shown.indexOf(id)]!;
+    if (!shown.includes("rev.paid-conversion")) return { key: "pelotonCompleteTwo", values: { activated: clause("act.rate"), d30: clause("ret.d30") } };
+    return { key: "pelotonComplete", values: { activated: clause("act.rate"), d30: clause("ret.d30"), paid: clause("rev.paid-conversion") } };
+  }
   if (peloton.chain === "empty") return { key: "pelotonEmpty", values: {} };
 
   const known = clauses.filter((c): c is string => c !== null);
-  const unknown = PELOTON_METRICS.filter((_, i) => clauses[i] === null).map((id) => stagePhrase(id, strings, metrics));
+  const unknown = shown.filter((_, i) => clauses[i] === null).map((id) => stagePhrase(id, strings, metrics));
   const one = unknown.length === 1;
   const key = peloton.chain === "gap" ? (one ? "pelotonGapOne" : "pelotonGap") : one ? "pelotonTailBreakOne" : "pelotonTailBreak";
   return { key, values: { clauses: joinList(known, strings.grammar), stages: joinList(unknown, strings.grammar) } };
@@ -378,11 +388,14 @@ export function buildLeak(
   const absent: LeakBuild = { present: false, title: { key: "leakLevel", values: {} }, lines: [], notes: [] };
   const subject = (id: MetricId) => subjectOf(id, strings, metrics);
   const positions = diagnosis.positions as Record<CandidateId, { position: Position; comparator?: Comparator }>;
+  const app = isApp(state.setup);
   const impactOf = (id: CandidateId): Impact | null => {
     const comparator = positions[id].comparator;
     if (!comparator) return null;
-    return slg
-      ? slgWhatIf(state, id as SlgCandidateId, impactTarget(comparator), ctx, strings.units)
+    if (slg) return slgWhatIf(state, id as SlgCandidateId, impactTarget(comparator), ctx, strings.units);
+    // An app's chain has its second stream and its own sentences (§21.7.2).
+    return app
+      ? appWhatIf(state, id as SelfServeCandidateId, impactTarget(comparator), ctx, strings.units)
       : whatIf(state, id as PlgCandidateId, impactTarget(comparator), ctx, strings.units);
   };
   const named = diagnosis.named as readonly CandidateId[];
@@ -473,7 +486,8 @@ export function buildLeak(
 
   // Alongside: every other candidate of the motion, where it stands — on the right side of its comparator, and what it is worth.
   const r = strings.notes.ranking;
-  for (const id of slg ? SLG_CANDIDATE_IDS : CANDIDATE_IDS) {
+  // The candidates its rules positioned, in their order — an app's are not the SaaS's (§21.5.4).
+  for (const id of Object.keys(positions) as CandidateId[]) {
     if (diagnosis.state === "clear" && id === named[0]) continue;
     const { position, comparator } = positions[id];
     const side = sideText(position, comparator, strings);
@@ -589,11 +603,12 @@ function buildUnitEconomics(
   metrics: ResolvedMetric[],
   ctx: EngineCalcContext,
   prose: DeckProse,
-): { present: boolean; title: SlideTitle; lines: Row[]; paybackChart: SlidePaybackChart | null; loss: boolean } {
+): { present: boolean; title: SlideTitle; lines: Row[]; paybackChart: SlidePaybackChart | null; installChart: SlideInstallChart | null; loss: boolean } {
+  if (isApp(state.setup)) return buildAppUnitEconomics(state, derived, strings, metrics, ctx, prose);
   const { unit } = derived;
   const cac = knownIn(state, "acq.cac", ctx);
   // Today's money, from the scenario the board's money block reads (A20.d T4.c): nothing moved.
-  const money = unitMoney({ state, k: buildScenario(state, {}, ctx).today.kpis, slg: false, unit, strings, metrics, ctx });
+  const money = unitMoney({ state, k: scenarioOf(state, {}, ctx).today.kpis, slg: false, unit, strings, metrics, ctx });
   const currency = state.setup.currency;
   const present = cac.kind === "known" || [unit.ltv, unit.payback, unit.ltvCac, unit.grr, unit.nrr].some((d) => d.kind === "known");
 
@@ -638,7 +653,84 @@ function buildUnitEconomics(
   ];
   // The cap only qualifies a lifetime value that exists.
   if (unit.ltv.kind === "known") lines.push({ row: "cap", text: strings.slide.unitCap });
-  return { present, title, lines, paybackChart: money.chart, loss: money.lossTitle !== null };
+  return { present, title, lines, paybackChart: money.chart, installChart: null, loss: money.lossTitle !== null };
+}
+
+
+/**
+ * A consumer app's unit-economics slide (§21.7.3): the cost per install, an install's value over 12 and 36 months,
+ * their ratio and its payback; the picture is `installChart`, not `paybackChart` (`PaybackChart`'s story is a customer
+ * who leaves, an install's is a curve that slows). No months after payback and no cash tied up (D11); the subscriptions'
+ * GRR and NRR only with subscriptions. The money beyond the figures is `appUnitMoney`'s (`deck-unit.ts`).
+ */
+function buildAppUnitEconomics(
+  state: EngineState,
+  derived: Omit<EngineDerived, "findings">,
+  strings: Words,
+  metrics: ResolvedMetric[],
+  ctx: EngineCalcContext,
+  prose: DeckProse,
+): { present: boolean; title: SlideTitle; lines: Row[]; paybackChart: null; installChart: SlideInstallChart | null; loss: boolean } {
+  const { unit } = derived;
+  const appDerived = derived.app;
+  if (!appDerived) throw new Error("An app's deck needs its derived figures (derive.ts sets `app` for a consumer app)");
+  const subscriptions = monetizationOf(state.setup)?.subscriptions ?? false;
+  const kpis = scenarioOf(state, {}, ctx).today.kpis;
+  const money = appUnitMoney({ state, k: kpis, unit, subscriptions, strings, metrics, ctx });
+  const currency = state.setup.currency;
+  const cpi = knownIn(state, "app.acq.cpi", ctx);
+  const present = cpi.kind === "known" || [appDerived.value12, unit.ltv, unit.payback, unit.ltvCac].some((d) => d.kind === "known") || (subscriptions && [unit.grr, unit.nrr].some((d) => d.kind === "known"));
+
+  let title: SlideTitle;
+  if (unit.payback.kind === "known" && unit.ltvCac.kind === "known") {
+    title = {
+      key: "unitEconomics",
+      values: {
+        m: formatDurationInterval(unit.payback.value, "months", ctx, strings.units),
+        x: fillTemplate(strings.units.times, { n: formatInterval(unit.ltvCac.value, "ratio", ctx, strings.units) }),
+      },
+    };
+  } else {
+    const missing = [...new Set([...(unit.payback.kind === "uncomputable" ? unit.payback.missing : []), ...(unit.ltvCac.kind === "uncomputable" ? unit.ltvCac.missing : [])])];
+    title = { key: "unitEconomicsUnknown", values: { input: unitInputsPhrase(missing, strings, metrics) } };
+  }
+  // A certain loss titles the slide (C48): the money first, the payback and the ratio in its tiles.
+  if (money.lossTitle) title = money.lossTitle;
+
+  const variantId = currentSnapshot(state).metrics["app.acq.cpi"]?.variant;
+  const cpiValue = cpi.kind === "known" ? formatInterval(cpi.value, "money", ctx, strings.units, { currency }) : "";
+  // Always written: "media-only" and "fully loaded" cost per install are two numbers that print the same.
+  const variant = metricOf(metrics, "app.acq.cpi").variants?.find((v) => v.id === variantId)?.label ?? "";
+  const figure = (row: string, id: DerivedId, value: string, missing: readonly MetricId[] | null, caveat = ""): Row => {
+    const d = prose.derived?.find((x) => x.id === id);
+    // An empty list is a verdict (an install that never pays back its cost), not a missing number: nothing to ask for.
+    const note = !value && missing && missing.length > 0 && d ? fillTemplate(d.uncomputable, { input: unitInputsPhrase(missing, strings, metrics) }) : value ? caveat : "";
+    return { row, id, label: d?.name ?? "", value, note, text: [value, note].filter(Boolean).join(" · ") || strings.slide.noNumber };
+  };
+  const approx = (d: DerivedValue) => (d.kind === "known" ? formatApproxMoneyInterval(d.value, currency, ctx, strings.units) : "");
+  const missingOf = (d: DerivedValue) => (d.kind === "uncomputable" ? d.missing : null);
+  const value12 = figure("value12", "app.rev.install-value", approx(appDerived.value12), missingOf(appDerived.value12));
+  const payback = figure("payback", "app.rev.install-payback", unit.payback.kind === "known" ? formatDurationInterval(unit.payback.value, "months", ctx, strings.units) : "", missingOf(unit.payback));
+  // A loss has no payback to print: the tile says why in the picture's own words.
+  const lossNote = !payback.value && !payback.note && money.chart?.story === "loss" ? money.chart.labels.loss : "";
+  const paybackRow = lossNote ? { ...payback, note: lossNote, text: lossNote } : payback;
+  const lines: Row[] = [
+    { row: "cac", id: "app.acq.cpi", label: metricOf(metrics, "app.acq.cpi").name, value: cpiValue, variant, text: cpiValue ? [cpiValue, lowerFirst(variant)].filter(Boolean).join(" · ") : strings.slide.noNumber },
+    // The tile says « Valeur sur 12 mois »: the catalogue's long name is the board's.
+    { ...value12, label: strings.slide.unitValue12 },
+    figure("ltv", "app.rev.install-ltv", approx(unit.ltv), missingOf(unit.ltv)),
+    figure(
+      "ltvCac",
+      "app.rev.value-to-cost",
+      unit.ltvCac.kind === "known" ? fillTemplate(strings.units.times, { n: formatInterval(unit.ltvCac.value, "ratio", ctx, strings.units) }) : "",
+      missingOf(unit.ltvCac),
+    ),
+    paybackRow,
+    ...money.rows,
+  ];
+  // The cap only qualifies a value that exists.
+  if (unit.ltv.kind === "known") lines.push({ row: "cap", text: strings.slide.unitCap });
+  return { present, title, lines, paybackChart: null, installChart: money.chart, loss: money.lossTitle !== null };
 }
 
 // --- Slide 6: the ask --------------------------------------------------------
@@ -857,13 +949,28 @@ export type Print = (i: Interval, extra?: number) => string;
  * the month and the GRR left the slide for them; the panel keeps them.
  * Self-serve and sales-assisted print the same rows.
  */
-export type WhatIfKpiId = "mrr12" | "arr12" | "nrr" | "cac" | "ltv" | "ltvCac" | "payback" | "cash";
+export type WhatIfKpiId = "mrr12" | "arr12" | "nrr" | "cac" | "value12" | "ltv" | "ltvCac" | "payback" | "cash";
 export const WHATIF_KPI_IDS: readonly WhatIfKpiId[] = ["mrr12", "arr12", "nrr", "cac", "ltv", "ltvCac", "payback", "cash"];
+/**
+ * A consumer app's rows (§21.7.4), in the same order: its install's value over 12 months joins the cost, the 36-month value,
+ * the ratio and the payback; the NRR only with subscriptions (`appKpiIds`); never the cash (D11). `WHATIF_KPI_IDS` is
+ * the SaaS's and sales-assisted's (`deck-slg.ts` reads it too), and does not change.
+ */
+export const APP_WHATIF_KPI_IDS: readonly WhatIfKpiId[] = ["mrr12", "arr12", "nrr", "cac", "value12", "ltv", "ltvCac", "payback"];
 
 /** A scenario's figures, either motion's: self-serve's under `kpis`, sales-assisted's at the top. */
-export type WhatIfKpis = MoneyKpis & { mrr12: Interval | null; nrr: Interval | null; cac: Interval | null; ltv: Interval | null; payback: Interval | null };
+export type WhatIfKpis = MoneyKpis & {
+  mrr12: Interval | null;
+  nrr: Interval | null;
+  cac: Interval | null;
+  ltv: Interval | null;
+  payback: Interval | null;
+  /** An app's own figures: only `value12` is read here. */
+  app?: { value12: Interval | null };
+};
 
 export function whatIfKpi(k: WhatIfKpis, id: WhatIfKpiId): Interval | null {
+  if (id === "value12") return k.app?.value12 ?? null;
   return id === "cash" ? (k.cash?.tiedUp ?? null) : k[id];
 }
 
@@ -944,6 +1051,7 @@ export function whatIfKpiLabel(id: WhatIfKpiId, strings: Words, slg: boolean): s
     arr12: strings.lever.arr12,
     nrr: slg ? w.kpiNrr12 : w.kpiNrr,
     cac: w.kpiCac,
+    value12: w.kpiValue12,
     ltv: w.kpiLtv,
     ltvCac: w.rowLtvCac,
     payback: w.kpiPayback,
@@ -1040,6 +1148,7 @@ export function whatIfPrinters(state: EngineState, strings: Words, ctx: EngineCa
     ltvCac: { today: times, projected: times, change: ratio },
     cash: money,
     cac: { today: (i) => formatInterval(i, "money", ctx, units, { currency }), projected: approxMoney, change: roundMoney, round: approxRounding },
+    value12: money,
     ltv: money,
     payback: same(months),
   };
@@ -1091,11 +1200,15 @@ export function changeRow(
 /** The two tables and the footer, for one scenario — a lever alone, or all of them. */
 function scenarioLines(s: Scenario, rowTemplate: string, state: EngineState, strings: Words, ctx: EngineCalcContext): Row[] {
   const printers = whatIfPrinters(state, strings, ctx);
+  // An app's rows are its own (§21.7.4); without subscriptions it has no NRR and no new subscribers.
+  const subscriptions = monetizationOf(state.setup)?.subscriptions ?? true;
+  const kpiIds = isApp(state.setup) ? APP_WHATIF_KPI_IDS.filter((id) => subscriptions || id !== "nrr") : WHATIF_KPI_IDS;
+  const stepRows = STEP_ROWS.filter(([id]) => subscriptions || id !== "paying");
   const lines: Row[] = [
-    ...WHATIF_KPI_IDS.map((id) =>
+    ...kpiIds.map((id) =>
       changeRow("kpi", id, whatIfKpiLabel(id, strings, false), whatIfKpi(s.today.kpis, id), whatIfKpi(s.projected.kpis, id), printers.kpis[id], rowTemplate, strings),
     ),
-    ...STEP_ROWS.map(([id, label]) =>
+    ...stepRows.map(([id, label]) =>
       changeRow("funnelStep", id, strings.scenario[label], s.today.funnel[id], s.projected.funnel[id], printers.steps[id], rowTemplate, strings),
     ),
   ];
@@ -1119,8 +1232,8 @@ interface MovedLever {
  * can see, and is no slide.
  */
 function movedLevers(state: EngineState, strings: Words, ctx: EngineCalcContext): MovedLever[] {
-  return LEVER_IDS.flatMap((id) => {
-    const alone = leverAlone(state, id, ctx);
+  return leverIdsOf(state.setup).flatMap((id) => {
+    const alone = leverAloneOf(state, id, ctx);
     const lever = alone?.levers.find((l) => l.id === id);
     if (!alone || !lever?.today || lever.target === null) return [];
     // Self-serve's levers are percents and money; the link's count is sales-assisted's, for its slides (S4).
@@ -1149,6 +1262,32 @@ function annexSlides(annex: BuiltSlide, rows: (Row & AnnexCells)[]): { id: Slide
   }));
 }
 
+/** The levers an app moves that change no revenue, only what is left of it (D13): their gain is on the payback. */
+const MARGIN_ONLY_LEVERS: readonly LeverId[] = ["app.rev.commission"];
+
+/**
+ * A lever slide's title: the gain on the revenue in 12 months when it prints (`isPricedGain`); else, for a lever that
+ * touches only the margins and moves the payback at the precision it prints (§21.7.4), the payback; else the question.
+ */
+function whatIfLeverTitle(
+  lever: MovedLever,
+  gain: Interval | null,
+  values: { stage: string; from: string; to: string },
+  state: EngineState,
+  strings: Words,
+  ctx: EngineCalcContext,
+): SlideTitle {
+  if (isPricedGain(gain)) return { key: "whatIfLever", values: { ...values, gain: whatIfPrinters(state, strings, ctx).approxMoney(gain) } };
+  const { payback: today } = lever.alone.today.kpis;
+  const { payback: projected } = lever.alone.projected.kpis;
+  if (MARGIN_ONLY_LEVERS.includes(lever.id) && today && projected) {
+    const payback = formatDurationInterval(projected, "months", ctx, strings.units);
+    const paybackToday = formatDurationInterval(today, "months", ctx, strings.units);
+    if (payback !== paybackToday) return { key: "whatIfLeverMargin", values: { ...values, payback, paybackToday } };
+  }
+  return { key: "whatIfLeverPlain", values };
+}
+
 /** The what-if slides, in the order they print: each lever alone, then all of them together when there are two or more. */
 function buildWhatIfSlides(state: EngineState, strings: Words, ctx: EngineCalcContext): { id: SlideId; slide: BuiltSlide }[] {
   const levers = movedLevers(state, strings, ctx);
@@ -1158,7 +1297,7 @@ function buildWhatIfSlides(state: EngineState, strings: Words, ctx: EngineCalcCo
   const slides: { id: SlideId; slide: BuiltSlide }[] = levers.map((lever) => {
     const gain = mrrGain(lever.alone);
     const values = { stage: strings.leverSubject[lever.id], from: lever.from, to: lever.to };
-    const title: SlideTitle = isPricedGain(gain) ? { key: "whatIfLever", values: { ...values, gain: approxMoney(gain) } } : { key: "whatIfLeverPlain", values };
+    const title = whatIfLeverTitle(lever, gain, values, state, strings, ctx);
     const curve = slideCurve(lever.alone.today.kpis, lever.alone.projected.kpis, strings.slide.curveWhatifOne, state, strings, ctx);
     return {
       id: `whatif:${lever.id}`,
@@ -1169,7 +1308,7 @@ function buildWhatIfSlides(state: EngineState, strings: Words, ctx: EngineCalcCo
   // One lever is already its own slide: « together » would repeat it.
   if (levers.length < 2) return slides;
   const targets: Partial<Record<LeverId, number>> = Object.fromEntries(levers.map((l) => [l.id, state.whatIf![l.id]!]));
-  const all = buildScenario(state, targets, ctx);
+  const all = scenarioOf(state, targets, ctx);
   const gain = mrrGain(all);
   const n = String(levers.length);
 
@@ -1248,7 +1387,8 @@ export function buildDeck(state: EngineState, derived: EngineDerived, strings: W
   // Sales-assisted ticked, alone or with self-serve: the deck of §18.8. Self-serve alone is the v1 deck below, to the character.
   if (state.setup.motions.slg) return buildMotionsDeck(state, derived, strings, metrics, ctx, prose);
   const snapshot = currentSnapshot(state);
-  const starsKnown = METRIC_SHAPES.filter((s) => s.primary && knownIn(state, s.id, ctx).kind === "known").length;
+  // The ★ of the numbers the setup shows: the SaaS's list as before, an app's own (§21.7.4).
+  const starsKnown = shapesOf(state.setup).filter((s) => s.primary && knownIn(state, s.id, ctx).kind === "known").length;
   // Under two ★ known, the message is "we can't see the engine yet": visibility leads and there is no leak to name (§9.2).
   const blindEngine = starsKnown < 2;
 
@@ -1280,7 +1420,14 @@ export function buildDeck(state: EngineState, derived: EngineDerived, strings: W
     },
     leak: { present: leak.present && !blindEngine, title: leak.title, lines: leak.lines, notes: leak.notes },
     visibility: { present: true, title: visibility.title, lines: visibility.lines, notes: [] },
-    "unit-economics": { present: unit.present, title: unit.title, lines: unit.lines, notes: [], ...(unit.paybackChart ? { paybackChart: unit.paybackChart } : {}) },
+    "unit-economics": {
+      present: unit.present,
+      title: unit.title,
+      lines: unit.lines,
+      notes: [],
+      ...(unit.paybackChart ? { paybackChart: unit.paybackChart } : {}),
+      ...(unit.installChart ? { installChart: unit.installChart } : {}),
+    },
     mirror: {
       present: mirrorLinked,
       title: {
@@ -1321,7 +1468,8 @@ export function buildDeck(state: EngineState, derived: EngineDerived, strings: W
 
   const tools = [
     ...new Set(
-      METRIC_SHAPES.map((s) => entryOf(snapshot, s.id))
+      motionShapes(state.setup)
+        .map((s) => entryOf(snapshot, s.id))
         .filter((e) => e?.status === "measured" && e.source?.kind === "tool")
         .map((e) => sourceLabel(e!.source, strings)),
     ),

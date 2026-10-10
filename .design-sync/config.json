@@ -121,6 +121,7 @@
     "EngineProgress": "src/components/engine/EngineProgress.tsx",
     "EngineStart": "src/components/engine/EngineStart.tsx",
     "HowItCompares": "src/components/engine/HowItCompares.tsx",
+    "InstallPaybackChart": "src/components/engine/InstallPaybackChart.tsx",
     "LeverCard": "src/components/engine/LeverCard.tsx",
     "LeverSum": "src/components/engine/LeverSum.tsx",
     "MoneyBlock": "src/components/engine/MoneyBlock.tsx",

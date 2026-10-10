@@ -872,7 +872,7 @@ Le texte, chiffre par chiffre. Les formulations sont un premier jet pour le bon
 **`acq.signup-rate`**
 - name : « Taux d'installation » / "Install rate"
 - oneLiner : « La part des visiteurs de ta fiche qui installent l'app. » / "The share of your store page's visitors who install the app."
-- formula : « premières installations du mois ÷ visiteurs uniques de ta fiche App Store ou Google Play du mois » / "first-time installs in the month ÷ unique visitors to your App Store or Google Play page in the month"
+- formula : « premières installations du mois ÷ visiteurs uniques de la fiche App Store ou Google Play du mois » / "first-time installs in the month ÷ unique visitors to the App Store or Google Play page in the month" *(« la fiche », pas « ta fiche » : l'annexe d'une slide l'imprime, et une slide ne tutoie pas ; décidé par Antoine le 2026-10-10, relevé par APP-9)*
 - inputs : numérateur « Installations en {month} » / "Installs in {month}" ; dénominateur « Visiteurs de la fiche en {month} » / "Store page visitors in {month}"
 - where :
   1. app-store-connect · « App Store Connect » · « Analytics : la métrique Product Page Views (vues uniques de la fiche) et la métrique First-Time Downloads, sur le mois » / "Analytics: the Product Page Views metric (unique views of your page) and the First-Time Downloads metric, over the month"
@@ -1959,6 +1959,18 @@ installation ») ; `paysBack` = `slide.installChartPaysBack` ; `loss` =
 `slide.installChartSummaryHealthy` ou `slide.installChartSummaryLoss`
 (§21.8.4 b).
 
+**Ce qu'APP-9 a précisé en exécutant** : le composant prend aussi `summary`
+(le `figcaption`) et `id` (le motif hachuré) ; `size="sm"` retire
+l'étiquette du coût, comme `PaybackChart`. L'étiquette de la perte est dans
+l'accolade quand elle y tient, au-dessus de la ligne du coût sinon
+(`installLossLabelY`) ; les tics 12 et 24 n'ont pas d'étiquette. Un seul
+récit à la fois : `labels.loss` n'est écrit que pour une perte,
+`labels.paysBack` que pour un remboursement ; la tuile « remboursement »
+d'une perte porte l'étiquette de la perte en note. `summary` n'est pas écrit
+quand `installChartSummaryLoss` manquerait de `{ltv}` ou de `{gap}` (relevé
+par la relecture d'APP-9). Le test d'export (la ligne du coût à l'encre, le
+dessous de la courbe en papier) est un spec de `e2e/engine-deck-theme.spec.ts`.
+
 ### 21.7 Les slides (`deck.ts`, `deck-unit.ts`, `phrases.ts`, `_engine/deck/*`, APP-9)
 
 Le modèle du deck d'une app est celui du libre-service : mêmes slides, même
@@ -2047,12 +2059,34 @@ aujourd'hui. `Impact.mrrPerMonth` = le total affiché. Le titre est
 `leakClearMrrNew` ou `leakClearMrrRetained`, avec les mots de l'app
 (§21.8).
 
+**Moins d'un actif** (décidé par Antoine le 2026-10-10, relevé par la
+relecture d'APP-9) : quand le gain d'une chaîne sur les actifs fait moins d'un
+actif, sa ligne `less-than-one` ne lit pas `whatIf.lessThanOne` (le calque de
+l'app y écrit « abonné ») : `chainTemplate` prend `whatIf.lessThanOneActive`
+pour `"actives-flow"` et `whatIf.lessThanOneActiveKept` pour
+`"actives-retention"`, et `worthOf` prend `worth.lessThanOneActive` et
+`worth.lessThanOneActiveKept` de même (§21.8.4 b). La chaîne
+`"subscriptions"` garde `lessThanOne`.
+
+**Ce qu'APP-9 a précisé en exécutant** :
+- les lignes `usage-then`, `usage-times`, `sum`, et `times` des deux chaînes
+  sur les actifs, n'ont pas de libellé (`label: null`) : « × revenu par
+  abonné » serait faux pour un actif ;
+- un flux coché mais incalculable : la chaîne des abonnés garde ses abonnés
+  (un titre en abonnés, sans argent) ; une chaîne sur les actifs rend `null`
+  quand il manque les installations, J30 ou le revenu par actif, et la slide
+  de la fuite ne se fait pas ;
+- `annual` de la chaîne à deux flux : `abonnements × twelveMonthFactor(churn,
+  borne haute arrondie) + usage × twelveMonthFactor(100 − rétention des
+  actifs, borne basse arrondie)`, depuis les montants imprimés ; sans churn
+  ou sans rétention connus, pas de ligne `annual`.
+
 **L'exemple** (J30 de 12 à 15 %, §21.9) doit imprimer, en français :
 « 12 %, soit 360 nouveaux abonnés par mois » · « La rétention à J30 atteint
 15 % (cible de l'équipe) » · « 360 × 15/12 = 450 (+90) » · « 6,40 € par
 abonné, soit ~580 € d'abonnements ajoutés chaque mois » · « Et 1 440 nouveaux
-actifs × 15/12 = 1 800 (+360) » · « 0,70 € par actif, soit ~250 € d'achats et
-de pub ajoutés chaque mois » · « Soit ~830 € de revenu ajouté chaque mois. ».
+actifs × 15/12 = 1 800 (+360) » · « 0,70 € par actif, soit ~250 € de revenu
+des actifs ajouté chaque mois » (`whatIf.timesActivesFlow`, §21.8.4 b) · « Soit ~830 € de revenu ajouté chaque mois. ».
 *Les arrondis « ~ » suivent `formatApproxMoneyInterval` (deux chiffres
 significatifs) ; APP-9 relève les chaînes réelles dans son journal et
 s'arrête si un nombre exact (360, 450, 90, 1 440, 1 800, 360) diffère.*
@@ -2095,6 +2129,10 @@ et `derived.unit` (§21.5.5), et rend :
 - `deck/deck-rows.ts` : `value12` rejoint les lignes `ROW_FIELDS` de la slide
   (son test, `deck-rows.test.ts`, la vérifie contre le vrai `buildDeck`) ;
   `SlideUnitEconomics.tsx` rend sa tuile entre `cac` et `ltv`.
+- *Précisé par APP-9* : `slide.unitAssumeApp` n'est écrite que quand la
+  courbe l'est ; le pied « sources » lit `motionShapes(state.setup)` au lieu
+  de `METRIC_SHAPES` (identique pour le SaaS ; sans cela AppsFlyer manquait
+  au pied d'une app).
 
 #### 21.7.4 Les « Et si »
 
@@ -2110,7 +2148,8 @@ et `derived.unit` (§21.5.5), et rend :
   change pas : `deck-slg.ts:219` la lit aussi) : `mrr12`, `arr12`, `nrr`
   (avec les abonnements), `cac`, `value12` (`kpis.app.value12`, libellé
   `scenario.kpiValue12`), `ltv`, `ltvCac`, `payback` ; jamais `cash`.
-  `WhatIfKpiId` gagne `"value12"`. Ses lignes de funnel (`STEP_ROWS`) perdent
+  `WhatIfKpiId` (dans `deck.ts`) gagne `"value12"`, et `WhatIfKpis` gagne
+  `app?: { value12 }`. Ses lignes de funnel (`STEP_ROWS`) perdent
   `paying` sans les abonnements.
 - `deck.ts:1251` (`starsKnown`) compte les ★ de `shapesOf(state.setup)`.
 
@@ -2497,6 +2536,8 @@ les affiche pas). Chaque unité ajoute celles qu'elle utilise.
 | APP-9 | `whatIf.usageThenReferral` | Et {n} nouveaux actifs × (100 – {rate})/(100 – {target}) = {m} (+{delta}) | And {n} new actives × (100 – {rate})/(100 – {target}) = {m} (+{delta}) |
 | APP-9 | `whatIf.sumApp` | Soit {amount} de revenu ajouté chaque mois. | That's {amount} of revenue added every month. |
 | APP-9 | `whatIf.annualApp` | Soit {amount} de revenu de plus au bout d'un an, départs compris. | That's {amount} more revenue after a year, departures included. |
+| APP-9 | `whatIf.lessThanOneActive` · `lessThanOneActiveKept` (décidé par Antoine le 2026-10-10, §21.7.2) | Moins d'un actif de plus par mois. · Moins d'un actif gardé de plus par mois. | Less than one more active a month. · Less than one more active kept a month. |
+| APP-9 | `worth.lessThanOneActive` · `lessThanOneActiveKept` (idem) | moins d'un actif de plus par mois · moins d'un actif gardé de plus par mois | less than one more active a month · less than one more active kept a month |
 | APP-9 | `slide.unitValue12` | Valeur sur 12 mois | 12-month value |
 | APP-9 | `slide.unitAssumeApp` | Une installation : sa marge baisse chaque mois avec les départs ; le remboursement se lit sur cette courbe. | One install: its margin falls each month as people leave; the payback is read on that curve. |
 | APP-9 | `scenario.kpiValue12` | Valeur d'une installation sur 12 mois | An install's 12-month value |
@@ -3270,7 +3311,8 @@ relire" src/`), puis l'ouverture par Antoine.
   l'app perdent `deck: false`), `content/engine-copy.ts` (APP-9,
   dont `slideTitles.pelotonCompleteTwo`), `content/engine-copy-consumer.ts`
   (la réécriture de `pelotonCompleteTwo`), `engine-copy.test.ts`
-  (`TITLE_CONTRACT`), leurs tests.
+  (`TITLE_CONTRACT`), `e2e/engine-deck-theme.spec.ts` (le test d'export de
+  §21.6.6), leurs tests.
 - **Étapes** : §21.7.1 à §21.7.5 dans l'ordre (dont `deck.ts:476`, l'aparté
   de la fuite, sur les clés de `positions`, et `pelotonTitle` par chiffre) ;
   la chaîne de l'exemple (§21.7.2) vérifiée ligne par ligne ; `chainTemplate`

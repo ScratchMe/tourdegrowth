@@ -1,15 +1,18 @@
 import { describe, expect, it } from "vitest";
+import { appWhatIf } from "../app";
 import { CANDIDATE_IDS, METRIC_SHAPES, shapeOf, shapesOf } from "../catalog-shape";
 import { buildDeck, chainLine, comparatorText, deckMarkdown, renderTitle, targetPhrase } from "../deck";
 import { deriveEngine } from "../derive";
 import { comparatorOf, impactTarget } from "../diagnose";
+import { EXAMPLE_CONSUMER_WHATIF } from "../example";
 import { fillTemplate, formatInterval } from "../format";
 import { whatIf } from "../impact";
 import { behindSentence, blindSentence, catalogueValues, notEnoughBelowSentence, staticCatalogueValues, subjectOf, unpricedSentence } from "../phrases";
 import { buildRequest } from "../request";
 import { findingText, sanityText } from "../sentences";
+import { candidatesFor } from "../scenario-of";
 import { SLIDE_ORDER } from "../types";
-import type { EngineState, FindingKind, MetricEntry, SanityId, SlideTitleKey, SourceRef, ToolId } from "../types";
+import type { EngineState, FindingKind, MetricEntry, PlgCandidateId, SanityId, SelfServeCandidateId, SlideTitleKey, SourceRef, ToolId } from "../types";
 import { mergeStrings } from "../strings";
 import { knownIn } from "../values";
 import { CTX_EN, CTX_FR, EN, FR } from "./props";
@@ -119,14 +122,12 @@ const TOUR_ANSWERS = { "acq-1": 0, "acq-3": 2, "act-1": 0, "act-2": 1, "ret-1": 
 
 /**
  * `type: "consumer-app"` reads an app's resolved copy (the overlay merged over the engine's strings, and the app's own
- * catalogue prose), as the island does; `deck: false` leaves the deck and its text export out — an app's deck waits for
- * its slides (APP-9, §21.7), and `buildDeck` throws on one before them. APP-9 removes the flag.
+ * catalogue prose), as the island does. Since APP-9 an app's deck and its text export are swept like any other.
  */
 interface ScenarioDef {
   name: string;
   build: () => { state: EngineState; result?: ReturnType<typeof tourResult> };
   type?: "consumer-app";
-  deck?: false;
 }
 
 const SCENARIOS: ScenarioDef[] = [
@@ -404,14 +405,39 @@ const SCENARIOS: ScenarioDef[] = [
       }),
     }),
   },
-  // The consumer app (A22 APP-6, §21.5.5): its derivation, findings and checks, in its own words. No deck until APP-9.
-  { name: "the consumer app (§21.9)", type: "consumer-app", deck: false, build: () => ({ state: consumerState() }) },
-  { name: "the consumer app without subscriptions (§21.9)", type: "consumer-app", deck: false, build: () => ({ state: consumerUsageOnlyState() }) },
+  // The consumer app (A22 APP-6, §21.5.5; its deck, APP-9): its derivation, findings, checks and slides, in its own words.
+  { name: "the consumer app (§21.9)", type: "consumer-app", build: () => ({ state: consumerState() }) },
+  { name: "the consumer app without subscriptions (§21.9)", type: "consumer-app", build: () => ({ state: consumerUsageOnlyState() }) },
+  // Its two « Et si » (§21.9.1): day-30 retention (a priced gain) and the commission (a payback only: `whatIfLeverMargin`).
+  { name: "the consumer app with its what-ifs (§21.9)", type: "consumer-app", build: () => ({ state: withWhatIf(consumerState(), EXAMPLE_CONSUMER_WHATIF) }) },
+  {
+    name: "the consumer app without subscriptions, day-30 retention and the actives' retention moved",
+    type: "consumer-app",
+    build: () => ({ state: withWhatIf(consumerUsageOnlyState(), { "ret.d30": 15, "app.ret.active-retention": 95 }) }),
+  },
+  // The gain on the actives is under one (§21.7.2): « Moins d'un actif de plus par mois », and the one that keeps.
+  {
+    name: "the consumer app without subscriptions, three installs a month (a gain under one new active)",
+    type: "consumer-app",
+    build: () => {
+      const state = consumerUsageOnlyState();
+      state.snapshots[0]!.base = { ...state.snapshots[0]!.base, monthSignups: 3, cohortSignups: 3 };
+      return { state };
+    },
+  },
+  {
+    name: "the consumer app, five actives (a gain under one active kept)",
+    type: "consumer-app",
+    build: () => {
+      const state = consumerState();
+      state.snapshots[0]!.base = { ...state.snapshots[0]!.base, appActives: 5 };
+      return { state };
+    },
+  },
   {
     // 11 655 € of 33 300 € billed: 35 %, past the 30 % that rarely is the commission alone.
     name: "the consumer app, commission at 35 %",
     type: "consumer-app",
-    deck: false,
     build: () => ({ state: withEntry(consumerState(), "app.rev.commission", measured(ratio(11_655, 33_300), tool("revenuecat"))) }),
   },
 ];
@@ -446,20 +472,23 @@ function sweep(): Sweep {
       const derived = deriveEngine(state, p.ctx, result ?? null, p.bridges, strings.units);
 
       // The deck: every title, every printed field of every line, every note, the footer, and the text export.
-      if (scenario.deck !== false) {
-        const deck = buildDeck(state, derived, strings, metrics, p.ctx, { derived: proseDerived, bridges: p.bridges });
-        for (const slide of deck.slides) {
-          if (!slide.present) continue;
-          out.titleKeys.add(slide.title.key);
-          add(`${slide.id} title`, renderTitle(slide.title, strings), true);
-          slide.lines.forEach((line, i) => {
-            for (const [key, value] of Object.entries(line)) if (!MACHINE_KEYS.has(key) && value !== "") add(`${slide.id} line ${i} ${line.row}.${key}`, value, true);
-          });
-          slide.notes.forEach((note, i) => add(`${slide.id} note ${i}`, note, true));
+      const deck = buildDeck(state, derived, strings, metrics, p.ctx, { derived: proseDerived, bridges: p.bridges });
+      for (const slide of deck.slides) {
+        if (!slide.present) continue;
+        out.titleKeys.add(slide.title.key);
+        add(`${slide.id} title`, renderTitle(slide.title, strings), true);
+        slide.lines.forEach((line, i) => {
+          for (const [key, value] of Object.entries(line)) if (!MACHINE_KEYS.has(key) && value !== "") add(`${slide.id} line ${i} ${line.row}.${key}`, value, true);
+        });
+        slide.notes.forEach((note, i) => add(`${slide.id} note ${i}`, note, true));
+        // The picture's own words: its labels and the sentence that describes it (an app's `installChart`).
+        if (slide.installChart) {
+          for (const [key, value] of Object.entries(slide.installChart.labels)) if (value !== "") add(`${slide.id} installChart.labels.${key}`, value, true);
+          if (slide.installChart.summary !== undefined) add(`${slide.id} installChart.summary`, slide.installChart.summary, true);
         }
-        add("footer", deck.footer.text, true);
-        add("markdown", deckMarkdown(deck, strings), true);
       }
+      add("footer", deck.footer.text, true);
+      add("markdown", deckMarkdown(deck, strings), true);
 
       // What the board and the "to check" list print.
       for (const f of derived.findings) {
@@ -484,11 +513,14 @@ function sweep(): Sweep {
         add(`diagnosis named ${id}`, behindSentence(comparator, value, comparatorText(state, id, strings, p.ctx), strings), false);
       }
 
-      // The "what if" drawer, for every stage that has a comparator — the leak slide only shows the named one.
-      for (const id of CANDIDATE_IDS) {
+      // The "what if" drawer, for every stage that has a comparator — the leak slide only shows the named one. An app's
+      // are its own, and its chain has its own sentences (§21.7.2).
+      for (const id of app ? candidatesFor(state.setup, "plg") : CANDIDATE_IDS) {
         const comparator = comparatorOf(state, id);
         if (!comparator) continue;
-        const impact = whatIf(state, id, impactTarget(comparator), p.ctx, strings.units);
+        const impact = app
+          ? appWhatIf(state, id as SelfServeCandidateId, impactTarget(comparator), p.ctx, strings.units)
+          : whatIf(state, id as PlgCandidateId, impactTarget(comparator), p.ctx, strings.units);
         if (!impact) continue;
         const target = targetPhrase(comparator, id, state, strings, p.ctx);
         for (const line of impact.lines) add(`what-if ${id} ${line.key}`, chainLine(line, impact, subjectOf(id, strings, metrics), target, strings, locale).text, false);
@@ -671,6 +703,15 @@ describe("the sweep reaches every sentence it claims to", () => {
     expect(kinds.filter((k) => !SWEEP.findingKinds.has(k))).toEqual([]);
     const ids: SanityId[] = ["num-gt-den", "retained-gt-activated", "paid-gt-retained", "churn-high", "margin-odd", "commission-high", "ttv-mean", "cohort-mismatch", "reconcile-gap"];
     expect(ids.filter((k) => !SWEEP.sanityIds.has(k))).toEqual([]);
+  });
+
+  it("and reaches the app's « less than one active » sentences, in both languages", () => {
+    const all = SWEEP.samples.map((s) => s.text).join("\n");
+    for (const needle of [
+      "Moins d'un actif de plus par mois.", "Moins d'un actif gardé de plus par mois.", "Less than one more active a month.", "Less than one more active kept a month.",
+      "moins d'un actif de plus par mois", "moins d'un actif gardé de plus par mois", "less than one more active a month", "less than one more active kept a month",
+    ])
+      expect(all, needle).toContain(needle);
   });
 
   it("and reaches the forms the rules are about", () => {

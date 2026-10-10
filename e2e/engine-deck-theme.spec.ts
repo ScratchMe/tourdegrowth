@@ -1,7 +1,8 @@
 import { readFile } from "node:fs/promises";
 import type { Page } from "@playwright/test";
 import { ENGINE_COPY } from "@/content/engine-copy";
-import { exampleState } from "../src/lib/engine/__tests__/fixtures";
+import { consumerState, exampleState } from "../src/lib/engine/__tests__/fixtures";
+import type { EngineState } from "../src/lib/engine/types";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
 import { engineSeed, storedEngineEntry } from "./engine-helpers";
 
@@ -19,13 +20,13 @@ test.beforeEach(async ({ context }) => {
  * ground changes: the paper's #e7e1d2 becomes pure white, without its lift.
  */
 
-async function openDeck(page: Page, locale: "en" | "fr"): Promise<void> {
+async function openDeck(page: Page, locale: "en" | "fr", state: EngineState = exampleState()): Promise<void> {
   await page.clock.setFixedTime(new Date(2026, 8, 24, 12));
   await page.addInitScript((items) => {
     if (sessionStorage.getItem("e2e-engine-seeded")) return;
     for (const [key, value] of items) localStorage.setItem(key, value);
     sessionStorage.setItem("e2e-engine-seeded", "1");
-  }, engineSeed(exampleState()));
+  }, engineSeed(state));
   await page.goto(`/${locale}/aarrr-funnel-template`);
   await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
   await page.getByTestId("engine-open-deck").click();
@@ -120,6 +121,40 @@ test("the PNG keeps a chart's lines: under the unit economics' cost line, ink (A
   const [r, g, b] = await pngPixel(page, (await (await download).path())!, at.x, at.y);
   // Ink is dark; the paper around it is rgb(231, 225, 210).
   expect(Math.max(r, g, b)).toBeLessThan(120);
+});
+
+/*
+ * The same for an app's picture of an install (A22 APP-9, §21.6.6): its curve is a path, which html-to-image would fill
+ * black without the inlined styles — a black shape under the curve, not a line. Under the cost line, ink; under the
+ * curve, well above the axis, the slide's paper. The app's engine opens with the owner's preview like the SaaS's, on
+ * a build whose `ENGINE_TYPES` holds the app (the CI's).
+ */
+test("the PNG keeps an install's curve a line: ink under the cost line, the paper under the curve (A22 APP-9)", async ({ page }) => {
+  await openDeck(page, "fr", consumerState());
+  const slide = page.getByTestId("slide-unit-economics");
+  const chart = slide.locator('[data-testid="slide-install-payback-chart"]');
+  await expect(chart).toHaveCount(1);
+  await expect(slide.locator('[data-testid="slide-payback-chart"]')).toHaveCount(0);
+  // The cost line's middle, and a point a little above the axis, 3/4 along it — in the 1 920-pixel slide's own coordinates.
+  const at = await slide.evaluate((el) => {
+    const box = el.getBoundingClientRect();
+    const k = 1920 / box.width;
+    const rect = (selector: string) => el.querySelector(`[data-testid="slide-install-payback-chart"] svg ${selector}`)!.getBoundingClientRect();
+    const cost = rect('line[class*="cost"]');
+    const axis = rect('line[class*="axis"]');
+    return {
+      cost: { x: Math.round((cost.left + cost.width / 2 - box.left) * k), y: Math.round((cost.top + cost.height / 2 - box.top) * k) },
+      under: { x: Math.round((axis.left + axis.width * 0.75 - box.left) * k), y: Math.round((axis.top - box.top) * k) - 40 },
+    };
+  });
+  const download = page.waitForEvent("download");
+  await page.getByTestId("deck-png-unit-economics").click();
+  const file = (await (await download).path())!;
+  const [r, g, b] = await pngPixel(page, file, at.cost.x, at.cost.y);
+  expect(Math.max(r, g, b)).toBeLessThan(120);
+  // Not filled black: the paper is rgb(231, 225, 210), the slide's lighter corner is lighter still.
+  const [pr, pg, pb] = await pngPixel(page, file, at.under.x, at.under.y);
+  expect(Math.min(pr, pg, pb)).toBeGreaterThan(190);
 });
 
 /*

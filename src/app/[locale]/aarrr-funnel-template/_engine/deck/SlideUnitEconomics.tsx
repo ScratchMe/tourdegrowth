@@ -1,5 +1,8 @@
+import type { CSSProperties } from "react";
 import { CashWarning } from "@/components/engine/CashWarning";
+import { InstallPaybackChart } from "@/components/engine/InstallPaybackChart";
 import { PaybackChart } from "@/components/engine/PaybackChart";
+import { installChartGeometry } from "@/lib/viz/install-payback-chart";
 import { rowOf } from "./deck-rows";
 import { SlideFrame, type SlideProps } from "./SlideFrame";
 import { SlideText } from "./slide-text";
@@ -31,6 +34,12 @@ export const UNIT_CHART = { width: 900, height: 330 } as const;
  * prints « ? », never a 0 — and never a margin-less LTV, the flattering
  * version the glossary warns against (§5.7). Ink only: a certain loss titles
  * the slide in ink (C48, C53), a warning wears the advice's dashed edge.
+ *
+ * A consumer app's slide (§21.7.3) has five tiles — the cost per install, its
+ * value over 12 months, over 36 months, their ratio and its payback; no
+ * months after payback, no cash — and `InstallPaybackChart` in the picture's
+ * place: an install pays back along a curve, not a line. It reads
+ * `slide.installChart`, which only an app's slide carries.
  */
 export function SlideUnitEconomics({ slide, context }: SlideProps) {
   const cac = rowOf(slide, "cac");
@@ -39,10 +48,11 @@ export function SlideUnitEconomics({ slide, context }: SlideProps) {
   const assume = rowOf(slide, "assume");
   const cap = rowOf(slide, "cap");
   const chart = slide.paybackChart;
+  const install = slide.installChart;
 
   const tiles: Tile[] = [
     cac ? { id: "cac", label: cac.label, value: cac.value, note: cac.variant } : null,
-    ...(["ltv", "ltvCac", "payback", "after", "cash"] as const).map((kind) => {
+    ...(["value12", "ltv", "ltvCac", "payback", "after", "cash"] as const).map((kind) => {
       const row = rowOf(slide, kind);
       return row ? { id: kind === "ltvCac" ? "ltv-cac" : kind, label: row.label, value: row.value, note: row.note } : null;
     }),
@@ -51,7 +61,8 @@ export function SlideUnitEconomics({ slide, context }: SlideProps) {
   return (
     <SlideFrame slide={slide} context={context}>
       <div className={styles.unit}>
-        <ul className={`${styles.figureRow} ${styles.figureRowSix}`}>
+        {/* The money's six tiles in one row; an app has five (`--figure-columns`), the SaaS's row doesn't change. */}
+        <ul className={`${styles.figureRow} ${styles.figureRowSix}`} style={install ? ({ "--figure-columns": 5 } as CSSProperties) : undefined}>
           {tiles.map((tile) => {
             const known = tile.value !== "";
             return (
@@ -67,7 +78,15 @@ export function SlideUnitEconomics({ slide, context }: SlideProps) {
         </ul>
 
         <div className={styles.unitLower}>
-          {chart ? (
+          {install ? (
+            <InstallPaybackChart
+              geometry={installChartGeometry({ curve: install.curve, cost: install.cost, payback: install.payback, story: install.story, ...UNIT_CHART })}
+              labels={install.labels}
+              summary={install.summary}
+              id={`install-payback-${slide.id}`}
+              data-testid="slide-install-payback-chart"
+            />
+          ) : chart ? (
             <PaybackChart
               story={chart.story}
               monthlyMargin={chart.monthlyMargin}

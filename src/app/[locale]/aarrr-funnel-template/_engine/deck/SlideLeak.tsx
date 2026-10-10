@@ -3,13 +3,16 @@ import { SlideFrame, type SlideProps } from "./SlideFrame";
 import { SlideText } from "./slide-text";
 import styles from "./deck.module.css";
 
-/** The four steps of the chain, in the order they recompute from one another (§6.7). */
-const CHAIN_STEPS = new Set(["today", "if", "then", "times"]);
+/**
+ * The steps of the chain, in the order they recompute from one another (§6.7). An app with subscriptions and a usage
+ * stream (§21.7.2) has three more after `times`: the second stream's two lines and the sum of both.
+ */
+const CHAIN_STEPS = new Set(["today", "if", "then", "times", "usage-then", "usage-times", "sum"]);
 
 /**
  * Slide 2 — "where it leaks, and what that is worth" (§9.3).
  *
- * Left, "the calculation" in four lines, each one recomputable from the
+ * Left, "the calculation" in four lines (seven for an app with two streams), each one recomputable from the
  * numbers printed on the line before (§6.7) — and these are the SAME lines
  * the title's amount was read from (`buildDeck` takes the title's figure from
  * the chain's "× ARPA" line), which is the whole point: the angles'

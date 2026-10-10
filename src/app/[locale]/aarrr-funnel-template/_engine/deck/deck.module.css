@@ -1154,7 +1154,8 @@
  * the slide. Under them, the picture and, beside it, what it assumes.
  */
 .figureRowSix {
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  /* An app's slide has five (`SlideUnitEconomics` sets --figure-columns); the SaaS's keeps its six, to the pixel. */
+  grid-template-columns: repeat(var(--figure-columns, 6), minmax(0, 1fr));
   gap: 18px;
 }
 

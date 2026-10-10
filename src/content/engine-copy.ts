@@ -876,6 +876,11 @@ export const ENGINE_COPY = {
     perHundredRenewalOne: { fr: "{n} contrat gardé de plus pour 100 contrats échus", en: "{n} more contract kept per 100 up for renewal" },
     lessThanOneQuarter: { fr: "moins d'un client de plus par trimestre", en: "less than one more customer a quarter" },
     lessThanOneKept: { fr: "moins d'un contrat gardé de plus par trimestre", en: "less than one more contract kept a quarter" },
+    /**
+     * TODO: à relire (convention 6) — copie neuve, §21.7.2 (A22 APP-9, décidé par Antoine le 2026-10-10) : what `worthOf` says of a gain of less than one active; the app's overlay never has to rewrite it.
+     */
+    lessThanOneActive: { fr: "moins d'un actif de plus par mois", en: "less than one more active a month" },
+    lessThanOneActiveKept: { fr: "moins d'un actif gardé de plus par mois", en: "less than one more active kept a month" },
   },
 
   // --- Closed vocabularies (§14.4) -----------------------------------------
@@ -1574,6 +1579,61 @@ export const ENGINE_COPY = {
       en: "That's {amount} more MRR after a year, churn included.",
     },
     lessThanOne: { fr: "Moins d'un client de plus par mois.", en: "Less than one more customer a month." },
+    /**
+     * TODO: à relire — copie neuve (convention 6), §21.7.2 (A22 APP-9) : the chain of an app's usage stream (purchases and ads
+     * on the month's actives), its sum with the subscriptions, and the chain of the actives' retention (`todayActives` to
+     * `timesActives`). `{perActive}`: the revenue per active; `{base}`: the actives.
+     */
+    todayActives: {
+      fr: "{retention} des actifs gardés d'un mois sur l'autre, sur {base} actifs",
+      en: "{retention} of actives kept from one month to the next, out of {base} actives",
+    },
+    thenActives: {
+      fr: "{base} × ({target} – {retention}) = {n} actifs gardés de plus par mois",
+      en: "{base} × ({target} – {retention}) = {n} more actives kept a month",
+    },
+    thenActivesOne: {
+      fr: "{base} × ({target} – {retention}) = {n} actif gardé de plus par mois",
+      en: "{base} × ({target} – {retention}) = {n} more active kept a month",
+    },
+    timesActives: {
+      fr: "{perActive} par actif, soit {amount} de revenu des actifs préservé chaque mois",
+      en: "{perActive} per active, i.e. {amount} of revenue from actives kept every month",
+    },
+    todayActivesFlow: {
+      fr: "{rate}, soit {n} nouveaux actifs par mois",
+      en: "{rate}, i.e. {n} new actives a month",
+    },
+    todayActivesFlowOne: {
+      fr: "{rate}, soit {n} nouvel actif par mois",
+      en: "{rate}, i.e. {n} new active a month",
+    },
+    timesActivesFlow: {
+      fr: "{perActive} par actif, soit {amount} de revenu des actifs ajouté chaque mois",
+      en: "{perActive} per active, i.e. {amount} of revenue from actives added every month",
+    },
+    usageThenFlow: {
+      fr: "Et {n} nouveaux actifs × {target}/{rate} = {m} (+{delta})",
+      en: "And {n} new actives × {target}/{rate} = {m} (+{delta})",
+    },
+    usageThenReferral: {
+      fr: "Et {n} nouveaux actifs × (100 – {rate})/(100 – {target}) = {m} (+{delta})",
+      en: "And {n} new actives × (100 – {rate})/(100 – {target}) = {m} (+{delta})",
+    },
+    sumApp: {
+      fr: "Soit {amount} de revenu ajouté chaque mois.",
+      en: "That's {amount} of revenue added every month.",
+    },
+    annualApp: {
+      fr: "Soit {amount} de revenu de plus au bout d'un an, départs compris.",
+      en: "That's {amount} more revenue after a year, departures included.",
+    },
+    /**
+     * TODO: à relire (convention 6) — copie neuve, §21.7.2 (A22 APP-9, décidé par Antoine le 2026-10-10) : the « less than one » line of an app's chains on the actives, which never says « abonné »;
+     * `chainTemplate` reads `lessThanOneActive` for the flow chain and `lessThanOneActiveKept` for the retention chain.
+     */
+    lessThanOneActive: { fr: "Moins d'un actif de plus par mois.", en: "Less than one more active a month." },
+    lessThanOneActiveKept: { fr: "Moins d'un actif gardé de plus par mois.", en: "Less than one more active kept a month." },
     targetTeam: { fr: "{value} (cible de l'équipe)", en: "{value} (team target)" },
   },
   /**
@@ -1708,6 +1768,8 @@ export const ENGINE_COPY = {
     kpiCac: { fr: "CAC", en: "CAC" },
     kpiLtv: { fr: "LTV", en: "LTV" },
     kpiPayback: { fr: "CAC payback", en: "CAC payback" },
+    // TODO: à relire — copie neuve (convention 6), §21.7.4 (A22 APP-9) : the app's what-if table, between the cost per install and the 36-month value.
+    kpiValue12: { fr: "Valeur d'une installation sur 12 mois", en: "An install's 12-month value" },
     /**
      * Validé au bon à tirer nº10 (2026-10-04) — neuf le 2026-10-03 (A20.d T3.b, le retour du brief 09, `panel.*` et `row.*`) : the
      * panel's three tables (`WhatIfFigures`), replacing its seven tiles — their groups, their columns, the rows the money
@@ -2373,6 +2435,27 @@ export const ENGINE_COPY = {
       en: "One customer, month by month: its cost is known ({cac}), what it brings back is not. Missing: {input}.",
     },
     /**
+     * TODO: à relire — copie neuve (convention 6), §21.8.4 b (A22 APP-9) : la slide de l'économie d'une app. Le graphique
+     * d'une installation (`InstallPaybackChart`, §21.6.6) : ses deux étiquettes (`{payback}`, `{gap}` : une durée, une
+     * somme) et les deux phrases qui le décrivent (`{cpi}`, `{ltv}`, `{gap}` : des sommes). La tuile de la valeur sur 12 mois
+     * et ce que suppose la slide d'une app (`unitAssumeApp`, à la place de la trésorerie immobilisée).
+     */
+    installChartPaysBack: { fr: "remboursée : {payback}", en: "paid back: {payback}" },
+    installChartLoss: { fr: "pas remboursée en 36 mois, il manque {gap}", en: "not paid back in 36 months, {gap} short" },
+    installChartSummaryHealthy: {
+      fr: "Une installation, mois par mois : sa marge baisse à mesure que ses utilisateurs s'en vont ; elle rembourse ses {cpi} à {payback}.",
+      en: "One install, month by month: its margin falls as its users leave; it pays back its {cpi} at {payback}.",
+    },
+    installChartSummaryLoss: {
+      fr: "Une installation, mois par mois : sa marge baisse à mesure que ses utilisateurs s'en vont ; en 36 mois, elle rapporte {ltv}, {gap} de moins que ses {cpi}.",
+      en: "One install, month by month: its margin falls as its users leave; in 36 months it brings back {ltv}, {gap} short of its {cpi}.",
+    },
+    unitValue12: { fr: "Valeur sur 12 mois", en: "12-month value" },
+    unitAssumeApp: {
+      fr: "Une installation : sa marge baisse chaque mois avec les départs ; le remboursement se lit sur cette courbe.",
+      en: "One install: its margin falls each month as people leave; the payback is read on that curve.",
+    },
+    /**
      * Validé au bon à tirer nº10 (2026-10-04) — neuf le 2026-10-03 (A20.d T4.d, retour du brief 09, Q12) : l'unit economics de
      * l'hybride, les deux moteurs côte à côte, de `chartTimeLoss` à `unitBothReference`. La ligne des mois du graphique
      * en petit, ce que dit chaque côté du titre quand une perte est certaine, et la note commune sous les deux colonnes.
@@ -2541,6 +2624,11 @@ export const ENGINE_COPY = {
       fr: "Sur 100 inscrits, {activated}, {d30} et **{paid}**.",
       en: "Out of 100 sign-ups, {activated}, {d30} and **{paid}**.",
     },
+    // TODO: à relire — copie neuve (convention 6), §21.7.1 (A22 APP-9) : an app without subscriptions has two columns; the SaaS never fires it.
+    pelotonCompleteTwo: {
+      fr: "Sur 100 inscrits, {activated} et **{d30}**.",
+      en: "Out of 100 sign-ups, {activated} and **{d30}**.",
+    },
     pelotonGap: {
       fr: "Sur 100 inscrits, {clauses}. **Entre les deux, on ne voit rien : {stages} ne sont pas mesurées.**",
       en: "Out of 100 sign-ups, {clauses}. **In between, we see nothing: {stages} aren't measured.**",
@@ -2671,6 +2759,11 @@ export const ENGINE_COPY = {
     annex: { fr: "Définitions et sources ({i}/{n})", en: "Definitions and sources ({i}/{n})" },
     // TODO: à relire — nouveau (2026-09-26).
     whatIfLever: { fr: "Si {stage} passait à {to} (aujourd'hui : {from}), le MRR dans 12 mois gagnerait **{gain}**.", en: "If {stage} went from {from} to {to}, MRR in 12 months would gain **{gain}**." },
+    // TODO: à relire — copie neuve (convention 6), §21.7.4 (A22 APP-9) : an app's lever that touches only the margins (the stores' commission): the gain is on the payback.
+    whatIfLeverMargin: {
+      fr: "Si {stage} passait à {to} (aujourd'hui : {from}), une installation se rembourserait en **{payback}** au lieu de {paybackToday}.",
+      en: "If {stage} went to {to} (today: {from}), an install would pay back in **{payback}** instead of {paybackToday}.",
+    },
     // TODO: à relire — nouveau (2026-09-26).
     whatIfLeverPlain: { fr: "**Et si {stage} passait à {to} ?** Aujourd'hui : {from}.", en: "**What if {stage} went from {from} to {to}?**" },
     // TODO: à relire — nouveau (2026-09-26).

@@ -317,7 +317,12 @@ export function worthOf(impact: Impact, strings: Words, locale: Locale): string 
   // Sales-assisted counts a quarter (§18.5.3); its money is said a month, like self-serve's.
   const slg = motionOfMetric(impact.metric) === "slg";
   const renewal = impact.metric === "slg.ret.renewal";
-  if (impact.lines.some((l) => l.key === "less-than-one")) return slg ? (renewal ? w.lessThanOneKept : w.lessThanOneQuarter) : w.lessThanOne;
+  if (impact.lines.some((l) => l.key === "less-than-one")) {
+    // An app's chains on the actives say « actif », never « abonné » (§21.7.2); its subscriptions chain keeps `lessThanOne`.
+    if (impact.appChain === "actives-flow") return w.lessThanOneActive;
+    if (impact.appChain === "actives-retention") return w.lessThanOneActiveKept;
+    return slg ? (renewal ? w.lessThanOneKept : w.lessThanOneQuarter) : w.lessThanOne;
+  }
   const head = impactHeadline(impact);
   if (head.amount) return fillTemplate(impact.kind === "retained-mrr" ? w.retainedMrr : w.newMrr, { amount: head.amount });
   if (!head.n) return null;
@@ -347,13 +352,21 @@ type ChainTemplateKey = Exclude<keyof Words["whatIf"], "today" | "if" | "then" |
  */
 export function chainTemplate(
   line: ImpactLine,
-  impact: Pick<Impact, "metric" | "kind">,
+  impact: Pick<Impact, "metric" | "kind" | "appChain">,
   words: Words["whatIf"],
   locale: Locale,
 ): { label: string | null; template: string } {
   const churn = impact.metric === "ret.logo-churn";
   const pick = (key: ChainTemplateKey) => words[key];
+  // An app's chain (§21.7.2): `appWhatIf` says which of its three it built, and the table below is its templates.
+  if (impact.appChain === "actives-flow" || impact.appChain === "actives-retention") return activesChainTemplate(line, impact.appChain, impact.metric, words, locale);
   switch (line.key) {
+    case "usage-then":
+    case "usage-times":
+    case "sum":
+      // The second stream of an app's chain (§21.7.2): only `appChain: "subscriptions"` has one, and says it below.
+      if (impact.appChain === "subscriptions") return subscriptionsUsageTemplate(line.key, impact.metric, words);
+      throw new Error(`A chain without an app's usage stream has no ${line.key} line`);
     case "today":
       if (churn) return { label: words.today, template: words.todayChurn };
       return {
@@ -369,11 +382,54 @@ export function chainTemplate(
     case "times":
       return { label: words.times, template: churn ? words.timesChurn : words.timesFlow };
     case "annual":
-      return { label: null, template: words.annual };
+      return { label: null, template: impact.appChain === "subscriptions" ? words.annualApp : words.annual };
     case "less-than-one":
       return { label: null, template: words.lessThanOne };
     case "per-month":
       throw new Error("A self-serve chain has no per-month line: it counts a month already");
+  }
+}
+
+/** The subscriptions chain of an app, its second stream: the actives that day 30 brings, what they earn, and the sum (§21.7.2). */
+function subscriptionsUsageTemplate(key: "usage-then" | "usage-times" | "sum", metric: Impact["metric"], words: Words["whatIf"]): { label: string | null; template: string } {
+  if (key === "usage-then") return { label: null, template: metric === "ref.referred-share" ? words.usageThenReferral : words.usageThenFlow };
+  if (key === "usage-times") return { label: null, template: words.timesActivesFlow };
+  return { label: null, template: words.sumApp };
+}
+
+/**
+ * An app's chains on the month's actives (§21.7.2): the flows without subscriptions, and the actives' retention. The
+ * `if` line is the same sentence as everywhere; a line with no template of its own in the chain throws, as
+ * `per-month` does for a SaaS. The money line carries no label: « × revenu par abonné » would be false for an active.
+ */
+function activesChainTemplate(
+  line: ImpactLine,
+  chain: "actives-flow" | "actives-retention",
+  metric: Impact["metric"],
+  words: Words["whatIf"],
+  locale: Locale,
+): { label: string | null; template: string } {
+  const retention = chain === "actives-retention";
+  switch (line.key) {
+    case "today":
+      return { label: words.today, template: retention ? words.todayActives : words[numbered("todayActivesFlow", line.count, locale)] };
+    case "if":
+      return { label: words.if, template: words.ifFlow };
+    case "then":
+      if (retention) return { label: words.then, template: words[numbered("thenActives", line.count, locale)] };
+      return { label: words.then, template: metric === "ref.referred-share" ? words.thenReferral : words.thenFlow };
+    case "times":
+      return { label: null, template: retention ? words.timesActives : words.timesActivesFlow };
+    case "annual":
+      return { label: null, template: words.annualApp };
+    case "less-than-one":
+      // « abonné » would be false for an active: the app's overlay rewrites `lessThanOne`, and these two never say it.
+      return { label: null, template: retention ? words.lessThanOneActiveKept : words.lessThanOneActive };
+    case "usage-then":
+    case "usage-times":
+    case "sum":
+    case "per-month":
+      throw new Error(`An app's ${chain} chain has no ${line.key} line`);
   }
 }
 
@@ -417,6 +473,10 @@ export function slgChainTemplate(
       return plain(null, term === "monthly" ? c.annualMonthly : c.annual);
     case "less-than-one":
       return plain(null, renewal ? c.lessThanOneKept : c.lessThanOne);
+    case "usage-then":
+    case "usage-times":
+    case "sum":
+      throw new Error(`A sales-assisted chain has no ${line.key} line: it belongs to a consumer app`);
   }
 }
 

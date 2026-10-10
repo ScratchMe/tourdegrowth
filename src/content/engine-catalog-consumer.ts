@@ -26,9 +26,10 @@ export const ENGINE_CATALOG_CONSUMER: Record<ConsumerPlgMetricId, EngineCatalogE
       fr: "La part des visiteurs de ta fiche qui installent l'app.",
       en: "The share of your store page's visitors who install the app.",
     },
+    // TODO: à relire (convention 6) — retouchée le 2026-10-10 (A22 APP-9) : « la fiche » au lieu de « ta fiche » (l'annexe d'une slide ne tutoie pas, décidé par Antoine).
     formula: {
-      fr: "premières installations du mois ÷ visiteurs uniques de ta fiche App Store ou Google Play du mois",
-      en: "first-time installs in the month ÷ unique visitors to your App Store or Google Play page in the month",
+      fr: "premières installations du mois ÷ visiteurs uniques de la fiche App Store ou Google Play du mois",
+      en: "first-time installs in the month ÷ unique visitors to the App Store or Google Play page in the month",
     },
     inputs: {
       numerator: { fr: "Installations en {month}", en: "Installs in {month}" },
