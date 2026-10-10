@@ -636,6 +636,18 @@ export const ENGINE_COPY = {
       fr: "Il rembourse son coût en {payback} et reste {life} : {after} de marge après le remboursement.",
       en: "It pays back its cost in {payback} and stays {life}: {after} of margin after payback.",
     },
+    /**
+     * TODO: à relire (convention 6) — neuf le 2026-10-08 (A22 APP-8, §21.6.4) : l'économie d'une installation, en une phrase de temps (`monthsApp`,
+     * suivie de `monthsAppBeyond` quand le pire cas dépasse 36 mois) et la raison de l'absence de trésorerie immobilisée (`lineApp`, D11).
+     */
+    monthsApp: {
+      fr: "Elle rembourse son coût en {payback}, puis continue de rapporter, de moins en moins, à mesure que ses utilisateurs s'en vont.",
+      en: "It pays back its cost in {payback}, then keeps bringing in, less and less, as its users leave.",
+    },
+    monthsAppBeyond: {
+      fr: "Dans le pire des cas, elle ne l'a pas remboursé au bout de 36 mois.",
+      en: "In the worst case, it hasn't paid it back after 36 months.",
+    },
     /** Sales-assisted, annual contracts. */
     slgAnnual: {
       fr: "Ses renouvellements reviennent une fois par an, et la durée de vie est plafonnée à 36 mois.",
@@ -654,6 +666,10 @@ export const ENGINE_COPY = {
       en: "Whether it all comes back isn't certain: customers may leave before they pay back.",
     },
     lineHealthy: { fr: "Elle revient toute, au fil des remboursements.", en: "It all comes back, as customers pay back." },
+    lineApp: {
+      fr: "Pas de trésorerie immobilisée pour une app : sa formule suppose qu'une installation rembourse son coût en parts égales, alors que sa marge baisse chaque mois.",
+      en: "No cash tied up for an app: its formula assumes an install pays back its cost in equal parts, while its margin falls every month.",
+    },
     lineNone: {
       fr: "Pas de chiffre de trésorerie sans payback : c'est lui qui dit quand la dépense revient.",
       en: "No cash figure without a payback: it says when the spend comes back.",
@@ -698,6 +714,24 @@ export const ENGINE_COPY = {
       fr: "Un client met {payback} à rembourser son coût : peut-être {n} ou plus. Saisis ton runway dans les Réglages pour y comparer ton payback.",
       en: "A customer takes {payback} to pay back its cost: maybe {n} or more. Type your runway in Settings to hold your payback against it.",
     },
+  },
+
+  /**
+   * TODO: à relire (convention 6) — neuf le 2026-10-08 (A22 APP-8, §21.6.4) : la bande des deux flux d'une app (`AppStreamsBand`) :
+   * ses titres selon l'usage coché, ses lignes et ses deux sommes. Les parts se lisent comme le MRR du bloc de l'argent.
+   */
+  appStreams: {
+    eyebrow: { fr: "Deux flux", en: "Two streams" },
+    titlePurchases: { fr: "Abonnements et achats", en: "Subscriptions and purchases" },
+    titleAds: { fr: "Abonnements et pub", en: "Subscriptions and ads" },
+    titleBoth: { fr: "Abonnements, achats et pub", en: "Subscriptions, purchases and ads" },
+    subscriptions: { fr: "Abonnements", en: "Subscriptions" },
+    total: { fr: "Revenu du mois", en: "Revenue this month" },
+    usagePurchases: { fr: "Achats intégrés", en: "In-app purchases" },
+    usageAds: { fr: "Publicité", en: "Ads" },
+    usageBoth: { fr: "Achats et pub", en: "Purchases and ads" },
+    newPerMonth: { fr: "Nouveau revenu par mois", en: "New revenue a month" },
+    in12Months: { fr: "Revenu dans 12 mois, au rythme actuel", en: "Revenue in 12 months, at today's pace" },
   },
 
   coverage: {
@@ -1690,6 +1724,8 @@ export const ENGINE_COPY = {
     rowAfter: { fr: "Mois après remboursement", en: "Months after payback" },
     rowSpend: { fr: "Dépensé en acquisition par mois", en: "Spent on acquisition a month" },
     rowCash: { fr: "Trésorerie immobilisée", en: "Cash tied up" },
+    // TODO: à relire (convention 6) — neuf le 2026-10-08 (A22 APP-8, §21.6.4) : `rowValue12`, la ligne de la valeur d'une installation sur 12 mois, le numérateur du ratio.
+    rowValue12: { fr: "Valeur sur 12 mois", en: "12-month value" },
     /**
      * Months after payback below zero: the customer leaves before paying their cost back — the loss, said in months.
      * `{n}`: how many months short (« ~5 mois »). TODO: à relire — réécrite le 2026-10-04 (A21.2) : « part avant » des
@@ -1703,6 +1739,11 @@ export const ENGINE_COPY = {
     assumeLtv: {
       fr: "LTV : la marge mensuelle sur la durée de vie comptée d'un client (1 ÷ churn, plafonnée à 36 mois), à l'ARPA d'aujourd'hui : l'expansion n'y entre pas.",
       en: "LTV: the monthly margin over a customer's counted lifetime (1 ÷ churn, capped at 36 months), on today's ARPA: expansion is not in it.",
+    },
+    // TODO: à relire (convention 6) — neuf le 2026-10-08 (A22 APP-8, §21.6.4) : `assumeLtvApp`, la règle de la valeur d'une installation, imprimée sous les tableaux d'une app à la place de `assumeLtv`.
+    assumeLtvApp: {
+      fr: "Valeur d'une installation : sa marge mois par mois, qui baisse avec les départs (le churn des abonnés, la rétention des actifs, selon ce qu'elle rapporte), sur 36 mois au plus. Le ratio se lit sur 12 mois.",
+      en: "An install's value: its margin month by month, falling as people leave (subscriber churn, active retention, depending on what it earns from), over 36 months at most. The ratio is read over 12 months.",
     },
     assumeCash: {
       fr: "Trésorerie immobilisée : la dépense d'acquisition du mois × le payback ÷ 2. La dépense de chaque mois revient régulièrement sur le payback ; le churn et la rétrogradation, qui la ralentissent, ne sont pas comptés (un plancher), sauf si l'expansion les dépasse. Facturation mensuelle. Même dépense avec les « Et si » : plus de payants rendent chacun moins cher.",

@@ -1,8 +1,9 @@
 import type { NumberStatus } from "@/components/engine/EngineProgress";
-import { metricsOfStageIn, shapeOf } from "@/lib/engine/catalog-shape";
+import { metricsOfStageIn, shapeOf, type SetupShapes } from "@/lib/engine/catalog-shape";
 import type { AnyDiagnosis } from "@/lib/engine/phrases";
-import type { MetricId, MetricStatus, Motion, Snapshot } from "@/lib/engine/types";
-import { statusOf } from "@/lib/engine/values";
+import { candidatesFor } from "@/lib/engine/scenario-of";
+import type { CandidateId, EngineCalcContext, EngineState, Interval, MetricId, MetricStatus, Motion, Snapshot } from "@/lib/engine/types";
+import { knownIn, statusOf } from "@/lib/engine/values";
 import { PILLARS, type Pillar } from "@/lib/scoring/pillars";
 
 /**
@@ -62,11 +63,29 @@ export function namedStages(diagnosis: AnyDiagnosis): ReadonlySet<Pillar> {
   return new Set(named.map((id) => shapeOf(id).stage));
 }
 
-/** One motion's five stages (A7.3.c S3): its own numbers and its own diagnosis — the hybrid shows one motion's at a time. */
-export function listStages(snapshot: Snapshot, diagnosis: AnyDiagnosis, motion: Motion = "plg"): ListStage[] {
+/**
+ * The value of every candidate the setup's diagnosis positions, when known: what `Diagnosis` prints next to its comparator
+ * (« 90 %, sous ta cible »). The candidates are the setup's own — an app's include the actives' retention (§21.5.4) —
+ * for both motions, as the hybrid shows either.
+ */
+export function candidateValuesOf(state: EngineState, ctx: EngineCalcContext): Partial<Record<CandidateId, Interval>> {
+  const values: Partial<Record<CandidateId, Interval>> = {};
+  for (const id of [...candidatesFor(state.setup, "plg"), ...candidatesFor(state.setup, "slg")]) {
+    const known = knownIn(state, id, ctx);
+    if (known.kind === "known") values[id] = known.value;
+  }
+  return values;
+}
+
+/**
+ * One motion's five stages (A7.3.c S3): its own numbers and its own diagnosis — the hybrid shows one motion's at a time.
+ * `setup`: an app's self-serve lists its own numbers, the replaced and the hidden ones left out (§21.6.4, D3); absent,
+ * the SaaS's, as before.
+ */
+export function listStages(snapshot: Snapshot, diagnosis: AnyDiagnosis, motion: Motion = "plg", setup?: SetupShapes): ListStage[] {
   const named = namedStages(diagnosis);
   return PILLARS.map((stage) => {
-    const rows = metricsOfStageIn(stage, motion).map((shape) => ({ id: shape.id, status: rowStatusOf(statusOf(snapshot.metrics[shape.id])) }));
+    const rows = metricsOfStageIn(stage, motion, setup).map((shape) => ({ id: shape.id, status: rowStatusOf(statusOf(snapshot.metrics[shape.id])) }));
     const marks = rows.flatMap((r) => (r.status === "na" ? [] : [r.status]));
     return {
       stage,

@@ -1,9 +1,8 @@
 import { Card } from "@/components/core/Card";
-import { candidatesOf } from "@/lib/engine/catalog-shape";
 import { knownSharedCount } from "@/lib/engine/shared-counts";
-import type { CandidateId, Interval, MotionDerived } from "@/lib/engine/types";
-import { knownIn } from "@/lib/engine/values";
+import type { MotionDerived } from "@/lib/engine/types";
 import { Coverage } from "./Coverage";
+import { candidateValuesOf } from "./number-list";
 import { Diagnosis } from "./Diagnosis";
 import { Peloton } from "./Peloton";
 import { PipelineBand } from "./PipelineBand";
@@ -32,11 +31,7 @@ export function MotionColumns({ view, actions, readOnly }: { view: EngineView; a
   const slgD = derived.motions.find((m): m is SlgDerived => m.motion === "slg");
   if (!plgD || !slgD) return null;
   const snapshot = state.snapshots[state.snapshots.length - 1]!;
-  const values: Partial<Record<CandidateId, Interval>> = {};
-  for (const id of [...candidatesOf("plg"), ...candidatesOf("slg")]) {
-    const known = knownIn(state, id, ctx);
-    if (known.kind === "known") values[id] = known.value;
-  }
+  const values = candidateValuesOf(state, ctx);
 
   return (
     <>

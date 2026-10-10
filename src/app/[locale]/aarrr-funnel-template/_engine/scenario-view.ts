@@ -11,11 +11,15 @@ import {
   rateRounding,
   roundSignificant,
 } from "@/lib/engine/format";
+import { appInputsOf } from "@/lib/engine/app";
+import { hasUsageStream, type AppMonetization } from "@/lib/engine/app-model";
 import { unitInputsPhrase } from "@/lib/engine/phrases";
-import { buildScenario, leverAlone, type LeverView, type Scenario, type ScenarioFunnel, type ScenarioKpis } from "@/lib/engine/scenario";
+import type { LeverView, Scenario, ScenarioFunnel, ScenarioKpis } from "@/lib/engine/scenario";
+import { leverAloneOf, scenarioOf } from "@/lib/engine/scenario-of";
+import { isApp, monetizationOf } from "@/lib/engine/setup-type";
 import { buildSlgScenario, oppsCreated, oppsFromSelfServe, type SlgScenario, type SlgScenarioKpis } from "@/lib/engine/slg-scenario";
 import type { EngineStrings, ResolvedMetric } from "@/lib/engine/strings";
-import type { Currency, EngineCalcContext, EngineState, Interval, LeverId, MetricId } from "@/lib/engine/types";
+import type { Currency, EngineCalcContext, EngineSetup, EngineState, Interval, LeverId, MetricId } from "@/lib/engine/types";
 import { knownIn } from "@/lib/engine/values";
 
 /**
@@ -155,6 +159,42 @@ export const KPI_INPUTS: Record<Exclude<KpiId, "won">, readonly MetricId[]> = {
   payback: ["acq.cac", "rev.arpa", "rev.gross-margin"],
 };
 
+/**
+ * A consumer app's (§21.6.4), by what it earns from. The order of each list fixes the order of « il manque … »: the
+ * subscriptions' numbers first, then day 30 and the revenues per active, the actives' retention last. `cac` is the
+ * cost per install; the value, the payback and the 12-month value read `appInputsOf`, which holds their complete lists.
+ */
+export function appKpiInputs(m: AppMonetization): Record<Exclude<KpiId, "won">, readonly MetricId[]> & { value12: readonly MetricId[] } {
+  const usage = hasUsageStream(m);
+  const perActive: MetricId[] = [...(m.purchases ? (["app.rev.purchases-per-active"] as const) : []), ...(m.ads ? (["app.rev.ads-per-active"] as const) : [])];
+  return {
+    mrr12: [...(m.subscriptions ? KPI_INPUTS.mrr12 : []), ...(usage ? (["ret.d30"] as const) : []), ...(usage ? perActive : []), ...(usage ? (["app.ret.active-retention"] as const) : [])],
+    newMrr: [...(m.subscriptions ? KPI_INPUTS.newMrr : []), ...(usage ? (["ret.d30"] as const) : []), ...(usage ? perActive : [])],
+    nrr: KPI_INPUTS.nrr,
+    grr: KPI_INPUTS.grr,
+    cac: ["app.acq.cpi"],
+    ltv: appInputsOf("app.rev.install-ltv", m),
+    payback: appInputsOf("app.rev.install-payback", m),
+    value12: appInputsOf("app.rev.install-value", m),
+  };
+}
+
+/** What the self-serve figures read for this setup: an app's by its monetization, the SaaS's `KPI_INPUTS` (its `value12` absent). */
+export function selfServeKpiInputs(setup: EngineSetup): Record<Exclude<KpiId, "won">, readonly MetricId[]> & { value12?: readonly MetricId[] } {
+  return isApp(setup) ? appKpiInputs(monetizationOf(setup)!) : KPI_INPUTS;
+}
+
+/**
+ * What « il manque » is followed by for an app's figure (§21.6.4): the inputs not entered, then — a revenue figure of an
+ * app whose actives are not known (`kpis.app.activesMissing`) — `io.sharedCount.appActives`, joined as a list. null when
+ * there is nothing to ask for: the caller then says `scenario.unknownStep`, never « il manque » on an empty list.
+ */
+export function appMissingPhrase(absent: readonly MetricId[], activesMissing: boolean, strings: EngineStrings, metrics: ResolvedMetric[]): string | null {
+  const items = absent.map((id) => unitInputsPhrase([id], strings, metrics));
+  if (activesMissing) items.push(strings.io.sharedCount.appActives);
+  return items.length > 0 ? joinList(items, strings.grammar) : null;
+}
+
 /** Sales-assisted's (§18.5.5): the quarter's new contracts at their ACV, the base at the 12-month NRR. No GRR: nobody types one. */
 export const SLG_KPI_INPUTS: Record<Exclude<KpiId, "grr">, readonly MetricId[]> = {
   mrr12: ["slg.rev.arpa", "slg.rev.acv", "slg.ret.renewal"],
@@ -168,6 +208,9 @@ export const SLG_KPI_INPUTS: Record<Exclude<KpiId, "grr">, readonly MetricId[]> 
 
 const LOWER_IS_BETTER: readonly KpiId[] = ["cac", "payback"];
 
+/** The growth figures of an app that read its actives: unknown without their count (§21.6.4). */
+const APP_REVENUE_KPIS: readonly KpiId[] = ["mrr12", "newMrr", "ltv", "payback"];
+
 /** The growth numbers, today → with the what-ifs. A figure unknown today AND projected is still listed: its absence is information. */
 export function kpiRows(
   scenario: Scenario,
@@ -177,8 +220,16 @@ export function kpiRows(
   missing: { state: EngineState; metrics: ResolvedMetric[] },
 ): KpiView[] {
   const w = strings.scenario;
+  const inputs = selfServeKpiInputs(missing.state.setup);
+  const app = isApp(missing.state.setup);
+  const activesMissing = scenario.today.kpis.app?.activesMissing === true;
   const unknownText = (id: KpiId) => {
-    const absent = KPI_INPUTS[id as Exclude<KpiId, "won">].filter((m) => knownIn(missing.state, m, ctx).kind !== "known");
+    const absent = inputs[id as Exclude<KpiId, "won">].filter((m) => knownIn(missing.state, m, ctx).kind !== "known");
+    // An app also names its actives when a revenue figure lacks them (§21.6.4); an empty list is never « il manque ».
+    if (app) {
+      const phrase = appMissingPhrase(absent, activesMissing && APP_REVENUE_KPIS.includes(id), strings, missing.metrics);
+      return phrase !== null ? fillTemplate(w.kpiUnknown, { input: phrase }) : w.unknownStep;
+    }
     // Every input entered and still no figure (the month's sign-ups missing, say): the plain « inconnu ».
     return absent.length > 0 ? fillTemplate(w.kpiUnknown, { input: unitInputsPhrase(absent, strings, missing.metrics) }) : w.unknownStep;
   };
@@ -207,7 +258,9 @@ export function kpiRows(
     { id: "payback", label: w.kpiPayback, pick: (k) => k.payback, show: months, delta: (d) => signed(months({ lo: Math.abs(d), hi: Math.abs(d) }) ?? "", d) },
   ];
   const mid = (i: Interval) => (i.lo + i.hi) / 2;
-  return rows.map((row) => {
+  // Without subscriptions an app has no NRR and no GRR: the rows go, they are not « unknown » (§21.6.4).
+  const shown = app && !monetizationOf(missing.state.setup)!.subscriptions ? rows.filter((row) => row.id !== "nrr" && row.id !== "grr") : rows;
+  return shown.map((row) => {
     const today = row.pick(scenario.today.kpis);
     const projected = row.pick(scenario.projected.kpis);
     const d = today && projected ? mid(projected) - mid(today) : 0;
@@ -254,6 +307,8 @@ export function kpiAnnouncement(kpis: readonly KpiView[], moved: boolean, string
 
 /** U+2212 for a minus: StatTile.tsx asks for it, and a hyphen reads as a dash. */
 function signed(text: string, d: number): string {
+  // A gain of exactly nothing has no sign: the commission lever alone moves no revenue (D13).
+  if (d === 0) return text;
   return `${d > 0 ? "+" : "\u2212"}${text}`;
 }
 
@@ -277,7 +332,7 @@ export function leverGains(state: EngineState, scenario: Scenario, ctx: EngineCa
   const base = mid(scenario.today.kpis.mrr12);
   const withTargets: EngineState = { ...state, whatIf: Object.fromEntries(scenario.levers.filter((l) => l.target !== null).map((l) => [l.id, l.target!])) };
   const alone = scenario.moved.map((id) => {
-    const s = leverAlone(withTargets, id, ctx);
+    const s = leverAloneOf(withTargets, id, ctx);
     const projected = s ? mid(s.projected.kpis.mrr12) : null;
     return { id, gain: base !== null && projected !== null ? projected - base : null };
   });
@@ -289,7 +344,7 @@ export function leverGains(state: EngineState, scenario: Scenario, ctx: EngineCa
 
 /** The scenario the panel shows for a map of targets — one entry point, so the panel and its tests read the same thing. */
 export function scenarioFor(state: EngineState, targets: Partial<Record<LeverId, number>>, ctx: EngineCalcContext): Scenario {
-  return buildScenario(state, targets, ctx);
+  return scenarioOf(state, targets, ctx);
 }
 
 export interface LeverRowView {

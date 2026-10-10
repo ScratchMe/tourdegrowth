@@ -70,7 +70,7 @@ export function numberPosition(id: MetricId, view: EngineView): string {
   const { strings } = view;
   if (LINK_METRIC_SHAPES.some((s) => s.id === id)) return strings.hybrid.linkBlock;
   const shape = shapeOf(id);
-  const inStage = metricsOfStageIn(shape.stage, motionOfMetric(id));
+  const inStage = metricsOfStageIn(shape.stage, motionOfMetric(id), view.state.setup);
   return fill(strings.list.position, { stage: stageName(shape.stage), i: inStage.findIndex((s) => s.id === id) + 1, n: inStage.length });
 }
 
@@ -84,7 +84,7 @@ export function numberRemaining(id: MetricId, view: EngineView): string {
   const snapshot = view.state.snapshots[view.state.snapshots.length - 1]!;
   const { plg, slg } = view.state.setup.motions;
   const motions: Motion[] = plg && slg ? ["plg", "slg"] : [motionOfMetric(id)];
-  const remaining = motions.reduce((n, motion) => n + listProgress(listStages(snapshot, diagnosisOf(view, motion), motion)).remaining, 0);
+  const remaining = motions.reduce((n, motion) => n + listProgress(listStages(snapshot, diagnosisOf(view, motion), motion, view.state.setup)).remaining, 0);
   return remainingText(remaining, view);
 }
 
@@ -112,7 +112,7 @@ export function BoardNumbers({
   const { strings, state } = view;
   const l = strings.list;
   const snapshot = state.snapshots[state.snapshots.length - 1]!;
-  const stages = listStages(snapshot, diagnosisOf(view, motion), motion);
+  const stages = listStages(snapshot, diagnosisOf(view, motion), motion, state.setup);
   const progress = listProgress(stages);
   const word = (status: NumberStatus) => l.status[status];
 

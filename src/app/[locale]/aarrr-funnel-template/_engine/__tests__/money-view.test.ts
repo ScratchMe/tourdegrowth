@@ -43,7 +43,7 @@ describe("the money block — the film's SaaS, a certain loss", () => {
 
   it("the cash: the month's spend to the unit, what it ties up as an estimate, and it does not all come back; no warning with the loss", () => {
     expect(m.cash.spend.value).toBe(`93${N}480${N}€`);
-    expect(m.cash.tied.value).toBe(`~990${N}000${N}€`);
+    expect(m.cash.tied!.value).toBe(`~990${N}000${N}€`);
     expect(m.cash.line).toBe(FR.strings.money.lineLoss);
     expect(m.cash.assumptions).toBe(FR.strings.money.assumePlg);
     expect(m.cash.warning).toBeNull();

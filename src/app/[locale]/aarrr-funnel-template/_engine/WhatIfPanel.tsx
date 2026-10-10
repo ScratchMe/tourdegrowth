@@ -9,6 +9,7 @@ import { LeverSum } from "@/components/engine/LeverSum";
 import { WhatIfFigures } from "@/components/engine/WhatIfFigures";
 import { DotGrid, DotLegend } from "@/components/viz/DotGrid";
 import { fillTemplate, joinList, lowerFirst } from "@/lib/engine/format";
+import { isApp, monetizationOf } from "@/lib/engine/setup-type";
 import type { LeverId } from "@/lib/engine/types";
 import { dotsInUse, funnelSteps, gridAria, kpiAnnouncement, kpiRows, leverRows, scenarioFor, targetAt, withTarget, type FunnelStepView, type ScenarioDot } from "./scenario-view";
 import type { EngineView } from "./view";
@@ -82,7 +83,9 @@ export function WhatIfPanel({ view, onChange }: { view: EngineView; onChange: (t
   }
 
   const unknownLevers = levers.filter((l) => l.today === null);
-  const steps = funnelSteps(scenario, ctx, strings);
+  // An app without subscriptions has no paying customers: the funnel of the month stops at day 30 (§21.6.4).
+  const noPaying = isApp(state.setup) && !monetizationOf(state.setup)!.subscriptions;
+  const steps = funnelSteps(scenario, ctx, strings).filter((step) => !(noPaying && step.id === "paying"));
   const figures = whatIfFigureGroups(view, "plg", targets);
   const sum = leverSumView(view, targets);
   const money = moneyAssumptions(view, "plg", targets);

@@ -13,11 +13,13 @@ import {
 import { sub } from "@/lib/engine/interval";
 import type { MoneyKpis } from "@/lib/engine/money";
 import { unitInputsPhrase } from "@/lib/engine/phrases";
+import type { AppKpis } from "@/lib/engine/scenario";
 import { findingText } from "@/lib/engine/sentences";
+import { isApp } from "@/lib/engine/setup-type";
 import type { EngineStrings, ResolvedDerived, ResolvedMetric } from "@/lib/engine/strings";
 import type { Currency, EngineCalcContext, EngineDerived, EngineState, Interval, LeverId, MetricId, Motion, YearMonth } from "@/lib/engine/types";
 import { knownIn } from "@/lib/engine/values";
-import { KPI_INPUTS, SLG_KPI_INPUTS, scenarioFor, slgScenarioFor } from "./scenario-view";
+import { SLG_KPI_INPUTS, appMissingPhrase, scenarioFor, selfServeKpiInputs, slgScenarioFor } from "./scenario-view";
 
 /**
  * The money on the board (design system extension 09, `MoneyBlock`, A20.d
@@ -36,11 +38,13 @@ import { KPI_INPUTS, SLG_KPI_INPUTS, scenarioFor, slgScenarioFor } from "./scena
  *   estimates and projections at two significant digits with « ~ »;
  * - the warning (C49) comes from `money.ts#paybackWarning`, against the
  *   team's runway or the 30-month floor; never with a certain loss.
+ * - an app (§21.6.4): the same block on its own scenario (`scenarioFor` reads the
+ *   seam) with its own inputs, the time in one sentence, no cash tied up (D11).
  *
  * No copy lives here: words come in as `EngineStrings`.
  */
 
-type MoneyKpisWithBase = MoneyKpis & { mrr: Interval | null; cac: Interval | null; ltv: Interval | null; payback: Interval | null };
+type MoneyKpisWithBase = MoneyKpis & { mrr: Interval | null; cac: Interval | null; ltv: Interval | null; payback: Interval | null; app?: AppKpis };
 
 export interface MoneyBarsView {
   cost: { label: string; value: string; amount: Interval };
@@ -66,7 +70,8 @@ export interface MoneyView {
   cash: {
     title: string;
     spend: { label: string; value: string | null; missing: string | null };
-    tied: { label: string; value: string | null; missing: string | null };
+    /** null for an app (D11): no cash is tied up, and `line` says why. */
+    tied: { label: string; value: string | null; missing: string | null } | null;
     line: string;
     warning: { text: string; maybe: boolean } | null;
     assumptions: string | null;
@@ -74,7 +79,7 @@ export interface MoneyView {
 }
 
 /** A fact to the unit; a range (an estimate) as one, at two significant digits. */
-function factMoney(i: Interval, currency: Currency, ctx: EngineCalcContext, strings: EngineStrings): string {
+export function factMoney(i: Interval, currency: Currency, ctx: EngineCalcContext, strings: EngineStrings): string {
   return i.lo === i.hi ? formatInterval(i, "money", ctx, strings.units, { currency }) : formatApproxMoneyInterval(i, currency, ctx, strings.units);
 }
 
@@ -93,16 +98,19 @@ export function moneyView(
   const w = strings.money;
   const u = strings.units;
   const currency = state.setup.currency;
+  const app = motion === "plg" && isApp(state.setup);
   const k: MoneyKpisWithBase = motion === "plg" ? scenarioFor(state, {}, ctx).today.kpis : slgScenarioFor(state, {}, ctx).today;
   const money = (i: Interval) => factMoney(i, currency, ctx, strings);
   const approx = (i: Interval) => formatApproxMoneyInterval(i, currency, ctx, u);
   const months = (i: Interval) => formatDurationInterval(i, "months", ctx, u);
   const approxMonths = (i: Interval) => fillTemplate(u.approx, { n: months(i) });
 
-  const inputs = motion === "plg" ? KPI_INPUTS : SLG_KPI_INPUTS;
+  const inputs = motion === "plg" ? selfServeKpiInputs(state.setup) : SLG_KPI_INPUTS;
   const absent = (ids: readonly MetricId[]) => ids.filter((id) => knownIn(state, id, ctx).kind !== "known");
   const phrase = (ids: readonly MetricId[]) => unitInputsPhrase(ids, strings, metrics);
-  const marginId: MetricId = motion === "plg" ? "rev.gross-margin" : "slg.rev.gross-margin";
+  const marginId: MetricId = motion === "plg" ? (app ? "app.rev.gross-margin" : "rev.gross-margin") : "slg.rev.gross-margin";
+  // An app whose actives are not known names them last, after the inputs missing (§21.6.4); with nothing to ask, none.
+  const activesMissing = k.app?.activesMissing === true;
 
   const snapshot = state.snapshots[state.snapshots.length - 1]!;
   const eyebrow = fillTemplate(w.eyebrow, { month: formatMonth(snapshot.referenceMonth, ctx.locale) });
@@ -125,8 +133,10 @@ export function moneyView(
   const cacMissing = absent(inputs.cac);
   const cost = k.cac ? { label: w.costs, value: money(k.cac), amount: k.cac } : null;
   if (!k.ltv) {
-    finding = fillTemplate(w.noLtv, { input: phrase(ltvMissing.length > 0 ? ltvMissing : inputs.ltv) });
-    if (cost) bars = { cost, brings: { label: w.brings, value: "?", amount: null, unknown: fillTemplate(w.missing, { input: phrase(ltvMissing) }) } };
+    const appAsk = app ? appMissingPhrase(ltvMissing, activesMissing, strings, metrics) : null;
+    finding = fillTemplate(w.noLtv, { input: app ? (appAsk ?? phrase(inputs.ltv)) : phrase(ltvMissing.length > 0 ? ltvMissing : inputs.ltv) });
+    const unknown = app ? (appAsk !== null ? fillTemplate(w.missing, { input: appAsk }) : strings.scenario.unknownStep) : fillTemplate(w.missing, { input: phrase(ltvMissing) });
+    if (cost) bars = { cost, brings: { label: w.brings, value: "?", amount: null, unknown } };
     if (ltvMissing.includes(marginId)) note = w.noMarginNote;
   } else if (!k.cac || !k.loss) {
     finding = fillTemplate(w.noCac, { ltv: approx(k.ltv), input: phrase(cacMissing.length > 0 ? cacMissing : inputs.cac) });
@@ -152,7 +162,13 @@ export function moneyView(
   // The finding's figure in time: the lifetime against the payback (§20.5).
   let monthsText: string | null = null;
   let monthsTerm = false;
-  if (k.lifetime && k.payback && verdict) {
+  if (app) {
+    // An install has no counted lifetime (D11): one sentence on its payback — none for a loss, the finding says it.
+    if (k.payback && verdict !== null && verdict !== "loss") {
+      monthsText = fillTemplate(w.monthsApp, { payback: months(k.payback) });
+      if (k.app?.paybackBeyondCap) monthsText += ` ${w.monthsAppBeyond}`;
+    }
+  } else if (k.lifetime && k.payback && verdict) {
     if (verdict === "loss") monthsText = fillTemplate(w.monthsLoss, { life: approxMonths(k.lifetime), payback: months(k.payback) });
     else if (verdict === "maybe") monthsText = fillTemplate(w.monthsMaybe, { life: approxMonths(k.lifetime), payback: months(k.payback) });
     else if (k.afterPayback) {
@@ -168,8 +184,8 @@ export function moneyView(
   // --- Cash -------------------------------------------------------------------------
   const paybackMissing = absent(inputs.payback);
   const missingText = (ids: readonly MetricId[]) => (ids.length > 0 ? fillTemplate(w.missing, { input: phrase(ids) }) : null);
-  const line = !k.cash ? w.lineNone : verdict === "loss" ? w.lineLoss : verdict === "maybe" ? w.lineMaybe : w.lineHealthy;
-  const assumptions = !k.cash ? null : motion === "plg" ? (k.cash.floor ? w.assumePlg : w.assumePlgOutpaced) : k.cash.floor ? w.assumeSlg : w.assumeSlgOutpaced;
+  const line = app ? w.lineApp : !k.cash ? w.lineNone : verdict === "loss" ? w.lineLoss : verdict === "maybe" ? w.lineMaybe : w.lineHealthy;
+  const assumptions = app || !k.cash ? null : motion === "plg" ? (k.cash.floor ? w.assumePlg : w.assumePlgOutpaced) : k.cash.floor ? w.assumeSlg : w.assumeSlgOutpaced;
   let warning: MoneyView["cash"]["warning"] = null;
   if (k.warning && k.payback) {
     const runway = k.warning.limit.kind === "runway";
@@ -187,7 +203,7 @@ export function moneyView(
     cash: {
       title: w.cashTitle,
       spend: { label: w.spend, value: k.spend ? money(k.spend) : null, missing: k.spend ? null : missingText(absent(inputs.cac)) },
-      tied: { label: w.tied, value: k.cash ? approx(k.cash.tiedUp) : null, missing: k.cash ? null : missingText(paybackMissing) },
+      tied: app ? null : { label: w.tied, value: k.cash ? approx(k.cash.tiedUp) : null, missing: k.cash ? null : missingText(paybackMissing) },
       line,
       warning,
       assumptions,
@@ -284,10 +300,11 @@ export function leverMoneyView(
   // --- The ARR in twelve months: the MRR in twelve months × 12, the same inputs, the same « il manque » ---
   const [arrToday, arrWhatif] = pair(t.arr12, isMoved ? p.arr12 : null);
   const value = isMoved ? arrWhatif : arrToday;
-  const inputs = motion === "plg" ? KPI_INPUTS.mrr12 : SLG_KPI_INPUTS.mrr12;
+  const inputs = motion === "plg" ? selfServeKpiInputs(state.setup).mrr12 : SLG_KPI_INPUTS.mrr12;
   const absent = inputs.filter((id) => knownIn(state, id, ctx).kind !== "known");
-  const unknown =
-    absent.length > 0 ? fillTemplate(strings.scenario.kpiUnknown, { input: unitInputsPhrase(absent, strings, metrics) }) : strings.scenario.unknownStep;
+  // An app names its actives when the revenue lacks them (§21.6.4); an empty list is never « il manque ».
+  const ask = motion === "plg" && isApp(state.setup) ? appMissingPhrase(absent, t.app?.activesMissing === true, strings, metrics) : absent.length > 0 ? unitInputsPhrase(absent, strings, metrics) : null;
+  const unknown = ask !== null ? fillTemplate(strings.scenario.kpiUnknown, { input: ask }) : strings.scenario.unknownStep;
   const arr12 = {
     label: l.arr12,
     value: value ?? unknown,
@@ -298,8 +315,11 @@ export function leverMoneyView(
   // --- One new customer ---
   let worth: string | null = null;
   if (isMoved && t.loss?.verdict === "loss" && p.loss && p.ltv && p.cac && t.ltv && t.cac) {
-    const sameCac = Math.abs(middle(p.cac) - middle(t.cac)) < 0.5;
-    const sameLtv = Math.abs(middle(p.ltv) - middle(t.ltv)) < 0.5;
+    // « Unchanged »: half a currency unit for a SaaS (a customer is hundreds). An install is worth a euro or two, so for an
+    // app it is an equality — half a euro would call « unchanged » a value that went from 0,59 € to 0,77 €.
+    const tolerance = isApp(state.setup) ? 1e-9 : 0.5;
+    const sameCac = Math.abs(middle(p.cac) - middle(t.cac)) < tolerance;
+    const sameLtv = Math.abs(middle(p.ltv) - middle(t.ltv)) < tolerance;
     const cacText = sameCac ? money(p.cac) : approx(p.cac);
     const gap = (i: Interval) => approx(abs(i));
     if (p.loss.verdict === "none") worth = fillTemplate(l.worthOut, { ltv: approx(p.ltv), cac: cacText, gap: approx(p.loss.gap) });
