@@ -37,7 +37,8 @@
  */
 .columns {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  /* The sign-ups, then the drawn columns: 4 for the SaaS, 3 for an app without subscriptions (engine spec §21.5.5). */
+  grid-template-columns: repeat(var(--peloton-columns, 4), minmax(0, 1fr));
   grid-template-rows: auto auto auto 1fr;
   column-gap: var(--space-11);
   row-gap: var(--space-4);

@@ -12,13 +12,15 @@ import type { EngineView } from "./view";
  * The money on the board (design system extension 09, A20.d T2): right after
  * the diagnosis, one flat ruled block — the MRR and its ARR, what one new
  * customer is worth, the cash it ties up and, past the team's runway or 30
- * months, the warning. The words it teaches carry the engine's « ? »
+ * months, the warning. An app (§21.6.4) has no cash tied up (D11): its block
+ * says why and lists the month's spend alone. The words it teaches carry the engine's « ? »
  * (`EngineTerm`): « ARR » (bon à tirer nº10, 2026-10-04), « trésorerie immobilisée », « mois après
  * remboursement ».
  */
 export function BoardMoney({ view, motion, hybrid }: { view: EngineView; motion: Motion; hybrid: boolean }) {
   const m = moneyView(view, motion, hybrid);
   const { strings } = view;
+  const tied = m.cash.tied;
   return (
     <MoneyBlock
       eyebrow={m.eyebrow}
@@ -55,17 +57,21 @@ export function BoardMoney({ view, motion, hybrid }: { view: EngineView; motion:
         title: m.cash.title,
         facts: [
           { key: "spend", label: m.cash.spend.label, value: m.cash.spend.value, missing: m.cash.spend.missing ?? undefined },
-          {
-            key: "tied",
-            label: (
-              <>
-                {m.cash.tied.label}
-                <EngineTerm id="cashTied" strings={strings} />
-              </>
-            ),
-            value: m.cash.tied.value,
-            missing: m.cash.tied.missing ?? undefined,
-          },
+          ...(tied
+            ? [
+                {
+                  key: "tied",
+                  label: (
+                    <>
+                      {tied.label}
+                      <EngineTerm id="cashTied" strings={strings} />
+                    </>
+                  ),
+                  value: tied.value,
+                  missing: tied.missing ?? undefined,
+                },
+              ]
+            : []),
         ],
         line: m.cash.line,
         warning: m.cash.warning ? (

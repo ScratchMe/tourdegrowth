@@ -104,7 +104,8 @@ export interface AppKpis {
   paybackBeyondCap: boolean;
   /**
    * The usage stream is ticked and the month's actives are not known (an estimated per-active revenue, no count typed):
-   * every « il manque » of a usage figure then ends with `io.sharedCount.appActives` (§21.6.4). False without usage.
+   * the « il manque » of the month's revenue and of the revenue in 12 months then ends with `scenario.missingActives`
+   * (§21.6.4). False without usage.
    */
   activesMissing: boolean;
 }

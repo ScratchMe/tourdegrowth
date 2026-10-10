@@ -78,7 +78,7 @@ export const ENGINE_COPY_CONSUMER: DeepPartialTranslatable<typeof ENGINE_COPY> =
     },
     noLtv: {
       fr: "On ne peut pas encore dire ce que rapporte une installation : il manque {input}.",
-      en: "We can't yet say what an install brings back: {input} is missing.",
+      en: "We can't yet say what an install brings back. Missing: {input}.",
     },
     noCac: {
       fr: "Une installation rapporte {ltv} de marge en 36 mois ; ce qu'elle coûte, on ne le sait pas encore : il manque {input}.",

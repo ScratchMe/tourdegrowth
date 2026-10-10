@@ -1,17 +1,20 @@
 import { approxRounding, fillTemplate, formatApproxMoneyInterval, formatDurationInterval, formatInterval, pairPrecision } from "@/lib/engine/format";
 import type { LossCheck, MoneyKpis } from "@/lib/engine/money";
 import { unitInputsPhrase } from "@/lib/engine/phrases";
+import type { AppKpis } from "@/lib/engine/scenario";
+import { isApp } from "@/lib/engine/setup-type";
 import type { EngineStrings, ResolvedMetric } from "@/lib/engine/strings";
 import type { EngineCalcContext, EngineState, Interval, LeverId, MetricId, Motion } from "@/lib/engine/types";
 import { knownIn } from "@/lib/engine/values";
 import {
+  appMissingPhrase,
   gainText,
-  KPI_INPUTS,
   kpiRows,
   leverGains,
   leverRows,
   roundedMoney,
   scenarioFor,
+  selfServeKpiInputs,
   SLG_KPI_INPUTS,
   slgKpiRows,
   slgScenarioFor,
@@ -30,7 +33,9 @@ import {
  *   « stable »;
  * - the month's spend never moves (the same spend with the what-ifs): it is
  *   a fact, to the unit;
- * - months after payback below zero: « part ~5 mois avant », the loss in months.
+ * - months after payback below zero: « part ~5 mois avant », the loss in months;
+ * - an app (§21.6.4): its own inputs, a « 12-month value » row (the ratio's numerator) and no « months after
+ *   payback » nor cash row: an install has no counted lifetime and ties up no cash (D11).
  */
 
 export interface FigureRow {
@@ -59,7 +64,7 @@ export interface LeverSumView {
 }
 
 type Input = { state: EngineState; ctx: EngineCalcContext; strings: EngineStrings; metrics: ResolvedMetric[] };
-type Kpis = MoneyKpis & { cac: Interval | null; ltv: Interval | null; payback: Interval | null };
+type Kpis = MoneyKpis & { cac: Interval | null; ltv: Interval | null; payback: Interval | null; app?: AppKpis };
 
 const middle = (i: Interval) => (i.lo + i.hi) / 2;
 const abs = (i: Interval): Interval => (i.hi <= 0 ? { lo: -i.hi, hi: -i.lo } : i);
@@ -77,10 +82,17 @@ export function whatIfFigureGroups(input: Input, motion: Motion, targets: Partia
   const t: Kpis = plg ? plg.today.kpis : slg!.today;
   const p: Kpis = plg ? plg.projected.kpis : slg!.projected;
   const moved = (plg ? plg.moved : slg!.moved).length > 0;
-  const inputs: Partial<Record<string, readonly MetricId[]>> = plg ? KPI_INPUTS : SLG_KPI_INPUTS;
+  const inputs: Partial<Record<string, readonly MetricId[]>> = plg ? selfServeKpiInputs(state.setup) : SLG_KPI_INPUTS;
+  const app = plg !== null && isApp(state.setup);
 
   const missingFor = (ids: readonly MetricId[]) => {
     const absent = [...new Set(ids)].filter((id) => knownIn(state, id, ctx).kind !== "known");
+    if (app) {
+      // No row of these tables is the month's revenue or the revenue in 12 months, the only figures that name an app's
+      // actives (§21.6.4): the rows name their own missing inputs. An empty list is never « il manque ».
+      const ask = appMissingPhrase(absent, false, strings, metrics);
+      return ask !== null ? fillTemplate(w.kpiUnknown, { input: ask }) : w.unknownStep;
+    }
     return absent.length > 0 ? fillTemplate(w.kpiUnknown, { input: unitInputsPhrase(absent, strings, metrics) }) : w.unknownStep;
   };
   const sense = (better: boolean) => (better ? w.better : w.worse);
@@ -141,6 +153,7 @@ export function whatIfFigureGroups(input: Input, motion: Motion, targets: Partia
     i.hi < 0 ? fillTemplate(w.leavesFirst, { n: fillTemplate(u.approx, { n: months(abs(i)) }) }) : fillTemplate(u.approx, { n: months(i.lo < 0 ? { lo: 0, hi: i.hi } : i) });
 
   const ltvIds = inputs.ltv ?? [];
+  const value12Ids = inputs.value12 ?? [];
   const cacIds = inputs.cac ?? [];
   const paybackIds = inputs.payback ?? [];
   const growth = [fromKpi("newMrr"), fromKpi("nrr"), plg ? fromKpi("grr") : fromKpi("won")].filter((r): r is FigureRow => r !== null);
@@ -153,21 +166,26 @@ export function whatIfFigureGroups(input: Input, motion: Motion, targets: Partia
   };
   const customer = [
     fromKpi("cac"),
+    // An app: what an install brings back in its first year, the ratio's numerator (§21.6.4).
+    app ? row("value12", w.rowValue12, t.app?.value12 ?? null, p.app?.value12 ?? null, money, moneyDelta, true, value12Ids, approxRounding) : null,
     fromKpi("ltv"),
     row("ltvCac", w.rowLtvCac, t.ltvCac, p.ltvCac, ratio, ratioDelta, true, [...ltvIds, ...cacIds]),
     gapRow,
     fromKpi("payback"),
     // Whole months on each side before the difference: « part ~4 mois avant » then « ~9 mois » is +13, never the +14
     // of the raw middles (B15).
-    row("after", w.rowAfter, t.afterPayback, p.afterPayback, afterText, monthsDelta, true, [...ltvIds, ...paybackIds], undefined, (a, b) =>
-      Math.round(middle(b)) - Math.round(middle(a)),
-    ),
+    app
+      ? null
+      : row("after", w.rowAfter, t.afterPayback, p.afterPayback, afterText, monthsDelta, true, [...ltvIds, ...paybackIds], undefined, (a, b) =>
+          Math.round(middle(b)) - Math.round(middle(a)),
+        ),
   ].filter((r): r is FigureRow => r !== null);
   const cash = [
     // A fact, to the unit: the month's spend never moves with the what-ifs.
     row("spend", w.rowSpend, t.spend, p.spend, (i) => formatInterval(i, "money", ctx, u, { currency }), moneyDelta, false, cacIds),
-    row("cash", w.rowCash, t.cash?.tiedUp ?? null, p.cash?.tiedUp ?? null, money, moneyDelta, false, paybackIds, approxRounding),
-  ];
+    // An app ties up no cash (D11): the group is the month's spend alone.
+    app ? null : row("cash", w.rowCash, t.cash?.tiedUp ?? null, p.cash?.tiedUp ?? null, money, moneyDelta, false, paybackIds, approxRounding),
+  ].filter((r): r is FigureRow => r !== null);
   return {
     moved,
     groups: [
@@ -184,7 +202,7 @@ export function moneyAssumptions(input: Input, motion: Motion, targets: Partial<
   const w = strings.scenario;
   const t: Kpis = motion === "plg" ? scenarioFor(state, targets, ctx).today.kpis : slgScenarioFor(state, targets, ctx).today;
   const out: string[] = [];
-  if (t.ltv) out.push(motion === "plg" ? w.assumeLtv : w.assumeLtvSlg);
+  if (t.ltv) out.push(motion === "plg" ? (isApp(state.setup) ? w.assumeLtvApp : w.assumeLtv) : w.assumeLtvSlg);
   if (t.cash) out.push(motion === "plg" ? w.assumeCash : w.assumeCashSlg);
   return out;
 }

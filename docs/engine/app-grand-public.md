@@ -617,7 +617,7 @@ du mois, est la base du flux d'usage (§21.5.3), et une valeur saisie sans lui
 laisserait le revenu de l'usage incalculable sans rien à nommer. Une
 estimation (une fourchette sans comptes) reste possible : les actifs se
 saisissent alors dans les Réglages (§21.6.2), et tant qu'ils manquent, « il
-manque » les nomme (`io.sharedCount.appActives`, §21.6.4).
+manque » les nomme (`scenario.missingActives`, §21.6.4).
 
 **Ce que montre une monétisation** (`appShapeShown`) :
 
@@ -833,7 +833,10 @@ manque » les écrit par leur nom, sans article, comme le SaaS aujourd'hui.
 
 **`io.sharedCount.appActives`** (`Record<SharedCount, …>`, à côté de
 `monthSignups` : un nom en minuscules, lu au milieu d'une phrase) : « actifs du
-mois » / "actives in the month".
+mois » / "actives in the month". C'est le libellé de la ligne qui regroupe le
+chiffre partagé ; « il manque » ne le lit pas, il lit
+`scenario.missingActives`, qui porte l'article (§21.6.4, décidé par Antoine
+le 2026-10-10).
 
 #### 21.4.6 La prose des quinze, dans les mots de l'app (`src/content/engine-catalog-consumer.ts`, APP-2)
 
@@ -1195,7 +1198,8 @@ export interface AppKpis {
   paybackBeyondCap: boolean;
   /**
    * The usage stream is ticked and the month's actives are not known (an estimated per-active revenue, no count typed):
-   * every « il manque » of a usage figure then ends with `io.sharedCount.appActives` (§21.6.4). False without usage.
+   * the « il manque » of the month's revenue and of the revenue in 12 months then ends with `scenario.missingActives`
+   * (§21.6.4). False without usage.
    */
   activesMissing: boolean;
 }
@@ -1621,7 +1625,10 @@ rendre argent ? { gap: sub.gap, mrr: argent } : sub.gap ? { gap: sub.gap } : {}
   `shapesOf(avant)`). **Chaque ligne compte comme si sa façon changeait
   seule** : décocher les achats et la publicité d'un coup donne deux lignes,
   chacune avec son propre compte ; un chiffre que seules les deux ensemble
-  masquent (la rétention des actifs) n'est compté sur aucune. *Décidé par
+  masquent (la rétention des actifs) n'est compté sur aucune. À l'inverse,
+  cocher les deux d'un coup fait apparaître ce chiffre sur chaque ligne,
+  puisque chacune seule le montre (précisé après APP-7, #369 : c'est la
+  lettre, appliquée et testée). *Décidé par
   Antoine le 2026-10-07* : la première lettre (avant contre après, le réglage
   entier) mettait le total sur chaque ligne (relevé par APP-7, #369). Rien
   n'est effacé ; une dernière façon cochée ne se décoche pas, avec la raison
@@ -1736,11 +1743,19 @@ qui change pour une app :
   (`money-view.ts:102`), `leverMoneyView` (`money-view.ts:287`, sa liste
   `mrr12`) et `whatIfFigureGroups` (`whatif-figures.ts:80`).
 - **Les actifs qui manquent** (`kpis.app.activesMissing`, §21.5.3) : dans ces
-  quatre lecteurs, une figure de revenu (`mrr`, `newMrr`, `mrr12`, `ltv`,
-  `payback`, `value12`) inconnue d'une app dont `activesMissing` est vrai dit
-  « il manque » suivi de ses entrées manquantes **puis**
-  `io.sharedCount.appActives` (« les actifs du mois »), joints par `joinList`
-  ; sans entrée manquante, les actifs seuls. **Sans entrée manquante ni
+  quatre lecteurs, **seuls le revenu du mois (`mrr`) et le revenu dans 12 mois
+  (`mrr12`)**, les deux chiffres qui lisent le nombre d'actifs, inconnus d'une
+  app dont `activesMissing` est vrai, disent « il manque » suivi de leurs
+  entrées manquantes **puis** `scenario.missingActives` (« les actifs du
+  mois » / "the month's actives", avec son article : §21.8.4 b), joints par
+  `joinList` ; sans entrée manquante, les actifs seuls. Les autres (`newMrr`,
+  `ltv`, `payback`, `value12`) ne nomment que leurs entrées manquantes, même
+  quand les actifs manquent : les nommer indiquerait une saisie qui ne
+  débloque pas le chiffre regardé (décidé par Antoine le 2026-10-10).
+  Aujourd'hui, seul `mrr12` écrit un tel « il manque » (`kpiRows`, et le
+  revenu annualisé dans 12 mois de `leverMoneyView`) : `kpiRows` n'a pas de
+  ligne `mrr`, le bloc de l'argent ne rend pas ses chiffres sans `mrr`, et la
+  bande des deux flux écrit `slide.noNumber` (relevé par la relance d'APP-8). **Sans entrée manquante ni
   actifs manquants** (un `uncomputable` à `missing: []`, le remboursement
   d'une installation qui ne se rembourse jamais : §21.5.5), elle n'écrit
   jamais « il manque » sur une liste vide : elle rend `unknownStep`, comme
@@ -1791,6 +1806,13 @@ qui change pour une app :
   peut voisiner avec « 0,95 ».
 - **`WhatIfPanel.tsx`** : sans abonnements, la ligne `paying` du funnel du mois
   n'est pas rendue. Le reste passe par la couture.
+- **« Ce levier ne change pas ce que rapporte une installation »**
+  (`leverMoneyView`, `money-view.ts`, `lever.worthStill` et
+  `worthStillMany`) : le coût et la valeur d'une installation « ne changent
+  pas » quand leurs milieux, aujourd'hui et avec le levier, diffèrent de
+  moins de `1e-9` pour une app, de moins de 0,50 pour le SaaS (inchangé). Une
+  installation vaut un euro ou deux : la tolérance du SaaS dirait « ne change
+  pas » d'une valeur passée de 0,59 € à 0,77 € (relevé par APP-8).
 - **`BoardLever.tsx`** : rien (il lit `leverMoneyView`, qui lit `scenarioFor`) ;
   `cardLever` lit les lignes de `leverRows`, donc les leviers de l'app. Le
   levier de la commission n'est la carte que si aucun autre levier n'est
@@ -2322,7 +2344,7 @@ recopiant ; `copy-typography.test.ts` la vérifie.
 | `money.arr` | Revenu annualisé, le revenu du mois × 12 | Annualised revenue, the month's revenue × 12 |
 | `money.worthTitle` | Ce que vaut une installation | What an install is worth |
 | `money.healthy` | Chaque installation coûte {cac} et rapporte {ltv} de marge en 36 mois : {gap} de plus que ce qu'elle coûte. | Each install costs {cac} and brings back {ltv} of margin over 36 months: {gap} more than it costs. |
-| `money.noLtv` | On ne peut pas encore dire ce que rapporte une installation : il manque {input}. | We can't yet say what an install brings back: {input} is missing. |
+| `money.noLtv` | On ne peut pas encore dire ce que rapporte une installation : il manque {input}. | We can't yet say what an install brings back. Missing: {input}. |
 | `money.noCac` | Une installation rapporte {ltv} de marge en 36 mois ; ce qu'elle coûte, on ne le sait pas encore : il manque {input}. | An install brings back {ltv} of margin over 36 months; what it costs, we don't know yet: {input} is missing. |
 | `money.noMarginNote` | Sans elle, ni valeur d'une installation ni remboursement : calculés sur le chiffre d'affaires, ils flatteraient ton app. | Without it, no install value and no payback: computed on revenue, they would flatter your app. |
 | `money.warnRunway` | Une installation met {payback} à rembourser son coût, plus que ton runway ({n}) : tu gagnes de l'argent, mais peut-être après la fin de ta trésorerie. | An install takes {payback} to pay back its cost, longer than your runway ({n}): you make money, but maybe after your cash runs out. |
@@ -2455,6 +2477,7 @@ les affiche pas). Chaque unité ajoute celles qu'elle utilise.
 | APP-8 | `appStreams.newPerMonth` · `in12Months` | Nouveau revenu par mois · Revenu dans 12 mois, au rythme actuel | New revenue a month · Revenue in 12 months, at today's pace |
 | APP-8 | `money.monthsApp` | Elle rembourse son coût en {payback}, puis continue de rapporter, de moins en moins, à mesure que ses utilisateurs s'en vont. | It pays back its cost in {payback}, then keeps bringing in, less and less, as its users leave. |
 | APP-8 | `money.monthsAppBeyond` | Dans le pire des cas, elle ne l'a pas remboursé au bout de 36 mois. | In the worst case, it hasn't paid it back after 36 months. |
+| APP-8 | `scenario.missingActives` (le dernier élément d'un « il manque », §21.6.4 ; décidé par Antoine le 2026-10-10) | les actifs du mois | the month's actives |
 | APP-8 | `money.lineApp` | Pas de trésorerie immobilisée pour une app : sa formule suppose qu'une installation rembourse son coût en parts égales, alors que sa marge baisse chaque mois. | No cash tied up for an app: its formula assumes an install pays back its cost in equal parts, while its margin falls every month. |
 | APP-8 | `scenario.rowValue12` | Valeur sur 12 mois | 12-month value |
 | APP-8 | `scenario.assumeLtvApp` | Valeur d'une installation : sa marge mois par mois, qui baisse avec les départs (le churn des abonnés, la rétention des actifs, selon ce qu'elle rapporte), sur 36 mois au plus. Le ratio se lit sur 12 mois. | An install's value: its margin month by month, falling as people leave (subscriber churn, active retention, depending on what it earns from), over 36 months at most. The ratio is read over 12 months. |

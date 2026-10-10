@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { DotGrid, DotLegend } from "@/components/viz/DotGrid";
 import type { Locale } from "@/lib/i18n/locale";
 import type { Diagnosis, Peloton as PelotonModel, PelotonColumn, YearMonth } from "@/lib/engine/types";
@@ -57,7 +58,8 @@ function twoSignificant(v: number): number {
 /**
  * The peloton — engine spec §8.1, the engine's main visual.
  *
- * Four columns, **every one counted on the same 100 sign-ups** (D5): there
+ * Four columns (three for an app without subscriptions, which has no paid
+ * column: `--peloton-columns`), **every one counted on the same 100 sign-ups** (D5): there
  * is no bar proportional to a head count between stages and no chain that
  * multiplies rates measured on different bases — the three prototypes that
  * drew one lied, and the spec's own mock did too. Each column reads, top to
@@ -145,7 +147,7 @@ export function Peloton({ peloton, strings, locale, cohortMonth, paidWindowDays,
         <span>{upstream}</span>
       </p>
 
-      <div className={styles.columns}>
+      <div className={styles.columns} style={{ "--peloton-columns": columns.length + 1 } as CSSProperties}>
         <Column
           numeral="100"
           label={w.signups}

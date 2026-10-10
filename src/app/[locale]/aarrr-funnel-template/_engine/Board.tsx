@@ -7,12 +7,10 @@ import { Card } from "@/components/core/Card";
 import { Disclosure } from "@/components/core/Disclosure";
 import { Field } from "@/components/core/Field";
 import { Segmented } from "@/components/core/Segmented";
-import { candidatesOf } from "@/lib/engine/catalog-shape";
 import { pelotonTitle } from "@/lib/engine/deck";
 import { relaysTitle } from "@/lib/engine/deck-motions";
 import { findingText } from "@/lib/engine/sentences";
-import type { CandidateId, Interval, MetricId, Motion, MotionDerived, SlideTitle } from "@/lib/engine/types";
-import { knownIn } from "@/lib/engine/values";
+import type { MetricId, Motion, MotionDerived, SlideTitle } from "@/lib/engine/types";
 import { knownSharedCount } from "@/lib/engine/shared-counts";
 import { BoardBar, BoardNextStep, boardNextStep, type EngineControls, type SeriesControls } from "./BoardHead";
 import type { CollectPlan } from "./collect";
@@ -20,8 +18,10 @@ import { Diagnosis } from "./Diagnosis";
 import { Mirror } from "./Mirror";
 import { Peloton } from "./Peloton";
 import { Relays } from "./Relays";
+import { candidateValuesOf } from "./number-list";
 import { previousLeakLine } from "./series-view";
 import { SlgWhatIfPanel } from "./SlgWhatIfPanel";
+import { AppStreamsBand } from "./AppStreamsBand";
 import { BoardLever } from "./BoardLever";
 import { BoardMoney } from "./BoardMoney";
 import { BoardNumbers } from "./BoardNumbers";
@@ -142,11 +142,7 @@ export function Board({
 
   // The diagnosis prints each named stage's value next to its comparator; the Diagnosis
   // object carries positions, not values. knownIn — the same reading the rows make.
-  const candidateValues: Partial<Record<CandidateId, Interval>> = {};
-  for (const id of [...candidatesOf("plg"), ...candidatesOf("slg")]) {
-    const known = knownIn(state, id, ctx);
-    if (known.kind === "known") candidateValues[id] = known.value;
-  }
+  const candidateValues = candidateValuesOf(state, ctx);
   const snapshot = state.snapshots[state.snapshots.length - 1]!;
   // « Sur 25 opportunités conclues, un de plus ou de moins bouge le taux de 4 points » — the finding's own sentence.
   const smallSample = derived.findings.find((f) => f.kind === "small-sample" && f.motion === "slg");
@@ -220,6 +216,8 @@ export function Board({
         values={candidateValues}
         previous={previousLeakLine(view, "plg")}
       />
+      {/* An app's two streams (§21.6.4), once, before the money: it draws itself only for an app with both kinds of stream. */}
+      <AppStreamsBand view={view} />
       {/* The money, right after the diagnosis (design system extension 09, C54): flat, so the peloton stays the one raised card.
           Then « Et si ? », moved up under it: move a lever, watch the ARR move right under the money. */}
       <BoardMoney view={view} motion="plg" hybrid={hybrid} />
