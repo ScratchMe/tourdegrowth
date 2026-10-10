@@ -85,11 +85,12 @@ export function whatIfFigureGroups(input: Input, motion: Motion, targets: Partia
   const inputs: Partial<Record<string, readonly MetricId[]>> = plg ? selfServeKpiInputs(state.setup) : SLG_KPI_INPUTS;
   const app = plg !== null && isApp(state.setup);
 
-  const missingFor = (ids: readonly MetricId[], revenue = true) => {
+  const missingFor = (ids: readonly MetricId[]) => {
     const absent = [...new Set(ids)].filter((id) => knownIn(state, id, ctx).kind !== "known");
     if (app) {
-      // An app also names its actives when a revenue figure lacks them; an empty list is never « il manque » (§21.6.4).
-      const ask = appMissingPhrase(absent, revenue && t.app?.activesMissing === true, strings, metrics);
+      // No row of these tables is the month's revenue or the revenue in 12 months, the only figures that name an app's
+      // actives (§21.6.4): the rows name their own missing inputs. An empty list is never « il manque ».
+      const ask = appMissingPhrase(absent, false, strings, metrics);
       return ask !== null ? fillTemplate(w.kpiUnknown, { input: ask }) : w.unknownStep;
     }
     return absent.length > 0 ? fillTemplate(w.kpiUnknown, { input: unitInputsPhrase(absent, strings, metrics) }) : w.unknownStep;
@@ -123,14 +124,13 @@ export function whatIfFigureGroups(input: Input, motion: Motion, targets: Partia
     missing: readonly MetricId[],
     round?: (v: number, extra: number) => number,
     diff: (a: Interval, b: Interval) => number = (a, b) => middle(b) - middle(a),
-    revenue = true,
   ): FigureRow => {
     const extra = moved && a && b && round ? pairPrecision(middle(a), middle(b), round) : 0;
     const today = a ? show(a, extra) : "?";
     const whatif = b ? show(b, extra) : "?";
     const d = a && b ? diff(a, b) : 0;
     const change = !moved ? null : !a || !b ? "?" : today === whatif || d === 0 ? w.stable : `${delta(d)} ·\u00a0${sense(higherIsBetter ? d > 0 : d < 0)}`;
-    return { id, label, today, whatif: moved ? whatif : null, change, missing: !a || (moved && !b) ? missingFor(missing, revenue) : null };
+    return { id, label, today, whatif: moved ? whatif : null, change, missing: !a || (moved && !b) ? missingFor(missing) : null };
   };
 
   const money = (i: Interval, extra: number) => formatApproxMoneyInterval(i, currency, ctx, u, extra);
@@ -182,7 +182,7 @@ export function whatIfFigureGroups(input: Input, motion: Motion, targets: Partia
   ].filter((r): r is FigureRow => r !== null);
   const cash = [
     // A fact, to the unit: the month's spend never moves with the what-ifs.
-    row("spend", w.rowSpend, t.spend, p.spend, (i) => formatInterval(i, "money", ctx, u, { currency }), moneyDelta, false, cacIds, undefined, undefined, false),
+    row("spend", w.rowSpend, t.spend, p.spend, (i) => formatInterval(i, "money", ctx, u, { currency }), moneyDelta, false, cacIds),
     // An app ties up no cash (D11): the group is the month's spend alone.
     app ? null : row("cash", w.rowCash, t.cash?.tiedUp ?? null, p.cash?.tiedUp ?? null, money, moneyDelta, false, paybackIds, approxRounding),
   ].filter((r): r is FigureRow => r !== null);

@@ -638,7 +638,7 @@ export const ENGINE_COPY = {
     },
     /**
      * TODO: à relire (convention 6) — neuf le 2026-10-08 (A22 APP-8, §21.6.4) : l'économie d'une installation, en une phrase de temps (`monthsApp`,
-     * suivie de `monthsAppBeyond` quand le pire cas dépasse 36 mois) et la raison de l'absence de trésorerie immobilisée (`lineApp`, D11).
+     * suivie de `monthsAppBeyond` quand le pire cas dépasse 36 mois).
      */
     monthsApp: {
       fr: "Elle rembourse son coût en {payback}, puis continue de rapporter, de moins en moins, à mesure que ses utilisateurs s'en vont.",
@@ -666,6 +666,7 @@ export const ENGINE_COPY = {
       en: "Whether it all comes back isn't certain: customers may leave before they pay back.",
     },
     lineHealthy: { fr: "Elle revient toute, au fil des remboursements.", en: "It all comes back, as customers pay back." },
+    // TODO: à relire (convention 6) — neuf le 2026-10-08 (A22 APP-8, §21.6.4) : `lineApp`, la raison de l'absence de trésorerie immobilisée (D11).
     lineApp: {
       fr: "Pas de trésorerie immobilisée pour une app : sa formule suppose qu'une installation rembourse son coût en parts égales, alors que sa marge baisse chaque mois.",
       en: "No cash tied up for an app: its formula assumes an install pays back its cost in equal parts, while its margin falls every month.",
@@ -1726,6 +1727,8 @@ export const ENGINE_COPY = {
     rowCash: { fr: "Trésorerie immobilisée", en: "Cash tied up" },
     // TODO: à relire (convention 6) — neuf le 2026-10-08 (A22 APP-8, §21.6.4) : `rowValue12`, la ligne de la valeur d'une installation sur 12 mois, le numérateur du ratio.
     rowValue12: { fr: "Valeur sur 12 mois", en: "12-month value" },
+    // TODO: à relire (convention 6) — neuf le 2026-10-10 (A22 APP-8, §21.6.4, décidé par Antoine) : `missingActives`, le dernier élément d'un « il manque » du revenu du mois et dans 12 mois d'une app dont les actifs manquent.
+    missingActives: { fr: "les actifs du mois", en: "the month's actives" },
     /**
      * Months after payback below zero: the customer leaves before paying their cost back — the loss, said in months.
      * `{n}`: how many months short (« ~5 mois »). TODO: à relire — réécrite le 2026-10-04 (A21.2) : « part avant » des

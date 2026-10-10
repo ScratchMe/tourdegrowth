@@ -185,13 +185,14 @@ export function selfServeKpiInputs(setup: EngineSetup): Record<Exclude<KpiId, "w
 }
 
 /**
- * What « il manque » is followed by for an app's figure (§21.6.4): the inputs not entered, then — a revenue figure of an
- * app whose actives are not known (`kpis.app.activesMissing`) — `io.sharedCount.appActives`, joined as a list. null when
+ * What « il manque » is followed by for an app's figure (§21.6.4): the inputs not entered, then — the month's revenue or the
+ * revenue in 12 months of an app whose actives are not known (`kpis.app.activesMissing`) — `scenario.missingActives`, joined
+ * as a list. The caller passes `activesMissing` for those two figures only: no other figure names the actives. null when
  * there is nothing to ask for: the caller then says `scenario.unknownStep`, never « il manque » on an empty list.
  */
 export function appMissingPhrase(absent: readonly MetricId[], activesMissing: boolean, strings: EngineStrings, metrics: ResolvedMetric[]): string | null {
   const items = absent.map((id) => unitInputsPhrase([id], strings, metrics));
-  if (activesMissing) items.push(strings.io.sharedCount.appActives);
+  if (activesMissing) items.push(strings.scenario.missingActives);
   return items.length > 0 ? joinList(items, strings.grammar) : null;
 }
 
@@ -208,8 +209,12 @@ export const SLG_KPI_INPUTS: Record<Exclude<KpiId, "grr">, readonly MetricId[]> 
 
 const LOWER_IS_BETTER: readonly KpiId[] = ["cac", "payback"];
 
-/** The growth figures of an app that read its actives: unknown without their count (§21.6.4). */
-const APP_REVENUE_KPIS: readonly KpiId[] = ["mrr12", "newMrr", "ltv", "payback"];
+/**
+ * The growth figures of an app whose « il manque » ends with its actives when they are not known (§21.6.4): the revenue in
+ * 12 months, the one that reads their count. (The month's revenue, `mrr`, is no row here.) `newMrr`, `ltv`, `payback` and
+ * `value12` name only their own missing inputs, even when the actives are missing: a typed count would not unlock them.
+ */
+const APP_ACTIVES_KPIS: readonly KpiId[] = ["mrr12"];
 
 /** The growth numbers, today → with the what-ifs. A figure unknown today AND projected is still listed: its absence is information. */
 export function kpiRows(
@@ -225,9 +230,9 @@ export function kpiRows(
   const activesMissing = scenario.today.kpis.app?.activesMissing === true;
   const unknownText = (id: KpiId) => {
     const absent = inputs[id as Exclude<KpiId, "won">].filter((m) => knownIn(missing.state, m, ctx).kind !== "known");
-    // An app also names its actives when a revenue figure lacks them (§21.6.4); an empty list is never « il manque ».
+    // An app also names its actives when the revenue in 12 months lacks them (§21.6.4); an empty list is never « il manque ».
     if (app) {
-      const phrase = appMissingPhrase(absent, activesMissing && APP_REVENUE_KPIS.includes(id), strings, missing.metrics);
+      const phrase = appMissingPhrase(absent, activesMissing && APP_ACTIVES_KPIS.includes(id), strings, missing.metrics);
       return phrase !== null ? fillTemplate(w.kpiUnknown, { input: phrase }) : w.unknownStep;
     }
     // Every input entered and still no figure (the month's sign-ups missing, say): the plain « inconnu ».

@@ -74,9 +74,15 @@ describe("appKpiInputs: what each figure of an app reads, in the order « il man
 describe("appMissingPhrase", () => {
   const strings = inputOf(consumerState()).strings;
   const metrics = inputOf(consumerState()).metrics;
-  it("names the inputs missing, then the actives, as one list", () => {
-    expect(appMissingPhrase(["rev.arpa", "app.rev.ads-per-active"], true, strings, metrics)).toBe("le revenu mensuel par abonné, la publicité par actif et actifs du mois");
-    expect(appMissingPhrase([], true, strings, metrics)).toBe("actifs du mois");
+  it("names the inputs missing, then the actives (with their article), as one list", () => {
+    expect(appMissingPhrase(["rev.arpa", "app.rev.ads-per-active"], true, strings, metrics)).toBe("le revenu mensuel par abonné, la publicité par actif et les actifs du mois");
+    expect(appMissingPhrase([], true, strings, metrics)).toBe("les actifs du mois");
+  });
+  it("reads scenario.missingActives, in both languages; the shared count's line keeps its own label", () => {
+    const en = inputOf(consumerState(), "en");
+    expect(appMissingPhrase([], true, en.strings, en.metrics)).toBe("the month's actives");
+    expect(strings.io.sharedCount.appActives).toBe("actifs du mois");
+    expect(en.strings.io.sharedCount.appActives).toBe("actives in the month");
   });
   it("is null with nothing to ask for: never « il manque » on an empty list", () => {
     expect(appMissingPhrase([], false, strings, metrics)).toBeNull();
@@ -98,15 +104,32 @@ describe("the growth figures of an app (kpiRows)", () => {
   it("without subscriptions an app has no NRR and no GRR row", () => {
     expect(rows(consumerUsageOnlyState()).map((r) => r.id)).toEqual(["mrr12", "newMrr", "cac", "ltv", "payback"]);
   });
-  it("a revenue figure that lacks the actives names them last; a payback that never comes says plain « inconnu »", () => {
+  it("the revenue in 12 months, which lacks the actives, names them last; a payback that never comes says plain « inconnu »", () => {
     const k = rows(withoutActives(consumerState()));
     expect(k.find((r) => r.id === "mrr12")!.today).toBeNull();
-    expect(k.find((r) => r.id === "mrr12")!.unknown).toBe("il manque actifs du mois");
+    expect(k.find((r) => r.id === "mrr12")!.unknown).toBe("il manque les actifs du mois");
+    expect(rows(withoutActives(consumerState()), "en").find((r) => r.id === "mrr12")!.unknown).toBe("missing: the month's actives");
     // The cost per install is no revenue: the actives are not asked for it.
     expect(k.find((r) => r.id === "cac")!.today).not.toBeNull();
     const usage = rows(consumerUsageOnlyState());
     expect(usage.find((r) => r.id === "payback")!.today).toBeNull();
     expect(usage.find((r) => r.id === "payback")!.unknown).toBe("inconnu");
+  });
+  it("the value, the payback and the new revenue, unknown for want of the margin, name the margin and never the actives (§21.6.4)", () => {
+    const state = withEntry(withoutActives(consumerState()), "app.rev.gross-margin", undefined);
+    for (const locale of ["fr", "en"] as const) {
+      const k = rows(state, locale);
+      const margin = locale === "fr" ? "la marge brute après commission" : "gross margin after commission";
+      for (const id of ["ltv", "payback"] as const) {
+        const row = k.find((r) => r.id === id)!;
+        expect(row.today).toBeNull();
+        expect(row.unknown).toContain(margin);
+        expect(row.unknown).not.toContain(locale === "fr" ? "actifs" : "actives");
+      }
+      // The revenue in 12 months, on the same state, still names them, with their article and last.
+      const mrr12 = k.find((r) => r.id === "mrr12")!;
+      expect(mrr12.unknown.endsWith(locale === "fr" ? "les actifs du mois" : "the month's actives")).toBe(true);
+    }
   });
   it("with J30 and the commission at 15 %: 8 months, not 13", () => {
     const k = rows(withWhatIf(consumerState(), EXAMPLE_CONSUMER_WHATIF));
@@ -155,13 +178,13 @@ describe("the money block of an app (moneyView)", () => {
     expect(m.worth.months).toBe("It pays back its cost in 13 months, then keeps bringing in, less and less, as its users leave.");
     expect(m.cash.line).toMatch(/^No cash tied up for an app/);
   });
-  it("an app that lacks its actives says so where the value is unknown; with the margin missing, the note", () => {
+  it("an app that lacks its actives does not name them where the value of an install is unknown: only the margin, and the note", () => {
     const state = withEntry(withoutActives(consumerState()), "app.rev.gross-margin", undefined);
     const m = moneyView(inputOf(state), "plg");
-    expect(m.worth.finding).toBe(`On ne peut pas encore dire ce que rapporte une installation${N}: il manque la marge brute après commission et actifs du mois.`);
+    expect(m.worth.finding).toBe(`On ne peut pas encore dire ce que rapporte une installation${N}: il manque la marge brute après commission.`);
     expect(m.worth.note).toBe(inputOf(state).strings.money.noMarginNote);
     expect(m.worth.note).toMatch(/^Sans elle, ni valeur d'une installation ni remboursement/);
-    expect(m.worth.bars?.brings.unknown).toBe("il manque la marge brute après commission et actifs du mois");
+    expect(m.worth.bars?.brings.unknown).toBe("il manque la marge brute après commission");
   });
   it("the SaaS's block is the one it was: its cash tied up, its lifetime", () => {
     const m = moneyView(inputOf(exampleState()), "plg");
@@ -183,7 +206,7 @@ describe("the lever card's money for an app (leverMoneyView)", () => {
     expect(moved.arr12.today).toBe(`aujourd'hui ~510${N}000${N}€`);
   });
   it("without the actives, the annualised revenue is unknown and asks for them", () => {
-    expect(card(withoutActives(consumerState())).arr12).toMatchObject({ unknown: true, value: "il manque actifs du mois" });
+    expect(card(withoutActives(consumerState())).arr12).toMatchObject({ unknown: true, value: "il manque les actifs du mois" });
   });
   it("an install worth 0,59 € then 0,77 € is not « unchanged » (half a euro would say so)", () => {
     const c = card(consumerUsageOnlyState(), EXAMPLE_CONSUMER_WHATIF);
@@ -217,13 +240,20 @@ describe("the « Et si » figures of an app (whatIfFigureGroups)", () => {
     expect(row("ltvCac")).toMatchObject({ label: `Valeur sur 12${N}mois ÷ coût`, today: expect.stringContaining("0,95") });
     expect(row("payback")).toMatchObject({ today: `13${N}mois`, whatif: `8${N}mois` });
   });
-  it("a row that cannot be computed says what is missing, the actives last — except the spend", () => {
+  it("a row that cannot be computed says what is missing, never the actives (§21.6.4), and not for the spend", () => {
     const g = groups(withoutActives(consumerState()));
     expect(g[0]!.rows.find((r) => r.id === "newMrr")!.today).not.toBe("?");
     const spend = g[2]!.rows[0]!;
     expect(spend.missing).toBeNull();
     const noCpi = groups(withEntry(withoutActives(consumerState()), "app.acq.cpi", undefined));
     expect(noCpi[2]!.rows[0]!.missing).toBe("il manque le coût par installation");
+    // The 12-month value and the value of an install, unknown for want of the margin, ask for it alone.
+    const noMargin = groups(withEntry(withoutActives(consumerState()), "app.rev.gross-margin", undefined));
+    for (const id of ["value12", "ltv", "payback"]) {
+      const missing = noMargin[1]!.rows.find((r) => r.id === id)!.missing;
+      expect(missing).toContain("la marge brute après commission");
+      expect(missing).not.toContain("actifs");
+    }
   });
   it("the rule under the tables is the install's, never the cash's", () => {
     expect(moneyAssumptions(inputOf(consumerState()), "plg", {})).toEqual([FR.strings.scenario.assumeLtvApp]);

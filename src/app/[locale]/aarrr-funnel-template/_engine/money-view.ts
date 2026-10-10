@@ -109,8 +109,6 @@ export function moneyView(
   const absent = (ids: readonly MetricId[]) => ids.filter((id) => knownIn(state, id, ctx).kind !== "known");
   const phrase = (ids: readonly MetricId[]) => unitInputsPhrase(ids, strings, metrics);
   const marginId: MetricId = motion === "plg" ? (app ? "app.rev.gross-margin" : "rev.gross-margin") : "slg.rev.gross-margin";
-  // An app whose actives are not known names them last, after the inputs missing (§21.6.4); with nothing to ask, none.
-  const activesMissing = k.app?.activesMissing === true;
 
   const snapshot = state.snapshots[state.snapshots.length - 1]!;
   const eyebrow = fillTemplate(w.eyebrow, { month: formatMonth(snapshot.referenceMonth, ctx.locale) });
@@ -133,7 +131,8 @@ export function moneyView(
   const cacMissing = absent(inputs.cac);
   const cost = k.cac ? { label: w.costs, value: money(k.cac), amount: k.cac } : null;
   if (!k.ltv) {
-    const appAsk = app ? appMissingPhrase(ltvMissing, activesMissing, strings, metrics) : null;
+    // The value of an install names its own missing inputs only, never the actives (§21.6.4).
+    const appAsk = app ? appMissingPhrase(ltvMissing, false, strings, metrics) : null;
     finding = fillTemplate(w.noLtv, { input: app ? (appAsk ?? phrase(inputs.ltv)) : phrase(ltvMissing.length > 0 ? ltvMissing : inputs.ltv) });
     const unknown = app ? (appAsk !== null ? fillTemplate(w.missing, { input: appAsk }) : strings.scenario.unknownStep) : fillTemplate(w.missing, { input: phrase(ltvMissing) });
     if (cost) bars = { cost, brings: { label: w.brings, value: "?", amount: null, unknown } };
@@ -302,7 +301,7 @@ export function leverMoneyView(
   const value = isMoved ? arrWhatif : arrToday;
   const inputs = motion === "plg" ? selfServeKpiInputs(state.setup).mrr12 : SLG_KPI_INPUTS.mrr12;
   const absent = inputs.filter((id) => knownIn(state, id, ctx).kind !== "known");
-  // An app names its actives when the revenue lacks them (§21.6.4); an empty list is never « il manque ».
+  // An app names its actives when the revenue in 12 months lacks them (§21.6.4); an empty list is never « il manque ».
   const ask = motion === "plg" && isApp(state.setup) ? appMissingPhrase(absent, t.app?.activesMissing === true, strings, metrics) : absent.length > 0 ? unitInputsPhrase(absent, strings, metrics) : null;
   const unknown = ask !== null ? fillTemplate(strings.scenario.kpiUnknown, { input: ask }) : strings.scenario.unknownStep;
   const arr12 = {
@@ -316,7 +315,7 @@ export function leverMoneyView(
   let worth: string | null = null;
   if (isMoved && t.loss?.verdict === "loss" && p.loss && p.ltv && p.cac && t.ltv && t.cac) {
     // « Unchanged »: half a currency unit for a SaaS (a customer is hundreds). An install is worth a euro or two, so for an
-    // app it is an equality — half a euro would call « unchanged » a value that went from 0,59 € to 0,77 €.
+    // app it is an equality — half a euro would call « unchanged » a value that went from 0,59 € to 0,77 € (§21.6.4).
     const tolerance = isApp(state.setup) ? 1e-9 : 0.5;
     const sameCac = Math.abs(middle(p.cac) - middle(t.cac)) < tolerance;
     const sameLtv = Math.abs(middle(p.ltv) - middle(t.ltv)) < tolerance;
