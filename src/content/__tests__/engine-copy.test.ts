@@ -132,6 +132,8 @@ describe.each(COPIES)("%s", (_name, COPY) => {
      */
     const TITLE_CONTRACT: Record<SlideTitleKey, string[]> = {
       pelotonComplete: ["activated", "d30", "paid"],
+      // An app without subscriptions: two columns (A22 APP-9, §21.7.1).
+      pelotonCompleteTwo: ["activated", "d30"],
       pelotonGap: ["clauses", "stages"],
       pelotonGapOne: ["clauses", "stages"],
       pelotonTailBreak: ["clauses", "stages"],
@@ -161,6 +163,8 @@ describe.each(COPIES)("%s", (_name, COPY) => {
       askMeasureFirst: ["cost", "metric"],
       annex: ["i", "n"],
       whatIfLever: ["from", "gain", "stage", "to"],
+      // An app's lever that touches only the margins: priced on the payback (A22 APP-9, §21.7.4).
+      whatIfLeverMargin: ["from", "payback", "paybackToday", "stage", "to"],
       whatIfLeverPlain: ["from", "stage", "to"],
       scenario: ["gain", "n"],
       scenarioPlain: ["n"],
@@ -219,6 +223,7 @@ describe.each(COPIES)("%s", (_name, COPY) => {
         worth: "3 opportunités de plus pour 100 leads", known: "libre-service", other: "assisté",
         month: "juillet 2026", leak: "\u00a0; l'activation reste la fuite", before: "juillet 2026", now: "août 2026",
         cac: "1\u00a0900\u00a0€", ltv: "~1\u00a0500\u00a0€", gap: "~400\u00a0€",
+        payback: "8\u00a0mois", paybackToday: "11\u00a0mois",
       },
       en: {
         activated: "18 reach first value", d30: "9–12 are still active at day 30", paid: "6–9 pay",
@@ -239,6 +244,7 @@ describe.each(COPIES)("%s", (_name, COPY) => {
         worth: "3 more opportunities per 100 leads", known: "self-serve", other: "sales-assisted",
         month: "July 2026", leak: "; activation is still the leak", before: "July 2026", now: "August 2026",
         cac: "€1,900", ltv: "~€1,500", gap: "~€400",
+        payback: "8 months", paybackToday: "11 months",
       },
     };
 

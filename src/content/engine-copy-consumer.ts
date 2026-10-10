@@ -341,6 +341,11 @@ export const ENGINE_COPY_CONSUMER: DeepPartialTranslatable<typeof ENGINE_COPY> =
       fr: "Sur 100 installations, {activated}, {d30} et **{paid}**.",
       en: "Out of 100 installs, {activated}, {d30} and **{paid}**.",
     },
+    // TODO: à relire — copie neuve (convention 6), §21.7.1 (A22 APP-9) : the rewrite of `pelotonCompleteTwo`, added with its base leaf.
+    pelotonCompleteTwo: {
+      fr: "Sur 100 installations, {activated} et **{d30}**.",
+      en: "Out of 100 installs, {activated} and **{d30}**.",
+    },
     pelotonGap: {
       fr: "Sur 100 installations, {clauses}. **Entre les deux, on ne voit rien : {stages} ne sont pas mesurées.**",
       en: "Out of 100 installs, {clauses}. **In between, we see nothing: {stages} aren't measured.**",

@@ -20,10 +20,12 @@ import {
   valueToCost,
   type AppMonetization,
 } from "./app-model";
-import { APP_LEVER_IDS, CANDIDATE_IDS, LEVER_IDS, LTV_CAP_MONTHS, appShapeShown, derivedShapeOf, shapesOf, type MetricShape } from "./catalog-shape";
-import { isFlow, rankingImpact } from "./impact";
-import { add, div, mul, point, scale } from "./interval";
+import { APP_LEVER_IDS, CANDIDATE_IDS, LEVER_IDS, LTV_CAP_MONTHS, REFERRAL_CANDIDATES, appShapeShown, derivedShapeOf, isPricedAt, shapesOf, type MetricShape } from "./catalog-shape";
+import { formatApproxMoneyInterval, formatCountInterval, formatInterval, roundDisplay, roundMoney, type UnitWords } from "./format";
+import { isFlow, rankingImpact, twelveMonthFactor, whatIf } from "./impact";
+import { add, div, mapBounds, mul, point, scale } from "./interval";
 import { acquisitionSpend, arrOf, paybackLimit } from "./money";
+import { cohortIsSmall } from "./peloton";
 import { buildScenario, leverViews, mrrToday, valueOf, type AppKpis, type Scenario, type ScenarioAssumption, type ScenarioFunnel, type ScenarioKpis } from "./scenario";
 import type { PanelLeverId } from "./scenario-of"; // type only: scenario-of.ts imports this module
 import { DEFAULT_APP_MONETIZATION, monetizationOf } from "./setup-type";
@@ -38,6 +40,8 @@ import type {
   EngineCalcContext,
   EngineSetup,
   EngineState,
+  Impact,
+  ImpactLine,
   Interval,
   LeverId,
   MetricId,
@@ -361,6 +365,208 @@ export function appRankingImpact(state: EngineState, id: SelfServeCandidateId, t
   const money = appRankingGain(m, subscriptionsPart, usagePart);
   if (money) return { ...(sub.gap ? { gap: sub.gap } : {}), mrr: money };
   return sub.gap ? { gap: sub.gap } : {};
+}
+
+// --- The « Et si » chain of an app (§21.7.2, APP-9) ---------------------------------
+
+const floorAtZero = (i: Interval): Interval => mapBounds(i, (v) => Math.max(0, v));
+
+/**
+ * The displayed chain of one candidate and one target for a consumer app: the self-serve `whatIf` (§6.7), built from the
+ * numbers the reader sees, with the app's second stream where it has one. `null` when nothing can be priced, as `whatIf`.
+ *
+ * Three chains, which `Impact.appChain` names for `phrases.ts#chainTemplate`:
+ * - `subscriptions`: the self-serve chain on the subscribers, unchanged (`whatIf`, its `annual` line printed with the
+ *   app's words); a flow, with a usage stream ticked, adds the actives that day 30 brings, what they earn, and the sum
+ *   (`usage-then`, `usage-times`, `sum`), then its own `annual` over both streams;
+ * - `actives-flow`: a flow without subscriptions, counted on the new actives (the month's installs still there at day
+ *   30, D9) and priced at the revenue per active;
+ * - `actives-retention`: the actives' retention, the base being the month's actives, as churn is the paying base.
+ *
+ * A ticked stream whose gain can't be computed leaves the money out: the subscribers' chain keeps its customers
+ * only; the two chains on the actives are `null` (their sentences would count subscribers).
+ */
+export function appWhatIf(state: EngineState, candidate: SelfServeCandidateId, target: number, ctx: EngineCalcContext, words: UnitWords): Impact | null {
+  if (!isPricedAt(candidate, target)) return null;
+  const inputs = appInputs(state, ctx);
+  const { m } = inputs;
+  const usageTicked = hasUsageStream(m);
+  const perActive = usageTicked ? revenuePerActive(m, inputs.purchases, inputs.ads) : null;
+
+  if (candidate === ACTIVE_RETENTION) return activeRetentionChain(state, target, ctx, words, inputs, perActive);
+
+  if (!m.subscriptions) return activesFlowChain(state, candidate, target, ctx, words, inputs, perActive);
+
+  const impact = whatIf(state, candidate, target, ctx, words);
+  if (!impact) return null;
+  const subscriptions: Impact = { ...impact, appChain: "subscriptions" };
+  const flow = candidate !== "rev.paid-conversion" && candidate !== "ret.logo-churn";
+  if (!usageTicked || !flow) return subscriptions;
+  // The money of the subscriptions, on the way it was printed: if it isn't there (no ARPA, under one subscriber), the usage doesn't add to it.
+  const subscriptionsMoney = subscriptions.mrrPerMonth;
+  if (!subscriptionsMoney) return subscriptions;
+  const usage = usageLines(state, candidate, target, ctx, words, inputs, perActive);
+  if (!usage) {
+    // The second stream is ticked and its gain unknown: the title can't say a revenue it only half knows, so the chain keeps its customers.
+    const { mrrPerMonth: _month, mrrAfter12Months: _year, ...customers } = subscriptions;
+    return { ...customers, kind: "customers", lines: subscriptions.lines.filter((l) => l.key !== "times" && l.key !== "annual") };
+  }
+
+  const currency = state.setup.currency;
+  const total = add(subscriptionsMoney, usage.amount);
+  const lines: ImpactLine[] = subscriptions.lines.filter((l) => l.key !== "annual");
+  lines.push(...usage.lines, { key: "sum", values: { amount: formatApproxMoneyInterval(total, currency, ctx, words) } });
+  const { mrrAfter12Months: _single, ...rest } = subscriptions;
+  const churn = knownValueOf(state, "ret.logo-churn", ctx);
+  const retention = inputs.activeRetention;
+  // The year: each stream eroded by its own departures, from its own printed amount (the subscribers' churn, the actives' retention).
+  if (!churn || !retention) return { ...rest, mrrPerMonth: total, lines };
+  const year = add(scaleBy(subscriptionsMoney, twelveMonthFactor(roundDisplay(churn.hi))), scaleBy(usage.amount, twelveMonthFactor(roundDisplay(100 - retention.lo))));
+  lines.push({ key: "annual", values: { amount: formatApproxMoneyInterval(year, currency, ctx, words) } });
+  return { ...rest, mrrPerMonth: total, mrrAfter12Months: year, lines };
+}
+
+function knownValueOf(state: EngineState, id: MetricId, ctx: EngineCalcContext): Interval | null {
+  const k = knownIn(state, id, ctx);
+  return k.kind === "known" ? k.value : null;
+}
+
+const scaleBy = (i: Interval, k: number): Interval => ({ lo: i.lo * k, hi: i.hi * k });
+
+/**
+ * The displayed numbers every chain of the app starts from, as `whatIf` computes them: the rate and the target rounded
+ * as the reader sees them, the rate's printer, and the ratio the volume grows by.
+ */
+function flowFigures(state: EngineState, candidate: SelfServeCandidateId, target: number, ctx: EngineCalcContext, words: UnitWords, r: Interval) {
+  const referral = REFERRAL_CANDIDATES.includes(candidate);
+  // A small COHORT shows whole percents; the month's flows (installs, the referred share) aren't a cohort.
+  const noDecimals = candidate !== "acq.signup-rate" && !referral && cohortIsSmall(currentSnapshot(state), state.setup);
+  const pct = (i: Interval) => formatInterval(i, "percent", ctx, words, { noDecimals });
+  const bare = (i: Interval) => formatInterval(i, "ratio", ctx, words);
+  const rD = mapBounds(r, (v) => roundDisplay(v, { noDecimals }));
+  const tD = roundDisplay(target, { noDecimals });
+  /** What the volume becomes at the target, per bound from the displayed numbers: the fewest with the highest value today. */
+  const grown = (v: Interval): Interval =>
+    referral
+      ? { lo: Math.round((v.lo * (100 - rD.hi)) / (100 - tD)), hi: Math.round((v.hi * (100 - rD.lo)) / (100 - tD)) }
+      : { lo: Math.round((v.lo * tD) / rD.hi), hi: Math.round((v.hi * tD) / rD.lo) };
+  return { referral, pct, bare, rD, tD, grown };
+}
+
+/** The new actives of the month (the installs still there at day 30, D9), as the reader sees them: the volume, its growth, and the gain. */
+function newActivesFigures(state: EngineState, candidate: SelfServeCandidateId, target: number, ctx: EngineCalcContext, words: UnitWords, inputs: AppInputs) {
+  const r = knownValueOf(state, candidate, ctx);
+  const actives = newActivesPerMonth(inputs.installs, inputs.d30);
+  if (!r || !actives) return null;
+  const f = flowFigures(state, candidate, target, ctx, words, r);
+  if (!(f.rD.lo > 0 || f.referral) || !(f.tD > f.rD.lo)) return null;
+  const nD = mapBounds(actives, Math.round);
+  const mD = f.grown(nD);
+  const delta = floorAtZero({ lo: mD.lo - nD.lo, hi: mD.hi - nD.hi });
+  return { r, f, nD, mD, delta };
+}
+
+/** The usage stream's two lines of a chain with subscriptions (`usage-then`, `usage-times`), and its monthly amount. */
+function usageLines(
+  state: EngineState,
+  candidate: SelfServeCandidateId,
+  target: number,
+  ctx: EngineCalcContext,
+  words: UnitWords,
+  inputs: AppInputs,
+  perActive: Interval | null,
+): { lines: ImpactLine[]; amount: Interval } | null {
+  const figures = newActivesFigures(state, candidate, target, ctx, words, inputs);
+  if (!figures || !perActive || figures.delta.hi < 1) return null;
+  const { f, nD, mD, delta } = figures;
+  const perD = mapBounds(perActive, roundMoney);
+  const amount = mul(delta, perD);
+  const currency = state.setup.currency;
+  return {
+    amount,
+    lines: [
+      {
+        key: "usage-then",
+        values: { n: formatCountInterval(nD, ctx, words), target: f.bare(point(f.tD)), rate: f.bare(f.rD), m: formatCountInterval(mD, ctx, words), delta: formatCountInterval(delta, ctx, words) },
+        count: delta,
+      },
+      {
+        key: "usage-times",
+        values: { perActive: formatInterval(perD, "money", ctx, words, { currency }), amount: formatApproxMoneyInterval(amount, currency, ctx, words) },
+      },
+    ],
+  };
+}
+
+/** A flow without subscriptions: the new actives, then what they earn (`actives-flow`). `null` without the month's installs, day 30 or the revenue per active. */
+function activesFlowChain(
+  state: EngineState,
+  candidate: SelfServeCandidateId,
+  target: number,
+  ctx: EngineCalcContext,
+  words: UnitWords,
+  inputs: AppInputs,
+  perActive: Interval | null,
+): Impact | null {
+  const figures = newActivesFigures(state, candidate, target, ctx, words, inputs);
+  if (!figures || !perActive) return null;
+  const { r, f, nD, mD, delta } = figures;
+  const currency = state.setup.currency;
+  const lines: ImpactLine[] = [
+    { key: "today", values: { rate: f.pct(f.rD), n: formatCountInterval(nD, ctx, words) }, count: nD },
+    { key: "if", values: { target: f.pct(point(f.tD)) } },
+    { key: "then", values: { n: formatCountInterval(nD, ctx, words), target: f.bare(point(f.tD)), rate: f.bare(f.rD), m: formatCountInterval(mD, ctx, words), delta: formatCountInterval(delta, ctx, words) }, count: delta },
+  ];
+  const base: Impact = { metric: candidate, kind: "new-mrr", from: r, to: target, customersPerMonth: delta, appChain: "actives-flow", lines };
+  if (delta.hi < 1) {
+    lines.push({ key: "less-than-one", values: {} });
+    return { ...base, kind: "customers" };
+  }
+  const perD = mapBounds(perActive, roundMoney);
+  const amount = mul(delta, perD);
+  lines.push({ key: "times", values: { perActive: formatInterval(perD, "money", ctx, words, { currency }), amount: formatApproxMoneyInterval(amount, currency, ctx, words) } });
+  const retention = inputs.activeRetention;
+  if (!retention) return { ...base, mrrPerMonth: amount, lines };
+  const annual = scaleBy(amount, twelveMonthFactor(roundDisplay(100 - retention.lo)));
+  lines.push({ key: "annual", values: { amount: formatApproxMoneyInterval(annual, currency, ctx, words) } });
+  return { ...base, mrrPerMonth: amount, mrrAfter12Months: annual, lines };
+}
+
+/** The actives' retention: the actives kept by the change, at the revenue per active (`actives-retention`). `null` without the actives, their retention or the revenue per active. */
+function activeRetentionChain(
+  state: EngineState,
+  target: number,
+  ctx: EngineCalcContext,
+  words: UnitWords,
+  inputs: AppInputs,
+  perActive: Interval | null,
+): Impact | null {
+  const r = inputs.activeRetention;
+  const base = inputs.actives;
+  if (!r || !base || !perActive) return null;
+  const pct = (i: Interval) => formatInterval(i, "percent", ctx, words);
+  const rD = mapBounds(r, (v) => roundDisplay(v));
+  const tD = roundDisplay(target);
+  if (!(tD > rD.lo) || tD > 100) return null;
+  const currency = state.setup.currency;
+  const baseText = formatCountInterval(base, ctx, words);
+  const kept = mapBounds(floorAtZero({ lo: (base.lo * (tD - rD.hi)) / 100, hi: (base.hi * (tD - rD.lo)) / 100 }), Math.round);
+  const lines: ImpactLine[] = [
+    { key: "today", values: { retention: pct(rD), base: baseText } },
+    { key: "if", values: { target: pct(point(tD)) } },
+    { key: "then", values: { base: baseText, retention: pct(rD), target: pct(point(tD)), n: formatCountInterval(kept, ctx, words) }, count: kept },
+  ];
+  const impact: Impact = { metric: ACTIVE_RETENTION, kind: "retained-mrr", from: r, to: target, customersPerMonth: kept, appChain: "actives-retention", lines };
+  if (kept.hi < 1) {
+    lines.push({ key: "less-than-one", values: {} });
+    return { ...impact, kind: "customers" };
+  }
+  const perD = mapBounds(perActive, roundMoney);
+  const amount = mul(kept, perD);
+  lines.push({ key: "times", values: { perActive: formatInterval(perD, "money", ctx, words, { currency }), amount: formatApproxMoneyInterval(amount, currency, ctx, words) } });
+  const annual = scaleBy(amount, twelveMonthFactor(100 - tD));
+  lines.push({ key: "annual", values: { amount: formatApproxMoneyInterval(annual, currency, ctx, words) } });
+  return { ...impact, mrrPerMonth: amount, mrrAfter12Months: annual, lines };
 }
 
 // --- The derivation of an app (§21.5.5, APP-6) ------------------------------------

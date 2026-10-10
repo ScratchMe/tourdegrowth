@@ -517,8 +517,12 @@ export type Position = "below" | "maybe-below" | "within" | "above" | "no-compar
  * displayed numbers of the one before (tested).
  */
 export interface ImpactLine {
-  /** `per-month`: sales-assisted only — its chain counts a quarter, then says what that is a month (§18.5.3). */
-  key: "today" | "if" | "then" | "times" | "per-month" | "annual" | "less-than-one";
+  /**
+   * `per-month`: sales-assisted only — its chain counts a quarter, then says what that is a month (§18.5.3).
+   * `usage-then`, `usage-times` and `sum`: a consumer app's chain with subscriptions and a usage stream, the second
+   * stream's two lines and the sum of both (§21.7.2).
+   */
+  key: "today" | "if" | "then" | "times" | "usage-then" | "usage-times" | "sum" | "per-month" | "annual" | "less-than-one";
   values: Record<string, string>;
   /**
    * The count this line's noun agrees with, AS PRINTED (rounded like its
@@ -549,6 +553,8 @@ export interface Impact {
    * copy's `findings.base` — never a word.
    */
   perHundredBase?: "leads" | "mql" | "closedOpps" | "renewals" | "oppsCreated";
+  /** §21.7.2: which of the app's chains `appWhatIf` built; absent for the SaaS (today's templates, unchanged). */
+  appChain?: "subscriptions" | "actives-flow" | "actives-retention";
   lines: ImpactLine[];
 }
 
@@ -820,6 +826,8 @@ export interface Mirror {
  */
 export type SlideTitleKey =
   | "pelotonComplete"
+  /** An app without subscriptions: two columns, « Sur 100 installations, {activated} et {d30} » (§21.7.1). */
+  | "pelotonCompleteTwo"
   | "pelotonGap"
   | "pelotonGapOne"
   | "pelotonTailBreak"
@@ -854,6 +862,8 @@ export type SlideTitleKey =
   | "annex"
   /** « Et si » (2026-09-26): one lever, priced on the MRR in 12 months — or plain when it can't be. */
   | "whatIfLever"
+  /** An app's lever that touches only the margins (the stores' commission): its gain is on the payback, not the revenue (§21.7.4). */
+  | "whatIfLeverMargin"
   | "whatIfLeverPlain"
   /** All the levers under test, together. */
   | "scenario"
@@ -925,6 +935,8 @@ export interface DeckSlide {
    * against what it cost. Drawn, not printed: its figures are the rows'.
    */
   paybackChart?: SlidePaybackChart;
+  /** A consumer app's unit-economics picture (§21.6.6): an install's cumulative margin against its cost. Never set for a SaaS. */
+  installChart?: SlideInstallChart;
   /** The hybrid's unit economics (A20.d T4.d): each engine's picture, side by side, compact — never summed. */
   paybackCharts?: { plg?: SlidePaybackChart; slg?: SlidePaybackChart };
 }
@@ -977,6 +989,32 @@ export interface SlidePaybackChart {
     after: string;
     /** Compact (the hybrid's two columns): the time story on the axis row, « part vers 17 mois ; rembourserait à 21 mois ». */
     time: string;
+  };
+  /** The chart in words, for a screen reader. */
+  summary: string;
+}
+/**
+ * One install, month by month (`InstallPaybackChart`, §21.6.6): its cumulative margin over 36 months against what it
+ * cost. Absent without a margin: the slide keeps its « ? ».
+ */
+export interface SlideInstallChart {
+  /** `installCumulative` (app-model.ts): 37 points, months 0 to 36. */
+  curve: { lo: number[]; hi: number[] };
+  /** What one install costs (`app.acq.cpi`), a range when estimated. */
+  cost: [number, number];
+  /** `installPaybackInterval`: null for a loss; hi = 36 when the worst case is beyond the cap. */
+  payback: [number, number] | null;
+  story: "pays-back" | "loss";
+  labels: {
+    /** « 0 », « 36 mois »: the axis's two ends. */
+    start: string;
+    end: string;
+    /** « ce que coûte une installation ». */
+    cost: string;
+    /** « remboursée : 13 mois ». */
+    paysBack: string;
+    /** « pas remboursée en 36 mois, il manque ~0,70 € ». */
+    loss: string;
   };
   /** The chart in words, for a screen reader. */
   summary: string;

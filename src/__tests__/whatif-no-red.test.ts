@@ -27,7 +27,8 @@ import { describe, expect, it } from "vitest";
  * Design system extension 09 (A20.d T3): the money's projections are never
  * red either — the MRR's curve, the panel's three tables, the compounding
  * drawn, the loss's bars and the one customer's picture (PaybackChart, T4.c) —
- * the loss is arithmetic in ink, not the leak.
+ * the loss is arithmetic in ink, not the leak. The consumer app's picture of one install (InstallPaybackChart,
+ * A22 APP-9) is read the same way.
  * Their sheets are read too, and so are the engine's and the money's
  * tokens bound to a red one, layer under layer (tokens/engine.css, then
  * money.css): `--money-warning-edge`, the long-payback warning's dashed
@@ -38,7 +39,7 @@ const ROOT = process.cwd();
 const COLORS = readFileSync(join(ROOT, "src/styles/tokens/colors.css"), "utf8");
 const strip = (css: string) => css.replace(/\/\*[\s\S]*?\*\//g, "");
 const PANEL = strip(readFileSync(join(ROOT, "src/app/[locale]/aarrr-funnel-template/_engine/WhatIfPanel.module.css"), "utf8"));
-const MONEY_SHEETS = ["MrrCurve", "WhatIfFigures", "LeverSum", "WorthBars", "LeverCard", "PaybackChart"].map((name) => ({
+const MONEY_SHEETS = ["MrrCurve", "WhatIfFigures", "LeverSum", "WorthBars", "LeverCard", "PaybackChart", "InstallPaybackChart"].map((name) => ({
   name,
   css: strip(readFileSync(join(ROOT, `src/components/engine/${name}.module.css`), "utf8")),
 }));

@@ -1,0 +1,91 @@
+/*
+ * InstallPaybackChart — the consumer app's unit-economics picture (engine spec §21.6.6, A22 APP-9). Tokens only,
+ * copied from PaybackChart.module.css (not imported: a component's sheet is its own).
+ *
+ * Drawn on the deck's 1 920 canvas only, so its type is the slides' own scale (--slide-*, 18px and up, design audit
+ * S-8). Mono, as MrrCurve and PaybackChart on a slide: SVG text in the UI font dropped its spaces in the PNG export.
+ */
+.root {
+  margin: 0;
+}
+
+.svg {
+  display: block;
+  overflow: visible;
+}
+
+.axis {
+  stroke: var(--viz-axis);
+  stroke-width: var(--border-width-hairline);
+}
+
+.tick,
+.note {
+  font: var(--slide-meta);
+  fill: var(--text-muted);
+}
+
+.label {
+  font: var(--slide-meta);
+  fill: var(--text-body);
+}
+
+.strong {
+  font-weight: 700;
+}
+
+.cost {
+  stroke: var(--viz-ink);
+  stroke-width: var(--border-width-stamp);
+}
+
+/* The install's margin so far, month after month: ink. */
+.curve {
+  fill: none;
+  stroke: var(--money-line-whatif);
+  stroke-width: var(--money-curve-line-whatif);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.hatch {
+  fill: var(--money-range-ink);
+}
+
+.band {
+  stroke: none;
+}
+
+/* A range of the curve: the same hatch, lighter than the cost's band, so the two never read as one. */
+.curveBand {
+  stroke: none;
+  opacity: 0.55;
+}
+
+/* Where the curve meets the cost line, and the span of it when the payback is a range. */
+.paybackTick {
+  stroke: var(--viz-ink);
+  stroke-width: var(--border-width);
+  stroke-linecap: round;
+}
+
+.paybackRange {
+  stroke: var(--money-range-ink);
+  stroke-width: var(--border-width-stamp);
+  stroke-linecap: round;
+}
+
+.bracket {
+  fill: none;
+  stroke: var(--money-bracket-ink);
+  stroke-width: var(--border-width);
+}
+
+/* Labels keep a halo of their ground where they cross a line, so they keep their contrast: the page's unless the
+ * parent says otherwise (`--chart-halo`, e.g. the deck's white theme — A21.4). */
+.halo {
+  paint-order: stroke;
+  stroke: var(--chart-halo, var(--surface-page));
+  stroke-width: var(--border-width-stamp);
+  stroke-linejoin: round;
+}

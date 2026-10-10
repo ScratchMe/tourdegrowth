@@ -4,7 +4,8 @@ import { fillTemplate, formatApproxMoneyInterval, formatChange, formatDuration, 
 import type { MoneyKpis } from "./money";
 import { unitInputsPhrase } from "./phrases";
 import type { EngineStrings, ResolvedMetric } from "./strings";
-import type { BusinessType, DerivedId, DerivedValue, EngineCalcContext, EngineState, Interval, MetricId, SlidePaybackChart, SlideTitle } from "./types";
+import type { ScenarioKpis } from "./scenario";
+import type { BusinessType, DerivedId, DerivedValue, EngineCalcContext, EngineState, Interval, MetricId, SlideInstallChart, SlidePaybackChart, SlideTitle } from "./types";
 
 /**
  * deck-unit.ts — the money on the unit-economics slide (design system
@@ -26,6 +27,10 @@ import type { BusinessType, DerivedId, DerivedValue, EngineCalcContext, EngineSt
  *
  * Nothing here is a reference (C1): the LTV:CAC's « about 3:1 » and the
  * chart's dotted 12 months situate, printed in context, never a verdict.
+ *
+ * A consumer app's slide is `appUnitMoney`, below: what it adds to the
+ * rows `buildUnitEconomics` writes is its own (§21.7.3), and `unitMoney` does
+ * not know it.
  */
 
 type Words = EngineStrings;
@@ -199,4 +204,103 @@ export function unitMoney(input: {
     verdict === "loss" && k.loss && k.cac && k.ltv ? { key: "unitEconomicsLoss", values: { cac: money(k.cac), ltv: approx(k.ltv), gap: approx(abs(k.loss.gap)) } } : null;
 
   return { rows, ratioNote, chart, lossTitle };
+}
+
+// --- A consumer app's unit economics (engine spec §21.7.3, A22 APP-9) -------------------------------------
+
+/**
+ * What an app's unit-economics slide gains beyond its five figure rows (`cac`, `value12`, `ltv`, `ltvCac`, `payback`),
+ * from the app's scenario, nothing moved (`scenarioOf`, like the board's money block). An install's margin falls month
+ * by month, so there is no « months after payback » and no cash tied up (D11), and no reference to situate it (C60):
+ * only the subscriptions' GRR and NRR (with subscriptions), the long-payback warning (C49), what the picture assumes,
+ * the picture itself (`InstallPaybackChart`: the install's cumulative margin against its cost) and, for a certain loss,
+ * the slide's title (C48).
+ */
+export interface AppUnitMoney {
+  /** The rows the slide gains, in print order: retention, warning, assume — those that apply. */
+  rows: Row[];
+  chart: SlideInstallChart | null;
+  /** A certain loss titles the slide (C48); null otherwise. */
+  lossTitle: SlideTitle | null;
+}
+
+export function appUnitMoney(input: {
+  state: EngineState;
+  k: ScenarioKpis;
+  /** The derived figures: the subscriptions' GRR and NRR. */
+  unit: { grr?: DerivedValue; nrr?: DerivedValue };
+  /** The app's monetization shows the subscriptions' GRR and NRR only when they are ticked. */
+  subscriptions: boolean;
+  strings: Words;
+  metrics: ResolvedMetric[];
+  ctx: EngineCalcContext;
+}): AppUnitMoney {
+  const { state, k, unit, subscriptions, strings, metrics, ctx } = input;
+  const w = strings.slide;
+  const u = strings.units;
+  const currency = state.setup.currency;
+  const money = (i: Interval) => formatInterval(i, "money", ctx, u, { currency });
+  const approx = (i: Interval) => formatApproxMoneyInterval(i, currency, ctx, u);
+  const months = (i: Interval) => formatDurationInterval(i, "months", ctx, u);
+  const phrase = (ids: readonly MetricId[]) => unitInputsPhrase(ids, strings, metrics);
+  const verdict = k.loss?.verdict ?? null;
+  const rows: Row[] = [];
+
+  // --- The subscriptions' GRR and NRR, one line (they explain the subscribers' share of the margin) ---
+  if (subscriptions && unit.grr && unit.nrr) {
+    const percent = (d: DerivedValue) => (d.kind === "known" ? formatInterval(d.value, "percent", ctx, u) : "");
+    const grr = percent(unit.grr);
+    const nrr = percent(unit.nrr);
+    const missing = [...new Set([...missingOf(unit.grr), ...missingOf(unit.nrr)])];
+    let text: string;
+    if (!grr && !nrr) text = fillTemplate(w.unitRetentionUnknown, { input: phrase(missing) });
+    else {
+      text = fillTemplate(w.unitRetention, { grr: grr || "?", nrr: nrr || "?" });
+      if (missing.length > 0) text = `${text} ${fillTemplate(w.unitRetentionMissing, { input: phrase(missing) })}`;
+    }
+    rows.push({ row: "retention", text });
+  }
+
+  // --- The long-payback warning (C49): against the runway, or the 30-month floor ---
+  if (k.warning && k.payback) {
+    const maybe = k.warning.verdict === "maybe";
+    const template = k.warning.limit.kind === "runway" ? (maybe ? w.unitWarnRunwayMaybe : w.unitWarnRunway) : maybe ? w.unitWarnFloorMaybe : w.unitWarnFloor;
+    rows.push({ row: "warning", maybe: maybe ? "true" : "", text: fillTemplate(template, { payback: months(k.payback), n: formatDuration(k.warning.limit.months, "months", ctx, u) }) });
+  }
+
+  // --- The picture: one install, month by month; absent without a margin or a cost ---
+  let chart: SlideInstallChart | null = null;
+  const curve = k.app?.curve ?? null;
+  if (curve && k.cac) {
+    const story = k.payback === null ? "loss" : "pays-back";
+    const gap = k.loss ? abs(k.loss.gap) : null;
+    const cost = money(k.cac);
+    chart = {
+      curve,
+      cost: tuple(k.cac),
+      payback: k.payback ? tuple(k.payback) : null,
+      story,
+      labels: {
+        start: formatNumber(0, ctx.locale),
+        end: formatDuration(LTV_CAP_MONTHS, "months", ctx, u),
+        cost: w.chartCost,
+        // Each story says its own words only: « pas remboursée, il manque … » over a healthy install would be false.
+        paysBack: story === "pays-back" && k.payback ? fillTemplate(w.installChartPaysBack, { payback: months(k.payback) }) : "",
+        loss: story === "loss" && gap ? fillTemplate(w.installChartLoss, { gap: approx(gap) }) : "",
+      },
+      summary:
+        story === "pays-back"
+          ? fillTemplate(w.installChartSummaryHealthy, { cpi: cost, payback: months(k.payback!) })
+          : fillTemplate(w.installChartSummaryLoss, { cpi: cost, ltv: k.ltv ? approx(k.ltv) : "", gap: gap ? approx(gap) : "" }),
+    };
+  }
+
+  // --- What the picture assumes, printed with it ---
+  if (chart) rows.push({ row: "assume", text: w.unitAssumeApp });
+
+  // --- A certain loss titles the slide (C48), its figures in ink (C53) ---
+  const lossTitle: SlideTitle | null =
+    verdict === "loss" && k.loss && k.cac && k.ltv ? { key: "unitEconomicsLoss", values: { cac: money(k.cac), ltv: approx(k.ltv), gap: approx(abs(k.loss.gap)) } } : null;
+
+  return { rows, chart, lossTitle };
 }

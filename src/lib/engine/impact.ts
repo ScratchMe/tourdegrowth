@@ -122,7 +122,7 @@ export function rankingImpact(
 }
 
 /** Σ_{k=0}^{11} (1 − churn)^k — twelve months of a monthly amount that erodes at `churnPercent`. */
-function twelveMonthFactor(churnPercent: number): number {
+export function twelveMonthFactor(churnPercent: number): number {
   const c = churnPercent / 100;
   return c <= 0 ? 12 : (1 - Math.pow(1 - c, 12)) / c;
 }
@@ -281,9 +281,12 @@ export function whatIf(
 export function impactHeadline(impact: Impact): { amount?: string; n?: string; count?: Interval } {
   // Sales-assisted: the title says « chaque mois », read on the chain's own `per-month` line (§18.5.3).
   const perMonth = impact.lines.find((l) => l.key === "per-month");
+  // A consumer app with subscriptions and a usage stream: the title says the sum of both streams, not the first line's part (§21.7.2).
+  const sum = impact.lines.find((l) => l.key === "sum");
   const times = impact.lines.find((l) => l.key === "times");
   const then = impact.lines.find((l) => l.key === "then");
   if (perMonth?.values.amount) return { amount: perMonth.values.amount };
+  if (sum?.values.amount) return { amount: sum.values.amount };
   if (times?.values.amount) return { amount: times.values.amount };
   if (impact.metric === "ret.logo-churn") return { n: then?.values.n, count: then?.count };
   if (impact.metric === "slg.ret.renewal") return { n: then?.values.kept, count: then?.count };

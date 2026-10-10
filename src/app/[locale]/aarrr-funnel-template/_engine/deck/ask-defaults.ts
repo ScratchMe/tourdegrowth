@@ -1,5 +1,6 @@
-import { candidatesOf, motionShapes, TEXT_LIMITS } from "@/lib/engine/catalog-shape";
+import { motionShapes, TEXT_LIMITS } from "@/lib/engine/catalog-shape";
 import { impactTarget } from "@/lib/engine/diagnose";
+import { candidatesFor } from "@/lib/engine/scenario-of";
 import type { CandidateId, EngineAsk, EngineDerived, EngineSetup, EngineState, MetricId, RepairScale, YearMonth } from "@/lib/engine/types";
 import { currentSnapshot } from "@/lib/engine/values";
 
@@ -75,10 +76,11 @@ export function askDefaults(state: EngineState, derived: EngineDerived): EngineA
 
 /**
  * The success metrics the form offers: the rates a diagnosis can name (§6.6), each ticked motion's —
- * self-serve's six, then sales-assisted's (§18.5.2), in catalogue order, never by value.
+ * self-serve's six, then sales-assisted's (§18.5.2), in catalogue order, never by value. An app's self-serve are its
+ * own (§21.5.4): the ones its monetization shows, then the actives' retention when it has one.
  */
-export function successMetrics(setup: Pick<EngineSetup, "motions">): readonly MetricId[] {
-  return (["plg", "slg"] as const).filter((m) => setup.motions[m]).flatMap((m) => candidatesOf(m));
+export function successMetrics(setup: Pick<EngineSetup, "type" | "motions" | "monetization">): readonly MetricId[] {
+  return (["plg", "slg"] as const).filter((m) => setup.motions[m]).flatMap((m) => candidatesFor(setup, m));
 }
 
 /**

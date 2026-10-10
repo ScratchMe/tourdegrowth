@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { exampleState, filmState, hybridState, measured, ratio, salesAssistedState, tourResult, withEntry, withMonthBefore, withTarget } from "@/lib/engine/__tests__/fixtures";
+import { consumerState, consumerUsageOnlyState, exampleState, filmState, hybridState, measured, ratio, salesAssistedState, tourResult, withEntry, withMonthBefore, withTarget } from "@/lib/engine/__tests__/fixtures";
 import { CTX_EN, CTX_FR, EN, FR } from "@/lib/engine/__tests__/props";
 import { buildDeck } from "@/lib/engine/deck";
 import { deriveEngine } from "@/lib/engine/derive";
+import { EXAMPLE_CONSUMER_WHATIF } from "@/lib/engine/example";
+import { isApp } from "@/lib/engine/setup-type";
+import { mergeStrings } from "@/lib/engine/strings";
 import type { DeckModel, EngineState } from "@/lib/engine/types";
 import { OPTIONAL_FIELDS, ROW_FIELDS, type RowKind } from "../deck-rows";
 
@@ -34,7 +37,8 @@ import { OPTIONAL_FIELDS, ROW_FIELDS, type RowKind } from "../deck-rows";
  * sum — the hybrid's own rows; its unit tiles since A20.d T4.d are the
  * single engine's kinds, tagged with their motion (`salesAssisted` still writes the
  * relays); dropping `series` and `seriesApart` (A14 T1) fails it naming
- * evolution and apart.
+ * evolution and apart; dropping `app` and `appWhatIf` (A22 APP-9) fails it naming value12 — the
+ * consumer app's twelve-month value, the tile between its cost and its 36-month value.
  */
 
 const props = { fr: { ...FR, ctx: CTX_FR }, en: { ...EN, ctx: CTX_EN } } as const;
@@ -126,13 +130,31 @@ function late(): EngineState {
   return withEntry(withEntry(filmState(), "ret.logo-churn", measured(ratio(8, 400), { kind: "tool", tool: "stripe" })), "acq.cac", measured({ kind: "amount", amount: 2_900 }));
 }
 
-const STATES: Record<string, () => EngineState> = { example: exampleState, linked, filledAsk, teamAsk, margin, whatIf, hybrid, hybridLinked, salesAssisted, series, seriesApart, pipeline, late };
+/**
+ * A consumer app (A22 APP-9, §21.7): its deck writes `value12`, the usage stream's chain lines, and with its what-ifs
+ * the commission lever's slide; without subscriptions, a peloton of two columns and a loss.
+ */
+function app(): EngineState {
+  return consumerState();
+}
+function appUsage(): EngineState {
+  return consumerUsageOnlyState();
+}
+function appWhatIf(): EngineState {
+  return { ...consumerState(), whatIf: EXAMPLE_CONSUMER_WHATIF };
+}
+
+const STATES: Record<string, () => EngineState> = { example: exampleState, linked, filledAsk, teamAsk, margin, whatIf, hybrid, hybridLinked, salesAssisted, series, seriesApart, pipeline, late, app, appUsage, appWhatIf };
 
 function model(state: EngineState, locale: "fr" | "en"): DeckModel {
   const p = props[locale];
   const result = state.tourLink ? RESULT : null;
-  const derived = deriveEngine(state, p.ctx, result, p.bridges, p.strings.units);
-  return buildDeck(state, derived, p.strings, p.metrics, p.ctx, { derived: p.derived, bridges: p.bridges });
+  // An app reads the copy as the island resolves it: the overlay over the engine's strings, its own catalogue prose.
+  const consumer = isApp(state.setup);
+  const strings = consumer ? mergeStrings(p.strings, p.typeStrings["consumer-app"]) : p.strings;
+  const catalog = consumer ? p.typeCatalogs["consumer-app"] : { metrics: p.metrics, derived: p.derived };
+  const derived = deriveEngine(state, p.ctx, result, p.bridges, strings.units);
+  return buildDeck(state, derived, strings, catalog.metrics, p.ctx, { derived: catalog.derived, bridges: p.bridges });
 }
 
 const KINDS = Object.keys(ROW_FIELDS) as RowKind[];

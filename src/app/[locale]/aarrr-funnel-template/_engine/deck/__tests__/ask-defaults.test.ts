@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
+import { consumerState, consumerUsageOnlyState } from "@/lib/engine/__tests__/fixtures";
 import { CANDIDATE_IDS } from "@/lib/engine/catalog-shape";
 import type { Diagnosis, EngineAsk, EngineDerived, EngineState, MetricEntry, MetricId, PlgCandidateId } from "@/lib/engine/types";
 import { SETUP_V2_DEFAULTS } from "@/lib/engine/types";
-import { askDefaults, horizonOptions, isPristineAsk, missingByRepairCost, suggestedSuccess } from "../ask-defaults";
+import { askDefaults, horizonOptions, isPristineAsk, missingByRepairCost, successMetrics, suggestedSuccess } from "../ask-defaults";
 
 /**
  * The ask form's defaults (engine spec §7 E5), on the §6.0 example: three
@@ -146,5 +147,20 @@ describe("horizonOptions", () => {
       { year: 2027, quarter: 1 },
       { year: 2027, quarter: 2 },
     ]);
+  });
+});
+
+describe("successMetrics", () => {
+  it("offers a SaaS the candidates of its ticked motions, as before", () => {
+    expect(successMetrics(exampleState().setup)).toEqual(CANDIDATE_IDS);
+  });
+
+  it("offers an app its own candidates (A22 APP-9, §21.5.4): the actives' retention, and no churn without subscriptions", () => {
+    const withSubscriptions = successMetrics(consumerState().setup);
+    expect(withSubscriptions).toEqual([...CANDIDATE_IDS, "app.ret.active-retention"]);
+    const usageOnly = successMetrics(consumerUsageOnlyState().setup);
+    expect(usageOnly).toContain("app.ret.active-retention");
+    expect(usageOnly).not.toContain("ret.logo-churn");
+    expect(usageOnly).not.toContain("rev.paid-conversion");
   });
 });
