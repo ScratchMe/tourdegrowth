@@ -325,13 +325,17 @@ test.describe("sales-assisted keeps everything in the browser too (D16, §18.10.
 
 /**
  * The same promise for the consumer app (engine spec §21.10.3, A22 APP-11):
- * its free texts — the app's name, what a first session is, the name of the
- * top source, why people stop, a note and a definition on the commission —
- * and a nine-digit count, typed through the real sheets after the start card
- * chose the app and its three ways of earning; then a way of earning unticked
- * and ticked again, the slides' text and the file. Every canary is in the
- * `.json`, the slides' ask in the copied text, none in any request, and not
- * one request of the session is anything but a GET.
+ * every free text the app has — the app's name, what a first session is, the
+ * name of the top source, why people stop, a note and a definition on the
+ * commission, the repair comment of a triage, the definition a copied request
+ * carries, a count pasted through « Saisie en tableau », the slides' ask and
+ * its three bullets — and a nine-digit count, typed through the real sheets
+ * after the start card chose the app and its three ways of earning; then a
+ * way of earning unticked and ticked again, the slides' text, the PNG of the
+ * unit-economics slide (its install curve is a chart the PNG export redraws)
+ * and the file. Every canary is in the `.json`, the request's definition and
+ * the slides' ask and bullets in the copied text, none in any request, and
+ * not one request of the session is anything but a GET.
  *
  * Needs a build whose `ENGINE_TYPES` opens the app (CI's): without it the
  * start card has no such answer, and the spec skips with its reason.
@@ -349,9 +353,14 @@ test.describe("the consumer app keeps everything in the browser too (D16, §21.1
     const DEFINITION = `TDG-CANARY-COMMDEF-${stamp}`;
     const NOTE = `TDG-CANARY-COMMNOTE-${stamp}`;
     const ASK = `TDG-CANARY-APPASK-${stamp}`;
+    const REPAIR = `TDG-CANARY-APPREPAIR-${stamp}`;
+    const ASKED = `TDG-CANARY-APPASKED-${stamp}`;
+    const BULLETS = [1, 2, 3].map((n) => `TDG-CANARY-APPBULLET${n}-${stamp}`);
     // Nine digits, the numerator of a count: stored exactly as typed.
     const COUNT = `7${Date.now().toString().slice(-8)}`;
-    const canaries = [APP, EVENT, SOURCE, CAUSE, DEFINITION, NOTE, ASK, COUNT];
+    // A count pasted through « Saisie en tableau », the other way a number comes in (seven digits: see the SaaS test).
+    const PASTED = `6${Date.now().toString().slice(-6)}`;
+    const canaries = [APP, EVENT, SOURCE, CAUSE, DEFINITION, NOTE, ASK, REPAIR, ASKED, ...BULLETS, COUNT, PASTED];
 
     const seen: Request[] = [];
     page.on("request", (request) => seen.push(request));
@@ -397,6 +406,54 @@ test.describe("the consumer app keeps everything in the browser too (D16, §21.1
     await commission.locator("#engine-app-rev-commission-note").fill(NOTE);
     await saveSheet(commission, "app-rev-commission");
 
+    // « I can't find it » on the time to first value: the triage and its free repair comment.
+    const triage = await openSheet(page, "activation", "act-ttv");
+    await triage.getByRole("button", { name: ENGINE_COPY.sheet.cantFind.en }).click();
+    await triage.getByTestId("engine-triage").getByRole("radio", { name: ENGINE_COPY.cause.notTracked.en }).check();
+    await triage.getByTestId("engine-triage").getByRole("radio", { name: ENGINE_COPY.repair.sprint.en }).check();
+    await triage.locator("#engine-act-ttv-repair-comment").fill(REPAIR);
+    await saveSheet(triage, "act-ttv");
+
+    // « I'll ask for it » on the install rate: a definition that travels in the copied request.
+    const asked = await openSheet(page, "activation", "act-rate");
+    await asked.getByRole("button", { name: ENGINE_COPY.sheet.willAsk.en }).click();
+    await openWords(asked);
+    await asked.locator("#engine-act-rate-definition").fill(ASKED);
+    await asked.getByTestId("engine-request-copy").click();
+    await expect(asked.getByText(ENGINE_COPY.request.copied.en)).toBeVisible();
+    // The copy is a way out the person chose: the definition IS in it.
+    expect(await clipboard(page)).toContain(ASKED);
+
+    // The cost per install, typed: with the numbers pasted below, the install's curve exists for the slides' picture.
+    await backToBoard(page);
+    const cpi = await openSheet(page, "acquisition", "app-acq-cpi");
+    await cpi.locator("#engine-app-acq-cpi-num").fill("4000");
+    await cpi.locator("#engine-app-acq-cpi-den").fill("1000");
+    await cpi.locator("#engine-app-acq-cpi-source").selectOption({ index: 1 });
+    // What a cost per install counts is a choice the sheet requires before it saves.
+    await cpi.getByRole("radio", { name: "Media only" }).check();
+    await saveSheet(cpi, "app-acq-cpi");
+
+    // « Saisie en tableau »: a count pasted with the rates and amounts the curve needs, read and applied.
+    await openEngineMenu(page);
+    await page.getByTestId("engine-table").locator("summary").click();
+    await page.getByTestId("engine-table-paste").fill(
+      [
+        `ref.k-factor,,,${PASTED},99999999,,,`,
+        "ret.d30,,,,,25,,",
+        "app.ret.active-retention,,,,,40,,",
+        "ret.logo-churn,,,,,6,,",
+        "rev.paid-conversion,,,,,4,,",
+        "rev.arpa,,,,,9,,",
+        "app.rev.gross-margin,,,,,70,,",
+        "app.rev.purchases-per-active,,,30,1000,,,",
+        "app.rev.ads-per-active,,,10,1000,,,",
+      ].join("\n") + "\n",
+    );
+    await page.getByTestId("engine-table-read").click();
+    await page.getByTestId("engine-table-apply").click();
+    await expect(page.getByTestId("engine-table-applied")).toBeVisible();
+
     // The ways of earning changed after the fact: ads unticked, saved, ticked again — on the device only.
     await backToBoard(page);
     await page.getByTestId("engine-bar-settings").click();
@@ -415,8 +472,19 @@ test.describe("the consumer app keeps everything in the browser too (D16, §21.1
     const what = page.getByTestId("deck-ask-what");
     await what.fill(ASK);
     await what.blur();
+    for (const [i, bullet] of BULLETS.entries()) {
+      const field = page.getByTestId(`deck-ask-bullet-${i + 1}`);
+      await field.fill(bullet);
+      await field.blur();
+    }
     await page.getByTestId("deck-copy-text").click();
     await expect.poll(() => clipboard(page)).toContain(ASK);
+    for (const bullet of BULLETS) expect(await clipboard(page)).toContain(bullet);
+    // The economics slide of an app carries a chart the PNG export redraws (the install's curve): it is exported too.
+    await expect(page.getByTestId("slide-unit-economics").getByTestId("slide-install-payback-chart")).toHaveCount(1);
+    const economics = page.waitForEvent("download");
+    await page.getByTestId("deck-png-unit-economics").click();
+    expect((await economics).suggestedFilename()).toMatch(/\.png$/);
     const json = page.waitForEvent("download");
     await page.getByTestId("deck-save-json").click();
     const exported = await readFile((await (await json).path())!, "utf8");
@@ -435,7 +503,7 @@ test.describe("the consumer app keeps everything in the browser too (D16, §21.1
     // The type counted as a choice (Q14), and the stages of the app's numbers.
     const events = await trackedEvents(page);
     expect(events.filter((e) => !engineEventPaths().includes(e))).toEqual([]);
-    for (const expected of ["engine_setup/app", "engine_stage_saved/activation", "engine_stage_saved/acquisition", "engine_stage_saved/retention", "engine_stage_saved/revenue"]) {
+    for (const expected of ["engine_setup/app", "engine_stage_saved/activation", "engine_stage_saved/acquisition", "engine_stage_saved/retention", "engine_stage_saved/revenue", "engine_request_copied", "engine_exported/png"]) {
       expect(events).toContain(expected);
     }
     expect(seen.length).toBeGreaterThan(5);
