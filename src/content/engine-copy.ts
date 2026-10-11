@@ -3544,4 +3544,16 @@ export const ENGINE_COPY = {
       },
     },
   ],
+
+  /**
+   * A sentence added to the FAQ's fifth answer (« En quoi est-ce différent du Tour ? ») when the build opens the consumer
+   * app (`ENGINE_TYPES`, §21.3), and only then (D15, C63). One leaf per type: the marketplace's comes with its own unit.
+   * TODO: à relire (convention 6) — copie neuve, neuf le 2026-10-11, §21.8.4 b (A22 APP-11).
+   */
+  faqTypeNote: {
+    consumerApp: {
+      fr: "Il sert aussi les apps grand public : choisis-la sur la carte de départ.",
+      en: "It also works for consumer apps: pick one on the start card.",
+    },
+  },
 };

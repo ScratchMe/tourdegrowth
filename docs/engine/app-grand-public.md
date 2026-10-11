@@ -2779,6 +2779,19 @@ en français à 1 280 px et en anglais à 390 px :
    unitaire : le test de `startCopy` (§21.6.1) et `openTypesWith("")` (garde
    1 de §21.10.1).
 
+**Ce qu'APP-11 a précisé en exécutant** : au cas 3, l'ordre des sources se lit
+sur la ligne « Où le trouver » de l'écran, pas dans la liste déroulante ; au
+cas 4, « Sur 100 installations » est le verdict et l'en-tête du peloton (la
+carte du peloton dit « Pour 100 installations »), et l'argent (39 300 €, la
+bande, 13 mois, `money.lineApp`) se lit sur le tableau d'un moteur posé avec
+`consumerState()`, parce que l'écran de l'exemple n'a pas de bloc d'argent ;
+au cas 5 bis, le tableau n'imprime pas la cible : elle se vérifie dans le
+stockage de l'appareil et dans le diagnostic, sur un état d'achats et de pub
+sans cible de rétention des actifs. La longueur de la cinquième réponse avec
+sa phrase (≤ 400 caractères) n'est gardée que par le cas 7 ; la variante
+`both` de MKT-10 (§22) remplace la phrase au lieu de s'y ajouter, et tient
+aussi sous le plafond.
+
 Et les specs existantes étendues : `engine-screens.spec.ts` (la carte de départ
 à quatre options et ses cases, le tableau d'une app, passés à axe et aux
 largeurs 1 280, 390 et 320), `engine-canary.spec.ts` (un parcours app où chaque

@@ -3,10 +3,11 @@ import AxeBuilder from "@axe-core/playwright";
 import type { Page, Request } from "@playwright/test";
 import { QUESTIONS } from "../src/content/copy-library";
 import { METRIC_SHAPES } from "../src/lib/engine/catalog-shape";
-import { exampleState, measured, missing, ratio, tourResult, withEntry, withTarget } from "../src/lib/engine/__tests__/fixtures";
+import { consumerState, exampleState, measured, missing, ratio, tourResult, withEntry, withTarget } from "../src/lib/engine/__tests__/fixtures";
 import { ENGINE_COPY } from "../src/content/engine-copy";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, readEachOnScreen, SKIP_ADMIN_REASON, test } from "./helpers";
 import { engineSeed } from "./engine-helpers";
+import type { EngineState } from "../src/lib/engine/types";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
 // owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
@@ -54,8 +55,8 @@ function namedExample() {
   return state;
 }
 
-/** Seeds once per test: a reload must keep what the test changed, not re-seed over it. */
-async function seed(page: Page) {
+/** Seeds once per test: a reload must keep what the test changed, not re-seed over it. `state` is the named example unless a test brings its own. */
+async function seed(page: Page, state: EngineState = namedExample()) {
   await page.addInitScript(
     ([items, tour]) => {
       if (sessionStorage.getItem("e2e-engine-seeded")) return;
@@ -63,7 +64,7 @@ async function seed(page: Page) {
       localStorage.setItem("tdg.results.v1", JSON.stringify([tour]));
       sessionStorage.setItem("e2e-engine-seeded", "1");
     },
-    [engineSeed(namedExample()), TOUR] as const,
+    [engineSeed(state), TOUR] as const,
   );
 }
 
@@ -72,8 +73,8 @@ async function seed(page: Page) {
  * "prepare my slides" button; until then the island mounts the deck
  * directly. Either way the spec reaches the same DeckView — it never skips.
  */
-async function openDeck(page: Page, locale: "fr" | "en") {
-  await seed(page);
+async function openDeck(page: Page, locale: "fr" | "en", state?: EngineState) {
+  await seed(page, state);
   await page.goto(`/${locale}/aarrr-funnel-template`);
   await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
   const opener = page.getByTestId("engine-open-deck");
@@ -537,5 +538,41 @@ for (const locale of ["fr", "en"] as const) {
         expect(scroll).toBe(client);
       });
     }
+
+    /**
+     * A22 APP-11 (§21.10.3, §21.7.3): the consumer app's deck, on the example of §21.9. Its first slide is out of 100
+     * installs; its unit-economics slide has five tiles (no months after payback, no tied-up cash), says the payback
+     * of an install in months, and draws the install's curve — not the SaaS's line, so no dotted 12-month reference.
+     */
+    test("the app's deck: out of 100 installs, five tiles, the install's curve, no dotted reference and no cash tile", async ({ page }) => {
+      await openDeck(page, locale, consumerState());
+      await expect(page.getByTestId("slide-peloton").locator("h3")).toContainText(locale === "fr" ? "Sur 100 installations" : "Out of 100 installs");
+      const unit = page.getByTestId("slide-unit-economics");
+      await expect(unit.locator("h3")).toContainText(locale === "fr" ? "13 mois" : "13 months");
+      // The curve, not the line: one picture, and it is the install's.
+      await expect(unit.getByTestId("slide-install-payback-chart")).toHaveCount(1);
+      await expect(unit.getByTestId("slide-payback-chart")).toHaveCount(0);
+      await expect(unit.getByTestId("slide-install-payback-chart-pays-back")).toContainText("13");
+      await expect(unit.locator('svg [class*="reference"]')).toHaveCount(0);
+      // Five tiles, in the app's order; the SaaS's « after payback » and « cash tied up » do not exist for an app (D11).
+      const tiles = await unit.locator('[data-testid^="slide-figure-"]').evaluateAll((els) => els.map((el) => el.getAttribute("data-testid")));
+      expect(tiles).toEqual(["slide-figure-cac", "slide-figure-value12", "slide-figure-ltv", "slide-figure-ltv-cac", "slide-figure-payback"]);
+      await expect(unit.getByTestId("slide-figure-cash")).toHaveCount(0);
+      await expect(unit.getByTestId("slide-figure-after")).toHaveCount(0);
+      // The row lays five columns, not the SaaS's six.
+      const row = unit.locator('[data-testid="slide-figure-cac"]').locator("xpath=..");
+      expect(await row.evaluate((el) => (el as HTMLElement).style.getPropertyValue("--figure-columns"))).toBe("5");
+      // No tied-up cash line either: the slide's assumption is the install's own.
+      await expect(unit.getByTestId("slide-unit-assume")).toContainText(ENGINE_COPY.slide.unitAssumeApp[locale]);
+    });
+
+    /** The leak's chain of an app with two streams has seven lines (§21.7.2), the SaaS's four: one stage named alone, the day-30 retention. */
+    test("the app's leak slide names one stage and draws the seven lines of its two streams", async ({ page }) => {
+      // Conversion met (3 %), so day-30 retention (12 % under a 15 % target) is the only stage short of its target.
+      await openDeck(page, locale, withTarget(consumerState(), "rev.paid-conversion", 3));
+      const leak = page.getByTestId("slide-leak");
+      await expect(leak.locator("section dl > div")).toHaveCount(7);
+      await expect(leak.locator("h3")).toContainText(locale === "fr" ? "la rétention à J30 à 15 %" : "day-30 retention to 15%");
+    });
   });
 }

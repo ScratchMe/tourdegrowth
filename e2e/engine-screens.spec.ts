@@ -1,6 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import type { Page } from "@playwright/test";
-import { exampleState, hybridState, withEntry } from "../src/lib/engine/__tests__/fixtures";
+import { consumerState, exampleState, hybridState, withEntry } from "../src/lib/engine/__tests__/fixtures";
 import type { EngineState } from "../src/lib/engine/types";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
 import { openEngineMenu, skipToAsks, writeEngineSeed } from "./engine-helpers";
@@ -32,6 +32,11 @@ test.beforeEach(async ({ context }) => {
  * Each step of the port held these on its own screens; this walks them all
  * once more, as one person would, after the last step.
  *
+ * A22 APP-11 (§21.10.3) adds the consumer app's screens to the same walk: the
+ * start card with its fourth answer and its three boxes (when the build opens
+ * the type: CI's does), the app's board — its two streams, its money — and its
+ * settings, with the type fixed and the ways of earning.
+ *
  * Non-vacuity, measured on 2026-10-03: the first run failed for real, at
  * every width and in both languages — the setup's company field took 42.5px
  * down, the number fields 38: the field's box is drawn 48px (44 small), but
@@ -42,6 +47,9 @@ test.beforeEach(async ({ context }) => {
  */
 
 const CLOCK = new Date(2026, 8, 24, 12);
+
+/** The consumer app's start card exists only in a build whose `ENGINE_TYPES` holds it (CI's does). */
+const TYPE_OPEN = (process.env.ENGINE_TYPES ?? "").split(",").some((name) => name.trim() === "consumer-app");
 
 /** The §6.0 example with four numbers back to « to do », last touched twelve days before the clock. */
 function returning(base: EngineState = exampleState()): EngineState {
@@ -118,6 +126,13 @@ async function walk(page: Page, locale: "fr" | "en", check: (name: string, scope
   await page.goto(`/${locale}/aarrr-funnel-template`);
   await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
   await check("start", '[data-testid="engine-start"]');
+  if (TYPE_OPEN) {
+    // The app's answer and its three ways of earning, then back to the SaaS the walk goes on with.
+    await page.locator("#engine-start-motion-app").check();
+    await expect(page.getByTestId("engine-start-earns")).toBeVisible();
+    await check("start, app", '[data-testid="engine-start"]');
+    await page.locator("#engine-start-motion-ss").check();
+  }
   await page.getByTestId("engine-start-change").click();
   await expect(page.getByTestId("engine-setup")).toBeVisible();
   await check("setup", '[data-testid="engine-setup"]');
@@ -144,6 +159,12 @@ async function walk(page: Page, locale: "fr" | "en", check: (name: string, scope
   await check("settings", '[data-testid="engine-settings"]');
   await seed(page, returning(hybridState()));
   await check("hybrid board", '[data-testid="engine-board"]');
+  // The consumer app: its board (two streams, money, a type's own list of numbers), then its settings.
+  await seed(page, returning(consumerState()));
+  await check("app board", '[data-testid="engine-board"]');
+  await page.getByTestId("engine-bar-settings").click();
+  await expect(page.getByTestId("engine-setup-earns")).toBeVisible();
+  await check("app settings", '[data-testid="engine-settings"]');
 }
 
 for (const locale of ["fr", "en"] as const) {
@@ -165,7 +186,7 @@ for (const locale of ["fr", "en"] as const) {
         expect(await overflow(page), `${name}: sideways`).toBe(0);
         seen.push(name);
       });
-      expect(seen).toHaveLength(10);
+      expect(seen).toHaveLength(TYPE_OPEN ? 13 : 12);
     });
   }
 
