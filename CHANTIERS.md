@@ -425,7 +425,7 @@ APP-6, APP-9 et APP-11.
 | APP-8 | les écrans de l'argent, la bande des deux flux | APP-7 | **Livré le 2026-10-10** ([#371](https://github.com/ScratchMe/tourdegrowth/pull/371)) |
 | APP-9 | les slides, la courbe de remboursement | APP-8 | **Livré le 2026-10-10** ([#372](https://github.com/ScratchMe/tourdegrowth/pull/372)) |
 | APP-10 | l'exemple et le golden | APP-9 | **Livré le 2026-10-11** ([#373](https://github.com/ScratchMe/tourdegrowth/pull/373)) |
-| APP-11 | la phrase de la page, les e2e, la documentation | APP-10 | **Livré le 2026-10-11** |
+| APP-11 | la phrase de la page, les e2e, la documentation | APP-10 | **Livré le 2026-10-11** ([#374](https://github.com/ScratchMe/tourdegrowth/pull/374)) |
 
 | # | Quoi | Qui | État |
 |---|---|---|---|
@@ -433,7 +433,7 @@ APP-6, APP-9 et APP-11.
 | A22.b | **Le modèle pur** (`stream.ts`, `app-model.ts`, leurs tests) | Session | **Livré le 2026-10-04** ([#329](https://github.com/ScratchMe/tourdegrowth/pull/329)) |
 | A22.c | **Le code** : les douze unités ci-dessus, une PR chacune, le type fermé | Orchestrateur et sous-agents (prompt G) | **Livré le 2026-10-11** (APP-0 à APP-11) |
 | A22.d | **Le bon à tirer** de la copie neuve (`/bon-a-tirer`) | Agent des bons à tirer, puis Antoine | Prêt à construire (APP-11 livré) |
-| A22.e | **L'ouverture** : `ENGINE_TYPES=consumer-app` dans Vercel, puis redéployer | Antoine (D2) | Après A22.d |
+| A22.e | **L'ouverture** : `ENGINE_TYPES=consumer-app` dans Vercel, puis redéployer ; dans le même geste, avancer `CONTENT_UPDATED_AT["/aarrr-funnel-template"]` (`src/content/updated-at.ts`), que rien d'A22 n'a bougé puisque le type était fermé (relevé par la relecture d'APP-11) | Antoine (D2) | Après A22.d |
 
 ### A23 — La place de marché (spécifiée le 2026-10-04, prête à exécuter)
 
