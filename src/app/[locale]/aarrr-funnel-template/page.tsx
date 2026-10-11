@@ -37,6 +37,9 @@ import styles from "./page.module.css";
 
 const PATH = "/aarrr-funnel-template";
 
+/** The FAQ answer that carries the sentence about the other types (D15): the fifth, « How is this different from the Tour? » (index 4 of `ENGINE_COPY.faq`). */
+const FAQ_TYPES_ANSWER = 4;
+
 interface PageProps {
   params: Promise<{ locale: string }>;
 }
@@ -105,6 +108,8 @@ export default async function EnginePage({ params }: PageProps) {
   const locale = (await params).locale as Locale;
   const props = resolveEngineProps(locale);
   const { strings } = props;
+  // The business types this build opens (§21.3): read once, for the island and for the FAQ's sentence about them.
+  const openTypes = openTypesAtBuild();
   const t = strings.page;
   // No setup here: no event named, no window chosen. Generic words and bracketed slots fill the catalogue
   // (« … ayant déclenché l'événement d'activation sous n jours », « inscrits en [mois de cohorte] »), from the
@@ -262,9 +267,9 @@ export default async function EnginePage({ params }: PageProps) {
           <p className={styles.reserve} data-testid="engine-reserve">
             {t.reserve}
           </p>
-          {/* The types this BUILD opens (§21.3, ENGINE_TYPES): read here, on the server, and handed down as a prop —
+          {/* The types this BUILD opens (§21.3, ENGINE_TYPES): read on the server (above), and handed down as a prop —
               the island never reads the environment. The start card and the settings read it (APP-7). */}
-          <EngineWorkbench {...props} openTypes={openTypesAtBuild()} />
+          <EngineWorkbench {...props} openTypes={openTypes} />
         </section>
 
         {/* How long it takes, under the tool since A18 T4 (the return: the start card says the same counts in one
@@ -341,13 +346,18 @@ export default async function EnginePage({ params }: PageProps) {
               list; a closed <details> keeps its answer in the prerendered
               HTML, so search engines and find-in-page still reach it. */}
           <div className={styles.faqList}>
-            {strings.faq.map((item) => (
+            {strings.faq.map((item, index) => (
               <Disclosure
                 key={item.q}
                 summary={<span className={styles.faqQuestion}>{item.q}</span>}
                 data-testid="engine-faq-item"
               >
-                <p className={[styles.text, styles.faqAnswer].join(" ")}>{item.a}</p>
+                <p className={[styles.text, styles.faqAnswer].join(" ")}>
+                  {item.a}
+                  {/* D15, C63: the fifth answer (« How is this different from the Tour? ») also says which other types the
+                      engine serves, once the build opens one. The count of six questions stays; the answer stays under 400. */}
+                  {index === FAQ_TYPES_ANSWER && openTypes.includes("consumer-app") ? ` ${strings.faqTypeNote.consumerApp}` : null}
+                </p>
               </Disclosure>
             ))}
           </div>

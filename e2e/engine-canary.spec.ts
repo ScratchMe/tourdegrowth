@@ -12,6 +12,9 @@ test.beforeEach(async ({ context }) => {
   await grantOwnerPreview(context.request, "engine");
 });
 
+/** The consumer app's start card exists only in a build whose `ENGINE_TYPES` holds it (CI's does). */
+const TYPE_OPEN = (process.env.ENGINE_TYPES ?? "").split(",").some((name) => name.trim() === "consumer-app");
+
 /**
  * Engine spec §13.3 and D16 — the canary. Modelled on `audit-canary.spec.ts`.
  *
@@ -314,6 +317,125 @@ test.describe("sales-assisted keeps everything in the browser too (D16, §18.10.
     const events = await trackedEvents(page);
     expect(events.filter((e) => !engineEventPaths().includes(e))).toEqual([]);
     for (const expected of ["engine_setup/hybrid", "engine_setup/plg", "engine_stage_saved/slg-activation", "engine_stage_saved/slg-revenue", "engine_stage_saved/slg-acquisition"]) {
+      expect(events).toContain(expected);
+    }
+    expect(seen.length).toBeGreaterThan(5);
+  });
+});
+
+/**
+ * The same promise for the consumer app (engine spec §21.10.3, A22 APP-11):
+ * its free texts — the app's name, what a first session is, the name of the
+ * top source, why people stop, a note and a definition on the commission —
+ * and a nine-digit count, typed through the real sheets after the start card
+ * chose the app and its three ways of earning; then a way of earning unticked
+ * and ticked again, the slides' text and the file. Every canary is in the
+ * `.json`, the slides' ask in the copied text, none in any request, and not
+ * one request of the session is anything but a GET.
+ *
+ * Needs a build whose `ENGINE_TYPES` opens the app (CI's): without it the
+ * start card has no such answer, and the spec skips with its reason.
+ */
+test.describe("the consumer app keeps everything in the browser too (D16, §21.10.3)", () => {
+  test.skip(!TYPE_OPEN, 'ENGINE_TYPES does not hold "consumer-app" for this build — the start card has no app to choose.');
+  test.use({ permissions: ["clipboard-read", "clipboard-write"] });
+
+  test("its texts and its counts never leave, and changing the ways of earning sends nothing", async ({ page }) => {
+    const stamp = Date.now().toString(36);
+    const APP = `TDG-CANARY-APP-${stamp}`;
+    const EVENT = `TDG-CANARY-FIRST-${stamp}`;
+    const SOURCE = `TDG-CANARY-SOURCE-${stamp}`;
+    const CAUSE = `TDG-CANARY-CAUSE-${stamp}`;
+    const DEFINITION = `TDG-CANARY-COMMDEF-${stamp}`;
+    const NOTE = `TDG-CANARY-COMMNOTE-${stamp}`;
+    const ASK = `TDG-CANARY-APPASK-${stamp}`;
+    // Nine digits, the numerator of a count: stored exactly as typed.
+    const COUNT = `7${Date.now().toString().slice(-8)}`;
+    const canaries = [APP, EVENT, SOURCE, CAUSE, DEFINITION, NOTE, ASK, COUNT];
+
+    const seen: Request[] = [];
+    page.on("request", (request) => seen.push(request));
+
+    await page.goto("/en/aarrr-funnel-template");
+    await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
+    // The app and its three ways, then the full card for the app's name (« Change »).
+    await page.locator("#engine-start-motion-app").check();
+    for (const way of ["subscriptions", "purchases", "ads"] as const) await page.getByTestId(`engine-start-earns-${way}`).check();
+    await page.getByTestId("engine-start-change").click();
+    await page.getByLabel(ENGINE_COPY.setup.companyLabelApp.en).fill(APP);
+    await page.getByTestId("engine-setup-start").click();
+    await page.getByTestId("engine-targets-next").click();
+    await page.getByTestId("engine-number-back").click();
+    await expect(page.getByTestId("engine-board")).toBeVisible();
+
+    // What a first session is: the one number that IS a text.
+    const event = await openSheet(page, "activation", "act-event");
+    await event.locator("#engine-act-event-text").fill(EVENT);
+    await saveSheet(event, "act-event");
+
+    // The top source's name, with its two counts.
+    const source = await openSheet(page, "acquisition", "acq-top-channel-share");
+    await source.locator("#engine-acq-top-channel-share-num").fill("300");
+    await source.locator("#engine-acq-top-channel-share-den").fill("1000");
+    await source.locator("#engine-acq-top-channel-share-label").fill(SOURCE);
+    await source.locator("#engine-acq-top-channel-share-source").selectOption({ index: 1 });
+    await saveSheet(source, "acq-top-channel-share");
+
+    // Why people stop: a cause is said with how it is known; the first answer will do.
+    const cause = await openSheet(page, "retention", "ret-churn-cause");
+    await cause.locator("#engine-ret-churn-cause-text").fill(CAUSE);
+    await cause.getByRole("group", { name: ENGINE_COPY.sheet.evidence.en }).getByRole("radio").first().check();
+    await saveSheet(cause, "ret-churn-cause");
+
+    // The commission: a nine-digit count, its definition and a note.
+    const commission = await openSheet(page, "revenue", "app-rev-commission");
+    await commission.locator("#engine-app-rev-commission-num").fill(COUNT);
+    await commission.locator("#engine-app-rev-commission-den").fill("999999999");
+    await commission.locator("#engine-app-rev-commission-source").selectOption({ index: 1 });
+    await openWords(commission);
+    await commission.locator("#engine-app-rev-commission-definition").fill(DEFINITION);
+    await commission.locator("#engine-app-rev-commission-note").fill(NOTE);
+    await saveSheet(commission, "app-rev-commission");
+
+    // The ways of earning changed after the fact: ads unticked, saved, ticked again — on the device only.
+    await backToBoard(page);
+    await page.getByTestId("engine-bar-settings").click();
+    await page.getByTestId("engine-setup-earns-ads").uncheck();
+    await expect(page.getByTestId("engine-settings-resets")).not.toBeEmpty();
+    await page.getByTestId("engine-settings-save").click();
+    await expect(page.getByTestId("engine-board")).toBeVisible();
+    await page.getByTestId("engine-bar-settings").click();
+    await page.getByTestId("engine-setup-earns-ads").check();
+    await page.getByTestId("engine-settings-save").click();
+    await expect(page.getByTestId("engine-board")).toBeVisible();
+
+    // The slides' ask and text, then the file.
+    await page.getByTestId("engine-open-deck").click();
+    await expect(page.getByTestId("engine-deck")).toBeVisible();
+    const what = page.getByTestId("deck-ask-what");
+    await what.fill(ASK);
+    await what.blur();
+    await page.getByTestId("deck-copy-text").click();
+    await expect.poll(() => clipboard(page)).toContain(ASK);
+    const json = page.waitForEvent("download");
+    await page.getByTestId("deck-save-json").click();
+    const exported = await readFile((await (await json).path())!, "utf8");
+    // The canaries ARE in the engine, which is an app's: a spec that typed nothing would prove nothing.
+    expect(JSON.parse(exported).setup.type).toBe("consumer-app");
+    for (const canary of canaries) expect(exported, canary).toContain(canary);
+
+    const leaks: string[] = [];
+    for (const request of seen) {
+      const carried = `${request.url()}\n${request.postData() ?? ""}\n${JSON.stringify(await request.allHeaders())}`;
+      for (const canary of canaries) if (carried.includes(canary)) leaks.push(`${request.method()} ${request.url()} ← ${canary}`);
+    }
+    expect(leaks).toEqual([]);
+    expect(seen.filter((r) => r.method() !== "GET").map((r) => `${r.method()} ${r.url()}`)).toEqual([]);
+
+    // The type counted as a choice (Q14), and the stages of the app's numbers.
+    const events = await trackedEvents(page);
+    expect(events.filter((e) => !engineEventPaths().includes(e))).toEqual([]);
+    for (const expected of ["engine_setup/app", "engine_stage_saved/activation", "engine_stage_saved/acquisition", "engine_stage_saved/retention", "engine_stage_saved/revenue"]) {
       expect(events).toContain(expected);
     }
     expect(seen.length).toBeGreaterThan(5);

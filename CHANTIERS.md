@@ -393,7 +393,7 @@ Les composants changés (`TotalBand`, `HowItCompares`, `PaybackChart`,
 `MrrCurve`) et l'aperçu de `WhatIfFigures` sont dans Claude Design depuis B15
 (le 2026-10-04 au soir).
 
-### A22 — L'app grand public (spécifiée le 2026-10-04, prête à exécuter)
+### A22 — L'app grand public (spécifiée le 2026-10-04, codée le 2026-10-11, type fermé)
 
 **La spécification est `ENGINE.md` §21, dans
 [`docs/engine/app-grand-public.md`](docs/engine/app-grand-public.md)**,
@@ -425,14 +425,14 @@ APP-6, APP-9 et APP-11.
 | APP-8 | les écrans de l'argent, la bande des deux flux | APP-7 | **Livré le 2026-10-10** ([#371](https://github.com/ScratchMe/tourdegrowth/pull/371)) |
 | APP-9 | les slides, la courbe de remboursement | APP-8 | **Livré le 2026-10-10** ([#372](https://github.com/ScratchMe/tourdegrowth/pull/372)) |
 | APP-10 | l'exemple et le golden | APP-9 | **Livré le 2026-10-11** ([#373](https://github.com/ScratchMe/tourdegrowth/pull/373)) |
-| APP-11 | la phrase de la page, les e2e, la documentation | APP-10 | ☐ |
+| APP-11 | la phrase de la page, les e2e, la documentation | APP-10 | **Livré le 2026-10-11** |
 
 | # | Quoi | Qui | État |
 |---|---|---|---|
 | A22.a | **La spécification**, puis les décisions C56 à C63 et C92, puis **sa réécriture** en guide d'exécution | Session, Antoine | **Fait le 2026-10-04** ([#333](https://github.com/ScratchMe/tourdegrowth/pull/333)) |
 | A22.b | **Le modèle pur** (`stream.ts`, `app-model.ts`, leurs tests) | Session | **Livré le 2026-10-04** ([#329](https://github.com/ScratchMe/tourdegrowth/pull/329)) |
-| A22.c | **Le code** : les douze unités ci-dessus, une PR chacune, le type fermé | Orchestrateur et sous-agents (prompt G) | Prêt. ~19 jours-agent |
-| A22.d | **Le bon à tirer** de la copie neuve (`/bon-a-tirer`) | Agent des bons à tirer, puis Antoine | Après APP-11 |
+| A22.c | **Le code** : les douze unités ci-dessus, une PR chacune, le type fermé | Orchestrateur et sous-agents (prompt G) | **Livré le 2026-10-11** (APP-0 à APP-11) |
+| A22.d | **Le bon à tirer** de la copie neuve (`/bon-a-tirer`) | Agent des bons à tirer, puis Antoine | Prêt à construire (APP-11 livré) |
 | A22.e | **L'ouverture** : `ENGINE_TYPES=consumer-app` dans Vercel, puis redéployer | Antoine (D2) | Après A22.d |
 
 ### A23 — La place de marché (spécifiée le 2026-10-04, prête à exécuter)
