@@ -3360,8 +3360,9 @@ relire" src/`), puis l'ouverture par Antoine.
      (§21.8.1).
   2. `exampleEngine(words, motions, type?, monetization?)` (§21.9.1) ;
      `consumerState()` le lit.
-  3. `ExampleView` gagne les props `type: BusinessType`, `monetization?:
-     AppMonetization` et `stringsFor` ; pour une app, son bandeau lit
+  3. `ExampleView` gagne les props `type: BusinessType` et `stringsFor`
+     (pas de monétisation : l'exemple d'une app a toujours ses trois façons,
+     §21.6.1) ; pour une app, son bandeau lit
      `example.bannerTitleApp` et `example.bannerBodyApp` (`{d30}`, `{paid}`,
      `{retention}` remplis depuis `EXAMPLE_CONSUMER_TARGETS`), ses cibles
      passent par `candidatesFor` (`ExampleView.tsx:127`), ses chiffres par
