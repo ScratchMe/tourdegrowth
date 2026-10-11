@@ -7,13 +7,15 @@ import { Card } from "@/components/core/Card";
 import { pelotonTitle } from "@/lib/engine/deck";
 import { relaysTitle, totalTitle } from "@/lib/engine/deck-motions";
 import { deriveEngine } from "@/lib/engine/derive";
-import { EXAMPLE_SLG_TARGETS, EXAMPLE_TARGETS, EXAMPLE_TODAY_ISO, exampleEngine } from "@/lib/engine/example";
+import type { AppMonetization } from "@/lib/engine/app-model";
+import { EXAMPLE_CONSUMER_TARGETS, EXAMPLE_SLG_TARGETS, EXAMPLE_TARGETS, EXAMPLE_TODAY_ISO, exampleEngine } from "@/lib/engine/example";
 import { fillTemplate, formatPercent } from "@/lib/engine/format";
 import { knownSharedCount } from "@/lib/engine/shared-counts";
-import { CANDIDATE_IDS, SLG_CANDIDATE_IDS } from "@/lib/engine/catalog-shape";
+import { isApp } from "@/lib/engine/business-type";
+import { candidatesFor } from "@/lib/engine/scenario-of";
 import { knownIn } from "@/lib/engine/values";
 import type { EngineStrings, ResolvedBridge, ResolvedDerived, ResolvedMetric } from "@/lib/engine/strings";
-import type { CandidateId, EngineDeck, Interval, Motion, MotionDerived } from "@/lib/engine/types";
+import type { BusinessType, CandidateId, EngineDeck, Interval, Motion, MotionDerived } from "@/lib/engine/types";
 import type { Locale } from "@/lib/i18n/locale";
 import { Coverage } from "./Coverage";
 import { DeckView } from "./deck/DeckView";
@@ -30,7 +32,8 @@ import styles from "./Screens.module.css";
  * demande, il faut qu'on montre un exemple plausible de slides et funnel
  * remplis »): the spec's §6.0 example — the very data set every test checks —
  * drawn by the board's own components, then its slides in the real slide
- * screen.
+ * screen. For an app (§21.9) the data set is the consumer app's, and every
+ * word is the app's (`stringsFor`).
  *
  * Read-only by construction: nothing here reaches the store. The slide
  * choices someone makes on the example live in this component's memory and
@@ -38,7 +41,9 @@ import styles from "./Screens.module.css";
  */
 export function ExampleView({
   locale,
-  strings,
+  stringsFor,
+  type,
+  monetization,
   metrics,
   derivedCopy,
   bridges,
@@ -46,7 +51,13 @@ export function ExampleView({
   onBack,
 }: {
   locale: Locale;
-  strings: EngineStrings;
+  /** The words of a type (§21.8.1): the example reads those of its own, whatever engine is on screen. */
+  stringsFor: (type: BusinessType) => EngineStrings;
+  /** The type of the example shown (§21.9): the SaaS's §6.0, or the consumer app's §21.9.1. */
+  type: BusinessType;
+  /** What the app earns from, as the start card had it ticked (§21.6.1); the example's three ways when absent. Read by an app only. */
+  monetization?: AppMonetization;
+  /** The catalogue of the example's type (`metricsFor`), likewise `derivedCopy`. */
   metrics: ResolvedMetric[];
   derivedCopy: ResolvedDerived[];
   bridges: ResolvedBridge[];
@@ -54,7 +65,9 @@ export function ExampleView({
   motions?: Record<Motion, boolean>;
   onBack: () => void;
 }) {
+  const strings = stringsFor(type);
   const e = strings.example;
+  const app = isApp({ type });
   const [deck, setDeck] = useState<EngineDeck | null>(null);
   const [showDeck, setShowDeck] = useState(false);
   const heading = useRef<HTMLHeadingElement>(null);
@@ -62,10 +75,10 @@ export function ExampleView({
 
   const { plg: withPlg, slg: withSlg } = motions;
   const { state, ctx, derived, verdict } = useMemo(() => {
-    const base = exampleEngine(
-      { event: e.event, channel: e.channel, company: e.company, liveEvent: e.liveEvent, lossCause: e.lossCause, pqlThreshold: e.pqlThreshold },
-      { plg: withPlg, slg: withSlg },
-    );
+    const words = app
+      ? { event: e.eventApp, channel: e.channelApp, company: e.companyApp, churnCause: e.churnCauseApp }
+      : { event: e.event, channel: e.channel, company: e.company, liveEvent: e.liveEvent, lossCause: e.lossCause, pqlThreshold: e.pqlThreshold };
+    const base = exampleEngine(words, { plg: withPlg, slg: withSlg }, type, monetization);
     const ctx = { today: new Date(EXAMPLE_TODAY_ISO), locale };
     const derived = deriveEngine(base, ctx, null, bridges, strings.units);
     const relays = derived.motions.find((m): m is Extract<MotionDerived, { motion: "slg" }> => m.motion === "slg");
@@ -77,7 +90,7 @@ export function ExampleView({
           ? relaysTitle(base, relays.relays, strings, metrics, ctx)
           : pelotonTitle(base, derived.peloton, strings, metrics, ctx);
     return { state: base, ctx, derived, verdict };
-  }, [e.event, e.channel, e.company, e.liveEvent, e.lossCause, e.pqlThreshold, withPlg, withSlg, locale, bridges, strings, metrics]);
+  }, [e.event, e.channel, e.company, e.liveEvent, e.lossCause, e.pqlThreshold, e.eventApp, e.channelApp, e.companyApp, e.churnCauseApp, app, type, monetization, withPlg, withSlg, locale, bridges, strings, metrics]);
 
   useEffect(() => {
     if (!showDeck && opened.current) heading.current?.focus();
@@ -92,14 +105,23 @@ export function ExampleView({
     winRate: formatPercent(EXAMPLE_SLG_TARGETS["slg.rev.win-rate"]!, locale),
     renewal: formatPercent(EXAMPLE_SLG_TARGETS["slg.ret.renewal"]!, locale),
   };
-  const bannerBody = fillTemplate(withPlg && withSlg ? e.bannerBodyHybrid : withSlg ? e.bannerBodySlg : e.bannerBody, targets);
+  // An app's three targets (§21.9.1), read the same way.
+  const appTargets = {
+    d30: formatPercent(EXAMPLE_CONSUMER_TARGETS["ret.d30"]!, locale),
+    paid: formatPercent(EXAMPLE_CONSUMER_TARGETS["rev.paid-conversion"]!, locale),
+    retention: formatPercent(EXAMPLE_CONSUMER_TARGETS["app.ret.active-retention"]!, locale),
+  };
+  const bannerTitle = app ? e.bannerTitleApp : e.bannerTitle;
+  const bannerBody = app
+    ? fillTemplate(e.bannerBodyApp, appTargets)
+    : fillTemplate(withPlg && withSlg ? e.bannerBodyHybrid : withSlg ? e.bannerBodySlg : e.bannerBody, targets);
 
   if (showDeck) {
     return (
       <div className={styles.panel} data-testid="engine-example-deck">
         <Callout tone="caveat">
           <p>
-            <strong>{e.bannerTitle}</strong> — {bannerBody}
+            <strong>{bannerTitle}</strong> — {bannerBody}
           </p>
         </Callout>
         <DeckView
@@ -124,7 +146,7 @@ export function ExampleView({
   const relays = derived.motions.find((m): m is Extract<MotionDerived, { motion: "slg" }> => m.motion === "slg");
   // As the board does: the diagnosis prints each named stage's value next to its comparator.
   const values: Partial<Record<CandidateId, Interval>> = {};
-  for (const id of [...CANDIDATE_IDS, ...SLG_CANDIDATE_IDS]) {
+  for (const id of [...candidatesFor(state.setup, "plg"), ...candidatesFor(state.setup, "slg")]) {
     const known = knownIn(state, id, ctx);
     if (known.kind === "known") values[id] = known.value;
   }
@@ -132,7 +154,7 @@ export function ExampleView({
     <div className={styles.panel} data-testid="engine-example">
       <Callout tone="caveat">
         <h2 id="engine-example-title" ref={heading} tabIndex={-1} className={styles.exampleTitle}>
-          {e.bannerTitle}
+          {bannerTitle}
         </h2>
         <p>{bannerBody}</p>
       </Callout>

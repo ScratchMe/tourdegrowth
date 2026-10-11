@@ -1,0 +1,1342 @@
+{
+  "example": {
+    "schemaVersion": 3,
+    "id": "00000000-0000-4000-8000-000000000060",
+    "createdAt": "2026-09-24T08:00:00.000Z",
+    "updatedAt": "2026-09-24T09:00:00.000Z",
+    "setup": {
+      "type": "consumer-app",
+      "motions": {
+        "plg": true,
+        "slg": false
+      },
+      "currency": "EUR",
+      "activationWindowDays": 7,
+      "paidWindowDays": 30,
+      "qualificationWindowDays": 30,
+      "goLiveWindowDays": 90,
+      "monetization": {
+        "subscriptions": true,
+        "purchases": true,
+        "ads": true
+      }
+    },
+    "snapshots": [
+      {
+        "id": "00000000-0000-4000-8000-000000000061",
+        "referenceMonth": "2026-08",
+        "cohortMonth": "2026-07",
+        "createdAt": "2026-09-24T08:00:00.000Z",
+        "metrics": {
+          "acq.signup-rate": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 12000,
+              "denominator": 40000
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "app-store-connect"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "acq.top-channel-share": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 5400,
+              "denominator": 12000
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "app-store-connect"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z",
+            "label": "Recherche App Store"
+          },
+          "act.event": {
+            "status": "measured",
+            "value": {
+              "kind": "text",
+              "text": "a terminé une première séance"
+            },
+            "source": {
+              "kind": "other"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "act.rate": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 4025,
+              "denominator": 11500
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "amplitude"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "act.ttv": {
+            "status": "measured",
+            "value": {
+              "kind": "duration",
+              "value": 3,
+              "unit": "hours",
+              "statistic": "median"
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "amplitude"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z",
+            "variant": "median"
+          },
+          "ret.d30": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 1380,
+              "denominator": 11500
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "amplitude"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "ret.logo-churn": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 315,
+              "denominator": 4500
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "revenuecat"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "ret.churn-cause": {
+            "status": "measured",
+            "value": {
+              "kind": "text",
+              "text": "l'essai se termine avant la troisième séance"
+            },
+            "source": {
+              "kind": "person",
+              "role": "data"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z",
+            "evidence": "data"
+          },
+          "ref.mechanism": {
+            "status": "measured",
+            "value": {
+              "kind": "choice",
+              "choice": "product"
+            },
+            "source": {
+              "kind": "other"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "ref.referred-share": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 575,
+              "denominator": 11500
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "product-db"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "ref.k-factor": {
+            "status": "requested",
+            "request": {
+              "role": "data",
+              "requestedAt": "2026-09-20T09:00:00.000Z"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "rev.paid-conversion": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 345,
+              "denominator": 11500
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "revenuecat"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "rev.arpa": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 28800,
+              "denominator": 4500
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "revenuecat"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "rev.expansion": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 284,
+              "denominator": 28400
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "revenuecat"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "rev.contraction": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 142,
+              "denominator": 28400
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "revenuecat"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "app.acq.cpi": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 18000,
+              "denominator": 12000
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "appsflyer"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z",
+            "variant": "media-only"
+          },
+          "app.ret.active-retention": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 13500,
+              "denominator": 15000
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "amplitude"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "app.rev.purchases-per-active": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 4500,
+              "denominator": 15000
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "revenuecat"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "app.rev.ads-per-active": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 6000,
+              "denominator": 15000
+            },
+            "source": {
+              "kind": "person",
+              "role": "finance"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "app.rev.commission": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 7326,
+              "denominator": 33300
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "revenuecat"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "app.rev.gross-margin": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 25579.2,
+              "denominator": 31974
+            },
+            "source": {
+              "kind": "person",
+              "role": "finance"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          }
+        },
+        "targets": {
+          "ret.d30": 15,
+          "rev.paid-conversion": 4,
+          "app.ret.active-retention": 92
+        },
+        "base": {
+          "monthSignups": 12000,
+          "cohortSignups": 11500,
+          "mrrEnd": 28800,
+          "mrrStart": 28400,
+          "appActives": 15000
+        }
+      }
+    ],
+    "tourLink": null,
+    "deck": {
+      "include": {},
+      "showCompany": false,
+      "showSiteCredit": true,
+      "ask": {
+        "what": "",
+        "bullets": [],
+        "measureFirst": []
+      }
+    }
+  },
+  "example-no-targets": {
+    "schemaVersion": 3,
+    "id": "00000000-0000-4000-8000-000000000060",
+    "createdAt": "2026-09-24T08:00:00.000Z",
+    "updatedAt": "2026-09-24T09:00:00.000Z",
+    "setup": {
+      "type": "consumer-app",
+      "motions": {
+        "plg": true,
+        "slg": false
+      },
+      "currency": "EUR",
+      "activationWindowDays": 7,
+      "paidWindowDays": 30,
+      "qualificationWindowDays": 30,
+      "goLiveWindowDays": 90,
+      "monetization": {
+        "subscriptions": true,
+        "purchases": true,
+        "ads": true
+      }
+    },
+    "snapshots": [
+      {
+        "id": "00000000-0000-4000-8000-000000000061",
+        "referenceMonth": "2026-08",
+        "cohortMonth": "2026-07",
+        "createdAt": "2026-09-24T08:00:00.000Z",
+        "metrics": {
+          "acq.signup-rate": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 12000,
+              "denominator": 40000
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "app-store-connect"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "acq.top-channel-share": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 5400,
+              "denominator": 12000
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "app-store-connect"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z",
+            "label": "Recherche App Store"
+          },
+          "act.event": {
+            "status": "measured",
+            "value": {
+              "kind": "text",
+              "text": "a terminé une première séance"
+            },
+            "source": {
+              "kind": "other"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "act.rate": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 4025,
+              "denominator": 11500
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "amplitude"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "act.ttv": {
+            "status": "measured",
+            "value": {
+              "kind": "duration",
+              "value": 3,
+              "unit": "hours",
+              "statistic": "median"
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "amplitude"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z",
+            "variant": "median"
+          },
+          "ret.d30": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 1380,
+              "denominator": 11500
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "amplitude"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "ret.logo-churn": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 315,
+              "denominator": 4500
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "revenuecat"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "ret.churn-cause": {
+            "status": "measured",
+            "value": {
+              "kind": "text",
+              "text": "l'essai se termine avant la troisième séance"
+            },
+            "source": {
+              "kind": "person",
+              "role": "data"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z",
+            "evidence": "data"
+          },
+          "ref.mechanism": {
+            "status": "measured",
+            "value": {
+              "kind": "choice",
+              "choice": "product"
+            },
+            "source": {
+              "kind": "other"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "ref.referred-share": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 575,
+              "denominator": 11500
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "product-db"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "ref.k-factor": {
+            "status": "requested",
+            "request": {
+              "role": "data",
+              "requestedAt": "2026-09-20T09:00:00.000Z"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "rev.paid-conversion": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 345,
+              "denominator": 11500
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "revenuecat"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "rev.arpa": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 28800,
+              "denominator": 4500
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "revenuecat"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "rev.expansion": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 284,
+              "denominator": 28400
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "revenuecat"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "rev.contraction": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 142,
+              "denominator": 28400
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "revenuecat"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "app.acq.cpi": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 18000,
+              "denominator": 12000
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "appsflyer"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z",
+            "variant": "media-only"
+          },
+          "app.ret.active-retention": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 13500,
+              "denominator": 15000
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "amplitude"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "app.rev.purchases-per-active": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 4500,
+              "denominator": 15000
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "revenuecat"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "app.rev.ads-per-active": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 6000,
+              "denominator": 15000
+            },
+            "source": {
+              "kind": "person",
+              "role": "finance"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "app.rev.commission": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 7326,
+              "denominator": 33300
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "revenuecat"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "app.rev.gross-margin": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 25579.2,
+              "denominator": 31974
+            },
+            "source": {
+              "kind": "person",
+              "role": "finance"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          }
+        },
+        "targets": {},
+        "base": {
+          "monthSignups": 12000,
+          "cohortSignups": 11500,
+          "mrrEnd": 28800,
+          "mrrStart": 28400,
+          "appActives": 15000
+        }
+      }
+    ],
+    "tourLink": null,
+    "deck": {
+      "include": {},
+      "showCompany": false,
+      "showSiteCredit": true,
+      "ask": {
+        "what": "",
+        "bullets": [],
+        "measureFirst": []
+      }
+    }
+  },
+  "example-whatif": {
+    "schemaVersion": 3,
+    "id": "00000000-0000-4000-8000-000000000060",
+    "createdAt": "2026-09-24T08:00:00.000Z",
+    "updatedAt": "2026-09-24T09:00:00.000Z",
+    "setup": {
+      "type": "consumer-app",
+      "motions": {
+        "plg": true,
+        "slg": false
+      },
+      "currency": "EUR",
+      "activationWindowDays": 7,
+      "paidWindowDays": 30,
+      "qualificationWindowDays": 30,
+      "goLiveWindowDays": 90,
+      "monetization": {
+        "subscriptions": true,
+        "purchases": true,
+        "ads": true
+      }
+    },
+    "snapshots": [
+      {
+        "id": "00000000-0000-4000-8000-000000000061",
+        "referenceMonth": "2026-08",
+        "cohortMonth": "2026-07",
+        "createdAt": "2026-09-24T08:00:00.000Z",
+        "metrics": {
+          "acq.signup-rate": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 12000,
+              "denominator": 40000
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "app-store-connect"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "acq.top-channel-share": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 5400,
+              "denominator": 12000
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "app-store-connect"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z",
+            "label": "Recherche App Store"
+          },
+          "act.event": {
+            "status": "measured",
+            "value": {
+              "kind": "text",
+              "text": "a terminé une première séance"
+            },
+            "source": {
+              "kind": "other"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "act.rate": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 4025,
+              "denominator": 11500
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "amplitude"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "act.ttv": {
+            "status": "measured",
+            "value": {
+              "kind": "duration",
+              "value": 3,
+              "unit": "hours",
+              "statistic": "median"
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "amplitude"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z",
+            "variant": "median"
+          },
+          "ret.d30": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 1380,
+              "denominator": 11500
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "amplitude"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "ret.logo-churn": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 315,
+              "denominator": 4500
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "revenuecat"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "ret.churn-cause": {
+            "status": "measured",
+            "value": {
+              "kind": "text",
+              "text": "l'essai se termine avant la troisième séance"
+            },
+            "source": {
+              "kind": "person",
+              "role": "data"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z",
+            "evidence": "data"
+          },
+          "ref.mechanism": {
+            "status": "measured",
+            "value": {
+              "kind": "choice",
+              "choice": "product"
+            },
+            "source": {
+              "kind": "other"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "ref.referred-share": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 575,
+              "denominator": 11500
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "product-db"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "ref.k-factor": {
+            "status": "requested",
+            "request": {
+              "role": "data",
+              "requestedAt": "2026-09-20T09:00:00.000Z"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "rev.paid-conversion": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 345,
+              "denominator": 11500
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "revenuecat"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "rev.arpa": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 28800,
+              "denominator": 4500
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "revenuecat"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "rev.expansion": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 284,
+              "denominator": 28400
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "revenuecat"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "rev.contraction": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 142,
+              "denominator": 28400
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "revenuecat"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "app.acq.cpi": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 18000,
+              "denominator": 12000
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "appsflyer"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z",
+            "variant": "media-only"
+          },
+          "app.ret.active-retention": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 13500,
+              "denominator": 15000
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "amplitude"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "app.rev.purchases-per-active": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 4500,
+              "denominator": 15000
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "revenuecat"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "app.rev.ads-per-active": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 6000,
+              "denominator": 15000
+            },
+            "source": {
+              "kind": "person",
+              "role": "finance"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "app.rev.commission": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 7326,
+              "denominator": 33300
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "revenuecat"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "app.rev.gross-margin": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 25579.2,
+              "denominator": 31974
+            },
+            "source": {
+              "kind": "person",
+              "role": "finance"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          }
+        },
+        "targets": {
+          "ret.d30": 15,
+          "rev.paid-conversion": 4,
+          "app.ret.active-retention": 92
+        },
+        "base": {
+          "monthSignups": 12000,
+          "cohortSignups": 11500,
+          "mrrEnd": 28800,
+          "mrrStart": 28400,
+          "appActives": 15000
+        }
+      }
+    ],
+    "tourLink": null,
+    "deck": {
+      "include": {},
+      "showCompany": false,
+      "showSiteCredit": true,
+      "ask": {
+        "what": "",
+        "bullets": [],
+        "measureFirst": []
+      }
+    },
+    "whatIf": {
+      "ret.d30": 15,
+      "app.rev.commission": 15
+    }
+  },
+  "usage-only": {
+    "schemaVersion": 3,
+    "id": "00000000-0000-4000-8000-000000000060",
+    "createdAt": "2026-09-24T08:00:00.000Z",
+    "updatedAt": "2026-09-24T09:00:00.000Z",
+    "setup": {
+      "type": "consumer-app",
+      "motions": {
+        "plg": true,
+        "slg": false
+      },
+      "currency": "EUR",
+      "activationWindowDays": 7,
+      "paidWindowDays": 30,
+      "qualificationWindowDays": 30,
+      "goLiveWindowDays": 90,
+      "monetization": {
+        "subscriptions": false,
+        "purchases": true,
+        "ads": true
+      }
+    },
+    "snapshots": [
+      {
+        "id": "00000000-0000-4000-8000-000000000061",
+        "referenceMonth": "2026-08",
+        "cohortMonth": "2026-07",
+        "createdAt": "2026-09-24T08:00:00.000Z",
+        "metrics": {
+          "acq.signup-rate": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 12000,
+              "denominator": 40000
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "app-store-connect"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "acq.top-channel-share": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 5400,
+              "denominator": 12000
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "app-store-connect"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z",
+            "label": "Recherche App Store"
+          },
+          "act.event": {
+            "status": "measured",
+            "value": {
+              "kind": "text",
+              "text": "a terminé une première séance"
+            },
+            "source": {
+              "kind": "other"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "act.rate": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 4025,
+              "denominator": 11500
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "amplitude"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "act.ttv": {
+            "status": "measured",
+            "value": {
+              "kind": "duration",
+              "value": 3,
+              "unit": "hours",
+              "statistic": "median"
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "amplitude"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z",
+            "variant": "median"
+          },
+          "ret.d30": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 1380,
+              "denominator": 11500
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "amplitude"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "ret.logo-churn": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 315,
+              "denominator": 4500
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "revenuecat"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "ret.churn-cause": {
+            "status": "measured",
+            "value": {
+              "kind": "text",
+              "text": "l'essai se termine avant la troisième séance"
+            },
+            "source": {
+              "kind": "person",
+              "role": "data"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z",
+            "evidence": "data"
+          },
+          "ref.mechanism": {
+            "status": "measured",
+            "value": {
+              "kind": "choice",
+              "choice": "product"
+            },
+            "source": {
+              "kind": "other"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "ref.referred-share": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 575,
+              "denominator": 11500
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "product-db"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "ref.k-factor": {
+            "status": "requested",
+            "request": {
+              "role": "data",
+              "requestedAt": "2026-09-20T09:00:00.000Z"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "rev.paid-conversion": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 345,
+              "denominator": 11500
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "revenuecat"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "rev.arpa": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 28800,
+              "denominator": 4500
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "revenuecat"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "rev.expansion": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 284,
+              "denominator": 28400
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "revenuecat"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "rev.contraction": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 142,
+              "denominator": 28400
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "revenuecat"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "app.acq.cpi": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 18000,
+              "denominator": 12000
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "appsflyer"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z",
+            "variant": "media-only"
+          },
+          "app.ret.active-retention": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 13500,
+              "denominator": 15000
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "amplitude"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "app.rev.purchases-per-active": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 4500,
+              "denominator": 15000
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "revenuecat"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "app.rev.ads-per-active": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 6000,
+              "denominator": 15000
+            },
+            "source": {
+              "kind": "person",
+              "role": "finance"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "app.rev.commission": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 7326,
+              "denominator": 33300
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "revenuecat"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "app.rev.gross-margin": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 25579.2,
+              "denominator": 31974
+            },
+            "source": {
+              "kind": "person",
+              "role": "finance"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          }
+        },
+        "targets": {
+          "ret.d30": 15,
+          "rev.paid-conversion": 4,
+          "app.ret.active-retention": 92
+        },
+        "base": {
+          "monthSignups": 12000,
+          "cohortSignups": 11500,
+          "mrrEnd": 28800,
+          "mrrStart": 28400,
+          "appActives": 15000
+        }
+      }
+    ],
+    "tourLink": null,
+    "deck": {
+      "include": {},
+      "showCompany": false,
+      "showSiteCredit": true,
+      "ask": {
+        "what": "",
+        "bullets": [],
+        "measureFirst": []
+      }
+    }
+  },
+  "empty": {
+    "schemaVersion": 3,
+    "id": "00000000-0000-4000-8000-000000000060",
+    "createdAt": "2026-09-24T08:00:00.000Z",
+    "updatedAt": "2026-09-24T09:00:00.000Z",
+    "setup": {
+      "type": "consumer-app",
+      "motions": {
+        "plg": true,
+        "slg": false
+      },
+      "currency": "EUR",
+      "activationWindowDays": 7,
+      "paidWindowDays": 30,
+      "qualificationWindowDays": 30,
+      "goLiveWindowDays": 90,
+      "monetization": {
+        "subscriptions": true,
+        "purchases": true,
+        "ads": true
+      }
+    },
+    "snapshots": [
+      {
+        "id": "00000000-0000-4000-8000-000000000061",
+        "referenceMonth": "2026-08",
+        "cohortMonth": "2026-07",
+        "createdAt": "2026-09-24T08:00:00.000Z",
+        "metrics": {},
+        "targets": {}
+      }
+    ],
+    "tourLink": null,
+    "deck": {
+      "include": {},
+      "showCompany": false,
+      "showSiteCredit": true,
+      "ask": {
+        "what": "",
+        "bullets": [],
+        "measureFirst": []
+      }
+    }
+  }
+}

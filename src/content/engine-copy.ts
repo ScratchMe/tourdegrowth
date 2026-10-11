@@ -3276,6 +3276,21 @@ export const ENGINE_COPY = {
     liveEvent: { fr: "premier rapport partagé avec l'équipe du client", en: "first report shared with the customer's team" },
     lossCause: { fr: "départ du sponsor chez le client", en: "departure of the customer's sponsor" },
     pqlThreshold: { fr: "espace avec 3 membres actifs", en: "workspace with 3 active members" },
+    /**
+     * The consumer app's example (§21.9, A22 APP-10), read from `stringsFor("consumer-app").example`: its banner, its
+     * company label (printed on its slides) and its three words. `{d30}`, `{paid}` and `{retention}` are the fictional
+     * team's targets, formatted from `lib/engine/example.ts` (`EXAMPLE_CONSUMER_TARGETS`).
+     * TODO: à relire — copie neuve (convention 6), §21.8.4 b (A22 APP-10).
+     */
+    bannerTitleApp: { fr: "Exemple : une app grand public fictive", en: "Example: a fictional consumer app" },
+    bannerBodyApp: {
+      fr: "Chiffres et cibles inventés, pour montrer le funnel et les slides une fois remplis : l'équipe fictive vise {d30} de rétention à J30, {paid} de conversion en abonné et {retention} de rétention des actifs. Rien n'est enregistré, et ça ne touche pas à ton moteur.",
+      en: "Made-up numbers and targets, to show the funnel and the slides once filled in: the fictional team aims for {d30} day-30 retention, {paid} subscriber conversion and {retention} active retention. Nothing is saved, and it doesn't touch your engine.",
+    },
+    companyApp: { fr: "Exemple d'app", en: "Example app" },
+    eventApp: { fr: "a terminé une première séance", en: "completed a first session" },
+    channelApp: { fr: "Recherche App Store", en: "App Store search" },
+    churnCauseApp: { fr: "l'essai se termine avant la troisième séance", en: "the trial ends before the third session" },
   },
 
   storage: {

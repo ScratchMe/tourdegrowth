@@ -1,4 +1,5 @@
-import { ENGINE_SCHEMA_VERSION, type EngineState, type LeverId, type MetricEntry, type MetricId, type MetricValue, type Motion, type SharedCount, type SourceRef, type ToolId } from "./types";
+import type { AppMonetization } from "./app-model";
+import { ENGINE_SCHEMA_VERSION, type BusinessType, type EngineState, type LeverId, type MetricEntry, type MetricId, type MetricValue, type Motion, type SharedCount, type SourceRef, type ToolId } from "./types";
 
 /**
  * The engine spec's §6.0 example — a fictional self-serve SaaS, reference
@@ -37,6 +38,8 @@ export interface ExampleWords {
   liveEvent?: string;
   lossCause?: string;
   pqlThreshold?: string;
+  /** « l'essai se termine avant la troisième séance » — the main reason subscribers leave. Only read by `exampleConsumerMetrics` (§21.9.1). */
+  churnCause?: string;
 }
 
 export function exampleMetrics(words: ExampleWords): Partial<Record<MetricId, MetricEntry>> {
@@ -125,32 +128,82 @@ export const EXAMPLE_CONSUMER_TARGETS: Partial<Record<MetricId, number>> = { "re
  */
 export const EXAMPLE_CONSUMER_WHATIF: Partial<Record<LeverId, number>> = { "ret.d30": 15, "app.rev.commission": 15 };
 
+/** The consumer app example's five shared counts (§21.9.1): the August installs, the July cohort, the two MRRs and the August actives. */
+export const EXAMPLE_CONSUMER_BASE: Partial<Record<SharedCount, number>> = { monthSignups: 12_000, cohortSignups: 11_500, mrrEnd: 28_800, mrrStart: 28_400, appActives: 15_000 };
+
+/**
+ * The consumer app of §21.9.1 — a fictional guided-meditation app — entry by entry, whatever it earns from (a way of
+ * earning unticked hides its numbers without erasing them, §21.1 D7). The words are the activation event, the top
+ * channel and the main reason subscribers leave. The sources are the table's: a tool, "product" (`other`), "data" and
+ * "finance" (a person of that role).
+ */
+export function exampleConsumerMetrics(words: ExampleWords): Partial<Record<MetricId, MetricEntry>> {
+  const data: SourceRef = { kind: "person", role: "data" };
+  const finance: SourceRef = { kind: "person", role: "finance" };
+  return {
+    "acq.signup-rate": measured(ratio(12_000, 40_000), tool("app-store-connect")),
+    "acq.top-channel-share": measured(ratio(5_400, 12_000), tool("app-store-connect"), { label: words.channel }),
+    "act.event": measured({ kind: "text", text: words.event }, { kind: "other" }),
+    "act.rate": measured(ratio(4_025, 11_500), tool("amplitude")),
+    "act.ttv": measured({ kind: "duration", value: 3, unit: "hours", statistic: "median" }, tool("amplitude"), { variant: "median" }),
+    "ret.d30": measured(ratio(1_380, 11_500), tool("amplitude")),
+    "ret.logo-churn": measured(ratio(315, 4_500), tool("revenuecat")),
+    "ret.churn-cause": measured({ kind: "text", text: words.churnCause ?? "" }, data, { evidence: "data" }),
+    "ref.mechanism": measured({ kind: "choice", choice: "product" }, { kind: "other" }),
+    "ref.referred-share": measured(ratio(575, 11_500), tool("product-db")),
+    "ref.k-factor": { status: "requested", request: { role: "data", requestedAt: "2026-09-20T09:00:00.000Z" }, updatedAt: at },
+    "rev.paid-conversion": measured(ratio(345, 11_500), tool("revenuecat")),
+    "rev.arpa": measured(ratio(28_800, 4_500), tool("revenuecat")),
+    "rev.expansion": measured(ratio(284, 28_400), tool("revenuecat")),
+    "rev.contraction": measured(ratio(142, 28_400), tool("revenuecat")),
+    "app.acq.cpi": measured(ratio(18_000, 12_000), tool("appsflyer"), { variant: "media-only" }),
+    "app.ret.active-retention": measured(ratio(13_500, 15_000), tool("amplitude")),
+    "app.rev.purchases-per-active": measured(ratio(4_500, 15_000), tool("revenuecat")),
+    "app.rev.ads-per-active": measured(ratio(6_000, 15_000), finance),
+    "app.rev.commission": measured(ratio(7_326, 33_300), tool("revenuecat")),
+    "app.rev.gross-margin": measured(ratio(25_579.2, 31_974), finance),
+  };
+}
+
 /**
  * A fresh copy each call: callers may change it (the example's own slide
  * choices live in memory only). `motions` shows the example in the motions
  * ticked at setup (§18.9): self-serve alone is exactly §6.0, untouched.
+ *
+ * `type` "consumer-app" (§21.9.1) builds the app of `exampleConsumerMetrics` instead, earning from `monetization`
+ * (the example's three ways when absent): it is self-serve only, and sales-assisted is refused.
  */
-export function exampleEngine(words: ExampleWords, motions: Record<Motion, boolean> = { plg: true, slg: false }): EngineState {
+export function exampleEngine(
+  words: ExampleWords,
+  motions: Record<Motion, boolean> = { plg: true, slg: false },
+  type: BusinessType = "b2b-saas",
+  monetization?: AppMonetization,
+): EngineState {
+  const app = type === "consumer-app";
+  if (app && motions.slg) throw new Error("The consumer app example has no sales-assisted motion");
   const hybrid = motions.plg && motions.slg;
-  const metrics = {
-    ...(motions.plg ? exampleMetrics(words) : {}),
-    ...(motions.slg ? exampleSlgMetrics(words) : {}),
-    ...(hybrid ? exampleLinkMetrics(words) : {}),
-  };
-  const targets = { ...(motions.plg ? EXAMPLE_TARGETS : {}), ...(motions.slg ? EXAMPLE_SLG_TARGETS : {}) };
+  const metrics = app
+    ? exampleConsumerMetrics(words)
+    : {
+        ...(motions.plg ? exampleMetrics(words) : {}),
+        ...(motions.slg ? exampleSlgMetrics(words) : {}),
+        ...(hybrid ? exampleLinkMetrics(words) : {}),
+      };
+  const targets = app ? { ...EXAMPLE_CONSUMER_TARGETS } : { ...(motions.plg ? EXAMPLE_TARGETS : {}), ...(motions.slg ? EXAMPLE_SLG_TARGETS : {}) };
   return structuredClone({
     schemaVersion: ENGINE_SCHEMA_VERSION,
     id: "00000000-0000-4000-8000-000000000060",
     createdAt: "2026-09-24T08:00:00.000Z",
     updatedAt: "2026-09-24T09:00:00.000Z",
     setup: {
-      type: "b2b-saas",
+      type,
       motions: { ...motions },
       currency: "EUR",
       activationWindowDays: 7,
       paidWindowDays: 30,
       qualificationWindowDays: 30,
       goLiveWindowDays: 90,
+      ...(app ? { monetization: { ...(monetization ?? { subscriptions: true, purchases: true, ads: true }) } } : {}),
       ...(words.company ? { companyLabel: words.company } : {}),
     },
     snapshots: [
@@ -161,7 +214,7 @@ export function exampleEngine(words: ExampleWords, motions: Record<Motion, boole
         createdAt: "2026-09-24T08:00:00.000Z",
         metrics,
         targets,
-        ...(motions.slg ? { base: { ...EXAMPLE_SLG_BASE } } : {}),
+        ...(app ? { base: { ...EXAMPLE_CONSUMER_BASE } } : motions.slg ? { base: { ...EXAMPLE_SLG_BASE } } : {}),
       },
     ],
     tourLink: null,
