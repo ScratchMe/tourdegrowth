@@ -1562,8 +1562,13 @@ rendre argent ? { gap: sub.gap, mrr: argent } : sub.gap ? { gap: sub.gap } : {}
   le réglage, D3) ; la phrase des défauts est `start.defaultsApp`. **« Voir un
   exemple rempli »** : jusqu'à APP-10, avec `app` choisi, il ouvre l'exemple
   du SaaS (`openExample(motionsOf(choice))`, inchangé) ; APP-10 change la
-  signature en `openExample(choice: StartChoice, monetization:
-  AppMonetization)` et ouvre l'exemple de l'app (§21.9).
+  signature en `openExample(choice: StartChoice)` et ouvre l'exemple de l'app
+  (§21.9). **L'exemple d'une
+  app s'ouvre toujours avec ses trois façons de gagner** (abonnements, achats,
+  pub : la monétisation de §21.9.1), quoi que coche la carte de départ : « on
+  montre le maximum », et le bandeau (`example.bannerBodyApp`, qui nomme J30,
+  la conversion en abonné et la rétention des actifs) n'est juste qu'avec les
+  trois (décidé par Antoine le 2026-10-11, relevé par APP-10 et sa relecture).
 - **`start.ts`** : `motionsOf("app") = { plg: true, slg: false }` ;
   `typeOf(choice): BusinessType` (`"consumer-app"` pour `app`, `"b2b-saas"`
   sinon) ; `startDefaults(choice, monetization, today)` écrit `type`, et
@@ -2228,7 +2233,7 @@ export type DeepPartialTranslatable<T> = T extends Translatable ? Translatable :
 |---|---|---|
 | inscrit, inscrits (m.) | installation, installations (f.) | « nouvelles installations », « installations recommandées », « 100 installations », « activées », « actives à J30 » |
 | inscription | installation | « le taux d'installation » |
-| visiteurs, visiteurs uniques | visiteurs de la fiche | « ~333 visiteurs de la fiche pour 100 installations » |
+| visiteurs, visiteurs uniques | visiteurs de la fiche | « ~330 visiteurs de la fiche pour 100 installations » (deux chiffres significatifs ; la valeur est 333,33) |
 | client(s), client(s) payant(s), payant(s) — *hors économie unitaire* | abonné(s), abonné(s) payant(s) | « nouvel abonné », « abonnés perdus » |
 | un (nouveau) client — *dans l'économie unitaire* : `money.*`, `lever.worth*`, `scenario.figuresCustomer`, `scenario.rowGap`, `slide.unit*`, `slide.chart*`, `slideTitles.unitEconomics*`, `findings.unitEcon*` | une installation | « ce que coûte une installation » |
 | MRR | revenu | « nouveau revenu », « revenu préservé », « revenu dans 12 mois » ; *mais* dans la chaîne de la fuite d'un abonnement : « abonnements » (« 576 € d'abonnements ajoutés ») |
@@ -2627,7 +2632,7 @@ boucle et les sommes sans code du moteur : `node docs/engine/reference/app-examp
 | Grandeur | Valeur |
 |---|---|
 | Couverture | 21 chiffres : 20 trouvés, 0 approximatif, 0 introuvable, 1 en cours (demandé) |
-| Peloton | ~333 visiteurs de la fiche pour 100 installations ; 5 recommandées ; activées 35, actives à J30 12, abonnées 3 ; chaîne `complete` ; trois colonnes |
+| Peloton | ~330 visiteurs de la fiche pour 100 installations (333,33, imprimé à deux chiffres significatifs) ; 5 recommandées ; activées 35, actives à J30 12, abonnées 3 ; chaîne `complete` ; trois colonnes |
 | Diagnostic | `shared`, base `mrr`, nommées `ret.d30` puis `rev.paid-conversion` ; prix : `ret.d30` 828 €/mois (576 d'abonnements + 252 d'usage), `rev.paid-conversion` 768 €/mois, `app.ret.active-retention` 210 €/mois (sous sa cible, hors du groupe) ; 828 < 768 × 1,25 = 960 |
 | Constats | un `below-comparator` par étape nommée ; aucun constat de perte |
 | Contrôles de cohérence | aucun |
@@ -3355,14 +3360,16 @@ relire" src/`), puis l'ouverture par Antoine.
      (§21.8.1).
   2. `exampleEngine(words, motions, type?, monetization?)` (§21.9.1) ;
      `consumerState()` le lit.
-  3. `ExampleView` gagne les props `type: BusinessType`, `monetization?:
-     AppMonetization` et `stringsFor` ; pour une app, son bandeau lit
+  3. `ExampleView` gagne les props `type: BusinessType` et `stringsFor`
+     (pas de monétisation : l'exemple d'une app a toujours ses trois façons,
+     §21.6.1) ; pour une app, son bandeau lit
      `example.bannerTitleApp` et `example.bannerBodyApp` (`{d30}`, `{paid}`,
      `{retention}` remplis depuis `EXAMPLE_CONSUMER_TARGETS`), ses cibles
      passent par `candidatesFor` (`ExampleView.tsx:127`), ses chiffres par
      `metricsFor(props, "consumer-app")`. `EngineWorkbench` lui passe le type
-     de l'exemple demandé : `openExample(choice, monetization)` (§21.6.1)
-     garde le choix et la monétisation de la carte de départ.
+     de l'exemple demandé : `openExample(choice)` (§21.6.1)
+     garde le choix de la carte de départ ; pour une app, l'exemple prend
+     toujours ses trois façons de gagner (§21.6.1, décidé le 2026-10-11).
   4. Vérifier §21.9.2 dans les sorties ; **puis seulement** écrire le golden
      (l'entrée « avec ses deux « Et si » » = `{ ...consumerState(), whatIf:
      EXAMPLE_CONSUMER_WHATIF }`).
