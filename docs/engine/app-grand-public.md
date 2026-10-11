@@ -1562,8 +1562,8 @@ rendre argent ? { gap: sub.gap, mrr: argent } : sub.gap ? { gap: sub.gap } : {}
   le réglage, D3) ; la phrase des défauts est `start.defaultsApp`. **« Voir un
   exemple rempli »** : jusqu'à APP-10, avec `app` choisi, il ouvre l'exemple
   du SaaS (`openExample(motionsOf(choice))`, inchangé) ; APP-10 change la
-  signature en `openExample(choice: StartChoice, monetization:
-  AppMonetization)` et ouvre l'exemple de l'app (§21.9). **L'exemple d'une
+  signature en `openExample(choice: StartChoice)` et ouvre l'exemple de l'app
+  (§21.9). **L'exemple d'une
   app s'ouvre toujours avec ses trois façons de gagner** (abonnements, achats,
   pub : la monétisation de §21.9.1), quoi que coche la carte de départ : « on
   montre le maximum », et le bandeau (`example.bannerBodyApp`, qui nomme J30,
@@ -3366,7 +3366,7 @@ relire" src/`), puis l'ouverture par Antoine.
      `{retention}` remplis depuis `EXAMPLE_CONSUMER_TARGETS`), ses cibles
      passent par `candidatesFor` (`ExampleView.tsx:127`), ses chiffres par
      `metricsFor(props, "consumer-app")`. `EngineWorkbench` lui passe le type
-     de l'exemple demandé : `openExample(choice, monetization)` (§21.6.1)
+     de l'exemple demandé : `openExample(choice)` (§21.6.1)
      garde le choix de la carte de départ ; pour une app, l'exemple prend
      toujours ses trois façons de gagner (§21.6.1, décidé le 2026-10-11).
   4. Vérifier §21.9.2 dans les sorties ; **puis seulement** écrire le golden
