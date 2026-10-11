@@ -183,11 +183,10 @@ function Workbench(props: EngineWorkbenchProps) {
   const [askIds, setAskIds] = useState<readonly MetricId[]>([]);
   // The hybrid's selector (§18.7): the motion of the number opened last in this session, else self-serve.
   const [motionView, setMotionView] = useState<Motion | null>(null);
-  // The choice the start screen had when « Voir un exemple rempli » was pressed (§18.7, §21.9): its motions, its type and,
-  // for an app, what it earns from.
+  // The choice the start screen had when « Voir un exemple rempli » was pressed (§18.7, §21.9): its motions and its type.
+  // An app's example always earns from its three ways (§21.6.1), whatever the start card ticks: nothing to keep.
   const [exampleMotions, setExampleMotions] = useState<Record<Motion, boolean>>({ plg: true, slg: false });
   const [exampleType, setExampleType] = useState<BusinessType>("b2b-saas");
-  const [exampleMonetization, setExampleMonetization] = useState<AppMonetization>(DEFAULT_APP_MONETIZATION);
   // The start screen's one question (A18 T3.a): kept while the person looks at the example or the full card. With the app
   // type open it has a fourth answer, and the app's three ways of earning (§21.6.1) are kept with it.
   const [startChoice, setStartChoice] = useState<StartChoice>("ss");
@@ -327,10 +326,9 @@ function Workbench(props: EngineWorkbenchProps) {
     focus("engine-targets-title");
   }
 
-  function openExample(choice: StartChoice, earns: AppMonetization) {
+  function openExample(choice: StartChoice) {
     setExampleMotions(motionsOf(choice));
     setExampleType(typeOf(choice));
-    setExampleMonetization(earns);
     setScreen("example");
     focus("engine-example-title");
   }
@@ -373,7 +371,6 @@ function Workbench(props: EngineWorkbenchProps) {
           locale={locale}
           stringsFor={stringsFor}
           type={exampleType}
-          monetization={exampleMonetization}
           metrics={metricsFor(props, exampleType)}
           derivedCopy={derivedFor(props, exampleType)}
           bridges={bridges}
@@ -500,7 +497,7 @@ function Workbench(props: EngineWorkbenchProps) {
           else createEngine({ ...start.defaults, tourResultId: tour?.id ?? null });
         }}
         exampleLabel={strings.start.example}
-        onExample={() => openExample(startChoice, monetization)}
+        onExample={() => openExample(startChoice)}
         importLabel={strings.start.import}
         onImport={() => {
           setScreen("import");
@@ -785,12 +782,11 @@ function Workbench(props: EngineWorkbenchProps) {
 
   if (screen === "example") {
     return shell(
-      // The example of the engine on screen's type (§21.9), earning from what that engine earns from.
+      // The example of the engine on screen's type (§21.9); an app's earns from its three ways, whatever the engine earns from (§21.6.1).
       <ExampleView
         locale={locale}
         stringsFor={stringsFor}
         type={current.setup.type}
-        monetization={current.setup.monetization}
         metrics={metrics}
         derivedCopy={derivedCopy}
         bridges={bridges}

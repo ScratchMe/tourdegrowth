@@ -3280,7 +3280,7 @@ export const ENGINE_COPY = {
      * The consumer app's example (§21.9, A22 APP-10), read from `stringsFor("consumer-app").example`: its banner, its
      * company label (printed on its slides) and its three words. `{d30}`, `{paid}` and `{retention}` are the fictional
      * team's targets, formatted from `lib/engine/example.ts` (`EXAMPLE_CONSUMER_TARGETS`).
-     * TODO: à relire — copie neuve (convention 6), §21.8.4 b (A22 APP-10).
+     * TODO: à relire — copie neuve (convention 6), neuf le 2026-10-11, §21.8.4 b (A22 APP-10).
      */
     bannerTitleApp: { fr: "Exemple : une app grand public fictive", en: "Example: a fictional consumer app" },
     bannerBodyApp: {

@@ -1,7 +1,8 @@
 import type { Page } from "@playwright/test";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import type { MetricId } from "@/lib/engine/types";
-import { exampleState, withMonthBefore } from "../src/lib/engine/__tests__/fixtures";
+import { ENGINE_CATALOG } from "@/content/engine-catalog";
+import { consumerState, exampleState, withMonthBefore } from "../src/lib/engine/__tests__/fixtures";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
 import { storedEngineEntry, openEngineMenu, openNumber, expectFound, writeEngineSeed } from "./engine-helpers";
 
@@ -144,6 +145,41 @@ test("the example shows a filled-in funnel and its slides, and writes nothing on
   await expect(page.getByTestId("engine-example-deck")).toBeVisible();
   await expect(page.getByTestId("engine-deck")).toBeVisible();
   expect(await stored(page)).toBeNull();
+});
+
+/*
+ * An app's example always earns from its three ways (§21.6.1, Antoine 2026-10-11, A22 APP-10): its banner names the
+ * active retention, which only an app earning from purchases or ads carries. Read from the slides' annex, where every
+ * number the engine documents is a row: the active retention is there after ticking the subscriptions alone, and a
+ * subscriptions-only engine of the same app does not print it (the control, so the check can fail).
+ */
+for (const locale of ["fr", "en"] as const) {
+  test(`the app's example opens with its three ways, even with the subscriptions alone ticked (${locale})`, async ({ page }) => {
+    const retention = ENGINE_CATALOG["app.ret.active-retention"].name[locale];
+    await open(page, locale);
+    await page.locator("#engine-start-motion-app").check();
+    await expect(page.getByTestId("engine-start-earns-subscriptions")).toBeChecked();
+    await expect(page.getByTestId("engine-start-earns-purchases")).not.toBeChecked();
+    await expect(page.getByTestId("engine-start-earns-ads")).not.toBeChecked();
+    await page.getByTestId("engine-start-example").click();
+    await expect(page.getByTestId("engine-example")).toBeVisible();
+    await page.getByTestId("engine-example-deck-open").click();
+    await expect(page.getByTestId("engine-deck")).toContainText(retention);
+    expect(await stored(page)).toBeNull();
+  });
+}
+
+test("the same app's own engine, earning from the subscriptions alone, does not print the active retention (the control)", async ({ page }) => {
+  const own = consumerState();
+  own.setup.monetization = { subscriptions: true, purchases: false, ads: false };
+  await page.clock.setFixedTime(new Date(2026, 8, 24, 12));
+  await open(page, "fr");
+  await writeEngineSeed(page, own);
+  await page.reload();
+  await page.getByTestId("engine-open-deck").click();
+  const deck = page.getByTestId("engine-deck");
+  await expect(deck).toBeVisible();
+  await expect(deck).not.toContainText(ENGINE_CATALOG["app.ret.active-retention"].name.fr);
 });
 
 test("settings can be changed later; a new activation window sends that number back to « to fill in »", async ({ page }) => {

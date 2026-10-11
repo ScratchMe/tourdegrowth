@@ -7,7 +7,6 @@ import { Card } from "@/components/core/Card";
 import { pelotonTitle } from "@/lib/engine/deck";
 import { relaysTitle, totalTitle } from "@/lib/engine/deck-motions";
 import { deriveEngine } from "@/lib/engine/derive";
-import type { AppMonetization } from "@/lib/engine/app-model";
 import { EXAMPLE_CONSUMER_TARGETS, EXAMPLE_SLG_TARGETS, EXAMPLE_TARGETS, EXAMPLE_TODAY_ISO, exampleEngine } from "@/lib/engine/example";
 import { fillTemplate, formatPercent } from "@/lib/engine/format";
 import { knownSharedCount } from "@/lib/engine/shared-counts";
@@ -32,8 +31,9 @@ import styles from "./Screens.module.css";
  * demande, il faut qu'on montre un exemple plausible de slides et funnel
  * remplis »): the spec's §6.0 example — the very data set every test checks —
  * drawn by the board's own components, then its slides in the real slide
- * screen. For an app (§21.9) the data set is the consumer app's, and every
- * word is the app's (`stringsFor`).
+ * screen. For an app (§21.9) the data set is the consumer app's, earning from
+ * its three ways whatever the start card ticks (§21.6.1), and every word is
+ * the app's (`stringsFor`).
  *
  * Read-only by construction: nothing here reaches the store. The slide
  * choices someone makes on the example live in this component's memory and
@@ -43,7 +43,6 @@ export function ExampleView({
   locale,
   stringsFor,
   type,
-  monetization,
   metrics,
   derivedCopy,
   bridges,
@@ -55,8 +54,6 @@ export function ExampleView({
   stringsFor: (type: BusinessType) => EngineStrings;
   /** The type of the example shown (§21.9): the SaaS's §6.0, or the consumer app's §21.9.1. */
   type: BusinessType;
-  /** What the app earns from, as the start card had it ticked (§21.6.1); the example's three ways when absent. Read by an app only. */
-  monetization?: AppMonetization;
   /** The catalogue of the example's type (`metricsFor`), likewise `derivedCopy`. */
   metrics: ResolvedMetric[];
   derivedCopy: ResolvedDerived[];
@@ -78,7 +75,7 @@ export function ExampleView({
     const words = app
       ? { event: e.eventApp, channel: e.channelApp, company: e.companyApp, churnCause: e.churnCauseApp }
       : { event: e.event, channel: e.channel, company: e.company, liveEvent: e.liveEvent, lossCause: e.lossCause, pqlThreshold: e.pqlThreshold };
-    const base = exampleEngine(words, { plg: withPlg, slg: withSlg }, type, monetization);
+    const base = exampleEngine(words, { plg: withPlg, slg: withSlg }, type);
     const ctx = { today: new Date(EXAMPLE_TODAY_ISO), locale };
     const derived = deriveEngine(base, ctx, null, bridges, strings.units);
     const relays = derived.motions.find((m): m is Extract<MotionDerived, { motion: "slg" }> => m.motion === "slg");
@@ -90,7 +87,7 @@ export function ExampleView({
           ? relaysTitle(base, relays.relays, strings, metrics, ctx)
           : pelotonTitle(base, derived.peloton, strings, metrics, ctx);
     return { state: base, ctx, derived, verdict };
-  }, [e.event, e.channel, e.company, e.liveEvent, e.lossCause, e.pqlThreshold, e.eventApp, e.channelApp, e.companyApp, e.churnCauseApp, app, type, monetization, withPlg, withSlg, locale, bridges, strings, metrics]);
+  }, [e.event, e.channel, e.company, e.liveEvent, e.lossCause, e.pqlThreshold, e.eventApp, e.channelApp, e.companyApp, e.churnCauseApp, app, type, withPlg, withSlg, locale, bridges, strings, metrics]);
 
   useEffect(() => {
     if (!showDeck && opened.current) heading.current?.focus();
