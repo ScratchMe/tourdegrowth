@@ -8,7 +8,7 @@ question tranchée plus tard y gagne sa ligne, dans le même format.*
 C1 à C22 ont été tranchées dans la séance du 2026-09-29. Les questions de
 design y ont été posées avec des captures du vrai écran : un build local avec
 le jeu et le moteur ouverts, et, pour la vue propriétaire, un build jetable
-jamais commité. C23 à C29 l'ont été le 2026-09-30, C30 à C33 le 2026-10-01, C34 à C44 le 2026-10-02, C45 à C55 le 2026-10-03, C94 à C103 le 2026-10-05 (nées du retour du brief 10, toutes sur la reco), C56 à C74, C92 et C93 le 2026-10-04 (l'app grand public et la place de marché ; C92 et C93 sont deux questions de suivi, numérotées après C75 à C91, ouvertes le même jour pour le jeu), et C75 à C91 le même jour (les trois derniers niveaux du jeu).
+jamais commité. C23 à C29 l'ont été le 2026-09-30, C30 à C33 le 2026-10-01, C34 à C44 le 2026-10-02, C45 à C55 le 2026-10-03, C94 à C103 le 2026-10-05 (nées du retour du brief 10, toutes sur la reco), C56 à C74, C92 et C93 le 2026-10-04 (l'app grand public et la place de marché ; C92 et C93 sont deux questions de suivi, numérotées après C75 à C91, ouvertes le même jour pour le jeu), et C75 à C91 le même jour (les trois derniers niveaux du jeu). C104 l'a été le 2026-10-12, à la fin d'A22.
 Les questions encore ouvertes sont dans `CHANTIERS.md`, section C.
 
 | # | Sujet | Réponse | Écrit dans | Suite |
@@ -116,3 +116,4 @@ Les questions encore ouvertes sont dans `CHANTIERS.md`, section C.
 | C101 | La place de marché : un « ? » pour le revenu net (2026-10-05) | **Oui, un « ? » du moteur seul**, sans page de glossaire (la reco) | `docs/engine/place-de-marche.md` §22.14 | A23, MKT-7 |
 | C102 | La place de marché : les autres étapes sous leur cible sur la slide de la fuite (2026-10-05) | **À l'encre, la place de marché seule** ; le libre-service et l'assisté inchangés (la reco) | `docs/engine/place-de-marche.md` §22.14 | A23, MKT-8 |
 | C103 | La place de marché : la liste, la courbe du total, l'ordre du deck (2026-10-05) | **Oui aux trois** : une étape signalée, celle du côté affiché ; aucune courbe du total ; le total, puis les acheteurs, puis les vendeurs (la reco) | `docs/engine/place-de-marche.md` §22.14 | A23, MKT-7, MKT-8 |
+| C104 | Quand ouvrir l'app grand public (2026-10-12) | **Avec le moteur SaaS, en un seul geste** : le moteur n'est pas encore ouvert, l'app et le SaaS ouvrent ensemble ; la place de marché **probablement aussi**, à confirmer quand A23 approchera. L'ouverture du moteur attend donc le bon à tirer A22.d | `CHANTIERS.md` D2, A22.d, A22.e, A23.e | A22.d, A22.e, D2 |

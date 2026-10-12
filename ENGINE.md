@@ -109,7 +109,7 @@ spécifications ont été tranchées par Antoine (C56 à C74, C92, C93), puis
 réécrites le même jour **en guides d'exécution** : un orchestrateur lance un
 sous-agent par unité, une PR par unité, avec des points d'arrêt, selon
 **§23, [`docs/engine/executer-un-type.md`](docs/engine/executer-un-type.md)**.
-Leurs modèles purs sont codés et testés (A22.b, A23.b, #329) ; **§21 est exécutée en entier le 2026-10-11** (APP-0 à APP-11, le type fermé derrière `ENGINE_TYPES`, restent son bon à tirer A22.d et l'ouverture A22.e) ; des scripts de
+Leurs modèles purs sont codés et testés (A22.b, A23.b, #329) ; **§21 est exécutée en entier le 2026-10-11** (APP-0 à APP-11, le type fermé derrière `ENGINE_TYPES`, restent son bon à tirer A22.d et l'ouverture A22.e, avec celle du moteur : C104) ; des scripts de
 référence (`docs/engine/reference/`) refont leurs exemples sans le code du
 moteur.
 - **§21, [`docs/engine/app-grand-public.md`](docs/engine/app-grand-public.md)** :
