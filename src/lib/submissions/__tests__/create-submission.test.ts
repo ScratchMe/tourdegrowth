@@ -130,7 +130,7 @@ function geminiJson(overrides: Record<string, unknown> = {}) {
 
 function fakeDeepDiveDeps(overrides: Partial<CompleteDeepDiveDeps> = {}): CompleteDeepDiveDeps {
   return {
-    callGemini: vi.fn(async () => ({ data: geminiJson(), modelUsed: "gemini-3.7-flash" })),
+    callGemini: vi.fn(async () => ({ data: geminiJson(), modelUsed: "gemini-3.8-flash" })),
     ...overrides,
   };
 }

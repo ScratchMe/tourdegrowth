@@ -14,7 +14,7 @@ const validJson = JSON.stringify({
 
 describe("parseDeepDiveVerdict", () => {
   it("parses a well-formed Gemini response", () => {
-    const verdict = parseDeepDiveVerdict(validJson, "gemini-3.7-flash");
+    const verdict = parseDeepDiveVerdict(validJson, "gemini-3.8-flash");
     expect(verdict).toEqual({
       pillarRecommendations: {
         acquisition: "Specific acquisition recommendation.",
@@ -24,7 +24,7 @@ describe("parseDeepDiveVerdict", () => {
         revenue: "Specific revenue recommendation.",
       },
       priorityAction: "Instrument week-4 retention by cohort this month.",
-      modelUsed: "gemini-3.7-flash",
+      modelUsed: "gemini-3.8-flash",
     });
   });
 

@@ -124,12 +124,12 @@ describe("callGeminiWithFallback", () => {
     /**
      * The fifth live run: production's Deep dive failed after 47s while the
      * same API answered the runner's probe in 18s. A per-attempt ceiling has
-     * to be generous enough for a slow-but-working generation — but four
+     * to be generous enough for a slow-but-working generation — but three
      * generous attempts in a row would blow past the route's own
      * `maxDuration`. Hence a budget for the whole chain, not just a ceiling
      * per model.
      */
-    it("gives up on the whole chain once its budget is spent, clipping the last attempt to what is left", async () => {
+    it("clips the last attempt to what is left of the chain budget", async () => {
       const calls: string[] = [];
       const hangForever = (url: string | URL | Request, init?: RequestInit) => {
         calls.push(String(url));
@@ -147,13 +147,38 @@ describe("callGeminiWithFallback", () => {
       await vi.advanceTimersByTimeAsync(CHAIN_BUDGET_MS + REQUEST_TIMEOUT_MS);
 
       const message = await outcome;
-      // 45s + 45s + the 10s left over = 100s. The fourth model is never tried:
-      // starting it with nothing left would be a fourth abort, not a chance.
-      expect(calls.length).toBeLessThan(GEMINI_MODEL_CANDIDATES.length);
-      expect(message).toMatch(/chain budget/);
+      // 45s + 45s + the 10s left over = 100s: the third model gets the
+      // remainder, not a full ceiling that would overrun the route.
+      expect(calls).toHaveLength(3);
       // The clipped attempt reports the timeout it was ACTUALLY given, not the nominal one.
       const leftover = CHAIN_BUDGET_MS - 2 * REQUEST_TIMEOUT_MS;
+      expect(leftover).toBeLessThan(REQUEST_TIMEOUT_MS);
       expect(message).toContain(`timed out after ${leftover}ms`);
+    });
+
+    it("stops before a model it has no budget left to try", async () => {
+      const calls: string[] = [];
+      const hangForever = (url: string | URL | Request, init?: RequestInit) => {
+        calls.push(String(url));
+        return new Promise<Response>((_resolve, reject) => {
+          init?.signal?.addEventListener("abort", () => reject(new DOMException("Aborted", "AbortError")));
+        });
+      };
+      // Pauses long enough that, after two full attempts, under the minimum is left.
+      const slowSleep = () => new Promise<void>((resolve) => setTimeout(resolve, (CHAIN_BUDGET_MS - 2 * REQUEST_TIMEOUT_MS) / 2));
+
+      const promise = callGeminiWithFallback("prompt", "key", { fetchImpl: hangForever, sleepImpl: slowSleep });
+      const outcome = promise.then(
+        () => "resolved",
+        (err: Error) => err.message,
+      );
+      await vi.advanceTimersByTimeAsync(CHAIN_BUDGET_MS + REQUEST_TIMEOUT_MS);
+
+      const message = await outcome;
+      // Starting the last model with nothing left would be one more abort, not a chance.
+      expect(calls.length).toBeLessThan(GEMINI_MODEL_CANDIDATES.length);
+      expect(message).toMatch(/chain budget/);
+      expect(message).toContain(`before trying ${GEMINI_MODEL_CANDIDATES.at(-1)}`);
     });
   });
 });
@@ -180,10 +205,9 @@ describe("callGeminiWithFallback — backoff between attempts", () => {
     expect(waits).toHaveLength(GEMINI_MODEL_CANDIDATES.length - 1);
     for (const ms of waits) expect(ms).toBeGreaterThanOrEqual(0);
     // Full jitter, so each wait is a random point BELOW a growing ceiling:
-    // 500, 1000, 2000. Asserting the ceilings, not the values.
+    // 500, then 1000. Asserting the ceilings, not the values.
     expect(waits[0]).toBeLessThanOrEqual(500);
     expect(waits[1]).toBeLessThanOrEqual(1000);
-    expect(waits[2]).toBeLessThanOrEqual(2000);
   });
 
   it("never waits when the first model answers", async () => {

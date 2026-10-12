@@ -14,16 +14,16 @@
  * quietly defeating the fail-fast intent the code's own comment described.
  * Here the HTTP response is inspected *outside* any try/catch around the
  * fetch, so a non-retriable status genuinely fails fast instead of wasting
- * 3 more calls.
+ * a call on every remaining model.
  */
 export const GEMINI_MODEL_CANDIDATES = [
-  "gemini-3.7-flash",
-  // Second, not first (Antoine, 2026-10-07): on the live probe 3.8 took
-  // 21-34s per generation where 3.7 took 8-15s, the slowest 11s under the
-  // per-attempt ceiling. It is the first fallback, not the daily driver.
+  // 3.7 and 3.5 left the chain on 2026-10-12: Google decommissioned both and
+  // now redirects their calls to 3.8 and 3.6, asking callers to stop naming
+  // them. 3.8 was second behind 3.7 because it is slower (21-34s per
+  // generation on the live probe, against 8-15s for 3.7); with 3.7 redirected
+  // to it, it was already serving every Deep dive.
   "gemini-3.8-flash",
   "gemini-3.6-flash",
-  "gemini-3.5-flash",
   "gemini-flash-latest",
 ] as const;
 
@@ -83,7 +83,7 @@ export const REQUEST_TIMEOUT_MS = 45_000;
 /**
  * The whole chain — every model, every pause — gives up after this, so that
  * the four generations a Deep dive runs in parallel all land inside the
- * route's `maxDuration` (120s) with room to spare. Without it, four attempts
+ * route's `maxDuration` (120s) with room to spare. Without it, three attempts
  * at the per-attempt ceiling above would exceed the route's own budget.
  */
 export const CHAIN_BUDGET_MS = 100_000;

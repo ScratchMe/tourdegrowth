@@ -20,6 +20,13 @@ pointe toujours vers un modèle à jour — c'est le filet qui ne casse pas.
 Vérifier qu'un modèle est valide avant de l'utiliser, par un vrai appel à
 l'endpoint de liste, pas d'après la documentation.
 
+Un décommissionnement ne finit pas toujours en 404 : le fournisseur peut
+**rediriger** les appels vers le modèle suivant (2026-10-12, deux d'un coup).
+Rien ne casse, donc rien ne le signale, mais le modèle de tête n'est plus
+celui qu'on croit, avec ses temps de réponse et son coût. Le retirer de la
+chaîne dès l'avis, et relire ce que la chaîne supposait de lui (un ordre
+choisi pour sa vitesse, par exemple).
+
 ### 1.2 Le bug de repli le plus classique
 
 Dans le code d'origine que nous avons porté, une erreur « non retriable »
@@ -202,9 +209,13 @@ de repli ne la contourne pas (§1.2) — toutes les générations cassent d'un c
 
 ## 2. Propre à Tour de Growth
 
-- **Chaîne de repli** : `gemini-3.7-flash → 3.8 → 3.6 → 3.5 → gemini-flash-latest`
-  (non négociable, `CLAUDE.md` ; 3.8 en second depuis le 2026-10-07, plus
-  lent que 3.7 à la sonde : `JOURNAL.md`, même date). `REQUEST_TIMEOUT_MS` 45 s,
+- **Chaîne de repli** : `gemini-3.8-flash → 3.6 → gemini-flash-latest`
+  (non négociable, `CLAUDE.md`). 3.7 et 3.5 en sont sortis le 2026-10-12 :
+  Google les a décommissionnés, redirige leurs appels vers 3.8 et 3.6 et
+  demande de ne plus les nommer (`JOURNAL.md`, même date). 3.8 était en
+  second depuis le 2026-10-07 parce que plus lent que 3.7 à la sonde (21 à
+  34 s par génération contre 8 à 15 s) ; la redirection le faisait déjà
+  servir chaque Deep dive. `REQUEST_TIMEOUT_MS` 45 s,
   `CHAIN_BUDGET_MS` 100 s sous un `maxDuration` de 120 s.
 - **Un seul appel Gemini dans tout le produit** : `lib/gemini/deep-dive.ts`,
   utilisé par la route **et** par la sonde. Le mode Quick n'appelle plus rien
