@@ -71,6 +71,13 @@ const realSleep = (ms: number) => new Promise<void>((resolve) => setTimeout(reso
  * 1-2k tokens reasoning before ~500 tokens of answer; 20s was never sized
  * for that, it was sized for the case below.
  *
+ * Raised again, from 45s to 60s (Antoine, 2026-10-12), once 3.8 led the
+ * chain: the live probe timed its French roast at 33.5s, then 39.0s, with
+ * up to 3.6k thinking tokens. At 45s a slow day would have aborted a
+ * generation that was about to land. The cost is in the chain budget below:
+ * a first attempt that hangs leaves the second model ~40s, not 55s, and
+ * there is no time left for a third.
+ *
  * Originally found necessary the hard way while building this:
  * this build session's own network egress silently black-holes
  * `generateContent` calls (connects, sends, never responds — see
@@ -78,7 +85,7 @@ const realSleep = (ms: number) => new Promise<void>((resolve) => setTimeout(reso
  * a whole model attempt (and, on Vercel, the Route Handler's function
  * timeout) indefinitely instead of falling back to the next candidate.
  */
-export const REQUEST_TIMEOUT_MS = 45_000;
+export const REQUEST_TIMEOUT_MS = 60_000;
 
 /**
  * The whole chain — every model, every pause — gives up after this, so that

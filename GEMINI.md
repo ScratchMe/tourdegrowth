@@ -73,7 +73,8 @@ vraie longueur.
 Deux nombres, liés :
 
 - **`REQUEST_TIMEOUT_MS` par tentative** — assez pour une génération lente qui
-  aboutit (45 s chez nous).
+  aboutit (45 s chez nous, puis 60 s quand un modèle plus lent est passé en
+  tête : le plafond suit le modèle de tête, il se remesure quand il change).
 - **`CHAIN_BUDGET_MS`** qui borne l'ensemble (modèles **et** pauses), sous le
   plafond d'exécution de la fonction. La dernière tentative est **rognée** à ce
   qui reste plutôt que lancée à plein ; sous quelques secondes restantes, la
@@ -215,8 +216,10 @@ de repli ne la contourne pas (§1.2) — toutes les générations cassent d'un c
   demande de ne plus les nommer (`JOURNAL.md`, même date). 3.8 était en
   second depuis le 2026-10-07 parce que plus lent que 3.7 à la sonde (21 à
   34 s par génération contre 8 à 15 s) ; la redirection le faisait déjà
-  servir chaque Deep dive. `REQUEST_TIMEOUT_MS` 45 s,
-  `CHAIN_BUDGET_MS` 100 s sous un `maxDuration` de 120 s.
+  servir chaque Deep dive. `REQUEST_TIMEOUT_MS` 60 s depuis le même jour
+  (45 s avant ; le roast français sous 3.8 a pris 33,5 puis 39,0 s à la
+  sonde), `CHAIN_BUDGET_MS` 100 s sous un `maxDuration` de 120 s : une
+  première tentative qui pend laisse ~40 s à 3.6, et aucune à l'alias.
 - **Un seul appel Gemini dans tout le produit** : `lib/gemini/deep-dive.ts`,
   utilisé par la route **et** par la sonde. Le mode Quick n'appelle plus rien
   depuis `SPEC-ADDENDUM-01` §0 — il résout tout dans `content/copy-library.ts`.
