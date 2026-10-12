@@ -348,4 +348,6 @@ les leçons et les conventions numérotées, elles, sont restées dans `CLAUDE.m
 
 **Non-vacuité** (`TESTING.md` §1.2) : le test réécrit tombe, seul, avec `MIN_ATTEMPT_MS` à −1 (la troisième tentative part avec 0 ms) et, seul aussi, sans le `Math.min` qui rogne la tentative au budget restant ; rétabli, 46 sur 46 dans `src/lib/gemini`.
 
+**La sonde sur la branche** (run 17 de `verify-live.yml`, cible `gemini`) : **verte**, les trois générations servies par `gemini-3.8-flash`, `finishReason=STOP` partout, accents présents ; EN neutre 20,1 s, FR neutre 13,1 s, FR roast 31,7 s, contre un plafond de 60 s. Troisième échantillon du roast français sous 3.8 : 33,5, 39,0, 31,7 s.
+
 **À savoir.** La sonde imprime désormais « per-attempt ceiling 60s » : sa durée se lit contre ce plafond-là. Si une sonde montre 3.8 au-delà de ~50 s, la question de 3.6 en tête revient.
