@@ -2879,7 +2879,7 @@ Ton compte rendu, en français : une liste numérotée de constats, rangés par 
   d'A22 absente dont §22 a besoin et dont le remplacement change une décision
   de §22.14.
 - **Pause** : rien ne change dans le code ; §22 est remise d'accord avec lui.
-- **Fait le 2026-10-18**, sur `f78ecde` (A22 mergée, APP-11 #374 puis C104
+- **Fait le 2026-10-18** (#378), sur `f78ecde` (A22 mergée, APP-11 #374 puis C104
   #375) : 51 constats, 6 bloquants, 30 lacunes, 15 détails. Tous sont traités
   dans le texte de §22 (les renvois de §22.2.5 relevés sur `f78ecde`, les
   mesures de §22.2.5 et §22.8.3, et chaque fiche) ; deux demandaient une

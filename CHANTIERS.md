@@ -456,7 +456,7 @@ d'après A22), MKT-1, MKT-4, MKT-6, MKT-7b (le tableau), MKT-8 et MKT-10.
 | Unité | Ce qu'elle livre (fiche en §22.12) | Prérequis | Fait |
 |---|---|---|---|
 | MKT-B | les captures du brief 10, déposées (puis Antoine lance le brief) | — | ☑ 2026-10-04 ([#340](https://github.com/ScratchMe/tourdegrowth/pull/340)) |
-| MKT-R | **la relecture à blanc de §22** contre le code d'après A22, et la PR de documentation qui la traite (l'orchestrateur, prompt H, étape 0) | A22 | ☑ 2026-10-18 : 51 constats, tous traités dans §22 ; C105 et C106 |
+| MKT-R | **la relecture à blanc de §22** contre le code d'après A22, et la PR de documentation qui la traite (l'orchestrateur, prompt H, étape 0) | A22 | ☑ 2026-10-18 ([#378](https://github.com/ScratchMe/tourdegrowth/pull/378)) : 51 constats, tous traités dans §22 ; C105 et C106 |
 | MKT-0 | le contrat, le type, `EngineMotion`, la validation, les fenêtres | MKT-R | ☐ |
 | MKT-1 | les 19 chiffres et les 6 calculés, leur prose, les ponts | MKT-0 | ☐ |
 | MKT-2 | les grandeurs, les deux funnels, l'économie de chaque côté | MKT-1 | ☐ |
