@@ -195,6 +195,71 @@ describe("starting the next month (§19.2.1, §19.2.2)", () => {
   });
 });
 
+/**
+ * A marketplace's windows (engine spec §22.3, A23 MKT-0): its three are part of its numbers' definitions, so a closed
+ * month keeps them with the four every setup has — for that type only: the SaaS goldens and the app's see no new key.
+ *
+ * Non-vacuity, measured on 2026-10-18 (each sabotage applied alone, the whole of `src/lib/engine` run, the file
+ * restored; the count is the tests that fall): `windowsOf` writing the three for every type falls « a SaaS and an app
+ * write the four » and « a SaaS's closed month carries no key » (2) — and no golden: they do not read a month's
+ * windows, so this block is the only guard of « no new key »; writing none falls « a marketplace writes the four and
+ * its three », « the next month closes the month » and `merge.test.ts`'s closing test (3).
+ */
+describe("windowsOf and a closed month — the marketplace's three windows (§22.3)", () => {
+  const FOUR = ["activationWindowDays", "goLiveWindowDays", "paidWindowDays", "qualificationWindowDays"];
+  const market = (extra: Partial<EngineState["setup"]> = {}): EngineState => {
+    const s = exampleState();
+    return { ...s, setup: { ...s.setup, type: "marketplace", motions: { plg: false, slg: false }, ...extra } };
+  };
+  const OCTOBER = new Date(2026, 9, 3);
+
+  it("a SaaS and an app write the four windows they always did and no other key — even one that carries a marketplace's field", () => {
+    const saas = exampleState().setup;
+    expect(Object.keys(windowsOf(saas)).sort()).toEqual(FOUR);
+    expect(Object.keys(windowsOf({ ...saas, repeatWindowDays: 180, firstOrderWindowDays: 7, firstSaleWindowDays: 90 })).sort()).toEqual(FOUR);
+    const app: EngineState["setup"] = { ...saas, type: "consumer-app", motions: { plg: true, slg: false }, monetization: { subscriptions: true, purchases: false, ads: false } };
+    expect(Object.keys(windowsOf(app)).sort()).toEqual(FOUR);
+  });
+
+  it("a marketplace writes the four and its three: the defaults when the setup says nothing, its own values otherwise", () => {
+    expect(windowsOf(market().setup)).toEqual({
+      activationWindowDays: 7,
+      paidWindowDays: 30,
+      qualificationWindowDays: 30,
+      goLiveWindowDays: 90,
+      firstOrderWindowDays: 30,
+      repeatWindowDays: 90,
+      firstSaleWindowDays: 60,
+    });
+    expect(windowsOf(market({ firstOrderWindowDays: 7, repeatWindowDays: 180, firstSaleWindowDays: 90 }).setup)).toMatchObject({
+      firstOrderWindowDays: 7,
+      repeatWindowDays: 180,
+      firstSaleWindowDays: 90,
+    });
+  });
+
+  it("the next month closes the month that ends with the three, and the closed month is read back with them", () => {
+    const s = market({ repeatWindowDays: 180 });
+    const next = startNextMonth(s, OCTOBER, "2026-10-03T09:00:00.000Z", counter())!;
+    expect(next.snapshots[0]!.windows).toEqual(windowsOf(s.setup));
+    expect(next.snapshots[0]!.windows).toMatchObject({ firstOrderWindowDays: 30, repeatWindowDays: 180, firstSaleWindowDays: 60 });
+    expect(next.snapshots[1]!.windows).toBeUndefined();
+    expect(validateEngine(next)).toEqual([]);
+    // The setup changes its window afterwards: the closed month is read with the one it was closed with.
+    const later = { ...next, setup: { ...next.setup, repeatWindowDays: 60 as const, firstOrderWindowDays: 7 as const } };
+    const view = monthView(later, 0, OCTOBER);
+    expect(view.state.setup).toMatchObject({ repeatWindowDays: 180, firstOrderWindowDays: 30, firstSaleWindowDays: 60 });
+    expect(later.setup.repeatWindowDays).toBe(60);
+    // The open month is read with the setup as it stands.
+    expect(monthView(later, 1, OCTOBER).state.setup).toMatchObject({ repeatWindowDays: 60, firstOrderWindowDays: 7 });
+  });
+
+  it("a SaaS's closed month carries no key of the marketplace, whatever its setup holds", () => {
+    const next = startNextMonth({ ...exampleState(), setup: { ...exampleState().setup, repeatWindowDays: 180 } }, OCTOBER, "2026-10-03T09:00:00.000Z", counter())!;
+    expect(Object.keys(next.snapshots[0]!.windows!).sort()).toEqual(FOUR);
+  });
+});
+
 describe("comparing two months (§19.2.5)", () => {
   const setup = exampleState().setup;
   const act = shapeOf("act.rate");

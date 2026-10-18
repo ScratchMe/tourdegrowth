@@ -16,6 +16,7 @@ import {
   previousMonth,
   windowDaysOf,
 } from "../cohort";
+import type { EngineState } from "../types";
 import { EXAMPLE_TODAY, exampleState } from "./fixtures";
 
 // Engine spec §13.1 "cohort". `today` is always injected and read as a LOCAL
@@ -153,5 +154,75 @@ describe("three rolling months for sales-assisted (engine spec §18.2 S4, C25 Q2
   it("monthsBefore crosses the year", () => {
     expect(monthsBefore("2026-02", 2)).toBe("2025-12");
     expect(monthsBefore("2026-02", 0)).toBe("2026-02");
+  });
+});
+
+describe("a marketplace's windows and followed cohort (engine spec §22.2.3, A23 MKT-0)", () => {
+  // Non-vacuity, measured on 2026-10-18 (each sabotage applied alone, the whole of `src/lib/engine` run, the file
+  // restored; the count is the tests that fall): the marketplace's cohort at 30 days falls « mature for the longest
+  // of the three » (the cohort of May) and « follows the longest window » (2); leaving the first-sale window out of
+  // the `Math.max` falls the second alone (1); reading the first-order field for the repeat window falls 3 (« by their
+  // defaults », « its own field », and « the other types », whose stray repeat window it reads); `mktSetup` reading the
+  // fields of any type falls « the other types » here and `business-type.test.ts`'s (2).
+  const market = (extra: Partial<EngineState["setup"]> = {}): EngineState["setup"] => ({
+    ...exampleState().setup,
+    type: "marketplace",
+    motions: { plg: false, slg: false },
+    ...extra,
+  });
+  /** A shape that names one of the marketplace's windows: the numbers that carry them arrive with MKT-1, the windows do not wait. */
+  const shapeWith = (window: "first-order" | "repeat" | "first-sale") => ({ ...shapeOf("act.rate"), window: window as never });
+
+  it("the three windows are the setup's own, by their defaults when it says nothing: 30, 90 and 60 days", () => {
+    expect(windowDaysOf(shapeWith("first-order"), market())).toBe(30);
+    expect(windowDaysOf(shapeWith("repeat"), market())).toBe(90);
+    expect(windowDaysOf(shapeWith("first-sale"), market())).toBe(60);
+    expect(windowDaysOf(shapeWith("first-order"), market({ firstOrderWindowDays: 7 }))).toBe(7);
+    expect(windowDaysOf(shapeWith("first-order"), market({ firstOrderWindowDays: 90 }))).toBe(90);
+    expect(windowDaysOf(shapeWith("repeat"), market({ repeatWindowDays: 60 }))).toBe(60);
+    expect(windowDaysOf(shapeWith("repeat"), market({ repeatWindowDays: 180 }))).toBe(180);
+    expect(windowDaysOf(shapeWith("first-sale"), market({ firstSaleWindowDays: 30 }))).toBe(30);
+    expect(windowDaysOf(shapeWith("first-sale"), market({ firstSaleWindowDays: 90 }))).toBe(90);
+  });
+
+  it("each window reads its own field, not another's", () => {
+    const setup = market({ firstOrderWindowDays: 7, repeatWindowDays: 180, firstSaleWindowDays: 90 });
+    expect(windowDaysOf(shapeWith("first-order"), setup)).toBe(7);
+    expect(windowDaysOf(shapeWith("repeat"), setup)).toBe(180);
+    expect(windowDaysOf(shapeWith("first-sale"), setup)).toBe(90);
+  });
+
+  it("the windows of the other types are read as before", () => {
+    const setup = exampleState().setup;
+    expect(windowDaysOf(shapeOf("act.rate"), setup)).toBe(7);
+    expect(windowDaysOf(shapeOf("rev.paid-conversion"), setup)).toBe(30);
+    expect(windowDaysOf(shapeOf("ret.d30"), setup)).toBe(30);
+    expect(windowDaysOf(shapeOf("rev.arpa"), setup)).toBe(0);
+    // A SaaS file that carries a marketplace window has it unread.
+    expect(windowDaysOf(shapeWith("repeat"), { ...setup, repeatWindowDays: 180 })).toBe(90);
+  });
+
+  it("its followed cohort is mature for the longest of the three: May on 24 September 2026 with the defaults (90 days)", () => {
+    expect(defaultCohortMonth(market(), EXAMPLE_TODAY)).toBe("2026-05");
+  });
+
+  it("follows the longest window whichever field holds it", () => {
+    // Longest 60 (the repeat window): June. 7 / 60 / 30.
+    expect(defaultCohortMonth(market({ firstOrderWindowDays: 7, repeatWindowDays: 60, firstSaleWindowDays: 30 }), EXAMPLE_TODAY)).toBe("2026-06");
+    // Longest 90, held by the first order: May. 90 / 60 / 30.
+    expect(defaultCohortMonth(market({ firstOrderWindowDays: 90, repeatWindowDays: 60, firstSaleWindowDays: 30 }), EXAMPLE_TODAY)).toBe("2026-05");
+    // Longest 90, held by the first sale: May. 7 / 60 / 90.
+    expect(defaultCohortMonth(market({ firstOrderWindowDays: 7, repeatWindowDays: 60, firstSaleWindowDays: 90 }), EXAMPLE_TODAY)).toBe("2026-05");
+    // Longest 180: February (28 February + 180 days = 27 August, March's end would be 27 September).
+    expect(defaultCohortMonth(market({ repeatWindowDays: 180 }), EXAMPLE_TODAY)).toBe("2026-02");
+    // Never shorter than its own longest, however short the others: the SaaS's floor of 30 days does not apply.
+    expect(defaultCohortMonth(market({ firstOrderWindowDays: 7, repeatWindowDays: 60, firstSaleWindowDays: 30 }), EXAMPLE_TODAY)).toBe(matureCohortMonth(60, EXAMPLE_TODAY));
+  });
+
+  it("the cohort of the other types is the one of before: the payment window, 30 days at least, whatever a stray field says", () => {
+    const setup = exampleState().setup;
+    expect(defaultCohortMonth(setup, EXAMPLE_TODAY)).toBe("2026-07");
+    expect(defaultCohortMonth({ ...setup, paidWindowDays: 90 }, EXAMPLE_TODAY)).toBe("2026-05");
+    expect(defaultCohortMonth({ ...setup, repeatWindowDays: 180 }, EXAMPLE_TODAY)).toBe("2026-07");
   });
 });

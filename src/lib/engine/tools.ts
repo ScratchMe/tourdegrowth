@@ -1,4 +1,4 @@
-import { isApp } from "./setup-type"; // the leaf, never business-type.ts (§21.2.2): business-type.ts imports this module
+import { isApp, isMarketplace } from "./setup-type"; // the leaf, never business-type.ts (§21.2.2): business-type.ts imports this module
 import type { BusinessType, ToolId } from "./types";
 
 /**
@@ -12,7 +12,9 @@ import type { BusinessType, ToolId } from "./types";
  * families of `TOOL_FAMILIES`: App Store Connect and Play Console are not
  * among them, no SaaS number cites them. A consumer app is offered its own
  * families (`APP_TOOL_FAMILIES`, §21.6.5), the stores and the mobile tools
- * first — a file that carries a tool its type does not offer keeps it, unread.
+ * first — a file that carries a tool its type does not offer keeps it, unread. A
+ * marketplace is offered its own (`MKT_TOOL_FAMILIES`, §22.2.2), a CRM among
+ * them: its supply is often recruited by hand.
  */
 export type ToolFamily = "mobile" | "analytics" | "billing" | "crm" | "ads" | "other";
 
@@ -33,17 +35,27 @@ export const APP_TOOL_FAMILIES: readonly { family: ToolFamily; tools: readonly T
   { family: "other", tools: ["product-db", "spreadsheet"] },
 ];
 
+/** A marketplace's families (§22.2.2). */
+export const MKT_TOOL_FAMILIES: readonly { family: ToolFamily; tools: readonly ToolId[] }[] = [
+  { family: "analytics", tools: ["ga4", "mixpanel", "amplitude", "posthog"] },
+  { family: "billing", tools: ["stripe"] },
+  { family: "crm", tools: ["hubspot", "salesforce", "pipedrive"] },
+  { family: "ads", tools: ["google-ads", "meta-ads", "linkedin-ads"] },
+  { family: "other", tools: ["product-db", "spreadsheet"] },
+];
+
 /** Every tool a SaaS setup offers, in the families' order. */
 export const SETUP_TOOLS: readonly ToolId[] = TOOL_FAMILIES.flatMap((f) => f.tools);
 
 /** The families a type's setup lists. b2b-saas: `TOOL_FAMILIES`, as before the app. */
 export function toolFamiliesFor(type: BusinessType): readonly { family: ToolFamily; tools: readonly ToolId[] }[] {
+  if (isMarketplace({ type })) return MKT_TOOL_FAMILIES;
   return isApp({ type }) ? APP_TOOL_FAMILIES : TOOL_FAMILIES;
 }
 
 /** Every tool a type's setup offers, in its families' order (`business-type.ts#setupToolsFor` is this, for the screens). */
 function offeredBy(type: BusinessType): readonly ToolId[] {
-  return isApp({ type }) ? APP_TOOL_FAMILIES.flatMap((f) => f.tools) : SETUP_TOOLS;
+  return toolFamiliesFor(type).flatMap((f) => f.tools);
 }
 
 /** The team's tools the engine reads: the type's offered ones, in the families' order, once each (`type` absent: a SaaS). */

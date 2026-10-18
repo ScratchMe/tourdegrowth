@@ -8,9 +8,14 @@ import {
   DEFAULT_APP_MONETIZATION,
   DERIVED_DISPLAY_OVERRIDES,
   DISPLAY_OVERRIDES,
+  MKT_DEFAULTS,
+  activeMotions,
   displayDerivedShapeOf,
   displayShapeOf,
   isApp,
+  isMarketplace,
+  isSellingMotion,
+  mktSetup,
   monetizationOf,
   motionsAllowed,
   setupToolsFor,
@@ -19,8 +24,10 @@ import type { AppMonetization } from "../app-model";
 import { ALL_DERIVED_SHAPES, ALL_METRIC_SHAPES, APP_REPLACED, LEVER_IDS, METRIC_SHAPES, derivedShapeOf, shapeOf } from "../catalog-shape";
 import { buildScenario, leverAlone } from "../scenario";
 import { leverAloneOf, leverIdsOf, scenarioOf } from "../scenario-of";
-import { APP_TOOL_FAMILIES, SETUP_TOOLS } from "../tools";
-import type { EngineState, LeverId, MetricEntry, PlgMetricId, ToolId } from "../types";
+import { MARKETPLACE_SCREENS_READY } from "../setup-type";
+import { APP_TOOL_FAMILIES, MKT_TOOL_FAMILIES, SETUP_TOOLS } from "../tools";
+import { ENGINE_MOTIONS, MOTIONS } from "../types";
+import type { EngineMotion, EngineSetup, EngineState, LeverId, MetricEntry, PlgMetricId, ToolId } from "../types";
 import { exampleState, hybridState, withEntry } from "./fixtures";
 import { CTX_FR } from "./props";
 
@@ -68,7 +75,7 @@ describe("openTypesWith — the types a build opens (§21.3)", () => {
 
   it("always opens ALWAYS_OPEN_TYPE, and the list of types holds it first", () => {
     expect(ALWAYS_OPEN_TYPE).toBe("b2b-saas");
-    expect(BUSINESS_TYPES).toEqual(["b2b-saas", "consumer-app"]);
+    expect(BUSINESS_TYPES).toEqual(["b2b-saas", "consumer-app", "marketplace"]);
     for (const env of [undefined, "", "consumer-app", "unknown-type"]) expect(openTypesWith(env)).toContain(ALWAYS_OPEN_TYPE);
   });
 
@@ -76,7 +83,14 @@ describe("openTypesWith — the types a build opens (§21.3)", () => {
     const first = openTypesWith("consumer-app");
     first.length = 0;
     expect(openTypesWith("consumer-app")).toEqual(["b2b-saas", "consumer-app"]);
-    expect(BUSINESS_TYPES).toHaveLength(2);
+    expect(BUSINESS_TYPES).toHaveLength(3);
+  });
+
+  it("never opens the marketplace while its screens are not ready (§22.3), even when the variable lists it", () => {
+    expect(MARKETPLACE_SCREENS_READY).toBe(false);
+    expect(openTypesWith("marketplace")).toEqual(["b2b-saas"]);
+    expect(openTypesWith("consumer-app,marketplace")).toEqual(["b2b-saas", "consumer-app"]);
+    expect(openTypesWith("marketplace, consumer-app ,b2b-saas")).toEqual(["b2b-saas", "consumer-app"]);
   });
 });
 
@@ -94,13 +108,17 @@ describe("openTypesAtBuild — the page's reader", () => {
     expect(openTypesAtBuild()).toEqual(["b2b-saas", "consumer-app"]);
     process.env.ENGINE_TYPES = "unknown-type";
     expect(openTypesAtBuild()).toEqual(["b2b-saas"]);
+    // The barrier holds at the build too: the variable of MKT-10's CI lists the marketplace, and the page still does not offer it.
+    process.env.ENGINE_TYPES = "consumer-app,marketplace";
+    expect(openTypesAtBuild()).toEqual(["b2b-saas", "consumer-app"]);
   });
 });
 
-describe("motionsAllowed — what a type may tick (§21.1 D1)", () => {
-  it("lets the B2B SaaS tick both motions, and a consumer app self-serve only", () => {
+describe("motionsAllowed — what a type may tick (§21.1 D1, §22.2.2)", () => {
+  it("lets the B2B SaaS tick both motions, a consumer app self-serve only, and a marketplace nothing: its motion is derived", () => {
     expect(motionsAllowed("b2b-saas")).toEqual(["plg", "slg"]);
     expect(motionsAllowed("consumer-app")).toEqual(["plg"]);
+    expect(motionsAllowed("marketplace")).toEqual([]);
   });
 });
 
@@ -168,13 +186,156 @@ describe("monetizationOf and isApp", () => {
   });
 });
 
+/**
+ * The marketplace's motion, derived from its type (engine spec §22.1 D1, §22.2.2; A23 MKT-0). `Motion` stays the two
+ * boxes the setup ticks; `EngineMotion` adds the third, which nothing stores and nothing combines.
+ *
+ * Non-vacuity, measured on 2026-10-18 (each sabotage applied alone, the whole of `src/lib/engine` and the engine
+ * boundary guard run, the file restored; the count is the tests that fall, all in this file unless said): taking the
+ * `"marketplace"` line out of `activeMotions` falls its own case (1); inverting `isSellingMotion`, its own (1); taking
+ * the `"marketplace"` line out of `motionsAllowed`, its own (1). « Lists what it returns in ENGINE_MOTIONS order »
+ * passes in all three, as it must: `[]` and `["mkt"]` are both in order, it guards a future combination. `mktSetup`
+ * trusting a stored window (`?? default` instead of the list) falls « reads a stored value that is not one the setup
+ * offers » (1); reading the fields of any type, not of a marketplace only, falls « reads all defaults for any other
+ * type » and the cohort's « windows of the other types » (2). The barrier: `access.ts` without it falls 3 (here, the
+ * two `openTypesWith` ones, and `access.test.ts`'s); the constant at `true` falls 4 (those three, and `io.test.ts`'s
+ * refusal). `toolFamiliesFor` without the marketplace falls this file's « offers a SaaS the tools it always did » (1)
+ * and `tools.test.ts`'s three. A `setup.type === "marketplace"` added to `tools.ts` falls the guard of who reads the
+ * type (1); a cast written `x as Motion` in `setup-type.ts` falls the sweep below (1) — and the first sabotage tried,
+ * `as import("./types").Motion`, fell nothing: the sweep reads the literal `as Motion`, as the spec writes it, not a
+ * cast through an alias or an import type; the compiler's three answers of §22.2.5 are the main line, the sweep the net.
+ */
+describe("the motions an engine derives (§22.1 D1)", () => {
+  const boxes = (plg: boolean, slg: boolean): EngineSetup["motions"] => ({ plg, slg });
+
+  it("ENGINE_MOTIONS is the two selling motions in MOTIONS order, then the marketplace's, and MOTIONS did not move", () => {
+    expect(MOTIONS).toEqual(["plg", "slg"]);
+    expect(ENGINE_MOTIONS).toEqual([...MOTIONS, "mkt"]);
+  });
+
+  it("is the boxes ticked, in MOTIONS order, for a SaaS and for an app", () => {
+    expect(activeMotions({ type: "b2b-saas", motions: boxes(true, false) })).toEqual(["plg"]);
+    expect(activeMotions({ type: "b2b-saas", motions: boxes(false, true) })).toEqual(["slg"]);
+    expect(activeMotions({ type: "b2b-saas", motions: boxes(true, true) })).toEqual(["plg", "slg"]);
+    expect(activeMotions({ type: "consumer-app", motions: boxes(true, false) })).toEqual(["plg"]);
+    // A setup of the code before it is validated: nothing ticked, nothing derived — never a motion made up.
+    expect(activeMotions({ type: "b2b-saas", motions: boxes(false, false) })).toEqual([]);
+  });
+
+  it("is the marketplace's own motion, alone, whatever its two boxes say", () => {
+    for (const motions of [boxes(false, false), boxes(true, false), boxes(false, true), boxes(true, true)]) {
+      expect(activeMotions({ type: "marketplace", motions }), JSON.stringify(motions)).toEqual(["mkt"]);
+    }
+  });
+
+  it("lists what it returns in ENGINE_MOTIONS order", () => {
+    for (const type of BUSINESS_TYPES) {
+      for (const motions of [boxes(false, false), boxes(true, false), boxes(false, true), boxes(true, true)]) {
+        const derived = activeMotions({ type, motions });
+        expect(derived, `${type} ${JSON.stringify(motions)}`).toEqual(ENGINE_MOTIONS.filter((m) => derived.includes(m)));
+      }
+    }
+  });
+
+  it("tells a selling motion from the marketplace's, as a narrowing the compiler follows", () => {
+    expect(isSellingMotion("plg")).toBe(true);
+    expect(isSellingMotion("slg")).toBe(true);
+    expect(isSellingMotion("mkt")).toBe(false);
+    const derived: EngineMotion[] = activeMotions({ type: "b2b-saas", motions: boxes(true, true) });
+    // `MOTIONS.includes` takes a `Motion`: this line compiles only if the guard narrows.
+    expect(derived.filter(isSellingMotion).every((m) => MOTIONS.includes(m))).toBe(true);
+    expect(activeMotions({ type: "marketplace", motions: boxes(false, false) }).filter(isSellingMotion)).toEqual([]);
+  });
+
+  it("tells a marketplace from the other types", () => {
+    expect(isMarketplace({ type: "marketplace" })).toBe(true);
+    expect(isMarketplace({ type: "b2b-saas" })).toBe(false);
+    expect(isMarketplace({ type: "consumer-app" })).toBe(false);
+  });
+});
+
+describe("mktSetup — a marketplace's own setup, each field from the setup or its default (§22.1 D9-D11, §22.2.2)", () => {
+  const market = (extra: Partial<EngineSetup> = {}) => ({ type: "marketplace" as const, ...extra });
+
+  it("says what the spec says when the setup says nothing: products, no seller subscriptions, 30, 90 and 60 days", () => {
+    expect(MKT_DEFAULTS).toEqual({ offering: "products", sellerSubscriptions: false, firstOrderWindowDays: 30, repeatWindowDays: 90, firstSaleWindowDays: 60 });
+    expect(mktSetup(market())).toEqual(MKT_DEFAULTS);
+  });
+
+  it("reads every value the setup offers, field by field, the others staying at their defaults", () => {
+    expect(mktSetup(market({ offering: "services" }))).toEqual({ ...MKT_DEFAULTS, offering: "services" });
+    expect(mktSetup(market({ offering: "products" }))).toEqual(MKT_DEFAULTS);
+    expect(mktSetup(market({ sellerSubscriptions: true }))).toEqual({ ...MKT_DEFAULTS, sellerSubscriptions: true });
+    expect(mktSetup(market({ sellerSubscriptions: false }))).toEqual(MKT_DEFAULTS);
+    for (const days of [7, 30, 90] as const) expect(mktSetup(market({ firstOrderWindowDays: days })).firstOrderWindowDays).toBe(days);
+    for (const days of [60, 90, 180] as const) expect(mktSetup(market({ repeatWindowDays: days })).repeatWindowDays).toBe(days);
+    for (const days of [30, 60, 90] as const) expect(mktSetup(market({ firstSaleWindowDays: days })).firstSaleWindowDays).toBe(days);
+    expect(mktSetup(market({ offering: "services", sellerSubscriptions: true, firstOrderWindowDays: 7, repeatWindowDays: 180, firstSaleWindowDays: 90 }))).toEqual({
+      offering: "services",
+      sellerSubscriptions: true,
+      firstOrderWindowDays: 7,
+      repeatWindowDays: 180,
+      firstSaleWindowDays: 90,
+    });
+  });
+
+  // What a stored marketplace can really carry where the type says otherwise (a file opens with its errors, io.ts): the
+  // cast is the point of these cases. Each reads as its default; `validate.ts` reports the file on its own.
+  it("reads a stored value that is not one the setup offers as its default, as monetizationOf does", () => {
+    for (const offering of ["Services", "", 1, null, ["services"]]) expect(mktSetup(market({ offering: offering as never })).offering, JSON.stringify(offering)).toBe("products");
+    for (const stored of ["true", 1, null, []]) expect(mktSetup(market({ sellerSubscriptions: stored as never })).sellerSubscriptions, JSON.stringify(stored)).toBe(false);
+    for (const days of [45, 0, "30", null, 60, 180]) expect(mktSetup(market({ firstOrderWindowDays: days as never })).firstOrderWindowDays, JSON.stringify(days)).toBe(30);
+    for (const days of [45, 0, "90", null, 7, 30]) expect(mktSetup(market({ repeatWindowDays: days as never })).repeatWindowDays, JSON.stringify(days)).toBe(90);
+    for (const days of [45, 0, "60", null, 7, 180]) expect(mktSetup(market({ firstSaleWindowDays: days as never })).firstSaleWindowDays, JSON.stringify(days)).toBe(60);
+  });
+
+  it("reads all defaults for any other type, even a file that carries the fields: they belong to a marketplace, and the validator refuses them there", () => {
+    const carried = { offering: "services", sellerSubscriptions: true, firstOrderWindowDays: 7, repeatWindowDays: 180, firstSaleWindowDays: 90 } as const;
+    for (const type of ["b2b-saas", "consumer-app"] as const) expect(mktSetup({ type, ...carried }), type).toEqual(MKT_DEFAULTS);
+  });
+
+  it("hands back an object of its own: changing it changes nothing for the next caller", () => {
+    const first = mktSetup(market());
+    expect(first).not.toBe(MKT_DEFAULTS);
+    first.firstOrderWindowDays = 90;
+    expect(mktSetup(market()).firstOrderWindowDays).toBe(30);
+    const other = mktSetup({ type: "b2b-saas" });
+    other.firstOrderWindowDays = 7;
+    expect(mktSetup({ type: "b2b-saas" }).firstOrderWindowDays).toBe(30);
+    expect(MKT_DEFAULTS.firstOrderWindowDays).toBe(30);
+  });
+});
+
+/**
+ * The marketplace may not be cast into a selling motion (engine spec §22.2.5): where an `EngineMotion` reaches code
+ * written for `plg` and `slg`, the code narrows (`isSellingMotion`), widens its parameter, or reads `shapesOf` — never
+ * `as Motion`, which would let `"mkt"` through as the assisted motion without a word.
+ */
+describe("an EngineMotion is narrowed, never cast to a Motion (§22.2.5)", () => {
+  const CAST = /\bas\s+Motion\b/;
+
+  it("finds no `as Motion` in the source of src/, tests aside", () => {
+    const scanned = FILES.filter((f) => !f.path.includes("/__tests__/") && !/\.test\.tsx?$/.test(f.path));
+    // The sweep looked at something: the whole tree, and the pattern sees a cast, bare or on an array.
+    expect(scanned.length).toBeGreaterThan(300);
+    for (const cast of ["const m = x as Motion;", "(x as Motion)", "x as Motion[]", "x  as\nMotion"]) expect(CAST.test(cast), cast).toBe(true);
+    for (const fine of ["x as MotionDerived", "x as EngineMotion", "x as Motions", "const aliasMotion = 1"]) expect(CAST.test(fine), fine).toBe(false);
+    const offenders = scanned.filter((f) => CAST.test(stripComments(f.source))).map((f) => f.path);
+    expect(offenders, "narrow with isSellingMotion, or widen the parameter to EngineMotion").toEqual([]);
+  });
+});
+
 describe("the import graph of the type module (§21.2.2)", () => {
-  it("setup-type.ts is a leaf: every import it makes is a type import, erased at build", () => {
+  it("setup-type.ts is a leaf: every import it makes is a type import, erased at build — but the one value MOTIONS (§22.2.2)", () => {
     const source = BY_PATH.get("lib/engine/setup-type.ts");
     expect(source, "the module exists where the spec puts it").toBeDefined();
     // The walk looked at something: the file does import, by `import type`.
     expect(source!.match(/^import type /gm)?.length).toBeGreaterThanOrEqual(2);
-    expect(valueImports(source!)).toEqual([]);
+    // The single exception, named: `MOTIONS`, from types.ts, and from nothing else.
+    expect(valueImports(source!)).toEqual(["./types"]);
+    expect(source!.match(/^import \{([^}]*)\} from "\.\/types";/m)?.[1]?.trim()).toBe("MOTIONS");
+    // What makes the exception safe: types.ts imports no value of the engine itself, so no cycle can form through it.
+    expect(valueImports(BY_PATH.get("lib/engine/types.ts")!)).toEqual([]);
   });
 
   it("access.ts, which the Edge proxy imports, reaches neither business-type.ts nor the catalogue of shapes", () => {
@@ -282,6 +443,14 @@ describe("displayShapeOf / displayDerivedShapeOf — the shape as the type shows
     expect(setupToolsFor("consumer-app")).toContain("revenuecat");
     expect(setupToolsFor("b2b-saas")).not.toContain("revenuecat");
     expect(setupToolsFor("consumer-app")).not.toContain("hubspot");
+    expect(setupToolsFor("marketplace")).toEqual(MKT_TOOL_FAMILIES.flatMap((f) => f.tools));
+    expect(setupToolsFor("marketplace")).toContain("hubspot");
+    expect(setupToolsFor("marketplace")).not.toContain("revenuecat");
+  });
+
+  it("shows a marketplace the shape of the SaaS itself, number and figure alike: nothing is overridden for it (§22.2.5)", () => {
+    for (const shape of ALL_METRIC_SHAPES) expect(displayShapeOf(shape.id, "marketplace"), shape.id).toBe(shapeOf(shape.id));
+    for (const shape of ALL_DERIVED_SHAPES) expect(displayDerivedShapeOf(shape.id, "marketplace"), shape.id).toBe(derivedShapeOf(shape.id));
   });
 });
 
@@ -316,8 +485,10 @@ describe("every read of a shape's display fields goes through displayShapeOf (§
 });
 
 /**
- * Who may read the engine's type (engine spec §21.1 D4, §21.10.1 guard 3, A22 APP-4). A calculation or a screen asks
- * `isApp(setup)` or `monetizationOf(setup)`; only the modules that are about the type itself compare it: the leaf
+ * Who may read the engine's type (engine spec §21.1 D4, §21.10.1 guard 3, A22 APP-4; §22.2.2, A23 MKT-0). A calculation
+ * or a screen asks `isApp(setup)`, `monetizationOf(setup)`, `isMarketplace(setup)` or `activeMotions(setup)`; the pattern
+ * does not look at the value compared, so `setup.type === "marketplace"` outside the eight falls it as `"consumer-app"`
+ * does. Only the modules that are about the type itself compare it: the leaf
  * that defines it, the display layer, the seam that picks a model, and the three that validate, open and merge a file
  * (plus `migrate.ts` and the example, which build a setup). A comparison anywhere else is a model branching on the
  * type behind the seam's back, and the SaaS goldens would be the last to know.
@@ -338,8 +509,8 @@ describe("who reads the type of an engine (§21.10.1, guard 3)", () => {
     "lib/engine/migrate.ts",
     "lib/engine/example.ts",
   ];
-  /** `setup.type ===` (or `!==`, with `state.setup`, `a.setup`…), and `.type === "consumer-app"` on any object. */
-  const READS_THE_TYPE = /\bsetup\??\.type\s*[!=]==|\.type\s*[!=]==\s*["']consumer-app["']|["']consumer-app["']\s*[!=]==\s*[\w.?]*\.type\b/;
+  /** `setup.type ===` (or `!==`, with `state.setup`, `a.setup`…), and `.type === "consumer-app"` or `"marketplace"` on any object. */
+  const READS_THE_TYPE = /\bsetup\??\.type\s*[!=]==|\.type\s*[!=]==\s*["'](?:consumer-app|marketplace)["']|["'](?:consumer-app|marketplace)["']\s*[!=]==\s*[\w.?]*\.type\b/;
 
   it("is read by the eight modules about the type, and by nothing else in src/", () => {
     const scanned = FILES.filter((f) => !f.path.includes("/__tests__/") && !/\.test\.tsx?$/.test(f.path));
@@ -349,8 +520,11 @@ describe("who reads the type of an engine (§21.10.1, guard 3)", () => {
     for (const path of ["lib/engine/setup-type.ts", "lib/engine/scenario-of.ts", "lib/engine/validate.ts"]) {
       expect(READS_THE_TYPE.test(stripComments(BY_PATH.get(path)!)), `${path} reads the type, and the pattern sees it`).toBe(true);
     }
+    // The pattern sees the marketplace's comparison as it sees the app's, whatever the object it is read on.
+    for (const read of ['state.setup.type === "marketplace"', 'a.type !== "marketplace"', '"marketplace" === s.type']) expect(READS_THE_TYPE.test(read), read).toBe(true);
+    expect(READS_THE_TYPE.test("isMarketplace(setup)"), "the helper is not a read").toBe(false);
     const offenders = scanned.filter((f) => !READERS.includes(f.path) && READS_THE_TYPE.test(stripComments(f.source))).map((f) => f.path);
-    expect(offenders, "ask isApp(setup) or monetizationOf(setup) instead").toEqual([]);
+    expect(offenders, "ask isApp(setup), monetizationOf(setup), isMarketplace(setup) or activeMotions(setup) instead").toEqual([]);
   });
 });
 

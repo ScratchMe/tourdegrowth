@@ -265,6 +265,69 @@ describe("mergeRefusal — two engines that would not measure the same thing", (
     expect(mergeRefusal(exampleState(), app(subscriptions))).toBe("type");
   });
 
+  // Non-vacuity of the marketplace's refusals, measured on 2026-10-18 (each sabotage applied alone, the whole of
+  // `src/lib/engine` run, the file restored; the count is the tests that fall, all here): `mergeRefusal` without the
+  // sellers' subscriptions falls « do not pay the same way » (1); without the windows line, « three windows refuse »
+  // (1); refusing a different `offering` as well, « differ in their offering alone merge » (1); `windowsOf` writing no
+  // marketplace window falls « keeps the marketplace's three windows » here and two tests of `series.test.ts` (3).
+  /** The example's engine as a marketplace: its two boxes unticked, its motion derived (§22.3). */
+  const market = (extra: Partial<EngineState["setup"]> = {}): EngineState => {
+    const s = exampleState();
+    return { ...s, setup: { ...s.setup, type: "marketplace", motions: { plg: false, slg: false }, ...extra } };
+  };
+
+  it("two marketplaces whose sellers do not pay the same way are refused with the motions' reason; two that do merge (§22.3, A23 MKT-0)", () => {
+    expect(mergeRefusal(market(), market())).toBeNull();
+    expect(mergeRefusal(market({ sellerSubscriptions: true }), market({ sellerSubscriptions: true }))).toBeNull();
+    expect(mergeRefusal(market({ sellerSubscriptions: true }), market())).toBe("motions");
+    expect(mergeRefusal(market(), market({ sellerSubscriptions: true }))).toBe("motions");
+    expect(mergeEngines(market({ sellerSubscriptions: true }), market())).toEqual({ kind: "refused", reason: "motions" });
+    // The box absent is the box unticked.
+    expect(mergeRefusal(market({ sellerSubscriptions: false }), market())).toBeNull();
+    // The type is judged first, and the motions before the windows.
+    expect(mergeRefusal(market(), exampleState())).toBe("type");
+    expect(mergeRefusal(market({ sellerSubscriptions: true, repeatWindowDays: 180 }), market())).toBe("motions");
+  });
+
+  it("a marketplace's three windows refuse each on its own, with the windows' reason; a window left at its default is the window absent", () => {
+    expect(mergeRefusal(market(), market({ firstOrderWindowDays: 7 }))).toBe("windows");
+    expect(mergeRefusal(market(), market({ repeatWindowDays: 180 }))).toBe("windows");
+    expect(mergeRefusal(market(), market({ firstSaleWindowDays: 90 }))).toBe("windows");
+    expect(mergeRefusal(market({ firstOrderWindowDays: 90 }), market({ firstOrderWindowDays: 30 }))).toBe("windows");
+    expect(mergeEngines(market(), market({ repeatWindowDays: 60 }))).toEqual({ kind: "refused", reason: "windows" });
+    expect(mergeRefusal(market({ firstOrderWindowDays: 30, repeatWindowDays: 90, firstSaleWindowDays: 60 }), market())).toBeNull();
+    // Another type's windows are not read as a marketplace's: a SaaS file that carries one has it unread.
+    const { device, file } = twoCopies();
+    expect(mergeRefusal(device, { ...file, setup: { ...file.setup, repeatWindowDays: 180 } })).toBeNull();
+  });
+
+  it("two marketplaces that differ in their offering alone merge: it is words, and the device's setup is kept", () => {
+    expect(mergeRefusal(market({ offering: "services" }), market())).toBeNull();
+    expect(mergeRefusal(market(), market({ offering: "services" }))).toBeNull();
+    const { state, changes } = ok(mergeEngines(market({ offering: "services" }), market({ offering: "products" })));
+    expect(state.setup.offering).toBe("services");
+    expect(changes).toEqual([]);
+    expect(ok(mergeEngines(market({ offering: "products" }), market({ offering: "services" }))).state.setup.offering).toBe("products");
+  });
+
+  it("a month the merge closes keeps the marketplace's three windows with the four it always kept", () => {
+    const device = market({ firstOrderWindowDays: 7, repeatWindowDays: 180, firstSaleWindowDays: 90 });
+    const file = structuredClone(device);
+    const later = startNextMonth(file, SEPT, SEPT_ISO, () => "sept")!;
+    later.snapshots = [{ ...later.snapshots[1]!, createdAt: "2026-10-05T09:00:00.000Z" }];
+    const { state } = ok(mergeEngines(device, later));
+    expect(state.snapshots[0]!.windows).toEqual({
+      activationWindowDays: 7,
+      paidWindowDays: 30,
+      qualificationWindowDays: 30,
+      goLiveWindowDays: 90,
+      firstOrderWindowDays: 7,
+      repeatWindowDays: 180,
+      firstSaleWindowDays: 90,
+    });
+    expect(validateEngine(state)).toEqual([]);
+  });
+
   it("an unticked motion's windows are never read, so they never refuse", () => {
     const { device, file } = twoCopies();
     expect(device.setup.motions.slg).toBe(false);

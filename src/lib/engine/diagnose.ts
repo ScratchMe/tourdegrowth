@@ -8,6 +8,7 @@ import type {
   Comparator,
   Diagnosis,
   EngineCalcContext,
+  EngineMotion,
   EngineState,
   Impact,
   Interval,
@@ -106,7 +107,7 @@ function clearlyAbove(a: number, b: number): boolean {
  * of both: there is no « biggest leak of the two engines » (§18.6.1).
  */
 export interface MotionRules<C extends CandidateId> {
-  motion: Motion;
+  motion: EngineMotion;
   candidates: readonly C[];
   price: (state: EngineState, id: C, target: number, ctx: EngineCalcContext) => { gap?: Interval; mrr?: Interval };
   isFlow: (id: C) => boolean;

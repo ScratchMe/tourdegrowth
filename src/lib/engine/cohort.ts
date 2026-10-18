@@ -1,5 +1,6 @@
 import { METRIC_SHAPES } from "./catalog-shape";
 import type { MetricShape } from "./catalog-shape";
+import { isMarketplace, mktSetup } from "./setup-type";
 import { YEAR_MONTH_PATTERN } from "./types";
 import type { EngineSetup, MetricEntry, PlgMetricId, Snapshot, YearMonth } from "./types";
 
@@ -80,13 +81,21 @@ export function isImmature(period: YearMonth, windowDays: number, today: Date): 
   return period > matureCohortMonth(windowDays, today);
 }
 
-/** The window that is part of a metric's definition, in days; 0 for a metric with none. */
+/**
+ * The window that is part of a metric's definition, in days; 0 for a metric with none. A marketplace's three
+ * (§22.2.3) are the setup's own, read through `mktSetup`; the shape names them as plain strings so that the list of
+ * windows a shape may carry (`MetricShape.window`) widens with the numbers that use them (MKT-1), not before.
+ */
 export function windowDaysOf(shape: MetricShape, setup: EngineSetup): number {
-  if (shape.window === "activation") return setup.activationWindowDays;
-  if (shape.window === "paid") return setup.paidWindowDays;
-  if (shape.window === "qualification") return setup.qualificationWindowDays;
-  if (shape.window === "go-live") return setup.goLiveWindowDays;
-  return shape.window ?? 0;
+  const window: string | number | undefined = shape.window;
+  if (window === "activation") return setup.activationWindowDays;
+  if (window === "paid") return setup.paidWindowDays;
+  if (window === "qualification") return setup.qualificationWindowDays;
+  if (window === "go-live") return setup.goLiveWindowDays;
+  if (window === "first-order") return mktSetup(setup).firstOrderWindowDays;
+  if (window === "repeat") return mktSetup(setup).repeatWindowDays;
+  if (window === "first-sale") return mktSetup(setup).firstSaleWindowDays;
+  return typeof window === "number" ? window : 0;
 }
 
 /** Default reference month: the last closed month. */
@@ -97,9 +106,15 @@ export function defaultReferenceMonth(today: Date): YearMonth {
 /**
  * Default followed cohort: mature for the LONGEST window in the peloton —
  * day 30 is always a column, and the payment window may be 60 or 90 days —
- * so every column reads the same, complete cohort (§6.3).
+ * so every column reads the same, complete cohort (§6.3). A marketplace's is
+ * mature for the longest of its three windows (§22.2.3): May for a 24 September
+ * with the defaults, which make it 90 days.
  */
 export function defaultCohortMonth(setup: EngineSetup, today: Date): YearMonth {
+  if (isMarketplace(setup)) {
+    const { firstOrderWindowDays, repeatWindowDays, firstSaleWindowDays } = mktSetup(setup);
+    return matureCohortMonth(Math.max(firstOrderWindowDays, repeatWindowDays, firstSaleWindowDays), today);
+  }
   return matureCohortMonth(Math.max(30, setup.paidWindowDays), today);
 }
 

@@ -2,10 +2,22 @@ import { derivedShapeOf, shapeOf, type Benchmark, type DerivedShape, type Metric
 import { isApp } from "./setup-type";
 import { toolFamiliesFor } from "./tools";
 import type { BusinessType, DerivedId, MetricId, Motion, PlgDerivedId, PlgMetricId, ToolId } from "./types";
-export { ALWAYS_OPEN_TYPE, BUSINESS_TYPES, DEFAULT_APP_MONETIZATION, isApp, monetizationOf } from "./setup-type";
+export {
+  ALWAYS_OPEN_TYPE,
+  BUSINESS_TYPES,
+  DEFAULT_APP_MONETIZATION,
+  MKT_DEFAULTS,
+  activeMotions,
+  isApp,
+  isMarketplace,
+  isSellingMotion,
+  monetizationOf,
+  mktSetup,
+} from "./setup-type";
 
-/** What a type may tick (§21.1 D1): the consumer app sells self-serve only. */
+/** What a type may tick (§21.1 D1, §22.2.2): the consumer app sells self-serve only, a marketplace ticks nothing — its motion is derived. */
 export function motionsAllowed(type: BusinessType): readonly Motion[] {
+  if (type === "marketplace") return [];
   return type === "consumer-app" ? ["plg"] : ["plg", "slg"];
 }
 
@@ -67,7 +79,7 @@ export function displayDerivedShapeOf(id: DerivedId, type: BusinessType): Derive
   return override ? { ...shape, ...override } : shape;
 }
 
-/** The setup's tool list (§21.6.5): b2b-saas keeps `SETUP_TOOLS` as before the app; an app lists its own families' tools. */
+/** The setup's tool list (§21.6.5, §22.2.2): b2b-saas keeps `SETUP_TOOLS` as before the app; an app and a marketplace list their own families' tools. */
 export function setupToolsFor(type: BusinessType): readonly ToolId[] {
   return toolFamiliesFor(type).flatMap((f) => f.tools);
 }

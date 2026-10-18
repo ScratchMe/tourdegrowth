@@ -1,6 +1,6 @@
 import { motionsAllowed } from "./business-type";
 import { migrateToV3 } from "./migrate";
-import { BUSINESS_TYPES } from "./setup-type";
+import { BUSINESS_TYPES, MARKETPLACE_SCREENS_READY } from "./setup-type";
 import type { EngineStrings } from "./strings";
 import { ENGINE_SCHEMA_VERSION, MOTIONS, YEAR_MONTH_PATTERN, type BusinessType, type EngineState } from "./types";
 import { validateEngine } from "./validate";
@@ -132,12 +132,15 @@ function readableMonths(snapshots: unknown[]): boolean {
 const READABLE_VERSIONS: readonly number[] = [1, 2, ENGINE_SCHEMA_VERSION];
 
 /**
- * A setup the board can show at all (§18.3.2, §21.6.3): a known type, and at
- * least one way of selling ticked, every ticked one being one the type
- * allows (a consumer app sells self-serve only). Refused rather than opened
- * with errors — there would be nothing to draw, and « Remplacer » would
- * replace an engine with an empty one. The app's monetization is not read
- * here: an app without one opens, and the validator says so.
+ * A setup the board can show at all (§18.3.2, §21.6.3, §22.3): a known type, and
+ * at least one way of selling ticked, every ticked one being one the type
+ * allows (a consumer app sells self-serve only) — a marketplace is the reverse,
+ * it ticks none, its motion being derived, and it opens only once its screens
+ * exist (`MARKETPLACE_SCREENS_READY`): until then its file gets the refusal of a
+ * file that sells nothing. Refused rather than opened with errors — there would
+ * be nothing to draw, and « Remplacer » would replace an engine with an empty
+ * one. The app's monetization is not read here: an app without one opens, and
+ * the validator says so.
  */
 function sellsSomehow(state: EngineState): boolean {
   const setup = state.setup as unknown as Record<string, unknown>;
@@ -146,6 +149,7 @@ function sellsSomehow(state: EngineState): boolean {
   if (typeof motions !== "object" || motions === null) return false;
   const allowed = motionsAllowed(setup.type as BusinessType);
   const ticked = MOTIONS.filter((motion) => motions[motion] === true);
+  if (setup.type === "marketplace") return MARKETPLACE_SCREENS_READY && ticked.length === 0;
   return ticked.length > 0 && ticked.every((motion) => allowed.includes(motion));
 }
 

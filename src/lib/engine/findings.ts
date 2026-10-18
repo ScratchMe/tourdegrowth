@@ -13,12 +13,12 @@ import type {
   DerivedValue,
   EngineCalcContext,
   EngineDerived,
+  EngineMotion,
   EngineState,
   Finding,
   Interval,
   MetricId,
   MetricValue,
-  Motion,
   MotionDerived,
   Position,
 } from "./types";
@@ -92,7 +92,7 @@ export function findings(state: EngineState, derived: Omit<EngineDerived, "findi
   const snapshot = currentSnapshot(state);
   const out: Finding[] = [];
   const addFor =
-    (motion: Motion) =>
+    (motion: EngineMotion) =>
     (kind: Finding["kind"], metrics: Finding["metrics"], values: Record<string, string> = {}, count?: Interval) =>
       out.push({ kind, motion, rank: RANK[kind], metrics, values, ...(count ? { count } : {}) });
   const missing = (id: MetricId) => statusOf(entryOf(snapshot, id)) === "missing";

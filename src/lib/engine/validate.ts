@@ -260,14 +260,21 @@ function entryErrors(path: string, entry: unknown, shape: MetricShape): string[]
   return errors;
 }
 
+/** The windows a marketplace's setup offers (§22.2.1), and the ones a closed month keeps (§22.3). */
+const FIRST_ORDER_WINDOWS: readonly number[] = [7, 30, 90];
+const REPEAT_WINDOWS: readonly number[] = [60, 90, 180];
+const FIRST_SALE_WINDOWS: readonly number[] = [30, 60, 90];
+
 function setupErrors(setup: unknown): string[] {
   if (!isObj(setup)) return ["setup: missing"];
   const errors: string[] = [];
-  // Decision 3 (§18.1): the type, then how it sells — at least one motion, the hybrid being both.
+  // Decision 3 (§18.1): the type, then how it sells — at least one motion, the hybrid being both. A marketplace ticks none: its motion is derived (§22.3).
   if (!oneOf(BUSINESS_TYPES, setup.type)) errors.push("setup.type: unknown type");
   const motions = setup.motions;
   if (!isObj(motions) || !isBool(motions.plg) || !isBool(motions.slg)) errors.push("setup.motions: not two booleans (plg, slg)");
-  else if (!motions.plg && !motions.slg) errors.push("setup.motions: none ticked");
+  else if (setup.type === "marketplace") {
+    if (motions.plg || motions.slg) errors.push("setup.motions: a marketplace ticks no selling motion");
+  } else if (!motions.plg && !motions.slg) errors.push("setup.motions: none ticked");
   else if (setup.type === "consumer-app" && (!motions.plg || motions.slg)) errors.push("setup.motions: a consumer app sells self-serve only");
   // §21 (C56, C92): a consumer app says what it earns from, three booleans with one at least true; nothing else has the field.
   if (setup.type === "consumer-app") {
@@ -276,6 +283,18 @@ function setupErrors(setup: unknown): string[] {
       errors.push("setup.monetization: not three booleans, one at least true");
     }
   } else if (setup.monetization !== undefined) errors.push("setup.monetization: only for a consumer app");
+  // §22.3 (C64, C65): a marketplace's own fields, all optional; nothing else has them.
+  if (setup.type === "marketplace") {
+    if (setup.offering !== undefined && !oneOf(["products", "services"], setup.offering)) errors.push("setup.offering: not products or services");
+    if (setup.sellerSubscriptions !== undefined && !isBool(setup.sellerSubscriptions)) errors.push("setup.sellerSubscriptions: not a boolean");
+    if (setup.firstOrderWindowDays !== undefined && !FIRST_ORDER_WINDOWS.includes(setup.firstOrderWindowDays as number)) errors.push("setup.firstOrderWindowDays: not 7, 30 or 90");
+    if (setup.repeatWindowDays !== undefined && !REPEAT_WINDOWS.includes(setup.repeatWindowDays as number)) errors.push("setup.repeatWindowDays: not 60, 90 or 180");
+    if (setup.firstSaleWindowDays !== undefined && !FIRST_SALE_WINDOWS.includes(setup.firstSaleWindowDays as number)) errors.push("setup.firstSaleWindowDays: not 30, 60 or 90");
+  } else {
+    for (const field of ["offering", "sellerSubscriptions", "firstOrderWindowDays", "repeatWindowDays", "firstSaleWindowDays"]) {
+      if (setup[field] !== undefined) errors.push(`setup.${field}: only a marketplace has one`);
+    }
+  }
   if (!oneOf(CURRENCIES, setup.currency)) errors.push("setup.currency: unknown currency");
   if (![7, 14, 30].includes(setup.activationWindowDays as number)) errors.push("setup.activationWindowDays: not 7, 14 or 30");
   if (![30, 60, 90].includes(setup.paidWindowDays as number)) errors.push("setup.paidWindowDays: not 30, 60 or 90");
@@ -324,7 +343,11 @@ function snapshotErrors(path: string, snapshot: unknown): string[] {
       ![7, 14, 30].includes(w.activationWindowDays as number) ||
       ![30, 60, 90].includes(w.paidWindowDays as number) ||
       ![30, 60, 90].includes(w.qualificationWindowDays as number) ||
-      ![30, 60, 90].includes(w.goLiveWindowDays as number)
+      ![30, 60, 90].includes(w.goLiveWindowDays as number) ||
+      // A marketplace's three (§22.3): absent, or in their lists.
+      (w.firstOrderWindowDays !== undefined && !FIRST_ORDER_WINDOWS.includes(w.firstOrderWindowDays as number)) ||
+      (w.repeatWindowDays !== undefined && !REPEAT_WINDOWS.includes(w.repeatWindowDays as number)) ||
+      (w.firstSaleWindowDays !== undefined && !FIRST_SALE_WINDOWS.includes(w.firstSaleWindowDays as number))
     )
       errors.push(`${path}.windows: not the four windows of a setup`);
   }

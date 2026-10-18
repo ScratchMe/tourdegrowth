@@ -120,7 +120,7 @@ describe("validateEngine — the v2 setup and the sales-assisted numbers (engine
     const s = fullState();
     expect(validateEngine({ ...s, setup: { ...s.setup, motions: { plg: false, slg: false } } })).toEqual(["setup.motions: none ticked"]);
     expect(validateEngine({ ...s, setup: { ...s.setup, motions: { plg: true } as never } })).toEqual(["setup.motions: not two booleans (plg, slg)"]);
-    expect(validateEngine({ ...s, setup: { ...s.setup, type: "marketplace" as never } })).toEqual(["setup.type: unknown type"]);
+    expect(validateEngine({ ...s, setup: { ...s.setup, type: "unknown-type" as never } })).toEqual(["setup.type: unknown type"]);
     expect(validateEngine({ ...s, setup: { ...s.setup, qualificationWindowDays: 45 as never, goLiveWindowDays: 7 as never } })).toEqual([
       "setup.qualificationWindowDays: not 30, 60 or 90",
       "setup.goLiveWindowDays: not 30, 60 or 90",
@@ -348,12 +348,125 @@ describe("validateEngine — the consumer app's setup (engine spec §21.6.3, A22
     const s = fullState();
     const monetization = { subscriptions: true, purchases: false, ads: false };
     expect(validateEngine({ ...s, setup: { ...s.setup, monetization } })).toEqual(["setup.monetization: only for a consumer app"]);
-    expect(validateEngine({ ...s, setup: { ...s.setup, type: "marketplace" as never, monetization } })).toEqual([
+    expect(validateEngine({ ...s, setup: { ...s.setup, type: "unknown-type" as never, monetization } })).toEqual([
       "setup.type: unknown type",
       "setup.monetization: only for a consumer app",
     ]);
-    // The place of the marketplace is still « unknown »: it comes with §22, never with the app.
-    expect(validateEngine({ ...s, setup: { ...s.setup, type: "marketplace" as never } })).toEqual(["setup.type: unknown type"]);
+  });
+});
+
+describe("validateEngine — the marketplace's setup (engine spec §22.3, A23 MKT-0)", () => {
+  // Non-vacuity, measured on 2026-10-18 (each sabotage applied alone, the whole of `src/lib/engine` run, the file
+  // restored; the count is the tests that fall): the marketplace's branch of the motions check put AFTER « none
+  // ticked » falls 10 (6 here, 2 in `io.test.ts`, 1 in `merge.test.ts`, 1 in `series.test.ts` — every valid
+  // marketplace is then refused); no « only a marketplace has one » falls 3 (2 here, 1 in `io.test.ts`); a closed
+  // month's three windows left unchecked falls « a closed month keeps … » alone (1); the repeat window's list
+  // widened by 30 falls that test and « each field of its own is refused outside its list » (2).
+  const market = (extra: Partial<EngineState["setup"]> = {}): EngineState => {
+    const s = fullState();
+    return { ...s, setup: { ...s.setup, type: "marketplace", motions: { plg: false, slg: false }, ...extra } };
+  };
+  const NO_MOTION = "setup.motions: a marketplace ticks no selling motion";
+  const FIELDS = ["offering", "sellerSubscriptions", "firstOrderWindowDays", "repeatWindowDays", "firstSaleWindowDays"] as const;
+
+  it("a marketplace is valid with both boxes unticked — its motion is derived, so « none ticked » is not its refusal", () => {
+    expect(validateEngine(market())).toEqual([]);
+    expect(validateEngine(market({ motions: { plg: false, slg: false } }))).not.toContain("setup.motions: none ticked");
+  });
+
+  it("is valid with and without the sellers' subscriptions, in « services », and at every value its three windows offer", () => {
+    expect(validateEngine(market({ sellerSubscriptions: true }))).toEqual([]);
+    expect(validateEngine(market({ sellerSubscriptions: false }))).toEqual([]);
+    expect(validateEngine(market({ offering: "services" }))).toEqual([]);
+    expect(validateEngine(market({ offering: "products" }))).toEqual([]);
+    for (const days of [7, 30, 90] as const) expect(validateEngine(market({ firstOrderWindowDays: days })), `first order ${days}`).toEqual([]);
+    for (const days of [60, 90, 180] as const) expect(validateEngine(market({ repeatWindowDays: days })), `repeat ${days}`).toEqual([]);
+    for (const days of [30, 60, 90] as const) expect(validateEngine(market({ firstSaleWindowDays: days })), `first sale ${days}`).toEqual([]);
+    expect(validateEngine(market({ offering: "services", sellerSubscriptions: true, firstOrderWindowDays: 7, repeatWindowDays: 180, firstSaleWindowDays: 90 }))).toEqual([]);
+  });
+
+  it("a marketplace that ticks a selling box is refused with one message, the one box or both", () => {
+    for (const motions of [{ plg: true, slg: false }, { plg: false, slg: true }, { plg: true, slg: true }]) {
+      expect(validateEngine(market({ motions })), JSON.stringify(motions)).toEqual([NO_MOTION]);
+    }
+    expect(validateEngine(market({ motions: { plg: true } as never }))).toEqual(["setup.motions: not two booleans (plg, slg)"]);
+  });
+
+  it("each field of its own is refused outside its list, with its own message", () => {
+    expect(validateEngine(market({ offering: "goods" as never }))).toEqual(["setup.offering: not products or services"]);
+    expect(validateEngine(market({ offering: null as never }))).toEqual(["setup.offering: not products or services"]);
+    expect(validateEngine(market({ sellerSubscriptions: "yes" as never }))).toEqual(["setup.sellerSubscriptions: not a boolean"]);
+    expect(validateEngine(market({ sellerSubscriptions: 1 as never }))).toEqual(["setup.sellerSubscriptions: not a boolean"]);
+    expect(validateEngine(market({ firstOrderWindowDays: 14 as never }))).toEqual(["setup.firstOrderWindowDays: not 7, 30 or 90"]);
+    expect(validateEngine(market({ firstOrderWindowDays: 60 as never }))).toEqual(["setup.firstOrderWindowDays: not 7, 30 or 90"]);
+    expect(validateEngine(market({ repeatWindowDays: 30 as never }))).toEqual(["setup.repeatWindowDays: not 60, 90 or 180"]);
+    expect(validateEngine(market({ repeatWindowDays: "90" as never }))).toEqual(["setup.repeatWindowDays: not 60, 90 or 180"]);
+    expect(validateEngine(market({ firstSaleWindowDays: 7 as never }))).toEqual(["setup.firstSaleWindowDays: not 30, 60 or 90"]);
+    expect(validateEngine(market({ firstSaleWindowDays: 180 as never }))).toEqual(["setup.firstSaleWindowDays: not 30, 60 or 90"]);
+  });
+
+  it("says every refusal at once, in the order of the setup, and reads a present `undefined` as absent", () => {
+    expect(
+      validateEngine(
+        market({ motions: { plg: true, slg: false }, offering: "x" as never, sellerSubscriptions: 0 as never, firstOrderWindowDays: 1 as never, repeatWindowDays: 1 as never, firstSaleWindowDays: 1 as never }),
+      ),
+    ).toEqual([
+      NO_MOTION,
+      "setup.offering: not products or services",
+      "setup.sellerSubscriptions: not a boolean",
+      "setup.firstOrderWindowDays: not 7, 30 or 90",
+      "setup.repeatWindowDays: not 60, 90 or 180",
+      "setup.firstSaleWindowDays: not 30, 60 or 90",
+    ]);
+    expect(validateEngine(market({ offering: undefined, sellerSubscriptions: undefined, firstOrderWindowDays: undefined }))).toEqual([]);
+  });
+
+  it("a marketplace with a monetization gets the message every type without one gets — one message, not a second", () => {
+    const monetization = { subscriptions: true, purchases: false, ads: false };
+    expect(validateEngine(market({ monetization }))).toEqual(["setup.monetization: only for a consumer app"]);
+  });
+
+  it("nothing else carries a field of the marketplace: a B2B SaaS and an app are refused each one, in the setup's order", () => {
+    const carried = { offering: "services", sellerSubscriptions: true, firstOrderWindowDays: 7, repeatWindowDays: 180, firstSaleWindowDays: 90 } as const;
+    const refusals = FIELDS.map((field) => `setup.${field}: only a marketplace has one`);
+    const s = fullState();
+    expect(validateEngine({ ...s, setup: { ...s.setup, ...carried } })).toEqual(refusals);
+    const app: EngineState["setup"] = { ...s.setup, type: "consumer-app", monetization: { subscriptions: true, purchases: false, ads: false }, motions: { plg: true, slg: false } };
+    expect(validateEngine({ ...s, setup: { ...app, ...carried } })).toEqual(refusals);
+    // One field at a time, each its own message; the SaaS and the app themselves are as clean as before.
+    for (const field of FIELDS) {
+      expect(validateEngine({ ...s, setup: { ...s.setup, [field]: carried[field] } }), field).toEqual([`setup.${field}: only a marketplace has one`]);
+    }
+    expect(validateEngine(s)).toEqual([]);
+    expect(validateEngine({ ...s, setup: app })).toEqual([]);
+  });
+
+  it("an unknown type that carries a field gets both messages, as one with a monetization does", () => {
+    const s = fullState();
+    expect(validateEngine({ ...s, setup: { ...s.setup, type: "unknown-type" as never, offering: "services" } })).toEqual([
+      "setup.type: unknown type",
+      "setup.offering: only a marketplace has one",
+    ]);
+  });
+
+  it("a closed month keeps the marketplace's three windows with the four: absent, or in their lists", () => {
+    const closed = (windows: Record<string, unknown>): EngineState => {
+      const s = market();
+      s.snapshots[0]!.closedAt = "2026-10-01T08:00:00.000Z";
+      s.snapshots[0]!.windows = { activationWindowDays: 7, paidWindowDays: 30, qualificationWindowDays: 30, goLiveWindowDays: 90, ...windows } as never;
+      s.snapshots.push({ ...structuredClone(s.snapshots[0]!), id: "s-2", referenceMonth: "2026-09", cohortMonth: "2026-08" });
+      delete s.snapshots[1]!.closedAt;
+      delete s.snapshots[1]!.windows;
+      return s;
+    };
+    const REFUSED = ["snapshots[0].windows: not the four windows of a setup"];
+    expect(validateEngine(closed({}))).toEqual([]);
+    expect(validateEngine(closed({ firstOrderWindowDays: 30, repeatWindowDays: 90, firstSaleWindowDays: 60 }))).toEqual([]);
+    expect(validateEngine(closed({ firstOrderWindowDays: 7, repeatWindowDays: 180, firstSaleWindowDays: 30 }))).toEqual([]);
+    expect(validateEngine(closed({ firstOrderWindowDays: 14 })), "first order 14").toEqual(REFUSED);
+    expect(validateEngine(closed({ repeatWindowDays: 30 })), "repeat 30").toEqual(REFUSED);
+    expect(validateEngine(closed({ firstSaleWindowDays: 7 })), "first sale 7").toEqual(REFUSED);
+    expect(validateEngine(closed({ firstSaleWindowDays: null })), "first sale null").toEqual(REFUSED);
   });
 });
 

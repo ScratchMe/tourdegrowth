@@ -50,16 +50,20 @@ export const LEGACY_STORAGE_KEY_V1 = "tdg.engine.v1";
 export const ENGINE_SCHEMA_VERSION = 3 as const;
 
 /**
- * Decision 3 (C4), then §21 (C56-C63, C92): the TYPE of business. The consumer
- * app sells self-serve: the self-serve engine carries its subscriptions, an
- * app layer its in-app purchases, ads and per-install economics (`app.ts`).
- * The marketplace comes later (shown, disabled).
+ * Decision 3 (C4), then §21 (C56-C63, C92) and §22 (C64-C74, C93): the TYPE of
+ * business. The consumer app sells self-serve: the self-serve engine carries
+ * its subscriptions, an app layer its in-app purchases, ads and per-install
+ * economics (`app.ts`). The marketplace has two sides and a motion of its
+ * own, derived from the type and never ticked (`EngineMotion`, §22.1 D1).
  */
-export type BusinessType = "b2b-saas" | "consumer-app"; // later: | "marketplace"
+export type BusinessType = "b2b-saas" | "consumer-app" | "marketplace";
 /** Self-serve (PLG) and sales-assisted (SLG). Both ticked is the hybrid: derived, never stored (§18.2, S1). */
 export type Motion = "plg" | "slg";
 /** The canonical order, the only one: screens, slides, lists. Never sorted by a value (§18.6.4). */
 export const MOTIONS: readonly Motion[] = ["plg", "slg"];
+/** Every motion an engine derives (§22.1 D1): the two the setup ticks, and the marketplace's own — derived from `setup.type`, never stored, never combined. */
+export type EngineMotion = Motion | "mkt";
+export const ENGINE_MOTIONS: readonly EngineMotion[] = ["plg", "slg", "mkt"];
 export type Currency = "EUR" | "USD" | "GBP" | "CHF";
 /** "YYYY-MM", validated by `YEAR_MONTH_PATTERN`. */
 export type YearMonth = string;
@@ -275,6 +279,10 @@ export interface SnapshotWindows {
   paidWindowDays: EngineSetup["paidWindowDays"];
   qualificationWindowDays: EngineSetup["qualificationWindowDays"];
   goLiveWindowDays: EngineSetup["goLiveWindowDays"];
+  /** A marketplace's three (§22.3): written by `windowsOf` for that type only, absent on every other month. */
+  firstOrderWindowDays?: EngineSetup["firstOrderWindowDays"];
+  repeatWindowDays?: EngineSetup["repeatWindowDays"];
+  firstSaleWindowDays?: EngineSetup["firstSaleWindowDays"];
 }
 
 /**
@@ -323,7 +331,7 @@ export type LeverId = PlgLeverId | SlgLeverId | AppLeverId;
 
 export interface EngineSetup {
   type: BusinessType;
-  /** At least one true (validate.ts). Both true is the hybrid — derived, never stored. */
+  /** At least one true (validate.ts), a marketplace excepted: it stores both false, its motion being derived (§22.3). Both true is the hybrid — derived, never stored. */
   motions: Record<Motion, boolean>;
   currency: Currency;
   activationWindowDays: 7 | 14 | 30; // PLG, default 7 — part of act.rate's definition
@@ -353,6 +361,16 @@ export interface EngineSetup {
    * Required when `type` is "consumer-app", absent otherwise (validate.ts).
    */
   monetization?: AppMonetization;
+  /** Marketplace (C65): the words it is read in. Absent = "products". */
+  offering?: "products" | "services";
+  /** Marketplace (C64, D9): sellers pay a subscription. Absent = false. */
+  sellerSubscriptions?: boolean;
+  /** Marketplace: part of mkt.buy.first-order's definition. Absent = 30. */
+  firstOrderWindowDays?: 7 | 30 | 90;
+  /** Marketplace: part of mkt.buy.repeat's definition (a second order within it). Absent = 90. */
+  repeatWindowDays?: 60 | 90 | 180;
+  /** Marketplace: part of mkt.sell.first-sale's and mkt.sell.paid-conversion's definitions. Absent = 60. */
+  firstSaleWindowDays?: 30 | 60 | 90;
 }
 
 /**
@@ -558,6 +576,9 @@ export interface Impact {
   lines: ImpactLine[];
 }
 
+/** The marketplace's two sides (C70): each its diagnosis, its levers, its unit economics. */
+export type MktSide = "demand" | "supply";
+
 export type DiagnosisState = "clear" | "shared" | "level" | "not-enough";
 /**
  * One motion's diagnosis (§6.6, §18.5.2). Its positions carry ONLY that
@@ -567,7 +588,9 @@ export type DiagnosisState = "clear" | "shared" | "level" | "not-enough";
  * hybrid's screens (S3) read either.
  */
 export interface Diagnosis<C extends CandidateId = SelfServeCandidateId> {
-  motion: Motion;
+  motion: EngineMotion;
+  /** Marketplace only: which side this diagnosis is (C70). */
+  side?: MktSide;
   state: DiagnosisState;
   /** clear: 1; shared: the WHOLE group, never capped at two; otherwise []. */
   named: C[];
@@ -752,7 +775,9 @@ export type SanityId =
 export interface SanityCheck {
   id: SanityId;
   /** The motion the check reads; absent for one that reads both (`cac-variants-differ`). */
-  motion?: Motion;
+  motion?: EngineMotion;
+  /** Marketplace only: the side the check reads (C70). */
+  side?: MktSide;
   blocking: boolean;
   metrics: MetricId[];
   /** Placeholders of the message template, already formatted. */
@@ -781,7 +806,9 @@ export type FindingKind =
 export interface Finding {
   kind: FindingKind;
   /** The motion the finding is about (§18.5.8). Never the link: it makes no finding. */
-  motion?: Motion;
+  motion?: EngineMotion;
+  /** Marketplace only: the side the finding is about (C70). */
+  side?: MktSide;
   rank: 1 | 2 | 3 | 4;
   metrics: (MetricId | DerivedId)[];
   /** Placeholders of `findings.*`, already formatted. The sentence never asserts a cause. */
@@ -796,7 +823,7 @@ export type MirrorVerdict = "coherent" | "blind-spot" | "blind-spot-light" | "be
 export interface BridgeRow {
   questionId: string;
   /** In the hybrid, a question bridged in both motions gives one row per motion (§18.4.9). */
-  motion: Motion;
+  motion: EngineMotion;
   metric: MetricId | DerivedId;
   declaredPoints: number;
   declared: TrackingLevel;
@@ -1101,7 +1128,7 @@ export interface SeriesRow {
 }
 
 export interface MotionSeries {
-  motion: Motion;
+  motion: EngineMotion;
   /** Every number of the motion that is a number, in catalogue order — AARRR, never sorted by how far it moved. */
   rows: SeriesRow[];
   /** The stage(s) the month before named, when it named one; `[]` otherwise. */

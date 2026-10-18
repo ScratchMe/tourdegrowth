@@ -1,7 +1,7 @@
 import { CANDIDATE_IDS, METRIC_SHAPES, SLG_CANDIDATE_IDS, SLG_METRIC_SHAPES, shapeOf, shapesOf, type MetricShape } from "./catalog-shape";
 import { defaultReferenceMonth, nextMonth, windowDaysOf } from "./cohort";
 import { comparatorOf, diagnose } from "./diagnose";
-import { isApp } from "./setup-type";
+import { isApp, isMarketplace, mktSetup } from "./setup-type";
 import { MAX_MONTHS } from "./types";
 import type {
   CandidateId,
@@ -49,13 +49,18 @@ export function calendarDay(iso: string): Date {
   return new Date(d.getFullYear(), d.getMonth(), d.getDate());
 }
 
-/** The four windows of a setup — what a month keeps when it is closed. */
+/**
+ * The windows of a setup — what a month keeps when it is closed: the four every setup has, and a marketplace's
+ * three on top (§22.3), written for that type only, so no month of a SaaS or an app carries a key it never had.
+ */
 export function windowsOf(setup: EngineSetup): SnapshotWindows {
+  const { firstOrderWindowDays, repeatWindowDays, firstSaleWindowDays } = mktSetup(setup);
   return {
     activationWindowDays: setup.activationWindowDays,
     paidWindowDays: setup.paidWindowDays,
     qualificationWindowDays: setup.qualificationWindowDays,
     goLiveWindowDays: setup.goLiveWindowDays,
+    ...(isMarketplace(setup) ? { firstOrderWindowDays, repeatWindowDays, firstSaleWindowDays } : {}),
   };
 }
 
