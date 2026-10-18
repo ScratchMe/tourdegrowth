@@ -351,3 +351,64 @@ les leçons et les conventions numérotées, elles, sont restées dans `CLAUDE.m
 **La sonde sur la branche** (run 17 de `verify-live.yml`, cible `gemini`) : **verte**, les trois générations servies par `gemini-3.8-flash`, `finishReason=STOP` partout, accents présents ; EN neutre 20,1 s, FR neutre 13,1 s, FR roast 31,7 s, contre un plafond de 60 s. Troisième échantillon du roast français sous 3.8 : 33,5, 39,0, 31,7 s.
 
 **À savoir.** La sonde imprime désormais « per-attempt ceiling 60s » : sa durée se lit contre ce plafond-là. Si une sonde montre 3.8 au-delà de ~50 s, la question de 3.6 en tête revient.
+
+## A23, MKT-R : la relecture à blanc de §22 contre le code d'après A22 (2026-10-18)
+
+**Pourquoi** : §22 a été écrite et relue contre `9a7733d`, avant A22. A22 a déplacé presque toutes les lignes que ses tables citent. La fiche MKT-R demande de les revérifier avant MKT-0 (prompt H, étape 0).
+
+**Comment** : un sous-agent Sonnet en lecture seule, avec le prompt de la fiche, sur `f78ecde`. Il a travaillé dans une copie jetable sous le scratchpad, supprimée depuis. Il a appliqué les types de MKT-0, MKT-1, MKT-3 et MKT-4 et lancé `tsc` à chaque étape. Il a transcrit les huit lignes de `MKT_EXCLUDED` pour compter les feuilles que la règle de §22.8.3 désigne, et mesuré les 19 entrées de §22.4.4 contre `catalogRules`. Il s'est arrêté sur une limite de session après avoir écrit son rapport entier, gardé hors du dépôt. Je l'ai lu en entier, et j'ai revérifié contre le code les constats qui changent le texte (le `throw` de `shapesOf`, les trois tests sur `"ret.logo-churn"`, l'ordre de `validate.ts`, `offeredBy`, `EXTRA_SLIDES`, `DeckProse`, `SlideContext`, `buildEvolutionSlide`).
+
+**Trouvé** : 51 constats, 6 bloquants, 30 lacunes, 15 détails. Les six bloquants :
+- `shapesOf` lève sur les deux cases fausses avant toute branche ;
+- deux chaînes de §22.4.4 dépassent leur plafond (144 pour 140, 47 pour 40) ;
+- trois fonctions qui écrivent du texte testent l'id littéral du churn, invisibles pour `tsc` ;
+- les Réglages n'avaient pas de copie pour les trois fenêtres de la place de marché ;
+- un titre de slide se résout au rendu avec un seul jeu de mots : les mots d'un côté ne peuvent pas se choisir à la construction ;
+- les ids des slides de la place de marché iraient dans `SLIDE_ORDER`, ce qui change le deck du SaaS, et seraient refusés par `validate.ts` à la réouverture.
+
+Les lacunes sont surtout des fichiers absents des rubriques (`EngineWorkbench.tsx` porte les types de `typeStrings` et `typeCatalogs`, `coverage.ts`, `scenario-view.ts`, `engine-props.test.ts`, `app.test.ts`…) et des signatures non données. Exemples : `stringsFor` et son cache, `SetupCard`, `mkt-titles.ts`, `marketplaceChecks`, `ENGINE_MARKET_STAGES` en toutes lettres.
+
+**Les mesures** :
+- `tsc` donne 4, 19 puis 37 erreurs, dans 3, 14 puis 19 fichiers. On est loin de l'arrêt à 40.
+- La règle de §22.8.3 désigne **103 feuilles pour la demande et 128 pour l'offre**. Le « ~125 pour les deux côtés » de la spécification était le compte de l'offre.
+- `CLAUDE.md` est à 39 661 caractères pour 40 000 : 339 de marge.
+
+**Décidé par Antoine, sur la reco** :
+- **C105** : six feuilles qui parlaient SaaS sur les écrans d'une place de marché sont réécrites, en copie neuve « à relire ». Ce sont les quatre aides de la carte de réglage, plus les définitions de cohorte et de fenêtre (« ARPA », « un client », « s'activer en 7 jours, payer en 30 »).
+- **C106** : la métrique de réussite de la demande du deck propose les candidats des deux côtés, sans classement.
+
+**Choisi par moi** (le comment, pas le produit) :
+- Les six feuilles de C105 vont dans un calque commun, `products.common`, appliqué à tous les jeux de la place de marché, le neutre compris. Ainsi aucun lecteur ne change.
+- `MKT_OVERLAY_SKIPPED` devient un record par côté, pré-rempli de quatre noms avec leur raison.
+- Le message de `monetization` reste celui d'aujourd'hui.
+- `DeckSlide.motion` attend MKT-8.
+- La ligne d'aperçu de l'import reste générique.
+- Les deux sortes de lignes du deck s'appellent `streams` et `sideFunnel`.
+- Les deux « Et si » d'ensemble s'appellent `mktScenarioDemand` et `mktScenarioSupply`.
+
+**Les deux chaînes raccourcies** :
+- La formule de la part recommandée devient « inscrits acheteurs via un utilisateur (…) ÷ inscrits acheteurs de la cohorte » (136 caractères).
+- La variante `requests` devient « Demandes envoyées : réservation, devis… » (39 caractères) et garde les mots de C99. Pas de parenthèses : `{variant}` s'imprime déjà entre parenthèses.
+
+**Copie neuve** dans §22.8.5 : les six feuilles du calque commun, et quatre avertissements des Réglages (`settings.firstOrderReset`, `repeatReset`, `firstSaleReset`, et `firstSalePaidReset`, avec les abonnements). Toutes partiront « à relire » au bon à tirer A23.d.
+
+**Le relecteur de copie** a trouvé huit corrections, toutes appliquées :
+- des parenthèses imbriquées ;
+- « its cost » pour une personne ;
+- le point 2 du test de §22.8.3, qui aurait rougi sur le calque commun ;
+- `firstSalePaidReset`, désignée mais passée nulle part ;
+- un paragraphe de §22.6.1 resté sur une première version ;
+- le quatrième avertissement, oublié ;
+- l'ordre « inscrits acheteurs » ;
+- « commandes et revenu net des deux côtés ».
+
+**À regarder au bon à tirer A23.d** :
+- `setup.referenceMonthHint` ne nomme pas les abonnements des vendeurs.
+- `terms.cohort.definition` ne cite pas la conversion en abonné. Elle se lit aussi sur la cohorte quand les vendeurs paient, mais n'existe pas sans abonnements.
+
+**Changé** :
+- `docs/engine/place-de-marche.md` : tout §22. Les tables de §22.2.5 sont relevées sur `f78ecde`, avec une table neuve pour ce que `tsc` signale à MKT-0. On y trouve aussi le code exact de `validate.ts`, `io.ts`, `merge.ts`, `windowsOf`, `shapesOf`, `verdictOf`, `withSettings`, et l'analytique. Les fiches MKT-0 à MKT-8 sont mises à jour, et la ligne « Fait » est ajoutée à MKT-R.
+- `CHANTIERS.md` : la ligne MKT-R cochée, le prompt H, la section C.
+- `docs/decisions.md` : C105 et C106.
+
+Documentation seule, rien sous `src/`.
