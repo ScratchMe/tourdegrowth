@@ -754,18 +754,17 @@ l'événement). L'ordre du tableau est l'ordre de `MKT_METRIC_SHAPES`.
   `EN.typeCatalogs.marketplace.metrics` (et de même en français).
 - `unitInput` (`engine-copy.ts`) gagne les entrées des six calculés (douze ids) qui n'y
   sont pas (le test les exige) : `mkt.rev.frequency` « la fréquence de
-  commande » / "order frequency" ; `mkt.rev.aov` « le panier moyen » / "the
-  average order value" ; `mkt.rev.take-rate` « la commission » / "the take
-  rate" ; `mkt.rev.gross-margin` « la marge sur le revenu net » / "the margin on
-  net revenue" ; `mkt.buy.churn` « le churn des acheteurs » / "buyer churn" ;
-  `mkt.buy.cac` « le CAC acheteur » / "the buyer CAC" ; `mkt.sell.arpa` « le
+  commande » / "order frequency" ; `mkt.rev.aov` « le panier moyen » / "average order value" ; `mkt.rev.take-rate` « la commission » / "take rate" ; `mkt.rev.gross-margin` « la marge sur le revenu net » / "margin on net revenue" ; `mkt.buy.churn` « le churn des acheteurs » / "buyer churn" ;
+  `mkt.buy.cac` « le CAC acheteur » / "buyer CAC" ; `mkt.sell.arpa` « le
   revenu par vendeur abonné » / "revenue per paid seller" ;
-  `mkt.sell.gross-margin` « la marge sur les abonnements vendeurs » / "the
-  margin on seller subscriptions" ; `mkt.sell.paid-churn` « le churn des
+  `mkt.sell.gross-margin` « la marge sur les abonnements vendeurs » / "margin on seller subscriptions" ; `mkt.sell.paid-churn` « le churn des
   vendeurs abonnés » / "paid seller churn" ; `mkt.sell.cac` « le coût d'un
-  vendeur actif » / "the cost per active seller" ; `mkt.sell.first-sale` « la
-  première vente » / "the first sale" ; `mkt.sell.paid-conversion` « la
-  conversion en vendeur abonné » / "seller subscription conversion".
+  vendeur actif » / "cost per active seller" ; `mkt.sell.first-sale` « la
+  première vente » / "first sale" ; `mkt.sell.paid-conversion` « la
+  conversion en vendeur abonné » / "seller subscription conversion". En
+  anglais, aucun article, comme les treize entrées du SaaS et de l'app : elles
+  s'impriment après "Missing: {input}" et se lient entre elles (« le » du
+  français est exigé par `engine-copy.test.ts:92`, l'anglais non).
 
 #### 22.4.4 La prose (`ENGINE_CATALOG`, `ENGINE_DERIVED_CATALOG`)
 
