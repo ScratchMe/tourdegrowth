@@ -1,7 +1,7 @@
 import type { Pillar } from "@/lib/scoring/pillars";
 import type { GlossaryTermId } from "@/content/glossary-terms"; // type only: erased at compile time
 import type { AppMonetization } from "./app-model"; // type only: app-model.ts imports this module
-import { isApp, monetizationOf } from "./setup-type"; // the leaf, never business-type.ts (§21.2.2)
+import { isApp, isMarketplace, monetizationOf, mktSetup } from "./setup-type"; // the leaf, never business-type.ts (§21.2.2)
 import type {
   AppDerivedId,
   AppLeverId,
@@ -9,11 +9,14 @@ import type {
   CandidateId,
   DerivedId,
   Effort,
+  EngineMotion,
   EngineSetup,
   LeverId,
   LinkMetricId,
   MetricId,
   MetricValue,
+  MktDerivedId,
+  MktMetricId,
   Motion,
   PlgCandidateId,
   PlgDerivedId,
@@ -90,15 +93,15 @@ export interface MetricShape<Id extends MetricId = MetricId> {
   /**
    * The window that is part of the definition: the setup's activation or
    * payment window (self-serve), its qualification or go-live window
-   * (sales-assisted, §18.1.1), or a fixed 30 days.
+   * (sales-assisted, §18.1.1), a marketplace's first-order, repeat or first-sale window (§22.2.1), or a fixed 30 days.
    */
-  window?: "activation" | "paid" | "qualification" | "go-live" | 30;
+  window?: "activation" | "paid" | "qualification" | "go-live" | "first-order" | "repeat" | "first-sale" | 30;
   /**
    * Where the number lives (§18.2.1): a motion's own catalogue, the hybrid's
-   * link, or a consumer app's own numbers (§21.4.1). No number is shared by
-   * both motions since C25 Q4 (one gross margin per motion).
+   * link, a consumer app's own numbers (§21.4.1) or a marketplace's (§22.4.1).
+   * No number is shared by both motions since C25 Q4 (one gross margin per motion).
    */
-  scope: "plg" | "slg" | "link" | "app";
+  scope: "plg" | "slg" | "link" | "app" | "mkt";
   /**
    * Months the number covers: 1 for self-serve, 3 for all of sales-assisted
    * (C25 Q2: a month counts too few deals), 12 for the 12-month NRR.
@@ -106,6 +109,10 @@ export interface MetricShape<Id extends MetricId = MetricId> {
   span: 1 | 3 | 12;
   /** Out of coverage, never a finding, never a candidate: the link (§18.2.2, S10). */
   optional?: true;
+  /** A marketplace's number, by the side it belongs to (§22.2.3): the label of the list of numbers. `match` is neither side's alone. */
+  side?: "buy" | "sell" | "match";
+  /** One of the five numbers the sellers' subscriptions add (D9, C93): shown only when the setup ticks that box. */
+  sellerSubscription?: true;
   effort: Effort;
   defaultRole: RoleId;
   sources: readonly ToolId[];
@@ -130,6 +137,8 @@ export interface DerivedShape<Id extends DerivedId = DerivedId> {
   glossary: GlossaryTermId;
   tourQuestionId?: string;
   benchmark?: Benchmark;
+  /** One of a marketplace's three figures of a paid seller: shown only when the setup ticks the sellers' subscriptions (§22.4.2). */
+  sellerSubscription?: true;
 }
 
 /**
@@ -817,8 +826,329 @@ export const APP_METRIC_SHAPES: readonly MetricShape<AppMetricId>[] = ([
   },
 ] satisfies readonly Omit<MetricShape<AppMetricId>, "scope" | "span">[]).map((shape) => ({ ...shape, scope: "app" as const, span: 1 as const }));
 
-/** Every number the engine knows, in catalogue order: self-serve, sales-assisted, the link, the consumer app's. */
-export const ALL_METRIC_SHAPES: readonly MetricShape[] = [...METRIC_SHAPES, ...SLG_METRIC_SHAPES, ...LINK_METRIC_SHAPES, ...APP_METRIC_SHAPES];
+const MKT_CAC_VARIANTS = ["media-only", "plus-team", "fully-loaded"] as const;
+
+/**
+ * The marketplace's nineteen numbers (engine spec §22.4.1, A23 MKT-1), two sides in one list: the first draft's
+ * fourteen, then the five of the sellers' subscriptions (`sellerSubscription`, shown only when the setup ticks the
+ * box, D9). Each stage's ★ carries the column or the row of its stage in its side's funnel: one per stage for the
+ * demand, and for the supply the first sale, the sellers' churn, and with the subscriptions the conversion to a paid
+ * seller (C95). A ★ changes neither a number's effort, nor the start card's sentence, nor a diagnosis. None carries a
+ * reference (D12, C73): the prose says why. Order = the order of the spec's table; `shapesOf` keeps it.
+ */
+export const MKT_METRIC_SHAPES: readonly MetricShape<MktMetricId>[] = ([
+  // --- Acquisition -----------------------------------------------------------
+  {
+    id: "mkt.buy.signup-rate",
+    stage: "acquisition",
+    primary: true,
+    side: "buy",
+    valueKinds: ["ratio", "rate"],
+    unit: "percent",
+    bounded: true,
+    flow: "month",
+    effort: "self-5min",
+    defaultRole: "marketing",
+    sources: ["ga4", "mixpanel", "amplitude", "product-db"],
+    glossary: "acquisition",
+    defaultRepair: "afternoon",
+  },
+  {
+    id: "mkt.buy.cac",
+    stage: "acquisition",
+    primary: false,
+    side: "buy",
+    valueKinds: ["ratio", "amount"],
+    unit: "money",
+    bounded: false,
+    flow: "month",
+    effort: "ask",
+    defaultRole: "finance",
+    sources: ["google-ads", "meta-ads", "product-db"],
+    glossary: "cac",
+    tourQuestionId: "acq-3",
+    defaultRepair: "meeting",
+    variants: MKT_CAC_VARIANTS,
+  },
+  {
+    id: "mkt.sell.cac",
+    stage: "acquisition",
+    primary: false,
+    side: "sell",
+    valueKinds: ["ratio", "amount"],
+    unit: "money",
+    bounded: false,
+    flow: "month",
+    effort: "ask",
+    defaultRole: "finance",
+    sources: ["hubspot", "spreadsheet", "linkedin-ads"],
+    glossary: "cac",
+    defaultRepair: "meeting",
+    variants: MKT_CAC_VARIANTS,
+  },
+  {
+    id: "mkt.sell.signup-rate",
+    stage: "acquisition",
+    primary: false,
+    side: "sell",
+    sellerSubscription: true,
+    valueKinds: ["ratio", "rate"],
+    unit: "percent",
+    bounded: true,
+    flow: "month",
+    effort: "self-5min",
+    defaultRole: "marketing",
+    sources: ["ga4", "mixpanel", "amplitude", "product-db"],
+    glossary: "acquisition",
+    defaultRepair: "afternoon",
+  },
+  // --- Activation ------------------------------------------------------------
+  {
+    id: "mkt.buy.first-order",
+    stage: "activation",
+    primary: true,
+    side: "buy",
+    valueKinds: ["ratio", "rate"],
+    unit: "percent",
+    bounded: true,
+    flow: "cohort",
+    window: "first-order",
+    effort: "self-1h",
+    defaultRole: "data",
+    sources: ["product-db", "amplitude", "mixpanel"],
+    glossary: "activation",
+    tourQuestionId: "act-2",
+    defaultRepair: "sprint",
+  },
+  {
+    id: "mkt.sell.first-sale",
+    stage: "activation",
+    primary: true,
+    side: "sell",
+    valueKinds: ["ratio", "rate"],
+    unit: "percent",
+    bounded: true,
+    flow: "cohort",
+    window: "first-sale",
+    effort: "self-1h",
+    defaultRole: "data",
+    sources: ["product-db"],
+    glossary: "activation",
+    defaultRepair: "sprint",
+  },
+  {
+    id: "mkt.liq.fill-rate",
+    stage: "activation",
+    primary: false,
+    side: "match",
+    valueKinds: ["ratio", "rate"],
+    unit: "percent",
+    bounded: true,
+    flow: "month",
+    effort: "ask",
+    defaultRole: "data",
+    sources: ["product-db", "amplitude", "mixpanel"],
+    glossary: "activation",
+    defaultRepair: "sprint",
+    variants: ["requests", "searches"],
+  },
+  // --- Retention -------------------------------------------------------------
+  {
+    id: "mkt.buy.repeat",
+    stage: "retention",
+    primary: true,
+    side: "buy",
+    valueKinds: ["ratio", "rate"],
+    unit: "percent",
+    bounded: true,
+    flow: "cohort",
+    window: "repeat",
+    effort: "self-1h",
+    defaultRole: "data",
+    sources: ["product-db", "amplitude"],
+    glossary: "retention",
+    tourQuestionId: "ret-1",
+    defaultRepair: "sprint",
+  },
+  {
+    id: "mkt.buy.churn",
+    stage: "retention",
+    primary: false,
+    side: "buy",
+    valueKinds: ["ratio", "rate"],
+    unit: "percent",
+    bounded: true,
+    flow: "month",
+    effort: "ask",
+    defaultRole: "data",
+    sources: ["product-db"],
+    glossary: "churn",
+    defaultRepair: "afternoon",
+  },
+  {
+    id: "mkt.sell.churn",
+    stage: "retention",
+    primary: true,
+    side: "sell",
+    valueKinds: ["ratio", "rate"],
+    unit: "percent",
+    bounded: true,
+    flow: "month",
+    effort: "ask",
+    defaultRole: "data",
+    sources: ["product-db"],
+    glossary: "churn",
+    defaultRepair: "afternoon",
+  },
+  {
+    id: "mkt.sell.paid-churn",
+    stage: "retention",
+    primary: false,
+    side: "sell",
+    sellerSubscription: true,
+    valueKinds: ["ratio", "rate"],
+    unit: "percent",
+    bounded: true,
+    flow: "month",
+    effort: "self-5min",
+    defaultRole: "finance",
+    sources: ["stripe", "product-db"],
+    glossary: "churn",
+    defaultRepair: "afternoon",
+  },
+  // --- Referral --------------------------------------------------------------
+  {
+    id: "mkt.buy.referred-share",
+    stage: "referral",
+    primary: true,
+    side: "buy",
+    valueKinds: ["ratio", "rate"],
+    unit: "percent",
+    bounded: true,
+    flow: "cohort",
+    effort: "self-1h",
+    defaultRole: "marketing",
+    sources: ["product-db", "hubspot"],
+    glossary: "referral",
+    defaultRepair: "sprint",
+  },
+  // --- Revenue ---------------------------------------------------------------
+  {
+    id: "mkt.rev.take-rate",
+    stage: "revenue",
+    primary: true,
+    side: "match",
+    valueKinds: ["ratio", "rate"],
+    unit: "percent",
+    amounts: true,
+    bounded: true,
+    flow: "month",
+    effort: "self-5min",
+    defaultRole: "finance",
+    sources: ["stripe", "spreadsheet", "product-db"],
+    glossary: "revenue",
+    defaultRepair: "meeting",
+  },
+  {
+    id: "mkt.rev.aov",
+    stage: "revenue",
+    primary: false,
+    side: "buy",
+    valueKinds: ["ratio", "amount"],
+    unit: "money",
+    bounded: false,
+    flow: "month",
+    effort: "self-5min",
+    defaultRole: "finance",
+    sources: ["product-db", "stripe"],
+    glossary: "arpu",
+    defaultRepair: "meeting",
+  },
+  {
+    id: "mkt.rev.frequency",
+    stage: "revenue",
+    primary: false,
+    side: "buy",
+    valueKinds: ["ratio"],
+    unit: "ratio",
+    bounded: false,
+    flow: "month",
+    effort: "self-1h",
+    defaultRole: "data",
+    sources: ["product-db"],
+    glossary: "retention",
+    defaultRepair: "afternoon",
+  },
+  {
+    id: "mkt.rev.gross-margin",
+    stage: "revenue",
+    primary: false,
+    side: "match",
+    valueKinds: ["ratio", "rate"],
+    unit: "percent",
+    amounts: true,
+    bounded: true,
+    flow: "month",
+    effort: "ask",
+    defaultRole: "finance",
+    sources: ["spreadsheet"],
+    glossary: "cac-payback",
+    defaultRepair: "meeting",
+  },
+  {
+    id: "mkt.sell.paid-conversion",
+    stage: "revenue",
+    primary: true,
+    side: "sell",
+    sellerSubscription: true,
+    valueKinds: ["ratio", "rate"],
+    unit: "percent",
+    bounded: true,
+    flow: "cohort",
+    window: "first-sale",
+    effort: "self-1h",
+    defaultRole: "data",
+    sources: ["product-db", "stripe"],
+    glossary: "revenue",
+    defaultRepair: "sprint",
+  },
+  {
+    id: "mkt.sell.arpa",
+    stage: "revenue",
+    primary: false,
+    side: "sell",
+    sellerSubscription: true,
+    valueKinds: ["ratio", "amount"],
+    unit: "money",
+    bounded: false,
+    flow: "month",
+    effort: "self-5min",
+    defaultRole: "finance",
+    sources: ["stripe", "product-db"],
+    glossary: "arpu",
+    defaultRepair: "meeting",
+  },
+  {
+    id: "mkt.sell.gross-margin",
+    stage: "revenue",
+    primary: false,
+    side: "sell",
+    sellerSubscription: true,
+    valueKinds: ["ratio", "rate"],
+    unit: "percent",
+    amounts: true,
+    bounded: true,
+    flow: "month",
+    effort: "ask",
+    defaultRole: "finance",
+    sources: ["spreadsheet"],
+    glossary: "cac-payback",
+    defaultRepair: "meeting",
+  },
+] satisfies readonly Omit<MetricShape<MktMetricId>, "scope" | "span">[]).map((shape) => ({ ...shape, scope: "mkt" as const, span: 1 as const }));
+
+/** Every number the engine knows, in catalogue order: self-serve, sales-assisted, the link, the consumer app's, the marketplace's. */
+export const ALL_METRIC_SHAPES: readonly MetricShape[] = [...METRIC_SHAPES, ...SLG_METRIC_SHAPES, ...LINK_METRIC_SHAPES, ...APP_METRIC_SHAPES, ...MKT_METRIC_SHAPES];
 
 /** The two self-serve numbers an app never shows (§21.1 D2), replaced by `app.acq.cpi` and `app.rev.gross-margin`. */
 export const APP_REPLACED: readonly PlgMetricId[] = ["acq.cac", "rev.gross-margin"];
@@ -852,20 +1182,29 @@ export function appShapeShown(id: AppMetricId, m: AppMonetization): boolean {
   }
 }
 
+/** A marketplace's numbers (§22.2.3): all nineteen, minus the five of the sellers' subscriptions unless the setup ticks that box (D9). */
+function mktShapes(setup: SetupShapes): MetricShape[] {
+  const { sellerSubscriptions } = mktSetup(setup);
+  return MKT_METRIC_SHAPES.filter((s) => sellerSubscriptions || !s.sellerSubscription);
+}
+
 /**
- * The numbers a setup shows, in catalogue order (§18.2.1, §21.4.1). A SaaS:
+ * The numbers a setup shows, in catalogue order (§18.2.1, §21.4.1, §22.2.3). A SaaS:
  * self-serve's if ticked, sales-assisted's if ticked, the link only in the
  * hybrid. An app: the self-serve numbers minus `APP_REPLACED`, minus
  * `SUBSCRIPTION_METRICS` when subscriptions are unticked, then the app's
- * numbers its monetization calls for (`appShapeShown`). Throws on no motion —
- * `validate.ts` refuses such a setup before anything asks.
+ * numbers its monetization calls for (`appShapeShown`). A marketplace: its own
+ * nineteen (fourteen without the sellers' subscriptions), none of the others'.
+ * Throws on no motion — `validate.ts` refuses such a setup before anything asks;
+ * the marketplace ticks none, so its branch comes first.
  */
 export function shapesOf(setup: SetupShapes): MetricShape[] {
+  if (isMarketplace(setup)) return mktShapes(setup);
   const { motions } = setup;
   if (!motions.plg && !motions.slg) throw new Error("A setup sells at least one way (motions all false)");
   const app = monetizationOf(setup);
   return ALL_METRIC_SHAPES.filter((s) => {
-    if (app === null) return s.scope === "app" ? false : s.scope === "link" ? motions.plg && motions.slg : motions[s.scope];
+    if (app === null) return s.scope === "app" || s.scope === "mkt" ? false : s.scope === "link" ? motions.plg && motions.slg : motions[s.scope];
     if (!motions.plg) return false;
     if (s.scope === "app") return appShapeShown(s.id as AppMetricId, app);
     if (s.scope !== "plg") return false;
@@ -971,22 +1310,47 @@ export const APP_DERIVED_SHAPES: readonly DerivedShape<AppDerivedId>[] = [
   { id: "app.rev.value-to-cost", stage: "revenue", inputs: [...APP_VALUE_INPUTS, "app.acq.cpi"], glossary: "ltv" },
 ];
 
-export const ALL_DERIVED_SHAPES: readonly DerivedShape[] = [...DERIVED_SHAPES, ...SLG_DERIVED_SHAPES, ...APP_DERIVED_SHAPES];
+/**
+ * The marketplace's six computed figures (§22.4.2): a buyer's three (the revenue of an active buyer: frequency × average
+ * order × take rate × margin, over its churn), then a paid seller's three (the subscription × margin, over its churn;
+ * its cost is the one of an active seller, scaled by `paidSellerCac`, D8). No reference, no Tour question but `rev-2`.
+ * `ltv-cac` lists its payback's inputs and the churn, the way the SaaS's does.
+ */
+const MKT_BUYER_LTV_INPUTS: readonly MetricId[] = ["mkt.rev.frequency", "mkt.rev.aov", "mkt.rev.take-rate", "mkt.rev.gross-margin", "mkt.buy.churn"];
+const MKT_BUYER_PAYBACK_INPUTS: readonly MetricId[] = ["mkt.buy.cac", "mkt.rev.frequency", "mkt.rev.aov", "mkt.rev.take-rate", "mkt.rev.gross-margin"];
+const MKT_SELLER_LTV_INPUTS: readonly MetricId[] = ["mkt.sell.arpa", "mkt.sell.gross-margin", "mkt.sell.paid-churn"];
+const MKT_SELLER_PAYBACK_INPUTS: readonly MetricId[] = ["mkt.sell.cac", "mkt.sell.first-sale", "mkt.sell.paid-conversion", "mkt.sell.arpa", "mkt.sell.gross-margin"];
+export const MKT_DERIVED_SHAPES: readonly DerivedShape<MktDerivedId>[] = [
+  { id: "mkt.rev.ltv", stage: "revenue", inputs: MKT_BUYER_LTV_INPUTS, glossary: "ltv", tourQuestionId: "rev-2" },
+  { id: "mkt.rev.cac-payback", stage: "revenue", inputs: MKT_BUYER_PAYBACK_INPUTS, glossary: "cac-payback" },
+  { id: "mkt.rev.ltv-cac", stage: "revenue", inputs: [...MKT_BUYER_PAYBACK_INPUTS, "mkt.buy.churn"], glossary: "ltv" },
+  { id: "mkt.sell.ltv", stage: "revenue", inputs: MKT_SELLER_LTV_INPUTS, glossary: "ltv", sellerSubscription: true },
+  { id: "mkt.sell.cac-payback", stage: "revenue", inputs: MKT_SELLER_PAYBACK_INPUTS, glossary: "cac-payback", sellerSubscription: true },
+  { id: "mkt.sell.ltv-cac", stage: "revenue", inputs: [...MKT_SELLER_PAYBACK_INPUTS, "mkt.sell.paid-churn"], glossary: "ltv", sellerSubscription: true },
+];
+
+export const ALL_DERIVED_SHAPES: readonly DerivedShape[] = [...DERIVED_SHAPES, ...SLG_DERIVED_SHAPES, ...APP_DERIVED_SHAPES, ...MKT_DERIVED_SHAPES];
 
 /**
  * The ids « il manque » writes with `unitInput` (engine-copy.ts): the inputs
  * of the self-serve and sales-assisted computed figures, plus the app-only
- * ones of the app's. `ret.d30` and `rev.paid-conversion` stay out although the
- * app's figures read them: in the SaaS they are named without an article, and
- * must go on being (§21.4.5).
+ * ones of the app's and the marketplace's twelve. `ret.d30` and
+ * `rev.paid-conversion` stay out although the app's figures read them: in the
+ * SaaS they are named without an article, and must go on being (§21.4.5).
  */
 export const UNIT_INPUT_IDS: ReadonlySet<MetricId> = new Set<MetricId>([
   ...[...DERIVED_SHAPES, ...SLG_DERIVED_SHAPES].flatMap((s) => s.inputs),
   ...APP_DERIVED_SHAPES.flatMap((s) => s.inputs).filter((id) => id.startsWith("app.")),
+  ...MKT_DERIVED_SHAPES.flatMap((s) => s.inputs).filter((id) => id.startsWith("mkt.")),
 ]);
 
-/** The derived figures a setup shows: a SaaS's as today (self-serve's, then sales-assisted's); an app's: `rev.grr` and `rev.nrr` with subscriptions, then `APP_DERIVED_SHAPES`. */
+/**
+ * The derived figures a setup shows: a SaaS's as today (self-serve's, then sales-assisted's); an app's: `rev.grr` and
+ * `rev.nrr` with subscriptions, then `APP_DERIVED_SHAPES`; a marketplace's: a buyer's three, then a paid seller's three
+ * with the sellers' subscriptions (§22.2.3).
+ */
 export function derivedShapesOf(setup: SetupShapes): DerivedShape[] {
+  if (isMarketplace(setup)) return MKT_DERIVED_SHAPES.filter((s) => mktSetup(setup).sellerSubscriptions || !s.sellerSubscription);
   if (isApp(setup)) {
     const monetization = monetizationOf(setup);
     const subscriptionShapes = monetization?.subscriptions ? DERIVED_SHAPES.filter((s) => s.id === "rev.grr" || s.id === "rev.nrr") : [];
@@ -1049,6 +1413,23 @@ export const APP_LEVER_IDS: readonly AppLeverId[] = [
   "app.rev.commission",
 ];
 
+/**
+ * The marketplace's levers, one list per side (§22.4.3, C70): the demand's eight, then the three the sellers'
+ * subscriptions add. Ids of `MKT_METRIC_SHAPES` for now: `LeverId` widens to them with MKT-3 (§22.2.1, a type that
+ * widens a `Record<LeverId, …>` comes with its entries), and `ALL_LEVER_IDS` takes them in then.
+ */
+export const MKT_DEMAND_LEVER_IDS: readonly MktMetricId[] = [
+  "mkt.buy.signup-rate",
+  "mkt.buy.referred-share",
+  "mkt.buy.first-order",
+  "mkt.liq.fill-rate",
+  "mkt.buy.churn",
+  "mkt.rev.frequency",
+  "mkt.rev.aov",
+  "mkt.rev.take-rate",
+];
+export const MKT_SUPPLY_LEVER_IDS: readonly MktMetricId[] = ["mkt.sell.paid-conversion", "mkt.sell.paid-churn", "mkt.sell.arpa"];
+
 /** Every lever a file may carry a what-if target for. */
 export const ALL_LEVER_IDS: readonly LeverId[] = [...LEVER_IDS, ...SLG_LEVER_IDS, ...APP_LEVER_IDS];
 
@@ -1062,15 +1443,50 @@ export const SLG_CANDIDATE_IDS: readonly SlgCandidateId[] = [
 ];
 
 /**
+ * The marketplace's candidates, one list per side (§22.4.3, C70): the ★ and the rates a side's diagnosis positions, in
+ * canonical order. `mktCandidates("supply", setup)` (MKT-4, §22.5.6) takes the three subscription ones off without the
+ * sellers' subscriptions. Ids of `MKT_METRIC_SHAPES` for now: `CandidateId` widens to them with MKT-4.
+ */
+export const MKT_DEMAND_CANDIDATE_IDS: readonly MktMetricId[] = [
+  "mkt.buy.signup-rate",
+  "mkt.buy.first-order",
+  "mkt.liq.fill-rate",
+  "mkt.buy.referred-share",
+  "mkt.buy.repeat",
+  "mkt.buy.churn",
+];
+export const MKT_SUPPLY_CANDIDATE_IDS: readonly MktMetricId[] = [
+  "mkt.sell.signup-rate",
+  "mkt.sell.first-sale",
+  "mkt.sell.paid-conversion",
+  "mkt.sell.churn",
+  "mkt.sell.paid-churn",
+];
+
+/**
+ * What the rules below may name: today's candidates, and the marketplace's numbers ahead of MKT-4, which widens
+ * `CandidateId` to `MktCandidateId` (§22.2.1) and makes the second half redundant.
+ */
+type RuledId = CandidateId | MktMetricId;
+
+/**
  * Never priced in money: go-live, which would need a model tying it to
  * renewal (§18.5.2). Day-30 retention and the referred shares were unpriced
  * in v1 too (§6.6); the complete engine prices them (§19.3, A14 T3), the
- * referred shares up to `REFERRAL_PRICING_CEILING`.
+ * referred shares up to `REFERRAL_PRICING_CEILING`. A marketplace's four
+ * (D4, C67): the second order, the first sale, the sellers' churn and the
+ * sellers' sign-up rate are named, never given an amount.
  */
-export const UNPRICED_CANDIDATES: readonly CandidateId[] = ["slg.act.go-live"];
+export const UNPRICED_CANDIDATES: readonly RuledId[] = ["slg.act.go-live", "mkt.buy.repeat", "mkt.sell.first-sale", "mkt.sell.churn", "mkt.sell.signup-rate"];
 
-/** The two referred shares, priced as « the referred come on top of the others » (§19.3.2). */
-export const REFERRAL_CANDIDATES: readonly CandidateId[] = ["ref.referred-share", "slg.ref.referred-share"];
+/** The referred shares, priced as « the referred come on top of the others » (§19.3.2): the two of the SaaS and the buyers'. */
+export const REFERRAL_CANDIDATES: readonly RuledId[] = ["ref.referred-share", "slg.ref.referred-share", "mkt.buy.referred-share"];
+
+/**
+ * The candidates where a LOWER value is better: logo churn, and the marketplace's three churns (§22.2.3). Read by
+ * `diagnose.ts#directionOf` from MKT-4 on, in place of its test on `ret.logo-churn`.
+ */
+export const LOWER_IS_BETTER_CANDIDATES: readonly RuledId[] = ["ret.logo-churn", "mkt.buy.churn", "mkt.sell.churn", "mkt.sell.paid-churn"];
 
 /**
  * Past a target of 50 %, a referred share is not priced (§19.3.2): the
@@ -1090,8 +1506,9 @@ export function candidatesOf(motion: Motion): readonly CandidateId[] {
   return motion === "plg" ? CANDIDATE_IDS : SLG_CANDIDATE_IDS;
 }
 
-/** The motion a number belongs to; the link counts with sales-assisted, whose opportunities it counts. */
-export function motionOfMetric(id: MetricId | DerivedId): Motion {
+/** The motion a number belongs to; the link counts with sales-assisted, whose opportunities it counts; a marketplace's numbers are its own motion's (§22.1 D1). */
+export function motionOfMetric(id: MetricId | DerivedId): EngineMotion {
+  if (id.startsWith("mkt.")) return "mkt";
   return id.startsWith("slg.") || id.startsWith("link.") ? "slg" : "plg";
 }
 
@@ -1118,6 +1535,14 @@ export const ENGINE_BRIDGES: readonly EngineBridge[] = bridgesOf([...METRIC_SHAP
  */
 export const SLG_ENGINE_BRIDGES: readonly EngineBridge[] = bridgesOf([...SLG_METRIC_SHAPES, ...SLG_DERIVED_SHAPES]);
 
+/**
+ * The marketplace's bridges (§22.4.3): four, by the same literal rule, from the buyers' side — the cost of a buyer
+ * (`acq-3`), the first order (`act-2`), the second order (`ret-1`) and the buyer's LTV (`rev-2`). `buildMirror` keeps
+ * the rows of the motions a setup derives (`activeMotions`), so a SaaS and an app skip these and a marketplace skips
+ * the others.
+ */
+export const MKT_ENGINE_BRIDGES: readonly EngineBridge[] = bridgesOf([...MKT_METRIC_SHAPES, ...MKT_DERIVED_SHAPES]);
+
 // --- Rules shared by several modules, fixed here so no two can disagree ------
 
 /** `clear` needs top.lo > second.hi × CLEAR_MARGIN — the analogue of the Tour's 4-point gap on 20 (§6.6, D9). */
@@ -1132,6 +1557,8 @@ export const RECONCILE_BAND = { lo: 0.67, hi: 1.5 } as const;
 export const CHURN_HIGH_PERCENT = 30;
 /** A stores' commission above this is probably counting VAT or payment fees with it (§21.5.5, A22). */
 export const COMMISSION_HIGH_PERCENT = 30;
+/** A marketplace's take rate above this percent is probably a GMV counted without fees, or a net revenue counted gross (§22.5.7). */
+export const TAKE_RATE_HIGH_PERCENT = 50;
 /** A gross margin outside this is probably counting the wrong costs (§6.9). */
 export const MARGIN_ODD = { lo: 0, hi: 95 } as const;
 /** A median sales cycle past the three-month window: the quarter's CAC divides by customers of earlier spend (§18.5.7). */
@@ -1177,10 +1604,21 @@ export function metricsOfStage(stage: Pillar): MetricShape<PlgMetricId>[] {
  * panel and its tab marks. The link is never one motion's: the sales-assisted
  * Acquisition panel shows it apart, as its own block (§18.6.3). For an app's
  * self-serve motion, among `shapesOf(setup)` (its own numbers, the replaced
- * and hidden ones left out); `setup` absent: today's behaviour.
+ * and hidden ones left out); `setup` absent: today's behaviour. A marketplace's
+ * motion (`"mkt"`, §22.2.3): among `shapesOf(setup)` too, both sides in the
+ * table's order, ★ first; without a setup, all nineteen.
  */
-export function metricsOfStageIn(stage: Pillar, motion: Motion, setup?: SetupShapes): MetricShape[] {
-  const shapes: readonly MetricShape[] = setup !== undefined && isApp(setup) && motion === "plg" ? shapesOf(setup) : motion === "plg" ? METRIC_SHAPES : SLG_METRIC_SHAPES;
+export function metricsOfStageIn(stage: Pillar, motion: EngineMotion, setup?: SetupShapes): MetricShape[] {
+  const shapes: readonly MetricShape[] =
+    motion === "mkt"
+      ? setup !== undefined
+        ? shapesOf(setup)
+        : MKT_METRIC_SHAPES
+      : setup !== undefined && isApp(setup) && motion === "plg"
+        ? shapesOf(setup)
+        : motion === "plg"
+          ? METRIC_SHAPES
+          : SLG_METRIC_SHAPES;
   return shapes.filter((s) => s.stage === stage).sort((a, b) => Number(b.primary) - Number(a.primary));
 }
 

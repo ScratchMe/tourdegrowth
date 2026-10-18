@@ -1,4 +1,4 @@
-import { isApp } from "@/lib/engine/setup-type";
+import { isApp, isMarketplace } from "@/lib/engine/setup-type";
 import type { EngineStrings, ResolvedBridge, ResolvedDerived, ResolvedMetric } from "@/lib/engine/strings";
 import type { BusinessType, EngineCalcContext, EngineDerived, EngineState, LeverId, MetricEntry, MetricId, RoleId } from "@/lib/engine/types";
 import type { StoredResult } from "@/lib/quiz/storage";
@@ -53,14 +53,17 @@ export interface EngineActions {
 }
 
 /**
- * The catalogue a type's screens read (§21.4.7): the SaaS's `metrics`, or a consumer app's own (the fifteen in its words,
- * then its six). The one place that chooses, so no screen asks which type it is showing (D4).
+ * The catalogue a type's screens read (§21.4.7, §22.4.3): the SaaS's `metrics`, a consumer app's own (the fifteen in its
+ * words, then its six), or a marketplace's nineteen. The one place that chooses, so no screen asks which type it is
+ * showing (D4).
  */
 export function metricsFor(p: Pick<EngineWorkbenchProps, "metrics" | "typeCatalogs">, type: BusinessType): ResolvedMetric[] {
+  if (isMarketplace({ type })) return p.typeCatalogs.marketplace.metrics;
   return isApp({ type }) ? p.typeCatalogs["consumer-app"].metrics : p.metrics;
 }
 
 /** Same, for the computed figures (what `EngineWorkbench` passes as `derivedCopy`). */
 export function derivedFor(p: Pick<EngineWorkbenchProps, "derived" | "typeCatalogs">, type: BusinessType): ResolvedDerived[] {
+  if (isMarketplace({ type })) return p.typeCatalogs.marketplace.derived;
   return isApp({ type }) ? p.typeCatalogs["consumer-app"].derived : p.derived;
 }

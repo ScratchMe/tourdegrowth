@@ -4,6 +4,7 @@ import { EngineProgress, NUMBER_STATUSES, type NumberStatus } from "@/components
 import { NumberList, type NumberRow } from "@/components/engine/NumberList";
 import { LINK_METRIC_SHAPES, metricsOfStageIn, motionOfMetric, shapeOf, type MetricShape } from "@/lib/engine/catalog-shape";
 import type { AnyDiagnosis } from "@/lib/engine/phrases";
+import { isSellingMotion } from "@/lib/engine/setup-type";
 import type { MetricId, Motion } from "@/lib/engine/types";
 import { knownIn, statusOf } from "@/lib/engine/values";
 import { displayInterval, unknownReason } from "./display";
@@ -83,7 +84,9 @@ export function numberPosition(id: MetricId, view: EngineView): string {
 export function numberRemaining(id: MetricId, view: EngineView): string {
   const snapshot = view.state.snapshots[view.state.snapshots.length - 1]!;
   const { plg, slg } = view.state.setup.motions;
-  const motions: Motion[] = plg && slg ? ["plg", "slg"] : [motionOfMetric(id)];
+  const own = motionOfMetric(id);
+  // Until MKT-7b gives a marketplace its board, a number of the marketplace has no list of its own to count in.
+  const motions: Motion[] = plg && slg ? ["plg", "slg"] : isSellingMotion(own) ? [own] : [];
   const remaining = motions.reduce((n, motion) => n + listProgress(listStages(snapshot, diagnosisOf(view, motion), motion, view.state.setup)).remaining, 0);
   return remainingText(remaining, view);
 }

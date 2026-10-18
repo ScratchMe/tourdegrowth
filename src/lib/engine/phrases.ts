@@ -516,7 +516,17 @@ const HYBRID_TRAPS: Partial<Record<MetricId, keyof Words["sheet"]["hybridTrap"]>
  * catalogue's own text by a test, so a trap rewritten one day cannot keep a
  * button its words no longer ask for.
  */
-export const TRAPS_ASKING_DEFINITION: readonly MetricId[] = ["acq.signup-rate", "acq.cac", "act.rate", "slg.acq.lead-to-opp", "slg.acq.cac"];
+export const TRAPS_ASKING_DEFINITION: readonly MetricId[] = [
+  "acq.signup-rate",
+  "acq.cac",
+  "act.rate",
+  "slg.acq.lead-to-opp",
+  "slg.acq.cac",
+  // A marketplace's three (§22.4.3): what a request is, what the GMV counts, and a seller page that may not exist.
+  "mkt.liq.fill-rate",
+  "mkt.rev.take-rate",
+  "mkt.sell.signup-rate",
+];
 
 /**
  * The extra trap line a self-serve sheet shows in the hybrid, and ONLY in
