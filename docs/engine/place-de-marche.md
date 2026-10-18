@@ -339,7 +339,8 @@ export function isSellingMotion(m: EngineMotion): m is Motion {
   return m !== "mkt";
 }
 export const MKT_DEFAULTS = { offering: "products", sellerSubscriptions: false, firstOrderWindowDays: 30, repeatWindowDays: 90, firstSaleWindowDays: 60 } as const;
-/** The marketplace's own setup, each field from the setup or its default. */
+/** The marketplace's own setup, each field from the setup or its default. Like monetizationOf, it does not trust the
+ * type (MKT-0): an out-of-list window, an unknown offering, a non-boolean, or any field of another type's setup reads as its default. */
 export function mktSetup(setup: Pick<EngineSetup, "type" | "offering" | "sellerSubscriptions" | "firstOrderWindowDays" | "repeatWindowDays" | "firstSaleWindowDays">): {
   offering: "products" | "services"; sellerSubscriptions: boolean;
   firstOrderWindowDays: 7 | 30 | 90; repeatWindowDays: 60 | 90 | 180; firstSaleWindowDays: 30 | 60 | 90;
@@ -403,7 +404,10 @@ reste de §22 lit la place de marché par `isMarketplace`, `activeMotions` ou
 - `metricsOfStageIn(stage, "mkt", setup)` : parmi `shapesOf(setup)` ; la
   branche `motion === "mkt"` précède la ligne qui rend `SLG_METRIC_SHAPES` pour
   tout ce qui n'est pas `"plg"` (:1183).
-- `cohort.ts#windowDaysOf` : les trois fenêtres, via `mktSetup(setup)` ;
+- `cohort.ts#windowDaysOf` : les trois fenêtres, via `mktSetup(setup)` (fait
+  dès MKT-0, qui lit `shape.window` comme une chaîne en attendant
+  l'élargissement de l'union : MKT-1 l'élargit et retire les `as never` de
+  `cohort.test.ts`) ;
   `cohort.ts#defaultCohortMonth` : pour une place de marché,
   `matureCohortMonth(Math.max(firstOrder, repeat, firstSale), today)` (avec les
   défauts : 90 jours, la cohorte de mai pour un « aujourd'hui » au 24 septembre
@@ -504,8 +508,9 @@ numéro) :
 remplissent : `engine-copy.ts:794` (`subject`) et `:1732` (`leverSubject`),
 `phrases.ts:124` (`subjectOf`), `sentences.ts:139` (`SANITY_KEY`) ; leurs
 entrées sont en §22.8.5 et §22.5.7. Aucune étape n'approche l'arrêt à 40
-fichiers : 3 fichiers en erreur après les types de MKT-0, 14 après MKT-1, 19
-après MKT-3 et MKT-4.
+fichiers : 1 fichier (`findings.ts`, deux erreurs) après les types de MKT-0,
+mesuré par MKT-0 (MKT-R en comptait 3, avec un `DeckSlide.motion` élargi
+trop tôt), 14 après MKT-1, 19 après MKT-3 et MKT-4.
 
 **Ce que `tsc` ne signale pas** (des comparaisons sur un champ élargi, des
 boucles sur les deux cases, des tests sur l'id littéral du churn), relevé sur
@@ -603,9 +608,12 @@ surcharge, comme pour `b2b-saas`) ; `toolFamiliesFor("marketplace")` rend
   (`series.ts:53`) les écrit pour une place de marché, par un étalement
   conditionnel (`...(isMarketplace(setup) ? { firstOrderWindowDays, … } :
   {})`, les valeurs de `mktSetup`), jamais pour un SaaS ou
-  une app (les goldens n'y voient aucune clé neuve) ; `monthView`, qui étale
-  `snapshot.windows` dans le réglage, n'a rien à apprendre ; `validate.ts` les
-  accepte absents, ou dans leurs listes. `comparable` lit déjà la fenêtre d'un
+  une app (les goldens n'y voient aucune clé neuve) ; `monthView` ne recopie
+  dans le réglage que les sept clés de `SNAPSHOT_WINDOW_KEYS` (`types.ts`)
+  présentes avec une valeur, jamais tout `snapshot.windows` : un mois clos
+  forgé ne réécrit ni le type ni le reste du réglage (MKT-0, la relecture
+  sécurité) ; `validate.ts` accepte les trois absentes, ou dans leurs listes,
+  et signale toute autre clé (`snapshots[i].windows: unknown key <clé>`). `comparable` lit déjà la fenêtre d'un
   chiffre par `windowDaysOf` (§22.2.3) : un changement de fenêtre entre deux
   mois clos se voit.
 - **`io.ts#sellsSomehow`** (`io.ts:142-151`) : un SaaS ou une app avec au
@@ -616,7 +624,9 @@ surcharge, comme pour `b2b-saas`) ; `toolFamiliesFor("marketplace")` rend
   huit lecteurs du type, §22.2.2).
 - **`merge.ts#mergeRefusal`** (`merge.ts:68-81`) : deux places de marché dont
   `sellerSubscriptions` diffère refusent avec `"motions"` ; dont une des trois
-  fenêtres (`mktSetup`) diffère, avec `"windows"` ; dont `offering` diffère,
+  fenêtres diffère, avec `"windows"` (la valeur brute, le défaut de
+  `MKT_DEFAULTS` ne remplaçant qu'une fenêtre absente : une fenêtre hors liste
+  n'est pas lue comme son défaut, MKT-0) ; dont `offering` diffère,
   **fusionnent** (des mots seulement, le réglage de l'état reçu l'emporte).
   Les gardes d'aujourd'hui ne les voient pas : `sameMonetization` vaut déjà
   « égaux » pour deux places de marché (`null === null`), et les lignes
@@ -1529,7 +1539,9 @@ listes de la carte de réglage) : ils n'attendent pas le retour du brief 10.
   - `:407-412` : en édition, `app ? s.types.consumerApp : s.types.b2bSaas` ;
     une place de marché lit `s.setup.types.marketplace` (la feuille existe) ;
   - `:427-428` : le choix du type a déjà `marketplace` en `disabled: true` ;
-    il devient `disabled: !openTypes.includes("marketplace")` ;
+    il devient `disabled: !openTypes.includes("marketplace")` ; le choix
+    lui-même passe déjà par `start.ts#pickedType(next, openTypes)` (MKT-0, la
+    relecture sécurité), qui ne rend qu'un type ouvert ;
   - la case des abonnements : `streamChanges` (`stream-lines.ts:23`) n'accepte
     que `AppMonetization` et `AppStream` ; une fonction sœur,
     `sellerSubscriptionChange(setup, was, now, entered): { ticked; n }` (`n` :
@@ -2599,7 +2611,7 @@ rougit hors de cette liste arrête l'unité (§22.13).
 
 | Test | Ce qui change | Unité |
 |---|---|---|
-| `business-type.test.ts` (créé par A22) | `MARKETPLACE_SCREENS_READY` vaut `false` (jusqu'à MKT-7b) ; `openTypesWith("consumer-app,marketplace")` rend `["b2b-saas", "consumer-app"]` tant qu'elle vaut `false` ; `BUSINESS_TYPES` à trois ; `motionsAllowed("marketplace")` vide ; `activeMotions` des trois types ; `isSellingMotion` ; `mktSetup` et ses défauts ; le balayage qui refuse `as Motion` (§22.2.5) ; la garde « qui lit le type » de §21.10.1 gagne `isMarketplace` | MKT-0 |
+| `business-type.test.ts` (créé par A22) | `MARKETPLACE_SCREENS_READY` vaut `false` (jusqu'à MKT-7b) ; `openTypesWith("consumer-app,marketplace")` rend `["b2b-saas", "consumer-app"]` tant qu'elle vaut `false` ; `BUSINESS_TYPES` à trois ; `motionsAllowed("marketplace")` vide ; `activeMotions` des trois types ; `isSellingMotion` ; `mktSetup` et ses défauts ; le balayage qui refuse `as Motion` (§22.2.5 ; il lit le littéral `as Motion`, pas un cast par alias) ; la garde « qui lit le type » de §21.10.1 voit aussi `"marketplace"`, avec des cas qui le prouvent, et son message nomme `isMarketplace` et `activeMotions` | MKT-0 |
 | `validate.test.ts`, `io.test.ts`, `merge.test.ts`, `series.test.ts` | `validateEngine` : une place de marché valide (avec et sans abonnements, en « services ») ; chaque message de §22.3 déclenché ; un champ de la place de marché sur un SaaS, refusé ; l'app et le SaaS inchangés. **Les assertions d'aujourd'hui qui rougissent** : `validate.test.ts:123`, `:351-354` et `:356` (une `type: "marketplace"` attendue « unknown type », avec le commentaire « it comes with §22, never with the app ») ; `io.test.ts:122-126` (`unknownType` est une place de marché) reste **vert** tant que la barrière est fermée : ne pas le toucher avant MKT-7b. `io.ts` : un fichier de place de marché refusé tant que la barrière est fermée (MKT-7b retourne ce test). `mergeRefusal` : abonnements différents → `"motions"` ; une des trois fenêtres différente → `"windows"` ; `offering` différent → fusion. `windowsOf` : les trois fenêtres pour une place de marché, aucune clé neuve pour un SaaS | MKT-0 |
 | `cohort.test.ts` | les trois fenêtres ; la cohorte par défaut d'une place de marché (mai pour le 24 septembre 2026) | MKT-0 |
 | `business-type.test.ts` (suite) | `BUSINESS_TYPES` passe de `toHaveLength(2)` à trois ; le test « chaque import est un `import type` » (`:171-178`, `valueImports(source) toEqual([])`) nomme sa seule exception, `MOTIONS` (§22.2.2) | MKT-0 |
@@ -2889,7 +2901,8 @@ Ton compte rendu, en français : une liste numérotée de constats, rangés par 
   phrase « il manque » du SaaS » est trois pièces, le champ `uncomputable` de
   chaque calculé (`engine-catalog.ts:1477` et suivants),
   `phrases.ts#unitInputsPhrase` (`:138`) et la feuille `findings.unitEcon`.
-  Les mesures : 4, 19 puis 37 erreurs de `tsc` (3, 14 puis 19 fichiers) ;
+  Les mesures : 4, 19 puis 37 erreurs de `tsc` (3, 14 puis 19 fichiers ; les
+  3 de MKT-0 comptaient un `DeckSlide.motion` élargi, MKT-0 en a mesuré 1) ;
   `CLAUDE.md` à 39 661 caractères pour 40 000 (339 de marge : une unité qui
   change un chiffre de référence le remplace à longueur égale), `JOURNAL.md` à
   109 138 pour 200 000.
@@ -3613,7 +3626,11 @@ Ton compte rendu, en français : une liste numérotée de constats, rangés par 
      `io.importPreview` (« n sur 19 ») : pas de ligne par motion.
   9. **Les mots appris** : `EngineTerm` gagne les ids `gmv`, `takeRate`,
      `liquidity` et `netRevenue`, lus dans `strings.mkt.terms` (§22.8.5 k).
-  10. **La barrière** : `MARKETPLACE_SCREENS_READY = true`, et ses tests.
+  10. **La barrière** : `MARKETPLACE_SCREENS_READY = true`, et ses tests :
+      ceux du côté fermé (`business-type.test.ts`, `access.test.ts`,
+      `io.test.ts`) se retournent, et ceux qu'MKT-0 a écrits pour le côté
+      ouvert, par `vi.doMock` de `setup-type.ts` dans `access.test.ts` et
+      `io.test.ts`, deviennent des tests directs.
   11. **Les captures**, sur un build local ouvert (`ENGINE_TYPES=consumer-app,marketplace`,
       §23.8), l'état posé par `engineSeed` avec `marketplaceState()` (et
       `EXAMPLE_MKT_WHATIF` pour le panneau) : le tableau, côté demande et côté
