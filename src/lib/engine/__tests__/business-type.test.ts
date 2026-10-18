@@ -24,7 +24,7 @@ import type { AppMonetization } from "../app-model";
 import { ALL_DERIVED_SHAPES, ALL_METRIC_SHAPES, APP_REPLACED, LEVER_IDS, METRIC_SHAPES, derivedShapeOf, shapeOf } from "../catalog-shape";
 import { buildScenario, leverAlone } from "../scenario";
 import { leverAloneOf, leverIdsOf, scenarioOf } from "../scenario-of";
-import { MARKETPLACE_SCREENS_READY } from "../setup-type";
+import { MARKETPLACE_SCREENS_READY, SELLING_MOTIONS } from "../setup-type";
 import { APP_TOOL_FAMILIES, MKT_TOOL_FAMILIES, SETUP_TOOLS } from "../tools";
 import { ENGINE_MOTIONS, MOTIONS } from "../types";
 import type { EngineMotion, EngineSetup, EngineState, LeverId, MetricEntry, PlgMetricId, ToolId } from "../types";
@@ -44,6 +44,14 @@ import { CTX_FR } from "./props";
  * `ENGINE_TYPES` in `access.ts` falls « openTypesAtBuild » (and `engine-boundary`'s one-reader rule); letting an
  * app tick `slg` in `motionsAllowed` falls its own case (and `io.test.ts`'s refusal). `monetizationOf`'s own
  * measures, taken after the security review, are at the head of its block below.
+ *
+ * The leaf guard, measured again on 2026-10-18 (the CI of A23 MKT-1 had gone red on `e2e/engine-entries.spec.ts`): MKT-0
+ * had let `setup-type.ts` import the value `MOTIONS`, harmless while nothing called `activeMotions`; `bridge.ts` calls it
+ * from MKT-1 on, the bundler then keeps `MOTIONS` and so the whole of `types.ts` (`ENGINE_INDEX_KEY` with it) in the
+ * module `lib/analytics/goatcounter.ts` pulls into every page: 13 client chunks carry the key instead of 1, and the
+ * landing loads 3 of them. Putting the value import back falls the guard below alone (1) in the unit suite — the
+ * engine-entries spec is the only one that sees the bundle (2). The leaf's own tuple reversed falls the tuple test and the
+ * two `activeMotions` order tests (3).
  */
 
 describe("openTypesWith — the types a build opens (§21.3)", () => {
@@ -326,16 +334,18 @@ describe("an EngineMotion is narrowed, never cast to a Motion (§22.2.5)", () =>
 });
 
 describe("the import graph of the type module (§21.2.2)", () => {
-  it("setup-type.ts is a leaf: every import it makes is a type import, erased at build — but the one value MOTIONS (§22.2.2)", () => {
+  it("setup-type.ts is a leaf: every import it makes is a type import, erased at build", () => {
     const source = BY_PATH.get("lib/engine/setup-type.ts");
     expect(source, "the module exists where the spec puts it").toBeDefined();
     // The walk looked at something: the file does import, by `import type`.
     expect(source!.match(/^import type /gm)?.length).toBeGreaterThanOrEqual(2);
-    // The single exception, named: `MOTIONS`, from types.ts, and from nothing else.
-    expect(valueImports(source!)).toEqual(["./types"]);
-    expect(source!.match(/^import \{([^}]*)\} from "\.\/types";/m)?.[1]?.trim()).toBe("MOTIONS");
-    // What makes the exception safe: types.ts imports no value of the engine itself, so no cycle can form through it.
-    expect(valueImports(BY_PATH.get("lib/engine/types.ts")!)).toEqual([]);
+    // No exception, not even `MOTIONS` from types.ts: `goatcounter.ts` reads `isApp` from here on every page, and a value
+    // import of types.ts follows it into the code every page loads once any module calls `activeMotions` (A23 MKT-1).
+    expect(valueImports(source!)).toEqual([]);
+  });
+
+  it("the leaf's own tuple of the two selling motions is MOTIONS, in the same order (what the missing import of MOTIONS costs)", () => {
+    expect(SELLING_MOTIONS).toEqual(MOTIONS);
   });
 
   it("access.ts, which the Edge proxy imports, reaches neither business-type.ts nor the catalogue of shapes", () => {

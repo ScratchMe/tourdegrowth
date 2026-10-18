@@ -68,10 +68,47 @@ export const SHARED_COUNTS: Readonly<Record<SharedCount, readonly SharedSlot[]>>
     { metric: "app.rev.purchases-per-active", side: "denominator" },
     { metric: "app.rev.ads-per-active", side: "denominator" },
   ],
+  // §22.2.4, a marketplace: the buyer cohort (the followed cohort's sign-ups), the month's orders, GMV and net revenue.
+  mktCohortSignups: [
+    { metric: "mkt.buy.first-order", side: "denominator" },
+    { metric: "mkt.buy.repeat", side: "denominator" },
+    { metric: "mkt.buy.referred-share", side: "denominator" },
+  ],
+  mktOrders: [
+    { metric: "mkt.rev.frequency", side: "numerator" },
+    { metric: "mkt.rev.aov", side: "denominator" },
+  ],
+  mktGmv: [
+    { metric: "mkt.rev.aov", side: "numerator" },
+    { metric: "mkt.rev.take-rate", side: "denominator" },
+  ],
+  mktNetRevenue: [
+    { metric: "mkt.rev.take-rate", side: "numerator" },
+    { metric: "mkt.rev.gross-margin", side: "denominator" },
+  ],
+  // C93: the seller cohort and the sellers' subscription MRR.
+  mktSellerCohortSignups: [
+    { metric: "mkt.sell.first-sale", side: "denominator" },
+    { metric: "mkt.sell.paid-conversion", side: "denominator" },
+  ],
+  mktSellerMrrEnd: [
+    { metric: "mkt.sell.arpa", side: "numerator" },
+    { metric: "mkt.sell.gross-margin", side: "denominator" },
+  ],
 };
 
-/** Counts of people, deals or opportunities: whole numbers. The MRRs are amounts and may carry cents. */
-export const WHOLE_SHARED_COUNTS: readonly SharedCount[] = ["cohortSignups", "monthSignups", "slgOppsCreated", "slgDealsWon", "slgCustomers", "appActives"];
+/** Counts of people, deals, opportunities or orders: whole numbers. The MRRs, the GMV and the net revenue are amounts and may carry cents. */
+export const WHOLE_SHARED_COUNTS: readonly SharedCount[] = [
+  "cohortSignups",
+  "monthSignups",
+  "slgOppsCreated",
+  "slgDealsWon",
+  "slgCustomers",
+  "appActives",
+  "mktCohortSignups",
+  "mktOrders",
+  "mktSellerCohortSignups",
+];
 
 export const SHARED_COUNT_IDS = Object.keys(SHARED_COUNTS) as SharedCount[];
 

@@ -13,6 +13,9 @@ import {
   DERIVED_SHAPES,
   ENGINE_BRIDGES,
   METRIC_SHAPES,
+  MKT_DERIVED_SHAPES,
+  MKT_ENGINE_BRIDGES,
+  MKT_METRIC_SHAPES,
   SLG_ENGINE_BRIDGES,
   type MetricShape,
 } from "@/lib/engine/catalog-shape";
@@ -31,29 +34,30 @@ import type { EngineWorkbenchProps } from "./EngineWorkbench";
  *
  * Catalogue order is `ALL_METRIC_SHAPES`' order (self-serve, sales-assisted,
  * the link), so the prose and the shape always line up index by index as
- * well as by id. All of it travels whatever the setup (the app's own numbers
- * excepted, below): the motions are the user's, read in the browser, and the
- * island filters with `shapesOf`.
+ * well as by id. All of it travels whatever the setup (the app's and the
+ * marketplace's own numbers excepted, below): the motions are the user's, read
+ * in the browser, and the island filters with `shapesOf`.
  *
  * The consumer app has its own catalogue (`typeCatalogs`, §21.4.7): the fifteen
  * self-serve numbers it shows in its own words, then its six, and its figures.
- * It travels to every visitor, whatever the setup: a static page cannot know
+ * The marketplace has its own too (§22.4.3): its nineteen numbers and six figures.
+ * They travel to every visitor, whatever the setup: a static page cannot know
  * which type the browser will hold. A SaaS's `metrics` and `derived` carry none
- * of the app's ids. `typeStrings` (§21.8.1), the app's overlay on `strings`, travels the same way.
+ * of their ids. `typeStrings` (§21.8.1), the app's overlay on `strings`, travels the same way.
  *
  * Not the `openTypes` prop (§21.3): it comes from the build's environment, which
  * this function does not read — the page adds it (`openTypesAtBuild()`).
  */
 export function resolveEngineProps(locale: Locale): Omit<EngineWorkbenchProps, "openTypes"> {
-  // The SaaS catalogue only: the app's own numbers (scope "app", ids "app.*") travel in `typeCatalogs` below, never
-  // here. The counts (33 numbers, 8 computed figures) are held by a test.
-  const metrics: ResolvedMetric[] = ALL_METRIC_SHAPES.filter((shape) => shape.scope !== "app").map((shape) => ({
+  // The SaaS catalogue only: the app's own numbers (scope "app", ids "app.*") and the marketplace's (scope "mkt", ids
+  // "mkt.*") travel in `typeCatalogs` below, never here. The counts (33 numbers, 8 computed figures) are held by a test.
+  const metrics: ResolvedMetric[] = ALL_METRIC_SHAPES.filter((shape) => shape.scope !== "app" && shape.scope !== "mkt").map((shape) => ({
     id: shape.id,
     ...resolveTree(ENGINE_CATALOG[shape.id], locale),
     glossaryHref: localePath(locale, `/glossary/${shape.glossary}`),
   }));
 
-  const derived: ResolvedDerived[] = ALL_DERIVED_SHAPES.filter((shape) => !shape.id.startsWith("app.")).map((shape) => ({
+  const derived: ResolvedDerived[] = ALL_DERIVED_SHAPES.filter((shape) => !shape.id.startsWith("app.") && !shape.id.startsWith("mkt.")).map((shape) => ({
     id: shape.id,
     ...resolveTree(ENGINE_DERIVED_CATALOG[shape.id], locale),
     glossaryHref: localePath(locale, `/glossary/${shape.glossary}`),
@@ -95,11 +99,26 @@ export function resolveEngineProps(locale: Locale): Omit<EngineWorkbenchProps, "
     })),
   ];
 
+  // The marketplace's catalogue (§22.4.3): its nineteen numbers in `MKT_METRIC_SHAPES` order, its six figures in
+  // `MKT_DERIVED_SHAPES` order, in the words of "products" (MKT-S adds the "services" ones). The glossary link comes
+  // from the shape the marketplace DISPLAYS, which is its own (no override, as for the SaaS).
+  const marketMetrics: ResolvedMetric[] = MKT_METRIC_SHAPES.map((shape) => ({
+    id: shape.id,
+    ...resolveTree(ENGINE_CATALOG[shape.id], locale),
+    glossaryHref: glossaryHref(displayShapeOf(shape.id, "marketplace").glossary),
+  }));
+  const marketDerived: ResolvedDerived[] = MKT_DERIVED_SHAPES.map((shape) => ({
+    id: shape.id,
+    ...resolveTree(ENGINE_DERIVED_CATALOG[shape.id], locale),
+    glossaryHref: glossaryHref(displayDerivedShapeOf(shape.id, "marketplace").glossary),
+  }));
+
   // Only the bridged questions travel, not the fifteen: the island has no use
   // for the others, and the copy library stays on the server. Self-serve's
-  // eight, then sales-assisted's six (§18.4.9): the mirror keeps the ticked
-  // motions' rows, one per (question, motion), in this order.
-  const bridges: ResolvedBridge[] = [...ENGINE_BRIDGES, ...SLG_ENGINE_BRIDGES].map(({ questionId, metric }) => {
+  // eight, then sales-assisted's six (§18.4.9), then the marketplace's four
+  // (§22.4.3): the mirror keeps the ticked motions' rows, one per (question,
+  // motion), in this order.
+  const bridges: ResolvedBridge[] = [...ENGINE_BRIDGES, ...SLG_ENGINE_BRIDGES, ...MKT_ENGINE_BRIDGES].map(({ questionId, metric }) => {
     const question = QUESTIONS.find((q) => q.id === questionId);
     if (!question) throw new Error(`Engine bridge names an unknown Tour question: ${questionId}`);
     return {
@@ -117,7 +136,7 @@ export function resolveEngineProps(locale: Locale): Omit<EngineWorkbenchProps, "
     typeStrings: { "consumer-app": resolveTree(ENGINE_COPY_CONSUMER, locale) },
     metrics,
     derived,
-    typeCatalogs: { "consumer-app": { metrics: appMetrics, derived: appDerived } },
+    typeCatalogs: { "consumer-app": { metrics: appMetrics, derived: appDerived }, marketplace: { metrics: marketMetrics, derived: marketDerived } },
     bridges,
   };
 }

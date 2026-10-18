@@ -1,18 +1,31 @@
 import { describe, expect, it } from "vitest";
 import { derivedFor, metricsFor } from "@/app/[locale]/aarrr-funnel-template/_engine/view";
 import { displayDerivedShapeOf, displayShapeOf } from "../business-type";
-import { ALL_DERIVED_SHAPES, ALL_METRIC_SHAPES, APP_DERIVED_SHAPES, APP_METRIC_SHAPES, derivedShapesOf, shapesOf, type SetupShapes } from "../catalog-shape";
+import {
+  ALL_DERIVED_SHAPES,
+  ALL_METRIC_SHAPES,
+  APP_DERIVED_SHAPES,
+  APP_METRIC_SHAPES,
+  MKT_DERIVED_SHAPES,
+  MKT_ENGINE_BRIDGES,
+  MKT_METRIC_SHAPES,
+  derivedShapesOf,
+  shapesOf,
+  type SetupShapes,
+} from "../catalog-shape";
 import { SHARED_COUNTS, sharedWith } from "../shared-counts";
 import type { MetricId } from "../types";
 import { EN, FR } from "./props";
 
 /**
- * What the page hands the island (engine spec §21.4.7, A22 APP-1 and APP-2): the SaaS catalogue in `metrics` and
- * `derived`, alone — the app's six numbers and four figures travel in `typeCatalogs` (below), never here; a SaaS engine's
- * payload gains nothing from the app.
+ * What the page hands the island (engine spec §21.4.7, §22.4.3, A22 APP-1 and APP-2, A23 MKT-1): the SaaS catalogue in
+ * `metrics` and `derived`, alone — the app's six numbers and four figures, and the marketplace's nineteen and six, travel
+ * in `typeCatalogs` (below), never here; a SaaS engine's payload gains nothing from either.
  *
  * Non-vacuity, measured on 2026-10-05: taking either `filter` out of `resolveEngineProps` fails the same three tests
- * below (39 numbers, or 12 figures, arrive). The second block (the shared line) is measured with `sharedWith`'s
+ * below (39 numbers, or 12 figures, arrive). On 2026-10-18 the marketplace's half of the `metrics` filter, left out,
+ * falls 7 (here the two counts, the ids, the two shared-line cases and the app's list; and the trap test of
+ * trap-definition.test.ts); of the `derived` filter, 4 (here: the two counts, the ids and the app's list). The second block (the shared line) is measured with `sharedWith`'s
  * sabotages, listed in shared-counts.test.ts: `named` ignored fails its three tests (two for the 33 numbers, one for
  * the link and the cost per install).
  */
@@ -25,12 +38,12 @@ describe("the island's catalogue props", () => {
     expect(props.derived).toHaveLength(8);
   });
 
-  it("carry no id of the app's, and every id of the others", () => {
+  it("carry no id of the app's nor of the marketplace's, and every id of the others", () => {
     for (const props of [FR, EN]) {
-      expect(props.metrics.filter((m) => m.id.startsWith("app."))).toEqual([]);
-      expect(props.derived.filter((d) => d.id.startsWith("app."))).toEqual([]);
-      expect(props.metrics.map((m) => m.id)).toEqual(ALL_METRIC_SHAPES.filter((s) => s.scope !== "app").map((s) => s.id));
-      expect(props.derived.map((d) => d.id)).toEqual(ALL_DERIVED_SHAPES.filter((s) => !s.id.startsWith("app.")).map((s) => s.id));
+      expect(props.metrics.filter((m) => m.id.startsWith("app.") || m.id.startsWith("mkt."))).toEqual([]);
+      expect(props.derived.filter((d) => d.id.startsWith("app.") || d.id.startsWith("mkt."))).toEqual([]);
+      expect(props.metrics.map((m) => m.id)).toEqual(ALL_METRIC_SHAPES.filter((s) => s.scope !== "app" && s.scope !== "mkt").map((s) => s.id));
+      expect(props.derived.map((d) => d.id)).toEqual(ALL_DERIVED_SHAPES.filter((s) => !s.id.startsWith("app.") && !s.id.startsWith("mkt.")).map((s) => s.id));
     }
   });
 });
@@ -158,8 +171,8 @@ describe("the island's consumer-app catalogue (`typeCatalogs`)", () => {
     for (const props of [FR, EN]) {
       const ids = new Set<string>(metricsFor(props, "consumer-app").map((m) => m.id));
       for (const shape of shapesOf(THREE)) expect(ids.has(shape.id), shape.id).toBe(true);
-      expect(props.metrics.map((m) => m.id)).toEqual(ALL_METRIC_SHAPES.filter((s) => s.scope !== "app").map((s) => s.id));
-      expect(props.derived.map((d) => d.id)).toEqual(ALL_DERIVED_SHAPES.filter((s) => !s.id.startsWith("app.")).map((s) => s.id));
+      expect(props.metrics.map((m) => m.id)).toEqual(ALL_METRIC_SHAPES.filter((s) => s.scope !== "app" && s.scope !== "mkt").map((s) => s.id));
+      expect(props.derived.map((d) => d.id)).toEqual(ALL_DERIVED_SHAPES.filter((s) => !s.id.startsWith("app.") && !s.id.startsWith("mkt.")).map((s) => s.id));
     }
   });
 });
@@ -189,6 +202,102 @@ describe("the shared line of an app's numbers", () => {
       expect(rendered).toBeGreaterThan(10);
       // The actives' group: both per-active revenues, each naming the other.
       expect(sharedWith("app.rev.purchases-per-active", "denominator", named)).toEqual(["app.rev.ads-per-active"]);
+    }
+  });
+});
+
+/**
+ * The marketplace's own catalogue (engine spec §22.4.3, A23 MKT-1): its nineteen numbers and six figures in the words of
+ * "products", in the order of `MKT_METRIC_SHAPES` and `MKT_DERIVED_SHAPES`, resolved like the others and chosen per type by
+ * `metricsFor` / `derivedFor`. The "services" words are MKT-S's.
+ *
+ * Non-vacuity, measured on 2026-10-18 (each sabotage applied alone, the tests of `src/lib/engine`, `src/content`, `src/app`
+ * and `src/__tests__` run, then restored): `metricsFor` without its marketplace branch falls 2 (the choice test and the
+ * shared line); `derivedFor` without it, 1; the six figures left out of `typeCatalogs.marketplace` falls 3 (the two
+ * counts and the order); the marketplace's bridges left out of the page's `bridges` falls 4 (the one here, three in
+ * bridge.test.ts); the orders group emptied falls the shared line here (and 7 in shared-counts.test.ts).
+ */
+describe("the island's marketplace catalogue (`typeCatalogs.marketplace`)", () => {
+  const MARKET: SetupShapes = { type: "marketplace", motions: { plg: false, slg: false }, sellerSubscriptions: true };
+
+  it.each([
+    ["fr", FR],
+    ["en", EN],
+  ] as const)("carries the 19 numbers and the 6 figures a marketplace can show, in %s", (_locale, props) => {
+    expect(props.typeCatalogs.marketplace.metrics).toHaveLength(19);
+    expect(props.typeCatalogs.marketplace.derived).toHaveLength(6);
+  });
+
+  it("lists them in the order the marketplace shows them: with the sellers' subscriptions, `shapesOf` and `derivedShapesOf` list everything it can show", () => {
+    for (const props of [FR, EN]) {
+      const catalog = props.typeCatalogs.marketplace;
+      expect(catalog.metrics.map((m) => m.id)).toEqual(shapesOf(MARKET).map((s) => s.id));
+      expect(catalog.derived.map((d) => d.id)).toEqual(derivedShapesOf(MARKET).map((s) => s.id));
+      expect(catalog.metrics.map((m) => m.id)).toEqual(MKT_METRIC_SHAPES.map((s) => s.id));
+      expect(catalog.derived.map((d) => d.id)).toEqual(MKT_DERIVED_SHAPES.map((s) => s.id));
+    }
+  });
+
+  it("says the marketplace's words, in both languages — and the SaaS's own props keep theirs", () => {
+    const named = (props: typeof FR, id: MetricId) => props.typeCatalogs.marketplace.metrics.find((m) => m.id === id)?.name;
+    expect(named(FR, "mkt.liq.fill-rate")).toBe("Taux de service");
+    expect(named(EN, "mkt.liq.fill-rate")).toBe("Fill rate");
+    expect(named(FR, "mkt.rev.take-rate")).toBe("Commission (take rate)");
+    expect(named(EN, "mkt.sell.paid-conversion")).toBe("Seller subscription conversion");
+    expect(FR.metrics.find((m) => m.id === "acq.cac")?.name).toBe("CAC");
+  });
+
+  it("links each number and figure to the glossary term of its shape, in the page's language", () => {
+    for (const [locale, props] of [["fr", FR], ["en", EN]] as const) {
+      for (const m of props.typeCatalogs.marketplace.metrics) {
+        expect(m.glossaryHref, `${locale} ${m.id}`).toMatch(new RegExp(`/glossary/${displayShapeOf(m.id, "marketplace").glossary}$`));
+        expect(m.glossaryHref, `${locale} ${m.id}`).toContain(locale === "fr" ? "/fr/" : "/en/");
+      }
+      for (const d of props.typeCatalogs.marketplace.derived) {
+        expect(d.glossaryHref, `${locale} ${d.id}`).toMatch(new RegExp(`/glossary/${displayDerivedShapeOf(d.id, "marketplace").glossary}$`));
+      }
+    }
+  });
+
+  it("is chosen per type by metricsFor / derivedFor — the marketplace's own arrays for a marketplace, the others' as before", () => {
+    for (const props of [FR, EN]) {
+      expect(metricsFor(props, "marketplace")).toBe(props.typeCatalogs.marketplace.metrics);
+      expect(derivedFor(props, "marketplace")).toBe(props.typeCatalogs.marketplace.derived);
+      expect(metricsFor(props, "consumer-app")).toBe(props.typeCatalogs["consumer-app"].metrics);
+      expect(metricsFor(props, "b2b-saas")).toBe(props.metrics);
+      expect(derivedFor(props, "b2b-saas")).toBe(props.derived);
+    }
+  });
+
+  it("hands the four Tour bridges of the marketplace after the SaaS's fourteen, with their question and options", () => {
+    for (const props of [FR, EN]) {
+      expect(props.bridges).toHaveLength(18);
+      expect(props.bridges.slice(14).map((b) => [b.questionId, b.metric])).toEqual(MKT_ENGINE_BRIDGES.map((b) => [b.questionId, b.metric]));
+      for (const b of props.bridges.slice(14)) {
+        expect(b.question.trim(), b.questionId).toBeTruthy();
+        expect(b.options.map((o) => o.points), b.questionId).toEqual([20, 7, 0]);
+      }
+    }
+  });
+
+  it("names, on every shared count a marketplace holds, each place of the group in its catalogue — the shared line the sheet prints", () => {
+    for (const props of [FR, EN]) {
+      const named = new Set<MetricId>(metricsFor(props, "marketplace").map((m) => m.id));
+      expect(sharedWith("mkt.buy.first-order", "denominator", named)).toEqual(["mkt.buy.repeat", "mkt.buy.referred-share"]);
+      expect(sharedWith("mkt.rev.aov", "numerator", named)).toEqual(["mkt.rev.take-rate"]);
+      expect(sharedWith("mkt.rev.take-rate", "numerator", named)).toEqual(["mkt.rev.gross-margin"]);
+      expect(sharedWith("mkt.sell.first-sale", "denominator", named)).toEqual(["mkt.sell.paid-conversion"]);
+      let rendered = 0;
+      for (const { id } of metricsFor(props, "marketplace")) {
+        for (const side of ["numerator", "denominator"] as const) {
+          for (const other of sharedWith(id, side, named)) {
+            rendered += 1;
+            expect(metricsFor(props, "marketplace").find((m) => m.id === other)?.name.trim(), `${id} ${side} names ${other}`).toBeTruthy();
+          }
+        }
+      }
+      // Not vacuous: the six groups hold 3 + 2 + 2 + 2 + 2 + 2 places, each naming the others.
+      expect(rendered).toBe(3 * 2 + 5 * 1 * 2);
     }
   });
 });

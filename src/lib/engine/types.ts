@@ -120,7 +120,33 @@ export type AppMetricId =
   | "app.rev.ads-per-active"
   | "app.rev.commission"
   | "app.rev.gross-margin";
-export type MetricId = PlgMetricId | SlgMetricId | LinkMetricId | AppMetricId;
+/**
+ * The marketplace's own numbers (§22.4.1, A23 MKT-1): the first draft's fourteen, then the five of the sellers'
+ * subscriptions (C64, C93). Both sides, in the order of `MKT_METRIC_SHAPES`.
+ */
+export type MktMetricId =
+  // the first draft's fourteen
+  | "mkt.buy.signup-rate"
+  | "mkt.buy.cac"
+  | "mkt.sell.cac"
+  | "mkt.buy.first-order"
+  | "mkt.sell.first-sale"
+  | "mkt.liq.fill-rate"
+  | "mkt.buy.repeat"
+  | "mkt.buy.churn"
+  | "mkt.sell.churn"
+  | "mkt.buy.referred-share"
+  | "mkt.rev.take-rate"
+  | "mkt.rev.aov"
+  | "mkt.rev.frequency"
+  | "mkt.rev.gross-margin"
+  // the sellers' subscriptions (C64, C93)
+  | "mkt.sell.signup-rate"
+  | "mkt.sell.paid-conversion"
+  | "mkt.sell.arpa"
+  | "mkt.sell.paid-churn"
+  | "mkt.sell.gross-margin";
+export type MetricId = PlgMetricId | SlgMetricId | LinkMetricId | AppMetricId | MktMetricId;
 /**
  * The computed figures (§5.7): never entered, always derived. NRR and GRR
  * joined the three unit-economics figures on 2026-09-26, with the two MRR
@@ -131,7 +157,15 @@ export type PlgDerivedId = "rev.ltv" | "rev.cac-payback" | "rev.ltv-cac" | "rev.
 export type SlgDerivedId = "slg.rev.ltv" | "slg.rev.cac-payback" | "slg.rev.ltv-cac";
 /** The consumer app's computed figures (§21.4.2): per install. */
 export type AppDerivedId = "app.rev.install-value" | "app.rev.install-ltv" | "app.rev.install-payback" | "app.rev.value-to-cost";
-export type DerivedId = PlgDerivedId | SlgDerivedId | AppDerivedId;
+/** The marketplace's computed figures (§22.4.2): a buyer's three, then a paid seller's three. */
+export type MktDerivedId =
+  | "mkt.rev.ltv"
+  | "mkt.rev.cac-payback"
+  | "mkt.rev.ltv-cac" // a buyer
+  | "mkt.sell.ltv"
+  | "mkt.sell.cac-payback"
+  | "mkt.sell.ltv-cac"; // a paid seller
+export type DerivedId = PlgDerivedId | SlgDerivedId | AppDerivedId | MktDerivedId;
 
 export type ToolId =
   | "ga4"
@@ -316,7 +350,14 @@ export type SharedCount =
   | "slgDealsWon"
   | "slgCustomers"
   /** A consumer app (§21.2.4): the month's actives, the base of its two per-active revenues. */
-  | "appActives";
+  | "appActives"
+  /** A marketplace (§22.2.4): the buyer cohort, the month's orders, GMV and net revenue; the seller cohort and the sellers' subscription MRR. */
+  | "mktCohortSignups"
+  | "mktOrders"
+  | "mktGmv"
+  | "mktNetRevenue"
+  | "mktSellerCohortSignups"
+  | "mktSellerMrrEnd";
 
 /**
  * The levers « Et si ? » can move, together (Antoine, 2026-09-26: the
@@ -728,7 +769,20 @@ export type UnitInputId =
   | "app.rev.commission"
   | "app.ret.active-retention"
   | "app.rev.purchases-per-active"
-  | "app.rev.ads-per-active";
+  | "app.rev.ads-per-active"
+  // A marketplace (§22.4.3): the inputs of its six figures, twelve ids.
+  | "mkt.rev.frequency"
+  | "mkt.rev.aov"
+  | "mkt.rev.take-rate"
+  | "mkt.rev.gross-margin"
+  | "mkt.buy.churn"
+  | "mkt.buy.cac"
+  | "mkt.sell.arpa"
+  | "mkt.sell.gross-margin"
+  | "mkt.sell.paid-churn"
+  | "mkt.sell.cac"
+  | "mkt.sell.first-sale"
+  | "mkt.sell.paid-conversion";
 
 /** §5.7, §6.8. A computed figure with a missing input is "uncomputable — missing: …", never 0. */
 export type DerivedValue =

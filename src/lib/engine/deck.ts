@@ -63,7 +63,7 @@ import { buildRelaysSlide, buildSlgWhatIfSlides, buildTotalSlide, buildUnitBoth,
 import { appUnitMoney, unitMoney } from "./deck-unit";
 import { linkSentence } from "./deck-motions";
 import { leverAloneOf, leverIdsOf, scenarioOf } from "./scenario-of";
-import { isApp, monetizationOf } from "./setup-type";
+import { isApp, isSellingMotion, monetizationOf } from "./setup-type";
 import { renewalTermOf, slgWhatIf } from "./slg-impact";
 import { slgLeverAlone } from "./slg-scenario";
 import type { MoneyKpis } from "./money";
@@ -536,7 +536,10 @@ function buildVisibility(state: EngineState, derived: Omit<EngineDerived, "findi
   const hybrid = state.setup.motions.plg && state.setup.motions.slg;
   // In the hybrid, a row says its motion: two numbers can share a stage, and a repair belongs to one team.
   const motionTag = (id: MetricId): Row => (hybrid ? { motion: motionOfMetric(id) } : {});
-  const motionWord = (id: MetricId) => (hybrid ? strings.hybrid.motionAdjective[motionOfMetric(id)] : "");
+  const motionWord = (id: MetricId) => {
+    const motion = motionOfMetric(id);
+    return hybrid && isSellingMotion(motion) ? strings.hybrid.motionAdjective[motion] : "";
+  };
   // What is not documented, cheapest repair first: a missing number's own estimate, else the catalogue's default.
   const undocumented = shapes.filter((s) => ["todo", "requested", "missing"].includes(statusOf(entryOf(snapshot, s.id)))).map((s) => {
     const entry = entryOf(snapshot, s.id);

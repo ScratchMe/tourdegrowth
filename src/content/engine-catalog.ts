@@ -6,7 +6,8 @@ import type { DerivedId, MetricId, SourceRef } from "@/lib/engine/types";
  * engine-catalog.ts — the PROSE of the growth engine's numbers and computed
  * figures (engine spec §5, §14.13): self-serve's seventeen and five,
  * sales-assisted's fifteen and three, the hybrid's link (§18.4, A7.3.c
- * S2), and the consumer app's six and four (§21.4.4, A22 APP-1). Both
+ * S2), the consumer app's six and four (§21.4.4, A22 APP-1), and the
+ * marketplace's nineteen and six (§22.4.4, A23 MKT-1). Both
  * records are keyed by every id the types know, so a number
  * without its prose does not compile. Server only: the page
  * resolves it to one language with `resolveTree` and hands the island plain
@@ -86,7 +87,7 @@ export interface EngineDerivedEntry {
 const tool = (t: Extract<SourceRef, { kind: "tool" }>["tool"]): SourceRef => ({ kind: "tool", tool: t });
 const role = (r: Extract<SourceRef, { kind: "person" }>["role"]): SourceRef => ({ kind: "person", role: r });
 
-/** The prose of every number: self-serve's seventeen, sales-assisted's fifteen (A7.3.c S2), the link, and the consumer app's six. */
+/** The prose of every number: self-serve's seventeen, sales-assisted's fifteen (A7.3.c S2), the link, the consumer app's six, and the marketplace's nineteen (written with the words "products"; MKT-S rewrites them for "services"). */
 export const ENGINE_CATALOG: Record<MetricId, EngineCatalogEntry> = {
   // --- Acquisition -----------------------------------------------------------
   "acq.signup-rate": {
@@ -1465,6 +1466,854 @@ export const ENGINE_CATALOG: Record<MetricId, EngineCatalogEntry> = {
       en: "the published margin references are for SaaS, with no store commission or content cost",
     },
   },
+
+  // --- Marketplace (§22) ----------------------------------------------------
+  // TODO: à relire — copie neuve (convention 6), §22 (A23)
+  "mkt.buy.signup-rate": {
+    name: { fr: "Taux d'inscription des acheteurs", en: "Buyer sign-up rate" },
+    oneLiner: {
+      fr: "La part des visiteurs du mois qui créent un compte acheteur.",
+      en: "The share of the month's visitors who create a buyer account.",
+    },
+    formula: {
+      fr: "comptes acheteurs créés dans le mois ÷ visiteurs uniques du mois",
+      en: "buyer accounts created in the month ÷ unique visitors in the month",
+    },
+    inputs: {
+      numerator: { fr: "Inscrits acheteurs en {month}", en: "Buyer sign-ups in {month}" },
+      denominator: { fr: "Visiteurs uniques côté acheteurs en {month}", en: "Unique buyer-side visitors in {month}" },
+    },
+    where: [
+      {
+        source: tool("ga4"),
+        label: { fr: "GA4", en: "GA4" },
+        path: {
+          fr: "le total Utilisateurs du mois (la métrique Utilisateurs, à ajouter au rapport Acquisition de trafic si elle n'y est pas), pas Sessions",
+          en: "the month's total Users (the Users metric; add it to the Traffic acquisition report if it isn't there), not Sessions",
+        },
+      },
+      {
+        source: tool("mixpanel"),
+        label: { fr: "Mixpanel ou Amplitude", en: "Mixpanel or Amplitude" },
+        path: {
+          fr: "un entonnoir en deux étapes, page vue puis inscription d'un acheteur, sur le mois",
+          en: "a two-step funnel, page view then buyer sign-up, over the month",
+        },
+      },
+      {
+        source: tool("product-db"),
+        label: { fr: "Base produit", en: "Product database" },
+        path: {
+          fr: "les comptes acheteurs créés sur le mois",
+          en: "the buyer accounts created in the month",
+        },
+      },
+    ],
+    trap: {
+      fr: "Si on peut commander sans compte, compte une première commande avec une adresse e-mail neuve comme une inscription. Les vendeurs inscrits n'entrent pas ici.",
+      en: "If people can order without an account, count a first order with a new email address as a sign-up. Seller sign-ups don't belong here.",
+    },
+    request: {
+      fr: "le nombre de visiteurs uniques et le nombre de comptes acheteurs créés en {month}",
+      en: "the number of unique visitors and of buyer accounts created in {month}",
+    },
+    noReferenceReason: {
+      fr: "la conversion dépend de ce qu'il faut pour voir l'offre sans compte ; suis-la contre ta propre cible",
+      en: "conversion depends on how much people can see without an account; follow it against your own target",
+    },
+  },
+  "mkt.buy.cac": {
+    name: { fr: "CAC acheteur", en: "Buyer CAC" },
+    oneLiner: {
+      fr: "Ce que coûte, en moyenne, un nouvel acheteur.",
+      en: "What a new buyer costs, on average.",
+    },
+    formula: {
+      fr: "dépense d'acquisition côté acheteurs du mois ÷ nouveaux acheteurs du mois (première commande)",
+      en: "buyer-side acquisition spend in the month ÷ new buyers in the month (first order)",
+    },
+    inputs: {
+      numerator: { fr: "Dépense d'acquisition des acheteurs en {month}", en: "Buyer acquisition spend in {month}" },
+      denominator: { fr: "Nouveaux acheteurs en {month}", en: "New buyers in {month}" },
+    },
+    where: [
+      {
+        source: tool("google-ads"),
+        label: { fr: "Google Ads, Meta Ads Manager", en: "Google Ads, Meta Ads Manager" },
+        path: {
+          fr: "le montant dépensé en {month} pour les campagnes qui visent les acheteurs",
+          en: "the amount spent in {month} on the campaigns aimed at buyers",
+        },
+      },
+      {
+        source: role("finance"),
+        label: { fr: "Finance", en: "Finance" },
+        path: {
+          fr: "les salaires et les outils des équipes marketing, pour les variantes « + équipe » et « tout chargé »",
+          en: "marketing salaries and tools, for the \"+ team\" and \"fully loaded\" variants",
+        },
+      },
+      {
+        source: tool("product-db"),
+        label: { fr: "Base de commandes", en: "Orders database" },
+        path: {
+          fr: "les acheteurs dont la première commande a eu lieu en {month}",
+          en: "the buyers whose first order was in {month}",
+        },
+      },
+    ],
+    trap: {
+      fr: "La dépense pour recruter des vendeurs n'entre pas ici : elle a son propre chiffre. Un nouvel acheteur est quelqu'un qui commande pour la première fois, pas quelqu'un qui s'inscrit.",
+      en: "Spend to recruit sellers doesn't belong here: it has its own number. A new buyer is someone who orders for the first time, not someone who signs up.",
+    },
+    request: {
+      fr: "la dépense d'acquisition côté acheteurs en {month} ({variant}) et le nombre de nouveaux acheteurs du même mois",
+      en: "the buyer-side acquisition spend in {month} ({variant}) and the number of new buyers that same month",
+    },
+    noReferenceReason: {
+      fr: "il se juge contre ce qu'un acheteur rapporte (payback, LTV:CAC), pas dans l'absolu",
+      en: "it is judged against what a buyer brings in (payback, LTV:CAC), not in absolute terms",
+    },
+    variants: [
+      { id: "media-only", label: { fr: "Média seul", en: "Media only" } },
+      { id: "plus-team", label: { fr: "+ équipe marketing", en: "+ marketing team" } },
+      { id: "fully-loaded", label: { fr: "Tout chargé", en: "Fully loaded" } },
+    ],
+  },
+  "mkt.sell.cac": {
+    name: { fr: "Coût d'un vendeur actif", en: "Cost per active seller" },
+    oneLiner: {
+      fr: "Ce que coûte, en moyenne, un vendeur qui fait sa première vente.",
+      en: "What a seller who makes a first sale costs, on average.",
+    },
+    formula: {
+      fr: "dépense pour recruter des vendeurs du mois ÷ vendeurs qui ont fait leur première vente dans le mois",
+      en: "spend to recruit sellers in the month ÷ sellers who made their first sale in the month",
+    },
+    inputs: {
+      numerator: { fr: "Dépense pour l'offre en {month}", en: "Supply spend in {month}" },
+      denominator: { fr: "Nouveaux vendeurs actifs en {month}", en: "New active sellers in {month}" },
+    },
+    where: [
+      {
+        source: tool("hubspot"),
+        label: { fr: "HubSpot ou ton CRM", en: "HubSpot or your CRM" },
+        path: {
+          fr: "les vendeurs recrutés par l'équipe et le temps passé, si l'offre se recrute à la main",
+          en: "the sellers recruited by the team and the time spent, if supply is recruited by hand",
+        },
+      },
+      {
+        source: tool("spreadsheet"),
+        label: { fr: "Finance", en: "Finance" },
+        path: {
+          fr: "les salaires de l'équipe offre et les campagnes qui visent les vendeurs",
+          en: "the supply team's salaries and the campaigns aimed at sellers",
+        },
+      },
+    ],
+    trap: {
+      fr: "Il se lit à côté du CAC acheteur, jamais contre lui : les deux côtés ne se remplacent pas.",
+      en: "It is read next to the buyer CAC, never against it: one side doesn't replace the other.",
+    },
+    request: {
+      fr: "la dépense pour recruter des vendeurs en {month} ({variant}) et le nombre de vendeurs qui ont fait leur première vente ce mois-là",
+      en: "the spend to recruit sellers in {month} ({variant}) and the number of sellers who made their first sale that month",
+    },
+    noReferenceReason: {
+      fr: "il se juge contre ce que rapporte un vendeur abonné, quand tes vendeurs paient un abonnement ; sinon, il se suit sans se rembourser",
+      en: "it is judged against what a paid seller brings in, when your sellers pay a subscription; otherwise it is followed without being paid back",
+    },
+    variants: [
+      { id: "media-only", label: { fr: "Média seul", en: "Media only" } },
+      { id: "plus-team", label: { fr: "+ équipe offre", en: "+ supply team" } },
+      { id: "fully-loaded", label: { fr: "Tout chargé", en: "Fully loaded" } },
+    ],
+  },
+  "mkt.buy.first-order": {
+    name: { fr: "Première commande", en: "First order" },
+    oneLiner: {
+      fr: "La part des inscrits qui passent une première commande à temps.",
+      en: "The share of sign-ups who place a first order in time.",
+    },
+    formula: {
+      fr: "inscrits acheteurs de la cohorte ayant passé une première commande sous {n} jours ÷ inscrits acheteurs de la cohorte",
+      en: "cohort buyer sign-ups who placed a first order within {n} days ÷ cohort buyer sign-ups",
+    },
+    inputs: {
+      numerator: { fr: "Première commande sous {n} jours", en: "First order within {n} days" },
+      denominator: { fr: "Inscrits acheteurs en {cohort}", en: "Buyer sign-ups from {cohort}" },
+    },
+    where: [
+      {
+        source: tool("product-db"),
+        label: { fr: "Base de commandes", en: "Orders database" },
+        path: {
+          fr: "les inscrits en {cohort} et la date de leur première commande payée",
+          en: "the sign-ups from {cohort} and the date of their first paid order",
+        },
+      },
+      {
+        source: tool("amplitude"),
+        label: { fr: "Amplitude ou Mixpanel", en: "Amplitude or Mixpanel" },
+        path: {
+          fr: "un entonnoir inscription puis commande payée, avec une fenêtre de conversion de {n} jours",
+          en: "a funnel from sign-up to paid order, with a conversion window of {n} days",
+        },
+      },
+    ],
+    trap: {
+      fr: "Compte une commande payée, pas un panier ni une demande envoyée. Une commande annulée ou remboursée en entier ne compte pas.",
+      en: "Count a paid order, not a basket or a request sent. An order cancelled or refunded in full doesn't count.",
+    },
+    request: {
+      fr: "pour les inscrits acheteurs en {cohort}, combien ont passé une première commande payée sous {n} jours, et combien d'inscrits au total",
+      en: "for the buyer sign-ups from {cohort}, how many placed a first paid order within {n} days, and how many sign-ups in total",
+    },
+    noReferenceReason: {
+      fr: "aucun taux publié ne porte sur la même base que le tien ; compare-toi à toi-même",
+      en: "no published rate uses the same base as yours; compare with yourself",
+    },
+  },
+  "mkt.sell.first-sale": {
+    name: { fr: "Première vente", en: "First sale" },
+    oneLiner: {
+      fr: "La part des vendeurs inscrits qui vendent une première fois à temps.",
+      en: "The share of seller sign-ups who make a first sale in time.",
+    },
+    formula: {
+      fr: "vendeurs inscrits de la cohorte ayant fait une première vente sous {n} jours ÷ vendeurs inscrits de la cohorte",
+      en: "cohort seller sign-ups who made a first sale within {n} days ÷ cohort seller sign-ups",
+    },
+    inputs: {
+      numerator: { fr: "Première vente sous {n} jours", en: "First sale within {n} days" },
+      denominator: { fr: "Vendeurs inscrits en {cohort}", en: "Seller sign-ups from {cohort}" },
+    },
+    where: [
+      {
+        source: tool("product-db"),
+        label: { fr: "Base produit", en: "Product database" },
+        path: {
+          fr: "les vendeurs inscrits en {cohort} et la date de leur première vente payée",
+          en: "the sellers who signed up in {cohort} and the date of their first paid sale",
+        },
+      },
+    ],
+    trap: {
+      fr: "Un vendeur qui publie sans vendre n'est pas activé : c'est la vente qui compte, pas l'annonce.",
+      en: "A seller who lists without selling isn't activated: the sale counts, not the listing.",
+    },
+    request: {
+      fr: "pour les vendeurs inscrits en {cohort}, combien ont fait une première vente payée sous {n} jours, et combien de vendeurs inscrits au total",
+      en: "for the sellers who signed up in {cohort}, how many made a first paid sale within {n} days, and how many seller sign-ups in total",
+    },
+    noReferenceReason: {
+      fr: "aucun taux publié ne porte sur la même base que le tien ; compare-toi à toi-même",
+      en: "no published rate uses the same base as yours; compare with yourself",
+    },
+  },
+  "mkt.liq.fill-rate": {
+    name: { fr: "Taux de service", en: "Fill rate" },
+    oneLiner: {
+      fr: "La part des demandes qui trouvent une offre et aboutissent à une commande.",
+      en: "The share of requests that find supply and end in an order.",
+    },
+    formula: {
+      fr: "demandes qui aboutissent à une commande ÷ demandes du mois ({variant})",
+      en: "requests that end in an order ÷ requests in the month ({variant})",
+    },
+    inputs: {
+      numerator: { fr: "Demandes servies en {month}", en: "Requests filled in {month}" },
+      denominator: { fr: "Demandes en {month}", en: "Requests in {month}" },
+    },
+    where: [
+      {
+        source: tool("product-db"),
+        label: { fr: "Base produit", en: "Product database" },
+        path: {
+          fr: "les demandes, réservations ou missions publiées en {month}, et celles qui ont abouti à une commande",
+          en: "the requests, bookings or jobs posted in {month}, and those that ended in an order",
+        },
+      },
+      {
+        source: tool("amplitude"),
+        label: { fr: "Amplitude ou Mixpanel", en: "Amplitude or Mixpanel" },
+        path: {
+          fr: "les sessions avec une recherche et une fiche consultée, et celles qui se terminent par une commande",
+          en: "the sessions with a search and a listing viewed, and those that end in an order",
+        },
+      },
+    ],
+    trap: {
+      fr: "Écris ce qu'est une demande. Avec des recherches, ne compte que celles où quelqu'un a regardé une annonce : une recherche vide n'est pas une demande.",
+      en: "Write down what a request is. With searches, only count those where someone looked at a listing: an empty search isn't a request.",
+    },
+    request: {
+      fr: "le nombre de demandes en {month} ({variant}) et le nombre de celles qui ont abouti à une commande",
+      en: "the number of requests in {month} ({variant}) and how many ended in an order",
+    },
+    noReferenceReason: {
+      fr: "il dépend de ce que tu comptes comme une demande ; c'est le chiffre qui dit si ta place de marché tient sa promesse, suis-le contre ta cible",
+      en: "it depends on what you count as a request; it is the number that says whether your marketplace keeps its promise, follow it against your target",
+    },
+    variants: [
+      { id: "requests", label: { fr: "Demandes envoyées : réservation, devis…", en: "Requests sent: booking, quote…" } },
+      { id: "searches", label: { fr: "Recherches avec une annonce consultée", en: "Searches with a listing viewed" } },
+    ],
+  },
+  "mkt.buy.repeat": {
+    name: { fr: "Deuxième commande", en: "Second order" },
+    oneLiner: {
+      fr: "La part des inscrits qui reviennent commander une deuxième fois à temps.",
+      en: "The share of sign-ups who come back for a second order in time.",
+    },
+    formula: {
+      fr: "inscrits acheteurs de la cohorte ayant passé au moins deux commandes sous {n} jours ÷ inscrits acheteurs de la cohorte",
+      en: "cohort buyer sign-ups who placed at least two orders within {n} days ÷ cohort buyer sign-ups",
+    },
+    inputs: {
+      numerator: { fr: "Deux commandes sous {n} jours", en: "Two orders within {n} days" },
+      denominator: { fr: "Inscrits acheteurs en {cohort}", en: "Buyer sign-ups from {cohort}" },
+    },
+    where: [
+      {
+        source: tool("product-db"),
+        label: { fr: "Base de commandes", en: "Orders database" },
+        path: {
+          fr: "les inscrits en {cohort} qui ont au moins deux commandes payées dans les {n} jours qui suivent leur inscription",
+          en: "the sign-ups from {cohort} with at least two paid orders in the {n} days after signing up",
+        },
+      },
+      {
+        source: tool("amplitude"),
+        label: { fr: "Amplitude", en: "Amplitude" },
+        path: {
+          fr: "un graphique Retention Analysis, retour une commande payée, lu sur {n} jours",
+          en: "a Retention Analysis chart, return event a paid order, read over {n} days",
+        },
+      },
+    ],
+    trap: {
+      fr: "La fenêtre court depuis l'inscription, pas depuis la première commande : c'est ce qui garde les deux colonnes sur les mêmes 100 inscrits.",
+      en: "The window runs from sign-up, not from the first order: that is what keeps both columns on the same 100 sign-ups.",
+    },
+    request: {
+      fr: "pour les inscrits acheteurs en {cohort}, combien ont passé au moins deux commandes payées sous {n} jours, et combien d'inscrits au total",
+      en: "for the buyer sign-ups from {cohort}, how many placed at least two paid orders within {n} days, and how many sign-ups in total",
+    },
+    noReferenceReason: {
+      fr: "la fréquence d'achat d'une catégorie à l'autre va de la semaine à l'année ; compare-toi à toi-même",
+      en: "purchase frequency ranges from weekly to yearly across categories; compare with yourself",
+    },
+  },
+  "mkt.buy.churn": {
+    name: { fr: "Churn mensuel des acheteurs", en: "Monthly buyer churn" },
+    oneLiner: {
+      fr: "La part des acheteurs actifs qui cessent de l'être dans le mois.",
+      en: "The share of active buyers who stop being active in the month.",
+    },
+    formula: {
+      fr: "acheteurs sortis des actifs dans le mois ÷ acheteurs actifs au 1er du mois (actif : au moins une commande sur les 12 derniers mois)",
+      en: "buyers who left the active base in the month ÷ active buyers at the start of the month (active: at least one order in the last 12 months)",
+    },
+    inputs: {
+      numerator: { fr: "Acheteurs sortis en {month}", en: "Buyers who left in {month}" },
+      denominator: { fr: "Acheteurs actifs au 1er {month}", en: "Active buyers at the start of {month}" },
+    },
+    where: [
+      {
+        source: tool("product-db"),
+        label: { fr: "Base de commandes", en: "Orders database" },
+        path: {
+          fr: "les acheteurs actifs au 1er {month} dont la dernière commande atteint ses 12 mois pendant le mois sans nouvelle commande",
+          en: "the buyers active at the start of {month} whose last order turns 12 months old during the month with no new order",
+        },
+      },
+    ],
+    trap: {
+      fr: "Sans liste des départs, déduis-le : actifs au 1er + nouveaux acheteurs – actifs à fin de mois, divisé par les actifs au 1er. Un acheteur revenu après un an compte comme resté.",
+      en: "Without a list of who left, derive it: active at the start + new buyers – active at month end, divided by active at the start. A buyer back after a year counts as kept.",
+    },
+    request: {
+      fr: "le nombre d'acheteurs actifs (au moins une commande sur 12 mois) au 1er {month}, et le nombre de ceux qui ne l'étaient plus à la fin du mois",
+      en: "the number of active buyers (at least one order in 12 months) at the start of {month}, and how many were no longer active at month end",
+    },
+    noReferenceReason: {
+      fr: "il dépend de la fréquence d'achat de ta catégorie ; suis-le contre ta propre cible",
+      en: "it depends on how often your category buys; follow it against your own target",
+    },
+  },
+  "mkt.sell.churn": {
+    name: { fr: "Churn mensuel des vendeurs", en: "Monthly seller churn" },
+    oneLiner: {
+      fr: "La part des vendeurs actifs qui cessent de l'être dans le mois.",
+      en: "The share of active sellers who stop being active in the month.",
+    },
+    formula: {
+      fr: "vendeurs sortis des actifs dans le mois ÷ vendeurs actifs au 1er du mois (actif : au moins une vente sur les 12 derniers mois)",
+      en: "sellers who left the active base in the month ÷ active sellers at the start of the month (active: at least one sale in the last 12 months)",
+    },
+    inputs: {
+      numerator: { fr: "Vendeurs sortis en {month}", en: "Sellers who left in {month}" },
+      denominator: { fr: "Vendeurs actifs au 1er {month}", en: "Active sellers at the start of {month}" },
+    },
+    where: [
+      {
+        source: tool("product-db"),
+        label: { fr: "Base produit", en: "Product database" },
+        path: {
+          fr: "les vendeurs actifs au 1er {month} et ceux dont la dernière vente atteint ses 12 mois sans nouvelle vente",
+          en: "the sellers active at the start of {month} and those whose last sale turns 12 months old with no new sale",
+        },
+      },
+    ],
+    trap: {
+      fr: "Un vendeur qui ferme son compte et un vendeur qui ne vend plus partent tous les deux : compte les deux.",
+      en: "A seller who closes their account and a seller who no longer sells both leave: count both.",
+    },
+    request: {
+      fr: "le nombre de vendeurs actifs au 1er {month}, et le nombre de ceux qui ne l'étaient plus à la fin du mois",
+      en: "the number of active sellers at the start of {month}, and how many were no longer active at month end",
+    },
+    noReferenceReason: {
+      fr: "il dépend de la fréquence d'achat de ta catégorie ; suis-le contre ta propre cible",
+      en: "it depends on how often your category buys; follow it against your own target",
+    },
+  },
+  "mkt.buy.referred-share": {
+    name: { fr: "Part des acheteurs recommandés", en: "Referred buyer share" },
+    oneLiner: {
+      fr: "La part des inscrits acheteurs amenés par un utilisateur.",
+      en: "The share of buyer sign-ups brought in by a user.",
+    },
+    formula: {
+      fr: "inscrits acheteurs via un utilisateur (parrainage, lien partagé, « comment nous avez-vous connus ? ») ÷ inscrits acheteurs de la cohorte",
+      en: "buyer sign-ups who came through a user (referral, shared link, \"how did you hear about us?\") ÷ cohort buyer sign-ups",
+    },
+    inputs: {
+      numerator: { fr: "Inscrits acheteurs recommandés", en: "Referred buyer sign-ups" },
+      denominator: { fr: "Inscrits acheteurs en {cohort}", en: "Buyer sign-ups from {cohort}" },
+    },
+    where: [
+      {
+        source: tool("product-db"),
+        label: { fr: "Outil de parrainage ou base produit", en: "Referral tool or product database" },
+        path: {
+          fr: "les inscrits en {cohort} qui ont un parrain, un code ou un lien partagé par un vendeur ou un acheteur",
+          en: "the sign-ups from {cohort} with a referrer, a code or a link shared by a seller or a buyer",
+        },
+      },
+      {
+        source: tool("hubspot"),
+        label: { fr: "HubSpot", en: "HubSpot" },
+        path: {
+          fr: "une propriété « comment nous avez-vous connus ? » remplie à l'inscription",
+          en: "a \"how did you hear about us?\" property filled in at sign-up",
+        },
+      },
+    ],
+    trap: {
+      fr: "Un vendeur qui partage son annonce amène des acheteurs : c'est de la recommandation, compte-la. La source « referral » de GA4 n'en est pas.",
+      en: "A seller who shares their listing brings buyers: that is referral, count it. GA4's \"referral\" source isn't.",
+    },
+    request: {
+      fr: "pour les inscrits acheteurs en {cohort}, combien sont arrivés par un parrainage, un lien partagé ou une recommandation déclarée",
+      en: "for the buyer sign-ups from {cohort}, how many came through a referral, a shared link or a stated recommendation",
+    },
+    noReferenceReason: {
+      fr: "de presque rien à la majorité selon que le produit se voit ou non ; compare-toi à toi-même",
+      en: "from almost none to a majority depending on whether other people see the product; compare with yourself",
+    },
+  },
+  "mkt.rev.take-rate": {
+    name: { fr: "Commission (take rate)", en: "Take rate" },
+    oneLiner: {
+      fr: "La part du volume d'affaires que la place de marché garde.",
+      en: "The share of the gross volume the marketplace keeps.",
+    },
+    formula: {
+      fr: "revenu net du mois (commissions et frais facturés) ÷ volume d'affaires du mois (GMV)",
+      en: "net revenue in the month (commissions and fees charged) ÷ gross merchandise value in the month (GMV)",
+    },
+    inputs: {
+      numerator: { fr: "Revenu net en {month}", en: "Net revenue in {month}" },
+      denominator: { fr: "Volume d'affaires (GMV) en {month}", en: "Gross merchandise value (GMV) in {month}" },
+    },
+    where: [
+      {
+        source: tool("stripe"),
+        label: { fr: "Stripe Connect", en: "Stripe Connect" },
+        path: {
+          fr: "le volume des paiements du mois et les frais que la plateforme a prélevés",
+          en: "the month's payment volume and the fees the platform collected",
+        },
+      },
+      {
+        source: tool("spreadsheet"),
+        label: { fr: "Finance", en: "Finance" },
+        path: {
+          fr: "le chiffre d'affaires de commissions du mois et le volume qui l'a produit",
+          en: "the month's commission revenue and the volume that produced it",
+        },
+      },
+      {
+        source: tool("product-db"),
+        label: { fr: "Base de commandes", en: "Orders database" },
+        path: {
+          fr: "la somme des commandes payées du mois et la commission de chacune",
+          en: "the sum of the month's paid orders and each one's commission",
+        },
+      },
+    ],
+    trap: {
+      fr: "Écris ce que ton GMV compte (livraison, taxes). Un remboursement retire sa commande des deux côtés. Les abonnements des vendeurs ont leur propre chiffre.",
+      en: "Write down what your GMV counts (shipping, taxes). A refund takes its order off both sides. Seller subscriptions have their own number.",
+    },
+    request: {
+      fr: "le volume d'affaires (GMV) en {month} et le revenu net que la place de marché en a gardé (commissions et frais)",
+      en: "the gross merchandise value (GMV) in {month} and the net revenue the marketplace kept from it (commissions and fees)",
+    },
+    noReferenceReason: {
+      fr: "elle dépend de ce que la place de marché fait pour la transaction (paiement, garantie, livraison) ; elle se suit contre ta cible",
+      en: "it depends on what the marketplace does for the transaction (payment, guarantee, delivery); follow it against your target",
+    },
+  },
+  "mkt.rev.aov": {
+    name: { fr: "Panier moyen", en: "Average order value" },
+    oneLiner: {
+      fr: "Ce que vaut, en moyenne, une commande.",
+      en: "What an order is worth, on average.",
+    },
+    formula: {
+      fr: "volume d'affaires du mois ÷ commandes du mois",
+      en: "gross merchandise value in the month ÷ orders in the month",
+    },
+    inputs: {
+      numerator: { fr: "Volume d'affaires (GMV) en {month}", en: "Gross merchandise value (GMV) in {month}" },
+      denominator: { fr: "Commandes en {month}", en: "Orders in {month}" },
+    },
+    where: [
+      {
+        source: tool("product-db"),
+        label: { fr: "Base de commandes", en: "Orders database" },
+        path: {
+          fr: "la somme et le nombre des commandes payées du mois",
+          en: "the sum and the number of the month's paid orders",
+        },
+      },
+      {
+        source: tool("stripe"),
+        label: { fr: "Stripe Connect", en: "Stripe Connect" },
+        path: {
+          fr: "le volume et le nombre des paiements du mois",
+          en: "the month's payment volume and count",
+        },
+      },
+    ],
+    trap: {
+      fr: "Garde la même définition du GMV que pour la commission : les deux partagent ce chiffre.",
+      en: "Keep the same definition of GMV as for the take rate: both share this number.",
+    },
+    request: {
+      fr: "le volume d'affaires (GMV) et le nombre de commandes payées en {month}",
+      en: "the gross merchandise value (GMV) and the number of paid orders in {month}",
+    },
+    noReferenceReason: {
+      fr: "il dépend entièrement de ce qui se vend chez toi",
+      en: "it depends entirely on what sells on your marketplace",
+    },
+  },
+  "mkt.rev.frequency": {
+    name: { fr: "Fréquence de commande", en: "Order frequency" },
+    oneLiner: {
+      fr: "Le nombre moyen de commandes d'un acheteur actif dans le mois.",
+      en: "The average number of orders an active buyer places in the month.",
+    },
+    formula: {
+      fr: "commandes du mois ÷ acheteurs actifs à fin de mois (actif : au moins une commande sur 12 mois)",
+      en: "orders in the month ÷ active buyers at month end (active: at least one order in 12 months)",
+    },
+    inputs: {
+      numerator: { fr: "Commandes en {month}", en: "Orders in {month}" },
+      denominator: { fr: "Acheteurs actifs à fin {month}", en: "Active buyers at the end of {month}" },
+    },
+    where: [
+      {
+        source: tool("product-db"),
+        label: { fr: "Base de commandes", en: "Orders database" },
+        path: {
+          fr: "le nombre de commandes payées du mois, et le nombre d'acheteurs avec au moins une commande sur les 12 derniers mois à la fin du mois",
+          en: "the number of paid orders in the month, and the number of buyers with at least one order in the last 12 months at month end",
+        },
+      },
+    ],
+    trap: {
+      fr: "Elle se lit sur les acheteurs actifs sur 12 mois, pas sur ceux du mois : 0,3 veut dire qu'un acheteur actif commande à peu près une fois tous les trois mois.",
+      en: "It is read on buyers active over 12 months, not on the month's: 0.3 means an active buyer orders about once every three months.",
+    },
+    request: {
+      fr: "le nombre de commandes payées en {month} et le nombre d'acheteurs actifs (au moins une commande sur 12 mois) à la fin du mois",
+      en: "the number of paid orders in {month} and the number of active buyers (at least one order in 12 months) at month end",
+    },
+    noReferenceReason: {
+      fr: "la fréquence d'achat d'une catégorie à l'autre va de la semaine à l'année ; compare-toi à toi-même",
+      en: "purchase frequency ranges from weekly to yearly across categories; compare with yourself",
+    },
+  },
+  "mkt.rev.gross-margin": {
+    name: { fr: "Marge sur le revenu net", en: "Margin on net revenue" },
+    oneLiner: {
+      fr: "Ce qu'il reste du revenu net après le coût direct de chaque commande.",
+      en: "What is left of net revenue after the direct cost of each order.",
+    },
+    formula: {
+      fr: "(revenu net – coûts directs : frais de paiement, assurance, support des commandes, remboursements à ta charge) ÷ revenu net",
+      en: "(net revenue – direct costs: payment fees, insurance, order support, refunds you bear) ÷ net revenue",
+    },
+    inputs: {
+      numerator: { fr: "Marge sur ce revenu net", en: "Margin on that net revenue" },
+      denominator: { fr: "Revenu net en {month}", en: "Net revenue in {month}" },
+    },
+    where: [
+      {
+        source: role("finance"),
+        label: { fr: "Finance", en: "Finance" },
+        path: {
+          fr: "le compte de résultat du dernier trimestre clos : le revenu net, puis les coûts directs des commandes",
+          en: "the income statement of the last closed quarter: net revenue, then the direct cost of orders",
+        },
+      },
+    ],
+    trap: {
+      fr: "Les frais de paiement se paient sur tout le GMV, pas sur ta commission : à 12 % de commission, 2 % de frais sur le GMV mangent déjà un sixième de ton revenu net.",
+      en: "Payment fees are paid on the whole GMV, not on your commission: at a 12% take rate, 2% fees on GMV already eat a sixth of your net revenue.",
+    },
+    request: {
+      fr: "la marge sur le revenu net du dernier trimestre clos, et ce que ses coûts directs comprennent",
+      en: "the margin on net revenue of the last closed quarter, and what its direct costs include",
+    },
+    noReferenceReason: {
+      fr: "les repères de marge publiés portent sur le logiciel, pas sur une commission",
+      en: "the published margin references are for software, not for a commission",
+    },
+  },
+  "mkt.sell.signup-rate": {
+    name: { fr: "Taux d'inscription des vendeurs", en: "Seller sign-up rate" },
+    oneLiner: {
+      fr: "La part des visiteurs de ta page vendeurs qui créent un compte vendeur.",
+      en: "The share of your seller page's visitors who create a seller account.",
+    },
+    formula: {
+      fr: "comptes vendeurs créés dans le mois ÷ visiteurs uniques de la page vendeurs du mois",
+      en: "seller accounts created in the month ÷ unique visitors to the seller page in the month",
+    },
+    inputs: {
+      numerator: { fr: "Vendeurs inscrits en {month}", en: "Seller sign-ups in {month}" },
+      denominator: { fr: "Visiteurs de la page vendeurs en {month}", en: "Seller page visitors in {month}" },
+    },
+    where: [
+      {
+        source: tool("ga4"),
+        label: { fr: "GA4", en: "GA4" },
+        path: {
+          fr: "les visiteurs uniques de ta page pour devenir vendeur, et l'événement de création d'un compte vendeur, sur le mois",
+          en: "the unique visitors to your become-a-seller page, and the seller account creation event, over the month",
+        },
+      },
+      {
+        source: tool("product-db"),
+        label: { fr: "Base produit", en: "Product database" },
+        path: {
+          fr: "les comptes vendeurs créés sur le mois",
+          en: "the seller accounts created in the month",
+        },
+      },
+    ],
+    trap: {
+      fr: "Sans page à part pour les vendeurs, divise par tous les visiteurs du mois et écris-le : le taux sera bas, mais comparable d'un mois à l'autre.",
+      en: "With no separate page for sellers, divide by all the month's visitors and write it down: the rate will be low, but comparable month to month.",
+    },
+    request: {
+      fr: "le nombre de visiteurs de la page vendeurs et le nombre de comptes vendeurs créés en {month}",
+      en: "the number of seller page visitors and of seller accounts created in {month}",
+    },
+    noReferenceReason: {
+      fr: "il dépend de ce que tu offres aux vendeurs et de l'endroit où tu les recrutes ; suis-le contre ta propre cible",
+      en: "it depends on what you offer sellers and where you recruit them; follow it against your own target",
+    },
+  },
+  "mkt.sell.paid-conversion": {
+    name: { fr: "Conversion en vendeur abonné", en: "Seller subscription conversion" },
+    oneLiner: {
+      fr: "La part des vendeurs inscrits qui prennent un abonnement à temps.",
+      en: "The share of seller sign-ups who take a subscription in time.",
+    },
+    formula: {
+      fr: "vendeurs inscrits de la cohorte abonnés sous {n} jours ÷ vendeurs inscrits de la cohorte",
+      en: "cohort seller sign-ups subscribed within {n} days ÷ cohort seller sign-ups",
+    },
+    inputs: {
+      numerator: { fr: "Abonnés sous {n} jours", en: "Subscribed within {n} days" },
+      denominator: { fr: "Vendeurs inscrits en {cohort}", en: "Seller sign-ups from {cohort}" },
+    },
+    where: [
+      {
+        source: tool("stripe"),
+        label: { fr: "Stripe Billing", en: "Stripe Billing" },
+        path: {
+          fr: "les premiers paiements d'abonnement des vendeurs inscrits en {cohort}, sous {n} jours",
+          en: "the first subscription payments of the sellers who signed up in {cohort}, within {n} days",
+        },
+      },
+      {
+        source: tool("product-db"),
+        label: { fr: "Base produit", en: "Product database" },
+        path: {
+          fr: "les vendeurs inscrits en {cohort} et la date de leur premier paiement d'abonnement",
+          en: "the sellers who signed up in {cohort} and the date of their first subscription payment",
+        },
+      },
+    ],
+    trap: {
+      fr: "Un essai gratuit n'est pas un abonnement : compte le premier paiement. La fenêtre est celle de la première vente : les deux se lisent sur les mêmes vendeurs inscrits.",
+      en: "A free trial isn't a subscription: count the first payment. The window is the first sale's: both are read on the same seller sign-ups.",
+    },
+    request: {
+      fr: "pour les vendeurs inscrits en {cohort}, combien ont payé un premier abonnement sous {n} jours, et combien de vendeurs inscrits au total",
+      en: "for the sellers who signed up in {cohort}, how many paid a first subscription within {n} days, and how many seller sign-ups in total",
+    },
+    noReferenceReason: {
+      fr: "elle dépend de ce que l'abonnement apporte au vendeur ; compare-toi à toi-même",
+      en: "it depends on what the subscription gives the seller; compare with yourself",
+    },
+  },
+  "mkt.sell.arpa": {
+    name: { fr: "Revenu mensuel par vendeur abonné", en: "Monthly revenue per paid seller" },
+    oneLiner: {
+      fr: "Ce que paie en moyenne un vendeur abonné, par mois.",
+      en: "What a paid seller pays on average, per month.",
+    },
+    formula: {
+      fr: "MRR des abonnements vendeurs ÷ vendeurs abonnés",
+      en: "sellers' subscription MRR ÷ paid sellers",
+    },
+    inputs: {
+      numerator: { fr: "MRR vendeurs à fin {month}", en: "Seller MRR at the end of {month}" },
+      denominator: { fr: "Vendeurs abonnés à fin {month}", en: "Paid sellers at the end of {month}" },
+    },
+    where: [
+      {
+        source: tool("stripe"),
+        label: { fr: "Stripe Billing", en: "Stripe Billing" },
+        path: {
+          fr: "le MRR et les abonnés actifs, filtrés sur les produits d'abonnement des vendeurs",
+          en: "MRR and active subscribers, filtered to the sellers' subscription products",
+        },
+      },
+      {
+        source: tool("product-db"),
+        label: { fr: "Base produit", en: "Product database" },
+        path: {
+          fr: "les abonnements vendeurs actifs à fin {month} et leur prix mensuel",
+          en: "the active seller subscriptions at the end of {month} and their monthly price",
+        },
+      },
+    ],
+    trap: {
+      fr: "Un abonnement annuel compte pour un douzième de son prix chaque mois. Les commissions n'entrent pas ici : elles ont leur chiffre.",
+      en: "An annual plan counts for a twelfth of its price each month. Commissions don't belong here: they have their own number.",
+    },
+    request: {
+      fr: "le MRR des abonnements vendeurs à fin {month} et le nombre de vendeurs abonnés à la même date",
+      en: "the sellers' subscription MRR at the end of {month} and the number of paid sellers on the same date",
+    },
+    noReferenceReason: {
+      fr: "il dépend entièrement de ta grille d'abonnements",
+      en: "it depends entirely on your subscription plans",
+    },
+  },
+  "mkt.sell.paid-churn": {
+    name: { fr: "Churn mensuel des vendeurs abonnés", en: "Monthly paid seller churn" },
+    oneLiner: {
+      fr: "La part des vendeurs abonnés qui arrêtent leur abonnement dans le mois.",
+      en: "The share of paid sellers who end their subscription in the month.",
+    },
+    formula: {
+      fr: "vendeurs abonnés perdus dans le mois ÷ vendeurs abonnés au 1er du mois",
+      en: "paid sellers lost in the month ÷ paid sellers at the start of the month",
+    },
+    inputs: {
+      numerator: { fr: "Abonnés perdus en {month}", en: "Paid sellers lost in {month}" },
+      denominator: { fr: "Vendeurs abonnés au 1er {month}", en: "Paid sellers at the start of {month}" },
+    },
+    where: [
+      {
+        source: tool("stripe"),
+        label: { fr: "Stripe Billing", en: "Stripe Billing" },
+        path: {
+          fr: "les abonnements vendeurs annulés dans le mois, et les abonnés au 1er",
+          en: "the seller subscriptions cancelled in the month, and the subscribers at the start",
+        },
+      },
+      {
+        source: tool("product-db"),
+        label: { fr: "Base produit", en: "Product database" },
+        path: {
+          fr: "les abonnements vendeurs actifs au 1er {month} et ceux qui ne l'étaient plus à la fin",
+          en: "the seller subscriptions active at the start of {month} and those no longer active at the end",
+        },
+      },
+    ],
+    trap: {
+      fr: "Un vendeur qui arrête son abonnement mais vend encore n'a pas quitté la place de marché : il compte ici, pas dans le churn des vendeurs.",
+      en: "A seller who ends their subscription but still sells hasn't left the marketplace: they count here, not in seller churn.",
+    },
+    request: {
+      fr: "le nombre de vendeurs abonnés au 1er {month} et le nombre de ceux qui ont arrêté leur abonnement pendant le mois",
+      en: "the number of paid sellers at the start of {month} and how many ended their subscription during the month",
+    },
+    noReferenceReason: {
+      fr: "il dépend de ce que l'abonnement apporte ; suis-le contre ta propre cible",
+      en: "it depends on what the subscription gives; follow it against your own target",
+    },
+  },
+  "mkt.sell.gross-margin": {
+    name: { fr: "Marge sur les abonnements vendeurs", en: "Margin on seller subscriptions" },
+    oneLiner: {
+      fr: "Ce qu'il reste des abonnements des vendeurs après ce qu'ils coûtent à servir.",
+      en: "What is left of the sellers' subscriptions after what they cost to serve.",
+    },
+    formula: {
+      fr: "(MRR vendeurs – coûts directs : outils fournis aux vendeurs, support, frais de paiement) ÷ MRR vendeurs",
+      en: "(seller MRR – direct costs: tools provided to sellers, support, payment fees) ÷ seller MRR",
+    },
+    inputs: {
+      numerator: { fr: "Marge sur ce MRR", en: "Margin on that MRR" },
+      denominator: { fr: "MRR vendeurs à fin {month}", en: "Seller MRR at the end of {month}" },
+    },
+    where: [
+      {
+        source: role("finance"),
+        label: { fr: "Finance", en: "Finance" },
+        path: {
+          fr: "le compte de résultat du dernier trimestre clos : le chiffre d'affaires des abonnements vendeurs, puis leurs coûts directs",
+          en: "the income statement of the last closed quarter: the seller subscription revenue, then its direct costs",
+        },
+      },
+    ],
+    trap: {
+      fr: "Ce n'est pas la marge des commissions : un abonnement coûte peu à servir, une commande coûte ses frais de paiement. Chaque flux a sa marge.",
+      en: "This isn't the commissions' margin: a subscription costs little to serve, an order costs its payment fees. Each stream has its own margin.",
+    },
+    request: {
+      fr: "la marge sur les abonnements vendeurs du dernier trimestre clos, et ce que ses coûts directs comprennent",
+      en: "the margin on seller subscriptions of the last closed quarter, and what its direct costs include",
+    },
+    noReferenceReason: {
+      fr: "les repères de marge publiés portent sur le logiciel vendu seul, pas sur l'abonnement d'une place de marché",
+      en: "the published margin references are for software sold on its own, not for a marketplace's subscription",
+    },
+  },
 };
 
 export const ENGINE_DERIVED_CATALOG: Record<DerivedId, EngineDerivedEntry> = {
@@ -1578,6 +2427,69 @@ export const ENGINE_DERIVED_CATALOG: Record<DerivedId, EngineDerivedEntry> = {
     formula: {
       fr: "valeur d'une installation sur 12 mois ÷ coût par installation",
       en: "an install's 12-month value ÷ cost per install",
+    },
+    uncomputable: { fr: "incalculable — il manque {input}", en: "can't be computed — missing: {input}" },
+  },
+  // --- Marketplace (§22) ----------------------------------------------------
+  // TODO: à relire — copie neuve (convention 6), §22 (A23)
+  "mkt.rev.ltv": {
+    name: { fr: "LTV acheteur", en: "Buyer LTV" },
+    formula: {
+      fr: "fréquence × panier moyen × commission × marge × durée de vie (1 ÷ churn mensuel des acheteurs, au plus 36 mois)",
+      en: "frequency × average order value × take rate × margin × lifetime (1 ÷ monthly buyer churn, at most 36 months)",
+    },
+    uncomputable: { fr: "incalculable — il manque {input}", en: "can't be computed — missing: {input}" },
+    capNote: {
+      fr: "durée de vie plafonnée à 36 mois : beaucoup de praticiens plafonnent entre trois et cinq ans, on prend le bas",
+      en: "lifetime capped at 36 months: many practitioners cap it between three and five years, we take the low end",
+    },
+  },
+  "mkt.rev.cac-payback": {
+    name: { fr: "CAC payback acheteur", en: "Buyer CAC payback" },
+    formula: {
+      fr: "CAC acheteur ÷ (fréquence × panier moyen × commission × marge), en mois",
+      en: "buyer CAC ÷ (frequency × average order value × take rate × margin), in months",
+    },
+    uncomputable: { fr: "incalculable — il manque {input}", en: "can't be computed — missing: {input}" },
+    caveat: {
+      fr: "la vraie comparaison reste la trésorerie",
+      en: "the real comparison is still the cash in the bank",
+    },
+  },
+  "mkt.rev.ltv-cac": {
+    name: { fr: "LTV:CAC acheteur", en: "Buyer LTV:CAC" },
+    formula: { fr: "LTV acheteur ÷ CAC acheteur", en: "buyer LTV ÷ buyer CAC" },
+    uncomputable: { fr: "incalculable — il manque {input}", en: "can't be computed — missing: {input}" },
+  },
+  "mkt.sell.ltv": {
+    name: { fr: "LTV vendeur abonné", en: "Paid seller LTV" },
+    formula: {
+      fr: "revenu par vendeur abonné × marge × durée de vie (1 ÷ churn mensuel des vendeurs abonnés, au plus 36 mois)",
+      en: "revenue per paid seller × margin × lifetime (1 ÷ monthly paid seller churn, at most 36 months)",
+    },
+    uncomputable: { fr: "incalculable — il manque {input}", en: "can't be computed — missing: {input}" },
+    capNote: {
+      fr: "durée de vie plafonnée à 36 mois : beaucoup de praticiens plafonnent entre trois et cinq ans, on prend le bas",
+      en: "lifetime capped at 36 months: many practitioners cap it between three and five years, we take the low end",
+    },
+  },
+  "mkt.sell.cac-payback": {
+    name: { fr: "Payback d'un vendeur abonné", en: "Paid seller payback" },
+    formula: {
+      fr: "(coût d'un vendeur actif × première vente ÷ conversion en abonné) ÷ (revenu par vendeur abonné × marge), en mois",
+      en: "(cost per active seller × first sale ÷ subscription conversion) ÷ (revenue per paid seller × margin), in months",
+    },
+    uncomputable: { fr: "incalculable — il manque {input}", en: "can't be computed — missing: {input}" },
+    caveat: {
+      fr: "la vraie comparaison reste la trésorerie",
+      en: "the real comparison is still the cash in the bank",
+    },
+  },
+  "mkt.sell.ltv-cac": {
+    name: { fr: "LTV:CAC vendeur abonné", en: "Paid seller LTV:CAC" },
+    formula: {
+      fr: "LTV vendeur abonné ÷ coût d'un vendeur abonné",
+      en: "paid seller LTV ÷ cost per paid seller",
     },
     uncomputable: { fr: "incalculable — il manque {input}", en: "can't be computed — missing: {input}" },
   },

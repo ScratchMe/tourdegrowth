@@ -322,8 +322,10 @@ module feuille **`setup-type.ts`** (§21.2.2 : des `import type` seulement, pour
 qu'aucun cycle de valeurs ne naisse) ; `business-type.ts` le réexporte.
 
 ```ts
-// src/lib/engine/setup-type.ts — gains (MOTIONS is a value of types.ts, which imports nothing of the engine)
-import { MOTIONS } from "./types";
+// src/lib/engine/setup-type.ts — gains (`import type` only: the module stays a strict leaf)
+/** The two selling motions, in MOTIONS order (a test holds them equal): a value import of MOTIONS would pull types.ts,
+ * ENGINE_INDEX_KEY with it, into every page that loads this module (MKT-1, e2e/engine-entries.spec.ts). */
+export const SELLING_MOTIONS = ["plg", "slg"] as const satisfies readonly Motion[];
 /** §21.2.2 put the list here (access.ts, read by the Edge proxy, imports it): it gains the marketplace. */
 export const BUSINESS_TYPES: readonly BusinessType[] = ["b2b-saas", "consumer-app", "marketplace"];
 export function isMarketplace(setup: Pick<EngineSetup, "type">): boolean {
@@ -332,7 +334,7 @@ export function isMarketplace(setup: Pick<EngineSetup, "type">): boolean {
 /** The motions an engine derives, in ENGINE_MOTIONS order (§22.1 D1). */
 export function activeMotions(setup: Pick<EngineSetup, "type" | "motions">): EngineMotion[] {
   if (setup.type === "marketplace") return ["mkt"];
-  return MOTIONS.filter((m) => setup.motions[m]);
+  return SELLING_MOTIONS.filter((m) => setup.motions[m]);
 }
 /** The narrowing §22.2.5 uses where an EngineMotion reaches code written for the two selling motions. */
 export function isSellingMotion(m: EngineMotion): m is Motion {
@@ -347,9 +349,15 @@ export function mktSetup(setup: Pick<EngineSetup, "type" | "offering" | "sellerS
 };
 ```
 
-`setup-type.ts` importe la **valeur** `MOTIONS` de `types.ts` : c'est permis
-(`types.ts` n'importe aucune valeur du moteur) ; le test d'APP-0 (« chaque
-import est un `import type` ») gagne cette seule exception, nommée.
+**`setup-type.ts` n'importe aucune valeur**, pas même `MOTIONS` : le test
+d'APP-0 (« chaque import est un `import type` ») reste strict. Ce document le
+permettait d'abord ; MKT-1 l'a payé (#380). `goatcounter.ts`, chargé par toutes
+les pages, lit `setup-type.ts` ; dès qu'`activeMotions` a eu son premier
+appelant (`bridge.ts`), le bundler a gardé l'import de `MOTIONS`, donc
+`types.ts` entier, `ENGINE_INDEX_KEY` compris, dans treize chunks, dont trois
+de l'accueil d'un build fermé, ce que `e2e/engine-entries.spec.ts` refuse.
+`setup-type.ts` porte donc son propre tuple, `SELLING_MOTIONS`, qu'un test
+tient égal à `MOTIONS`.
 
 ```ts
 // src/lib/engine/business-type.ts — changes
@@ -415,8 +423,13 @@ reste de §22 lit la place de marché par `isMarketplace`, `activeMotions` ou
 - Les listes : `MKT_METRIC_SHAPES`, `MKT_DERIVED_SHAPES`,
   `MKT_DEMAND_CANDIDATE_IDS`, `MKT_SUPPLY_CANDIDATE_IDS`,
   `MKT_DEMAND_LEVER_IDS`, `MKT_SUPPLY_LEVER_IDS`, `MKT_ENGINE_BRIDGES` ;
-  `ALL_METRIC_SHAPES`, `ALL_DERIVED_SHAPES`, `ALL_LEVER_IDS` les incluent **à la
-  fin**.
+  `ALL_METRIC_SHAPES`, `ALL_DERIVED_SHAPES` les incluent **à la fin** (MKT-1),
+  et `ALL_LEVER_IDS` à MKT-3, qui élargit `LeverId` (un type vient avec ses
+  entrées, §22.2.1). Écrites à MKT-1 avant que leurs types existent, les
+  quatre listes de candidats et de leviers sont typées `readonly
+  MktMetricId[]`, et les règles partagées `readonly (CandidateId |
+  MktMetricId)[]` ; MKT-3 et MKT-4 les retypent en `MktDemandLeverId`… et
+  `CandidateId` quand ils élargissent ces unions.
 - Les règles partagées : `UNPRICED_CANDIDATES` += `mkt.buy.repeat`,
   `mkt.sell.first-sale`, `mkt.sell.churn`, `mkt.sell.signup-rate` (D4) ;
   `REFERRAL_CANDIDATES` += `mkt.buy.referred-share` ; une constante
@@ -499,7 +512,7 @@ numéro) :
 | `EngineWorkbench.tsx:125` (`engineStageDetail(shapeOf(id).stage, motionOfMetric(id))`, l'analytique) | 1 (`engineStageDetail` prend `"plg" \| "slg"`) ; MKT-6 la remplace par `ENGINE_MARKET_STAGES` (§22.9) | MKT-1 |
 | `EngineWorkbench.tsx:558` (`setMotionView(motionOfMetric(id))`) | 1 : `const m = motionOfMetric(id); if (isSellingMotion(m)) setMotionView(m);` ; MKT-7b y ajoute `setSideView` | MKT-1 |
 | `EngineWorkbench.tsx:1110` (`counts[motionOfMetric(id)] += 1`, le type `:1106-1107`) | 2 : `Record<EngineMotion, number>`, l'entrée `mkt` à `0` (un nombre, pas un mot : la règle 2 n'a pas besoin de copie ici) ; `Setup.tsx:135` garde son `Record<Motion, number>`, auquel l'autre s'assigne | MKT-1 |
-| `BoardNumbers.tsx:73`, `:86` | 1 jusqu'à MKT-7b | MKT-1 |
+| `BoardNumbers.tsx:86` (`numberRemaining`) | 1 jusqu'à MKT-7b ; `:73` ne demande rien (`metricsOfStageIn` accepte une `EngineMotion`) | MKT-1 |
 | `catalog-shape.ts:869` (`motions[s.scope]`) | la branche de tête de `shapesOf` (§22.2.3) | MKT-1 |
 | `phrases.ts:140` (`strings.unitInput[id as UnitInputId]`), `engine-copy.ts:832` (`unitInput`), `engine-catalog.ts:90` et `:1470` (les deux records), `shared-counts.ts:23` | les entrées qu'MKT-1 écrit (§22.4.3, §22.2.4, §22.8.5 g) | MKT-1 |
 | `ImportPanel.tsx:315` (`io.sharedCount[change.count]`) | les six feuilles `io.sharedCount.mkt*` de §22.8.5 g, écrites par MKT-1 | MKT-1 |
@@ -693,10 +706,10 @@ l'événement). L'ordre du tableau est l'ordre de `MKT_METRIC_SHAPES`.
 |---|---|---|---|---|
 | `mkt.rev.ltv` | `mkt.rev.frequency`, `mkt.rev.aov`, `mkt.rev.take-rate`, `mkt.rev.gross-margin`, `mkt.buy.churn` | `ltv` | `rev-2` | |
 | `mkt.rev.cac-payback` | `mkt.buy.cac`, `mkt.rev.frequency`, `mkt.rev.aov`, `mkt.rev.take-rate`, `mkt.rev.gross-margin` | `cac-payback` | — | |
-| `mkt.rev.ltv-cac` | les six d'un acheteur | `ltv` | — | |
+| `mkt.rev.ltv-cac` | les six d'un acheteur (ceux du payback, puis le churn : le CAC d'abord, comme le SaaS) | `ltv` | — | |
 | `mkt.sell.ltv` | `mkt.sell.arpa`, `mkt.sell.gross-margin`, `mkt.sell.paid-churn` | `ltv` | — | ✓ |
 | `mkt.sell.cac-payback` | `mkt.sell.cac`, `mkt.sell.first-sale`, `mkt.sell.paid-conversion`, `mkt.sell.arpa`, `mkt.sell.gross-margin` | `cac-payback` | — | ✓ |
-| `mkt.sell.ltv-cac` | les six d'un vendeur abonné | `ltv` | — | ✓ |
+| `mkt.sell.ltv-cac` | les six d'un vendeur abonné (même ordre) | `ltv` | — | ✓ |
 
 #### 22.4.3 Les listes
 
@@ -749,18 +762,17 @@ l'événement). L'ordre du tableau est l'ordre de `MKT_METRIC_SHAPES`.
   `EN.typeCatalogs.marketplace.metrics` (et de même en français).
 - `unitInput` (`engine-copy.ts`) gagne les entrées des six calculés (douze ids) qui n'y
   sont pas (le test les exige) : `mkt.rev.frequency` « la fréquence de
-  commande » / "order frequency" ; `mkt.rev.aov` « le panier moyen » / "the
-  average order value" ; `mkt.rev.take-rate` « la commission » / "the take
-  rate" ; `mkt.rev.gross-margin` « la marge sur le revenu net » / "the margin on
-  net revenue" ; `mkt.buy.churn` « le churn des acheteurs » / "buyer churn" ;
-  `mkt.buy.cac` « le CAC acheteur » / "the buyer CAC" ; `mkt.sell.arpa` « le
+  commande » / "order frequency" ; `mkt.rev.aov` « le panier moyen » / "average order value" ; `mkt.rev.take-rate` « la commission » / "take rate" ; `mkt.rev.gross-margin` « la marge sur le revenu net » / "margin on net revenue" ; `mkt.buy.churn` « le churn des acheteurs » / "buyer churn" ;
+  `mkt.buy.cac` « le CAC acheteur » / "buyer CAC" ; `mkt.sell.arpa` « le
   revenu par vendeur abonné » / "revenue per paid seller" ;
-  `mkt.sell.gross-margin` « la marge sur les abonnements vendeurs » / "the
-  margin on seller subscriptions" ; `mkt.sell.paid-churn` « le churn des
+  `mkt.sell.gross-margin` « la marge sur les abonnements vendeurs » / "margin on seller subscriptions" ; `mkt.sell.paid-churn` « le churn des
   vendeurs abonnés » / "paid seller churn" ; `mkt.sell.cac` « le coût d'un
-  vendeur actif » / "the cost per active seller" ; `mkt.sell.first-sale` « la
-  première vente » / "the first sale" ; `mkt.sell.paid-conversion` « la
-  conversion en vendeur abonné » / "seller subscription conversion".
+  vendeur actif » / "cost per active seller" ; `mkt.sell.first-sale` « la
+  première vente » / "first sale" ; `mkt.sell.paid-conversion` « la
+  conversion en vendeur abonné » / "seller subscription conversion". En
+  anglais, aucun article, comme les treize entrées du SaaS et de l'app : elles
+  s'impriment après "Missing: {input}" et se lient entre elles (« le » du
+  français est exigé par `engine-copy.test.ts:92`, l'anglais non).
 
 #### 22.4.4 La prose (`ENGINE_CATALOG`, `ENGINE_DERIVED_CATALOG`)
 
@@ -771,6 +783,14 @@ Les entrées s'ajoutent aux deux records existants, dans un bloc
 (rapports vérifiés, aucun menu inventé, six placeholders, glyphes des slides,
 « jamais de {month} »). Le texte est écrit avec les mots « produits » ; les mots
 « services » viennent du calque de §22.8.4.
+
+Un libellé de `where` sans anglais est un nom propre (la règle de §21.4.4),
+recopié tel quel, ou un libellé que le catalogue a déjà (« Base produit » /
+"Product database", « Amplitude ou Mixpanel », « Finance »), recopié du code.
+**Trois n'étaient ni l'un ni l'autre** ; MKT-1 leur a posé un anglais, « à
+relire » comme le reste : « Base de commandes » / "Orders database", « Outil de
+parrainage ou base produit » / "Referral tool or product database", « HubSpot
+ou ton CRM » / "HubSpot or your CRM".
 
 **`mkt.buy.signup-rate`**
 - name : « Taux d'inscription des acheteurs » / "Buyer sign-up rate"
@@ -2617,6 +2637,7 @@ rougit hors de cette liste arrête l'unité (§22.13).
 | `business-type.test.ts` (suite) | `BUSINESS_TYPES` passe de `toHaveLength(2)` à trois ; le test « chaque import est un `import type` » (`:171-178`, `valueImports(source) toEqual([])`) nomme sa seule exception, `MOTIONS` (§22.2.2) | MKT-0 |
 | `access.test.ts` (`lib/engine/__tests__/`), `tools.test.ts` | `openTypesWith` avec la barrière ; `offeredBy` d'une place de marché rend les outils de `MKT_TOOL_FAMILIES` (§22.2.2) | MKT-0 |
 | `engine-props.test.ts` | les deux filtres de la liste attendue (`:31-33`) excluent aussi `mkt` ; `typeCatalogs.marketplace` : 19 chiffres et 6 calculés, dans l'ordre des formes (§22.4.3) | MKT-1 |
+| `catalog-shape.test.ts` (suite), `bridge.test.ts` | les listes que MKT-1 allonge : `ALL_DERIVED_SHAPES.slice(-4)` devient `slice(-10, -6)`, `UNIT_INPUT_IDS` passe de 16 à 28 ; « every question exists in the Tour » compte les quatre ponts de plus | MKT-1 |
 | `catalog-shape.test.ts` | l'ensemble des portées hors `plg`/`slg` vaut `new Set(["link", "app", "mkt"])` (la ligne qu'A22 a passée en ensemble) ; `shapesOf` d'une place de marché : 19, 14 sans abonnements, dans l'ordre de `MKT_METRIC_SHAPES` ; `derivedShapesOf` : 6 ou 3 ; un ★ par étape côté demande, et côté offre ceux de C95 (trois, deux sans abonnements) ; aucun repère ; les listes de §22.4.3 ; `motionOfMetric("mkt.…") === "mkt"` ; `UNPRICED_CANDIDATES`, `LOWER_IS_BETTER_CANDIDATES` | MKT-1 |
 | `shared-counts.test.ts` | les six comptes partagés de §22.2.4 : la parité des libellés tient d'elle-même (§22.4.4 écrit les mêmes, et aucun libellé de la place de marché ne reprend un libellé du SaaS ou de l'app) ; en MKT-S, la même parité sur le catalogue « services » | MKT-1, MKT-S |
 | `content/__tests__/engine-catalog.test.ts` | couvre les 19 et les 6 ; aucun `benchmarkCaveat`, un `noReferenceReason` chacun ; en MKT-S, les mêmes plafonds sur le catalogue « services » (§22.8.4) | MKT-1, MKT-S |
@@ -3002,7 +3023,7 @@ Ton compte rendu, en français : une liste numérotée de constats, rangés par 
   `bridge.ts`, `engine-props.ts`, `content/engine-catalog.ts` (son en-tête :
   les règles d'écriture), `content/engine-copy.ts` (`unitInput`,
   `io.sharedCount`).
-- **Fichiers** : `catalog-shape.ts`, `shared-counts.ts`, `bridge.ts`,
+- **Fichiers** : `types.ts` (le bloc MKT-1 de §22.2.1), `catalog-shape.ts`, `shared-counts.ts`, `bridge.ts`,
   `engine-props.ts` (les ponts, le filtre des props du SaaS,
   `typeCatalogs.marketplace`), `EngineWorkbench.tsx` (le type de
   `typeCatalogs`, `:78` ; et les lignes `:125`, `:558`, `:1110` de §22.2.5),
@@ -3309,7 +3330,15 @@ Ton compte rendu, en français : une liste numérotée de constats, rangés par 
   endroits de §22.2.5 marqués « MKT-6 » ; §22.9 (les cinq étapes écrites en
   toutes lettres, `engineSetupDetail`, `/admin/stats`). Un test d'aller-retour :
   enregistrer les Réglages d'une place de marché garde `offering`,
-  `sellerSubscriptions` et les trois fenêtres.
+  `sellerSubscriptions` et les trois fenêtres. **Ce qu'MKT-1 a déjà posé**,
+  à garder ou à reprendre ici : `stageSaved` (`EngineWorkbench.tsx`) rend sans
+  événement pour une place de marché, qu'MKT-6 compte par
+  `ENGINE_MARKET_STAGES` ; `settingsSharedCounts` offre, pour une place de
+  marché, `mktCohortSignups`, `mktOrders` et, avec les abonnements,
+  `mktSellerCohortSignups` (un test le fixe) ; le commentaire de
+  `cohort.ts#windowDaysOf` et son annotation `string | number | undefined`,
+  sans objet depuis que MKT-1 a élargi `MetricShape.window`, se rangent ici
+  (le fichier est déjà lu pour `defaultCohortMonth`).
 - **Acceptation** : commune ; captures de la carte de départ, de la carte de
   réglage et de l'écran des cibles d'une place de marché, en « produits » et en
   « services », FR 1 280 et EN 390, regardées, sur un build

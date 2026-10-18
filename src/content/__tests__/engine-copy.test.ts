@@ -3,8 +3,9 @@ import { ENGINE_COPY } from "../engine-copy";
 import { ENGINE_COPY_CONSUMER } from "../engine-copy-consumer";
 import { ALL_METRIC_SHAPES, CANDIDATE_IDS, SLG_CANDIDATE_IDS, UNIT_INPUT_IDS } from "@/lib/engine/catalog-shape";
 import { hybridTrapOf } from "@/lib/engine/phrases";
+import { SHARED_COUNT_IDS } from "@/lib/engine/shared-counts";
 import { mergeStrings } from "@/lib/engine/strings";
-import type { SlideTitleKey } from "@/lib/engine/types";
+import type { SharedCount, SlideTitleKey } from "@/lib/engine/types";
 import { PILLARS } from "@/lib/scoring/pillars";
 import type { Translatable } from "@/lib/i18n/translatable";
 import { LOCALES, type Locale } from "@/lib/i18n/locale";
@@ -89,6 +90,16 @@ describe("keys the code reads by id", () => {
     expect(Object.keys(ENGINE_COPY.unitInput)).not.toContain("ret.d30");
     expect(Object.keys(ENGINE_COPY.unitInput)).not.toContain("rev.paid-conversion");
     for (const phrase of Object.values(ENGINE_COPY.unitInput)) expect(phrase.fr).toMatch(/^(le |la |les |l['’])/);
+    // A23 MKT-1 (§22.4.3): the marketplace's twelve are there, and each stays an article-ful phrase.
+    expect(Object.keys(ENGINE_COPY.unitInput).filter((id) => id.startsWith("mkt."))).toHaveLength(12);
+  });
+
+  it("names every shared count in a merge line (`io.sharedCount`, « {count} »): one phrase each, the marketplace's six included (A23 MKT-1, §22.8.5 g)", () => {
+    // Held by the compiler (`Record<SharedCount, …>`) and, since vitest does not compile, here: a count with no phrase would
+    // print `undefined` in the merge line of an imported month.
+    expect(Object.keys(ENGINE_COPY.io.sharedCount).sort()).toEqual([...SHARED_COUNT_IDS].sort());
+    for (const count of SHARED_COUNT_IDS) for (const l of LOCALES) expect(ENGINE_COPY.io.sharedCount[count as SharedCount][l].trim(), `${count}.${l}`).not.toBe("");
+    expect(SHARED_COUNT_IDS.filter((count) => count.startsWith("mkt"))).toEqual(["mktCohortSignups", "mktOrders", "mktGmv", "mktNetRevenue", "mktSellerCohortSignups", "mktSellerMrrEnd"]);
   });
 
   it("asks six FAQ questions, each answered in both languages — the sixth for a sales team (§18.7 E0)", () => {

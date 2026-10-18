@@ -807,7 +807,7 @@ export const ENGINE_COPY = {
    * An input of the three computed figures after « il manque » / "missing:" —
    * with its article in French (« il manque la marge brute », never « il manque
    * marge brute »). Keyed by `UNIT_INPUT_IDS` (catalog-shape.ts): the inputs of the
-   * self-serve and sales-assisted figures, and the app-only ones of the app's.
+   * self-serve and sales-assisted figures, the app-only ones of the app's, and the marketplace's twelve.
    */
   unitInput: {
     "acq.cac": { fr: "le CAC", en: "CAC" },
@@ -829,6 +829,19 @@ export const ENGINE_COPY = {
     "app.ret.active-retention": { fr: "la rétention des actifs", en: "active retention" },
     "app.rev.purchases-per-active": { fr: "les achats par actif", en: "purchases per active" },
     "app.rev.ads-per-active": { fr: "la publicité par actif", en: "ads per active" },
+    // TODO: à relire — copie neuve (convention 6), §22 (A23 MKT-1) : les douze entrées des six calculés de la place de marché (§22.4.3).
+    "mkt.rev.frequency": { fr: "la fréquence de commande", en: "order frequency" },
+    "mkt.rev.aov": { fr: "le panier moyen", en: "average order value" },
+    "mkt.rev.take-rate": { fr: "la commission", en: "take rate" },
+    "mkt.rev.gross-margin": { fr: "la marge sur le revenu net", en: "margin on net revenue" },
+    "mkt.buy.churn": { fr: "le churn des acheteurs", en: "buyer churn" },
+    "mkt.buy.cac": { fr: "le CAC acheteur", en: "buyer CAC" },
+    "mkt.sell.arpa": { fr: "le revenu par vendeur abonné", en: "revenue per paid seller" },
+    "mkt.sell.gross-margin": { fr: "la marge sur les abonnements vendeurs", en: "margin on seller subscriptions" },
+    "mkt.sell.paid-churn": { fr: "le churn des vendeurs abonnés", en: "paid seller churn" },
+    "mkt.sell.cac": { fr: "le coût d'un vendeur actif", en: "cost per active seller" },
+    "mkt.sell.first-sale": { fr: "la première vente", en: "first sale" },
+    "mkt.sell.paid-conversion": { fr: "la conversion en vendeur abonné", en: "seller subscription conversion" },
   } satisfies Record<UnitInputId, Translatable>,
   /**
    * Where a value sits against its comparator — the team's target (« la
@@ -3447,6 +3460,13 @@ export const ENGINE_COPY = {
       slgCustomers: { fr: "clients assistés en fin de mois", en: "sales-assisted customers at the month's end" },
       // TODO: à relire — copie neuve (convention 6), §21 (A22 APP-1) : les actifs du mois, la base des deux revenus par actif d'une app.
       appActives: { fr: "actifs du mois", en: "actives in the month" },
+      // TODO: à relire — copie neuve (convention 6), §22 (A23 MKT-1) : les six comptes partagés de la place de marché (§22.8.5 g).
+      mktCohortSignups: { fr: "inscrits côté acheteurs de la cohorte suivie", en: "buyer sign-ups in the followed cohort" },
+      mktOrders: { fr: "commandes du mois", en: "orders in the month" },
+      mktGmv: { fr: "GMV du mois", en: "GMV in the month" },
+      mktNetRevenue: { fr: "revenu net du mois", en: "net revenue in the month" },
+      mktSellerCohortSignups: { fr: "vendeurs inscrits de la cohorte suivie", en: "seller sign-ups in the followed cohort" },
+      mktSellerMrrEnd: { fr: "MRR des abonnements vendeurs en fin de mois", en: "seller subscription MRR at the month's end" },
     },
   },
   /**

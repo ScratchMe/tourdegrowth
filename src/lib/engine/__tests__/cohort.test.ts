@@ -170,8 +170,8 @@ describe("a marketplace's windows and followed cohort (engine spec §22.2.3, A23
     motions: { plg: false, slg: false },
     ...extra,
   });
-  /** A shape that names one of the marketplace's windows: the numbers that carry them arrive with MKT-1, the windows do not wait. */
-  const shapeWith = (window: "first-order" | "repeat" | "first-sale") => ({ ...shapeOf("act.rate"), window: window as never });
+  /** A shape that names one of the marketplace's windows, whichever number carries it (the real numbers that do are held by `catalog-shape.test.ts`). */
+  const shapeWith = (window: "first-order" | "repeat" | "first-sale") => ({ ...shapeOf("act.rate"), window });
 
   it("the three windows are the setup's own, by their defaults when it says nothing: 30, 90 and 60 days", () => {
     expect(windowDaysOf(shapeWith("first-order"), market())).toBe(30);

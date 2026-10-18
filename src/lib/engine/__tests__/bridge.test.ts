@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { QUESTIONS } from "@/content/copy-library";
 import { buildMirror, declaredLevel, latestTourWithAnswers, verdictOf } from "../bridge";
-import { ENGINE_BRIDGES, SLG_ENGINE_BRIDGES } from "../catalog-shape";
-import type { MetricEntry, MirrorVerdict, TrackingLevel } from "../types";
+import { ENGINE_BRIDGES, MKT_ENGINE_BRIDGES, SLG_ENGINE_BRIDGES } from "../catalog-shape";
+import type { EngineState, MetricEntry, MirrorVerdict, TrackingLevel } from "../types";
 import { FR } from "./props";
-import { exampleState, hybridState, noMarginState, salesAssistedState, tourResult, withEntry } from "./fixtures";
+import { consumerState, exampleState, hybridState, measured, noMarginState, salesAssistedState, tourResult, withEntry } from "./fixtures";
 
 // Engine spec §13.1 "bridge". Non-vacuity, measured: giving todo/requested/
 // not-applicable a verdict (found "unknown") fails "no verdict for what
@@ -44,13 +44,13 @@ describe("the eight bridges", () => {
     ]);
   });
 
-  it("every question exists in the Tour, with 20 / 7 / 0 points — self-serve's eight, then sales-assisted's six", () => {
-    for (const { questionId } of [...ENGINE_BRIDGES, ...SLG_ENGINE_BRIDGES]) {
+  it("every question exists in the Tour, with 20 / 7 / 0 points — self-serve's eight, then sales-assisted's six, then the marketplace's four", () => {
+    for (const { questionId } of [...ENGINE_BRIDGES, ...SLG_ENGINE_BRIDGES, ...MKT_ENGINE_BRIDGES]) {
       const q = QUESTIONS.find((x) => x.id === questionId);
       expect(q, questionId).toBeDefined();
       expect(q!.options.map((o) => o.points)).toEqual([20, 7, 0]);
     }
-    expect(FR.bridges.map((b) => b.metric)).toEqual([...ENGINE_BRIDGES, ...SLG_ENGINE_BRIDGES].map((b) => b.metric));
+    expect(FR.bridges.map((b) => b.metric)).toEqual([...ENGINE_BRIDGES, ...SLG_ENGINE_BRIDGES, ...MKT_ENGINE_BRIDGES].map((b) => b.metric));
   });
 });
 
@@ -137,5 +137,55 @@ describe("the mirror in the hybrid: one row per (question, motion)", () => {
     expect(mirror.rows.every((r) => r.motion === "plg")).toBe(true);
     expect(mirror.rows).toHaveLength(ENGINE_BRIDGES.length);
     expect(buildMirror(salesAssistedState(), allTracked, FR.bridges).rows.map((r) => r.motion)).toEqual(Array(6).fill("slg"));
+  });
+});
+
+// --- The marketplace (§22.2.5, A23 MKT-1). Non-vacuity, measured on 2026-10-18 (each sabotage alone, the tests of
+// `src/lib/engine`, `src/content`, `src/app` and `src/__tests__` run, then put back): `buildMirror` back on
+// `state.setup.motions[motion]` (the line it had before the marketplace) keeps no row for a marketplace, whose two boxes
+// are unticked — the first two tests below fall (2), and the SaaS's and the app's stay green; reading every bridge
+// whatever the motions gives a SaaS the marketplace's four rows on top of its eight — 13 tests fall (5 here: the three
+// below and the hybrid's two; the app's; the hybrid deck's; four deck tests; the golden v1 and v2) and two files, the
+// sentences guard and the deck rows, no longer load, their mirror being built when the file is read; the bridges
+// of the page left at fourteen (the marketplace's four out of `resolveEngineProps`) fall 3 here (the list of Tour
+// questions above and the first two below) and one in engine-props.test.ts; `motionOfMetric` without its `mkt.` line reads a marketplace bridge as the SaaS's, with the same effect (15 tests in all, two of them in catalog-shape.test.ts).
+
+describe("the mirror of a marketplace: one row per bridge of its own motion", () => {
+  const allTracked = tourResult(Object.fromEntries([...ENGINE_BRIDGES, ...SLG_ENGINE_BRIDGES, ...MKT_ENGINE_BRIDGES].map((b) => [b.questionId, 0 as const])));
+  /** A marketplace that measured the buyer's CAC and the five inputs of the buyer's LTV. */
+  function marketState(): EngineState {
+    const base = exampleState();
+    let state: EngineState = { ...base, setup: { ...base.setup, type: "marketplace" as const, motions: { plg: false, slg: false } } };
+    for (const id of ["mkt.buy.cac", "mkt.rev.frequency", "mkt.rev.aov", "mkt.rev.take-rate", "mkt.rev.gross-margin", "mkt.buy.churn"] as const) {
+      state = withEntry(state, id, measured({ kind: "ratio", numerator: 10, denominator: 100 }));
+    }
+    return state;
+  }
+
+  it("keeps the four rows of the marketplace's bridges, in their order, and none of the SaaS's or the sales-assisted's", () => {
+    const mirror = buildMirror(marketState(), allTracked, FR.bridges);
+    expect(mirror.rows.map((r) => [r.questionId, r.motion, r.metric])).toEqual([
+      ["acq-3", "mkt", "mkt.buy.cac"],
+      ["act-2", "mkt", "mkt.buy.first-order"],
+      ["ret-1", "mkt", "mkt.buy.repeat"],
+      ["rev-2", "mkt", "mkt.rev.ltv"],
+    ]);
+  });
+
+  it("finds a measured buyer's CAC and, as its weakest input, the buyer's LTV; what nobody looked for has no verdict", () => {
+    const mirror = buildMirror(marketState(), allTracked, FR.bridges);
+    const row = (q: string) => mirror.rows.find((r) => r.questionId === q)!;
+    expect(row("acq-3")).toMatchObject({ declared: "tracked", found: "tracked", verdict: "coherent" });
+    expect(row("rev-2")).toMatchObject({ declared: "tracked", found: "tracked", verdict: "coherent" });
+    // The first and second orders were never entered: to do, so nothing contradicts the Tour's answer.
+    expect(row("act-2")).toMatchObject({ found: null, verdict: null });
+    expect(row("ret-1")).toMatchObject({ found: null, verdict: null });
+    expect(mirror.counts).toEqual({ coherent: 2, "blind-spot": 0, "blind-spot-light": 0, better: 0, "known-gap": 0 });
+  });
+
+  it("is skipped by a SaaS and an app: their rows are the ones they had", () => {
+    expect(buildMirror(exampleState(), allTracked, FR.bridges).rows.map((r) => r.motion)).toEqual(Array(8).fill("plg"));
+    expect(buildMirror(hybridState(), allTracked, FR.bridges).rows.some((r) => r.motion === "mkt")).toBe(false);
+    expect(buildMirror(consumerState(), allTracked, FR.bridges).rows.some((r) => r.motion === "mkt")).toBe(false);
   });
 });

@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import type { AppMonetization } from "../app-model";
+import { windowDaysOf } from "../cohort";
 import type { MetricId } from "../types";
+import { exampleState } from "./fixtures";
 import { GLOSSARY_TERMS } from "@/content/glossary-terms";
 import { QUESTIONS } from "@/content/copy-library";
 import { ENGINE_CATALOG, ENGINE_DERIVED_CATALOG } from "@/content/engine-catalog";
@@ -15,7 +17,15 @@ import {
   DERIVED_SHAPES,
   ENGINE_BRIDGES,
   LINK_METRIC_SHAPES,
+  LOWER_IS_BETTER_CANDIDATES,
   METRIC_SHAPES,
+  MKT_DEMAND_CANDIDATE_IDS,
+  MKT_DEMAND_LEVER_IDS,
+  MKT_DERIVED_SHAPES,
+  MKT_ENGINE_BRIDGES,
+  MKT_METRIC_SHAPES,
+  MKT_SUPPLY_CANDIDATE_IDS,
+  MKT_SUPPLY_LEVER_IDS,
   PELOTON_METRICS,
   REFERRAL_PRICING_CEILING,
   SLG_CANDIDATE_IDS,
@@ -24,6 +34,7 @@ import {
   SLG_LEVER_IDS,
   SLG_METRIC_SHAPES,
   SUBSCRIPTION_METRICS,
+  TAKE_RATE_HIGH_PERCENT,
   UNIT_INPUT_IDS,
   UNPRICED_CANDIDATES,
   appShapeShown,
@@ -98,8 +109,8 @@ describe("candidates and the peloton", () => {
     expect(lower).toEqual(["ret.logo-churn"]);
   });
 
-  it("never prices go-live (§18.5.2); prices D30 retention, and the referred shares up to a 50 % target (§19.3)", () => {
-    expect([...UNPRICED_CANDIDATES]).toEqual(["slg.act.go-live"]);
+  it("never prices go-live (§18.5.2), nor the marketplace's four (§22.4.3); prices D30 retention, and the referred shares up to a 50 % target (§19.3)", () => {
+    expect([...UNPRICED_CANDIDATES]).toEqual(["slg.act.go-live", "mkt.buy.repeat", "mkt.sell.first-sale", "mkt.sell.churn", "mkt.sell.signup-rate"]);
     expect(isPricedAt("slg.act.go-live", 10)).toBe(false);
     expect(isPricedAt("ret.d30", 99)).toBe(true);
     for (const id of ["ref.referred-share", "slg.ref.referred-share"] as const) {
@@ -146,8 +157,8 @@ describe("the sales-assisted catalogue and the link (engine spec §18.4, A7.3.c 
   it("no number is shared by both motions: one gross margin each (C25 Q4)", () => {
     expect(shapeOf("rev.gross-margin").scope).toBe("plg");
     expect(shapeOf("slg.rev.gross-margin").scope).toBe("slg");
-    // A set, not a list: the seven scopes outside plg and slg are one link and six app numbers (§21).
-    expect(new Set(ALL_METRIC_SHAPES.map((s) => s.scope).filter((scope) => scope !== "plg" && scope !== "slg"))).toEqual(new Set(["link", "app"]));
+    // A set, not a list: the scopes outside plg and slg are the link, the app's six (§21) and the marketplace's nineteen (§22).
+    expect(new Set(ALL_METRIC_SHAPES.map((s) => s.scope).filter((scope) => scope !== "plg" && scope !== "slg"))).toEqual(new Set(["link", "app", "mkt"]));
   });
 
   it("the link: optional, its own scope, never a candidate (C25 Q7)", () => {
@@ -280,7 +291,7 @@ describe("motions of the catalogue (A7.3.c S1)", () => {
   it("each motion's candidates, in canonical order; every number belongs to one motion, the link with sales-assisted", () => {
     expect(candidatesOf("plg")).toEqual(CANDIDATE_IDS);
     expect(candidatesOf("slg")).toEqual(SLG_CANDIDATE_IDS);
-    for (const s of ALL_METRIC_SHAPES) expect(motionOfMetric(s.id), s.id).toBe(s.scope === "slg" || s.scope === "link" ? "slg" : "plg");
+    for (const s of ALL_METRIC_SHAPES) expect(motionOfMetric(s.id), s.id).toBe(s.scope === "slg" || s.scope === "link" ? "slg" : s.scope === "mkt" ? "mkt" : "plg");
     expect(motionOfMetric("rev.ltv")).toBe("plg");
     expect(motionOfMetric("slg.rev.ltv")).toBe("slg");
   });
@@ -467,7 +478,8 @@ describe("the consumer app's numbers (engine spec §21.4, A22 APP-1)", () => {
       expect(d.benchmark, d.id).toBeUndefined();
       expect(d.tourQuestionId, d.id).toBeUndefined();
     }
-    expect(ALL_DERIVED_SHAPES.slice(-4)).toEqual(APP_DERIVED_SHAPES);
+    // The app's four sit right before the marketplace's six, which `ALL_DERIVED_SHAPES` takes in last (§22.2.3).
+    expect(ALL_DERIVED_SHAPES.slice(-10, -6)).toEqual(APP_DERIVED_SHAPES);
     expect(derivedShapeOf("app.rev.value-to-cost").glossary).toBe("ltv");
   });
 
@@ -481,10 +493,11 @@ describe("the consumer app's numbers (engine spec §21.4, A22 APP-1)", () => {
   });
 
   /** Building the set from `ALL_DERIVED_SHAPES` adds `ret.d30` and `rev.paid-conversion`: fails here and in engine-copy.test.ts. */
-  it("UNIT_INPUT_IDS: the inputs « il manque » writes with an article — the SaaS's ten and the app's six, not `ret.d30` nor `rev.paid-conversion`", () => {
+  it("UNIT_INPUT_IDS: the inputs « il manque » writes with an article — the SaaS's ten, the app's six and the marketplace's twelve, not `ret.d30` nor `rev.paid-conversion`", () => {
     const saas = [...DERIVED_SHAPES, ...SLG_DERIVED_SHAPES].flatMap((d) => d.inputs);
-    expect([...UNIT_INPUT_IDS].sort()).toEqual([...new Set<string>([...saas, ...APP_IDS])].sort());
-    expect(UNIT_INPUT_IDS.size).toBe(16);
+    const market = MKT_DERIVED_SHAPES.flatMap((d) => d.inputs);
+    expect([...UNIT_INPUT_IDS].sort()).toEqual([...new Set<string>([...saas, ...APP_IDS, ...market])].sort());
+    expect(UNIT_INPUT_IDS.size).toBe(28);
     expect(UNIT_INPUT_IDS.has("ret.d30")).toBe(false);
     expect(UNIT_INPUT_IDS.has("rev.paid-conversion")).toBe(false);
     for (const id of ["acq.cac", "rev.arpa", "rev.gross-margin", "ret.logo-churn", "rev.expansion", "rev.contraction", "slg.acq.cac", "slg.rev.acv", "slg.rev.gross-margin", "slg.ret.renewal"] as const) {
@@ -506,5 +519,254 @@ describe("the consumer app's numbers (engine spec §21.4, A22 APP-1)", () => {
     expect(ids(appSetup(USAGE_ONLY))).toEqual(four);
     // The three self-serve figures never show for an app (D2): they read the CAC and the margin it does not have.
     for (const id of ["rev.ltv", "rev.cac-payback", "rev.ltv-cac"]) expect(ids(appSetup(ALL_THREE))).not.toContain(id);
+  });
+});
+
+// --- The marketplace's numbers (engine spec §22.4, A23 MKT-1) -------------------------------------------------------
+//
+// Non-vacuity, measured on 2026-10-18 (each sabotage applied alone, the tests of `src/lib/engine`, `src/content`, `src/app`
+// and `src/__tests__` run, then put back; the count is the tests that fall, over all those files):
+//  - `shapesOf` keeping the five subscription numbers without the box: 4 — here « shapesOf », the ★ test and the stage
+//    lists (3), and the Settings' counts in shared-counts.test.ts (1).
+//  - the marketplace branch of `shapesOf` moved after the `throw` of the two unticked boxes: 5 (3 here, one in
+//    engine-props.test.ts, one in shared-counts.test.ts) — the branch must be the first line.
+//  - `mkt.sell.paid-conversion` without its `first-sale` window: 2 — the table and the windows test.
+//  - `motionOfMetric` without its `mkt.` line: 15 tests — this file's motions test and this block's (2), but also the Tour's
+//    mirror (bridge.test.ts 5, the app's, the hybrid deck's, four deck tests, the golden v1 and v2) and two files that no
+//    longer load: a marketplace bridge read as the SaaS's would add its rows to theirs.
+//  - `LOWER_IS_BETTER_CANDIDATES` without `mkt.sell.paid-churn`: 1; `UNPRICED_CANDIDATES` without `mkt.sell.first-sale`: 2
+//    (the pricing test above and the shared rules).
+//  - `mkt.rev.take-rate` no longer a ★: 3 (the table, the ★ test, the stage lists); the `sellerSubscription` flag off
+//    `mkt.sell.ltv`: 1; the LTV:CAC without the churn among its inputs: 1; the marketplace left out of `UNIT_INPUT_IDS`: 2
+//    (here and in engine-copy.test.ts); the « mkt » branch of `metricsOfStageIn` dropped: 1.
+//  - **Not observable**: `shapesOf` of a SaaS without its `s.scope === "mkt"` clause falls nothing — `motions["mkt"]` is
+//    `undefined`, so the filter drops the number anyway. The clause is the compiler's (`motions` is a
+//    `Record<Motion, boolean>`), kept because indexing it with a scope that is not a motion would not compile.
+describe("the marketplace's numbers (engine spec §22.4, A23 MKT-1)", () => {
+  const market = (sellerSubscriptions?: boolean): SetupShapes => ({
+    type: "marketplace",
+    motions: { plg: false, slg: false },
+    ...(sellerSubscriptions === undefined ? {} : { sellerSubscriptions }),
+  });
+  const WITH = market(true);
+  const WITHOUT = market(false);
+  const MKT_IDS = MKT_METRIC_SHAPES.map((s) => s.id);
+  const SUBSCRIPTION_IDS = ["mkt.sell.signup-rate", "mkt.sell.paid-churn", "mkt.sell.paid-conversion", "mkt.sell.arpa", "mkt.sell.gross-margin"];
+
+  it("has the nineteen numbers of §22.4.1, in the table's order, each of the marketplace's scope and one month long", () => {
+    expect(MKT_IDS).toEqual([
+      "mkt.buy.signup-rate",
+      "mkt.buy.cac",
+      "mkt.sell.cac",
+      "mkt.sell.signup-rate",
+      "mkt.buy.first-order",
+      "mkt.sell.first-sale",
+      "mkt.liq.fill-rate",
+      "mkt.buy.repeat",
+      "mkt.buy.churn",
+      "mkt.sell.churn",
+      "mkt.sell.paid-churn",
+      "mkt.buy.referred-share",
+      "mkt.rev.take-rate",
+      "mkt.rev.aov",
+      "mkt.rev.frequency",
+      "mkt.rev.gross-margin",
+      "mkt.sell.paid-conversion",
+      "mkt.sell.arpa",
+      "mkt.sell.gross-margin",
+    ]);
+    for (const s of MKT_METRIC_SHAPES) expect([s.scope, s.span], s.id).toEqual(["mkt", 1]);
+    expect(ALL_METRIC_SHAPES.slice(-19)).toEqual(MKT_METRIC_SHAPES);
+  });
+
+  it("writes the table of §22.4.1 line for line: stage, ★, side, value kinds, unit, bounds, flow, window, effort, role, sources, term, Tour question, variants, repair, subscription", () => {
+    const CAC_VARIANTS = ["media-only", "plus-team", "fully-loaded"];
+    const rate = { valueKinds: ["ratio", "rate"], unit: "percent", bounded: true } as const;
+    const amount = { valueKinds: ["ratio", "amount"], unit: "money", bounded: false } as const;
+    const marginRate = { ...rate, amounts: true } as const;
+    const expected: Record<string, Partial<MetricShape>> = {
+      "mkt.buy.signup-rate": { stage: "acquisition", primary: true, side: "buy", ...rate, flow: "month", effort: "self-5min", defaultRole: "marketing", sources: ["ga4", "mixpanel", "amplitude", "product-db"], glossary: "acquisition", defaultRepair: "afternoon" },
+      "mkt.buy.cac": { stage: "acquisition", primary: false, side: "buy", ...amount, flow: "month", effort: "ask", defaultRole: "finance", sources: ["google-ads", "meta-ads", "product-db"], glossary: "cac", tourQuestionId: "acq-3", variants: CAC_VARIANTS, defaultRepair: "meeting" },
+      "mkt.sell.cac": { stage: "acquisition", primary: false, side: "sell", ...amount, flow: "month", effort: "ask", defaultRole: "finance", sources: ["hubspot", "spreadsheet", "linkedin-ads"], glossary: "cac", variants: CAC_VARIANTS, defaultRepair: "meeting" },
+      "mkt.sell.signup-rate": { stage: "acquisition", primary: false, side: "sell", sellerSubscription: true, ...rate, flow: "month", effort: "self-5min", defaultRole: "marketing", sources: ["ga4", "mixpanel", "amplitude", "product-db"], glossary: "acquisition", defaultRepair: "afternoon" },
+      "mkt.buy.first-order": { stage: "activation", primary: true, side: "buy", ...rate, flow: "cohort", window: "first-order", effort: "self-1h", defaultRole: "data", sources: ["product-db", "amplitude", "mixpanel"], glossary: "activation", tourQuestionId: "act-2", defaultRepair: "sprint" },
+      "mkt.sell.first-sale": { stage: "activation", primary: true, side: "sell", ...rate, flow: "cohort", window: "first-sale", effort: "self-1h", defaultRole: "data", sources: ["product-db"], glossary: "activation", defaultRepair: "sprint" },
+      "mkt.liq.fill-rate": { stage: "activation", primary: false, side: "match", ...rate, flow: "month", effort: "ask", defaultRole: "data", sources: ["product-db", "amplitude", "mixpanel"], glossary: "activation", variants: ["requests", "searches"], defaultRepair: "sprint" },
+      "mkt.buy.repeat": { stage: "retention", primary: true, side: "buy", ...rate, flow: "cohort", window: "repeat", effort: "self-1h", defaultRole: "data", sources: ["product-db", "amplitude"], glossary: "retention", tourQuestionId: "ret-1", defaultRepair: "sprint" },
+      "mkt.buy.churn": { stage: "retention", primary: false, side: "buy", ...rate, flow: "month", effort: "ask", defaultRole: "data", sources: ["product-db"], glossary: "churn", defaultRepair: "afternoon" },
+      "mkt.sell.churn": { stage: "retention", primary: true, side: "sell", ...rate, flow: "month", effort: "ask", defaultRole: "data", sources: ["product-db"], glossary: "churn", defaultRepair: "afternoon" },
+      "mkt.sell.paid-churn": { stage: "retention", primary: false, side: "sell", sellerSubscription: true, ...rate, flow: "month", effort: "self-5min", defaultRole: "finance", sources: ["stripe", "product-db"], glossary: "churn", defaultRepair: "afternoon" },
+      "mkt.buy.referred-share": { stage: "referral", primary: true, side: "buy", ...rate, flow: "cohort", effort: "self-1h", defaultRole: "marketing", sources: ["product-db", "hubspot"], glossary: "referral", defaultRepair: "sprint" },
+      "mkt.rev.take-rate": { stage: "revenue", primary: true, side: "match", ...marginRate, flow: "month", effort: "self-5min", defaultRole: "finance", sources: ["stripe", "spreadsheet", "product-db"], glossary: "revenue", defaultRepair: "meeting" },
+      "mkt.rev.aov": { stage: "revenue", primary: false, side: "buy", ...amount, flow: "month", effort: "self-5min", defaultRole: "finance", sources: ["product-db", "stripe"], glossary: "arpu", defaultRepair: "meeting" },
+      "mkt.rev.frequency": { stage: "revenue", primary: false, side: "buy", valueKinds: ["ratio"], unit: "ratio", bounded: false, flow: "month", effort: "self-1h", defaultRole: "data", sources: ["product-db"], glossary: "retention", defaultRepair: "afternoon" },
+      "mkt.rev.gross-margin": { stage: "revenue", primary: false, side: "match", ...marginRate, flow: "month", effort: "ask", defaultRole: "finance", sources: ["spreadsheet"], glossary: "cac-payback", defaultRepair: "meeting" },
+      "mkt.sell.paid-conversion": { stage: "revenue", primary: true, side: "sell", sellerSubscription: true, ...rate, flow: "cohort", window: "first-sale", effort: "self-1h", defaultRole: "data", sources: ["product-db", "stripe"], glossary: "revenue", defaultRepair: "sprint" },
+      "mkt.sell.arpa": { stage: "revenue", primary: false, side: "sell", sellerSubscription: true, ...amount, flow: "month", effort: "self-5min", defaultRole: "finance", sources: ["stripe", "product-db"], glossary: "arpu", defaultRepair: "meeting" },
+      "mkt.sell.gross-margin": { stage: "revenue", primary: false, side: "sell", sellerSubscription: true, ...marginRate, flow: "month", effort: "ask", defaultRole: "finance", sources: ["spreadsheet"], glossary: "cac-payback", defaultRepair: "meeting" },
+    };
+    expect(Object.keys(expected)).toEqual(MKT_IDS);
+    for (const s of MKT_METRIC_SHAPES) {
+      const want = expected[s.id]!;
+      expect(s, s.id).toMatchObject(want);
+      // `toMatchObject` does not see an extra key: the optional ones are compared apart.
+      for (const key of ["amounts", "window", "tourQuestionId", "variants", "sellerSubscription"] as const) expect(s[key], `${s.id}.${key}`).toEqual(want[key]);
+      // No reference (D12, C73), no dependency, nothing optional, no closed list but the variants.
+      expect(s.benchmark, s.id).toBeUndefined();
+      expect(s.dependsOn, s.id).toBeUndefined();
+      expect(s.optional, s.id).toBeUndefined();
+      expect(s.naReasons, s.id).toBeUndefined();
+      expect(s.choices, s.id).toBeUndefined();
+    }
+  });
+
+  it("links every number and figure to a glossary term that exists, and every input of a figure to a number of the marketplace", () => {
+    for (const s of [...MKT_METRIC_SHAPES, ...MKT_DERIVED_SHAPES]) expect(GLOSSARY_TERMS[s.glossary], `${s.id} → ${s.glossary}`).toBeDefined();
+    for (const d of MKT_DERIVED_SHAPES) for (const input of d.inputs) expect(MKT_IDS, `${d.id} ← ${input}`).toContain(input);
+  });
+
+  it("shapesOf: all nineteen with the sellers' subscriptions, fourteen without — the setting absent or invalid reads as without — and never a SaaS or app number", () => {
+    expect(shapesOf(WITH).map((s) => s.id)).toEqual(MKT_IDS);
+    expect(shapesOf(WITHOUT)).toHaveLength(14);
+    expect(shapesOf(market())).toHaveLength(14);
+    expect(shapesOf({ ...WITH, sellerSubscriptions: "yes" as never })).toHaveLength(14);
+    expect(shapesOf(WITHOUT).map((s) => s.id)).toEqual(MKT_IDS.filter((id) => !SUBSCRIPTION_IDS.includes(id)));
+    expect(MKT_METRIC_SHAPES.filter((s) => s.sellerSubscription).map((s) => s.id)).toEqual(MKT_IDS.filter((id) => SUBSCRIPTION_IDS.includes(id)));
+    // Two unticked boxes are no error for a marketplace (the branch comes before the `throw`); a stray tick changes nothing.
+    expect(() => shapesOf(WITH)).not.toThrow();
+    expect(shapesOf({ ...WITH, motions: { plg: true, slg: true } })).toEqual(shapesOf(WITH));
+    expect(motionShapes(WITH)).toEqual(shapesOf(WITH));
+  });
+
+  it("a SaaS and an app never show a marketplace number, whatever stray fields their setup carries", () => {
+    for (const [plg, slg] of [[true, false], [false, true], [true, true]] as const) {
+      const saas: SetupShapes = { type: "b2b-saas", motions: { plg, slg }, sellerSubscriptions: true };
+      expect(shapesOf(saas).filter((s) => s.scope === "mkt")).toEqual([]);
+      expect(derivedShapesOf(saas).filter((d) => d.id.startsWith("mkt."))).toEqual([]);
+    }
+    const app: SetupShapes = { type: "consumer-app", motions: { plg: true, slg: false }, monetization: { subscriptions: true, purchases: true, ads: true }, sellerSubscriptions: true };
+    expect(shapesOf(app).filter((s) => s.scope === "mkt")).toEqual([]);
+    expect(derivedShapesOf(app).filter((d) => d.id.startsWith("mkt."))).toEqual([]);
+  });
+
+  it("carries a ★ per stage on the demand side, and on the supply side the first sale, the sellers' churn, and with the subscriptions the conversion (C95)", () => {
+    const stars = (setup: SetupShapes, sides: readonly string[]) => shapesOf(setup).filter((s) => s.primary && sides.includes(s.side ?? "")).map((s) => [s.stage, s.id]);
+    const demand = [
+      ["acquisition", "mkt.buy.signup-rate"],
+      ["activation", "mkt.buy.first-order"],
+      ["retention", "mkt.buy.repeat"],
+      ["referral", "mkt.buy.referred-share"],
+      ["revenue", "mkt.rev.take-rate"],
+    ];
+    expect(stars(WITH, ["buy", "match"])).toEqual(demand);
+    expect(stars(WITHOUT, ["buy", "match"])).toEqual(demand);
+    expect(stars(WITH, ["sell"])).toEqual([["activation", "mkt.sell.first-sale"], ["retention", "mkt.sell.churn"], ["revenue", "mkt.sell.paid-conversion"]]);
+    expect(stars(WITHOUT, ["sell"])).toEqual([["activation", "mkt.sell.first-sale"], ["retention", "mkt.sell.churn"]]);
+  });
+
+  it("derivedShapesOf: a buyer's three, then a paid seller's three with the subscriptions — in Revenue, with no reference and a Tour question on the buyer's LTV only", () => {
+    const ids = (setup: SetupShapes) => derivedShapesOf(setup).map((d) => d.id);
+    const buyer = ["mkt.rev.ltv", "mkt.rev.cac-payback", "mkt.rev.ltv-cac"];
+    const seller = ["mkt.sell.ltv", "mkt.sell.cac-payback", "mkt.sell.ltv-cac"];
+    expect(ids(WITH)).toEqual([...buyer, ...seller]);
+    expect(ids(WITHOUT)).toEqual(buyer);
+    expect(ids(market())).toEqual(buyer);
+    expect(MKT_DERIVED_SHAPES.map((d) => [d.id, d.stage, d.glossary, d.tourQuestionId, d.sellerSubscription])).toEqual([
+      ["mkt.rev.ltv", "revenue", "ltv", "rev-2", undefined],
+      ["mkt.rev.cac-payback", "revenue", "cac-payback", undefined, undefined],
+      ["mkt.rev.ltv-cac", "revenue", "ltv", undefined, undefined],
+      ["mkt.sell.ltv", "revenue", "ltv", undefined, true],
+      ["mkt.sell.cac-payback", "revenue", "cac-payback", undefined, true],
+      ["mkt.sell.ltv-cac", "revenue", "ltv", undefined, true],
+    ]);
+    for (const d of MKT_DERIVED_SHAPES) expect(d.benchmark, d.id).toBeUndefined();
+    expect(ALL_DERIVED_SHAPES.slice(-6)).toEqual(MKT_DERIVED_SHAPES);
+  });
+
+  it("lists as inputs the complete set each figure reads (§22.4.2): the LTV's, the payback's, and both for the LTV:CAC", () => {
+    const [ltv, payback, ltvCac, sellerLtv, sellerPayback, sellerLtvCac] = MKT_DERIVED_SHAPES.map((d) => [...d.inputs]);
+    expect(ltv).toEqual(["mkt.rev.frequency", "mkt.rev.aov", "mkt.rev.take-rate", "mkt.rev.gross-margin", "mkt.buy.churn"]);
+    expect(payback).toEqual(["mkt.buy.cac", "mkt.rev.frequency", "mkt.rev.aov", "mkt.rev.take-rate", "mkt.rev.gross-margin"]);
+    expect([...new Set([...ltv!, ...payback!])].sort()).toEqual([...ltvCac!].sort());
+    expect(ltvCac).toHaveLength(6);
+    expect(sellerLtv).toEqual(["mkt.sell.arpa", "mkt.sell.gross-margin", "mkt.sell.paid-churn"]);
+    expect(sellerPayback).toEqual(["mkt.sell.cac", "mkt.sell.first-sale", "mkt.sell.paid-conversion", "mkt.sell.arpa", "mkt.sell.gross-margin"]);
+    expect([...new Set([...sellerLtv!, ...sellerPayback!])].sort()).toEqual([...sellerLtvCac!].sort());
+    expect(sellerLtvCac).toHaveLength(6);
+  });
+
+  it("the lists of §22.4.3: each side's candidates and levers in canonical order, all rates the marketplace shows, never a number of both sides", () => {
+    expect([...MKT_DEMAND_CANDIDATE_IDS]).toEqual(["mkt.buy.signup-rate", "mkt.buy.first-order", "mkt.liq.fill-rate", "mkt.buy.referred-share", "mkt.buy.repeat", "mkt.buy.churn"]);
+    expect([...MKT_SUPPLY_CANDIDATE_IDS]).toEqual(["mkt.sell.signup-rate", "mkt.sell.first-sale", "mkt.sell.paid-conversion", "mkt.sell.churn", "mkt.sell.paid-churn"]);
+    expect([...MKT_DEMAND_LEVER_IDS]).toEqual(["mkt.buy.signup-rate", "mkt.buy.referred-share", "mkt.buy.first-order", "mkt.liq.fill-rate", "mkt.buy.churn", "mkt.rev.frequency", "mkt.rev.aov", "mkt.rev.take-rate"]);
+    expect([...MKT_SUPPLY_LEVER_IDS]).toEqual(["mkt.sell.paid-conversion", "mkt.sell.paid-churn", "mkt.sell.arpa"]);
+    for (const id of [...MKT_DEMAND_CANDIDATE_IDS, ...MKT_SUPPLY_CANDIDATE_IDS]) {
+      expect(MKT_IDS, id).toContain(id);
+      expect(shapeOf(id).unit, id).toBe("percent");
+    }
+    for (const id of [...MKT_DEMAND_LEVER_IDS, ...MKT_SUPPLY_LEVER_IDS]) expect(MKT_IDS, id).toContain(id);
+    // D2: no candidate sits in both lists, and no lever in both.
+    expect(MKT_DEMAND_CANDIDATE_IDS.filter((id) => MKT_SUPPLY_CANDIDATE_IDS.includes(id))).toEqual([]);
+    expect(MKT_DEMAND_LEVER_IDS.filter((id) => MKT_SUPPLY_LEVER_IDS.includes(id))).toEqual([]);
+    // The supply's levers and subscription candidates are exactly the numbers the subscriptions' box adds.
+    const subscriptionIds: MetricId[] = [...MKT_SUPPLY_LEVER_IDS, "mkt.sell.signup-rate", "mkt.sell.paid-conversion", "mkt.sell.paid-churn"];
+    for (const id of subscriptionIds) expect(shapeOf(id).sellerSubscription, id).toBe(true);
+  });
+
+  it("the shared rules: lower-is-better churns (logo churn and the marketplace's three), unpriced candidates, the referral rule, the take-rate ceiling (§22.2.3)", () => {
+    expect([...LOWER_IS_BETTER_CANDIDATES]).toEqual(["ret.logo-churn", "mkt.buy.churn", "mkt.sell.churn", "mkt.sell.paid-churn"]);
+    expect([...UNPRICED_CANDIDATES].filter((id) => id.startsWith("mkt."))).toEqual(["mkt.buy.repeat", "mkt.sell.first-sale", "mkt.sell.churn", "mkt.sell.signup-rate"]);
+    expect(TAKE_RATE_HIGH_PERCENT).toBe(50);
+  });
+
+  it("motionOfMetric: every number and figure of the marketplace is of the `mkt` motion, and the others' are as they were", () => {
+    for (const id of [...MKT_IDS, ...MKT_DERIVED_SHAPES.map((d) => d.id)]) expect(motionOfMetric(id), id).toBe("mkt");
+    expect(motionOfMetric("acq.cac")).toBe("plg");
+    expect(motionOfMetric("app.acq.cpi")).toBe("plg");
+    expect(motionOfMetric("slg.acq.cac")).toBe("slg");
+    expect(motionOfMetric("link.pql-handoff")).toBe("slg");
+  });
+
+  it("the windows: first order for the first order, repeat for the second, first sale for the first sale and the subscription conversion — read by windowDaysOf", () => {
+    expect(MKT_METRIC_SHAPES.filter((s) => s.window).map((s) => [s.id, s.window])).toEqual([
+      ["mkt.buy.first-order", "first-order"],
+      ["mkt.sell.first-sale", "first-sale"],
+      ["mkt.buy.repeat", "repeat"],
+      ["mkt.sell.paid-conversion", "first-sale"],
+    ]);
+    const setup = exampleState().setup;
+    const own = { ...setup, type: "marketplace" as const, motions: { plg: false, slg: false } };
+    expect(MKT_METRIC_SHAPES.filter((s) => s.window).map((s) => windowDaysOf(s, own))).toEqual([30, 60, 90, 60]);
+    expect(windowDaysOf(shapeOf("mkt.buy.first-order"), { ...own, firstOrderWindowDays: 7 })).toBe(7);
+    // The cohort numbers follow a cohort; the month's numbers a month (§22.4.1).
+    for (const s of MKT_METRIC_SHAPES) expect(s.window !== undefined ? s.flow === "cohort" : true, s.id).toBe(true);
+  });
+
+  it("metricsOfStageIn(stage, \"mkt\", setup): the stage's numbers of both sides in the table's order, ★ first; without a setup, all nineteen", () => {
+    const ids = (stage: Parameters<typeof metricsOfStageIn>[0], setup?: SetupShapes) => metricsOfStageIn(stage, "mkt", setup).map((s) => s.id);
+    expect(ids("acquisition", WITH)).toEqual(["mkt.buy.signup-rate", "mkt.buy.cac", "mkt.sell.cac", "mkt.sell.signup-rate"]);
+    expect(ids("acquisition", WITHOUT)).toEqual(["mkt.buy.signup-rate", "mkt.buy.cac", "mkt.sell.cac"]);
+    expect(ids("activation", WITH)).toEqual(["mkt.buy.first-order", "mkt.sell.first-sale", "mkt.liq.fill-rate"]);
+    expect(ids("retention", WITH)).toEqual(["mkt.buy.repeat", "mkt.sell.churn", "mkt.buy.churn", "mkt.sell.paid-churn"]);
+    expect(ids("referral", WITHOUT)).toEqual(["mkt.buy.referred-share"]);
+    expect(ids("revenue", WITH)).toEqual(["mkt.rev.take-rate", "mkt.sell.paid-conversion", "mkt.rev.aov", "mkt.rev.frequency", "mkt.rev.gross-margin", "mkt.sell.arpa", "mkt.sell.gross-margin"]);
+    expect(PILLARS.flatMap((stage) => ids(stage)).sort()).toEqual([...MKT_IDS].sort());
+    // The SaaS's two motions are asked as before.
+    expect(metricsOfStageIn("revenue", "plg").map((s) => s.id)).toEqual(metricsOfStage("revenue").map((s) => s.id));
+  });
+
+  it("the four bridges (§22.4.3): the buyer's CAC, first order, second order and LTV — a fifth is a decision", () => {
+    expect(MKT_ENGINE_BRIDGES).toEqual([
+      { questionId: "acq-3", metric: "mkt.buy.cac" },
+      { questionId: "act-2", metric: "mkt.buy.first-order" },
+      { questionId: "ret-1", metric: "mkt.buy.repeat" },
+      { questionId: "rev-2", metric: "mkt.rev.ltv" },
+    ]);
+    for (const { questionId, metric } of MKT_ENGINE_BRIDGES) {
+      const question = QUESTIONS.find((q) => q.id === questionId);
+      expect(question, questionId).toBeDefined();
+      const stage = metric === "mkt.rev.ltv" ? derivedShapeOf(metric).stage : shapeOf(metric as MetricId).stage;
+      expect(question!.pillar, `${questionId} → ${metric}`).toBe(stage);
+    }
   });
 });

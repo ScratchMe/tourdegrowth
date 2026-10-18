@@ -8,8 +8,8 @@ import { EngineTermScope } from "./_engine/EngineTerm";
 import { motionOfMetric, motionShapes, shapeOf } from "@/lib/engine/catalog-shape";
 import { mergeStrings, type DeepPartial, type EngineStrings, type ResolvedBridge, type ResolvedDerived, type ResolvedMetric } from "@/lib/engine/strings";
 import type { AppMonetization } from "@/lib/engine/app-model";
-import { DEFAULT_APP_MONETIZATION } from "@/lib/engine/setup-type";
-import { MAX_ENGINES, MAX_MONTHS, type BusinessType, type EngineCalcContext, type EngineDerived, type EngineSetup, type EngineState, type LeverId, type MetricEntry, type MetricId, type Motion, type MotionDerived, type RoleId, type SlideTitle, type Snapshot, type YearMonth } from "@/lib/engine/types";
+import { DEFAULT_APP_MONETIZATION, isSellingMotion } from "@/lib/engine/setup-type";
+import { MAX_ENGINES, MAX_MONTHS, type BusinessType, type EngineCalcContext, type EngineDerived, type EngineMotion, type EngineSetup, type EngineState, type LeverId, type MetricEntry, type MetricId, type Motion, type MotionDerived, type RoleId, type SlideTitle, type Snapshot, type YearMonth } from "@/lib/engine/types";
 import type { Locale } from "@/lib/i18n/locale";
 import { Board } from "./_engine/Board";
 import type { SeriesControls } from "./_engine/BoardHead";
@@ -72,10 +72,15 @@ export interface EngineWorkbenchProps {
   derived: ResolvedDerived[];
   /**
    * The consumer app's prose (§21.4.7), resolved like `metrics` and `derived`: its fifteen self-serve numbers in its own
-   * words, then its six, and its figures. The SaaS's props carry none of the app's ids. A screen reads the catalogue of
-   * its engine's type through `metricsFor` / `derivedFor` (`_engine/view.ts`), never this field directly.
+   * words, then its six, and its figures. The marketplace's (§22.4.3): its nineteen numbers and its six figures, in the
+   * order of `MKT_METRIC_SHAPES` and `MKT_DERIVED_SHAPES`, in the words of "products" (MKT-S adds the "services" ones).
+   * The SaaS's props carry none of their ids. A screen reads the catalogue of its engine's type through `metricsFor` /
+   * `derivedFor` (`_engine/view.ts`), never this field directly.
    */
-  typeCatalogs: { "consumer-app": { metrics: ResolvedMetric[]; derived: ResolvedDerived[] } };
+  typeCatalogs: {
+    "consumer-app": { metrics: ResolvedMetric[]; derived: ResolvedDerived[] };
+    marketplace: { metrics: ResolvedMetric[]; derived: ResolvedDerived[] };
+  };
   /** The eight Tour bridges, question text and options in the Tour's order (§6.11). */
   bridges: ResolvedBridge[];
   /**
@@ -122,7 +127,10 @@ let persistenceAsked = false;
 
 /** The first save of a number of its stage in the session (§11.6). Sales-assisted's stages count apart, prefixed (Q14); the link's block sits under its acquisition. */
 function stageSaved(id: MetricId): void {
-  const stageDetail = engineStageDetail(shapeOf(id).stage, motionOfMetric(id));
+  const motion = motionOfMetric(id);
+  // A marketplace's stages are counted by MKT-6 (§22.9, `ENGINE_MARKET_STAGES`): until then, no event for them.
+  if (!isSellingMotion(motion)) return;
+  const stageDetail = engineStageDetail(shapeOf(id).stage, motion);
   if (savedStages.has(stageDetail)) return;
   savedStages.add(stageDetail);
   trackEngine({ name: "engine_stage_saved", detail: stageDetail });
@@ -555,7 +563,8 @@ function Workbench(props: EngineWorkbenchProps) {
     openMetric(id: MetricId) {
       // Its own screen, its heading focused: a move between screens the person asked for (R-19).
       // The link is sales-assisted's: its motion, for the selector the way back lands on.
-      setMotionView(motionOfMetric(id));
+      const motion = motionOfMetric(id);
+      if (isSellingMotion(motion)) setMotionView(motion); // MKT-7b adds the marketplace's selector (`setSideView`)
       setNumberId(id);
       setScreen("number");
       focus("engine-number-title");
@@ -1103,8 +1112,9 @@ function enteredIds(snapshot: Snapshot): MetricId[] {
 }
 
 /** The numbers already entered on each side (anything but « à faire »): what the settings say a motion keeps (§18.1.2). */
-function enteredCounts(snapshot: Snapshot): Record<Motion, number> {
-  const counts: Record<Motion, number> = { plg: 0, slg: 0 };
+function enteredCounts(snapshot: Snapshot): Record<EngineMotion, number> {
+  // `mkt` stays 0: a marketplace ticks no motion, so the settings have nothing of its to say a motion keeps (§22.2.5).
+  const counts: Record<EngineMotion, number> = { plg: 0, slg: 0, mkt: 0 };
   for (const [id, entry] of Object.entries(snapshot.metrics)) {
     if (!entry || entry.status === "todo") continue;
     counts[motionOfMetric(id as MetricId)] += 1;

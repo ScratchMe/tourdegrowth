@@ -295,6 +295,139 @@ describe("the consumer app's counts (engine spec §21.2.4, A22 APP-1)", () => {
   });
 });
 
+// A marketplace's six counts (engine spec §22.2.4, A23 MKT-1). Non-vacuity, measured on 2026-10-18 (each sabotage alone,
+// the tests of `src/lib/engine`, `src/content`, `src/app` and `src/__tests__` run, then put back): the `mktOrders` group
+// emptied falls 8 (the five tests below, the « repeated label is a group » guard and `sharedWith`'s order test of the
+// first blocks, and the shared line of engine-props.test.ts); `mktCohortSignups` out of `WHOLE_SHARED_COUNTS` falls 2 (the
+// whole-number test and the Settings'); the GMV in `WHOLE_SHARED_COUNTS` falls the same 2; the seller cohort's slot on
+// the subscription conversion taken out falls 5 (four here, one in engine-props.test.ts).
+describe("a marketplace's counts (engine spec §22.2.4, A23 MKT-1)", () => {
+  const at = "2026-10-18T10:00:00.000Z";
+  const store = { kind: "tool" as const, tool: "stripe" as const };
+  const entry = (numerator: number, denominator: number) => ({ status: "measured" as const, value: ratio(numerator, denominator), source: store, updatedAt: at });
+  const label = (id: MetricId, side: "numerator" | "denominator", locale: "fr" | "en") => ENGINE_CATALOG[id as keyof typeof ENGINE_CATALOG].inputs?.[side]?.[locale];
+
+  it("holds six groups: the buyer cohort (three places), the orders, the GMV, the net revenue, the seller cohort, the sellers' subscription MRR (two each)", () => {
+    expect(SHARED_COUNTS.mktCohortSignups).toEqual([
+      { metric: "mkt.buy.first-order", side: "denominator" },
+      { metric: "mkt.buy.repeat", side: "denominator" },
+      { metric: "mkt.buy.referred-share", side: "denominator" },
+    ]);
+    expect(SHARED_COUNTS.mktOrders).toEqual([
+      { metric: "mkt.rev.frequency", side: "numerator" },
+      { metric: "mkt.rev.aov", side: "denominator" },
+    ]);
+    expect(SHARED_COUNTS.mktGmv).toEqual([
+      { metric: "mkt.rev.aov", side: "numerator" },
+      { metric: "mkt.rev.take-rate", side: "denominator" },
+    ]);
+    expect(SHARED_COUNTS.mktNetRevenue).toEqual([
+      { metric: "mkt.rev.take-rate", side: "numerator" },
+      { metric: "mkt.rev.gross-margin", side: "denominator" },
+    ]);
+    expect(SHARED_COUNTS.mktSellerCohortSignups).toEqual([
+      { metric: "mkt.sell.first-sale", side: "denominator" },
+      { metric: "mkt.sell.paid-conversion", side: "denominator" },
+    ]);
+    expect(SHARED_COUNTS.mktSellerMrrEnd).toEqual([
+      { metric: "mkt.sell.arpa", side: "numerator" },
+      { metric: "mkt.sell.gross-margin", side: "denominator" },
+    ]);
+    expect(sharedCountAt("mkt.buy.referred-share", "denominator")).toBe("mktCohortSignups");
+    // Nothing else of the marketplace is shared; the SaaS's own groups hold none of its numbers.
+    const shared = Object.values(SHARED_COUNTS).flat().filter((slot) => slot.metric.startsWith("mkt."));
+    expect(shared).toHaveLength(3 + 2 * 5);
+    for (const count of ["cohortSignups", "monthSignups", "mrrEnd", "mrrStart", "appActives"] as const) expect(SHARED_COUNTS[count].some((slot) => slot.metric.startsWith("mkt."))).toBe(false);
+  });
+
+  it.each(["fr", "en"] as const)("labels every place of a group alike (%s), the catalogue's words for the six counts", (locale) => {
+    const read = Object.fromEntries(
+      Object.entries(SHARED_COUNTS)
+        .filter(([, slots]) => slots.some((slot) => slot.metric.startsWith("mkt.")))
+        .map(([count, slots]) => {
+          const labels = slots.map((slot) => label(slot.metric, slot.side, locale));
+          expect(new Set(labels).size, `${locale} ${count}: ${JSON.stringify(labels)}`).toBe(1);
+          return [count, labels[0]];
+        }),
+    );
+    expect(read).toEqual(
+      locale === "fr"
+        ? {
+            mktCohortSignups: "Inscrits acheteurs en {cohort}",
+            mktOrders: "Commandes en {month}",
+            mktGmv: "Volume d'affaires (GMV) en {month}",
+            mktNetRevenue: "Revenu net en {month}",
+            mktSellerCohortSignups: "Vendeurs inscrits en {cohort}",
+            mktSellerMrrEnd: "MRR vendeurs à fin {month}",
+          }
+        : {
+            mktCohortSignups: "Buyer sign-ups from {cohort}",
+            mktOrders: "Orders in {month}",
+            mktGmv: "Gross merchandise value (GMV) in {month}",
+            mktNetRevenue: "Net revenue in {month}",
+            mktSellerCohortSignups: "Seller sign-ups from {cohort}",
+            mktSellerMrrEnd: "Seller MRR at the end of {month}",
+          },
+    );
+  });
+
+  it("a count typed on one number is written into the other places of its group, and into the base", () => {
+    const base = emptyState().snapshots[0]!;
+    // The orders: the frequency's 300 against the average order's 400; typing the average order wins.
+    const orders = propagateFrom({ ...base, metrics: { "mkt.rev.frequency": entry(300, 1_000), "mkt.rev.aov": entry(48_000, 400) } }, "mkt.rev.aov");
+    expect(orders.base?.mktOrders).toBe(400);
+    expect(orders.metrics["mkt.rev.frequency"]?.value).toEqual(ratio(400, 1_000));
+    // The GMV: the average order's numerator is the take rate's denominator.
+    const gmv = propagateFrom({ ...base, metrics: { "mkt.rev.aov": entry(48_000, 400), "mkt.rev.take-rate": entry(5_000, 20_000) } }, "mkt.rev.aov");
+    expect(gmv.base?.mktGmv).toBe(48_000);
+    expect(gmv.metrics["mkt.rev.take-rate"]?.value).toEqual(ratio(5_000, 48_000));
+    // The net revenue: the take rate's numerator is the margin's denominator.
+    const net = propagateFrom({ ...base, metrics: { "mkt.rev.take-rate": entry(5_760, 48_000), "mkt.rev.gross-margin": entry(4_000, 5_000) } }, "mkt.rev.take-rate");
+    expect(net.base?.mktNetRevenue).toBe(5_760);
+    expect(net.metrics["mkt.rev.gross-margin"]?.value).toEqual(ratio(4_000, 5_760));
+    // The buyer cohort: three places; the seller cohort: two; the subscription MRR: two.
+    const buyers = propagateFrom({ ...base, metrics: { "mkt.buy.first-order": entry(300, 1_000), "mkt.buy.repeat": entry(150, 900), "mkt.buy.referred-share": entry(80, 1_100) } }, "mkt.buy.first-order");
+    expect(buyers.base?.mktCohortSignups).toBe(1_000);
+    expect(buyers.metrics["mkt.buy.repeat"]?.value).toEqual(ratio(150, 1_000));
+    expect(buyers.metrics["mkt.buy.referred-share"]?.value).toEqual(ratio(80, 1_000));
+    const sellers = propagateFrom({ ...base, metrics: { "mkt.sell.first-sale": entry(60, 200), "mkt.sell.paid-conversion": entry(30, 180) } }, "mkt.sell.first-sale");
+    expect(sellers.base?.mktSellerCohortSignups).toBe(200);
+    expect(sellers.metrics["mkt.sell.paid-conversion"]?.value).toEqual(ratio(30, 200));
+    const mrr = propagateFrom({ ...base, metrics: { "mkt.sell.arpa": entry(2_025, 60), "mkt.sell.gross-margin": entry(1_500, 2_000) } }, "mkt.sell.arpa");
+    expect(mrr.base?.mktSellerMrrEnd).toBe(2_025);
+    expect(mrr.metrics["mkt.sell.gross-margin"]?.value).toEqual(ratio(1_500, 2_025));
+    // A SaaS number never reaches a marketplace one: the SaaS's cohort count is its own.
+    const saas = propagateFrom({ ...base, metrics: { "act.rate": entry(144, 800), "mkt.buy.first-order": entry(300, 1_000) } }, "act.rate");
+    expect(saas.base?.cohortSignups).toBe(800);
+    expect(saas.metrics["mkt.buy.first-order"]?.value).toEqual(ratio(300, 1_000));
+  });
+
+  it("the people and the orders are whole numbers (12.5 orders is refused), the GMV, the net revenue and the MRR are amounts and may carry cents", () => {
+    expect(WHOLE_SHARED_COUNTS).toEqual(expect.arrayContaining(["mktCohortSignups", "mktOrders", "mktSellerCohortSignups"]));
+    for (const count of ["mktGmv", "mktNetRevenue", "mktSellerMrrEnd"] as const) expect(WHOLE_SHARED_COUNTS).not.toContain(count);
+    const state = exampleState();
+    state.snapshots[0]!.base = { mktOrders: 400, mktGmv: 48_000.5, mktNetRevenue: 5_760.25, mktSellerMrrEnd: 2_025.75 };
+    expect(validateEngine(state)).toEqual([]);
+    state.snapshots[0]!.base.mktOrders = 12.5;
+    expect(validateEngine(state)).toEqual(["snapshots[0].base.mktOrders: not a whole number > 0"]);
+  });
+
+  it("the Settings offer a marketplace's counts, the numbers that carry each said under them — the subscription ones only with the subscriptions", () => {
+    const offered = (sellerSubscriptions: boolean) =>
+      settingsSharedCounts(shapesOf({ type: "marketplace", motions: { plg: false, slg: false }, sellerSubscriptions }).map((s) => s.id)).map(({ count, slots }) => [count, slots.map((slot) => slot.metric)]);
+    expect(offered(true)).toEqual([
+      ["mktCohortSignups", ["mkt.buy.first-order", "mkt.buy.repeat", "mkt.buy.referred-share"]],
+      ["mktOrders", ["mkt.rev.frequency", "mkt.rev.aov"]],
+      ["mktSellerCohortSignups", ["mkt.sell.first-sale", "mkt.sell.paid-conversion"]],
+    ]);
+    // Without the subscriptions the seller cohort is carried by the first sale alone: not shared, so not offered.
+    expect(offered(false)).toEqual([
+      ["mktCohortSignups", ["mkt.buy.first-order", "mkt.buy.repeat", "mkt.buy.referred-share"]],
+      ["mktOrders", ["mkt.rev.frequency", "mkt.rev.aov"]],
+    ]);
+  });
+});
+
 // Engine spec §21.2.4, A22 APP-1 (the line under a number's boxes names the other numbers of its count, among the ones
 // the view can name). Non-vacuity, measured on 2026-10-05 (each sabotage alone on `sharedWith`, the engine's unit tests
 // run, then put back; failures counted over this file and engine-props.test.ts): `named` ignored, 5 (the SaaS view and

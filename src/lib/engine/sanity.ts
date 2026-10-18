@@ -15,7 +15,7 @@ import { periodOf } from "./cohort";
 import { formatCountInterval, formatInterval, formatMonth, formatNumber, type UnitWords } from "./format";
 import { mapBounds } from "./interval";
 import { isApp } from "./setup-type";
-import type { EngineCalcContext, EngineState, Interval, MetricEntry, MetricId, MetricValue, Motion, SanityCheck } from "./types";
+import type { EngineCalcContext, EngineMotion, EngineState, Interval, MetricEntry, MetricId, MetricValue, SanityCheck } from "./types";
 import { countsOf, currentSnapshot, entryOf, knownIn } from "./values";
 
 /**
@@ -93,7 +93,7 @@ export function sanityChecks(state: EngineState, ctx: EngineCalcContext, words: 
   const { motions } = state.setup;
   const checks: SanityCheck[] = [];
   const addFor =
-    (motion: Motion | undefined) =>
+    (motion: EngineMotion | undefined) =>
     (id: SanityCheck["id"], metrics: MetricId[], values: Record<string, string> = {}, count?: Interval) =>
       checks.push({ id, ...(motion ? { motion } : {}), blocking: false, metrics, values, ...(count ? { count } : {}) });
 
