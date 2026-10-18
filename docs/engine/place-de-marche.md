@@ -322,8 +322,10 @@ module feuille **`setup-type.ts`** (§21.2.2 : des `import type` seulement, pour
 qu'aucun cycle de valeurs ne naisse) ; `business-type.ts` le réexporte.
 
 ```ts
-// src/lib/engine/setup-type.ts — gains (MOTIONS is a value of types.ts, which imports nothing of the engine)
-import { MOTIONS } from "./types";
+// src/lib/engine/setup-type.ts — gains (`import type` only: the module stays a strict leaf)
+/** The two selling motions, in MOTIONS order (a test holds them equal): a value import of MOTIONS would pull types.ts,
+ * ENGINE_INDEX_KEY with it, into every page that loads this module (MKT-1, e2e/engine-entries.spec.ts). */
+export const SELLING_MOTIONS = ["plg", "slg"] as const satisfies readonly Motion[];
 /** §21.2.2 put the list here (access.ts, read by the Edge proxy, imports it): it gains the marketplace. */
 export const BUSINESS_TYPES: readonly BusinessType[] = ["b2b-saas", "consumer-app", "marketplace"];
 export function isMarketplace(setup: Pick<EngineSetup, "type">): boolean {
@@ -332,7 +334,7 @@ export function isMarketplace(setup: Pick<EngineSetup, "type">): boolean {
 /** The motions an engine derives, in ENGINE_MOTIONS order (§22.1 D1). */
 export function activeMotions(setup: Pick<EngineSetup, "type" | "motions">): EngineMotion[] {
   if (setup.type === "marketplace") return ["mkt"];
-  return MOTIONS.filter((m) => setup.motions[m]);
+  return SELLING_MOTIONS.filter((m) => setup.motions[m]);
 }
 /** The narrowing §22.2.5 uses where an EngineMotion reaches code written for the two selling motions. */
 export function isSellingMotion(m: EngineMotion): m is Motion {
@@ -347,9 +349,15 @@ export function mktSetup(setup: Pick<EngineSetup, "type" | "offering" | "sellerS
 };
 ```
 
-`setup-type.ts` importe la **valeur** `MOTIONS` de `types.ts` : c'est permis
-(`types.ts` n'importe aucune valeur du moteur) ; le test d'APP-0 (« chaque
-import est un `import type` ») gagne cette seule exception, nommée.
+**`setup-type.ts` n'importe aucune valeur**, pas même `MOTIONS` : le test
+d'APP-0 (« chaque import est un `import type` ») reste strict. Ce document le
+permettait d'abord ; MKT-1 l'a payé (#380). `goatcounter.ts`, chargé par toutes
+les pages, lit `setup-type.ts` ; dès qu'`activeMotions` a eu son premier
+appelant (`bridge.ts`), le bundler a gardé l'import de `MOTIONS`, donc
+`types.ts` entier, `ENGINE_INDEX_KEY` compris, dans treize chunks, dont trois
+de l'accueil d'un build fermé, ce que `e2e/engine-entries.spec.ts` refuse.
+`setup-type.ts` porte donc son propre tuple, `SELLING_MOTIONS`, qu'un test
+tient égal à `MOTIONS`.
 
 ```ts
 // src/lib/engine/business-type.ts — changes

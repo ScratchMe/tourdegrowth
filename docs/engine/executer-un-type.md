@@ -263,10 +263,13 @@ branche** : `ENGINE_TYPES` y vaut `consumer-app` depuis APP-0, puis
 avec ses e2e). Avant MKT-10, les e2e se lancent avec `ENGINE_TYPES=consumer-app`
 comme la CI, et seules les captures d'une unité de la place de marché se
 prennent sur un build `consumer-app,marketplace`. **Une unité sans écran
-fait quand même tourner**, contre ce build, `e2e/engine-canary.spec.ts` et
-`e2e/engine-collect.spec.ts`. Le pilote APP-1 n'avait pas d'écran et il en a
-cassé un : un compte partagé nommait un chiffre que les props du SaaS ne
-portent pas. Seuls ces e2e l'ont vu. La suite complète (plus d'une heure en
+fait quand même tourner**, contre ce build, `e2e/engine-canary.spec.ts`,
+`e2e/engine-collect.spec.ts` et `e2e/engine-entries.spec.ts`. Le pilote APP-1
+n'avait pas d'écran et il en a cassé un : un compte partagé nommait un
+chiffre que les props du SaaS ne portent pas. Seuls ces e2e l'ont vu.
+`engine-entries` est la seule garde qui lit ce que charge l'accueil d'un
+build fermé : MKT-1, sans écran, y a fait entrer le code du moteur par un
+import de valeur de `setup-type.ts` (#380), et aucun test unitaire ne l'a vu. La suite complète (plus d'une heure en
 local) est celle de la CI.
 
 **Les captures** (leçon nº 1 de `CLAUDE.md`) : une spec Playwright jetable,
