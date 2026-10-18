@@ -386,7 +386,25 @@ Les lacunes sont surtout des fichiers absents des rubriques (`EngineWorkbench.ts
 - Les deux sortes de lignes du deck s'appellent `streams` et `sideFunnel`.
 - Les deux « Et si » d'ensemble s'appellent `mktScenarioDemand` et `mktScenarioSupply`.
 
-**Les deux chaînes raccourcies** : la formule de la part recommandée devient « acheteurs inscrits via un utilisateur (…) ÷ acheteurs inscrits de la cohorte » (136). La variante `requests` devient « Demandes envoyées (réservation, devis…) » (39), les mots de C99 gardés. **Copie neuve** dans §22.8.5 : six feuilles du calque commun et quatre avertissements des Réglages (`settings.firstOrderReset`, `repeatReset`, `firstSaleReset`, `firstSalePaidReset`). Toutes partiront « à relire » au bon à tirer A23.d.
+**Les deux chaînes raccourcies** :
+- La formule de la part recommandée devient « inscrits acheteurs via un utilisateur (…) ÷ inscrits acheteurs de la cohorte » (136 caractères).
+- La variante `requests` devient « Demandes envoyées : réservation, devis… » (39 caractères) et garde les mots de C99. Pas de parenthèses : `{variant}` s'imprime déjà entre parenthèses.
+
+**Copie neuve** dans §22.8.5 : les six feuilles du calque commun, et quatre avertissements des Réglages (`settings.firstOrderReset`, `repeatReset`, `firstSaleReset`, et `firstSalePaidReset`, avec les abonnements). Toutes partiront « à relire » au bon à tirer A23.d.
+
+**Le relecteur de copie** a trouvé huit corrections, toutes appliquées :
+- des parenthèses imbriquées ;
+- « its cost » pour une personne ;
+- le point 2 du test de §22.8.3, qui aurait rougi sur le calque commun ;
+- `firstSalePaidReset`, désignée mais passée nulle part ;
+- un paragraphe de §22.6.1 resté sur une première version ;
+- le quatrième avertissement, oublié ;
+- l'ordre « inscrits acheteurs » ;
+- « commandes et revenu net des deux côtés ».
+
+**À regarder au bon à tirer A23.d** :
+- `setup.referenceMonthHint` ne nomme pas les abonnements des vendeurs.
+- `terms.cohort.definition` ne cite pas la conversion en abonné. Elle se lit aussi sur la cohorte quand les vendeurs paient, mais n'existe pas sans abonnements.
 
 **Changé** :
 - `docs/engine/place-de-marche.md` : tout §22. Les tables de §22.2.5 sont relevées sur `f78ecde`, avec une table neuve pour ce que `tsc` signale à MKT-0. On y trouve aussi le code exact de `validate.ts`, `io.ts`, `merge.ts`, `windowsOf`, `shapesOf`, `verdictOf`, `withSettings`, et l'analytique. Les fiches MKT-0 à MKT-8 sont mises à jour, et la ligne « Fait » est ajoutée à MKT-R.

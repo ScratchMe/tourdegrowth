@@ -823,7 +823,7 @@ Les entrées s'ajoutent aux deux records existants, dans un bloc
 - trap : « Écris ce qu'est une demande. Avec des recherches, ne compte que celles où quelqu'un a regardé une annonce : une recherche vide n'est pas une demande. » / "Write down what a request is. With searches, only count those where someone looked at a listing: an empty search isn't a request."
 - request : « le nombre de demandes en {month} ({variant}) et le nombre de celles qui ont abouti à une commande » / "the number of requests in {month} ({variant}) and how many ended in an order"
 - noReferenceReason : « il dépend de ce que tu comptes comme une demande ; c'est le chiffre qui dit si ta place de marché tient sa promesse, suis-le contre ta cible » / "it depends on what you count as a request; it is the number that says whether your marketplace keeps its promise, follow it against your target"
-- variants : `requests` · « Demandes envoyées (réservation, devis…) » / "Requests sent (booking, quote…)" (C99 ; raccourcie par MKT-R, constat 13 : l'ancienne, « Demandes envoyées : réservation, devis, mission », faisait 47 caractères pour un plafond de 40, `TEXT_LIMITS.label`) ; `searches` · « Recherches avec une annonce consultée » / "Searches with a listing viewed"
+- variants : `requests` · « Demandes envoyées : réservation, devis… » / "Requests sent: booking, quote…" (C99 ; raccourcie par MKT-R, constat 13 : l'ancienne, « Demandes envoyées : réservation, devis, mission », faisait 47 caractères pour un plafond de 40, `TEXT_LIMITS.label` ; pas de parenthèses : `{variant}` s'imprime déjà entre parenthèses dans la formule et la demande) ; `searches` · « Recherches avec une annonce consultée » / "Searches with a listing viewed"
 
 **`mkt.buy.repeat`**
 - name : « Deuxième commande » / "Second order"
@@ -858,7 +858,7 @@ Les entrées s'ajoutent aux deux records existants, dans un bloc
 **`mkt.buy.referred-share`**
 - name : « Part des acheteurs recommandés » / "Referred buyer share"
 - oneLiner : « La part des inscrits acheteurs amenés par un utilisateur. » / "The share of buyer sign-ups brought in by a user."
-- formula : « acheteurs inscrits via un utilisateur (parrainage, lien partagé, « comment nous avez-vous connus ? ») ÷ acheteurs inscrits de la cohorte » / "buyer sign-ups who came through a user (referral, shared link, \"how did you hear about us?\") ÷ cohort buyer sign-ups" (136 caractères ; raccourcie par MKT-R, constat 13 : l'ancienne en faisait 144 pour un plafond de 140)
+- formula : « inscrits acheteurs via un utilisateur (parrainage, lien partagé, « comment nous avez-vous connus ? ») ÷ inscrits acheteurs de la cohorte » / "buyer sign-ups who came through a user (referral, shared link, \"how did you hear about us?\") ÷ cohort buyer sign-ups" (136 caractères ; raccourcie par MKT-R, constat 13 : l'ancienne en faisait 144 pour un plafond de 140)
 - inputs : « Inscrits acheteurs recommandés » / "Referred buyer sign-ups" ; « Inscrits acheteurs en {cohort} » / "Buyer sign-ups from {cohort}"
 - where : 1. product-db · « Outil de parrainage ou base produit » · « les inscrits en {cohort} qui ont un parrain, un code ou un lien partagé par un vendeur ou un acheteur » / "the sign-ups from {cohort} with a referrer, a code or a link shared by a seller or a buyer" ; 2. hubspot · « HubSpot » · « une propriété « comment nous avez-vous connus ? » remplie à l'inscription » / "a \"how did you hear about us?\" property filled in at sign-up"
 - trap : « Un vendeur qui partage son annonce amène des acheteurs : c'est de la recommandation, compte-la. La source « referral » de GA4 n'en est pas. » / "A seller who shares their listing brings buyers: that is referral, count it. GA4's \"referral\" source isn't."
@@ -1540,13 +1540,12 @@ listes de la carte de réglage) : ils n'attendent pas le retour du brief 10.
 
   **Les quatre aides de la carte parlent SaaS** (C105, constat 28) : la carte
   et les Réglages lisent le jeu neutre (`stringsFor(type)`, `Setup.tsx:158`),
-  où quatre feuilles disent « ARPA », « un client », « les inscrits ». Pour une
-  place de marché, la carte lit à leur place quatre feuilles `mkt.setup.*`
-  (§22.8.5 k) : `setup.referenceMonthHint` (`:542`) →
-  `mkt.setup.referenceMonthHint`, `settings.runwayHint` (`:641`) →
-  `mkt.setup.runwayHint`, `setup.cohortHint` (`:353`, `:553`) →
-  `mkt.setup.cohortHint`, `settings.windowHint` (`:368`) →
-  `mkt.setup.windowHint`, choisies par `isMarketplace(setup)`.
+  où quatre feuilles disent « ARPA », « un client », « les inscrits » :
+  `setup.referenceMonthHint` (`:542`), `settings.runwayHint` (`:641`),
+  `setup.cohortHint` (`:353`, `:553`), `settings.windowHint` (`:368`).
+  `products.common` les réécrit (§22.8.5 c bis, avec les deux définitions de
+  l'écran d'un chiffre) ; la carte lit toujours `stringsFor(type)`, aucun
+  lecteur ne change.
 - **`TargetsStart`** : deux groupes, un par côté (titres
   `mkt.side.demandTitle`, `mkt.side.supplyTitle`), avec les candidats de
   `mktCandidates(side, setup)`. La boucle lit `activeMotions(setup)` au lieu de
@@ -1568,8 +1567,10 @@ listes de la carte de réglage) : ils n'attendent pas le retour du brief 10.
   `firstSale` (la première vente **ou** la conversion des abonnés saisie) ; et
   l'avertissement d'avant l'enregistrement (`Setup.tsx:321-324`, qui lit les
   quatre feuilles `settings.*Reset`) lit pour ces trois fenêtres
-  `settings.firstOrderReset`, `settings.repeatReset` et
-  `settings.firstSaleReset` (§22.8.5 a).
+  `settings.firstOrderReset`, `settings.repeatReset`, et pour la première
+  vente `settings.firstSaleReset` sans abonnements des vendeurs,
+  `settings.firstSalePaidReset` avec (`mktSetup(setup).sellerSubscriptions`)
+  (§22.8.5 a).
 - **La barre** : `workbench.modelShort.marketplace` ; le mois des flux.
   `BoardHead.tsx:102-114` (`modelShort`, `:107`) lit `isApp ? app : !slg ?
   selfserve : …` : la branche `isMarketplace` passe en tête, sinon la barre
@@ -1872,6 +1873,7 @@ s'arrête pas pour ces noms et recopie leur commentaire :
 | les deux | `slide.unitLeavesBefore`, `slide.unitMayLeaveBefore` | même fausse alerte (« part {n} avant d'avoir remboursé » / "leaves {n} before paying back") |
 | demande | `scenario.assumption.referral-on-top` | « qui s'inscrivent » / "who sign up" est un verbe juste pour des acheteurs ; l'offre n'a pas de levier de recommandation, elle ne l'imprime jamais |
 | demande | `terms.arr.definition` | jamais affichée côté demande : son « ? » lit `mkt.terms.netRevenue` (§22.8.5 k) ; l'offre la réécrit (le MRR des abonnements) |
+| les deux | `settings.firstSalePaidReset` | écrite pour la place de marché (§22.8.5 a) : « conversion en abonné » est déjà le mot de l'offre. Pas dans `MKT_EXCLUDED` : la règle 5 doit encore la réécrire en mots « services » |
 
 `terms.cohort.definition` et `terms.window.definition` ne sont pas dans cette
 liste : `products.common` les réécrit (§22.8.5 c bis), et le test les tient
@@ -1941,7 +1943,7 @@ désigne. La liste vit dans `src/content/__tests__/mkt-words.ts` sous le nom
    (la marge globale est réservée au SaaS) ; `sanity.paidGtRetained`,
    `sanity.retainedGtActivated` (les contrôles du funnel du SaaS ; ceux de la
    place de marché sont `sanity.mkt*`) ; `settings.paidReset` (la fenêtre de
-   paiement du SaaS ; la place de marché a ses trois avertissements, §22.8.5
+   paiement du SaaS ; la place de marché a ses quatre avertissements, §22.8.5
    a), `io.sharedCount.mrrEnd`, `io.sharedCount.mrrStart` (le MRR du SaaS, que
    la NRR et la GRR lisent ; l'app les passe aussi).
 8. **Ce que seule l'app imprime** : les clés neuves de §21.8.4 b (son tableau
@@ -1966,7 +1968,10 @@ d'acceptation de MKT-5, sur le modèle d'`engine-copy-consumer.test.ts` :
      visitors`, `LTV:CAC` ;
    - pour `demand` : aucune (son lexique n'en contient pas) ;
 
-   sauf les exceptions nommées une par une, chacune commentée ;
+   sauf les exceptions nommées une par une, chacune commentée, dont les six
+   feuilles de `products.common` (§22.8.5 c bis), écrites pour les deux
+   côtés à la fois : « inscrit », « visiteurs », "signed up" et « vendeur
+   abonné » y sont voulus ;
 3. **pas de clé orpheline** : chaque feuille d'un calque existe dans
    `ENGINE_COPY`, et a **les mêmes gabarits** (`{…}`) que la feuille qu'elle
    remplace, dans les deux langues ;
@@ -2226,10 +2231,10 @@ règle 5 les attrape).
 
 | Clé | FR | EN |
 |---|---|---|
-| `setup.referenceMonthHint` | Visiteurs, inscriptions, dépense, commandes, revenu net et churn de ce mois-là, des deux côtés. Par défaut : le dernier mois terminé. | Visitors, sign-ups, spend, orders, net revenue and churn for that month, on both sides. Default: the last full month. |
+| `setup.referenceMonthHint` | Visiteurs, inscriptions, dépense et churn des deux côtés, commandes et revenu net de ce mois-là. Par défaut : le dernier mois terminé. | Visitors, sign-ups, spend and churn on both sides, orders and net revenue for that month. Default: the last full month. |
 | `setup.cohortHint` | On suit les acheteurs et les vendeurs inscrits en {cohort} : ceux inscrits en {next} n'ont pas encore eu {n} jours. | We follow the buyers and sellers who signed up in {cohort}: those from {next} haven't had {n} days yet. |
-| `settings.windowHint` | La fenêtre : le nombre de jours qu'a un acheteur ou un vendeur inscrit pour que ça compte. | The window: how many days a buyer or seller who signed up has for it to count. |
-| `settings.runwayHint` | Sert seulement à te prévenir quand un acheteur ou un vendeur abonné met plus longtemps à rembourser son coût. | Only used to warn you when a buyer or a paid seller takes longer to pay back its cost. |
+| `settings.windowHint` | La fenêtre : le nombre de jours qu'a un acheteur ou un vendeur, depuis son inscription, pour que ça compte. | The window: how many days a buyer or seller has, from signing up, for it to count. |
+| `settings.runwayHint` | Sert seulement à te prévenir quand un acheteur ou un vendeur abonné met plus longtemps à rembourser son coût. | Only used to warn you when a buyer or a paid seller takes longer to pay back their cost. |
 | `terms.cohort.definition` | Les acheteurs ou les vendeurs inscrits un même mois, suivis sur les jours qui suivent. La première commande, la deuxième et la première vente se lisent sur une cohorte assez ancienne pour que chacun ait eu toute la fenêtre : la cohorte suivie, dans les Réglages. | The buyers or sellers who signed up in one month, followed over the days after. The first order, the second one and the first sale are read on a cohort old enough for each of them to have had the whole window: the cohort you follow, in Settings. |
 | `terms.window.definition` | Le nombre de jours qu'a un inscrit pour qu'une action compte : commander en 30 jours, commander une deuxième fois en 90, vendre en 60. Elle se règle dans Réglages. | How many days a sign-up has for an action to count: order within 30 days, order a second time within 90, sell within 60. Change it in Settings. |
 
