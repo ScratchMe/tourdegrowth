@@ -1,15 +1,16 @@
 import type { AppMonetization } from "./app-model";
-import { MOTIONS } from "./types";
 import type { BusinessType, EngineMotion, EngineSetup, Motion } from "./types";
 
 /*
  * setup-type.ts — what the engine knows of a setup's TYPE (engine spec §21.2.2, §22.2.2, A22 APP-0, A23 MKT-0).
  *
- * A LEAF on purpose: it imports types only, and the one value `MOTIONS` of `types.ts`, which imports no value of
- * the engine itself (`business-type.test.ts` holds both). `catalog-shape.ts` reads it to tell an app from a SaaS,
- * and `access.ts` — which the Edge proxy, the sitemap, `llms.ts` and the owner preview import — reads the list of
- * types from it: read from `business-type.ts`, which imports the catalogue from APP-2 on, they would drag the
- * whole catalogue into the proxy's bundle.
+ * A LEAF on purpose: it imports types only (`business-type.test.ts` holds that), not even the value `MOTIONS` of
+ * `types.ts`: `lib/analytics/goatcounter.ts` reads `isApp` from here on every page, and a value import of `types.ts`
+ * (which holds `ENGINE_INDEX_KEY`) would put the engine's storage keys in the code every page loads as soon as any
+ * engine module calls `activeMotions` (A23 MKT-1: `bridge.ts`; `e2e/engine-entries.spec.ts` sees it on the landing).
+ * `catalog-shape.ts` reads it to tell an app from a SaaS, and `access.ts` — which the Edge proxy, the sitemap,
+ * `llms.ts` and the owner preview import — reads the list of types from it: read from `business-type.ts`, which
+ * imports the catalogue from APP-2 on, they would drag the whole catalogue into the proxy's bundle.
  */
 
 /** Every type the code knows, in the order the setup lists them. Here, not in business-type.ts: access.ts (read by the Edge proxy) imports it. */
@@ -43,10 +44,15 @@ export function monetizationOf(setup: Pick<EngineSetup, "type" | "monetization">
 export function isMarketplace(setup: Pick<EngineSetup, "type">): boolean {
   return setup.type === "marketplace";
 }
+/**
+ * The two selling motions, in `MOTIONS` order. Written here, not read from `types.ts`, to keep this module a leaf
+ * (see the header); `business-type.test.ts` holds that it equals `MOTIONS`, in the same order.
+ */
+export const SELLING_MOTIONS = ["plg", "slg"] as const satisfies readonly Motion[];
 /** The motions an engine derives, in `ENGINE_MOTIONS` order (§22.1 D1): a marketplace's is its own, the others' are the boxes ticked. */
 export function activeMotions(setup: Pick<EngineSetup, "type" | "motions">): EngineMotion[] {
   if (setup.type === "marketplace") return ["mkt"];
-  return MOTIONS.filter((m) => setup.motions[m]);
+  return SELLING_MOTIONS.filter((m) => setup.motions[m]);
 }
 /** The narrowing §22.2.5 uses where an `EngineMotion` reaches code written for the two selling motions. */
 export function isSellingMotion(m: EngineMotion): m is Motion {
