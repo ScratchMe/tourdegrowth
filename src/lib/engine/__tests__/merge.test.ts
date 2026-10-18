@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { mergeEngines, mergeRefusal, type MergeChange } from "../merge";
 import { startNextMonth } from "../series";
 import { SHARED_COUNTS } from "../shared-counts";
+import { mktSetup } from "../setup-type";
 import { MAX_MONTHS, type EngineState, type SharedCount } from "../types";
 import { validateEngine } from "../validate";
 import { exampleState, hybridState, measured, ratio, withMonthBefore } from "./fixtures";
@@ -299,6 +300,26 @@ describe("mergeRefusal — two engines that would not measure the same thing", (
     // Another type's windows are not read as a marketplace's: a SaaS file that carries one has it unread.
     const { device, file } = twoCopies();
     expect(mergeRefusal(device, { ...file, setup: { ...file.setup, repeatWindowDays: 180 } })).toBeNull();
+  });
+
+  // Non-vacuity of the raw comparison, measured on 2026-10-18 (the security review of A23 MKT-0; each sabotage applied
+  // alone, the whole of `src/lib/engine` run, the file restored): `sameMktWindows` back on `mktSetup` falls the test
+  // below (1); the windows compared with no default for an absent one falls it and « a window left at its default is
+  // the window absent » (2).
+  it("a window outside its list is not the default: 45 days refuses against 30, an absent window merges against the default (security review, 2026-10-18)", () => {
+    // `mktSetup` reads 45 as 30; the comparison reads what is stored, the default standing for an ABSENT window only.
+    const forged = { firstOrderWindowDays: 45 as never };
+    expect(mktSetup(market(forged).setup).firstOrderWindowDays).toBe(30);
+    expect(mergeRefusal(market({ firstOrderWindowDays: 30 }), market(forged))).toBe("windows");
+    expect(mergeRefusal(market(forged), market({ firstOrderWindowDays: 30 }))).toBe("windows");
+    expect(mergeRefusal(market(), market(forged))).toBe("windows");
+    expect(mergeRefusal(market(forged), market(forged))).toBeNull();
+    expect(mergeEngines(market({ repeatWindowDays: 90 }), market({ repeatWindowDays: 45 as never }))).toEqual({ kind: "refused", reason: "windows" });
+    expect(mergeEngines(market({ firstSaleWindowDays: 60 }), market({ firstSaleWindowDays: 45 as never }))).toEqual({ kind: "refused", reason: "windows" });
+    // Absent against the default value merges, on each of the three, in both directions.
+    expect(mergeRefusal(market(), market({ firstOrderWindowDays: 30 }))).toBeNull();
+    expect(mergeRefusal(market({ repeatWindowDays: 90 }), market())).toBeNull();
+    expect(mergeRefusal(market(), market({ firstSaleWindowDays: 60 }))).toBeNull();
   });
 
   it("two marketplaces that differ in their offering alone merge: it is words, and the device's setup is kept", () => {

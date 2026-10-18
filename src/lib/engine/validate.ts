@@ -7,6 +7,7 @@ import {
   ENGINE_SCHEMA_VERSION,
   MAX_MONTHS,
   SLIDE_ORDER,
+  SNAPSHOT_WINDOW_KEYS,
   YEAR_MONTH_PATTERN,
   type Currency,
   type EngineDeck,
@@ -350,6 +351,8 @@ function snapshotErrors(path: string, snapshot: unknown): string[] {
       (w.firstSaleWindowDays !== undefined && !FIRST_SALE_WINDOWS.includes(w.firstSaleWindowDays as number))
     )
       errors.push(`${path}.windows: not the four windows of a setup`);
+    // `windowsOf` writes the seven keys of `SnapshotWindows` and no other: any more is a file written by hand.
+    if (isObj(w)) for (const k of Object.keys(w)) if (!(SNAPSHOT_WINDOW_KEYS as readonly string[]).includes(k)) errors.push(`${path}.windows: unknown key ${k}`);
   }
   if (snapshot.pipelineOpen !== undefined && (!isNum(snapshot.pipelineOpen) || snapshot.pipelineOpen < 0)) errors.push(`${path}.pipelineOpen: not a number >= 0`);
 

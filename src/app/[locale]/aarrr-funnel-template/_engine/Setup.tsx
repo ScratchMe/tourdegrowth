@@ -5,7 +5,7 @@ import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
 import type { AppMonetization } from "@/lib/engine/app-model";
 import { METRIC_SHAPES, SLG_METRIC_SHAPES, TEXT_LIMITS, shapeOf } from "@/lib/engine/catalog-shape";
-import { BUSINESS_TYPES, DEFAULT_APP_MONETIZATION, isApp, monetizationOf } from "@/lib/engine/setup-type";
+import { DEFAULT_APP_MONETIZATION, isApp, monetizationOf } from "@/lib/engine/setup-type";
 import type { EngineStrings } from "@/lib/engine/strings";
 import type { BusinessType, Currency, EngineSetup, MetricId, Motion, SharedCount, ToolId, YearMonth } from "@/lib/engine/types";
 import { savedTools, teamTools, toolFamiliesFor } from "@/lib/engine/tools";
@@ -27,7 +27,7 @@ import { TextField } from "@/components/core/TextField";
 import { monthsEndingAt } from "@/lib/forms/date";
 import { isUnreadableNumber } from "@/lib/forms/number";
 import { moneyUnit, percentUnit, wordUnit } from "./sources";
-import { DEFAULT_CURRENCY, DEFAULT_WINDOWS, setupOfCard } from "./start";
+import { DEFAULT_CURRENCY, DEFAULT_WINDOWS, pickedType, setupOfCard } from "./start";
 import { streamChanges } from "./stream-lines";
 import { EngineTerm } from "./EngineTerm";
 import styles from "./Screens.module.css";
@@ -417,7 +417,9 @@ export function Setup({
           legend={s.companyType}
           value={type}
           onChange={(next) => {
-            if ((BUSINESS_TYPES as readonly string[]).includes(next)) changeType(next as BusinessType);
+            // Only a type this build opens (§21.3): the guard reads `openTypes`, not every type there is.
+            const picked = pickedType(next, openTypes);
+            if (picked) changeType(picked);
           }}
           options={[
             { value: "b2b-saas", label: s.types.b2bSaas },

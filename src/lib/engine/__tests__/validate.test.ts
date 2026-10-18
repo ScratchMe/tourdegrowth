@@ -244,6 +244,35 @@ describe("validateEngine — the v3 fields: the series, the tools, the pipeline,
     expect(validateEngine(zero)).toEqual([]);
   });
 
+  // Non-vacuity, measured on 2026-10-18 (the security review of A23 MKT-0; each sabotage applied alone, the whole of
+  // `src/lib/engine` run, the file restored): the unknown-key line of `snapshotErrors` removed falls this test alone
+  // (1); the list of keys without `firstSaleWindowDays` falls it and « a closed month keeps the marketplace's three
+  // windows » (2 here, 4 more elsewhere).
+  it("a closed month's windows hold the seven keys of a setup's windows and no other: each one more is reported, once, by name", () => {
+    const FOUR = { activationWindowDays: 7, paidWindowDays: 30, qualificationWindowDays: 30, goLiveWindowDays: 90 } as const;
+    const withWindows = (windows: Record<string, unknown>) => {
+      const s = twoMonths();
+      s.snapshots[0]!.windows = windows as never;
+      return s;
+    };
+    expect(validateEngine(withWindows(FOUR))).toEqual([]);
+    expect(validateEngine(withWindows({ ...FOUR, firstOrderWindowDays: 7, repeatWindowDays: 180, firstSaleWindowDays: 90 }))).toEqual([]);
+    expect(validateEngine(withWindows({ ...FOUR, type: "marketplace" }))).toEqual(["snapshots[0].windows: unknown key type"]);
+    expect(validateEngine(withWindows({ ...FOUR, type: "marketplace", currency: "USD", motions: { plg: false, slg: false }, tools: ["stripe"], companyLabel: "Forged" }))).toEqual([
+      "snapshots[0].windows: unknown key type",
+      "snapshots[0].windows: unknown key currency",
+      "snapshots[0].windows: unknown key motions",
+      "snapshots[0].windows: unknown key tools",
+      "snapshots[0].windows: unknown key companyLabel",
+    ]);
+    // A key with no value is still a key; a window outside its list keeps its own message, beside the unknown key's.
+    expect(validateEngine(withWindows({ ...FOUR, offering: undefined }))).toEqual(["snapshots[0].windows: unknown key offering"]);
+    expect(validateEngine(withWindows({ ...FOUR, paidWindowDays: 45, type: "marketplace" }))).toEqual([
+      "snapshots[0].windows: not the four windows of a setup",
+      "snapshots[0].windows: unknown key type",
+    ]);
+  });
+
   it("the tools: optional, empty allowed, every one known, none twice — pipedrive and the CS platform included", () => {
     const s = fullState();
     for (const tools of [[], ["hubspot", "pipedrive", "cs-platform"]] as ToolId[][]) expect(validateEngine({ ...s, setup: { ...s.setup, tools } })).toEqual([]);

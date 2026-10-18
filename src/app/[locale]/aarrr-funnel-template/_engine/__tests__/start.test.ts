@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { shapesOf } from "@/lib/engine/catalog-shape";
 import { EN, FR } from "@/lib/engine/__tests__/props";
-import { DEFAULT_APP_MONETIZATION } from "@/lib/engine/setup-type";
+import { openTypesWith } from "@/lib/engine/access";
+import { ALWAYS_OPEN_TYPE, BUSINESS_TYPES, DEFAULT_APP_MONETIZATION } from "@/lib/engine/setup-type";
 import { savedTools, teamTools } from "@/lib/engine/tools";
 import type { EngineSetup } from "@/lib/engine/types";
-import { motionsOf, setupOfCard, startCopy, startDefaults, startMotionOf, startPlan, typeOf } from "../start";
+import { motionsOf, pickedType, setupOfCard, startCopy, startDefaults, startMotionOf, startPlan, typeOf } from "../start";
 
 /** What the card passes `startPlan` for a SaaS: its two motions, as the card reads them. */
 const saas = (answer: "ss" | "sa" | "both") => ({ type: "b2b-saas" as const, motions: motionsOf(answer) });
@@ -21,6 +22,48 @@ describe("the start's question", () => {
     expect(motionsOf("sa")).toEqual({ plg: false, slg: true });
     expect(motionsOf("both")).toEqual({ plg: true, slg: true });
     for (const answer of ["ss", "sa", "both"] as const) expect(startMotionOf(motionsOf(answer))).toBe(answer);
+  });
+});
+
+/**
+ * The settings card's type guard (the security review of A23 MKT-0, 2026-10-18): a click picks a type only when the
+ * build opens it (`openTypes`), not whenever it is a type there is — the marketplace is listed in `BUSINESS_TYPES`
+ * since MKT-0 and only the dashed option's `disabled` kept it from being picked. Vitest mounts no component, so the
+ * guard is this pure function and `Setup` calls it.
+ *
+ * Non-vacuity, measured on 2026-10-18 (each sabotage applied alone, this file run, the file restored): the guard
+ * reading `BUSINESS_TYPES` again falls « the marketplace is a type there is and no choice » and « the app is a choice
+ * only in a build that opens it » (2); answering with whatever string it is given falls those two and « a string that
+ * is no type at all is no choice » (3). That `Setup` calls it is not tested: its `onChange` fires on a click, which
+ * `renderToStaticMarkup` cannot send, and the option is `disabled`, so no e2e can click it either.
+ */
+describe("pickedType — the settings card's type guard", () => {
+  it("the marketplace is a type there is and no choice: not while its screens are not ready, even listed in ENGINE_TYPES", () => {
+    expect((BUSINESS_TYPES as readonly string[]).includes("marketplace")).toBe(true);
+    for (const env of [undefined, "", "consumer-app", "marketplace", "consumer-app,marketplace"]) {
+      expect(pickedType("marketplace", openTypesWith(env)), `ENGINE_TYPES=${env}`).toBeNull();
+    }
+  });
+
+  it("the SaaS is always a choice: it is in every build's open types", () => {
+    for (const env of [undefined, "", "consumer-app", "marketplace", "consumer-app,marketplace"]) {
+      const open = openTypesWith(env);
+      expect(open, `ENGINE_TYPES=${env}`).toContain(ALWAYS_OPEN_TYPE);
+      expect(pickedType("b2b-saas", open)).toBe("b2b-saas");
+    }
+  });
+
+  it("the app is a choice only in a build that opens it", () => {
+    expect(pickedType("consumer-app", openTypesWith(undefined))).toBeNull();
+    expect(pickedType("consumer-app", ["b2b-saas"])).toBeNull();
+    expect(pickedType("consumer-app", openTypesWith("consumer-app"))).toBe("consumer-app");
+    expect(pickedType("consumer-app", openTypesWith("consumer-app,marketplace"))).toBe("consumer-app");
+  });
+
+  it("a string that is no type at all is no choice", () => {
+    expect(pickedType("", ["b2b-saas", "consumer-app"])).toBeNull();
+    expect(pickedType("unknown-type", ["b2b-saas", "consumer-app"])).toBeNull();
+    expect(pickedType("B2B-SAAS", ["b2b-saas"])).toBeNull();
   });
 });
 

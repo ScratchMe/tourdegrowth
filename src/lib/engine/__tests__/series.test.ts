@@ -14,7 +14,7 @@ import {
   windowsOf,
   withMonth,
 } from "../series";
-import { MAX_MONTHS, type EngineState, type MetricEntry } from "../types";
+import { MAX_MONTHS, SNAPSHOT_WINDOW_KEYS, type EngineState, type MetricEntry } from "../types";
 import { validateEngine } from "../validate";
 import { currentSnapshot, knownOf } from "../values";
 import { EXAMPLE_TODAY, estimated, exampleState, hybridState, measured, missing, ratio, salesAssistedState, withMonthBefore } from "./fixtures";
@@ -257,6 +257,86 @@ describe("windowsOf and a closed month — the marketplace's three windows (§22
   it("a SaaS's closed month carries no key of the marketplace, whatever its setup holds", () => {
     const next = startNextMonth({ ...exampleState(), setup: { ...exampleState().setup, repeatWindowDays: 180 } }, OCTOBER, "2026-10-03T09:00:00.000Z", counter())!;
     expect(Object.keys(next.snapshots[0]!.windows!).sort()).toEqual(FOUR);
+  });
+});
+
+/**
+ * A closed month never rewrites the setup (the security review of A23 MKT-0, 2026-10-18): `monthView` copies the seven
+ * keys of `SnapshotWindows` and no other, so a forged file whose closed month carries `type: "marketplace"` (or a
+ * currency, the motions, the tools…) is still read as the SaaS it is — the barrier `MARKETPLACE_SCREENS_READY` cannot
+ * be walked round through a past month.
+ *
+ * Non-vacuity, measured on 2026-10-18 (each sabotage applied alone, the whole of `src/lib/engine` run, the file
+ * restored; the count is the tests that fall): the old spread of `snapshot.windows` into the setup falls the first
+ * three tests here (3); copying the four windows only falls « a window the month holds is copied » and the
+ * marketplace test above (2); copying a key whose value is undefined falls « a window the month does not hold » (1);
+ * the list without `firstSaleWindowDays` falls the list test, « a window the month holds », the marketplace test
+ * above, `merge.test.ts`'s closing test and two tests of `validate.test.ts` (6).
+ */
+describe("monthView — a closed month copies its windows and nothing else", () => {
+  const OCTOBER = new Date(2026, 9, 3);
+  const FORGED = {
+    type: "marketplace",
+    currency: "USD",
+    motions: { plg: false, slg: false },
+    tools: ["stripe"],
+    companyLabel: "Forged Inc.",
+    offering: "services",
+    sellerSubscriptions: true,
+  };
+  /** The example, with the two optional fields the forged month tries to rewrite actually set. */
+  const saas = (): EngineState => {
+    const s = exampleState();
+    return { ...s, setup: { ...s.setup, companyLabel: "Acme", tools: ["amplitude"] } };
+  };
+  const forgedMonth = (extra: Record<string, unknown>): EngineState => {
+    const s = saas();
+    const next = startNextMonth(s, OCTOBER, "2026-10-03T09:00:00.000Z", counter())!;
+    next.snapshots[0]!.windows = { ...windowsOf(s.setup), ...extra } as never;
+    return next;
+  };
+
+  it("a closed month that carries a type, a currency, the motions, the tools or a label keeps the setup's own — the SaaS stays a SaaS", () => {
+    const s = saas();
+    const next = forgedMonth(FORGED);
+    const { setup } = monthView(next, 0, OCTOBER).state;
+    expect(setup.type).toBe("b2b-saas");
+    expect(setup.currency).toBe(s.setup.currency);
+    expect(setup.currency).not.toBe("USD");
+    expect(setup.motions).toEqual(s.setup.motions);
+    expect(setup.tools).toEqual(["amplitude"]);
+    expect(setup.companyLabel).toBe("Acme");
+    expect(setup.offering).toBeUndefined();
+    expect(setup.sellerSubscriptions).toBeUndefined();
+    // Not one field of the setup moved: the windows the forged month carries are the setup's own, so the view IS the setup.
+    expect(setup).toEqual(next.setup);
+  });
+
+  it("a window the month holds is copied, over the setup's: the four, and a marketplace's three", () => {
+    const next = forgedMonth({ ...FORGED, activationWindowDays: 14, goLiveWindowDays: 60 });
+    expect(monthView(next, 0, OCTOBER).state.setup).toMatchObject({ activationWindowDays: 14, goLiveWindowDays: 60, type: "b2b-saas" });
+    const s = exampleState();
+    const market: EngineState = { ...s, setup: { ...s.setup, type: "marketplace", motions: { plg: false, slg: false }, repeatWindowDays: 180 } };
+    const closed = startNextMonth(market, OCTOBER, "2026-10-03T09:00:00.000Z", counter())!;
+    const later = { ...closed, setup: { ...closed.setup, repeatWindowDays: 60 as const, firstOrderWindowDays: 7 as const, firstSaleWindowDays: 90 as const } };
+    expect(monthView(later, 0, OCTOBER).state.setup).toMatchObject({ type: "marketplace", repeatWindowDays: 180, firstOrderWindowDays: 30, firstSaleWindowDays: 60 });
+  });
+
+  it("a window the month does not hold leaves the setup's alone — a SaaS's closed month has no marketplace window to copy", () => {
+    const s = exampleState();
+    const saas = { ...s, setup: { ...s.setup, repeatWindowDays: 180 as const } };
+    const closed = startNextMonth(saas, OCTOBER, "2026-10-03T09:00:00.000Z", counter())!;
+    expect(monthView(closed, 0, OCTOBER).state.setup.repeatWindowDays).toBe(180);
+    const { activationWindowDays: _kept, ...fewer } = closed.snapshots[0]!.windows!;
+    closed.snapshots[0]!.windows = { ...fewer, paidWindowDays: undefined } as never;
+    expect(monthView({ ...closed, setup: { ...closed.setup, activationWindowDays: 14 } }, 0, OCTOBER).state.setup).toMatchObject({ activationWindowDays: 14, paidWindowDays: closed.setup.paidWindowDays });
+  });
+
+  it("the list of copied keys is the keys `windowsOf` writes for a marketplace: seven, no more", () => {
+    const s = exampleState();
+    const market = { ...s.setup, type: "marketplace" as const, motions: { plg: false, slg: false } };
+    expect([...SNAPSHOT_WINDOW_KEYS].sort()).toEqual(Object.keys(windowsOf(market)).sort());
+    expect(SNAPSHOT_WINDOW_KEYS).toHaveLength(7);
   });
 });
 

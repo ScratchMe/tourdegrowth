@@ -1,7 +1,7 @@
 import { ALL_METRIC_SHAPES, shapeOf } from "./catalog-shape";
 import { windowsOf } from "./series";
 import { knownSharedCount, SHARED_COUNT_IDS } from "./shared-counts";
-import { isMarketplace, mktSetup, monetizationOf } from "./setup-type";
+import { isMarketplace, MKT_DEFAULTS, mktSetup, monetizationOf } from "./setup-type";
 import { MAX_MONTHS, type EngineState, type MetricEntry, type MetricId, type SharedCount, type Snapshot, type YearMonth } from "./types";
 
 /**
@@ -66,11 +66,17 @@ function sameMonetization(a: EngineState["setup"], b: EngineState["setup"]): boo
   return ma.subscriptions === mb.subscriptions && ma.purchases === mb.purchases && ma.ads === mb.ads;
 }
 
-/** Two marketplaces measure alike when their three windows (`mktSetup`) are the same. */
+/**
+ * Two marketplaces measure alike when their three windows are the same, each compared as stored: the default
+ * (`MKT_DEFAULTS`) stands for a window that is ABSENT only. A window outside its list (45 days) is not the default
+ * (30) — `mktSetup` would read it as one — so a file that carries it is never merged into a device set on 30.
+ */
 function sameMktWindows(a: EngineState["setup"], b: EngineState["setup"]): boolean {
-  const ma = mktSetup(a);
-  const mb = mktSetup(b);
-  return ma.firstOrderWindowDays === mb.firstOrderWindowDays && ma.repeatWindowDays === mb.repeatWindowDays && ma.firstSaleWindowDays === mb.firstSaleWindowDays;
+  return (
+    (a.firstOrderWindowDays ?? MKT_DEFAULTS.firstOrderWindowDays) === (b.firstOrderWindowDays ?? MKT_DEFAULTS.firstOrderWindowDays) &&
+    (a.repeatWindowDays ?? MKT_DEFAULTS.repeatWindowDays) === (b.repeatWindowDays ?? MKT_DEFAULTS.repeatWindowDays) &&
+    (a.firstSaleWindowDays ?? MKT_DEFAULTS.firstSaleWindowDays) === (b.firstSaleWindowDays ?? MKT_DEFAULTS.firstSaleWindowDays)
+  );
 }
 
 /** Why the two engines cannot be merged, or null when they can. What the import screen greys the choice with. */

@@ -286,6 +286,21 @@ export interface SnapshotWindows {
 }
 
 /**
+ * The seven keys of `SnapshotWindows` and no other: what `monthView` copies from a closed month into the setup, and
+ * what `validate.ts` lets a closed month carry. A key outside this list never reaches the setup (the security review
+ * of A23 MKT-0): `windowsOf` has never written one.
+ */
+export const SNAPSHOT_WINDOW_KEYS = [
+  "activationWindowDays",
+  "paidWindowDays",
+  "qualificationWindowDays",
+  "goLiveWindowDays",
+  "firstOrderWindowDays",
+  "repeatWindowDays",
+  "firstSaleWindowDays",
+] as const satisfies readonly (keyof SnapshotWindows)[];
+
+/**
  * A count more than one number is computed on (`lib/engine/shared-counts.ts`).
  * `mrrEnd` is the MRR at the end of the flows' month (ARPA's numerator, the
  * gross margin's revenue); `mrrStart` the MRR on its 1st (the base the two
