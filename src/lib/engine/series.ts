@@ -1,8 +1,8 @@
 import { CANDIDATE_IDS, METRIC_SHAPES, SLG_CANDIDATE_IDS, SLG_METRIC_SHAPES, shapeOf, shapesOf, type MetricShape } from "./catalog-shape";
 import { defaultReferenceMonth, nextMonth, windowDaysOf } from "./cohort";
 import { comparatorOf, diagnose } from "./diagnose";
-import { isApp } from "./setup-type";
-import { MAX_MONTHS } from "./types";
+import { isApp, isMarketplace, mktSetup } from "./setup-type";
+import { MAX_MONTHS, SNAPSHOT_WINDOW_KEYS } from "./types";
 import type {
   CandidateId,
   Comparator,
@@ -49,13 +49,18 @@ export function calendarDay(iso: string): Date {
   return new Date(d.getFullYear(), d.getMonth(), d.getDate());
 }
 
-/** The four windows of a setup — what a month keeps when it is closed. */
+/**
+ * The windows of a setup — what a month keeps when it is closed: the four every setup has, and a marketplace's
+ * three on top (§22.3), written for that type only, so no month of a SaaS or an app carries a key it never had.
+ */
 export function windowsOf(setup: EngineSetup): SnapshotWindows {
+  const { firstOrderWindowDays, repeatWindowDays, firstSaleWindowDays } = mktSetup(setup);
   return {
     activationWindowDays: setup.activationWindowDays,
     paidWindowDays: setup.paidWindowDays,
     qualificationWindowDays: setup.qualificationWindowDays,
     goLiveWindowDays: setup.goLiveWindowDays,
+    ...(isMarketplace(setup) ? { firstOrderWindowDays, repeatWindowDays, firstSaleWindowDays } : {}),
   };
 }
 
@@ -69,8 +74,11 @@ export function monthView(state: EngineState, index: number, today: Date): { sta
   const snapshot = state.snapshots[index];
   if (!snapshot) throw new Error(`No month at ${index}: the engine holds ${state.snapshots.length}.`);
   if (index === state.snapshots.length - 1) return { state, today };
+  // Only the seven window keys, and only those the month holds: a closed month never rewrites the type, the motions,
+  // the currency or any other field of the setup (a forged file could carry them; the validator refuses them too).
+  const windows = Object.fromEntries(SNAPSHOT_WINDOW_KEYS.flatMap((key) => (snapshot.windows?.[key] === undefined ? [] : [[key, snapshot.windows[key]]])));
   return {
-    state: { ...state, setup: { ...state.setup, ...snapshot.windows }, snapshots: state.snapshots.slice(0, index + 1) },
+    state: { ...state, setup: { ...state.setup, ...windows }, snapshots: state.snapshots.slice(0, index + 1) },
     today: snapshot.closedAt ? calendarDay(snapshot.closedAt) : today,
   };
 }

@@ -826,7 +826,7 @@ export const APP_REPLACED: readonly PlgMetricId[] = ["acq.cac", "rev.gross-margi
 export const SUBSCRIPTION_METRICS: readonly PlgMetricId[] = ["ret.logo-churn", "rev.paid-conversion", "rev.arpa", "rev.expansion", "rev.contraction"];
 
 /** What `shapesOf` reads of a setup. */
-export type SetupShapes = Pick<EngineSetup, "type" | "motions" | "monetization">;
+export type SetupShapes = Pick<EngineSetup, "type" | "motions" | "monetization" | "sellerSubscriptions">;
 
 /**
  * Which app number a monetization shows (§21.4.1): the cost per install and

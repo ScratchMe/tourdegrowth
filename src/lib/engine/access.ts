@@ -20,7 +20,7 @@
  * and `openTypesAtBuild()`.
  */
 
-import { ALWAYS_OPEN_TYPE, BUSINESS_TYPES } from "./setup-type";
+import { ALWAYS_OPEN_TYPE, BUSINESS_TYPES, MARKETPLACE_SCREENS_READY } from "./setup-type";
 import type { BusinessType } from "./types";
 
 export type EngineAccess = "open" | "closed";
@@ -95,10 +95,12 @@ export function engineTypesFlag(): string | undefined {
  * The business types open in THIS build: always b2b-saas, plus each known
  * type listed in ENGINE_TYPES (comma-separated, spaces ignored, unknown names
  * ignored, duplicates once), in BUSINESS_TYPES order. Pure on its input.
+ * The marketplace is never open while its screens are not (`MARKETPLACE_SCREENS_READY`,
+ * §22.3), even when ENGINE_TYPES lists it.
  */
 export function openTypesWith(env: string | undefined): BusinessType[] {
   const listed = new Set((env ?? "").split(",").map((name) => name.trim()));
-  return BUSINESS_TYPES.filter((type) => type === ALWAYS_OPEN_TYPE || listed.has(type));
+  return BUSINESS_TYPES.filter((type) => (type === ALWAYS_OPEN_TYPE || listed.has(type)) && (type !== "marketplace" || MARKETPLACE_SCREENS_READY));
 }
 
 /** Read at build by the page, never by the island: the page is static (●). */

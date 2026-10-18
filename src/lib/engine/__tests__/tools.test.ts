@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { APP_TOOL_FAMILIES, SETUP_TOOLS, TOOL_FAMILIES, savedTools, teamTools, toolFamiliesFor } from "../tools";
+import { APP_TOOL_FAMILIES, MKT_TOOL_FAMILIES, SETUP_TOOLS, TOOL_FAMILIES, savedTools, teamTools, toolFamiliesFor } from "../tools";
 import type { EngineSetup, ToolId } from "../types";
 import { validateEngine } from "../validate";
 import { emptyState } from "./fixtures";
@@ -86,5 +86,59 @@ describe("a consumer app's tools", () => {
       expect(savedTools([], undefined, "consumer-app")).toEqual([]);
       expect(savedTools([], ["chargebee"], "consumer-app")).toEqual(["chargebee"]);
     });
+  });
+});
+
+/**
+ * A marketplace's tools (engine spec §22.2.2, A23 MKT-0): its own five families. Before them, `offeredBy` answered the
+ * SaaS's list for any type but the app, so a marketplace was offered the SaaS's sales tools and a tool of the SaaS's
+ * that the marketplace's card does not show was read as ticked instead of kept unread.
+ *
+ * Non-vacuity, measured on 2026-10-18 (each sabotage applied alone, the whole of `src/lib/engine` run, the file
+ * restored; the count is the tests that fall): `offeredBy` back to the SaaS's list for any type but the app falls
+ * « reads the team's tools among the marketplace's offered ones » and « saved unchanged by the settings card » (2: a
+ * `chargebee` ticked is read as offered); `toolFamiliesFor` without the marketplace falls those two, the list of the
+ * five families here, and `business-type.test.ts`'s `setupToolsFor` (4).
+ */
+describe("a marketplace's tools", () => {
+  const marketSetup = (tools: ToolId[]): EngineSetup => ({ ...emptyState().setup, type: "marketplace", motions: { plg: false, slg: false }, tools });
+  const toolErrors = (tools: ToolId[]) => validateEngine({ ...emptyState(), setup: marketSetup(tools) }).filter((e) => e.startsWith("setup.tools"));
+
+  it("lists five families in the spec's order, every tool once: no store, no mobile tool, none of the SaaS's customer-success stack", () => {
+    expect(toolFamiliesFor("marketplace")).toBe(MKT_TOOL_FAMILIES);
+    expect(MKT_TOOL_FAMILIES).toEqual([
+      { family: "analytics", tools: ["ga4", "mixpanel", "amplitude", "posthog"] },
+      { family: "billing", tools: ["stripe"] },
+      { family: "crm", tools: ["hubspot", "salesforce", "pipedrive"] },
+      { family: "ads", tools: ["google-ads", "meta-ads", "linkedin-ads"] },
+      { family: "other", tools: ["product-db", "spreadsheet"] },
+    ]);
+    const all = MKT_TOOL_FAMILIES.flatMap((f) => f.tools);
+    expect(new Set(all).size).toBe(all.length);
+    for (const tool of ["app-store-connect", "play-console", "revenuecat", "appsflyer", "adjust", "chargebee", "chartmogul", "cs-platform"] as ToolId[]) expect(all).not.toContain(tool);
+  });
+
+  it("the other types keep their families: the SaaS's and the app's are the very lists they were", () => {
+    expect(toolFamiliesFor("b2b-saas")).toBe(TOOL_FAMILIES);
+    expect(toolFamiliesFor("consumer-app")).toBe(APP_TOOL_FAMILIES);
+  });
+
+  it("reads the team's tools among the marketplace's offered ones, in its families' order, once each", () => {
+    expect(teamTools(["hubspot", "stripe", "ga4", "stripe"], "marketplace")).toEqual(["ga4", "stripe", "hubspot"]);
+    expect(teamTools(["chargebee", "revenuecat"], "marketplace")).toEqual([]);
+    expect(teamTools(undefined, "marketplace")).toEqual([]);
+    // The same tool is the SaaS's to read: the offered list belongs to the type.
+    expect(teamTools(["chargebee"], "b2b-saas")).toEqual(["chargebee"]);
+  });
+
+  // The settings card writes `savedTools`: a marketplace that holds a tool its card does not offer keeps it unread, once,
+  // and the setup stays valid (« a tool listed twice » would refuse it).
+  it("saved unchanged by the settings card, keeps what the marketplace does not offer, once, after the ticked ones", () => {
+    const held: ToolId[] = ["chargebee", "hubspot", "ga4"];
+    const saved = savedTools(teamTools(held, "marketplace"), held, "marketplace");
+    expect(saved).toEqual(["ga4", "hubspot", "chargebee"]);
+    expect(toolErrors(saved)).toEqual([]);
+    expect(savedTools(["ga4"], ["ga4", "chargebee"], "marketplace")).toEqual(["ga4", "chargebee"]);
+    expect(savedTools([], undefined, "marketplace")).toEqual([]);
   });
 });

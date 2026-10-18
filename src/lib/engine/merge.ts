@@ -1,7 +1,7 @@
 import { ALL_METRIC_SHAPES, shapeOf } from "./catalog-shape";
 import { windowsOf } from "./series";
 import { knownSharedCount, SHARED_COUNT_IDS } from "./shared-counts";
-import { monetizationOf } from "./setup-type";
+import { isMarketplace, MKT_DEFAULTS, mktSetup, monetizationOf } from "./setup-type";
 import { MAX_MONTHS, type EngineState, type MetricEntry, type MetricId, type SharedCount, type Snapshot, type YearMonth } from "./types";
 
 /**
@@ -14,9 +14,11 @@ import { MAX_MONTHS, type EngineState, type MetricEntry, type MetricId, type Sha
  *
  * Refused, with its reason, when the two engines would not measure the same
  * thing: another type, other motions (two apps that do not earn the same way
- * count here too, §21.6.3), another currency, or other windows for
- * a ticked motion — a window is part of a number's definition. Also refused
- * when the months together exceed `MAX_MONTHS`: a merge never drops a month.
+ * count here too, §21.6.3, and so do two marketplaces whose sellers do not
+ * pay the same way, §22.3), another currency, or other windows for
+ * a ticked motion (a marketplace's three, §22.3) — a window is part of a
+ * number's definition. Also refused when the months together exceed
+ * `MAX_MONTHS`: a merge never drops a month.
  *
  * The rules, per month:
  * - a month on one side only is added, as it is;
@@ -64,17 +66,33 @@ function sameMonetization(a: EngineState["setup"], b: EngineState["setup"]): boo
   return ma.subscriptions === mb.subscriptions && ma.purchases === mb.purchases && ma.ads === mb.ads;
 }
 
+/**
+ * Two marketplaces measure alike when their three windows are the same, each compared as stored: the default
+ * (`MKT_DEFAULTS`) stands for a window that is ABSENT only. A window outside its list (45 days) is not the default
+ * (30) — `mktSetup` would read it as one — so a file that carries it is never merged into a device set on 30.
+ */
+function sameMktWindows(a: EngineState["setup"], b: EngineState["setup"]): boolean {
+  return (
+    (a.firstOrderWindowDays ?? MKT_DEFAULTS.firstOrderWindowDays) === (b.firstOrderWindowDays ?? MKT_DEFAULTS.firstOrderWindowDays) &&
+    (a.repeatWindowDays ?? MKT_DEFAULTS.repeatWindowDays) === (b.repeatWindowDays ?? MKT_DEFAULTS.repeatWindowDays) &&
+    (a.firstSaleWindowDays ?? MKT_DEFAULTS.firstSaleWindowDays) === (b.firstSaleWindowDays ?? MKT_DEFAULTS.firstSaleWindowDays)
+  );
+}
+
 /** Why the two engines cannot be merged, or null when they can. What the import screen greys the choice with. */
 export function mergeRefusal(into: EngineState, from: EngineState): MergeRefusal | null {
   const a = into.setup;
   const b = from.setup;
   if (a.type !== b.type) return "type";
   // Two apps that do not earn the same way (§21.6.3) do not sell the same way: the same reason as the motions.
-  if (a.motions.plg !== b.motions.plg || a.motions.slg !== b.motions.slg || !sameMonetization(a, b)) return "motions";
+  // Two marketplaces whose sellers do not pay the same way do not earn the same way either (§22.3).
+  if (a.motions.plg !== b.motions.plg || a.motions.slg !== b.motions.slg || !sameMonetization(a, b) || mktSetup(a).sellerSubscriptions !== mktSetup(b).sellerSubscriptions) return "motions";
   if (a.currency !== b.currency) return "currency";
   // Only the windows a ticked motion reads: an unticked motion's are kept, never used (§18.1.2).
   if (a.motions.plg && (a.activationWindowDays !== b.activationWindowDays || a.paidWindowDays !== b.paidWindowDays)) return "windows";
   if (a.motions.slg && (a.qualificationWindowDays !== b.qualificationWindowDays || a.goLiveWindowDays !== b.goLiveWindowDays)) return "windows";
+  // A marketplace's three windows are part of its numbers' definitions; its `offering` is only words, and the device's wins (§22.3).
+  if (isMarketplace(a) && !sameMktWindows(a, b)) return "windows";
   const months = new Set([...into.snapshots, ...from.snapshots].map((s) => s.referenceMonth));
   if (months.size > MAX_MONTHS) return "months";
   return null;
