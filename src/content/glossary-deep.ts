@@ -1086,6 +1086,17 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
           "Il peut avoir plusieurs segments avec des moments différents — un utilisateur seul et un administrateur d'équipe obtiennent rarement la valeur par la même action — mais chaque segment devrait en avoir une. Un même produit avec trois métriques d'activation pour le même utilisateur veut en général dire que personne n'a décidé laquelle compte, et l'onboarding essaie de faire les trois.",
         ),
       },
+      {
+        // TODO: à relire (convention 6) — question neuve, 2026-10-19, reprise mot pour mot d'une requête Search Console.
+        question: t(
+          "How do I define \"activated user\" so it means the same thing across every team?",
+          "Comment définir un « utilisateur activé » pour que le mot veuille dire la même chose dans toutes les équipes ?",
+        ),
+        answer: t(
+          "Write the definition as one sentence with four parts, and keep it in one place. The action: a single event, named the way it is tracked (\"invited_teammate\", not \"engaged\"). The window: within 7 days of sign-up. The population: everyone who signed up in the period, nobody excluded. The segment, if any: a solo user and a team admin can have different actions, but each gets one. Then every dashboard reads that one event, and the definition gets an owner and a date: when it changes, past figures keep the old label instead of being silently recomputed. Teams drift apart when marketing counts sign-ups, product counts finished onboardings and sales counts booked demos, all under the same word.",
+          "Écris la définition en une phrase en quatre parties, et range-la à un seul endroit. L'action : un seul événement, nommé comme il est suivi (« invited_teammate », pas « engagé »). La fenêtre : dans les 7 jours qui suivent l'inscription. La population : tous les inscrits de la période, sans en exclure aucun. Le segment, s'il y en a : un utilisateur seul et un administrateur d'équipe peuvent avoir des actions différentes, mais chacun n'en a qu'une. Ensuite, chaque tableau de bord lit ce seul événement, et la définition a un responsable et une date : quand elle change, les anciens chiffres gardent l'ancienne étiquette au lieu d'être recalculés en silence. Les équipes divergent quand le marketing compte les inscriptions, le produit les onboardings terminés et les ventes les démos réservées, tous sous le même mot.",
+        ),
+      },
     ],
   },
 

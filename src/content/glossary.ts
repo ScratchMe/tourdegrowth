@@ -78,7 +78,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   },
   activation: {
     ...GLOSSARY_TERMS.activation,
-    updatedAt: "2026-09-24", // revue de copie v1 (2026-09-24) — « étape » au lieu de « pilier », calques corrigés
+    updatedAt: "2026-10-19", // une quatrième question de FAQ (glossary-deep), sur une requête Search Console ; avant : revue de copie v1 (2026-09-24)
     extended: {
       fr: "La plupart des équipes confondent activation et inscription. Ce sont deux choses différentes : l'inscription est une action administrative, l'activation est le moment où l'utilisateur comprend enfin pourquoi il est là (voir Moment « aha »). Bien définir son activation demande de regarder, parmi les utilisateurs qui reviennent des mois plus tard, quelle action ils ont tous faite tôt — c'est souvent contre-intuitif, rarement la première chose qu'on montre dans l'onboarding. Une activation mal définie fausse tout le reste : on optimise le mauvais moment du parcours.",
       en: "Most teams confuse activation with sign-up. They're two different things: sign-up is an administrative action, activation is the moment the user finally understands why they're there (see Aha moment). Defining activation correctly means looking at users who are still around months later and finding the one early action they all took — it's often counter-intuitive, rarely the first thing shown in onboarding. A poorly defined activation moment skews everything downstream: you end up optimizing the wrong point in the journey.",
