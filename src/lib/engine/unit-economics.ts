@@ -36,7 +36,7 @@ type Knowns = Record<MetricId, Known>;
  * computed, it is because a divisor spans 0 (a margin estimated at -5 to
  * 10 %) — that input is named, so the sentence never ends on nothing.
  */
-function missingOf(id: DerivedId, knowns: Partial<Knowns>): MetricId[] {
+export function missingOf(id: DerivedId, knowns: Partial<Knowns>): MetricId[] {
   const inputs = derivedShapeOf(id).inputs;
   const unknown = inputs.filter((input) => knowns[input]?.kind !== "known");
   if (unknown.length > 0) return unknown;
@@ -46,7 +46,7 @@ function missingOf(id: DerivedId, knowns: Partial<Knowns>): MetricId[] {
   });
 }
 
-function confidenceOfInputs(id: DerivedId, knowns: Partial<Knowns>): Exclude<Confidence, "unknown"> {
+export function confidenceOfInputs(id: DerivedId, knowns: Partial<Knowns>): Exclude<Confidence, "unknown"> {
   return derivedShapeOf(id).inputs.every((input) => {
     const k = knowns[input];
     return k?.kind === "known" && k.confidence === "solid";

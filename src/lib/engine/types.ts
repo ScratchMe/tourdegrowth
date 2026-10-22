@@ -820,6 +820,23 @@ export interface SlgUnitEconomics {
   ltvCac: DerivedValue;
 }
 
+/**
+ * §22.5.3. One side of a marketplace, unit economics of its own (C70): a buyer against what the buyer costs, a paid
+ * seller against what a paid seller costs. The money of A20 (the loss, the months after the payback, the cash, the
+ * warning) is not here: it lives in each side's scenario, as it does for the self-serve motion.
+ */
+export interface MktUnitEconomics {
+  /** The side's CAC variant (mkt.buy.cac, or mkt.sell.cac for the supply). */
+  cacVariant: string | null;
+  /** a for a buyer; the subscription for a paid seller. */
+  revenuePerMonth: DerivedValue;
+  ltv: DerivedValue;
+  payback: DerivedValue; // months
+  ltvCac: DerivedValue;
+  /** Supply only: what a paid seller costs (D8). */
+  cac?: DerivedValue;
+}
+
 /** §6.9. `num-gt-den` blocks the save; every other check is shown "to check", never blocking (D11). */
 export type SanityId =
   | "num-gt-den"
