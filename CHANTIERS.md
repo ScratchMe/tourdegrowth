@@ -479,7 +479,7 @@ d'après A22), MKT-1, MKT-4, MKT-6, MKT-7b (le tableau), MKT-8 et MKT-10.
 | A23.b | **Le modèle pur** (`mkt-model.ts`, ses tests) | Session | **Livré le 2026-10-04** ([#329](https://github.com/ScratchMe/tourdegrowth/pull/329)) |
 | A23.c | **Le code** : les quinze unités ci-dessus, une PR chacune, le type fermé | Orchestrateur et sous-agents (prompt H) | MKT-B livrée le 2026-10-04 ; le reste après A22.c, MKT-7a dès MKT-R. ~32,5 jours-agent |
 | A23.d | **Le bon à tirer** de la copie neuve, en « produits » et en « services » | Agent des bons à tirer, puis Antoine | Après MKT-10 |
-| A23.e | **L'ouverture** (`ENGINE_TYPES=consumer-app,marketplace`) puis la re-synchro avec Claude Design (`/design-sync`), qui emporte les composants neufs. **Probablement avec celle du moteur** (C104, à confirmer par Antoine quand A23 approchera : l'ouverture du moteur attendrait alors tout A23) | Antoine (D2, prompt B) | Après A23.d |
+| A23.e | **L'ouverture** (`ENGINE_TYPES=consumer-app,marketplace`) puis la re-synchro avec Claude Design (`/design-sync`), qui emporte les composants neufs ; dans le même geste, avancer `CONTENT_UPDATED_AT["/aarrr-funnel-template"]` (`src/content/updated-at.ts`), que rien d'A23 ne bouge tant que le type est fermé (relevé par la relecture de MKT-3, comme pour A22.e). **Probablement avec celle du moteur** (C104, à confirmer par Antoine quand A23 approchera : l'ouverture du moteur attendrait alors tout A23) | Antoine (D2, prompt B) | Après A23.d |
 
 ### A24 — Les trois derniers niveaux du jeu (ouvert le 2026-10-04)
 
