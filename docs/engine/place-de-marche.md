@@ -1055,7 +1055,7 @@ export function mktActiveBuyersStart(state: EngineState): number | null;
 export function mktSellerSignups(state: EngineState): number | null;
 /** NS: new paid sellers a month — mkt-model.ts#newPaidSellersPerMonth(seller sign-ups, paid conversion). */
 export function mktNewPaidSellers(state: EngineState, ctx: EngineCalcContext): Interval | null;
-/** S: the sellers' subscription MRR — the shared mktSellerMrrEnd when typed (solid), else mkt.sell.arpa × the paid sellers (its denominator). */
+/** S: the sellers' subscription MRR — the shared mktSellerMrrEnd when typed (solid), else mkt.sell.arpa × the paid sellers: mkt.sell.paid-churn's denominator, else mkt.sell.arpa's (scenario.ts#mrrToday's order). */
 export function mktSellerMrrToday(state: EngineState, ctx: EngineCalcContext): Interval | null;
 /** The paid sellers on the 1st: mkt.sell.paid-churn's denominator, or null. */
 export function mktPaidSellersStart(state: EngineState): number | null;
@@ -1064,6 +1064,13 @@ export function mktPaidSellerCac(state: EngineState, ctx: EngineCalcContext): In
 ```
 
 Les inscrits acheteurs du mois sont le numérateur de `mkt.buy.signup-rate`.
+
+**Un dénominateur ne compte que positif** : à 0, il se lit inconnu, comme
+`readingValue` lit un ratio (`mktActiveBuyersStart`, `mktPaidSellersStart`,
+les acheteurs de R, les abonnés de S). Le repli de S suit l'ordre de
+`scenario.ts#mrrToday` : un abonnement saisi en comptes porte déjà
+`mktSellerMrrEnd` (son numérateur), lu à la ligne d'avant ; le repli sert à
+un abonnement saisi en montant, avec le churn des abonnés en comptes (MKT-2).
 
 #### 22.5.2 Les funnels (`mkt-funnel.ts`, MKT-2)
 
@@ -1138,8 +1145,16 @@ importe :
 - **l'offre** (avec les abonnements) : `sideEconomics(mkt.sell.arpa,
   mkt.sell.gross-margin, mkt.sell.paid-churn, mktPaidSellerCac)` ; ids
   `mkt.sell.ltv`, `mkt.sell.cac-payback`, `mkt.sell.ltv-cac` ; `cac` = le coût
-  d'un vendeur abonné ; sans abonnements, tout est `uncomputable` avec
-  `missing: []`, jamais affiché.
+  d'un vendeur abonné ; sans abonnements, chaque `DerivedValue` (`cac`
+  compris) est `uncomputable` avec `missing: []`, jamais affiché, et
+  `cacVariant` garde la variante saisie de `mkt.sell.cac`.
+
+`revenuePerMonth` et `cac` ne sont le calculé d'aucun `DerivedId` : leur
+confiance et leurs entrées manquantes suivent les deux mêmes règles sur leurs
+propres entrées (a : fréquence, panier, commission ; le coût d'un vendeur
+abonné : coût d'un vendeur actif, première vente, conversion en abonné). Un
+coût dont toutes les entrées sont connues mais qui divise par 0 nomme
+l'entrée nulle.
 
 L'argent d'A20 par côté (`MoneyKpis` : perte, mois après le remboursement,
 dépense, trésorerie, alerte) **n'est pas dans `MktUnitEconomics`** : il vit dans
@@ -2537,9 +2552,12 @@ abonnés (400 × 15 %) × 200 € = 12 000 €, la même dépense.
 **Les constantes** (`example.ts`, MKT-2) : `exampleMarketplaceMetrics()` (le
 tableau ci-dessus ; sans mots : aucune entrée de l'exemple n'a de texte libre),
 `EXAMPLE_MKT_TARGETS` (les cinq cibles), `EXAMPLE_MKT_WHATIF` (les quatre « Et
-si », jamais posé dans l'état de l'exemple). **Les états** (`fixtures.ts`,
-MKT-2, par `withEntry` et `measured` depuis un état vide au réglage de
-l'exemple, comme APP-4 le fait pour l'app) : `marketplaceState()` et
+si », jamais posé dans l'état de l'exemple ; typé `Partial<Record<MktMetricId,
+number>>`, puisque `LeverId` ne s'élargit qu'à MKT-3, et assignable tel quel
+aux leviers), `EXAMPLE_MKT_BASE` (les six comptes partagés, comme
+`EXAMPLE_CONSUMER_BASE` ; MKT-9 l'importe). **Les états** (`fixtures.ts`,
+MKT-2, par `withEntry` sur chaque entrée de `exampleMarketplaceMetrics()`,
+depuis un état vide au réglage de l'exemple : une seule table des 19 entrées) : `marketplaceState()` et
 `marketplaceNoSubscriptionsState()` (le même jeu, `sellerSubscriptions:
 false` : les cinq chiffres des abonnements restent saisis, cachés, et ne
 comptent nulle part). **MKT-9** : `exampleEngine(words, motions, type?,
@@ -3071,8 +3089,9 @@ Ton compte rendu, en français : une liste numérotée de constats, rangés par 
   (`chainOf` et `cohortIsSmall` sont exportées),
   `unit-economics.ts` (exporter `missingOf` et `confidenceOfInputs`, sans les
   changer), `example.ts` (`exampleMarketplaceMetrics()`,
-  `EXAMPLE_MKT_TARGETS`, `EXAMPLE_MKT_WHATIF`, sans écran), `fixtures.ts`
-  (`marketplaceState`, `marketplaceNoSubscriptionsState`), leurs tests.
+  `EXAMPLE_MKT_TARGETS`, `EXAMPLE_MKT_WHATIF`, `EXAMPLE_MKT_BASE`, sans
+  écran), `fixtures.ts` (`marketplaceState`, `marketplaceNoSubscriptionsState`,
+  qui lisent `exampleMarketplaceMetrics()`), leurs tests.
 - **Étapes** : §22.5.1 ; §22.5.2 ; §22.5.3 ; le jeu de §22.10.1 ; les tests
   `mkt-economics.test.ts` et `mkt-funnel.test.ts` (§22.11.1).
 - **Acceptation** : commune ; dans §22.10.2, chaque ligne des funnels, de
