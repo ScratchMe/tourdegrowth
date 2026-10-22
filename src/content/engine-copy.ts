@@ -4,6 +4,7 @@ import type { Translatable } from "@/lib/i18n/translatable";
 import type { Pillar } from "@/lib/scoring/pillars";
 import type { CandidateId, LeverId, SlideTitleKey, ToolId, UnitInputId } from "@/lib/engine/types";
 import type { ScenarioAssumption } from "@/lib/engine/scenario";
+import type { MktScenarioAssumption } from "@/lib/engine/mkt-scenario";
 import type { SlgScenarioAssumption } from "@/lib/engine/slg-scenario";
 
 /**
@@ -1742,6 +1743,18 @@ export const ENGINE_COPY = {
     "app.rev.purchases-per-active": { fr: "les achats par actif", en: "purchases per active" },
     "app.rev.ads-per-active": { fr: "la publicité par actif", en: "ads per active" },
     "app.rev.commission": { fr: "la commission des stores", en: "the store commission" },
+    // TODO: à relire — copie neuve (convention 6), §22.8.5 i (A23 MKT-3) : les onze leviers de la place de marché, sujets de phrase avec leur article.
+    "mkt.buy.signup-rate": { fr: "le taux d'inscription des acheteurs", en: "the buyer sign-up rate" },
+    "mkt.buy.referred-share": { fr: "la part des inscrits recommandés", en: "the referred share of sign-ups" },
+    "mkt.buy.first-order": { fr: "la première commande", en: "the first order" },
+    "mkt.liq.fill-rate": { fr: "le taux de service", en: "the fill rate" },
+    "mkt.buy.churn": { fr: "le churn des acheteurs", en: "buyer churn" },
+    "mkt.rev.frequency": { fr: "la fréquence de commande", en: "order frequency" },
+    "mkt.rev.aov": { fr: "le panier moyen", en: "the average order value" },
+    "mkt.rev.take-rate": { fr: "la commission", en: "the take rate" },
+    "mkt.sell.paid-conversion": { fr: "la conversion en vendeur abonné", en: "seller subscription conversion" },
+    "mkt.sell.paid-churn": { fr: "le churn des vendeurs abonnés", en: "paid seller churn" },
+    "mkt.sell.arpa": { fr: "le prix de l'abonnement des vendeurs", en: "the seller subscription price" },
   } satisfies Record<LeverId, Translatable>,
   /**
    * TODO: à relire — nouveau (2026-09-26). « Et si » cumulés : the panel
@@ -1946,6 +1959,22 @@ export const ENGINE_COPY = {
         en: "Over 12 months, at this quarter's pace: the base retained at the NRR, plus twelve months of new MRR. Annual contracts: none of the new ones comes up for renewal within the year.",
       },
     } satisfies Record<SlgScenarioAssumption, Translatable>,
+  },
+  /**
+   * TODO: à relire — copie neuve (convention 6), §22.8.5 d (A23 MKT-3) : the marketplace's own sheets, born with its
+   * « Et si ». For now the six rules of `lib/engine/mkt-scenario.ts` that no other motion shares; the four it shares
+   * (`signup-same-visitors`, `referral-on-top`, `same-spend`, `twelve-months`) are read in `scenario.assumption`,
+   * which each side's overlay rewrites. MKT-5 adds the rest of `mkt.*`.
+   */
+  mkt: {
+    assumption: {
+      "fill-new-buyers-only": { fr: "Un meilleur taux de service ne compte que pour les nouveaux acheteurs : l'effet sur les acheteurs déjà là n'est pas compté, c'est un minimum.", en: "A better fill rate only counts for new buyers: the effect on existing buyers isn't counted, so this is a minimum." },
+      "new-buyer-spends-average": { fr: "Un nouvel acheteur dépense comme l'acheteur actif moyen.", en: "A new buyer spends like the average active buyer." },
+      "money-levers-all-buyers": { fr: "Une fréquence, un panier ou une commission qui changent jouent sur tous les acheteurs, dès le mois suivant.", en: "A change in frequency, order value or take rate applies to every buyer, from the next month." },
+      "price-all-paid-sellers": { fr: "Un prix d'abonnement qui change joue sur tous les vendeurs abonnés, dès le mois suivant.", en: "A change in subscription price applies to every paid seller, from the next month." },
+      "active-twelve-months": { fr: "Un acheteur est actif s'il a commandé dans les 12 derniers mois ; ses départs sont le churn des acheteurs.", en: "A buyer is active if they ordered in the last 12 months; their departures are the buyer churn." },
+      "supply-priced-by-subscriptions": { fr: "L'offre ne se chiffre que par ses abonnements : convertir un vendeur, garder un abonné. La première vente et le départ d'un vendeur actif sont nommés, sans montant.", en: "Supply is priced only through its subscriptions: converting a seller, keeping a subscriber. The first sale and an active seller leaving are named, without an amount." },
+    } satisfies Record<Exclude<MktScenarioAssumption, ScenarioAssumption>, Translatable>,
   },
   peloton: {
     upstream: {

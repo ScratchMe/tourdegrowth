@@ -707,7 +707,7 @@ describe("the marketplace's numbers (engine spec §22.4, A23 MKT-1)", () => {
     for (const id of [...MKT_DEMAND_LEVER_IDS, ...MKT_SUPPLY_LEVER_IDS]) expect(MKT_IDS, id).toContain(id);
     // D2: no candidate sits in both lists, and no lever in both.
     expect(MKT_DEMAND_CANDIDATE_IDS.filter((id) => MKT_SUPPLY_CANDIDATE_IDS.includes(id))).toEqual([]);
-    expect(MKT_DEMAND_LEVER_IDS.filter((id) => MKT_SUPPLY_LEVER_IDS.includes(id))).toEqual([]);
+    expect(MKT_DEMAND_LEVER_IDS.filter((id) => (MKT_SUPPLY_LEVER_IDS as readonly string[]).includes(id))).toEqual([]);
     // The supply's levers and subscription candidates are exactly the numbers the subscriptions' box adds.
     const subscriptionIds: MetricId[] = [...MKT_SUPPLY_LEVER_IDS, "mkt.sell.signup-rate", "mkt.sell.paid-conversion", "mkt.sell.paid-churn"];
     for (const id of subscriptionIds) expect(shapeOf(id).sellerSubscription, id).toBe(true);

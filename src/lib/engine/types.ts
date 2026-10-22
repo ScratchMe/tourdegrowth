@@ -383,7 +383,18 @@ export type PlgLeverId =
 export type SlgLeverId = "slg.acq.lead-to-opp" | "slg.ref.referred-share" | "slg.rev.win-rate" | "slg.ret.renewal" | "slg.rev.acv" | "link.pql-handoff";
 /** The consumer app's levers (§21.5.3), after the self-serve ones in panel order. */
 export type AppLeverId = "app.ret.active-retention" | "app.rev.purchases-per-active" | "app.rev.ads-per-active" | "app.rev.commission";
-export type LeverId = PlgLeverId | SlgLeverId | AppLeverId;
+/** The marketplace's levers (§22.2.1, MKT-3), one list per side (C70): the demand's eight, then the three the sellers' subscriptions add. */
+export type MktDemandLeverId =
+  | "mkt.buy.signup-rate"
+  | "mkt.buy.referred-share"
+  | "mkt.buy.first-order"
+  | "mkt.liq.fill-rate"
+  | "mkt.buy.churn"
+  | "mkt.rev.frequency"
+  | "mkt.rev.aov"
+  | "mkt.rev.take-rate";
+export type MktSupplyLeverId = "mkt.sell.paid-conversion" | "mkt.sell.paid-churn" | "mkt.sell.arpa";
+export type LeverId = PlgLeverId | SlgLeverId | AppLeverId | MktDemandLeverId | MktSupplyLeverId;
 
 export interface EngineSetup {
   type: BusinessType;
