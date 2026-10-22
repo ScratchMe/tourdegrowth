@@ -21,7 +21,7 @@ import { CTX_FR } from "./props";
  * engine code, by `docs/engine/reference/mkt-example.mjs`; `mkt-model.test.ts` pins the model's own figures, and these
  * tests pin what the WIRING does with them: which lever moves which factor, which rule is printed, what an unknown does.
  *
- * Non-vacuity, measured on 2026-10-22 (26 sabotages, each applied alone, this file, `engine-copy.test.ts`,
+ * Non-vacuity, measured on 2026-10-22 (27 sabotages, each applied alone, this file, `engine-copy.test.ts`,
  * `scenario-view.test.ts` and `catalog-shape.test.ts` run, then the file restored and its sha compared; the count is
  * the tests that fall — every sabotage made at least one fall):
  * - the fill rate also applied to a and to the base (D5 betrayed): the demand's « Et si » curve and KPIs, the fill rate
@@ -40,13 +40,10 @@ import { CTX_FR } from "./props";
  * - an assumption printed out of the type's order: the order tests fall (5);
  * - today's spend computed on N', not N (1); the referred not on top of the others (1); the sign-up factor ignored (1);
  * - the warning never raised (1); the cash tied up not a floor (1);
+ * - the projected visitors left at the sign-up rate's denominator, not grown with the referred (1);
  * - `scenario-view.ts#leverText` printing the frequency as a percent: its test falls (1);
  * - a lever subject (1), an own rule's sentence (2) removed from the copy; `ALL_LEVER_IDS` without the supply's levers (2);
  * - a lever alone always read on the demand's side: the supply lever tests fall (2).
- *
- * A reading held, not a measure: the demand's visitors stay the sign-up rate's denominator in the projection, the referral
- * lever included (§22.5.4 names that denominator and nothing more, where the self-serve scenario grows its visitors with
- * the referred). The referral test below pins it; the journal says it was a choice.
  */
 
 const r2 = (v: number) => Math.round(v * 100) / 100;
@@ -281,10 +278,12 @@ describe("the other demand levers, each through its own factor", () => {
     expect(s.assumptions).toEqual(["signup-same-visitors", "new-buyer-spends-average", "same-spend", "active-twelve-months", "twelve-months"]);
   });
 
-  it("the referred share 8 % to 20 %: the referred come on top of the others — 3 000 × 0,92 ÷ 0,80 = 3 450 sign-ups, 690 of them referred", () => {
+  it("the referred share 8 % to 20 %: the referred come on top of the others, through visitors who sign up at today's rate — 3 000 × 0,92 ÷ 0,80 = 3 450 sign-ups from 69 000 visitors, 690 of them referred", () => {
     const s = buildMktScenario(example, { "mkt.buy.referred-share": 20 }, CTX_FR, "demand");
     expect(only(s.projected.funnel.signups)).toBeCloseTo(3_450, 9);
-    expect(only(s.projected.funnel.visitors)).toBe(60_000);
+    // The visitors grow by the same factor as the sign-ups (60 000 × 1,15), as self-serve's do; today's stay 60 000.
+    expect(only(s.projected.funnel.visitors)).toBeCloseTo(69_000, 6);
+    expect(only(s.today.funnel.visitors)).toBe(60_000);
     expect(only(s.projected.funnel.referred)).toBeCloseTo(690, 9);
     expect(only(s.projected.funnel.newUnits)).toBeCloseTo(690, 9);
     expect(s.assumptions).toEqual(["referral-on-top", "new-buyer-spends-average", "same-spend", "active-twelve-months", "twelve-months"]);

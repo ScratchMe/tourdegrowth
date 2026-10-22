@@ -16,7 +16,8 @@ import { countsOf, currentSnapshot, entryOf, knownIn } from "./values";
  * scenario, built apart (C70, §18.6.1's rule: no function sees the levers of both sides), and the total only adds the
  * two curves (`mkt-model.ts#marketplaceRevenuePath`). Every rule is printed with the result (`assumptions`):
  *
- * - The demand: N' = N × the sign-up, referral, first-order and fill-rate factors (the fill rate counts for the NEW
+ * - The demand: N' = N × the sign-up, referral, first-order and fill-rate factors (the referred come on top of the others,
+ *   through visitors who sign up at today's rate, so the visitors grow with them; the fill rate counts for the NEW
  *   buyers only, C68: a minimum); a' = a × the frequency, basket and take-rate factors, and those three apply to EVERY
  *   buyer from the next month (C69); the net revenue is kept at 1 − the buyers' churn, the new buyers' revenue on top
  *   (`demandPath`). The cost of a buyer falls with N' at the same spend.
@@ -75,7 +76,7 @@ export interface MktScenarioKpis extends MoneyKpis {
 
 /** The month's funnel of one side, today and with the what-ifs (the panel's « Ton funnel du mois »). null = unknown. */
 export interface MktScenarioFunnel {
-  /** The month's visitors: the sign-up rate's denominator (demand), the seller sign-up rate's (supply). */
+  /** The month's visitors: the sign-up rate's denominator (demand; with the what-ifs, grown by the referred sign-ups' factor, as self-serve's are), the seller sign-up rate's (supply). */
   visitors: Interval | null;
   /** The month's sign-ups: the sign-up rate's numerator × fSignup × fRefSignups (demand), the seller sign-ups (supply). */
   signups: Interval | null;
@@ -200,7 +201,8 @@ function buildDemand(state: EngineState, targets: Partial<Record<LeverId, number
     const signupsNow = signups ? (projected ? mul(mul(point(signups.numerator), fSignup), fRefSignups) : point(signups.numerator)) : null;
     return {
       funnel: {
-        visitors: signups ? point(signups.denominator) : null,
+        // The referred arrive through visitors who sign up at today's rate: the visitors grow with them, like self-serve's (scenario.ts).
+        visitors: signups ? mul(point(signups.denominator), projected ? fRefSignups : one) : null,
         signups: signupsNow,
         referred: signupsNow && shareNow ? mul(signupsNow, scale(shareNow, 1 / 100)) : null,
         newUnits: n,
