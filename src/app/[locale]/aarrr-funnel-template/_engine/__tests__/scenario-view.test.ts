@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { exampleState, hybridState, salesAssistedState, withEntry, noMarginState } from "@/lib/engine/__tests__/fixtures";
+import { exampleState, hybridState, marketplaceState, salesAssistedState, withEntry, noMarginState } from "@/lib/engine/__tests__/fixtures";
 import { CTX_EN, CTX_FR, EN, FR } from "@/lib/engine/__tests__/props";
+import { buildMktScenario } from "@/lib/engine/mkt-scenario";
 import type { EngineState, LeverId } from "@/lib/engine/types";
 import {
   dotsInUse,
@@ -231,6 +232,26 @@ describe("the sliders", () => {
     expect(arpa.moved).toBe(true);
     expect(arpa.position).toBe(150);
     expect(arpa.valueText).toBe("€150");
+  });
+
+  // A23 MKT-3 (§22.5.4): the marketplace's order frequency is a plain number of orders, neither a share nor an amount.
+  it("a ratio lever prints as a plain number, never as a percent: « 0,3 » today, « 0,45 » moved — and « 0.3 », « 0.45 » in English", () => {
+    const marketplace = marketplaceState();
+    const rowsOf = (targets: Partial<Record<LeverId, number>>, locale: "fr" | "en") => {
+      const ctx = locale === "fr" ? CTX_FR : CTX_EN;
+      const props = locale === "fr" ? FR : EN;
+      // `leverRows` reads the scenario's levers only; the self-serve scenario of the example stands for the rest.
+      const scenario = { ...scenarioFor(example, {}, ctx), levers: buildMktScenario(marketplace, targets, ctx, "demand").levers };
+      return leverRows(scenario, ctx, props.strings, "EUR", props.metrics);
+    };
+    const today = rowsOf({}, "fr").find((r) => r.id === "mkt.rev.frequency")!;
+    expect(today).toMatchObject({ todayValue: "0,3", valueText: "0,3", today: "aujourd'hui 0,3", moved: false, step: 0.01, min: 0.15, max: 0.9 });
+    const moved = rowsOf({ "mkt.rev.frequency": 0.45 }, "fr").find((r) => r.id === "mkt.rev.frequency")!;
+    expect(moved).toMatchObject({ valueText: "0,45", moved: true, position: 0.45 });
+    expect(rowsOf({ "mkt.rev.frequency": 0.45 }, "en").find((r) => r.id === "mkt.rev.frequency")!.valueText).toBe("0.45");
+    // Its neighbours keep their units: the take rate a percent, the basket an amount.
+    expect(rowsOf({}, "fr").find((r) => r.id === "mkt.rev.take-rate")!.valueText).toBe("12\u00a0%");
+    expect(rowsOf({}, "fr").find((r) => r.id === "mkt.rev.aov")!.valueText).toBe("65\u00a0€");
   });
 });
 

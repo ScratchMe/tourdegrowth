@@ -373,8 +373,9 @@ const middle = (i: Interval) => (i.lo + i.hi) / 2;
 /** On the step, halves rounded up — 3.15 / 0.1 is 31.499… in floating point, and must still give 3.2. */
 const onStep = (v: number, step: number) => Math.round(Math.round(v / step + 1e-9) * step * 1000) / 1000;
 
-/** One lever's value in its own unit: « 24 % », « 150 € ». */
+/** One lever's value in its own unit: « 24 % », « 150 € », « 0,45 » (an order frequency). */
 function leverText(lever: LeverView, v: Interval, ctx: EngineCalcContext, strings: EngineStrings, currency: Currency): string {
+  if (lever.unit === "ratio") return formatInterval(v, "ratio", ctx, strings.units);
   return lever.unit === "money" ? formatInterval(v, "money", ctx, strings.units, { currency }) : formatInterval(v, "percent", ctx, strings.units);
 }
 

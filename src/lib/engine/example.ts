@@ -181,8 +181,8 @@ export const EXAMPLE_MKT_TARGETS: Partial<Record<MetricId, number>> = {
 /**
  * The marketplace example's « Et si » (§22.10.1): the fill rate at 12 %, the first order at 25 % and the take rate at
  * 13 % (the buyers'); the conversion to a paid seller at 20 % (the sellers'). A constant, never put in the example's
- * state, like the app's. Keyed by the marketplace's ids rather than `LeverId`, which only widens to them with MKT-3
- * (§22.2.1): the type then accepts this constant as it stands.
+ * state, like the app's. Keyed by the marketplace's ids: `LeverId` has widened to them since MKT-3 (§22.2.1), so the
+ * type accepts this constant as it stands.
  */
 export const EXAMPLE_MKT_WHATIF: Partial<Record<MktMetricId, number>> = {
   "mkt.liq.fill-rate": 12,

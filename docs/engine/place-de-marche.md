@@ -1242,8 +1242,9 @@ const churn = t("mkt.buy.churn") !== null ? point(t("mkt.buy.churn")) : k("mkt.b
 Puis : `N' = mul(N, fN)` ; `a' = mul(a, fA)` ; `newMrr = mul(N', a')` ;
 `path = demandPath(R0, newMrr, churn, fA)` (`mkt-model.ts`, 13 points) ; `mrr
 = R0` dans les deux colonnes ; `mrr12 = path[12]` ; `revenuePerUnit = a'` ;
-`gmv` aujourd'hui seulement (`null` en projeté) ; `cac = mul(cac, mapBounds(fN,
-(f) => 1 / f))` à dépense égale ; `ltv`, `payback`, `ltvCac` par
+`gmv` aujourd'hui seulement (`null` en projeté) ; `cac = div(cac, fN)` à
+dépense égale (les bornes de `mul(cac, mapBounds(fN, (f) => 1 / f))`, mais
+`null` pour un facteur qui touche 0) ; `ltv`, `payback`, `ltvCac` par
 `sideEconomics(a', mkt.rev.gross-margin, churn, cac)` ; l'argent d'A20
 (`money.ts`) : `arr = arrOf(mrr)`, `arr12 = arrOf(mrr12)`, `loss =
 lossCheck(ltv, cac)`, `lifetime` (la durée de vie de `sideEconomics`),
@@ -1251,8 +1252,10 @@ lossCheck(ltv, cac)`, `lifetime` (la durée de vie de `sideEconomics`),
 d'aujourd'hui)` dans les deux colonnes, `cash = cashTiedUp(spend, payback,
 false)`, `warning = paybackWarning(payback, loss,
 paybackLimit(setup.runwayMonths))`. **Le funnel du scénario** (`MktScenarioFunnel`)
-: `visitors` = le dénominateur de `mkt.buy.signup-rate` ; `signups` = son
-numérateur × `fSignup` × `fRefSignups` ; `referred` = `signups` × la part
+: `visitors` = le dénominateur de `mkt.buy.signup-rate`, × `fRefSignups` en
+projeté (le précédent du libre-service, `scenario.ts:355` : les recommandés
+arrivent par des visiteurs qui s'inscrivent au taux d'aujourd'hui) ; `signups`
+= son numérateur × `fSignup` × `fRefSignups` ; `referred` = `signups` × la part
 recommandée (sa cible en projeté) ÷ 100 ; `newUnits` = `N'`. Pour l'exemple :
 60 000, 3 000, 240, 600 aujourd'hui ; 60 000, 3 000, 240, 1 000 avec les « Et
 si » (aucun ne touche l'inscription ni la recommandation).
@@ -1317,10 +1320,17 @@ type : `signup-same-visitors` (l'inscription bouge) ; `referral-on-top` ;
 `fill-new-buyers-only` (le taux de service bouge) ; `new-buyer-spends-average`
 (demande, toujours quand `newMrr` est calculable) ; `money-levers-all-buyers`
 (fréquence, panier ou commission) ; `price-all-paid-sellers` (le prix des
-abonnements) ; `same-spend` (`fN ≠ 1`, ou la conversion des vendeurs bouge) ;
-`active-twelve-months` (demande, toujours) ; `supply-priced-by-subscriptions`
+abonnements) ; `same-spend` (`fN ≠ 1`, ou la conversion des vendeurs bouge,
+et le coût d'aujourd'hui connu : celui d'un acheteur, ou d'un vendeur actif,
+comme la règle `cacToday && moves` du libre-service) ;
+`active-twelve-months` (demande, toujours, même quand le revenu ne se calcule
+pas) ; `supply-priced-by-subscriptions`
 (offre avec abonnements, toujours) ; `twelve-months` (demande toujours ; offre
-avec abonnements). L'offre sans abonnements n'en imprime aucune.
+avec abonnements). L'offre sans abonnements n'en imprime aucune. Les six
+propres à la place de marché sont typées `Exclude<MktScenarioAssumption,
+ScenarioAssumption>` dans `mkt.assumption` ; les quatre autres sont les
+phrases du libre-service. `mktLeverAlone` d'un levier d'aucun des deux côtés
+(un levier du SaaS) rend `null`, comme un levier sans cible.
 
 **Le total** : `marketplaceRevenuePath(sellerSubscriptions, demande, offre)`
 (`mkt-model.ts`), aujourd'hui et avec les « Et si » des deux côtés ensemble.
@@ -2942,6 +2952,8 @@ Ton compte rendu, en français : une liste numérotée de constats, rangés par 
   `phrases.ts#unitInputsPhrase` (`:138`) et la feuille `findings.unitEcon`.
   Les mesures : 4, 19 puis 37 erreurs de `tsc` (3, 14 puis 19 fichiers ; les
   3 de MKT-0 comptaient un `DeckSlide.motion` élargi, MKT-0 en a mesuré 1) ;
+  MKT-3 seul en a mesuré 5, dans 3 fichiers (`engine-copy.ts`, `deck.ts`,
+  `catalog-shape.test.ts`) ;
   `CLAUDE.md` à 39 661 caractères pour 40 000 (339 de marge : une unité qui
   change un chiffre de référence le remplace à longueur égale), `JOURNAL.md` à
   109 138 pour 200 000.
@@ -3120,8 +3132,10 @@ Ton compte rendu, en français : une liste numérotée de constats, rangés par 
   qui donne le `"ratio"`), `_engine/scenario-view.ts` (`leverText`, `:377-379`,
   et un cas à son test : §22.5.4), `content/engine-copy.ts`
   (`mkt.assumption`, §22.8.5 d : MKT-3 crée la clé `mkt` avec ce seul
-  sous-arbre ; `leverSubject`, §22.8.5 i, que `satisfies Record<LeverId, …>`
-  exige), les fichiers que `tsc` signale (`deck.ts:1299`, `:1321`, `:1355`
+  sous-arbre, après le bloc `scenario` ; `leverSubject`, §22.8.5 i, que
+  `satisfies Record<LeverId, …>` exige ; trois cas à `engine-copy.test.ts`),
+  `catalog-shape.test.ts` (un appel que le type des listes de leviers oblige
+  à retoucher, même valeur attendue), les fichiers que `tsc` signale (`deck.ts:1299`, `:1321`, `:1355`
   indexent `leverSubject` : rien à y changer une fois les entrées écrites),
   leurs tests. **Pas** `scenario-of.ts` (§22.5.4, les coutures d'A22).
 - **Étapes** : les ids et les listes de leviers, leurs domaines ;

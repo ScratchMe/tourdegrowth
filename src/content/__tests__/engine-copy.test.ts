@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { ENGINE_COPY } from "../engine-copy";
 import { ENGINE_COPY_CONSUMER } from "../engine-copy-consumer";
-import { ALL_METRIC_SHAPES, CANDIDATE_IDS, SLG_CANDIDATE_IDS, UNIT_INPUT_IDS } from "@/lib/engine/catalog-shape";
+import { ALL_LEVER_IDS, ALL_METRIC_SHAPES, CANDIDATE_IDS, MKT_DEMAND_LEVER_IDS, MKT_SUPPLY_LEVER_IDS, SLG_CANDIDATE_IDS, UNIT_INPUT_IDS } from "@/lib/engine/catalog-shape";
+import { EXAMPLE_MKT_WHATIF } from "@/lib/engine/example";
+import { buildMktScenario } from "@/lib/engine/mkt-scenario";
+import { marketplaceNoSubscriptionsState, marketplaceState } from "@/lib/engine/__tests__/fixtures";
+import { CTX_FR } from "@/lib/engine/__tests__/props";
 import { hybridTrapOf } from "@/lib/engine/phrases";
 import { SHARED_COUNT_IDS } from "@/lib/engine/shared-counts";
 import { mergeStrings } from "@/lib/engine/strings";
@@ -100,6 +104,35 @@ describe("keys the code reads by id", () => {
     expect(Object.keys(ENGINE_COPY.io.sharedCount).sort()).toEqual([...SHARED_COUNT_IDS].sort());
     for (const count of SHARED_COUNT_IDS) for (const l of LOCALES) expect(ENGINE_COPY.io.sharedCount[count as SharedCount][l].trim(), `${count}.${l}`).not.toBe("");
     expect(SHARED_COUNT_IDS.filter((count) => count.startsWith("mkt"))).toEqual(["mktCohortSignups", "mktOrders", "mktGmv", "mktNetRevenue", "mktSellerCohortSignups", "mktSellerMrrEnd"]);
+  });
+
+  it("gives every lever a subject with its article, the marketplace's eleven included (A23 MKT-3, §22.8.5 i)", () => {
+    // Held by the compiler (`Record<LeverId, …>`) and, since vitest does not compile, here: a lever with no subject would
+    // print `undefined` in a panel row and on a what-if slide's title.
+    expect(Object.keys(ENGINE_COPY.leverSubject).sort()).toEqual([...ALL_LEVER_IDS].sort());
+    const marketplace = [...MKT_DEMAND_LEVER_IDS, ...MKT_SUPPLY_LEVER_IDS];
+    expect(marketplace).toHaveLength(11);
+    for (const id of marketplace) expect(ENGINE_COPY.leverSubject[id].fr, id).toMatch(/^(le |la |les |l['’])/);
+  });
+
+  it("writes the marketplace's six own « Et si » rules under `mkt.assumption`, and reads the four it shares in `scenario.assumption` (A23 MKT-3, §22.8.5 d)", () => {
+    expect(Object.keys(ENGINE_COPY.mkt.assumption).sort()).toEqual(
+      ["active-twelve-months", "fill-new-buyers-only", "money-levers-all-buyers", "new-buyer-spends-average", "price-all-paid-sellers", "supply-priced-by-subscriptions"],
+    );
+    for (const shared of ["signup-same-visitors", "referral-on-top", "same-spend", "twelve-months"]) expect(Object.keys(ENGINE_COPY.scenario.assumption)).toContain(shared);
+    for (const [id, sentence] of Object.entries(ENGINE_COPY.mkt.assumption)) for (const l of LOCALES) expect(sentence[l].trim(), `${id}.${l}`).not.toBe("");
+  });
+
+  it("has a sentence for every rule the marketplace's scenario prints, on either side, with or without the subscriptions", () => {
+    // The scenario's rule ids are a TypeScript type, which a test cannot list: run the scenarios that print them all instead.
+    const everyLever = Object.fromEntries([...MKT_DEMAND_LEVER_IDS, ...MKT_SUPPLY_LEVER_IDS].map((id) => [id, 1]));
+    const printed = new Set<string>();
+    for (const state of [marketplaceState(), marketplaceNoSubscriptionsState()])
+      for (const targets of [{}, EXAMPLE_MKT_WHATIF, { ...EXAMPLE_MKT_WHATIF, "mkt.buy.signup-rate": 6, "mkt.buy.referred-share": 20, "mkt.sell.arpa": 35 }, everyLever])
+        for (const side of ["demand", "supply"] as const) for (const rule of buildMktScenario(state, targets, CTX_FR, side).assumptions) printed.add(rule);
+    expect(printed.size).toBe(10);
+    const known = new Set([...Object.keys(ENGINE_COPY.mkt.assumption), ...Object.keys(ENGINE_COPY.scenario.assumption)]);
+    for (const rule of printed) expect(known.has(rule), rule).toBe(true);
   });
 
   it("asks six FAQ questions, each answered in both languages — the sixth for a sales team (§18.7 E0)", () => {

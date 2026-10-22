@@ -15,8 +15,10 @@ import type {
   LinkMetricId,
   MetricId,
   MetricValue,
+  MktDemandLeverId,
   MktDerivedId,
   MktMetricId,
+  MktSupplyLeverId,
   Motion,
   PlgCandidateId,
   PlgDerivedId,
@@ -1415,10 +1417,9 @@ export const APP_LEVER_IDS: readonly AppLeverId[] = [
 
 /**
  * The marketplace's levers, one list per side (§22.4.3, C70): the demand's eight, then the three the sellers'
- * subscriptions add. Ids of `MKT_METRIC_SHAPES` for now: `LeverId` widens to them with MKT-3 (§22.2.1, a type that
- * widens a `Record<LeverId, …>` comes with its entries), and `ALL_LEVER_IDS` takes them in then.
+ * subscriptions add. `LeverId` widens to them with MKT-3 (§22.2.1) and `ALL_LEVER_IDS` takes them in.
  */
-export const MKT_DEMAND_LEVER_IDS: readonly MktMetricId[] = [
+export const MKT_DEMAND_LEVER_IDS: readonly MktDemandLeverId[] = [
   "mkt.buy.signup-rate",
   "mkt.buy.referred-share",
   "mkt.buy.first-order",
@@ -1428,10 +1429,10 @@ export const MKT_DEMAND_LEVER_IDS: readonly MktMetricId[] = [
   "mkt.rev.aov",
   "mkt.rev.take-rate",
 ];
-export const MKT_SUPPLY_LEVER_IDS: readonly MktMetricId[] = ["mkt.sell.paid-conversion", "mkt.sell.paid-churn", "mkt.sell.arpa"];
+export const MKT_SUPPLY_LEVER_IDS: readonly MktSupplyLeverId[] = ["mkt.sell.paid-conversion", "mkt.sell.paid-churn", "mkt.sell.arpa"];
 
 /** Every lever a file may carry a what-if target for. */
-export const ALL_LEVER_IDS: readonly LeverId[] = [...LEVER_IDS, ...SLG_LEVER_IDS, ...APP_LEVER_IDS];
+export const ALL_LEVER_IDS: readonly LeverId[] = [...LEVER_IDS, ...SLG_LEVER_IDS, ...APP_LEVER_IDS, ...MKT_DEMAND_LEVER_IDS, ...MKT_SUPPLY_LEVER_IDS];
 
 /** The five sales-assisted ★ (§18.5.2). The link is none of them, even with a team target (C25 Q7). */
 export const SLG_CANDIDATE_IDS: readonly SlgCandidateId[] = [

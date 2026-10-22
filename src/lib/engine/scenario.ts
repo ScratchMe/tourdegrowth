@@ -55,13 +55,13 @@ import { countsOf, currentSnapshot, entryOf, knownIn } from "./values";
 
 export interface LeverView {
   id: LeverId;
-  /** Today's value in the display unit (percent, the engine's currency for ARPA and ACV, opportunities for the link). null = not known: the lever can't move. */
+  /** Today's value in the display unit (percent, the engine's currency for ARPA and ACV, opportunities for the link, orders per buyer for the marketplace's frequency). null = not known: the lever can't move. */
   today: Interval | null;
   /** The target under test, or null when the lever hasn't been moved. */
   target: number | null;
   direction: "higher" | "lower";
-  /** `count`: the link, a whole number of opportunities per quarter (C25 Q7). */
-  unit: "percent" | "money" | "count";
+  /** `count`: the link, a whole number of opportunities per quarter (C25 Q7). `ratio`: the marketplace's order frequency, a plain number of orders (§22.5.4). */
+  unit: "percent" | "money" | "count" | "ratio";
   /** Where the slider may go — a range around today, never below 0, never past 100 for a share. */
   min: number;
   max: number;
@@ -158,9 +158,9 @@ export interface Scenario {
   assumptions: ScenarioAssumption[];
 }
 
-/** The levers priced in the engine's currency: what new customers pay, what a new contract is worth, what an active brings. */
-const MONEY_LEVERS: readonly LeverId[] = ["rev.arpa", "slg.rev.acv", "app.rev.purchases-per-active", "app.rev.ads-per-active"];
-const LOWER_IS_BETTER: readonly LeverId[] = ["ret.logo-churn", "rev.contraction", "app.rev.commission"];
+/** The levers priced in the engine's currency: what new customers pay, what a new contract is worth, what an active brings, a marketplace's basket and its sellers' subscription. */
+const MONEY_LEVERS: readonly LeverId[] = ["rev.arpa", "slg.rev.acv", "app.rev.purchases-per-active", "app.rev.ads-per-active", "mkt.rev.aov", "mkt.sell.arpa"];
+const LOWER_IS_BETTER: readonly LeverId[] = ["ret.logo-churn", "rev.contraction", "app.rev.commission", "mkt.buy.churn", "mkt.sell.paid-churn"];
 
 function known(state: EngineState, id: MetricId, ctx: EngineCalcContext): Interval | null {
   const k = knownIn(state, id, ctx);
@@ -174,9 +174,10 @@ const clampHi = (i: Interval, cap: Interval | number): Interval => {
 const nonNegative = (i: Interval): Interval => mapBounds(i, (v) => Math.max(0, v));
 const round = (v: number, step: number) => Math.round(v / step) * step;
 
-/** The slider's step: a tenth of a point under 10 %, a point above; 1 € under 100 € of ARPA (or ACV), 5 € above; a cent for what an active brings. */
+/** The slider's step: a tenth of a point under 10 %, a point above; 1 € under 100 € of ARPA (or ACV), 5 € above; a cent for what an active brings and a hundredth of an order for the marketplace's frequency. */
 function stepOf(id: LeverId, mid: number): number {
   if (id === "app.rev.purchases-per-active" || id === "app.rev.ads-per-active") return 0.01;
+  if (id === "mkt.rev.frequency") return 0.01;
   if (MONEY_LEVERS.includes(id)) return mid >= 100 ? 5 : 1;
   return mid >= 10 ? 1 : 0.1;
 }
@@ -213,7 +214,7 @@ export function leverViews(
 ): LeverView[] {
   return ids.map((id) => {
     const today = known(state, id, ctx);
-    const unit = MONEY_LEVERS.includes(id) ? "money" : "percent";
+    const unit = id === "mkt.rev.frequency" ? "ratio" : MONEY_LEVERS.includes(id) ? "money" : "percent";
     const direction = LOWER_IS_BETTER.includes(id) ? "lower" : "higher";
     if (!today) return { id, today: null, target: null, direction, unit, min: 0, max: 0, step: 1 };
     const { min, max, step } = domain(id, today);
