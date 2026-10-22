@@ -1,6 +1,6 @@
 import type { StoredResult } from "../../quiz/storage";
 import type { AppMonetization } from "../app-model";
-import { exampleEngine, exampleMetrics } from "../example";
+import { EXAMPLE_MKT_BASE, EXAMPLE_MKT_TARGETS, exampleEngine, exampleMarketplaceMetrics, exampleMetrics } from "../example";
 import { previousMonth } from "../cohort";
 import type { CandidateId, EngineState, LeverId, MetricEntry, MetricId, MetricValue, Snapshot, SourceRef, ToolId } from "../types";
 
@@ -211,6 +211,39 @@ export function consumerState(): EngineState {
 /** The same app earning from purchases and ads alone: its subscription numbers stay stored, and hidden. */
 export function consumerUsageOnlyState(): EngineState {
   return consumerEngine({ subscriptions: false, purchases: true, ads: true });
+}
+
+/**
+ * The marketplace example of §22.10.1 on the sellers' subscriptions: an empty state at the example's setup and months
+ * (EUR, the marketplace type, no selling motion ticked, products, the default windows), then every entry of the table —
+ * the same set whether or not the sellers pay, as a setup that unticks the box hides the five numbers of the
+ * subscriptions without erasing them (D9) — the base counts and the team's targets. Built by `withEntry` from
+ * `exampleMarketplaceMetrics()`, not `exampleEngine`, which has no marketplace yet: MKT-9 makes both fixtures read it.
+ * The buyers' and sellers' cohort is May, mature for the longest window on the example's 24 September.
+ */
+function marketplaceEngine(sellerSubscriptions: boolean): EngineState {
+  let state = emptyState();
+  state.setup = { ...state.setup, type: "marketplace", motions: { plg: false, slg: false }, offering: "products", sellerSubscriptions };
+  const snapshot = state.snapshots[0]!;
+  snapshot.cohortMonth = "2026-05";
+  snapshot.base = { ...EXAMPLE_MKT_BASE };
+  snapshot.targets = { ...EXAMPLE_MKT_TARGETS };
+  for (const [id, entry] of Object.entries(exampleMarketplaceMetrics()) as [MetricId, MetricEntry][]) state = withEntry(state, id, entry);
+  return state;
+}
+
+/**
+ * The marketplace of §22.10.1, sellers paying a subscription: a fictional second-hand furniture marketplace, 32 853,60 €
+ * of commissions and 26 100 € of sellers' subscriptions in August, the team's five targets and no « Et si »
+ * (`EXAMPLE_MKT_WHATIF` is applied on top). A fresh copy each call.
+ */
+export function marketplaceState(): EngineState {
+  return marketplaceEngine(true);
+}
+
+/** The same marketplace with the sellers paying nothing: the five numbers of the subscriptions stay stored, and hidden. */
+export function marketplaceNoSubscriptionsState(): EngineState {
+  return marketplaceEngine(false);
 }
 
 /**

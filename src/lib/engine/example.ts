@@ -1,5 +1,5 @@
 import type { AppMonetization } from "./app-model";
-import { ENGINE_SCHEMA_VERSION, type BusinessType, type EngineState, type LeverId, type MetricEntry, type MetricId, type MetricValue, type Motion, type SharedCount, type SourceRef, type ToolId } from "./types";
+import { ENGINE_SCHEMA_VERSION, type BusinessType, type EngineState, type LeverId, type MetricEntry, type MetricId, type MetricValue, type MktMetricId, type Motion, type SharedCount, type SourceRef, type ToolId } from "./types";
 
 /**
  * The engine spec's §6.0 example — a fictional self-serve SaaS, reference
@@ -162,6 +162,72 @@ export function exampleConsumerMetrics(words: ExampleWords): Partial<Record<Metr
     "app.rev.ads-per-active": measured(ratio(6_000, 15_000), finance),
     "app.rev.commission": measured(ratio(7_326, 33_300), tool("revenuecat")),
     "app.rev.gross-margin": measured(ratio(25_579.2, 31_974), finance),
+  };
+}
+
+/**
+ * The fictional marketplace's own targets (§22.10.1): the buyers' first order 25 % and the fill rate 12 %; the sellers'
+ * first sale 40 %, the conversion to a paid seller 20 % and the paid sellers' churn 2,5 %. Only a team target names the
+ * stage that holds a side back (C1), as for the SaaS above.
+ */
+export const EXAMPLE_MKT_TARGETS: Partial<Record<MetricId, number>> = {
+  "mkt.buy.first-order": 25,
+  "mkt.liq.fill-rate": 12,
+  "mkt.sell.first-sale": 40,
+  "mkt.sell.paid-conversion": 20,
+  "mkt.sell.paid-churn": 2.5,
+};
+
+/**
+ * The marketplace example's « Et si » (§22.10.1): the fill rate at 12 %, the first order at 25 % and the take rate at
+ * 13 % (the buyers'); the conversion to a paid seller at 20 % (the sellers'). A constant, never put in the example's
+ * state, like the app's. Keyed by the marketplace's ids rather than `LeverId`, which only widens to them with MKT-3
+ * (§22.2.1): the type then accepts this constant as it stands.
+ */
+export const EXAMPLE_MKT_WHATIF: Partial<Record<MktMetricId, number>> = {
+  "mkt.liq.fill-rate": 12,
+  "mkt.buy.first-order": 25,
+  "mkt.rev.take-rate": 13,
+  "mkt.sell.paid-conversion": 20,
+};
+
+/** The marketplace example's six shared counts (§22.10.1): the May buyers and sellers cohorts, August's orders, GMV and net revenue, and the sellers' subscription MRR. */
+export const EXAMPLE_MKT_BASE: Partial<Record<SharedCount, number>> = {
+  mktCohortSignups: 2_900,
+  mktOrders: 4_212,
+  mktGmv: 273_780,
+  mktNetRevenue: 32_853.6,
+  mktSellerCohortSignups: 420,
+  mktSellerMrrEnd: 26_100,
+};
+
+/**
+ * The fictional marketplace of §22.10.1 — second-hand furniture, both sides — entry by entry, whatever the sellers pay
+ * (a subscription box left unticked hides its five numbers without erasing them, D9). Flows are August's, the buyers'
+ * and sellers' cohorts May's (mature for the 90-day window on the example's 24 September). No word is typed in it: no
+ * entry of the example has a free text, so it takes none.
+ */
+export function exampleMarketplaceMetrics(): Partial<Record<MetricId, MetricEntry>> {
+  return {
+    "mkt.buy.signup-rate": measured(ratio(3_000, 60_000), tool("ga4")),
+    "mkt.buy.cac": measured(ratio(18_000, 600), tool("google-ads"), { variant: "media-only" }),
+    "mkt.sell.cac": measured(ratio(12_000, 120), tool("spreadsheet"), { variant: "media-only" }),
+    "mkt.sell.signup-rate": measured(ratio(400, 8_000), tool("ga4")),
+    "mkt.buy.first-order": measured(ratio(580, 2_900), tool("product-db")),
+    "mkt.sell.first-sale": measured(ratio(126, 420), tool("product-db")),
+    "mkt.liq.fill-rate": measured(ratio(2_340, 26_000), tool("amplitude"), { variant: "searches" }),
+    "mkt.buy.repeat": measured(ratio(145, 2_900), tool("product-db")),
+    "mkt.buy.churn": measured(ratio(560, 14_000), tool("product-db")),
+    "mkt.sell.churn": measured(ratio(96, 3_200), tool("product-db")),
+    "mkt.sell.paid-churn": measured(ratio(27, 900), tool("stripe")),
+    "mkt.buy.referred-share": measured(ratio(232, 2_900), tool("product-db")),
+    "mkt.rev.take-rate": measured(ratio(32_853.6, 273_780), tool("stripe")),
+    "mkt.rev.aov": measured(ratio(273_780, 4_212), tool("product-db")),
+    "mkt.rev.frequency": measured(ratio(4_212, 14_040), tool("product-db")),
+    "mkt.rev.gross-margin": { status: "estimated", estimate: { low: 55, high: 65, basis: "old-number" }, updatedAt: at },
+    "mkt.sell.paid-conversion": measured(ratio(63, 420), tool("stripe")),
+    "mkt.sell.arpa": measured(ratio(26_100, 900), tool("stripe")),
+    "mkt.sell.gross-margin": measured(ratio(22_185, 26_100), tool("spreadsheet")),
   };
 }
 
