@@ -459,7 +459,7 @@ d'après A22), MKT-1, MKT-4, MKT-6, MKT-7b (le tableau), MKT-8 et MKT-10.
 | MKT-R | **la relecture à blanc de §22** contre le code d'après A22, et la PR de documentation qui la traite (l'orchestrateur, prompt H, étape 0) | A22 | ☑ 2026-10-18 ([#378](https://github.com/ScratchMe/tourdegrowth/pull/378)) : 51 constats, tous traités dans §22 ; C105 et C106 |
 | MKT-0 | le contrat, le type, `EngineMotion`, la validation, les fenêtres | MKT-R | ☑ 2026-10-18 ([#379](https://github.com/ScratchMe/tourdegrowth/pull/379)) |
 | MKT-1 | les 19 chiffres et les 6 calculés, leur prose, les ponts | MKT-0 | ☑ 2026-10-18 ([#380](https://github.com/ScratchMe/tourdegrowth/pull/380)) |
-| MKT-2 | les grandeurs, les deux funnels, l'économie de chaque côté | MKT-1 | ☑ 2026-10-22 |
+| MKT-2 | les grandeurs, les deux funnels, l'économie de chaque côté | MKT-1 | ☑ 2026-10-22 ([#383](https://github.com/ScratchMe/tourdegrowth/pull/383)) |
 | MKT-3 | les deux scénarios et le total | MKT-2 | ☐ |
 | MKT-4 | les fuites, les deux diagnostics, la dérivation | MKT-3 | ☐ |
 | MKT-5 | la copie « produits » : `mkt.*`, les calques des deux côtés | MKT-1 | ☐ |
