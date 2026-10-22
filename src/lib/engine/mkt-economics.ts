@@ -100,16 +100,17 @@ export function mktNewPaidSellers(state: EngineState, ctx: EngineCalcContext): I
 }
 
 /**
- * S: the sellers' subscription MRR — the shared count when it is typed, else the subscription × the paid sellers (its
- * denominator). The subscription's own numerator is one of the shared count's places, so a subscription typed as counts
- * is read by the first line: the second is §22.5.1's, kept as it is written, and no entry the engine accepts reaches it.
+ * S: the sellers' subscription MRR — the shared count when it is typed, else the subscription × the paid sellers:
+ * the paid churn's denominator, or the subscription's own, as `scenario.ts#mrrToday` reads the SaaS's customers
+ * (the churn's denominator first, then ARPA's). The fallback serves a subscription typed as a value (29 €) with the
+ * paid churn typed as counts (27 ÷ 900): no entry then carries the MRR itself.
  */
 export function mktSellerMrrToday(state: EngineState, ctx: EngineCalcContext): Interval | null {
   if (!sellersPay(state)) return null;
   const typed = knownSharedCount(currentSnapshot(state), "mktSellerMrrEnd");
   if (typed) return point(typed.value);
   const subscription = known(state, "mkt.sell.arpa", ctx);
-  const paid = baseOf(state, "mkt.sell.arpa");
+  const paid = baseOf(state, "mkt.sell.paid-churn") ?? baseOf(state, "mkt.sell.arpa");
   return subscription && paid !== null ? scale(subscription, paid) : null;
 }
 

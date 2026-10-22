@@ -40,10 +40,11 @@ import { CTX_FR } from "./props";
  * - the confidence of a computed figure always « solid »: the buyer's approximate figures and the young cohort's fall (2);
  * - the box of the subscriptions ignored (the supply always counted): « every quantity of the subscriptions is null »,
  *   « a box that is not a boolean » and the uncomputable supply fall (3);
- * - an unknown take rate read as 0 for a: the two uncomputable cases of a fall (2).
- *
- * One branch no test reaches, and none can: the subscription × its own denominator in `mktSellerMrrToday` (see its
- * comment) — the coverage report shows it as the only branch of the two new modules left uncovered.
+ * - an unknown take rate read as 0 for a: the two uncomputable cases of a fall (2);
+ * - S's fallback reading the subscription's own denominator only (no paid churn's): the value-typed subscription and
+ *   « 27 ÷ 800 makes 29 × 800 » fall (2); S's fallback removed: the same two (2);
+ * - the typed shared MRR ignored: « the typed shared MRR wins » falls (1) — on the example the fallback finds the same
+ *   26 100 €, which is why that test types a different one.
  */
 
 const r2 = (v: number) => Math.round(v * 100) / 100;
@@ -221,11 +222,30 @@ describe("the supply's subscriptions — the example of §22.10.1", () => {
     expect(only(mktSellerMrrToday(amount, CTX_FR))).toBe(26_100);
   });
 
-  it("a subscription typed as an amount, and a margin without counts, leave no MRR to read: unknown, never 0", () => {
-    let state = withoutBase(marketplaceState(), "mktSellerMrrEnd");
-    state = withEntry(state, "mkt.sell.arpa", measured({ kind: "amount", amount: 29 }, stripe));
-    state = withEntry(state, "mkt.sell.gross-margin", estimated(80, 90));
-    expect(mktSellerMrrToday(state, CTX_FR)).toBeNull();
+  /** The subscription typed as a value (29 €) and the margin as an estimate: no entry carries the MRR, and the shared count is not typed. */
+  function valueOnly(): EngineState {
+    let value = withoutBase(marketplaceState(), "mktSellerMrrEnd");
+    value = withEntry(value, "mkt.sell.arpa", measured({ kind: "amount", amount: 29 }, stripe));
+    return withEntry(value, "mkt.sell.gross-margin", estimated(80, 90));
+  }
+
+  it("a subscription typed as a value, the paid churn as counts, no shared count: S is the subscription × the paid sellers, 29 × 900", () => {
+    // The precedent of `scenario.ts#mrrToday`: the churn's denominator is the customers.
+    expect(only(mktSellerMrrToday(valueOnly(), CTX_FR))).toBe(26_100);
+  });
+
+  it("the paid churn's denominator is the count of paid sellers: 27 ÷ 800 makes 29 × 800", () => {
+    const state = withEntry(valueOnly(), "mkt.sell.paid-churn", measured(ratio(27, 800), stripe));
+    expect(only(mktSellerMrrToday(state, CTX_FR))).toBe(23_200);
+  });
+
+  it("with no counts to read, S is unknown: never 0", () => {
+    // The paid churn as a rate has no denominator, and a subscription typed as a value has none either.
+    expect(mktSellerMrrToday(withEntry(valueOnly(), "mkt.sell.paid-churn", measured({ kind: "rate", percent: 3 }, stripe)), CTX_FR)).toBeNull();
+    // A paid churn over 0 sellers counts for nothing.
+    expect(mktSellerMrrToday(withEntry(valueOnly(), "mkt.sell.paid-churn", measured(ratio(0, 0), stripe)), CTX_FR)).toBeNull();
+    // Without a subscription there is nothing to multiply.
+    expect(mktSellerMrrToday(withEntry(valueOnly(), "mkt.sell.arpa", undefined), CTX_FR)).toBeNull();
   });
 
   it("an unknown conversion, sign-up count or cost makes NS and the cost unknown", () => {
