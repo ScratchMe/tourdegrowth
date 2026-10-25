@@ -1973,12 +1973,100 @@ export const ENGINE_COPY = {
     } satisfies Record<SlgScenarioAssumption, Translatable>,
   },
   /**
-   * TODO: à relire — copie neuve (convention 6), §22.8.5 d (A23 MKT-3) : the marketplace's own sheets, born with its
-   * « Et si ». For now the six rules of `lib/engine/mkt-scenario.ts` that no other motion shares; the four it shares
-   * (`signup-same-visitors`, `referral-on-top`, `same-spend`, `twelve-months`) are read in `scenario.assumption`,
-   * which each side's overlay rewrites. MKT-5 adds the rest of `mkt.*`.
+   * TODO: à relire — copie neuve (convention 6), §22.8.5 b and d (A23 MKT-3 and MKT-5) : the marketplace's own sheets,
+   * written with the words of "products" (MKT-S rewrites them for "services"). `side`, `funnel`, `money` and `total`
+   * (MKT-5, §22.8.5 b) are what its board, its two funnels and its total read; `assumption` (MKT-3, §22.8.5 d) holds the
+   * six rules of `lib/engine/mkt-scenario.ts` that no other motion shares: the four it shares (`signup-same-visitors`,
+   * `referral-on-top`, `same-spend`, `twelve-months`) are read in `scenario.assumption`, which each side's overlay
+   * rewrites. The texts the board's screens and the slides add (§22.8.5 k) are written by the unit that shows them.
    */
   mkt: {
+    side: {
+      demandTitle: { fr: "La demande : les acheteurs", en: "Demand: the buyers" },
+      supplyTitle: { fr: "L'offre : les vendeurs", en: "Supply: the sellers" },
+      buy: { fr: "Acheteurs", en: "Buyers" },
+      sell: { fr: "Vendeurs", en: "Sellers" },
+      match: { fr: "Liquidité", en: "Liquidity" },
+      selector: { fr: "Côté affiché", en: "Side shown" },
+      demand: { fr: "Demande", en: "Demand" },
+      supply: { fr: "Offre", en: "Supply" },
+    },
+    funnel: {
+      upstream: { fr: "~{n} visiteurs du mois pour 100 inscrits · {source} · {month}", en: "~{n} visitors a month for 100 sign-ups · {source} · {month}" },
+      sellerUpstream: {
+        fr: "~{n} visiteurs de la page vendeurs pour 100 vendeurs inscrits · {source} · {month}",
+        en: "~{n} seller page visitors for 100 seller sign-ups · {source} · {month}",
+      },
+      signups: { fr: "Inscrits", en: "Sign-ups" },
+      sellerSignups: { fr: "Vendeurs inscrits", en: "Seller sign-ups" },
+      first: { fr: "Première commande sous {n} jours", en: "First order within {n} days" },
+      repeat: { fr: "Deuxième commande sous {n} jours", en: "Second order within {n} days" },
+      firstSale: { fr: "Première vente sous {n} jours", en: "First sale within {n} days" },
+      paid: { fr: "Abonnés sous {n} jours", en: "Subscribed within {n} days" },
+      legendReferred: { fr: "venus par recommandation ({n})", en: "came through a referral ({n})" },
+      sameHundred: {
+        fr: "Tes inscrits en {cohort} sont ramenés à 100 pour se lire en pourcentages : chaque colonne est comptée sur ces mêmes 100.",
+        en: "Your {cohort} sign-ups are scaled to 100 so they read as percentages: every column is counted on those same 100.",
+      },
+      sellerSameHundred: {
+        fr: "Tes vendeurs inscrits en {cohort} sont ramenés à 100 pour se lire en pourcentages : chaque colonne est comptée sur ces mêmes 100.",
+        en: "Your {cohort} seller sign-ups are scaled to 100 so they read as percentages: every column is counted on those same 100.",
+      },
+      slideSameHundred: { fr: "Chaque colonne est comptée sur les mêmes 100 inscrits.", en: "Every column is counted on the same 100 sign-ups." },
+      slideSellerSameHundred: { fr: "Chaque colonne est comptée sur les mêmes 100 vendeurs inscrits.", en: "Every column is counted on the same 100 seller sign-ups." },
+      clauseFirst: { fr: "{a} passent une première commande", en: "{a} place a first order" },
+      clauseFirstOne: { fr: "{a} passe une première commande", en: "{a} places a first order" },
+      clauseRepeat: { fr: "{r} en passent une deuxième", en: "{r} place a second one" },
+      clauseRepeatOne: { fr: "{r} en passe une deuxième", en: "{r} places a second one" },
+      clauseFirstSale: { fr: "{a} font une première vente", en: "{a} make a first sale" },
+      clauseFirstSaleOne: { fr: "{a} fait une première vente", en: "{a} makes a first sale" },
+      clausePaid: { fr: "{p} s'abonnent", en: "{p} subscribe" },
+      clausePaidOne: { fr: "{p} s'abonne", en: "{p} subscribes" },
+      unmeasured: {
+        first: { fr: "la première commande", en: "first order" },
+        repeat: { fr: "la deuxième commande", en: "second order" },
+        firstSale: { fr: "la première vente", en: "first sale" },
+        paid: { fr: "la conversion en abonné", en: "subscription conversion" },
+      },
+      fillRequests: { fr: "Taux de service : {fill} des demandes envoyées aboutissent à une commande", en: "Fill rate: {fill} of requests sent end in an order" },
+      fillSearches: { fr: "Taux de service : {fill} des recherches aboutissent à une commande", en: "Fill rate: {fill} of searches end in an order" },
+      fillUnknown: { fr: "Taux de service : non mesuré", en: "Fill rate: not measured" },
+      churn: { fr: "Churn des vendeurs : {c} par mois", en: "Seller churn: {c} a month" },
+      paidChurn: { fr: "Churn des vendeurs abonnés : {c} par mois", en: "Paid seller churn: {c} a month" },
+      newBuyers: { fr: "Nouveaux acheteurs", en: "New buyers" },
+      newPaidSellers: { fr: "Nouveaux vendeurs abonnés", en: "New paid sellers" },
+      tableCaption: { fr: "La demande, en chiffres", en: "Demand, in numbers" },
+      sellerTableCaption: { fr: "L'offre, en chiffres", en: "Supply, in numbers" },
+    },
+    money: {
+      gmv: { fr: "Volume d'affaires du mois (GMV)", en: "Gross volume this month (GMV)" },
+      perBuyer: { fr: "Revenu net par acheteur actif et par mois", en: "Net revenue per active buyer a month" },
+      perSeller: { fr: "Revenu par vendeur abonné et par mois", en: "Revenue per paid seller a month" },
+      sellerCost: { fr: "Coût d'un vendeur abonné", en: "Cost per paid seller" },
+      sellerCostNote: {
+        fr: "Le coût d'un vendeur actif × la première vente ÷ la conversion en abonné, sur la même cohorte.",
+        en: "The cost per active seller × first sale ÷ subscription conversion, on the same cohort.",
+      },
+      supplyNone: {
+        fr: "Tes vendeurs ne paient pas d'abonnement : l'offre ne rapporte rien en direct",
+        en: "Your sellers pay no subscription: supply brings in nothing directly",
+      },
+    },
+    total: {
+      title: { fr: "Deux flux, un total", en: "Two streams, one total" },
+      demand: { fr: "Commissions (revenu net)", en: "Commissions (net revenue)" },
+      supply: { fr: "Abonnements des vendeurs", en: "Seller subscriptions" },
+      sum: { fr: "Total par mois", en: "Total a month" },
+      sumArr: { fr: "Total annualisé", en: "Annualised total" },
+      newLabel: { fr: "Nouveau chaque mois", en: "New a month" },
+      in12Label: { fr: "Dans 12 mois au rythme actuel", en: "In 12 months at the current pace" },
+      ofDemand: { fr: "le revenu net des commissions", en: "commission net revenue" },
+      ofSupply: { fr: "le MRR des abonnements", en: "subscription MRR" },
+      footer: {
+        fr: "Revenu net et MRR des abonnements à fin {month} · sources : {tools}",
+        en: "Net revenue and subscription MRR at the end of {month} · sources: {tools}",
+      },
+    },
     assumption: {
       "fill-new-buyers-only": { fr: "Un meilleur taux de service ne compte que pour les nouveaux acheteurs : l'effet sur les acheteurs déjà là n'est pas compté, c'est un minimum.", en: "A better fill rate only counts for new buyers: the effect on existing buyers isn't counted, so this is a minimum." },
       "new-buyer-spends-average": { fr: "Un nouvel acheteur dépense comme l'acheteur actif moyen.", en: "A new buyer spends like the average active buyer." },

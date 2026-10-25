@@ -7,6 +7,7 @@ import type {
   MetricId,
   MetricStatus,
   MissingCause,
+  MktSide,
   RepairScale,
   RoleId,
   SourceRef,
@@ -50,6 +51,30 @@ export function mergeStrings<T>(base: T, overlay: DeepPartial<NoInfer<T>> | unde
     out[key] = key in over && over[key] !== undefined ? mergeStrings(value, over[key] as DeepPartial<typeof value>) : value;
   }
   return out as T;
+}
+
+/** The marketplace's overlays, resolved in one language, as the page passes them. MKT-5 fills `products`; `services` is { common: {}, demand: {}, supply: {} } until MKT-S. */
+export interface MarketplaceLayers<T> {
+  /** `common` (C105): the six sheets a marketplace reads in every set, the neutral one included (§22.8.5 c bis). */
+  products: { common: DeepPartial<T>; demand: DeepPartial<T>; supply: DeepPartial<T> };
+  services: { common: DeepPartial<T>; demand: DeepPartial<T>; supply: DeepPartial<T> };
+}
+
+/**
+ * The strings a marketplace screen or slide reads (§22.8.1): the base, then the words of "products" (the common
+ * sheet, always, then the side's, when there is one), then, for "services", the services' common sheet and the
+ * side's. `side` is `null` for what belongs to neither side (the bar, the list, a number's screen before its side, the
+ * total, the setup card and the Settings): they read the neutral set, whose only "products" layer is the common one.
+ * The one place that knows the order of the layers; generic, so the tests pass `ENGINE_COPY` itself.
+ */
+export function marketplaceStrings<T>(base: T, layers: MarketplaceLayers<T>, offering: "products" | "services", side: MktSide | null): T {
+  let out = mergeStrings(base, layers.products.common);
+  if (side !== null) out = mergeStrings(out, layers.products[side]);
+  if (offering === "services") {
+    out = mergeStrings(out, layers.services.common);
+    if (side !== null) out = mergeStrings(out, layers.services[side]);
+  }
+  return out;
 }
 
 /** A plain object: neither a leaf (string, number…) nor an array, which an overlay replaces whole. */

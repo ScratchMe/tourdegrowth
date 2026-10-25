@@ -92,6 +92,11 @@ const BUDGETS: { module: string; max: number; why: string }[] = [
     why: "Les mots du moteur d'une app, posés sur ceux d'engine-copy.ts (A22 APP-3, §21.8) : seule /{locale}/aarrr-funnel-template le rend, pour `typeStrings`. Ni /llms.txt (il ne lit que le titre et la description, que le calque n'a pas), ni l'image de partage.",
   },
   {
+    module: "content/engine-copy-marketplace.ts",
+    max: 1,
+    why: "Les mots du moteur d'une place de marché (« produits »), posés sur ceux d'engine-copy.ts par côté (A23 MKT-5, §22.8) : seule /{locale}/aarrr-funnel-template le rend, pour `typeStrings.marketplace`. Ni /llms.txt (il ne lit que le titre et la description, que les calques n'ont pas), ni l'image de partage.",
+  },
+  {
     module: "content/engine-copy.ts",
     max: 2,
     why: "Toute la copie d'interface du moteur : sa page la résout, et /llms.txt lit son titre et sa description quand le moteur est ouvert au build (C27).",
