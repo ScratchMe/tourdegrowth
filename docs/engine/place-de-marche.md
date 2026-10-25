@@ -1816,7 +1816,9 @@ export function marketplaceStrings<T>(base: T, layers: MarketplaceLayers<T>, off
   choisit « produits ou services » dans cette même carte ; `drawable()`
   (`:272`) l'appelle sur un état candidat. Elle devient `stringsFor(type:
   BusinessType, offering?: "products" | "services", side?: MktSide | null):
-  EngineStrings` ; `Setup` et `ExampleView` reçoivent cette signature ;
+  EngineStrings` ; `Setup` et `ExampleView` reçoivent cette signature à
+  MKT-6 (MKT-5 les laisse sur `(type) => EngineStrings`, que la nouvelle
+  signature satisfait ; la carte qui choisit l'offre est MKT-6) ;
   `drawable` passe `candidate.setup.offering`. `marketplaceStrings` rend un
   arbre neuf à chaque appel : sans cache, `computed` (`:247-253`, un
   `useMemo` qui dépend de `strings`) se recalculerait à chaque rendu. Le
@@ -1948,9 +1950,9 @@ s'arrête pas pour ces noms et recopie leur commentaire :
 |---|---|---|
 | les deux | `scenario.leavesFirst` | fausse alerte : l'anglais « paying back » est le verbe, et « part {n} avant » n'en porte aucun (l'app la passe aussi) |
 | les deux | `slide.unitLeavesBefore`, `slide.unitMayLeaveBefore` | même fausse alerte (« part {n} avant d'avoir remboursé » / "leaves {n} before paying back") |
-| demande | `scenario.assumption.referral-on-top` | « qui s'inscrivent » / "who sign up" est un verbe juste pour des acheteurs ; l'offre n'a pas de levier de recommandation, elle ne l'imprime jamais |
+| les deux | `scenario.assumption.referral-on-top` | « qui s'inscrivent » / "who sign up" est un verbe juste pour des acheteurs ; l'offre n'a pas de levier de recommandation, elle ne l'imprime jamais (la règle de la demande ne la désigne même pas ; celle de l'offre, oui : MKT-5 l'a ajoutée de ce côté) |
 | demande | `terms.arr.definition` | jamais affichée côté demande : son « ? » lit `mkt.terms.netRevenue` (§22.8.5 k) ; l'offre la réécrit (le MRR des abonnements) |
-| les deux | `settings.firstSalePaidReset` | écrite pour la place de marché (§22.8.5 a) : « conversion en abonné » est déjà le mot de l'offre. Pas dans `MKT_EXCLUDED` : la règle 5 doit encore la réécrire en mots « services » |
+| les deux | `settings.firstSalePaidReset` | écrite pour la place de marché (§22.8.5 a) : « conversion en abonné » est déjà le mot de l'offre. Pas dans `MKT_EXCLUDED` : la règle 5 doit encore la réécrire en mots « services ». La feuille n'existe qu'à MKT-6 : la constante `NOT_WRITTEN_YET` d'`engine-copy-marketplace.test.ts` la tient pour absente jusque-là, et rougit le jour où elle s'écrit ; MKT-6 retire le nom de cette constante |
 
 `terms.cohort.definition` et `terms.window.definition` ne sont pas dans cette
 liste : `products.common` les réécrit (§22.8.5 c bis), et le test les tient
@@ -2048,7 +2050,11 @@ d'acceptation de MKT-5, sur le modèle d'`engine-copy-consumer.test.ts` :
    sauf les exceptions nommées une par une, chacune commentée, dont les six
    feuilles de `products.common` (§22.8.5 c bis), écrites pour les deux
    côtés à la fois : « inscrit », « visiteurs », "signed up" et « vendeur
-   abonné » y sont voulus ;
+   abonné » y sont voulus. MKT-5 en nomme d'autres, chacune tenue aux seules
+   langues nommées : "paying back" est le verbe dans l'anglais de
+   `money.monthsLoss`, `money.monthsMaybe`, `slide.chartSummaryMaybe` et
+   `terms.afterPayback.definition`, des deux côtés ; `money.arr` de l'offre,
+   dont le texte de §22.8.5 c dit « leur MRR » ;
 3. **pas de clé orpheline** : chaque feuille d'un calque existe dans
    `ENGINE_COPY`, et a **les mêmes gabarits** (`{…}`) que la feuille qu'elle
    remplace, dans les deux langues ;
@@ -3263,7 +3269,9 @@ Ton compte rendu, en français : une liste numérotée de constats, rangés par 
      `MKT_EXCLUDED` reprend les huit lignes de §22.8.3 (la 6 et la 7 avec ce
      que MKT-R y a ajouté) et `MKT_OVERLAY_SKIPPED` la table de §22.8.3, avec
      ses commentaires : l'exécutant ne s'arrête pas pour ces noms. Le compte
-     attendu, à quelques feuilles près : 103 pour la demande, 128 pour l'offre.
+     mesuré par MKT-5 : 93 feuilles désignées pour la demande, 118 pour
+     l'offre (103 et 128 sans la ligne 7 de `MKT_EXCLUDED`, que MKT-R a
+     mesurés avant ses ajouts).
   4. `marketplaceStrings` (l'ordre des calques de §22.8.1, et un test par
      étape de l'ordre), `typeStrings.marketplace`, la fusion dans l'îlot.
 - **Acceptation** : commune ; le poids de la page mesuré (comme MKT-1) ;
@@ -3391,7 +3399,12 @@ Ton compte rendu, en français : une liste numérotée de constats, rangés par 
   `mktSellerCohortSignups` (un test le fixe) ; le commentaire de
   `cohort.ts#windowDaysOf` et son annotation `string | number | undefined`,
   sans objet depuis que MKT-1 a élargi `MetricShape.window`, se rangent ici
-  (le fichier est déjà lu pour `defaultCohortMonth`).
+  (le fichier est déjà lu pour `defaultCohortMonth`). **Ce qu'MKT-5 a
+  laissé** : `Setup` et `ExampleView` reçoivent ici la signature
+  `stringsFor(type, offering?, side?)` (§22.8.1), la carte passant l'offre
+  qu'on y choisit ; écrire `settings.firstSalePaidReset` (§22.8.5 a) fait
+  rougir `NOT_WRITTEN_YET` d'`engine-copy-marketplace.test.ts`, dont MKT-6
+  retire le nom (ce test est dans ses fichiers).
 - **Acceptation** : commune ; captures de la carte de départ, de la carte de
   réglage et de l'écran des cibles d'une place de marché, en « produits » et en
   « services », FR 1 280 et EN 390, regardées, sur un build
