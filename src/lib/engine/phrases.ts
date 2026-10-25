@@ -1,4 +1,14 @@
-import { CANDIDATE_IDS, PELOTON_METRICS, SLG_CANDIDATE_IDS, UNIT_INPUT_IDS, motionOfMetric, shapeOf } from "./catalog-shape";
+import {
+  CANDIDATE_IDS,
+  MKT_DEMAND_CANDIDATE_IDS,
+  MKT_SUPPLY_CANDIDATE_IDS,
+  PELOTON_METRICS,
+  SLG_CANDIDATE_IDS,
+  UNIT_INPUT_IDS,
+  isRetentionMetric,
+  motionOfMetric,
+  shapeOf,
+} from "./catalog-shape";
 import { periodRangeOf, windowDaysOf } from "./cohort";
 import { CHAIN_VERB } from "./findings";
 import { capitalise, fillTemplate, formatMonth, formatMonthRange, joinList, lowerFirst } from "./format";
@@ -14,7 +24,9 @@ import type {
   ImpactLine,
   Interval,
   MetricId,
+  MktCandidateId,
   Motion,
+  MotionDerived,
   Position,
   SelfServeCandidateId,
   SlgDiagnosis,
@@ -60,21 +72,41 @@ function nameOf(metrics: ResolvedMetric[], id: MetricId): string {
   return m.name;
 }
 
+/** Re-exported from `catalog-shape.ts`, where `impact.ts` reads it too without a cycle through this module (§22.5.5). */
+export { isRetentionMetric };
+
 export function isCandidate(id: MetricId): id is CandidateId {
   // The actives' retention is an app's own candidate (§21.5.4): its target is entered on its own screen like any other.
-  return (CANDIDATE_IDS as readonly string[]).includes(id) || (SLG_CANDIDATE_IDS as readonly string[]).includes(id) || id === "app.ret.active-retention";
+  // A marketplace's are its two sides' (§22.5.6): each side positions its own list.
+  return (
+    (CANDIDATE_IDS as readonly string[]).includes(id) ||
+    (SLG_CANDIDATE_IDS as readonly string[]).includes(id) ||
+    (MKT_DEMAND_CANDIDATE_IDS as readonly string[]).includes(id) ||
+    (MKT_SUPPLY_CANDIDATE_IDS as readonly string[]).includes(id) ||
+    id === "app.ret.active-retention"
+  );
 }
 
-/** Either motion's diagnosis — the sentences below word both alike (§18.5.2). */
-export type AnyDiagnosis = Diagnosis<SelfServeCandidateId> | SlgDiagnosis;
+/** Any motion's diagnosis — the sentences below word them alike (§18.5.2); a marketplace's is one side's (C70). */
+export type AnyDiagnosis = Diagnosis<SelfServeCandidateId> | SlgDiagnosis | Diagnosis<MktCandidateId>;
+
+/**
+ * The diagnoses a derived motion holds: one for self-serve and sales-assisted, the demand's then the supply's for a
+ * marketplace (§22.2.5). Two diagnoses are never merged or ranked against each other: a reader that names a stage reads
+ * each on its own.
+ */
+export function diagnosesOf(m: MotionDerived): AnyDiagnosis[] {
+  return m.motion === "mkt" ? [m.sides.demand.diagnosis, m.sides.supply.diagnosis] : [m.diagnosis];
+}
 
 /** A candidate's position in its own motion's diagnosis; undefined for another motion's candidate. */
 export function positionIn(diagnosis: AnyDiagnosis, id: CandidateId): { position: Position; comparator?: Comparator; impact?: Impact } | undefined {
   return (diagnosis.positions as Partial<Record<CandidateId, { position: Position; comparator?: Comparator; impact?: Impact }>>)[id];
 }
 
-/** The candidate priced on the customer base, which ranks only in money: churn, or the renewal. */
+/** The candidate priced on the customer base, which ranks only in money: churn, the renewal, or a marketplace side's churn. */
 function retentionOf(diagnosis: AnyDiagnosis): CandidateId {
+  if (diagnosis.motion === "mkt") return diagnosis.side === "supply" ? "mkt.sell.paid-churn" : "mkt.buy.churn";
   return diagnosis.motion === "plg" ? "ret.logo-churn" : "slg.ret.renewal";
 }
 
@@ -338,7 +370,7 @@ export function worthOf(impact: Impact, strings: Words, locale: Locale): string 
     const key = renewal ? "keptQuarter" : "customersQuarter";
     return fillTemplate(w[numbered(key, head.count, locale)], { n: head.n });
   }
-  const key = impact.kind === "per-hundred" ? "perHundred" : impact.metric === "ret.logo-churn" ? "kept" : "customers";
+  const key = impact.kind === "per-hundred" ? "perHundred" : isRetentionMetric(impact.metric) ? "kept" : "customers";
   return fillTemplate(w[numbered(key, head.count, locale)], { n: head.n });
 }
 
@@ -356,7 +388,7 @@ export function chainTemplate(
   words: Words["whatIf"],
   locale: Locale,
 ): { label: string | null; template: string } {
-  const churn = impact.metric === "ret.logo-churn";
+  const churn = isRetentionMetric(impact.metric);
   const pick = (key: ChainTemplateKey) => words[key];
   // An app's chain (§21.7.2): `appWhatIf` says which of its three it built, and the table below is its templates.
   if (impact.appChain === "actives-flow" || impact.appChain === "actives-retention") return activesChainTemplate(line, impact.appChain, impact.metric, words, locale);
@@ -377,8 +409,8 @@ export function chainTemplate(
       return { label: words.if, template: words.ifFlow };
     case "then":
       if (churn) return { label: words.then, template: pick(numbered("thenChurn", line.count, locale)) };
-      // The referred come on top of the others (§19.3.2): « 42 × (100 – 6)/(100 – 10) ».
-      return { label: words.then, template: impact.metric === "ref.referred-share" ? words.thenReferral : words.thenFlow };
+      // The referred come on top of the others (§19.3.2): « 42 × (100 – 6)/(100 – 10) » — the buyers' referred share too.
+      return { label: words.then, template: impact.metric === "ref.referred-share" || impact.metric === "mkt.buy.referred-share" ? words.thenReferral : words.thenFlow };
     case "times":
       return { label: words.times, template: churn ? words.timesChurn : words.timesFlow };
     case "annual":

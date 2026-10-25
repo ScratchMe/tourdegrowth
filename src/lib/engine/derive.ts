@@ -2,14 +2,17 @@ import type { StoredResult } from "@/lib/quiz/storage";
 import { appDerived, appUnitEconomics } from "./app";
 import { buildMirror } from "./bridge";
 import { motionCoverage, setupCoverage } from "./coverage";
-import { diagnose } from "./diagnose";
+import { diagnose, diagnoseSide } from "./diagnose";
 import { findings } from "./findings";
 import type { UnitWords } from "./format";
+import { mktUnitEconomics } from "./mkt-economics";
+import { buildMktFunnel } from "./mkt-funnel";
+import { mktTotal } from "./mkt-scenario";
 import { buildPeloton } from "./peloton";
 import { buildRelays } from "./relays";
 import { sanityChecks } from "./sanity";
 import { deriveSeries } from "./series";
-import { isApp } from "./setup-type";
+import { activeMotions, isApp } from "./setup-type";
 import type { ResolvedBridge } from "./strings";
 import { buildTotal } from "./total";
 import type { EngineCalcContext, EngineDerived, EngineState, MotionDerived } from "./types";
@@ -41,7 +44,11 @@ import { currentSnapshot } from "./values";
  * unit economics are also kept at the top, where every v1 reader finds them
  * (`EngineDerived`): the same objects as the `plg` motion's. An app (§21.5.5)
  * derives its per-install economics in place of the customer's, and alone
- * carries the `app` key: its twelve-month value and its two streams.
+ * carries the `app` key: its twelve-month value and its two streams. A
+ * marketplace (§22) derives its one motion, `mkt`, with two sides — each its
+ * own diagnosis and economics, never read against the other (C70) — and the
+ * total that adds them; the top-level self-serve fields describe an empty
+ * self-serve engine, as for an assisted one alone.
  */
 export function deriveEngine(
   state: EngineState,
@@ -69,6 +76,19 @@ export function deriveEngine(
       relays: buildRelays(state, ctx),
       diagnosis: diagnose(state, ctx, "slg"),
       unit: slgUnitEconomics(state, ctx),
+    });
+  }
+  // A marketplace's motion is derived from its type, not ticked (§22.1 D1): two sides, each on its own, then their total.
+  if (activeMotions(state.setup).includes("mkt")) {
+    motions.push({
+      motion: "mkt",
+      coverage: motionCoverage(snapshot, "mkt", state.setup),
+      funnel: buildMktFunnel(state, ctx),
+      sides: {
+        demand: { side: "demand", diagnosis: diagnoseSide(state, ctx, "demand"), unit: mktUnitEconomics(state, ctx, "demand") },
+        supply: { side: "supply", diagnosis: diagnoseSide(state, ctx, "supply"), unit: mktUnitEconomics(state, ctx, "supply") },
+      },
+      total: mktTotal(state, ctx),
     });
   }
 

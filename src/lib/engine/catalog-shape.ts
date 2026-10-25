@@ -15,9 +15,11 @@ import type {
   LinkMetricId,
   MetricId,
   MetricValue,
+  MktDemandCandidateId,
   MktDemandLeverId,
   MktDerivedId,
   MktMetricId,
+  MktSupplyCandidateId,
   MktSupplyLeverId,
   Motion,
   PlgCandidateId,
@@ -1445,10 +1447,10 @@ export const SLG_CANDIDATE_IDS: readonly SlgCandidateId[] = [
 
 /**
  * The marketplace's candidates, one list per side (§22.4.3, C70): the ★ and the rates a side's diagnosis positions, in
- * canonical order. `mktCandidates("supply", setup)` (MKT-4, §22.5.6) takes the three subscription ones off without the
- * sellers' subscriptions. Ids of `MKT_METRIC_SHAPES` for now: `CandidateId` widens to them with MKT-4.
+ * canonical order. `diagnose.ts#mktCandidates("supply", setup)` (§22.5.6) takes the three subscription ones off without
+ * the sellers' subscriptions.
  */
-export const MKT_DEMAND_CANDIDATE_IDS: readonly MktMetricId[] = [
+export const MKT_DEMAND_CANDIDATE_IDS: readonly MktDemandCandidateId[] = [
   "mkt.buy.signup-rate",
   "mkt.buy.first-order",
   "mkt.liq.fill-rate",
@@ -1456,19 +1458,13 @@ export const MKT_DEMAND_CANDIDATE_IDS: readonly MktMetricId[] = [
   "mkt.buy.repeat",
   "mkt.buy.churn",
 ];
-export const MKT_SUPPLY_CANDIDATE_IDS: readonly MktMetricId[] = [
+export const MKT_SUPPLY_CANDIDATE_IDS: readonly MktSupplyCandidateId[] = [
   "mkt.sell.signup-rate",
   "mkt.sell.first-sale",
   "mkt.sell.paid-conversion",
   "mkt.sell.churn",
   "mkt.sell.paid-churn",
 ];
-
-/**
- * What the rules below may name: today's candidates, and the marketplace's numbers ahead of MKT-4, which widens
- * `CandidateId` to `MktCandidateId` (§22.2.1) and makes the second half redundant.
- */
-type RuledId = CandidateId | MktMetricId;
 
 /**
  * Never priced in money: go-live, which would need a model tying it to
@@ -1478,16 +1474,27 @@ type RuledId = CandidateId | MktMetricId;
  * (D4, C67): the second order, the first sale, the sellers' churn and the
  * sellers' sign-up rate are named, never given an amount.
  */
-export const UNPRICED_CANDIDATES: readonly RuledId[] = ["slg.act.go-live", "mkt.buy.repeat", "mkt.sell.first-sale", "mkt.sell.churn", "mkt.sell.signup-rate"];
+export const UNPRICED_CANDIDATES: readonly CandidateId[] = ["slg.act.go-live", "mkt.buy.repeat", "mkt.sell.first-sale", "mkt.sell.churn", "mkt.sell.signup-rate"];
 
 /** The referred shares, priced as « the referred come on top of the others » (§19.3.2): the two of the SaaS and the buyers'. */
-export const REFERRAL_CANDIDATES: readonly RuledId[] = ["ref.referred-share", "slg.ref.referred-share", "mkt.buy.referred-share"];
+export const REFERRAL_CANDIDATES: readonly CandidateId[] = ["ref.referred-share", "slg.ref.referred-share", "mkt.buy.referred-share"];
 
 /**
  * The candidates where a LOWER value is better: logo churn, and the marketplace's three churns (§22.2.3). Read by
- * `diagnose.ts#directionOf` from MKT-4 on, in place of its test on `ret.logo-churn`.
+ * `diagnose.ts#directionOf`.
  */
-export const LOWER_IS_BETTER_CANDIDATES: readonly RuledId[] = ["ret.logo-churn", "mkt.buy.churn", "mkt.sell.churn", "mkt.sell.paid-churn"];
+export const LOWER_IS_BETTER_CANDIDATES: readonly CandidateId[] = ["ret.logo-churn", "mkt.buy.churn", "mkt.sell.churn", "mkt.sell.paid-churn"];
+
+/**
+ * The candidates priced on the base of customers they keep, not on a flow of new ones: logo churn, and a marketplace's
+ * two priced churns (§22.5.5). Their chain counts customers kept, never new ones. `phrases.ts` re-exports the test.
+ */
+export const RETENTION_PRICED_CANDIDATES: readonly MetricId[] = ["ret.logo-churn", "mkt.buy.churn", "mkt.sell.paid-churn"];
+
+/** Whether a number is one of `RETENTION_PRICED_CANDIDATES`: a function, never the id of the SaaS's churn alone (§22.5.5). */
+export function isRetentionMetric(id: MetricId): boolean {
+  return RETENTION_PRICED_CANDIDATES.includes(id);
+}
 
 /**
  * Past a target of 50 %, a referred share is not priced (§19.3.2): the

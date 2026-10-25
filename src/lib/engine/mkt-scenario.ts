@@ -5,7 +5,9 @@ import { demandPath, marketplaceRevenuePath, paidSellerCac, sellerPath, sideEcon
 import { acquisitionSpend, arrOf, cashTiedUp, paybackLimit, paybackWarning, type MoneyKpis } from "./money";
 import { correlatedRatio, leverViews, type LeverView } from "./scenario";
 import { mktSetup } from "./setup-type";
-import type { EngineCalcContext, EngineState, Interval, LeverId, MetricId, MktDemandLeverId, MktSide } from "./types";
+import { knownSharedCount } from "./shared-counts";
+import { sumParts } from "./total";
+import type { Confidence, DerivedValue, EngineCalcContext, EngineState, Interval, LeverId, MetricId, MktDemandLeverId, MktSide, MktTotal } from "./types";
 import { countsOf, currentSnapshot, entryOf, knownIn } from "./values";
 
 /**
@@ -25,7 +27,8 @@ import { countsOf, currentSnapshot, entryOf, knownIn } from "./values";
  *   seller from the next month (C69); the MRR of the subscriptions is kept at 1 − the paid sellers' churn, the new
  *   subscribers on top (`sellerPath`). What a paid seller costs falls when the conversion rises (D8): the cost of an
  *   active seller × the first sale ÷ the new conversion. Nothing else on the supply is priced (C67, D4).
- * - The total adds the two curves, point by point, today and with the what-ifs of both sides together.
+ * - The total adds the two curves, point by point, today and with the what-ifs of both sides together
+ *   (`mktTotalPaths`), and its three rows (this month, new a month, in twelve months) the two sides' shares (`mktTotal`).
  *
  * Intervals all the way, like `scenario.ts`: an estimate stays a range, and every function of the model is monotonic in
  * its inputs. `null` is « unknown », never 0.
@@ -348,5 +351,52 @@ export function mktTotalPaths(state: EngineState, targets: Partial<Record<LeverI
   return {
     today: marketplaceRevenuePath(subscriptions, demand.today.kpis.mrrPath, supply.today.kpis.mrrPath),
     projected: marketplaceRevenuePath(subscriptions, demand.projected.kpis.mrrPath, supply.projected.kpis.mrrPath),
+  };
+}
+
+// --- The total's three rows (§22.5.9) -----------------------------------------------------
+
+/**
+ * A side's share of a total row: known, or uncomputable naming the inputs it lacks — the unknown ones first, else the
+ * first one (`total.ts#part`, private to the hybrid, which `app.ts#streamPart` copies for the same reason).
+ */
+function part(state: EngineState, ctx: EngineCalcContext, value: Interval | null, confidence: Exclude<Confidence, "unknown">, inputs: MetricId[]): DerivedValue {
+  if (value) return { kind: "known", value, confidence };
+  const unknown = inputs.filter((id) => knownIn(state, id, ctx).kind !== "known");
+  return { kind: "uncomputable", missing: unknown.length > 0 ? unknown : inputs.slice(0, 1) };
+}
+
+/**
+ * The marketplace's revenue, three ways: this month, new a month, in twelve months at the current pace (§22.5.9).
+ * Each side's share is read on its own scenario (`buildMktScenario(…, {}, …)`, no what-if) and the total only ADDS
+ * them (S9): known when the demand is known and the supply is too — or is `null`, the sellers paying nothing, in which
+ * case the total is the commissions alone — with the weakest of the two confidences; else uncomputable, naming what
+ * each part lacks. It never compares the two sides (D2, D14). This month is exact (`solid`) when the side's shared
+ * count is typed (the net revenue, the subscriptions' MRR); every other share is a model's.
+ */
+export function mktTotal(state: EngineState, ctx: EngineCalcContext): MktTotal {
+  const snapshot = currentSnapshot(state);
+  const sellersPay = mktSetup(state.setup).sellerSubscriptions;
+  const demand = buildMktScenario(state, {}, ctx, "demand").today.kpis;
+  const supply = sellersPay ? buildMktScenario(state, {}, ctx, "supply").today.kpis : null;
+
+  const demandNow: MetricId[] = ["mkt.rev.frequency", "mkt.rev.aov", "mkt.rev.take-rate"];
+  const demandNew: MetricId[] = [...demandNow, "mkt.buy.cac"];
+  const demand12: MetricId[] = [...demandNew, "mkt.buy.churn"];
+  const supplyNow: MetricId[] = ["mkt.sell.arpa"];
+  const supplyNew: MetricId[] = [...supplyNow, "mkt.sell.signup-rate", "mkt.sell.paid-conversion"];
+  const supply12: MetricId[] = [...supplyNew, "mkt.sell.paid-churn"];
+
+  const demandTyped = knownSharedCount(snapshot, "mktNetRevenue") !== null;
+  const supplyTyped = knownSharedCount(snapshot, "mktSellerMrrEnd") !== null;
+  const row = (demandPart: DerivedValue, supplyPart: DerivedValue | null): MktTotal["now"] => ({
+    demand: demandPart,
+    supply: supplyPart,
+    total: supplyPart ? sumParts(demandPart, supplyPart) : demandPart,
+  });
+  return {
+    now: row(part(state, ctx, demand.mrr, demandTyped ? "solid" : "approximate", demandNow), supply && part(state, ctx, supply.mrr, supplyTyped ? "solid" : "approximate", supplyNow)),
+    newPerMonth: row(part(state, ctx, demand.newMrr, "approximate", demandNew), supply && part(state, ctx, supply.newMrr, "approximate", supplyNew)),
+    in12Months: row(part(state, ctx, demand.mrr12, "approximate", demand12), supply && part(state, ctx, supply.mrr12, "approximate", supply12)),
   };
 }

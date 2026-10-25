@@ -461,7 +461,7 @@ d'après A22), MKT-1, MKT-4, MKT-6, MKT-7b (le tableau), MKT-8 et MKT-10.
 | MKT-1 | les 19 chiffres et les 6 calculés, leur prose, les ponts | MKT-0 | ☑ 2026-10-18 ([#380](https://github.com/ScratchMe/tourdegrowth/pull/380)) |
 | MKT-2 | les grandeurs, les deux funnels, l'économie de chaque côté | MKT-1 | ☑ 2026-10-22 ([#383](https://github.com/ScratchMe/tourdegrowth/pull/383)) |
 | MKT-3 | les deux scénarios et le total | MKT-2 | ☑ 2026-10-22 ([#384](https://github.com/ScratchMe/tourdegrowth/pull/384)) |
-| MKT-4 | les fuites, les deux diagnostics, la dérivation | MKT-3 | ☐ |
+| MKT-4 | les fuites, les deux diagnostics, la dérivation | MKT-3 | ☑ 2026-10-25 ([#385](https://github.com/ScratchMe/tourdegrowth/pull/385)) |
 | MKT-5 | la copie « produits » : `mkt.*`, les calques des deux côtés | MKT-1 | ☐ |
 | MKT-S | les mots « services » : trois calques et le catalogue | MKT-5 | ☐ |
 | MKT-G | trois termes de glossaire (texte écrit d'abord par l'orchestrateur, `docs/engine/glossaire-mkt.md`) | MKT-1 | ☐ |
@@ -478,7 +478,7 @@ d'après A22), MKT-1, MKT-4, MKT-6, MKT-7b (le tableau), MKT-8 et MKT-10.
 | A23.a | **La spécification**, puis les décisions C64 à C74 et C93, puis **sa réécriture** en guide d'exécution, et le brief 10 écrit (`design/DS-EXTENSION-BRIEF-10.md`) | Session, Antoine | **Fait le 2026-10-04** ([#333](https://github.com/ScratchMe/tourdegrowth/pull/333)) |
 | A23.b | **Le modèle pur** (`mkt-model.ts`, ses tests) | Session | **Livré le 2026-10-04** ([#329](https://github.com/ScratchMe/tourdegrowth/pull/329)) |
 | A23.c | **Le code** : les quinze unités ci-dessus, une PR chacune, le type fermé | Orchestrateur et sous-agents (prompt H) | MKT-B livrée le 2026-10-04 ; le reste après A22.c, MKT-7a dès MKT-R. ~32,5 jours-agent |
-| A23.d | **Le bon à tirer** de la copie neuve, en « produits » et en « services » | Agent des bons à tirer, puis Antoine | Après MKT-10 |
+| A23.d | **Le bon à tirer** de la copie neuve, en « produits » et en « services », avec ce que les relectures d'A23 ont gardé pour lui (`docs/engine/a23d-a-regarder.md`) | Agent des bons à tirer, puis Antoine | Après MKT-10 |
 | A23.e | **L'ouverture** (`ENGINE_TYPES=consumer-app,marketplace`) puis la re-synchro avec Claude Design (`/design-sync`), qui emporte les composants neufs ; dans le même geste, avancer `CONTENT_UPDATED_AT["/aarrr-funnel-template"]` (`src/content/updated-at.ts`), que rien d'A23 ne bouge tant que le type est fermé (relevé par la relecture de MKT-3, comme pour A22.e). **Probablement avec celle du moteur** (C104, à confirmer par Antoine quand A23 approchera : l'ouverture du moteur attendrait alors tout A23) | Antoine (D2, prompt B) | Après A23.d |
 
 ### A24 — Les trois derniers niveaux du jeu (ouvert le 2026-10-04)

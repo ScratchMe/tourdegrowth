@@ -1,14 +1,29 @@
 import { describe, expect, it } from "vitest";
-import { METRIC_SHAPES, SLG_CANDIDATE_IDS, SLG_METRIC_SHAPES, CANDIDATE_IDS, LINK_METRIC_SHAPES } from "../catalog-shape";
+import {
+  METRIC_SHAPES,
+  MKT_DEMAND_CANDIDATE_IDS,
+  MKT_DEMAND_LEVER_IDS,
+  MKT_METRIC_SHAPES,
+  MKT_SUPPLY_CANDIDATE_IDS,
+  MKT_SUPPLY_LEVER_IDS,
+  SLG_CANDIDATE_IDS,
+  SLG_METRIC_SHAPES,
+  CANDIDATE_IDS,
+  LINK_METRIC_SHAPES,
+} from "../catalog-shape";
 import type { MetricShape } from "../catalog-shape";
-import { diagnose } from "../diagnose";
+import { deriveEngine } from "../derive";
+import { diagnose, diagnoseSide } from "../diagnose";
+import { mktUnitEconomics } from "../mkt-economics";
+import { buildMktFunnel } from "../mkt-funnel";
+import { buildMktScenario, mktTotal } from "../mkt-scenario";
 import { buildPeloton } from "../peloton";
 import { buildRelays } from "../relays";
 import { buildScenario } from "../scenario";
-import type { EngineState, MetricEntry, MetricId } from "../types";
+import type { EngineState, LeverId, MetricEntry, MetricId, MotionDerived } from "../types";
 import { slgUnitEconomics, unitEconomics } from "../unit-economics";
-import { exampleState, hybridState } from "./fixtures";
-import { CTX_FR } from "./props";
+import { consumerState, exampleState, hybridState, marketplaceState } from "./fixtures";
+import { CTX_FR, FR } from "./props";
 
 // Engine spec §18.5 and §18.10.1 « indépendance des motions » (A7.3.c S1):
 // no module reads a number of the other motion — only `total.ts` adds, and
@@ -134,5 +149,116 @@ describe("the two motions never read each other", () => {
       if (diagnose(s, CTX_FR).named.length > 0) named++;
     }
     expect(named).toBeGreaterThan(100);
+  });
+});
+
+// --- A marketplace (§22.11.1, A23 MKT-4). Its numbers are read by no other type, and its two sides never read each other:
+// only the total adds (D2). Four hundred random states each (fixed seeds): a derivation of a whole marketplace costs ten times a diagnosis, and a test that nears the default 5 s timeout fails on a loaded machine.
+//
+// Non-vacuity, measured on 2026-10-25: see the entry of A23 MKT-4 in `JOURNAL.md`.
+
+const MKT_SELL = MKT_METRIC_SHAPES.filter((s) => s.side === "sell");
+const MKT_BUY = MKT_METRIC_SHAPES.filter((s) => s.side !== "sell");
+const MKT_SELL_COUNTS = ["mktSellerCohortSignups", "mktSellerMrrEnd"];
+const MKT_BUY_COUNTS = ["mktCohortSignups", "mktOrders", "mktGmv", "mktNetRevenue"];
+const levers = (ids: readonly LeverId[], rnd: () => number): Partial<Record<LeverId, number>> =>
+  Object.fromEntries(ids.filter(() => rnd() < 0.5).map((id) => [id, Math.floor(rnd() * 100)]));
+
+describe("a marketplace and the other types never read each other", () => {
+  const mktOf = (state: EngineState) => deriveEngine(state, CTX_FR, null, [], FR.strings.units);
+
+  it("a SaaS, a hybrid and an app don't move: four hundred random marketplace numbers, kept in their file, leave their diagnoses, economics and scenario as they were", () => {
+    const rnd = seeded(20261025);
+    // Non-vacuity of the draw itself: read as a marketplace's, the random numbers name a stage on one side or the other.
+    const asMarketplace = marketplaceState().setup;
+    let live = 0;
+    for (let i = 0; i < 400; i++) {
+      const base = i % 3 === 0 ? consumerState() : i % 3 === 1 ? hybridState() : exampleState();
+      const s = randomise(base, MKT_METRIC_SHAPES, [...MKT_DEMAND_CANDIDATE_IDS, ...MKT_SUPPLY_CANDIDATE_IDS], rnd);
+      const alone = without(s, ["mkt."], [...MKT_BUY_COUNTS, ...MKT_SELL_COUNTS]);
+      expect(diagnose(s, CTX_FR)).toEqual(diagnose(alone, CTX_FR));
+      expect(buildPeloton(s, CTX_FR)).toEqual(buildPeloton(alone, CTX_FR));
+      expect(unitEconomics(s, CTX_FR)).toEqual(unitEconomics(alone, CTX_FR));
+      expect(buildScenario(s, {}, CTX_FR)).toEqual(buildScenario(alone, {}, CTX_FR));
+      if (s.setup.motions.slg) {
+        expect(diagnose(s, CTX_FR, "slg")).toEqual(diagnose(alone, CTX_FR, "slg"));
+        expect(buildRelays(s, CTX_FR)).toEqual(buildRelays(alone, CTX_FR));
+      }
+      // Everything the board and the deck are made of: the whole derivation, but for nothing of a marketplace's.
+      expect(mktOf(s)).toEqual(mktOf(alone));
+      const read = { ...s, setup: asMarketplace };
+      if (diagnoseSide(read, CTX_FR, "demand").named.length + diagnoseSide(read, CTX_FR, "supply").named.length > 0) live++;
+    }
+    expect(live).toBeGreaterThan(100);
+  });
+
+  it("a marketplace doesn't move: four hundred random SaaS numbers, kept in its file, leave its motion, its checks and its findings as they were", () => {
+    const rnd = seeded(20261026);
+    const mktParts = (state: EngineState) => {
+      const derived = mktOf(state);
+      return {
+        motion: derived.motions.find((m): m is Extract<MotionDerived, { motion: "mkt" }> => m.motion === "mkt"),
+        sanity: derived.sanity.filter((c) => c.motion === "mkt"),
+        findings: derived.findings.filter((f) => f.motion === "mkt"),
+        total: derived.total,
+      };
+    };
+    // Non-vacuity of the draw itself: read as a hybrid's, the random numbers name a stage in one motion or the other.
+    const asHybrid = hybridState().setup;
+    let live = 0;
+    for (let i = 0; i < 400; i++) {
+      const s = randomise(marketplaceState(), [...METRIC_SHAPES, ...SLG_METRIC_SHAPES, ...LINK_METRIC_SHAPES], [...CANDIDATE_IDS, ...SLG_CANDIDATE_IDS], rnd);
+      const alone = without(s, [...PLG_PREFIXES, ...SLG_PREFIXES], [...PLG_COUNTS, ...SLG_COUNTS]);
+      expect(mktParts(s)).toEqual(mktParts(alone));
+      const read = { ...s, setup: asHybrid };
+      if (diagnose(read, CTX_FR).named.length + diagnose(read, CTX_FR, "slg").named.length > 0) live++;
+    }
+    expect(live).toBeGreaterThan(100);
+  });
+});
+
+describe("a marketplace's two sides never read each other", () => {
+  it("the demand doesn't move: four hundred random supply states leave its diagnosis, funnel, economics and scenario as they were — only the total moves", () => {
+    const rnd = seeded(20261027);
+    // Non-vacuity of the draw itself: the supply it randomises names a stage often, and moves the total.
+    let live = 0;
+    let totalMoved = 0;
+    for (let i = 0; i < 400; i++) {
+      const s = randomise(marketplaceState(), MKT_SELL, MKT_SUPPLY_CANDIDATE_IDS, rnd);
+      const alone = without(s, ["mkt.sell."], MKT_SELL_COUNTS);
+      // The other side's what-ifs are in the same file, and ignored: a side's scenario is built on its own levers.
+      const targets = { ...levers(MKT_DEMAND_LEVER_IDS, rnd), ...levers(MKT_SUPPLY_LEVER_IDS, rnd) };
+      const own = Object.fromEntries(Object.entries(targets).filter(([id]) => (MKT_DEMAND_LEVER_IDS as readonly string[]).includes(id)));
+      expect(diagnoseSide(s, CTX_FR, "demand")).toEqual(diagnoseSide(alone, CTX_FR, "demand"));
+      expect(buildMktFunnel(s, CTX_FR).demand).toEqual(buildMktFunnel(alone, CTX_FR).demand);
+      expect(mktUnitEconomics(s, CTX_FR, "demand")).toEqual(mktUnitEconomics(alone, CTX_FR, "demand"));
+      expect(buildMktScenario(s, targets, CTX_FR, "demand")).toEqual(buildMktScenario(alone, own, CTX_FR, "demand"));
+      expect(mktTotal(s, CTX_FR).now.demand).toEqual(mktTotal(alone, CTX_FR).now.demand);
+      if (diagnoseSide(s, CTX_FR, "supply").named.length > 0) live++;
+      if (JSON.stringify(mktTotal(s, CTX_FR).now.total) !== JSON.stringify(mktTotal(alone, CTX_FR).now.total)) totalMoved++;
+    }
+    expect(live).toBeGreaterThan(100);
+    expect(totalMoved).toBeGreaterThan(100);
+  });
+
+  it("the supply doesn't move: four hundred random demand states leave its diagnosis, funnel, economics and scenario as they were — only the total moves", () => {
+    const rnd = seeded(20261028);
+    let live = 0;
+    let totalMoved = 0;
+    for (let i = 0; i < 400; i++) {
+      const s = randomise(marketplaceState(), MKT_BUY, MKT_DEMAND_CANDIDATE_IDS, rnd);
+      const alone = without(s, ["mkt.buy.", "mkt.liq.", "mkt.rev."], MKT_BUY_COUNTS);
+      const targets = { ...levers(MKT_DEMAND_LEVER_IDS, rnd), ...levers(MKT_SUPPLY_LEVER_IDS, rnd) };
+      const own = Object.fromEntries(Object.entries(targets).filter(([id]) => (MKT_SUPPLY_LEVER_IDS as readonly string[]).includes(id)));
+      expect(diagnoseSide(s, CTX_FR, "supply")).toEqual(diagnoseSide(alone, CTX_FR, "supply"));
+      expect(buildMktFunnel(s, CTX_FR).supply).toEqual(buildMktFunnel(alone, CTX_FR).supply);
+      expect(mktUnitEconomics(s, CTX_FR, "supply")).toEqual(mktUnitEconomics(alone, CTX_FR, "supply"));
+      expect(buildMktScenario(s, targets, CTX_FR, "supply")).toEqual(buildMktScenario(alone, own, CTX_FR, "supply"));
+      expect(mktTotal(s, CTX_FR).now.supply).toEqual(mktTotal(alone, CTX_FR).now.supply);
+      if (diagnoseSide(s, CTX_FR, "demand").named.length > 0) live++;
+      if (JSON.stringify(mktTotal(s, CTX_FR).now.total) !== JSON.stringify(mktTotal(alone, CTX_FR).now.total)) totalMoved++;
+    }
+    expect(live).toBeGreaterThan(100);
+    expect(totalMoved).toBeGreaterThan(100);
   });
 });

@@ -1,8 +1,19 @@
 import { describe, expect, it } from "vitest";
 import { ENGINE_COPY } from "../engine-copy";
 import { ENGINE_COPY_CONSUMER } from "../engine-copy-consumer";
-import { ALL_LEVER_IDS, ALL_METRIC_SHAPES, CANDIDATE_IDS, MKT_DEMAND_LEVER_IDS, MKT_SUPPLY_LEVER_IDS, SLG_CANDIDATE_IDS, UNIT_INPUT_IDS } from "@/lib/engine/catalog-shape";
+import {
+  ALL_LEVER_IDS,
+  ALL_METRIC_SHAPES,
+  CANDIDATE_IDS,
+  MKT_DEMAND_CANDIDATE_IDS,
+  MKT_DEMAND_LEVER_IDS,
+  MKT_SUPPLY_CANDIDATE_IDS,
+  MKT_SUPPLY_LEVER_IDS,
+  SLG_CANDIDATE_IDS,
+  UNIT_INPUT_IDS,
+} from "@/lib/engine/catalog-shape";
 import { EXAMPLE_MKT_WHATIF } from "@/lib/engine/example";
+import { MKT_CHAIN_VERB } from "@/lib/engine/findings";
 import { buildMktScenario } from "@/lib/engine/mkt-scenario";
 import { marketplaceNoSubscriptionsState, marketplaceState } from "@/lib/engine/__tests__/fixtures";
 import { CTX_FR } from "@/lib/engine/__tests__/props";
@@ -66,8 +77,11 @@ describe("keys the code reads by id", () => {
   });
 
   it("gives every candidate a subject phrase, lower-case, since no template starts a sentence with it", () => {
-    // The SaaS's six, the five sales-assisted, and the app's own (the actives' retention, A22 APP-5).
-    expect(Object.keys(ENGINE_COPY.subject).sort()).toEqual([...CANDIDATE_IDS, ...SLG_CANDIDATE_IDS, "app.ret.active-retention"].sort());
+    // The SaaS's six, the five sales-assisted, the app's own (the actives' retention, A22 APP-5), and the marketplace's
+    // eleven: the six of the demand and the five of the supply (A23 MKT-4, §22.8.5 f).
+    expect(Object.keys(ENGINE_COPY.subject).sort()).toEqual(
+      [...CANDIDATE_IDS, ...SLG_CANDIDATE_IDS, "app.ret.active-retention", ...MKT_DEMAND_CANDIDATE_IDS, ...MKT_SUPPLY_CANDIDATE_IDS].sort(),
+    );
     for (const phrase of Object.values(ENGINE_COPY.subject))
       for (const l of LOCALES) expect(phrase[l], phrase[l]).toMatch(/^[a-zà-ÿ]/);
   });
@@ -133,6 +147,22 @@ describe("keys the code reads by id", () => {
     expect(printed.size).toBe(10);
     const known = new Set([...Object.keys(ENGINE_COPY.mkt.assumption), ...Object.keys(ENGINE_COPY.scenario.assumption)]);
     for (const rule of printed) expect(known.has(rule), rule).toBe(true);
+  });
+
+  it("gives each funnel column a marketplace can break on a verb that finishes « on ne sait pas dire combien … » (A23 MKT-4, §22.8.5 j)", () => {
+    // `MKT_CHAIN_VERB` picks the key by column id; a column with no verb would print `undefined` in the chain-break finding.
+    expect(Object.keys(ENGINE_COPY.findings.verbMkt).sort()).toEqual(Object.values(MKT_CHAIN_VERB).sort());
+    for (const [key, verb] of Object.entries(ENGINE_COPY.findings.verbMkt)) for (const l of LOCALES) expect(verb[l], `${key}.${l}`).toMatch(/^[a-zà-ÿ]/);
+    expect(Object.keys(MKT_CHAIN_VERB)).toEqual(["mkt.buy.first-order", "mkt.buy.repeat", "mkt.sell.first-sale", "mkt.sell.paid-conversion"]);
+  });
+
+  it("words the marketplace's two own checks as questions, with no placeholder to fill (A23 MKT-4, §22.8.5 f)", () => {
+    for (const key of ["mktRepeatGtFirst", "mktTakeHigh"] as const)
+      for (const l of LOCALES) {
+        const text = ENGINE_COPY.sanity[key][l];
+        expect(placeholdersOf(text), `${key}.${l}`).toEqual([]);
+        expect(text.endsWith("?"), `${key}.${l}`).toBe(true);
+      }
   });
 
   it("asks six FAQ questions, each answered in both languages — the sixth for a sales team (§18.7 E0)", () => {

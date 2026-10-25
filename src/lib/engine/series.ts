@@ -1,7 +1,17 @@
-import { CANDIDATE_IDS, METRIC_SHAPES, SLG_CANDIDATE_IDS, SLG_METRIC_SHAPES, shapeOf, shapesOf, type MetricShape } from "./catalog-shape";
+import {
+  CANDIDATE_IDS,
+  METRIC_SHAPES,
+  MKT_DEMAND_CANDIDATE_IDS,
+  MKT_SUPPLY_CANDIDATE_IDS,
+  SLG_CANDIDATE_IDS,
+  SLG_METRIC_SHAPES,
+  shapeOf,
+  shapesOf,
+  type MetricShape,
+} from "./catalog-shape";
 import { defaultReferenceMonth, nextMonth, windowDaysOf } from "./cohort";
-import { comparatorOf, diagnose } from "./diagnose";
-import { isApp, isMarketplace, mktSetup } from "./setup-type";
+import { comparatorOf, diagnose, diagnoseSide } from "./diagnose";
+import { activeMotions, isApp, isMarketplace, mktSetup } from "./setup-type";
 import { MAX_MONTHS, SNAPSHOT_WINDOW_KEYS } from "./types";
 import type {
   CandidateId,
@@ -13,6 +23,7 @@ import type {
   EngineState,
   MetricEntry,
   MetricId,
+  MktSide,
   Motion,
   MotionSeries,
   Series,
@@ -226,7 +237,13 @@ export function towardTarget(before: number, now: number, comparator: Comparator
 // --- The series of an engine --------------------------------------------------------
 
 const SHAPES: Record<Motion, readonly MetricShape[]> = { plg: METRIC_SHAPES, slg: SLG_METRIC_SHAPES };
-const CANDIDATES: ReadonlySet<string> = new Set<string>([...CANDIDATE_IDS, ...SLG_CANDIDATE_IDS, "app.ret.active-retention"]);
+const CANDIDATES: ReadonlySet<string> = new Set<string>([
+  ...CANDIDATE_IDS,
+  ...SLG_CANDIDATE_IDS,
+  "app.ret.active-retention",
+  ...MKT_DEMAND_CANDIDATE_IDS,
+  ...MKT_SUPPLY_CANDIDATE_IDS,
+]);
 const isCandidate = (id: MetricId): id is CandidateId => CANDIDATES.has(id);
 
 /** The stage(s) a diagnosis names, when it names one. */
@@ -235,12 +252,20 @@ function namedLeak(state: EngineState, ctx: EngineCalcContext, motion: Motion): 
   return d.state === "clear" || d.state === "shared" ? [...d.named] : [];
 }
 
+/** The stage(s) one side of a marketplace names, when it names one: each side on its own diagnosis, never both in one call (C70, D2). */
+function namedLeakOfSide(state: EngineState, ctx: EngineCalcContext, side: MktSide): CandidateId[] {
+  const d = diagnoseSide(state, ctx, side);
+  return d.state === "clear" || d.state === "shared" ? [...d.named] : [];
+}
+
 const sameSet = (a: readonly string[], b: readonly string[]): boolean => a.length === b.length && a.every((x) => b.includes(x));
 
 /**
  * The last two months side by side (§19.2.5), or `null` with one month. Each
- * ticked motion compares its own numbers; the previous month is read as it
- * was seen (`monthView`), so its leak is the one the team was shown then.
+ * ticked motion compares its own numbers, and a marketplace's own motion (derived
+ * from its type, §22.5.9) its nineteen or fourteen with one leak per side; the
+ * previous month is read as it was seen (`monthView`), so its leak is the one the
+ * team was shown then.
  */
 export function deriveSeries(state: EngineState, ctx: EngineCalcContext): Series | null {
   const n = state.snapshots.length;
@@ -251,11 +276,12 @@ export function deriveSeries(state: EngineState, ctx: EngineCalcContext): Series
   const beforeCtx: EngineCalcContext = { ...ctx, today: view.today };
 
   const motions: MotionSeries[] = [];
-  for (const motion of ["plg", "slg"] as const) {
-    if (!state.setup.motions[motion]) continue;
+  // The motions the setup derives: the ticked ones, or a marketplace's own (`activeMotions`, never the two boxes: a marketplace ticks none).
+  for (const motion of activeMotions(state.setup)) {
     const rows: SeriesRow[] = [];
     // An app compares the numbers it shows (D1: its only motion is "plg"): the CAC and the margin are not among them.
-    for (const shape of isApp(state.setup) ? shapesOf(state.setup) : SHAPES[motion]) {
+    // A marketplace compares the nineteen (or fourteen) it shows, both sides together in the catalogue's order.
+    for (const shape of motion === "mkt" || isApp(state.setup) ? shapesOf(state.setup) : SHAPES[motion]) {
       const comparison = comparable({ entry: before.metrics[shape.id], setup: view.state.setup }, { entry: now.metrics[shape.id], setup: state.setup }, shape);
       if (!comparison) continue;
       if (!comparison.comparable) {
@@ -270,6 +296,15 @@ export function deriveSeries(state: EngineState, ctx: EngineCalcContext): Series
         delta: delta(comparison.before, comparison.now, shapeOf(shape.id)),
         towardTarget: towardTarget(comparison.before, comparison.now, comparator),
       });
+    }
+    if (motion === "mkt") {
+      // One leak per side (C70): `previousLeak` and `leakChanged` of the motion itself say nothing, the screens read `sides`.
+      const side = (s: MktSide) => {
+        const previousLeak = namedLeakOfSide(view.state, beforeCtx, s);
+        return { previousLeak, leakChanged: previousLeak.length > 0 && !sameSet(previousLeak, namedLeakOfSide(state, ctx, s)) };
+      };
+      motions.push({ motion, rows, previousLeak: [], leakChanged: false, sides: { demand: side("demand"), supply: side("supply") } });
+      continue;
     }
     const previousLeak = namedLeak(view.state, beforeCtx, motion);
     const leak = namedLeak(state, ctx, motion);

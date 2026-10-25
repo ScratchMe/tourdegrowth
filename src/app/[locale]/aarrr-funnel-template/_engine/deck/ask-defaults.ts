@@ -1,5 +1,6 @@
 import { motionShapes, TEXT_LIMITS } from "@/lib/engine/catalog-shape";
 import { impactTarget } from "@/lib/engine/diagnose";
+import { diagnosesOf } from "@/lib/engine/phrases";
 import { candidatesFor } from "@/lib/engine/scenario-of";
 import type { CandidateId, EngineAsk, EngineDerived, EngineSetup, EngineState, MetricId, RepairScale, YearMonth } from "@/lib/engine/types";
 import { currentSnapshot } from "@/lib/engine/values";
@@ -41,9 +42,9 @@ export function missingByRepairCost(state: EngineState): MetricId[] {
  * deciding for the user.
  */
 export function suggestedSuccess(derived: EngineDerived): Pick<EngineAsk, "successMetric" | "successTarget"> {
-  // Each ticked motion's own diagnosis. When BOTH name a stage, nothing is proposed: picking one would be the
-  // tool choosing between the two motions for the team, and the form offers both without ranking them (Q13).
-  const naming = derived.motions.map((m) => m.diagnosis).filter((d) => (d.state === "clear" || d.state === "shared") && d.named.length > 0);
+  // Each ticked motion's own diagnosis (a marketplace's two sides count as two). When BOTH name a stage, nothing is proposed:
+  // picking one would be the tool choosing between the two motions for the team, and the form offers both without ranking them (Q13).
+  const naming = derived.motions.flatMap(diagnosesOf).filter((d) => (d.state === "clear" || d.state === "shared") && d.named.length > 0);
   if (naming.length !== 1) return {};
   const { named, positions } = naming[0]!;
   const metric = named[0] as CandidateId;

@@ -13,9 +13,13 @@ import { rowDelta } from "./series-view";
 import { domId, fill, joinList, metricById, stageName } from "./text";
 import type { EngineView } from "./view";
 
-/** A motion's diagnosis — the one its list marks and its rows word. Self-serve's is the v1 field. */
+/**
+ * A motion's diagnosis — the one its list marks and its rows word. Self-serve's is the v1 field. A marketplace's motion
+ * holds two (one per side) and no `diagnosis`: it falls to the v1 field here until the board reads it side by side (MKT-7b).
+ */
 export function diagnosisOf(view: EngineView, motion: Motion): AnyDiagnosis {
-  return view.derived.motions.find((m) => m.motion === motion)?.diagnosis ?? view.derived.diagnosis;
+  const own = view.derived.motions.find((m) => m.motion === motion);
+  return (own && own.motion !== "mkt" ? own.diagnosis : undefined) ?? view.derived.diagnosis;
 }
 
 /**
