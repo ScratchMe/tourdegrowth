@@ -538,7 +538,7 @@ remplacer par `activeMotions` là où elle doit.
 | `catalog-shape.ts:865` (le `throw`), `:995`, `:1094`, `:1183` | toute place de marché lève ; « mkt » tombe en `slg` | les branches de tête de §22.2.3 | MKT-1 |
 | `phrases.ts:78` `retentionOf` (`motion === "plg" ? … : "slg.ret.renewal"`) | une place de marché lue comme l'assisté | par côté : `diagnosis.side === "demand"` → `mkt.buy.churn`, `"supply"` → `mkt.sell.paid-churn` | MKT-4 |
 | `phrases.ts:277-283` `notEnoughBelowValues` | aucune valeur pour l'offre `not-enough` | `:280` lit déjà `Object.keys(diagnosis.positions)` : **APP-5 l'a fait** (§21.5.4) ; MKT-4 vérifie seulement que l'offre `not-enough` reçoit sa phrase | MKT-4 |
-| `phrases.ts:341` `worthOf`, `:359` `chainTemplate`, `impact.ts:291` `impactHeadline` (`impact.metric === "ret.logo-churn"`) | la chaîne du churn d'un côté dite avec les gabarits d'un flux (« Aujourd'hui · … nouveaux acheteurs »), son titre « ajouterait n nouveaux acheteurs », et `n` absent quand le revenu net manque | `phrases.ts` exporte `isRetentionMetric(id)` (`ret.logo-churn`, `mkt.buy.churn`, `mkt.sell.paid-churn`), que les trois lisent (§22.5.5) | MKT-4 |
+| `phrases.ts:341` `worthOf`, `:359` `chainTemplate`, `impact.ts:291` `impactHeadline` (`impact.metric === "ret.logo-churn"`) | la chaîne du churn d'un côté dite avec les gabarits d'un flux (« Aujourd'hui · … nouveaux acheteurs »), son titre « ajouterait n nouveaux acheteurs », et `n` absent quand le revenu net manque | `catalog-shape.ts` définit `isRetentionMetric(id)`, que `phrases.ts` réexporte (`ret.logo-churn`, `mkt.buy.churn`, `mkt.sell.paid-churn`), que les trois lisent (§22.5.5) | MKT-4 |
 | `series.ts:246` (la boucle sur les deux cases, `:247`) ; `CANDIDATES` `:221` | la série d'une place de marché vide | `activeMotions(setup)` ; `CANDIDATES` gagne les candidats `mkt.*` ; la branche `mkt` porte `sides` (§22.5.9) | MKT-4 |
 | `coverage.ts:57-58` `motionCoverage` (`motion === "plg" ? METRIC_SHAPES : SLG_METRIC_SHAPES`) | une place de marché compterait les 15 chiffres de l'assisté | `motion: EngineMotion` ; `"mkt"` → `coverage(snapshot, shapesOf(setup))`, `setup` obligatoire pour lui | MKT-4 |
 | `findings.ts:101-103` (`m.motion === "plg"` sinon les constats de l'assisté) | un côté lu par les constats de l'assisté | `if (m.motion === "mkt") marketplaceFindings(…)` en tête (§22.5.8) | MKT-4 |
@@ -569,7 +569,7 @@ la place de marché, dans cet ordre) :
 | `deck/ask-defaults.ts:46` (`derived.motions.map((m) => m.diagnosis)`) | `derived.motions.flatMap(diagnosesOf)` (deux côtés qui nomment chacun une étape : rien n'est proposé, la règle d'aujourd'hui pour l'hybride) |
 | `deck.ts:761` (`d.diagnosis.blind`) | `derived.motions.flatMap(diagnosesOf).some((d) => d.blind.includes(…))` |
 | `findings.ts:127` (le type du paramètre de `namedFindings`) | `AnyDiagnosis` |
-| `BoardNumbers.tsx:17` `diagnosisOf`, `MetricSheet.tsx:236` | 1 : la garde de type `m.motion !== "mkt"` dans le `find` ; MKT-7b leur donne la lecture par côté |
+| `BoardNumbers.tsx:17` `diagnosisOf`, `MetricSheet.tsx:236` | 1 : la garde de type `own && own.motion !== "mkt" ? own.diagnosis : undefined` après le `find` (un `find` à rappel booléen ne rétrécit pas le type) ; MKT-7b leur donne la lecture par côté |
 | `golden-v2.test.ts:93` (deux erreurs : `.diagnosis`, et `m.motion` passé à `listStages(…, motion?: Motion)`) | la même garde dans l'appel, qui couvre les deux arguments (une retouche d'appel, §21.10.1) |
 | `app.test.ts:1170-1171` (`.diagnosis`, `.unit`) | une garde `m.motion === "plg"` dans le `find` (une retouche d'appel) |
 
@@ -1366,7 +1366,16 @@ abonnés)` pour l'offre (`twelveMonthFactor` est déjà exportée d'`impact.ts`,
 `:125`, depuis APP-9). Sa règle « sans décimale » (une
 petite cohorte) lit la petite cohorte du côté (§22.5.2). Mêmes clés de lignes (`today`, `if`, `then`, `times`,
 `annual`, `less-than-one`) ; les gabarits sont ceux de `whatIf.*`, que le
-calque de chaque côté réécrit (§22.8.5 c). Pour les deux churns
+calque de chaque côté réécrit (§22.8.5 c). La règle « sans décimale » ne
+touche que les taux de cohorte (première commande, deuxième commande, première
+vente, conversion en abonné) : le taux de service, l'inscription, la part
+recommandée et les churns sont des flux du mois, comme l'exclusion
+« inscription, churn, part recommandée » de `whatIf`. Quand N (ou NS) est
+inconnu, `mktWhatIf` rend `null` : la place de marché n'a pas la chaîne
+« pour 100 inscrits » du libre-service (`per-hundred`, aucun mot n'est écrit
+pour elle), et le classement retombe sur l'écart relatif. `SUPPLY_PRICED`
+donne aussi le `isFlow` de l'offre (moins le churn des abonnés, une base).
+Pour les deux churns
 (`mkt.buy.churn`, `mkt.sell.paid-churn`), `mktWhatIf` rend les mêmes lignes
 que `whatIf` pour le churn du libre-service (`today` `{ churn, base }`, `if`,
 `then` `{ base, churn, target, n }` avec `count`, `times`, `annual`).
@@ -1381,18 +1390,24 @@ d'un flux), `phrases.ts:341` `worthOf` (`"kept"` au lieu de `"customers"`),
 changement, la chaîne du churn d'un côté s'imprimerait avec les gabarits d'un
 flux, son titre dirait « ajouterait n nouveaux acheteurs » au lieu de
 « garderait n acheteurs actifs », et `n` vaudrait `undefined`. MKT-4 :
-`phrases.ts` exporte `isRetentionMetric(id: MetricId): boolean`
-(`ret.logo-churn`, `mkt.buy.churn`, `mkt.sell.paid-churn`), que ces trois
-lignes lisent ; un test par côté rend `chainTemplate` pour chaque ligne de la
+`catalog-shape.ts` définit `isRetentionMetric(id: MetricId): boolean`
+(`ret.logo-churn`, `mkt.buy.churn`, `mkt.sell.paid-churn`), à côté de
+`LOWER_IS_BETTER_CANDIDATES`, et `phrases.ts` le réexporte (`phrases.ts`
+importe déjà `impact.ts`, qui le lit : le définir dans `phrases.ts` ferait un
+cycle) ; ces trois lignes le lisent. **Une quatrième lecture littérale** :
+`chainTemplate` teste `impact.metric === "ref.referred-share"` pour
+l'arithmétique « n × (100 − r)/(100 − t) » ; elle lit aussi
+`mkt.buy.referred-share` (sans quoi la part recommandée des acheteurs
+s'imprimerait « 600 × 12/8 = 900 ») ; un test par côté rend `chainTemplate` pour chaque ligne de la
 chaîne (les chaînes de `mkt-impact.test.ts` sont des valeurs, pas du texte).
 
 #### 22.5.6 Les deux diagnostics (`diagnose.ts`, MKT-4)
 
 ```ts
 /** The candidates one side positions: its own, the supply's subscription ones only when sellers pay one. */
-export function mktCandidates(side: MktSide, setup: EngineSetup): MktCandidateId[];
+export function mktCandidates(side: MktSide, setup: SetupShapes): MktCandidateId[]; // an EngineSetup passes, as for shapesOf
 /** One side's rules, built per setup like the app's (§21.5.4): its candidates and blindWatch depend on the subscriptions box. */
-export function mktRules(side: MktSide, setup: EngineSetup): MotionRules<MktCandidateId>;
+export function mktRules(side: MktSide, setup: SetupShapes): MotionRules<MktCandidateId>;
 export function diagnoseSide(state: EngineState, ctx: EngineCalcContext, side: MktSide): Diagnosis<MktCandidateId>;
 ```
 
@@ -1454,14 +1469,17 @@ le `side` de sa forme : `shape.side === "sell" ? "supply" : "demand"` (le côté
 #### 22.5.8 Les constats (`findings.ts`, `marketplaceFindings`, MKT-4)
 
 La copie de `selfServeFindings`, sur la motion `"mkt"` :
-`marketplaceFindings(state, derived, ctx, words, add)`, appelée en tête de la
+`marketplaceFindings(state, m, derived, ctx, words, addFor, missing)` (la
+motion et le prédicat `missing`, que son corps lit), appelée en tête de la
 boucle de `findings.ts:101-103` (`if (m.motion === "mkt")
 marketplaceFindings(…) else if (m.motion === "plg") … else …` : sans elle, la
 branche `else` de l'assisté recevrait `"mkt"`). Chaque constat porte son
 `side` : `marketplaceFindings` construit un `add` par côté (`const addFor =
 (side: MktSide): Add => (kind, metrics, values, count) => …push({ kind,
 metrics, values, count, motion: "mkt", side })`) et donne à chaque constat
-celui de son chiffre (le côté `match` : la demande).
+celui de son chiffre (le côté `match` : la demande ; les constats du pont du
+Tour, `blind-spot` et `hidden-knowledge`, portent aussi le côté de leur
+chiffre, la demande pour les quatre ponts acheteurs).
 - `chain-break` : une colonne d'un funnel nulle dont le chiffre est `missing` ;
   le verbe vient de `findings.verbMkt` (§22.8.5 j) ;
 - `no-definition`, `conflict` : comme partout, sur `shapesOf(setup)` ;
@@ -1473,8 +1491,9 @@ celui de son chiffre (le côté `match` : la demande).
   **le coût d'un vendeur abonné** : `findings.ts#lossFinding` gagne un dernier
   paramètre facultatif, `cacValue?: Interval`, qui remplace la lecture de
   `cacId` quand il est donné ; l'offre lui passe `mktPaidSellerCac`, 200 € dans
-  l'exemple, pas les 100 € d'un vendeur actif). Le type de `cacId` gagne
-  `"mkt.buy.cac" | "mkt.sell.cac"` ;
+  l'exemple, pas les 100 € d'un vendeur actif ; sans lui, aucune perte n'est
+  cherchée pour un vendeur abonné, et pas de repli sur le coût d'un vendeur
+  actif). Le type de `cacId` gagne `"mkt.buy.cac" | "mkt.sell.cac"` ;
 - `reconcile-gap` (depuis le contrôle, côté demande) ; `small-cohort` (la
   petite cohorte d'un côté, §22.5.2, avec ce côté).
 
@@ -1528,7 +1547,8 @@ celui de son chiffre (le côté `match` : la demande).
   inconnue, `uncomputable` avec ses manques, parmi ceux qui ne sont pas connus
   : demande `now` : `mkt.rev.frequency`, `mkt.rev.aov`, `mkt.rev.take-rate` ;
   `newPerMonth` : les mêmes, puis `mkt.buy.cac` ; `in12Months` : les mêmes,
-  puis `mkt.buy.churn` ; offre `now` : `mkt.sell.arpa` ; `newPerMonth` : puis
+  puis `mkt.buy.churn` (« les mêmes » se lit en cumul : les douze mois
+  nomment aussi `mkt.buy.cac`) ; offre `now` : `mkt.sell.arpa` ; `newPerMonth` : puis
   `mkt.sell.signup-rate`, `mkt.sell.paid-conversion` ; `in12Months` : puis
   `mkt.sell.paid-churn`. `supply` vaut `null` sans abonnements. `total` :
   connu quand la demande l'est et que l'offre l'est ou vaut `null` (la somme ;
@@ -2683,7 +2703,7 @@ rougit hors de cette liste arrête l'unité (§22.13).
 | `mkt-funnel.test.ts` | les deux funnels de §22.10.2 ; les quatre chaînes (`complete`, `gap`, `tail-break`, `empty`) de chaque côté ; le funnel de l'offre sans abonnements ; la petite cohorte (acheteurs, puis vendeurs) | MKT-2 |
 | `mkt-scenario.test.ts` | sans levier, chaque côté égal à `demandPath` / `sellerPath` d'aujourd'hui ; l'argent d'A20 de chaque côté (perte, mois après le remboursement, dépense, trésorerie, alerte) de §22.10.2 ; les courbes et les KPI des deux « Et si » de §22.10.2 ; chaque levier seul ; l'effet composé ; « dépense égale » des deux côtés ; les hypothèses imprimées selon les leviers bougés ; un levier inconnu sans curseur ; l'offre sans abonnements sans levier ; `mktTotalPaths` (aujourd'hui, avec les « Et si », sans abonnements) | MKT-3 |
 | `mkt-impact.test.ts` | les prix de classement des deux côtés ; les deux chaînes (taux de service, conversion en abonné) ligne par ligne ; le gain seul égal à la dernière ligne de la chaîne, des deux côtés ; les candidats jamais chiffrés (`{}`) ; `SUPPLY_PRICED` | MKT-4 |
-| `diagnose-mkt.test.ts` | les deux diagnostics de l'exemple ; `not-enough` de l'offre sans abonnements ; `level`, `shared` (deux flux de la demande à moins de 25 % d'écart) ; seuls des candidats non chiffrés sous leur cible → nommés, base `none` ; les trois churns « plus bas = mieux » ; **aucune fonction ne reçoit les candidats des deux côtés** (les candidats de `MKT_DEMAND_RULES` et de `MKT_SUPPLY_RULES` sont disjoints, et `diagnoseSide` n'appelle `diagnoseWith` qu'une fois) | MKT-4 |
+| `diagnose-mkt.test.ts` | les deux diagnostics de l'exemple ; `not-enough` de l'offre sans abonnements ; `level`, `shared` (deux flux de la demande à moins de 25 % d'écart) ; seuls des candidats non chiffrés sous leur cible → nommés, base `none` ; les trois churns « plus bas = mieux » ; **aucune fonction ne reçoit les candidats des deux côtés** (les candidats de `mktRules("demand", setup)` et de `mktRules("supply", setup)` sont disjoints, et `diagnoseSide` n'appelle `diagnoseWith` qu'une fois) | MKT-4 |
 | `sanity.test.ts`, `findings.test.ts` | les contrôles de §22.5.7 et les constats de §22.5.8, chacun déclenché et non déclenché, avec leur `side` | MKT-4 |
 | `series.test.ts` | deux mois d'une place de marché : les écarts, la fuite du mois d'avant de chaque côté | MKT-4 |
 | `phrases.test.ts` (ou `mkt-impact.test.ts`) | `isRetentionMetric` ; `chainTemplate` rendu, pour chaque ligne de la chaîne du churn d'un côté, avec les gabarits du churn ; `worthOf` et `impactHeadline` sur `mkt.buy.churn` et `mkt.sell.paid-churn` (§22.5.5) | MKT-4 |
@@ -2953,7 +2973,7 @@ Ton compte rendu, en français : une liste numérotée de constats, rangés par 
   Les mesures : 4, 19 puis 37 erreurs de `tsc` (3, 14 puis 19 fichiers ; les
   3 de MKT-0 comptaient un `DeckSlide.motion` élargi, MKT-0 en a mesuré 1) ;
   MKT-3 seul en a mesuré 5, dans 3 fichiers (`engine-copy.ts`, `deck.ts`,
-  `catalog-shape.test.ts`) ;
+  `catalog-shape.test.ts`), MKT-4 seul 14, dans 11 fichiers ;
   `CLAUDE.md` à 39 661 caractères pour 40 000 (339 de marge : une unité qui
   change un chiffre de référence le remplace à longueur égale), `JOURNAL.md` à
   109 138 pour 200 000.
