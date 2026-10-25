@@ -462,7 +462,7 @@ d'après A22), MKT-1, MKT-4, MKT-6, MKT-7b (le tableau), MKT-8 et MKT-10.
 | MKT-2 | les grandeurs, les deux funnels, l'économie de chaque côté | MKT-1 | ☑ 2026-10-22 ([#383](https://github.com/ScratchMe/tourdegrowth/pull/383)) |
 | MKT-3 | les deux scénarios et le total | MKT-2 | ☑ 2026-10-22 ([#384](https://github.com/ScratchMe/tourdegrowth/pull/384)) |
 | MKT-4 | les fuites, les deux diagnostics, la dérivation | MKT-3 | ☑ 2026-10-25 ([#385](https://github.com/ScratchMe/tourdegrowth/pull/385)) |
-| MKT-5 | la copie « produits » : `mkt.*`, les calques des deux côtés | MKT-1 | ☑ 2026-10-25 |
+| MKT-5 | la copie « produits » : `mkt.*`, les calques des deux côtés | MKT-1 | ☑ 2026-10-25 ([#386](https://github.com/ScratchMe/tourdegrowth/pull/386)) |
 | MKT-S | les mots « services » : trois calques et le catalogue | MKT-5 | ☐ |
 | MKT-G | trois termes de glossaire (texte écrit d'abord par l'orchestrateur, `docs/engine/glossaire-mkt.md`) | MKT-1 | ☐ |
 | MKT-6 | la carte de départ, le réglage, les cibles, les Réglages, l'analytique | MKT-4, MKT-5 | ☐ |
