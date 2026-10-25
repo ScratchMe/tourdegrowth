@@ -6,6 +6,7 @@ import {
   RECONCILE_BAND,
   SLG_ACV_ARPA_BAND,
   SLG_CYCLE_LONG_DAYS,
+  TAKE_RATE_HIGH_PERCENT,
   motionOfMetric,
   shapeOf,
   shapesOf,
@@ -14,8 +15,8 @@ import type { MetricShape } from "./catalog-shape";
 import { periodOf } from "./cohort";
 import { formatCountInterval, formatInterval, formatMonth, formatNumber, type UnitWords } from "./format";
 import { mapBounds } from "./interval";
-import { isApp } from "./setup-type";
-import type { EngineCalcContext, EngineMotion, EngineState, Interval, MetricEntry, MetricId, MetricValue, SanityCheck } from "./types";
+import { isApp, isMarketplace, mktSetup } from "./setup-type";
+import type { EngineCalcContext, EngineMotion, EngineState, Interval, MetricEntry, MetricId, MetricValue, MktSide, SanityCheck } from "./types";
 import { countsOf, currentSnapshot, entryOf, knownIn } from "./values";
 
 /**
@@ -77,6 +78,20 @@ export function reconcile(state: EngineState, ctx: EngineCalcContext): { predict
   return { predicted, billed, ratio: { lo: predicted.lo / billed, hi: predicted.hi / billed } };
 }
 
+/**
+ * The marketplace's reconcile (§22.5.7): the buyer sign-ups of the month × the first order, against the buyer CAC's own
+ * count of new buyers (its denominator). The same band as the SaaS's; returned for the finding that says the same thing.
+ */
+export function mktReconcile(state: EngineState, ctx: EngineCalcContext): { predicted: Interval; billed: number; ratio: Interval } | null {
+  const snapshot = currentSnapshot(state);
+  const signups = countsOf(entryOf(snapshot, "mkt.buy.signup-rate"))?.numerator;
+  const billed = countsOf(entryOf(snapshot, "mkt.buy.cac"))?.denominator;
+  const firstOrder = knownValue(state, "mkt.buy.first-order", ctx);
+  if (signups === undefined || !billed || !firstOrder) return null;
+  const predicted = mapBounds(firstOrder, (p) => (signups * p) / 100);
+  return { predicted, billed, ratio: { lo: predicted.lo / billed, hi: predicted.hi / billed } };
+}
+
 /** A duration whose statistic is the mean — on the value, or declared as the variant of an estimate. */
 function isMeanDuration(entry: MetricEntry | undefined): boolean {
   return entry !== undefined && (entry.variant === "mean" || readings(entry).some((v) => v.kind === "duration" && v.statistic === "mean"));
@@ -84,7 +99,8 @@ function isMeanDuration(entry: MetricEntry | undefined): boolean {
 
 /**
  * The checks of the ticked motions, each tagged with its motion — in
- * `MOTIONS` order, then the hybrid's one check across both. A motion
+ * `MOTIONS` order, then the hybrid's one check across both, then a
+ * marketplace's own (tagged with the side it reads, C70). A motion
  * unticked keeps its numbers (§18.1.2) but raises nothing: the board, the
  * deck and these checks ignore it.
  */
@@ -93,18 +109,20 @@ export function sanityChecks(state: EngineState, ctx: EngineCalcContext, words: 
   const { motions } = state.setup;
   const checks: SanityCheck[] = [];
   const addFor =
-    (motion: EngineMotion | undefined) =>
+    (motion: EngineMotion | undefined, side?: MktSide) =>
     (id: SanityCheck["id"], metrics: MetricId[], values: Record<string, string> = {}, count?: Interval) =>
-      checks.push({ id, ...(motion ? { motion } : {}), blocking: false, metrics, values, ...(count ? { count } : {}) });
+      checks.push({ id, ...(motion ? { motion } : {}), ...(side ? { side } : {}), blocking: false, metrics, values, ...(count ? { count } : {}) });
 
   for (const shape of shapesOf(state.setup)) {
     const entry = entryOf(snapshot, shape.id);
     const blocking = entry ? blockingCheck(entry, shape, ctx.locale) : null;
+    // A marketplace's number belongs to one side; the `match` ones (the fill rate, the take rate, the commissions' margin) to the demand.
+    const side = sideOfShape(shape);
     // An imported file can carry what the sheet would have refused.
-    if (blocking) checks.push({ ...blocking, motion: motionOfMetric(shape.id) });
+    if (blocking) checks.push({ ...blocking, motion: motionOfMetric(shape.id), ...(side ? { side } : {}) });
     // The numerator from one tool, the denominator from another (§19.5.3): they may not count the same thing.
     const two = entry ? twoToolsOf(entry) : null;
-    if (two) addFor(motionOfMetric(shape.id))("two-tools", [shape.id], two);
+    if (two) addFor(motionOfMetric(shape.id), side)("two-tools", [shape.id], two);
   }
 
   if (motions.plg) selfServeChecks(state, ctx, words, addFor("plg"));
@@ -118,7 +136,14 @@ export function sanityChecks(state: EngineState, ctx: EngineCalcContext, words: 
       addFor(undefined)("cac-variants-differ", ["acq.cac", "slg.acq.cac"], { plg: plg.variant, slg: slg.variant });
     }
   }
+  if (isMarketplace(state.setup)) marketplaceChecks(state, ctx, words, (side) => addFor("mkt", side));
   return checks;
+}
+
+/** The side a marketplace's number is read on (C70): the sellers' are the supply, the buyers' and the `match` ones the demand. `undefined` for any other number. */
+function sideOfShape(shape: MetricShape): MktSide | undefined {
+  if (shape.scope !== "mkt") return undefined;
+  return shape.side === "sell" ? "supply" : "demand";
 }
 
 type Add = (id: SanityCheck["id"], metrics: MetricId[], values?: Record<string, string>, count?: Interval) => void;
@@ -209,5 +234,71 @@ function salesAssistedChecks(state: EngineState, ctx: EngineCalcContext, words: 
     if (ratio.hi < SLG_ACV_ARPA_BAND.lo || ratio.lo > SLG_ACV_ARPA_BAND.hi) {
       add("slg-acv-vs-arpa", ["slg.rev.acv", "slg.rev.arpa"], { x: formatInterval(ratio, "ratio", ctx, words) });
     }
+  }
+}
+
+/**
+ * §22.5.7. A marketplace's checks, each tagged with the side whose number it reads (C70): "to check", never blocking,
+ * and never comparing the two sides. A number the setup hides — the sellers' subscription ones, without the box — stays
+ * stored and is never read, like an app's hidden ones.
+ */
+function marketplaceChecks(state: EngineState, ctx: EngineCalcContext, words: UnitWords, addFor: (side: MktSide) => Add): void {
+  const snapshot = currentSnapshot(state);
+  const demand = addFor("demand");
+  const supply = addFor("supply");
+  const shown = new Set<MetricId>(shapesOf(state.setup).map((s) => s.id));
+  const read = (id: MetricId): Interval | null => (shown.has(id) ? knownValue(state, id, ctx) : null);
+
+  // The second order is a subset of the first one's cohort: more of them than first orders means two cohorts or two windows.
+  const firstOrder = read("mkt.buy.first-order");
+  const repeat = read("mkt.buy.repeat");
+  if (firstOrder && repeat && repeat.lo > firstOrder.hi) demand("mkt-repeat-gt-first", ["mkt.buy.repeat", "mkt.buy.first-order"]);
+
+  // One check per churn, on its own side: a monthly churn above CHURN_HIGH_PERCENT is probably an annual figure.
+  for (const [id, add] of [
+    ["mkt.buy.churn", demand],
+    ["mkt.sell.churn", supply],
+    ["mkt.sell.paid-churn", supply],
+  ] as const) {
+    const churn = read(id);
+    if (churn && churn.lo > CHURN_HIGH_PERCENT) add("churn-high", [id]);
+  }
+
+  // One check per margin: each stream has its own (D7).
+  for (const [id, add] of [
+    ["mkt.rev.gross-margin", demand],
+    ["mkt.sell.gross-margin", supply],
+  ] as const) {
+    const margin = read(id);
+    if (margin && (margin.lo > MARGIN_ODD.hi || margin.hi < MARGIN_ODD.lo)) add("margin-odd", [id]);
+  }
+
+  // A take rate past TAKE_RATE_HIGH_PERCENT is rarely one: the GMV counted without fees, or the net revenue counted gross.
+  const take = read("mkt.rev.take-rate");
+  if (take && take.lo > TAKE_RATE_HIGH_PERCENT) demand("mkt-take-high", ["mkt.rev.take-rate"]);
+
+  // The columns of one funnel count the same sign-ups: each side's, read on its own.
+  const funnels: [Add, readonly MetricId[]][] = [
+    [demand, ["mkt.buy.first-order", "mkt.buy.repeat"]],
+    [supply, mktSetup(state.setup).sellerSubscriptions ? ["mkt.sell.first-sale", "mkt.sell.paid-conversion"] : ["mkt.sell.first-sale"]],
+  ];
+  for (const [add, columns] of funnels) {
+    const periods = columns.filter((id) => read(id)).map((id) => periodOf(shapeOf(id), entryOf(snapshot, id), snapshot));
+    if (new Set(periods).size > 1) add("cohort-mismatch", [...columns]);
+  }
+
+  const r = mktReconcile(state, ctx);
+  if (r && (r.ratio.hi < RECONCILE_BAND.lo || r.ratio.lo > RECONCILE_BAND.hi)) {
+    // « ~1 nouvel acheteur », « ~12 nouveaux acheteurs »: the noun follows the predicted count as printed (rounded).
+    demand(
+      "reconcile-gap",
+      ["mkt.buy.signup-rate", "mkt.buy.first-order", "mkt.buy.cac"],
+      {
+        p: formatCountInterval(r.predicted, ctx, words),
+        n: formatNumber(r.billed, ctx.locale),
+        month: formatMonth(snapshot.referenceMonth, ctx.locale),
+      },
+      mapBounds(r.predicted, Math.round),
+    );
   }
 }

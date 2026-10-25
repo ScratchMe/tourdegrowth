@@ -23,6 +23,7 @@
  */
 
 import type { AppMonetization } from "./app-model";
+import type { MktFunnel } from "./mkt-funnel"; // type only: mkt-funnel.ts imports this module
 
 /**
  * Several engines per device (engine spec §19.1.4, A14 T0): an index under
@@ -580,8 +581,21 @@ export type SlgCandidateId = "slg.acq.lead-to-opp" | "slg.act.go-live" | "slg.re
 export type AppCandidateId = "app.ret.active-retention";
 /** A self-serve engine's candidates, whatever its type: the SaaS ranks the first six, an app may add its own. */
 export type SelfServeCandidateId = PlgCandidateId | AppCandidateId;
-/** Any stage a diagnosis may name — each diagnosis only ever positions its own motion's (§18.5.2). */
-export type CandidateId = PlgCandidateId | SlgCandidateId | AppCandidateId;
+/**
+ * The marketplace's candidates, one list per side (§22.2.1, C70): what each side's diagnosis positions. The supply's
+ * sign-up rate, paid conversion and paid churn exist only when the sellers pay a subscription (D9).
+ */
+export type MktDemandCandidateId =
+  | "mkt.buy.signup-rate"
+  | "mkt.buy.first-order"
+  | "mkt.liq.fill-rate"
+  | "mkt.buy.referred-share"
+  | "mkt.buy.repeat"
+  | "mkt.buy.churn";
+export type MktSupplyCandidateId = "mkt.sell.signup-rate" | "mkt.sell.first-sale" | "mkt.sell.paid-conversion" | "mkt.sell.churn" | "mkt.sell.paid-churn";
+export type MktCandidateId = MktDemandCandidateId | MktSupplyCandidateId;
+/** Any stage a diagnosis may name — each diagnosis only ever positions its own motion's (§18.5.2), and a marketplace's its own side's (C70). */
+export type CandidateId = PlgCandidateId | SlgCandidateId | AppCandidateId | MktCandidateId;
 /**
  * What may name a stage: the team's own target, and nothing else (decision 5,
  * reversed 2026-09-29, `CHANTIERS.md` C1 — a published reference is context,
@@ -868,7 +882,10 @@ export type SanityId =
   // The hybrid's one check across motions: the two CACs count different spend.
   | "cac-variants-differ"
   // A rate's two counts from two tools (§19.5.3, A14 T4): never blocking, said once.
-  | "two-tools";
+  | "two-tools"
+  // A marketplace's own (§22.5.7): more second orders than first ones, a take rate that looks gross.
+  | "mkt-repeat-gt-first"
+  | "mkt-take-high";
 export interface SanityCheck {
   id: SanityId;
   /** The motion the check reads; absent for one that reads both (`cac-variants-differ`). */
@@ -1173,10 +1190,29 @@ export interface DeckModel {
   byMotion?: Record<Motion, DeckMotionChrome>;
 }
 
-/** One ticked motion, read on its own (§18.6.1): its coverage, its funnel, its diagnosis, its unit economics. */
+/** One side of a marketplace, derived on its own (C70, §18.6.1's rule): its diagnosis and its unit economics, never read against the other side's. */
+export interface MktSideDerived {
+  side: MktSide;
+  diagnosis: Diagnosis<MktCandidateId>;
+  unit: MktUnitEconomics;
+}
+
+/** The marketplace's revenue: the commissions plus the sellers' subscriptions (S9: a total only when both counted parts are known). `supply` is `null` when the sellers pay nothing. */
+export interface MktTotal {
+  now: { demand: DerivedValue; supply: DerivedValue | null; total: DerivedValue };
+  newPerMonth: { demand: DerivedValue; supply: DerivedValue | null; total: DerivedValue };
+  in12Months: { demand: DerivedValue; supply: DerivedValue | null; total: DerivedValue };
+}
+
+/**
+ * One ticked motion, read on its own (§18.6.1): its coverage, its funnel, its diagnosis, its unit economics. A
+ * marketplace's motion (`mkt`, derived from the type, §22.1 D1) has two sides instead of one diagnosis, each read on
+ * its own, and a total.
+ */
 export type MotionDerived =
   | { motion: "plg"; coverage: Coverage; peloton: Peloton; diagnosis: Diagnosis<SelfServeCandidateId>; unit: UnitEconomics }
-  | { motion: "slg"; coverage: Coverage; relays: Relays; diagnosis: SlgDiagnosis; unit: SlgUnitEconomics };
+  | { motion: "slg"; coverage: Coverage; relays: Relays; diagnosis: SlgDiagnosis; unit: SlgUnitEconomics }
+  | { motion: "mkt"; coverage: Coverage; funnel: MktFunnel; sides: { demand: MktSideDerived; supply: MktSideDerived }; total: MktTotal };
 
 /**
  * « Un total » (§18.6.2), the hybrid only. A sum exists only when both of its
@@ -1232,6 +1268,11 @@ export interface MotionSeries {
   previousLeak: CandidateId[];
   /** This month names another leak than the month before did (« En août, la fuite était Activation »). */
   leakChanged: boolean;
+  /**
+   * A marketplace's motion only: each side's own leak of the month before, and whether this month names another
+   * (C70). `previousLeak` is `[]` and `leakChanged` `false` for it: the screens read `sides`.
+   */
+  sides?: Record<MktSide, { previousLeak: CandidateId[]; leakChanged: boolean }>;
 }
 
 export interface Series {
@@ -1261,7 +1302,8 @@ export interface AppDerived {
  * Everything the board renders, computed in one pass from the state.
  *
  * `motions` holds the ticked motions, in `MOTIONS` order — never sorted by a
- * value (§18.6.4). `coverage` is their union, the link left out. `peloton`,
+ * value (§18.6.4); a marketplace holds its one motion `mkt` instead (§22.1 D1).
+ * `coverage` is their union, the link left out. `peloton`,
  * `diagnosis` and `unit` are SELF-SERVE's, where every v1 screen and the
  * deck read them; they are the very objects of the `plg` entry of `motions`
  * when self-serve is ticked, and describe an empty self-serve otherwise.

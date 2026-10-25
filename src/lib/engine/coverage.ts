@@ -1,7 +1,7 @@
 import { METRIC_SHAPES, SLG_METRIC_SHAPES, shapesOf } from "./catalog-shape";
 import type { MetricShape, SetupShapes } from "./catalog-shape";
 import { isApp } from "./setup-type";
-import type { Coverage, EngineSetup, Motion, Snapshot } from "./types";
+import type { Coverage, EngineMotion, EngineSetup, Motion, Snapshot } from "./types";
 import { statusOf } from "./values";
 
 /**
@@ -51,9 +51,17 @@ export function coverage(snapshot: Snapshot, shapes: readonly MetricShape[] = ME
 
 /**
  * One motion's own numbers (§18.6.1, its column): 17 for self-serve, 15 for sales-assisted. With an app's `setup`,
- * self-serve counts what that app shows (`shapesOf`, §21.5.5); without it, or for a SaaS, today's list.
+ * self-serve counts what that app shows (`shapesOf`, §21.5.5); without it, or for a SaaS, today's list. A marketplace's
+ * motion (`"mkt"`, §22.5.9) counts what its setup shows, nineteen or fourteen: its `setup` is required, since the
+ * sellers' subscription box changes the list.
  */
-export function motionCoverage(snapshot: Snapshot, motion: Motion, setup?: SetupShapes): Coverage {
+export function motionCoverage(snapshot: Snapshot, motion: Motion, setup?: SetupShapes): Coverage;
+export function motionCoverage(snapshot: Snapshot, motion: EngineMotion, setup: SetupShapes): Coverage;
+export function motionCoverage(snapshot: Snapshot, motion: EngineMotion, setup?: SetupShapes): Coverage {
+  if (motion === "mkt") {
+    if (setup === undefined) throw new Error("A marketplace's coverage needs its setup: the shown numbers depend on the sellers' subscriptions.");
+    return coverage(snapshot, shapesOf(setup));
+  }
   if (motion === "plg" && setup !== undefined && isApp(setup)) return coverage(snapshot, shapesOf(setup));
   return coverage(snapshot, motion === "plg" ? METRIC_SHAPES : SLG_METRIC_SHAPES);
 }

@@ -1,13 +1,15 @@
 import { describe, expect, it } from "vitest";
 import { appWhatIf } from "../app";
 import { CANDIDATE_IDS, METRIC_SHAPES, shapeOf, shapesOf } from "../catalog-shape";
+import { mktCandidates } from "../diagnose";
+import { mktWhatIf } from "../mkt-impact";
 import { buildDeck, chainLine, comparatorText, deckMarkdown, renderTitle, targetPhrase } from "../deck";
 import { deriveEngine } from "../derive";
 import { comparatorOf, impactTarget } from "../diagnose";
 import { EXAMPLE_CONSUMER_WHATIF } from "../example";
 import { fillTemplate, formatInterval } from "../format";
 import { whatIf } from "../impact";
-import { behindSentence, blindSentence, catalogueValues, notEnoughBelowSentence, staticCatalogueValues, subjectOf, unpricedSentence } from "../phrases";
+import { behindSentence, blindSentence, catalogueValues, diagnosesOf, notEnoughBelowSentence, staticCatalogueValues, subjectOf, unpricedSentence } from "../phrases";
 import { buildRequest } from "../request";
 import { findingText, sanityText } from "../sentences";
 import { candidatesFor } from "../scenario-of";
@@ -16,7 +18,29 @@ import type { EngineState, FindingKind, MetricEntry, PlgCandidateId, SanityId, S
 import { mergeStrings } from "../strings";
 import { knownIn } from "../values";
 import { CTX_EN, CTX_FR, EN, FR } from "./props";
-import { consumerState, consumerUsageOnlyState, emptyState, estimated, exampleState, filmState, hybridLossState, hybridNoMarginState, hybridState, noMarginState, measured, missing, ratio, salesAssistedState, tourResult, withEntry, withMonthBefore, withTarget, withoutTargets } from "./fixtures";
+import {
+  consumerState,
+  consumerUsageOnlyState,
+  emptyState,
+  estimated,
+  exampleState,
+  filmState,
+  hybridLossState,
+  hybridNoMarginState,
+  hybridState,
+  marketplaceNoSubscriptionsState,
+  marketplaceState,
+  noMarginState,
+  measured,
+  missing,
+  ratio,
+  salesAssistedState,
+  tourResult,
+  withEntry,
+  withMonthBefore,
+  withTarget,
+  withoutTargets,
+} from "./fixtures";
 
 /**
  * The guard: every sentence the engine can produce, read as a reader would.
@@ -123,11 +147,14 @@ const TOUR_ANSWERS = { "acq-1": 0, "acq-3": 2, "act-1": 0, "act-2": 1, "ret-1": 
 /**
  * `type: "consumer-app"` reads an app's resolved copy (the overlay merged over the engine's strings, and the app's own
  * catalogue prose), as the island does. Since APP-9 an app's deck and its text export are swept like any other.
+ * `type: "marketplace"` (A23 MKT-4) reads the engine's neutral words and the marketplace's own catalogue prose: its findings,
+ * its checks, its two sides' diagnosis sentences and its « Et si » chains are swept; its deck is MKT-8's, and the words of
+ * each side (`demand`, `supply`) MKT-5's, which will rewrite what is swept here.
  */
 interface ScenarioDef {
   name: string;
   build: () => { state: EngineState; result?: ReturnType<typeof tourResult> };
-  type?: "consumer-app";
+  type?: "consumer-app" | "marketplace";
 }
 
 const SCENARIOS: ScenarioDef[] = [
@@ -440,6 +467,82 @@ const SCENARIOS: ScenarioDef[] = [
     type: "consumer-app",
     build: () => ({ state: withEntry(consumerState(), "app.rev.commission", measured(ratio(11_655, 33_300), tool("revenuecat"))) }),
   },
+  // The marketplace (A23 MKT-4, §22.10): the example, with and without the sellers' subscriptions, then a state for each finding and each check.
+  { name: "the marketplace (§22.10)", type: "marketplace", build: () => ({ state: marketplaceState() }) },
+  { name: "the marketplace without the sellers' subscriptions (§22.10)", type: "marketplace", build: () => ({ state: marketplaceNoSubscriptionsState() }) },
+  {
+    name: "the marketplace, every funnel column missing",
+    type: "marketplace",
+    build: () => {
+      let state = marketplaceState();
+      for (const id of ["mkt.buy.first-order", "mkt.buy.repeat", "mkt.sell.first-sale", "mkt.sell.paid-conversion"] as const) state = withEntry(state, id, missing("not-tracked", "sprint"));
+      return { state };
+    },
+  },
+  {
+    // 870 of 2 900 is 30 %, past the first order's 20 %; 164 268 € of 273 780 € is a 60 % commission.
+    name: "the marketplace, a second order above the first and a commission above 50 %",
+    type: "marketplace",
+    build: () => ({ state: withEntry(withEntry(marketplaceState(), "mkt.buy.repeat", measured(ratio(870, 2_900), tool("product-db"))), "mkt.rev.take-rate", measured(ratio(164_268, 273_780), tool("stripe"))) }),
+  },
+  {
+    // 100 € a buyer against 32 to 38 € of margin; 450 € an active seller, 900 € a paid one, against 821,67 €.
+    name: "the marketplace, a buyer and a paid seller who cost more than they bring back",
+    type: "marketplace",
+    build: () => ({
+      state: withEntry(withEntry(marketplaceState(), "mkt.buy.cac", measured(ratio(60_000, 600), tool("google-ads"), { variant: "media-only" })), "mkt.sell.cac", measured(ratio(54_000, 120), tool("spreadsheet"), { variant: "media-only" })),
+    }),
+  },
+  {
+    name: "the marketplace, margins to find and two stages behind together",
+    type: "marketplace",
+    build: () => {
+      let state = withEntry(withEntry(marketplaceState(), "mkt.rev.gross-margin", missing("not-tracked", "meeting")), "mkt.sell.gross-margin", missing("not-tracked", "meeting"));
+      state = withEntry(state, "mkt.buy.churn", measured(ratio(770, 14_000), tool("product-db")));
+      return { state: withTarget(state, "mkt.buy.churn", 4) };
+    },
+  },
+  {
+    name: "the marketplace, a billing far off and two small cohorts",
+    type: "marketplace",
+    build: () => {
+      let state = withEntry(marketplaceState(), "mkt.buy.cac", measured(ratio(18_000, 100), tool("google-ads"), { variant: "media-only" }));
+      state = withEntry(state, "mkt.buy.first-order", measured(ratio(14, 80), tool("product-db")));
+      return { state: withEntry(state, "mkt.sell.first-sale", measured(ratio(24, 80), tool("product-db"))) };
+    },
+  },
+  {
+    name: "the marketplace, two numbers that disagree and a definition missing",
+    type: "marketplace",
+    build: () => {
+      const disagree: MetricEntry = {
+        status: "conflicting",
+        conflict: { a: { value: ratio(1_000, 8_000), source: tool("stripe") }, b: { value: ratio(1_100, 8_000), source: { kind: "other" } } },
+        updatedAt: "2026-09-20T10:00:00.000Z",
+      };
+      return { state: withEntry(withEntry(withEntry(marketplaceState(), "mkt.rev.take-rate", disagree), "mkt.sell.gross-margin", disagree), "mkt.sell.arpa", missing("no-definition", "meeting")) };
+    },
+  },
+  {
+    name: "the marketplace, churns that look annual, margins that look odd, cohorts from two months",
+    type: "marketplace",
+    build: () => {
+      let state = withEntry(withEntry(marketplaceState(), "mkt.buy.churn", measured(ratio(5_600, 14_000), tool("product-db"))), "mkt.sell.churn", measured(ratio(1_200, 3_200), tool("product-db")));
+      state = withEntry(withEntry(state, "mkt.sell.paid-churn", measured(ratio(360, 900), tool("stripe"))), "mkt.rev.gross-margin", measured({ kind: "rate", percent: 98 }, tool("stripe")));
+      state = withEntry(state, "mkt.sell.gross-margin", measured({ kind: "rate", percent: 99 }, tool("spreadsheet")));
+      state = withEntry(state, "mkt.buy.repeat", measured(ratio(145, 2_900), tool("product-db"), { cohortMonth: "2026-04" }));
+      return { state: withEntry(state, "mkt.sell.paid-conversion", measured(ratio(63, 420), tool("stripe"), { cohortMonth: "2026-04" })) };
+    },
+  },
+  {
+    name: "the marketplace, the Tour's buyer CAC question declared tracked and nobody could pull it",
+    type: "marketplace",
+    build: () => {
+      const result = tourResult({ "acq-3": 0, "rev-2": 2 });
+      const state = withEntry(marketplaceState(), "mkt.buy.cac", missing("no-access", "meeting"));
+      return { state: { ...state, tourLink: { resultId: result.id, linkedAt: "2026-09-20T10:00:00.000Z" } }, result };
+    },
+  },
 ];
 
 // --- The sweep ---------------------------------------------------------------
@@ -460,16 +563,58 @@ function sweep(): Sweep {
     for (const locale of ["fr", "en"] as const) {
       const p = props[locale];
       // An app reads the copy as the island resolves it: the overlay merged over the engine's strings, its own catalogue prose.
+      // A marketplace reads the neutral words (no side's overlay yet, MKT-5) and its own catalogue prose.
       const app = scenario.type === "consumer-app";
+      const marketplace = scenario.type === "marketplace";
       const strings = app ? mergeStrings(p.strings, p.typeStrings["consumer-app"]) : p.strings;
-      const metrics = app ? p.typeCatalogs["consumer-app"].metrics : p.metrics;
-      const proseDerived = app ? p.typeCatalogs["consumer-app"].derived : p.derived;
+      const metrics = app ? p.typeCatalogs["consumer-app"].metrics : marketplace ? p.typeCatalogs.marketplace.metrics : p.metrics;
+      const proseDerived = app ? p.typeCatalogs["consumer-app"].derived : marketplace ? p.typeCatalogs.marketplace.derived : p.derived;
       const { state: raw, result } = scenario.build();
       const state = includeAll(raw);
       const add = (where: string, text: string | null | undefined, slide: boolean) => {
         if (text !== null && text !== undefined) out.samples.push({ scenario: scenario.name, locale, where, text, slide });
       };
       const derived = deriveEngine(state, p.ctx, result ?? null, p.bridges, strings.units);
+
+      // What the board and the "to check" list print.
+      const sweepFindingsAndChecks = () => {
+        for (const f of derived.findings) {
+          out.findingKinds.add(f.kind);
+          add(`finding ${f.kind}`, findingText(f, state, strings, metrics, proseDerived, locale), false);
+        }
+        for (const c of derived.sanity) {
+          out.sanityIds.add(c.id);
+          add(`check ${c.id}`, sanityText(c, strings, locale), false);
+        }
+      };
+
+      if (marketplace) {
+        sweepFindingsAndChecks();
+        // The diagnosis block of each side, and the « Et si » chain of each of its candidates that has a target.
+        for (const d of derived.motions.flatMap(diagnosesOf)) {
+          add(`diagnosis ${d.side} blind`, blindSentence(d.blind, strings, metrics), false);
+          add(`diagnosis ${d.side} not-enough`, notEnoughBelowSentence(d, strings, metrics), false);
+          add(`diagnosis ${d.side} unpriced`, unpricedSentence(d, strings, metrics), false);
+          for (const id of d.state === "clear" || d.state === "shared" ? d.named : []) {
+            const comparator = (d.positions as Record<string, { comparator?: NonNullable<ReturnType<typeof comparatorOf>> }>)[id]?.comparator;
+            const known = knownIn(state, id, p.ctx);
+            if (!comparator || known.kind !== "known") continue;
+            const value = formatInterval(known.value, shapeOf(id).unit, p.ctx, strings.units);
+            add(`diagnosis ${d.side} named ${id}`, behindSentence(comparator, value, comparatorText(state, id, strings, p.ctx), strings), false);
+          }
+        }
+        for (const side of ["demand", "supply"] as const) {
+          for (const id of mktCandidates(side, state.setup)) {
+            const comparator = comparatorOf(state, id);
+            if (!comparator) continue;
+            const impact = mktWhatIf(state, id, impactTarget(comparator), p.ctx, strings.units);
+            if (!impact) continue;
+            const target = targetPhrase(comparator, id, state, strings, p.ctx);
+            for (const line of impact.lines) add(`what-if ${id} ${line.key}`, chainLine(line, impact, subjectOf(id, strings, metrics), target, strings, locale).text, false);
+          }
+        }
+        continue;
+      }
 
       // The deck: every title, every printed field of every line, every note, the footer, and the text export.
       const deck = buildDeck(state, derived, strings, metrics, p.ctx, { derived: proseDerived, bridges: p.bridges });
@@ -490,15 +635,7 @@ function sweep(): Sweep {
       add("footer", deck.footer.text, true);
       add("markdown", deckMarkdown(deck, strings), true);
 
-      // What the board and the "to check" list print.
-      for (const f of derived.findings) {
-        out.findingKinds.add(f.kind);
-        add(`finding ${f.kind}`, findingText(f, state, strings, metrics, proseDerived, locale), false);
-      }
-      for (const c of derived.sanity) {
-        out.sanityIds.add(c.id);
-        add(`check ${c.id}`, sanityText(c, strings, locale), false);
-      }
+      sweepFindingsAndChecks();
 
       // The board's diagnosis block.
       const d = derived.diagnosis;
@@ -593,7 +730,7 @@ const RULES: Rule[] = [
   { name: "no double space, no space next to a no-break one", check: (s) => s.text.match(/.{0,20}(?: {2}|  |  ).{0,20}/)?.[0] ?? null },
   { name: "no trailing space on a line", check: (s) => s.text.match(/.{0,30}[  ]$/m)?.[0] ?? null },
   { name: "no undefined, NaN, null or object", check: (s) => s.text.match(/.{0,20}\b(undefined|NaN|null|\[object)\b.{0,20}/)?.[0] ?? null },
-  { name: "no raw number id", check: (s) => s.text.match(/.{0,20}\b(?:acq|act|ret|ref|rev)\.[a-z][\w-]*.{0,10}/)?.[0] ?? null },
+  { name: "no raw number id", check: (s) => s.text.match(/.{0,20}\b(?:acq|act|ret|ref|rev|mkt)\.[a-z][\w-]*.{0,10}/)?.[0] ?? null },
   { name: "only the slides' glyphs (§10.4)", check: (s) => (ALLOWED.test(s.text) ? null : [...s.text].filter((c) => !ALLOWED.test(c)).join(" ")) },
   {
     name: "no empty clause",
@@ -699,9 +836,33 @@ describe("the sweep reaches every sentence it claims to", () => {
   });
 
   it("fires every finding kind and every sanity check", () => {
-    const kinds: FindingKind[] = ["chain-break", "no-definition", "blind-spot", "below-comparator", "conflict", "unit-econ-uncomputable", "reconcile-gap", "small-cohort", "hidden-knowledge"];
+    const kinds: FindingKind[] = [
+      "chain-break",
+      "no-definition",
+      "blind-spot",
+      "below-comparator",
+      "conflict",
+      "unit-econ-uncomputable",
+      "unit-econ-loss",
+      "reconcile-gap",
+      "small-cohort",
+      "hidden-knowledge",
+    ];
     expect(kinds.filter((k) => !SWEEP.findingKinds.has(k))).toEqual([]);
-    const ids: SanityId[] = ["num-gt-den", "retained-gt-activated", "paid-gt-retained", "churn-high", "margin-odd", "commission-high", "ttv-mean", "cohort-mismatch", "reconcile-gap"];
+    const ids: SanityId[] = [
+      "num-gt-den",
+      "retained-gt-activated",
+      "paid-gt-retained",
+      "churn-high",
+      "margin-odd",
+      "commission-high",
+      "ttv-mean",
+      "cohort-mismatch",
+      "reconcile-gap",
+      // A marketplace's own (A23 MKT-4, §22.5.7).
+      "mkt-repeat-gt-first",
+      "mkt-take-high",
+    ];
     expect(ids.filter((k) => !SWEEP.sanityIds.has(k))).toEqual([]);
   });
 
@@ -712,6 +873,20 @@ describe("the sweep reaches every sentence it claims to", () => {
       "moins d'un actif de plus par mois", "moins d'un actif gardé de plus par mois", "less than one more active a month", "less than one more active kept a month",
     ])
       expect(all, needle).toContain(needle);
+  });
+
+  it("and reaches the marketplace's sentences: each chain-break verb, each side's findings, both churns' chains, in both languages", () => {
+    const all = SWEEP.samples.map((s) => s.text).join("\n");
+    for (const needle of [
+      "passent une première commande", "en passent une deuxième", "font une première vente", "s'abonnent",
+      "place a first order", "place a second one", "make a first sale", "subscribe.",
+      "Plus de deuxièmes commandes que de premières", "More second orders than first ones",
+      "Une commission au-dessus de 50", "A take rate above 50%",
+      "le taux de service", "the fill rate", "la conversion en vendeur abonné", "seller subscription conversion",
+    ])
+      expect(all, needle).toContain(needle);
+    for (const where of ["finding below-comparator", "finding unit-econ-loss", "diagnosis supply unpriced", "diagnosis demand named", "what-if mkt.liq.fill-rate then", "what-if mkt.sell.paid-conversion times", "what-if mkt.buy.churn then", "what-if mkt.sell.paid-churn today"])
+      expect(SWEEP.samples.some((s) => s.where.startsWith(where)), where).toBe(true);
   });
 
   it("and reaches the forms the rules are about", () => {

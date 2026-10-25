@@ -792,6 +792,18 @@ export const ENGINE_COPY = {
     "slg.rev.win-rate": { fr: "le taux de closing", en: "the win rate" },
     // TODO: à relire — copie neuve (convention 6), §21 (A22 APP-5) : la rétention des actifs, candidate propre à l'app, sujet de phrase avec son article.
     "app.ret.active-retention": { fr: "la rétention des actifs", en: "active retention" },
+    // TODO: à relire — copie neuve (convention 6), §22.8.5 f (A23 MKT-4) : les onze candidats de la place de marché, sujets de phrase avec leur article.
+    "mkt.buy.signup-rate": { fr: "le taux d'inscription des acheteurs", en: "the buyer sign-up rate" },
+    "mkt.buy.first-order": { fr: "la première commande", en: "the first order" },
+    "mkt.liq.fill-rate": { fr: "le taux de service", en: "the fill rate" },
+    "mkt.buy.referred-share": { fr: "la part des inscrits recommandés", en: "the referred share of sign-ups" },
+    "mkt.buy.repeat": { fr: "la deuxième commande", en: "the second order" },
+    "mkt.buy.churn": { fr: "le churn des acheteurs", en: "buyer churn" },
+    "mkt.sell.signup-rate": { fr: "le taux d'inscription des vendeurs", en: "the seller sign-up rate" },
+    "mkt.sell.first-sale": { fr: "la première vente", en: "the first sale" },
+    "mkt.sell.paid-conversion": { fr: "la conversion en vendeur abonné", en: "seller subscription conversion" },
+    "mkt.sell.churn": { fr: "le churn des vendeurs", en: "seller churn" },
+    "mkt.sell.paid-churn": { fr: "le churn des vendeurs abonnés", en: "paid seller churn" },
   } satisfies Record<CandidateId, Translatable>,
   /**
    * The activation event inside a sentence — what the catalogue's `{event}`
@@ -3018,6 +3030,13 @@ export const ENGINE_COPY = {
       d30: { fr: "sont encore là à J30", en: "are still active at day 30" },
       paid: { fr: "paient", en: "pay" },
     },
+    // TODO: à relire — copie neuve (convention 6), §22.8.5 j (A23 MKT-4) : verbMkt, le verbe d'une colonne de funnel de la place de marché qui casse la chaîne (`{verb}` de `chainBreak`).
+    verbMkt: {
+      first: { fr: "passent une première commande", en: "place a first order" },
+      repeat: { fr: "en passent une deuxième", en: "place a second one" },
+      firstSale: { fr: "font une première vente", en: "make a first sale" },
+      paid: { fr: "s'abonnent", en: "subscribe" },
+    },
     noDefinition: {
       fr: "{metric} : pas de définition partagée. Tout chiffre qu'on en donnerait serait l'opinion de quelqu'un.",
       en: "{metric}: no shared definition. Any number given for it would be someone's opinion.",
@@ -3114,6 +3133,15 @@ export const ENGINE_COPY = {
     commissionHigh: {
       fr: "Au-delà de 30 %, la TVA ou des frais de paiement sont souvent comptés avec la commission : vérifie.",
       en: "Above 30%, VAT or payment fees are often counted in with the commission: check.",
+    },
+    // TODO: à relire — copie neuve (convention 6), §22.8.5 f (A23 MKT-4) : mktRepeatGtFirst et mktTakeHigh, les deux contrôles propres à la place de marché (§22.5.7).
+    mktRepeatGtFirst: {
+      fr: "Plus de deuxièmes commandes que de premières : les deux chiffres portent-ils sur la même cohorte et la même fenêtre ?",
+      en: "More second orders than first ones: do both numbers cover the same cohort and window?",
+    },
+    mktTakeHigh: {
+      fr: "Une commission au-dessus de 50 % : le GMV est-il compté sans les frais, ou le revenu net compté brut ?",
+      en: "A take rate above 50%: is GMV counted without fees, or net revenue counted gross?",
     },
     ttvMean: {
       fr: "Une moyenne baisse quand les traînards abandonnent : prends la médiane.",

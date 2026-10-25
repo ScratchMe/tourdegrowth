@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { shapeOf } from "../catalog-shape";
-import { blockingCheck, reconcile, sanityChecks } from "../sanity";
+import { blockingCheck, mktReconcile, reconcile, sanityChecks } from "../sanity";
 import { sanityText } from "../sentences";
 import type { EngineState, MetricEntry, SanityId } from "../types";
 import { CTX_FR, FR } from "./props";
-import { estimated, exampleState, hybridState, measured, ratio, salesAssistedState, withEntry } from "./fixtures";
+import { estimated, exampleState, hybridState, marketplaceNoSubscriptionsState, marketplaceState, measured, ratio, salesAssistedState, withEntry } from "./fixtures";
 
 // Engine spec §13.1 "sanity" — one case that triggers and one that doesn't,
 // per check. Non-vacuity, measured: firing on ANY overlap instead of the
@@ -161,5 +161,129 @@ describe("« deux outils » (§19.5.3, A14 T4)", () => {
     const same = withEntry(exampleState(), "act.rate", measured(ratio(144, 800), { kind: "tool", tool: "amplitude" }, { denominatorSource: { kind: "tool", tool: "amplitude" } }));
     const person = withEntry(exampleState(), "act.rate", measured(ratio(144, 800), { kind: "tool", tool: "amplitude" }, { denominatorSource: { kind: "person", role: "data" } }));
     for (const state of [exampleState(), same, person]) expect(twoTools(state)).toEqual([]);
+  });
+});
+
+// --- A marketplace (§22.5.7; A23 MKT-4) — one case that triggers, one that doesn't, each check with its side.
+// Non-vacuity, measured on 2026-10-25: see the entry of A23 MKT-4 in `JOURNAL.md`.
+
+describe("a marketplace's checks", () => {
+  const checksOf = (state: EngineState) => sanityChecks(state, CTX_FR, FR.strings.units);
+  const of = (state: EngineState, id: SanityId) => checksOf(state).filter((c) => c.id === id);
+  const sides = (state: EngineState, id: SanityId) => of(state, id).map((c) => `${c.side}:${c.metrics.join("+")}`);
+
+  it("the example raises nothing, with the sellers' subscriptions or without: 3 000 × 20 % ÷ 600 = 1, inside the band", () => {
+    expect(checksOf(marketplaceState())).toEqual([]);
+    expect(checksOf(marketplaceNoSubscriptionsState())).toEqual([]);
+    const r = mktReconcile(marketplaceState(), CTX_FR)!;
+    expect(r.predicted).toEqual({ lo: 600, hi: 600 });
+    expect(r.billed).toBe(600);
+    expect(r.ratio).toEqual({ lo: 1, hi: 1 });
+  });
+
+  it("mkt-repeat-gt-first — the WHOLE second order above the first, on the demand", () => {
+    // 870 of 2 900 is 30 %, past the first order's 20 %: two cohorts, or two windows.
+    const [check] = of(withEntry(marketplaceState(), "mkt.buy.repeat", measured(ratio(870, 2_900), tool)), "mkt-repeat-gt-first");
+    expect(check).toMatchObject({ id: "mkt-repeat-gt-first", motion: "mkt", side: "demand", blocking: false, metrics: ["mkt.buy.repeat", "mkt.buy.first-order"], values: {} });
+    expect(sanityText(check!, FR.strings, "fr")).toBe("Plus de deuxièmes commandes que de premières\u00a0: les deux chiffres portent-ils sur la même cohorte et la même fenêtre\u00a0?");
+    // Equal is no alert, and an estimate that overlaps the first order's 20 % is not "definitely" more.
+    expect(of(withEntry(marketplaceState(), "mkt.buy.repeat", measured(ratio(580, 2_900), tool)), "mkt-repeat-gt-first")).toEqual([]);
+    expect(of(withEntry(marketplaceState(), "mkt.buy.repeat", estimated(15, 25)), "mkt-repeat-gt-first")).toEqual([]);
+  });
+
+  it("churn-high — one check per churn, on its own side: the buyers' on the demand, the active and the paid sellers' on the supply", () => {
+    let state = withEntry(marketplaceState(), "mkt.buy.churn", measured(ratio(5_600, 14_000), tool));
+    expect(sides(state, "churn-high")).toEqual(["demand:mkt.buy.churn"]);
+    state = withEntry(state, "mkt.sell.churn", measured(ratio(1_200, 3_200), tool));
+    state = withEntry(state, "mkt.sell.paid-churn", measured(ratio(360, 900), tool));
+    expect(sides(state, "churn-high")).toEqual(["demand:mkt.buy.churn", "supply:mkt.sell.churn", "supply:mkt.sell.paid-churn"]);
+    for (const check of of(state, "churn-high")) expect(check).toMatchObject({ motion: "mkt", blocking: false });
+    // The whole interval, as everywhere: a 20 to 40 % estimate is not « definitely an annual figure ».
+    expect(of(withEntry(marketplaceState(), "mkt.buy.churn", estimated(20, 40)), "churn-high")).toEqual([]);
+  });
+
+  it("margin-odd — one check per stream's margin: the commissions' on the demand, the subscriptions' on the supply", () => {
+    let state = withEntry(marketplaceState(), "mkt.rev.gross-margin", measured({ kind: "rate", percent: 98 }, tool));
+    expect(sides(state, "margin-odd")).toEqual(["demand:mkt.rev.gross-margin"]);
+    state = withEntry(state, "mkt.sell.gross-margin", measured({ kind: "rate", percent: 99 }, tool));
+    expect(sides(state, "margin-odd")).toEqual(["demand:mkt.rev.gross-margin", "supply:mkt.sell.gross-margin"]);
+    expect(of(withEntry(marketplaceState(), "mkt.rev.gross-margin", estimated(-8, -2)), "margin-odd")).toHaveLength(1);
+    expect(of(withEntry(marketplaceState(), "mkt.rev.gross-margin", measured({ kind: "rate", percent: 80 }, tool)), "margin-odd")).toEqual([]);
+  });
+
+  it("mkt-take-high — a take rate whose WHOLE interval is past 50 %: the GMV counted without fees, or the net revenue counted gross", () => {
+    // 164 268 € of 273 780 € is 60 %.
+    const [check] = of(withEntry(marketplaceState(), "mkt.rev.take-rate", measured(ratio(164_268, 273_780), tool)), "mkt-take-high");
+    expect(check).toMatchObject({ id: "mkt-take-high", motion: "mkt", side: "demand", blocking: false, metrics: ["mkt.rev.take-rate"] });
+    expect(sanityText(check!, FR.strings, "fr")).toBe(
+      "Une commission au-dessus de 50\u00a0%\u00a0: le GMV est-il compté sans les frais, ou le revenu net compté brut\u00a0?",
+    );
+    // Exactly 50 % is no alert, and neither is an estimate that straddles it.
+    expect(of(withEntry(marketplaceState(), "mkt.rev.take-rate", measured(ratio(136_890, 273_780), tool)), "mkt-take-high")).toEqual([]);
+    expect(of(withEntry(marketplaceState(), "mkt.rev.take-rate", estimated(40, 60)), "mkt-take-high")).toEqual([]);
+  });
+
+  it("cohort-mismatch — the columns of one funnel on different months, each funnel on its own", () => {
+    const demand = withEntry(marketplaceState(), "mkt.buy.repeat", measured(ratio(145, 2_900), tool, { cohortMonth: "2026-04" }));
+    expect(sides(demand, "cohort-mismatch")).toEqual(["demand:mkt.buy.first-order+mkt.buy.repeat"]);
+    const supply = withEntry(marketplaceState(), "mkt.sell.paid-conversion", measured(ratio(63, 420), tool, { cohortMonth: "2026-04" }));
+    expect(sides(supply, "cohort-mismatch")).toEqual(["supply:mkt.sell.first-sale+mkt.sell.paid-conversion"]);
+    // The paid conversion is hidden without the subscriptions: the supply's funnel has one column, nothing to compare.
+    const hidden = withEntry(marketplaceNoSubscriptionsState(), "mkt.sell.paid-conversion", measured(ratio(63, 420), tool, { cohortMonth: "2026-04" }));
+    expect(of(hidden, "cohort-mismatch")).toEqual([]);
+  });
+
+  it("reconcile-gap — the buyer sign-ups × the first order against the buyer CAC's count, on the demand", () => {
+    // 100 new buyers billed against the 600 the chain predicts.
+    const off = withEntry(marketplaceState(), "mkt.buy.cac", measured(ratio(18_000, 100), tool, { variant: "media-only" }));
+    const [check] = of(off, "reconcile-gap");
+    expect(check).toMatchObject({
+      motion: "mkt",
+      side: "demand",
+      blocking: false,
+      metrics: ["mkt.buy.signup-rate", "mkt.buy.first-order", "mkt.buy.cac"],
+      values: { p: "600", n: "100", month: "août 2026" },
+      count: { lo: 600, hi: 600 },
+    });
+    expect(mktReconcile(off, CTX_FR)!.ratio.lo).toBeCloseTo(6, 9);
+    // Without the CAC's count (an amount per buyer), or without the sign-ups' counts, there is nothing to reconcile.
+    expect(mktReconcile(withEntry(marketplaceState(), "mkt.buy.cac", measured({ kind: "amount", amount: 30 }, tool)), CTX_FR)).toBeNull();
+    expect(mktReconcile(withEntry(marketplaceState(), "mkt.buy.signup-rate", undefined), CTX_FR)).toBeNull();
+  });
+
+  it("num-gt-den and two-tools carry the side of their number: the sellers' on the supply, the `match` ones on the demand", () => {
+    const broken = checksOf(withEntry(withEntry(withEntry(marketplaceState(), "mkt.buy.first-order", measured(ratio(3_000, 2_900), tool)), "mkt.sell.first-sale", measured(ratio(500, 420), tool)), "mkt.liq.fill-rate", measured(ratio(30_000, 26_000), tool)));
+    expect(broken.filter((c) => c.id === "num-gt-den").map((c) => [c.metrics[0], c.motion, c.side, c.blocking])).toEqual([
+      ["mkt.buy.first-order", "mkt", "demand", true],
+      ["mkt.sell.first-sale", "mkt", "supply", true],
+      ["mkt.liq.fill-rate", "mkt", "demand", true],
+    ]);
+    const two = checksOf(
+      withEntry(
+        withEntry(marketplaceState(), "mkt.sell.first-sale", measured(ratio(126, 420), tool, { denominatorSource: { kind: "tool", tool: "ga4" } })),
+        "mkt.liq.fill-rate",
+        measured(ratio(2_340, 26_000), tool, { denominatorSource: { kind: "tool", tool: "ga4" } }),
+      ),
+    );
+    expect(two.filter((c) => c.id === "two-tools").map((c) => [c.metrics[0], c.motion, c.side])).toEqual([
+      ["mkt.sell.first-sale", "mkt", "supply"],
+      ["mkt.liq.fill-rate", "mkt", "demand"],
+    ]);
+  });
+
+  it("reads nothing of the numbers the setup hides: without the subscriptions, the sellers' paid churn and margin raise nothing", () => {
+    const hidden = withEntry(withEntry(marketplaceNoSubscriptionsState(), "mkt.sell.paid-churn", measured(ratio(360, 900), tool)), "mkt.sell.gross-margin", measured({ kind: "rate", percent: 99 }, tool));
+    expect(checksOf(hidden)).toEqual([]);
+    // The same numbers with the box ticked do raise them: they were stored, not erased.
+    const shown = withEntry(withEntry(marketplaceState(), "mkt.sell.paid-churn", measured(ratio(360, 900), tool)), "mkt.sell.gross-margin", measured({ kind: "rate", percent: 99 }, tool));
+    expect(checksOf(shown).map((c) => c.id)).toEqual(["churn-high", "margin-odd"]);
+  });
+
+  it("a SaaS raises none of the marketplace's checks and tags none of its own with a side", () => {
+    const state = withEntry(withEntry(exampleState(), "ret.logo-churn", measured(ratio(140, 400), tool)), "rev.gross-margin", measured({ kind: "rate", percent: 98 }, tool));
+    const checks = checksOf(state);
+    expect(checks.map((c) => c.id)).toEqual(["churn-high", "margin-odd"]);
+    for (const check of checks) expect(check).not.toHaveProperty("side");
+    expect(checks.filter((c) => c.motion === "mkt")).toEqual([]);
   });
 });

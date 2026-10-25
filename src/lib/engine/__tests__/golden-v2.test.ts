@@ -90,7 +90,7 @@ function outputsOf(state: EngineState, tour: StoredResult | null) {
       markdown: deckMarkdown(deckBeforeA20(deck), p.strings),
       scenario: motions.plg ? buildScenario(state, state.whatIf ?? {}, ctx) : null,
       slgScenario: motions.slg ? buildSlgScenario(state, state.whatIf ?? {}, ctx) : null,
-      tabs: Object.fromEntries(derived.motions.map((m) => [m.motion, asTabs(listStages(snapshot, m.diagnosis, m.motion))])),
+      tabs: Object.fromEntries(derived.motions.flatMap((m) => (m.motion === "mkt" ? [] : [[m.motion, asTabs(listStages(snapshot, m.diagnosis, m.motion))]]))),
       collect: collectPlan(snapshot, EXAMPLE_TODAY, motionShapes(state.setup)),
     };
   }

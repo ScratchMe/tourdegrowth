@@ -233,7 +233,9 @@ export function MetricSheet({
   const known = knownIn(state, id, ctx);
   const comparator = isCandidate ? comparatorOf(state, id as CandidateId) : undefined;
   // Its own motion's diagnosis: a sales-assisted rate sits against sales-assisted's targets (§18.5.2).
-  const motionDiagnosis = view.derived.motions.find((m) => m.motion === motionOfMetric(id))?.diagnosis ?? view.derived.diagnosis;
+  // A marketplace's motion holds two diagnoses and no `diagnosis`: it falls to the v1 field until the sheet reads a side (MKT-7b).
+  const ownMotion = view.derived.motions.find((m) => m.motion === motionOfMetric(id));
+  const motionDiagnosis = (ownMotion && ownMotion.motion !== "mkt" ? ownMotion.diagnosis : undefined) ?? view.derived.diagnosis;
   const position = isCandidate ? positionIn(motionDiagnosis, id as CandidateId)?.position : undefined;
   const hybrid = state.setup.motions.plg && state.setup.motions.slg;
   // Three months for everything sales-assisted (C25 Q2), « de juin à août 2026 » — and the link, read on the same opportunities.

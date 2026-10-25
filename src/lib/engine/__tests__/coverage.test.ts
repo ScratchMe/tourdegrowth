@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { METRIC_SHAPES } from "../catalog-shape";
 import { coverage, motionCoverage, setupCoverage } from "../coverage";
 import type { MetricEntry, MetricStatus, Snapshot } from "../types";
-import { exampleState, hybridState, salesAssistedState, withEntry } from "./fixtures";
+import { exampleState, hybridState, marketplaceNoSubscriptionsState, marketplaceState, salesAssistedState, withEntry } from "./fixtures";
 
 // Engine spec §13.1 "coverage". The invariant that lost half a point in the
 // audit instrument: found + approximate + missing + inProgress ===
@@ -153,5 +153,46 @@ describe("coverage of a consumer app (§21.5.5)", () => {
     // The logo churn is hidden without subscriptions: filling it moves nothing.
     const withChurn: Snapshot = { ...nothing, metrics: { "ret.logo-churn": { status: "measured", value: { kind: "rate", percent: 3 }, updatedAt: at } as MetricEntry } };
     expect(setupCoverage(withChurn, setup)).toEqual(setupCoverage(nothing, setup));
+  });
+});
+
+// Engine spec §22.5.9, A23 MKT-4: a marketplace's motion counts what its setup shows. Non-vacuity, measured on 2026-10-25:
+// reading the 15 sales-assisted numbers (the `else` of the old ternary) for `"mkt"` fails the two count lines (2 tests);
+// ignoring the sellers' box (always the nineteen) fails the fourteen only (1).
+describe("coverage of a marketplace (§22.5.9)", () => {
+  const nothing = { ...marketplaceState().snapshots[0]!, metrics: {} };
+
+  it("counts the numbers the setup shows: 19 with the sellers' subscriptions, 14 without", () => {
+    const withSubscriptions = marketplaceState();
+    const without = marketplaceNoSubscriptionsState();
+    expect(motionCoverage(nothing, "mkt", withSubscriptions.setup).denominator).toBe(19);
+    expect(motionCoverage(nothing, "mkt", without.setup).denominator).toBe(14);
+    // The example: 18 found and the commissions' margin estimated; without the five numbers of the subscriptions, 13 and the same estimate.
+    expect(motionCoverage(withSubscriptions.snapshots[0]!, "mkt", withSubscriptions.setup)).toEqual({ denominator: 19, found: 18, approximate: 1, missing: 0, inProgress: 0, requested: 0, todo: 0 });
+    expect(motionCoverage(without.snapshots[0]!, "mkt", without.setup)).toEqual({ denominator: 14, found: 13, approximate: 1, missing: 0, inProgress: 0, requested: 0, todo: 0 });
+  });
+
+  it("is the setup's own coverage: a marketplace has one motion, so the motion and the union are the same count", () => {
+    for (const state of [marketplaceState(), marketplaceNoSubscriptionsState()]) {
+      expect(motionCoverage(state.snapshots[0]!, "mkt", state.setup)).toEqual(setupCoverage(state.snapshots[0]!, state.setup));
+    }
+  });
+
+  it("a number the setup hides is never a hole: filling or emptying the subscription numbers moves nothing without the box", () => {
+    const state = marketplaceNoSubscriptionsState();
+    const emptied = withEntry(withEntry(state, "mkt.sell.paid-churn", undefined), "mkt.sell.arpa", undefined);
+    expect(motionCoverage(emptied.snapshots[0]!, "mkt", emptied.setup)).toEqual(motionCoverage(state.snapshots[0]!, "mkt", state.setup));
+    const ticked = marketplaceState();
+    const missing = withEntry(ticked, "mkt.sell.arpa", undefined);
+    expect(motionCoverage(missing.snapshots[0]!, "mkt", missing.setup).inProgress).toBe(1);
+  });
+
+  it("needs its setup: without it the list cannot be known, and the call is refused rather than counting another motion's", () => {
+    expect(() => (motionCoverage as (s: Snapshot, m: string) => unknown)(nothing, "mkt")).toThrow(/needs its setup/);
+  });
+
+  it("the SaaS still counts what it did: the 17 of self-serve and the 15 of sales-assisted", () => {
+    expect(motionCoverage(nothing, "plg").denominator).toBe(17);
+    expect(motionCoverage(nothing, "slg").denominator).toBe(15);
   });
 });

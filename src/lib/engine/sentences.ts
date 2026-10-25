@@ -1,6 +1,6 @@
 import { ALL_METRIC_SHAPES, PELOTON_METRICS } from "./catalog-shape";
 import { comparatorOf } from "./diagnose";
-import { CHAIN_VERB } from "./findings";
+import { CHAIN_VERB, MKT_CHAIN_VERB, type MktChainColumn } from "./findings";
 import { fillTemplate, lowerFirst } from "./format";
 import { isCandidate, numbered, sourceInSentence, unitInputsPhrase } from "./phrases";
 import type { EngineStrings, ResolvedDerived, ResolvedMetric } from "./strings";
@@ -91,6 +91,9 @@ export function findingText(
         const verb = fillTemplate(f.relayVerb[RELAY_VERB[relay]], { n: state.setup.goLiveWindowDays });
         return fillTemplate(f.chainBreakRelay, { base: slgBaseNoun(relay, state, strings), verb });
       }
+      // A marketplace's funnel column (§22.8.5 j): the first order, the second, the first sale, the subscription.
+      const mktColumn = finding.metrics.find((id): id is MktChainColumn => (Object.keys(MKT_CHAIN_VERB) as readonly string[]).includes(id));
+      if (mktColumn) return fillTemplate(f.chainBreak, { verb: f.verbMkt[MKT_CHAIN_VERB[mktColumn]] });
       // [act.event, act.rate] when the event is what's missing: the verb is still the column's.
       const column = finding.metrics.find((id): id is (typeof PELOTON_METRICS)[number] => (PELOTON_METRICS as readonly string[]).includes(id));
       return fillTemplate(f.chainBreak, { verb: column ? f.verb[CHAIN_VERB[column]] : f.verb.activated });
@@ -151,6 +154,9 @@ const SANITY_KEY: Record<Exclude<SanityId, "reconcile-gap" | "two-tools">, keyof
   "slg-ttl-mean": "ttvMean",
   "slg-acv-vs-arpa": "slgAcvVsArpa",
   "cac-variants-differ": "cacVariantsDiffer",
+  // A marketplace's own (§22.5.7).
+  "mkt-repeat-gt-first": "mktRepeatGtFirst",
+  "mkt-take-high": "mktTakeHigh",
 };
 
 /**

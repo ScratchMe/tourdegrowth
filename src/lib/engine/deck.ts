@@ -47,6 +47,7 @@ import {
   catalogueValues,
   chainTemplate,
   churnWithoutCommonAmount,
+  diagnosesOf,
   fillSegments,
   notEnoughBelowValues,
   numbered,
@@ -760,8 +761,8 @@ function buildAsk(
     .filter((s) => statusOf(entryOf(snapshot, s.id)) === "missing")
     .map((s) => ({ id: s.id, repair: entryOf(snapshot, s.id)?.missing?.repair ?? s.defaultRepair }))
     .sort((a, b) => REPAIR_ORDER.indexOf(a.repair) - REPAIR_ORDER.indexOf(b.repair));
-  const first =
-    missing.find((m) => m.id === ask.measureFirst[0]) ?? missing.find((m) => derived.motions.some((d) => d.diagnosis.blind.includes(m.id))) ?? missing[0];
+  const diagnoses = derived.motions.flatMap(diagnosesOf);
+  const first = missing.find((m) => m.id === ask.measureFirst[0]) ?? missing.find((m) => diagnoses.some((d) => d.blind.includes(m.id))) ?? missing[0];
 
   // The goal, from what the team filled in — only those parts, so no « de  à  d'ici ».
   const id = ask.successMetric;

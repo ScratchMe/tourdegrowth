@@ -9,9 +9,12 @@ import {
   catalogueValues,
   chainTemplate,
   churnWithoutCommonAmount,
+  diagnosesOf,
   eventPhrase,
   fillSegments,
   isAnswerMetric,
+  isCandidate,
+  isRetentionMetric,
   isSingular,
   notEnoughBelowSentence,
   notEnoughBelowValues,
@@ -31,7 +34,9 @@ import {
 } from "../phrases";
 import type { Comparator, EngineState, ImpactLine, Interval } from "../types";
 import { CTX_EN, CTX_FR, EN, FR } from "./props";
-import { exampleState, hybridState, measured, ratio, withEntry, withTarget, withoutTargets } from "./fixtures";
+import { exampleState, hybridState, marketplaceNoSubscriptionsState, marketplaceState, measured, ratio, withEntry, withTarget, withoutTargets } from "./fixtures";
+import { MKT_DEMAND_CANDIDATE_IDS, MKT_SUPPLY_CANDIDATE_IDS } from "../catalog-shape";
+import { mktWhatIf } from "../mkt-impact";
 
 // lib/engine/phrases.ts — the words that go INTO the templates. Each rule is
 // here once, by itself; sentences-guard.test.ts sweeps them together over
@@ -427,5 +432,96 @@ describe("the diagnosis sentences, sales-assisted", () => {
 
   it("the chain's per-month line has no self-serve template: asking for one is a bug", () => {
     expect(() => chainTemplate({ key: "per-month", values: {} }, { metric: "act.rate", kind: "new-mrr" }, FR.strings.whatIf, "fr")).toThrow();
+  });
+});
+
+// --- A marketplace (§22.2.5, §22.5.5; A23 MKT-4). Non-vacuity, measured on 2026-10-25: see the entry of A23 MKT-4 in
+// `JOURNAL.md`.
+
+describe("a marketplace's sentences", () => {
+  const mktDerived = (state: EngineState) => deriveEngine(state, CTX_FR, null, FR.bridges, FR.strings.units).motions.find((m) => m.motion === "mkt")!;
+  const words = FR.typeCatalogs.marketplace;
+  const identity = Object.fromEntries(
+    ["today", "if", "then", "times", "todayFlow", "todayFlowOne", "ifFlow", "thenFlow", "thenReferral", "timesFlow", "todayChurn", "thenChurn", "thenChurnOne", "timesChurn", "annual", "lessThanOne"].map((k) => [k, k]),
+  ) as unknown as typeof FR.strings.whatIf;
+  const line = (key: ImpactLine["key"], count?: Interval): ImpactLine => ({ key, values: {}, ...(count ? { count } : {}) });
+  const many: Interval = { lo: 12, hi: 12 };
+
+  it("a churn is recognised by a function, not by the id of the SaaS's: the SaaS's, the buyers' and the paid sellers' — and no other number", () => {
+    for (const id of ["ret.logo-churn", "mkt.buy.churn", "mkt.sell.paid-churn"] as const) expect(isRetentionMetric(id), id).toBe(true);
+    // The active sellers' churn is unpriced: a stage named without an amount, never a chain of customers kept.
+    for (const id of ["mkt.sell.churn", "mkt.buy.repeat", "mkt.liq.fill-rate", "slg.ret.renewal", "app.ret.active-retention", "ret.d30"] as const) expect(isRetentionMetric(id), id).toBe(false);
+  });
+
+  it("prints each line of a side's churn chain with the churn's templates, and a flow's with the flow's", () => {
+    for (const metric of ["mkt.buy.churn", "mkt.sell.paid-churn"] as const) {
+      const churn = { metric, kind: "retained-mrr" } as const;
+      expect(chainTemplate(line("today"), churn, identity, "en").template, metric).toBe("todayChurn");
+      expect(chainTemplate(line("then", many), churn, identity, "en").template, metric).toBe("thenChurn");
+      expect(chainTemplate(line("then", { lo: 1, hi: 1 }), churn, identity, "en").template, metric).toBe("thenChurnOne");
+      expect(chainTemplate(line("times"), churn, identity, "en").template, metric).toBe("timesChurn");
+    }
+    const flow = { metric: "mkt.liq.fill-rate", kind: "new-mrr" } as const;
+    expect(chainTemplate(line("today", many), flow, identity, "en").template).toBe("todayFlow");
+    expect(chainTemplate(line("then"), flow, identity, "en").template).toBe("thenFlow");
+    expect(chainTemplate(line("times"), flow, identity, "en").template).toBe("timesFlow");
+  });
+
+  it("prints the buyers' referred share with the referral's arithmetic, « 600 × (100 – 8)/(100 – 12) », as the SaaS's", () => {
+    expect(chainTemplate(line("then"), { metric: "mkt.buy.referred-share", kind: "new-mrr" }, identity, "en").template).toBe("thenReferral");
+    expect(chainTemplate(line("then"), { metric: "ref.referred-share", kind: "new-mrr" }, identity, "en").template).toBe("thenReferral");
+    expect(chainTemplate(line("then"), { metric: "mkt.buy.first-order", kind: "new-mrr" }, identity, "en").template).toBe("thenFlow");
+  });
+
+  it("says the customers kept for a churn without an amount, and the customers added for a flow: « kept » is the churn's key", () => {
+    const state = withEntry(marketplaceState(), "mkt.rev.take-rate", undefined);
+    const kept = mktWhatIf(state, "mkt.buy.churn", 3, CTX_FR, FR.strings.units)!;
+    expect(kept.kind).toBe("customers");
+    expect(worthOf(kept, FR.strings, "fr")).toBe("140 clients gardés par mois");
+    const added = mktWhatIf(state, "mkt.liq.fill-rate", 12, CTX_FR, FR.strings.units)!;
+    expect(worthOf(added, FR.strings, "fr")).toBe("200 clients payants de plus par mois");
+    const paid = mktWhatIf(withEntry(marketplaceState(), "mkt.sell.arpa", undefined), "mkt.sell.paid-churn", 2.5, CTX_FR, FR.strings.units)!;
+    expect(worthOf(paid, FR.strings, "fr")).toBe("5 clients gardés par mois");
+  });
+
+  it("knows the eleven candidates of the two sides, and stays false for a number that is none", () => {
+    for (const id of [...MKT_DEMAND_CANDIDATE_IDS, ...MKT_SUPPLY_CANDIDATE_IDS]) expect(isCandidate(id), id).toBe(true);
+    for (const id of ["mkt.rev.take-rate", "mkt.buy.cac", "mkt.sell.arpa", "mkt.sell.gross-margin", "mkt.rev.frequency"] as const) expect(isCandidate(id), id).toBe(false);
+  });
+
+  it("names a candidate with its article in a sentence, from `subject`, for every one of the eleven", () => {
+    expect(subjectOf("mkt.liq.fill-rate", FR.strings, words.metrics)).toBe("le taux de service");
+    expect(subjectOf("mkt.sell.paid-conversion", EN.strings, EN.typeCatalogs.marketplace.metrics)).toBe("seller subscription conversion");
+    for (const id of [...MKT_DEMAND_CANDIDATE_IDS, ...MKT_SUPPLY_CANDIDATE_IDS]) expect(subjectOf(id, FR.strings, words.metrics), id).toBe(FR.strings.subject[id]);
+  });
+
+  it("holds the demand's diagnosis then the supply's, in that order, for a reader that names stages — and one for any other motion", () => {
+    const mkt = mktDerived(marketplaceState());
+    expect(diagnosesOf(mkt).map((d) => d.side)).toEqual(["demand", "supply"]);
+    const plg = deriveEngine(exampleState(), CTX_FR, null, FR.bridges, FR.strings.units).motions[0]!;
+    expect(diagnosesOf(plg)).toEqual([plg.motion === "plg" ? plg.diagnosis : null]);
+    const hybrid = deriveEngine(hybridState(), CTX_FR, null, FR.bridges, FR.strings.units).motions;
+    expect(hybrid.flatMap(diagnosesOf).map((d) => d.motion)).toEqual(["plg", "slg"]);
+  });
+
+  it("not enough targets, for a side: which stage is behind, and where — the supply with no subscriptions, only its first sale", () => {
+    const supply = diagnosesOf(mktDerived(marketplaceNoSubscriptionsState()))[1]!;
+    expect(supply.state).toBe("not-enough");
+    expect(notEnoughBelowValues(supply, FR.strings, words.metrics)).toEqual({ stage: "La première vente", side: "sous la cible" });
+    expect(notEnoughBelowSentence(supply, FR.strings, words.metrics)).toBe(
+      "La première vente est sous la cible. Sans cible sur les autres étapes, impossible de dire si c'est la plus grosse fuite.",
+    );
+    // A side that names a stage has no such sentence.
+    expect(notEnoughBelowSentence(diagnosesOf(mktDerived(marketplaceState()))[1]!, FR.strings, words.metrics)).toBeNull();
+  });
+
+  it("the unpriced stages after the colon, as labels: the first sale on the supply, and the paid churn only when the flows can't set an amount next to it", () => {
+    const supply = diagnosesOf(mktDerived(marketplaceState()))[1]!;
+    const name = words.metrics.find((m) => m.id === "mkt.sell.first-sale")!.name;
+    expect(unpricedSentence(supply, FR.strings, words.metrics)).toBe(`Aussi en retard, sans montant calculable${NB}: ${name}`);
+    // Without the price the paid churn has no amount to set next to the conversion's: said once, in `noArpa`, not also in the list.
+    const noPrice = diagnosesOf(mktDerived(withEntry(marketplaceState(), "mkt.sell.arpa", undefined)))[1]!;
+    expect(churnWithoutCommonAmount(noPrice)).toBe(true);
+    expect(unpricedSentence(noPrice, FR.strings, words.metrics)).toBe(`Aussi en retard, sans montant calculable${NB}: ${name}`);
   });
 });

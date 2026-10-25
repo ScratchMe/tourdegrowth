@@ -1,4 +1,4 @@
-import { REFERRAL_CANDIDATES, isPricedAt } from "./catalog-shape";
+import { REFERRAL_CANDIDATES, isPricedAt, isRetentionMetric } from "./catalog-shape";
 import {
   formatApproxMoneyInterval,
   formatCountInterval,
@@ -288,7 +288,8 @@ export function impactHeadline(impact: Impact): { amount?: string; n?: string; c
   if (perMonth?.values.amount) return { amount: perMonth.values.amount };
   if (sum?.values.amount) return { amount: sum.values.amount };
   if (times?.values.amount) return { amount: times.values.amount };
-  if (impact.metric === "ret.logo-churn") return { n: then?.values.n, count: then?.count };
+  // A churn counts the customers it keeps — the SaaS's, and each side of a marketplace (§22.5.5).
+  if (isRetentionMetric(impact.metric)) return { n: then?.values.n, count: then?.count };
   if (impact.metric === "slg.ret.renewal") return { n: then?.values.kept, count: then?.count };
   return { n: then?.values.delta, count: then?.count };
 }

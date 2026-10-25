@@ -1,8 +1,23 @@
 import { describe, expect, it } from "vitest";
 import { deriveEngine } from "../derive";
 import type { EngineState, Finding, FindingKind, MetricEntry } from "../types";
-import { CTX_FR, FR } from "./props";
-import { estimated, exampleState, filmState, hybridState, measured, missing, ratio, salesAssistedState, tourResult, withEntry, hybridNoMarginState, noMarginState } from "./fixtures";
+import { CTX_FR, EN, FR } from "./props";
+import {
+  estimated,
+  exampleState,
+  filmState,
+  hybridState,
+  marketplaceNoSubscriptionsState,
+  marketplaceState,
+  measured,
+  missing,
+  ratio,
+  salesAssistedState,
+  tourResult,
+  withEntry,
+  hybridNoMarginState,
+  noMarginState,
+} from "./fixtures";
 import { findingText } from "../sentences";
 
 // Engine spec §13.1 "findings" — a table case → kinds, and stable ranks.
@@ -204,5 +219,136 @@ describe("findings — the loss (§20.4, C48, A20 T1)", () => {
   it("no loss, no finding: the film with a 2 % churn, the §6.0 example with no margin", () => {
     expect(loss(derive(withEntry(filmState(), "ret.logo-churn", measured(ratio(8, 400)))).findings)).toEqual([]);
     expect(loss(derive(exampleState()).findings)).toEqual([]);
+  });
+});
+
+// --- A marketplace (§22.5.8; A23 MKT-4) — each finding says the side of its number (C70).
+// Non-vacuity, measured on 2026-10-25: see the entry of A23 MKT-4 in `JOURNAL.md`.
+
+describe("findings — a marketplace", () => {
+  const NB = "\u00a0";
+  const sideOf = (fs: Finding[]) => fs.map((f) => `${f.kind}:${f.side}:${f.metrics.join("+")}`);
+  const words = FR.typeCatalogs.marketplace;
+  const textOf = (f: Finding, state: EngineState) => findingText(f, state, FR.strings, words.metrics, words.derived, "fr");
+
+  it("the example: one stage below its target on each side, in the demand-then-supply order, and nothing else", () => {
+    const state = marketplaceState();
+    expect(derive(state).findings).toEqual([
+      { kind: "below-comparator", motion: "mkt", side: "demand", rank: 2, metrics: ["mkt.liq.fill-rate"], values: { value: `9${NB}%`, comparator: `12${NB}%` } },
+      { kind: "below-comparator", motion: "mkt", side: "supply", rank: 2, metrics: ["mkt.sell.paid-conversion"], values: { value: `15${NB}%`, comparator: `20${NB}%` } },
+    ]);
+    // No loss, no missing figure, no alert: §22.10.2.
+    expect(derive(marketplaceNoSubscriptionsState()).findings.map((f) => `${f.side}:${f.metrics}`)).toEqual(["demand:mkt.liq.fill-rate"]);
+  });
+
+  it("a column of a funnel that nobody could pull breaks the chain, said with its own verb, in both languages", () => {
+    const cases: [string, Parameters<typeof missing>[0], string, string][] = [
+      ["mkt.buy.first-order", "no-access", "Sur 100 inscrits, on ne sait pas dire combien passent une première commande.", "Out of 100 sign-ups, we can't say how many place a first order."],
+      ["mkt.buy.repeat", "no-access", "Sur 100 inscrits, on ne sait pas dire combien en passent une deuxième.", "Out of 100 sign-ups, we can't say how many place a second one."],
+      ["mkt.sell.first-sale", "no-access", "Sur 100 inscrits, on ne sait pas dire combien font une première vente.", "Out of 100 sign-ups, we can't say how many make a first sale."],
+      ["mkt.sell.paid-conversion", "no-access", "Sur 100 inscrits, on ne sait pas dire combien s'abonnent.", "Out of 100 sign-ups, we can't say how many subscribe."],
+    ];
+    for (const [id, cause, fr, en] of cases) {
+      const state = withEntry(marketplaceState(), id as never, missing(cause, "meeting"));
+      const [f] = derive(state).findings.filter((x) => x.kind === "chain-break");
+      expect(f, id).toMatchObject({ kind: "chain-break", motion: "mkt", side: id.startsWith("mkt.sell") ? "supply" : "demand", rank: 1, metrics: [id] });
+      expect(textOf(f!, state), id).toBe(fr);
+      expect(findingText(f!, state, EN.strings, words.metrics, words.derived, "en"), id).toBe(en);
+    }
+    // In progress is collection, not a finding; and the supply's subscription column is gone with the subscriptions.
+    expect(kinds(derive(withEntry(marketplaceState(), "mkt.buy.repeat", undefined)).findings)).not.toContain("chain-break");
+    expect(kinds(derive(withEntry(marketplaceNoSubscriptionsState(), "mkt.sell.paid-conversion", missing("no-access", "meeting"))).findings)).not.toContain("chain-break");
+  });
+
+  it("no shared definition, and two numbers that disagree, each on the side of its number — the fill rate on the demand's", () => {
+    let state = withEntry(marketplaceState(), "mkt.sell.arpa", missing("no-definition", "meeting"));
+    state = withEntry(state, "mkt.liq.fill-rate", missing("no-definition", "meeting"));
+    expect(sideOf(derive(state).findings.filter((f) => f.kind === "no-definition"))).toEqual(["no-definition:demand:mkt.liq.fill-rate", "no-definition:supply:mkt.sell.arpa"]);
+    const disagree: MetricEntry = {
+      status: "conflicting",
+      conflict: { a: { value: ratio(10, 100), source: tool }, b: { value: ratio(12, 100), source: { kind: "person", role: "finance" } } },
+      updatedAt: "2026-09-20T10:00:00.000Z",
+    };
+    const both = withEntry(withEntry(marketplaceState(), "mkt.rev.take-rate", disagree), "mkt.sell.gross-margin", disagree);
+    expect(sideOf(derive(both).findings.filter((f) => f.kind === "conflict"))).toEqual(["conflict:demand:mkt.rev.take-rate", "conflict:supply:mkt.sell.gross-margin"]);
+  });
+
+  it("names the stages each side's diagnosis named — the shared case gives every one a finding, a churn above its target is « above »", () => {
+    // 5,5 % against a 4 % ceiling is worth 491,40 € a month, the fill rate's 468 €: within 25 %, both are named.
+    const targeted = withEntry(marketplaceState(), "mkt.buy.churn", measured(ratio(770, 14_000), tool));
+    targeted.snapshots[0]!.targets["mkt.buy.churn"] = 4;
+    const f = derive(targeted).findings.filter((x) => x.kind === "below-comparator" && x.side === "demand");
+    expect(f.map((x) => x.metrics[0])).toEqual(["mkt.buy.churn", "mkt.liq.fill-rate"]);
+    expect(textOf(f[0]!, targeted)).toBe(`${words.metrics.find((m) => m.id === "mkt.buy.churn")!.name}${NB}: 5,5${NB}%, au-dessus de 4${NB}%.`);
+  });
+
+  it("an LTV that cannot be computed is a finding only when an input was looked for and not found, on the side that lacks it", () => {
+    const demand = withEntry(marketplaceState(), "mkt.rev.gross-margin", missing("not-tracked", "meeting"));
+    const [d] = derive(demand).findings.filter((f) => f.kind === "unit-econ-uncomputable");
+    expect(d).toMatchObject({ motion: "mkt", side: "demand", rank: 3, metrics: ["mkt.rev.cac-payback", "mkt.rev.gross-margin"] });
+    expect(textOf(d!, demand)).toBe("Impossible de dire en combien de mois un client rembourse son coût d'acquisition. Il manque la marge sur le revenu net.");
+    const supply = withEntry(marketplaceState(), "mkt.sell.gross-margin", missing("not-tracked", "meeting"));
+    expect(derive(supply).findings.filter((f) => f.kind === "unit-econ-uncomputable")).toMatchObject([{ side: "supply", metrics: ["mkt.sell.cac-payback", "mkt.sell.gross-margin"] }]);
+    // Still to do, not looked for: collection, not a finding. And the supply's economics are not shown without the subscriptions.
+    expect(kinds(derive(withEntry(marketplaceState(), "mkt.rev.gross-margin", undefined)).findings)).not.toContain("unit-econ-uncomputable");
+    expect(kinds(derive(withEntry(marketplaceNoSubscriptionsState(), "mkt.sell.gross-margin", missing("not-tracked", "meeting"))).findings)).not.toContain("unit-econ-uncomputable");
+  });
+
+  it("a buyer who costs more than he brings back is a loss on the demand, the CAC as typed", () => {
+    // 60 000 € for 600 new buyers: 100 € a buyer, against an LTV of 32 to 38 €.
+    const state = withEntry(marketplaceState(), "mkt.buy.cac", measured(ratio(60_000, 600), tool, { variant: "media-only" }));
+    const loss = derive(state).findings.filter((f) => f.kind === "unit-econ-loss" || f.kind === "unit-econ-loss-maybe");
+    expect(loss).toMatchObject([{ kind: "unit-econ-loss", motion: "mkt", side: "demand", rank: 1, metrics: ["mkt.rev.ltv", "mkt.buy.cac"] }]);
+    expect(loss[0]!.values.cac).toBe(`100${NB}€`);
+    // Rank 1 sorts it before the stages below their target.
+    const all = derive(state).findings;
+    expect(all.findIndex((f) => f.kind === "unit-econ-loss")).toBeLessThan(all.findIndex((f) => f.kind === "below-comparator"));
+  });
+
+  it("a paid seller is set against what a PAID seller costs, 900 €, not the 450 € of an active one — the cost no one typed", () => {
+    // 54 000 € for 120 new active sellers: 450 € each, an LTV of 821,67 € would not be a loss. A paid seller costs 450 × 30 ÷ 15 = 900 €.
+    const state = withEntry(marketplaceState(), "mkt.sell.cac", measured(ratio(54_000, 120), tool, { variant: "media-only" }));
+    const loss = derive(state).findings.filter((f) => f.kind === "unit-econ-loss" || f.kind === "unit-econ-loss-maybe");
+    expect(loss).toMatchObject([{ kind: "unit-econ-loss", motion: "mkt", side: "supply", rank: 1, metrics: ["mkt.sell.ltv", "mkt.sell.cac"] }]);
+    expect(loss[0]!.values.cac).toBe(`900${NB}€`);
+    // The example's own: 100 € an active seller, 200 € a paid one, against 821,67 €: no loss.
+    expect(kinds(derive(marketplaceState()).findings)).not.toContain("unit-econ-loss");
+    // Without the subscriptions there is no paid seller, so no loss on the supply, whatever the cost typed.
+    const none = withEntry(marketplaceNoSubscriptionsState(), "mkt.sell.cac", measured(ratio(54_000, 12), tool, { variant: "media-only" }));
+    expect(derive(none).findings.filter((f) => f.side === "supply")).toEqual([]);
+  });
+
+  it("the chain and the buyer CAC's count don't describe the same population: the check's finding, on the demand", () => {
+    const off = withEntry(marketplaceState(), "mkt.buy.cac", measured(ratio(18_000, 100), tool, { variant: "media-only" }));
+    const [f] = derive(off).findings.filter((x) => x.kind === "reconcile-gap");
+    expect(f).toMatchObject({ motion: "mkt", side: "demand", rank: 3, metrics: ["mkt.buy.signup-rate", "mkt.buy.first-order", "mkt.buy.cac"], values: { p: "600", n: "100", month: `août 2026` } });
+    expect(f!.count).toEqual({ lo: 600, hi: 600 });
+  });
+
+  it("each sign-up weighs more than a point on a side's cohort under 100, said for that side", () => {
+    const demand = withEntry(marketplaceState(), "mkt.buy.first-order", measured(ratio(14, 80), tool));
+    expect(sideOf(derive(demand).findings.filter((f) => f.kind === "small-cohort"))).toEqual(["small-cohort:demand:"]);
+    const supply = withEntry(marketplaceState(), "mkt.sell.first-sale", measured(ratio(24, 80), tool));
+    expect(sideOf(derive(supply).findings.filter((f) => f.kind === "small-cohort"))).toEqual(["small-cohort:supply:"]);
+    const both = withEntry(demand, "mkt.sell.first-sale", measured(ratio(24, 80), tool));
+    expect(sideOf(derive(both).findings.filter((f) => f.kind === "small-cohort"))).toEqual(["small-cohort:demand:", "small-cohort:supply:"]);
+  });
+
+  it("the Tour's bridges of a marketplace are the buyers' side: a blind spot on the buyer CAC says demand", () => {
+    // acq-3 declared tracked (20 points) but the buyer CAC is missing: the Tour said it was tracked, nobody could pull it.
+    const result = tourResult({ "acq-3": 0 });
+    const linked: EngineState = { ...withEntry(marketplaceState(), "mkt.buy.cac", missing("no-access", "meeting")), tourLink: { resultId: result.id, linkedAt: "2026-09-24T09:00:00.000Z" } };
+    const blind = derive(linked, result).findings.filter((f) => f.kind === "blind-spot");
+    expect(blind).toMatchObject([{ motion: "mkt", side: "demand", rank: 2, metrics: ["mkt.buy.cac"] }]);
+  });
+
+  it("ranks never decrease, the demand's findings come before the supply's within a kind, and a SaaS's carry no side", () => {
+    const state = withEntry(withEntry(marketplaceState(), "mkt.buy.cac", measured(ratio(60_000, 600), tool, { variant: "media-only" })), "mkt.sell.cac", measured(ratio(54_000, 120), tool, { variant: "media-only" }));
+    const fs = derive(state).findings;
+    for (let i = 1; i < fs.length; i++) expect(fs[i]!.rank).toBeGreaterThanOrEqual(fs[i - 1]!.rank);
+    expect(sideOf(fs).map((s) => s.split(":").slice(0, 2).join(":"))).toEqual(["unit-econ-loss:demand", "unit-econ-loss:supply", "below-comparator:demand", "below-comparator:supply"]);
+    expect(derive(state).findings).toEqual(fs);
+    for (const f of derive(exampleState()).findings) expect(f).not.toHaveProperty("side");
+    for (const f of derive(hybridState()).findings) expect(f).not.toHaveProperty("side");
   });
 });

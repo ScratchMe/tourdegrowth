@@ -5,7 +5,7 @@ import { twelveMonthFactor } from "../impact";
 import { mul } from "../interval";
 import { mktNetRevenueToday, mktNewBuyersPerMonth, mktNewPaidSellers, mktRevenuePerBuyer, mktSellerMrrToday } from "../mkt-economics";
 import { demandPath, sellerPath } from "../mkt-model";
-import { buildMktScenario, mktLeverAlone, mktTotalPaths, type MktScenario, type MktScenarioAssumption } from "../mkt-scenario";
+import { buildMktScenario, mktLeverAlone, mktTotal, mktTotalPaths, type MktScenario, type MktScenarioAssumption } from "../mkt-scenario";
 import { scenarioOf } from "../scenario-of";
 import type { EngineState, Interval, LeverId } from "../types";
 import { knownIn } from "../values";
@@ -638,5 +638,104 @@ describe("the seams of A22 do not serve the marketplace (§22.5.4)", () => {
       expect(known.kind, lever.id).toBe("known");
       expect(lever.today, lever.id).toEqual(known.kind === "known" ? known.value : null);
     }
+  });
+});
+
+// --- The total's three rows (A23 MKT-4, §22.5.9). Non-vacuity, measured on 2026-10-25: see the entry of A23 MKT-4 in `JOURNAL.md`.
+
+describe("mktTotal — this month, new a month, in twelve months (S9)", () => {
+  const total = mktTotal(example, CTX_FR);
+  const known = (v: { kind: string }) => v as Extract<typeof total.now.total, { kind: "known" }>;
+  const amount = (v: { kind: string }) => only(known(v).value);
+
+  it("adds the two sides' shares of the example: 58 953,60 € this month, 3 144 € new a month, 69 590,04 € in twelve months", () => {
+    expect([amount(total.now.demand), amount(total.now.supply!), amount(total.now.total)].map(r2)).toEqual([32_853.6, 26_100, 58_953.6]);
+    expect([amount(total.newPerMonth.demand), amount(total.newPerMonth.supply!), amount(total.newPerMonth.total)].map(r2)).toEqual([1_404, 1_740, 3_144]);
+    expect([amount(total.in12Months.demand), amount(total.in12Months.supply!), amount(total.in12Months.total)].map(r2)).toEqual([33_723.61, 35_866.43, 69_590.04]);
+  });
+
+  it("reads each share on its own scenario, with no what-if: the first and the last point of the curves", () => {
+    expect(amount(total.now.demand)).toBeCloseTo(demandToday.today.kpis.mrrPath![0]!.lo, 9);
+    expect(amount(total.in12Months.demand)).toBeCloseTo(demandToday.today.kpis.mrrPath![12]!.lo, 9);
+    expect(amount(total.in12Months.supply!)).toBeCloseTo(supplyToday.today.kpis.mrrPath![12]!.lo, 9);
+    // The total's curve is the sum of the two, so its ends are the total's rows.
+    const curve = mktTotalPaths(example, {}, CTX_FR).today!;
+    expect(curve[0]!.lo).toBeCloseTo(amount(total.now.total), 9);
+    expect(curve[12]!.lo).toBeCloseTo(amount(total.in12Months.total), 9);
+    // A what-if moves nothing here: the three rows are today's, at the current pace.
+    expect(mktTotal(withWhatIf(example, EXAMPLE_MKT_WHATIF), CTX_FR)).toEqual(total);
+  });
+
+  it("this month is exact (`solid`) when the side's count is typed, and every other share is a model's (`approximate`)", () => {
+    const confidences = (row: typeof total.now) => [row.demand, row.supply, row.total].map((v) => known(v!).confidence);
+    expect(confidences(total.now)).toEqual(["solid", "solid", "solid"]);
+    expect(confidences(total.newPerMonth)).toEqual(["approximate", "approximate", "approximate"]);
+    expect(confidences(total.in12Months)).toEqual(["approximate", "approximate", "approximate"]);
+    // Without a typed count of the month's revenue (the take rate typed as a rate, the subscription as an amount, so no
+    // entry carries it) the month is a × the active buyers, and the price × the paid sellers: a model's, to the same figure.
+    const stripe = { kind: "tool", tool: "stripe" } as const;
+    const buyersModelled = (state: EngineState) => {
+      const next = withEntry(state, "mkt.rev.take-rate", measured({ kind: "rate", percent: 12 }, stripe));
+      delete next.snapshots[0]!.base!.mktNetRevenue;
+      return next;
+    };
+    const sellersModelled = (state: EngineState) => {
+      const next = withEntry(withEntry(state, "mkt.sell.arpa", measured({ kind: "amount", amount: 29 }, stripe)), "mkt.sell.gross-margin", measured({ kind: "rate", percent: 85 }, stripe));
+      delete next.snapshots[0]!.base!.mktSellerMrrEnd;
+      return next;
+    };
+    // One exact share and one modelled: the weakest of the two.
+    expect(confidences(mktTotal(sellersModelled(example), CTX_FR).now)).toEqual(["solid", "approximate", "approximate"]);
+    expect(confidences(mktTotal(buyersModelled(example), CTX_FR).now)).toEqual(["approximate", "solid", "approximate"]);
+    const both = mktTotal(buyersModelled(sellersModelled(example)), CTX_FR);
+    expect(confidences(both.now)).toEqual(["approximate", "approximate", "approximate"]);
+    expect([amount(both.now.demand), amount(both.now.supply!)].map(r2)).toEqual([32_853.6, 26_100]);
+  });
+
+  it("the sellers pay nothing: the total is the commissions alone, and the supply of every row is null", () => {
+    const none = mktTotal(noSubscriptions, CTX_FR);
+    for (const row of [none.now, none.newPerMonth, none.in12Months]) {
+      expect(row.supply).toBeNull();
+      expect(row.total).toEqual(row.demand);
+    }
+    expect([none.now, none.newPerMonth, none.in12Months].map((r) => r2(amount(r.total)))).toEqual([32_853.6, 1_404, 33_723.61]);
+    // The subscription numbers stay stored, and read as nothing: emptying them moves nothing.
+    expect(mktTotal(withEntry(withEntry(noSubscriptions, "mkt.sell.arpa", undefined), "mkt.sell.paid-churn", undefined), CTX_FR)).toEqual(none);
+  });
+
+  it("a total exists only when its parts do (S9): the known part is never passed off as the total, and the total names what each part lacks", () => {
+    // No take rate: the month's revenue is the typed count, but what a new buyer brings is unknown, so is the demand's new revenue.
+    const noTake = mktTotal(withEntry(example, "mkt.rev.take-rate", undefined), CTX_FR);
+    expect(noTake.now.demand.kind).toBe("known");
+    expect(noTake.newPerMonth.demand).toEqual({ kind: "uncomputable", missing: ["mkt.rev.take-rate"] });
+    expect(noTake.newPerMonth.supply!.kind).toBe("known");
+    expect(noTake.newPerMonth.total).toEqual({ kind: "uncomputable", missing: ["mkt.rev.take-rate"] });
+    expect(noTake.in12Months.total).toEqual({ kind: "uncomputable", missing: ["mkt.rev.take-rate"] });
+    // Both sides lacking something: the union, the demand's first.
+    const both = mktTotal(withEntry(withEntry(example, "mkt.rev.take-rate", undefined), "mkt.sell.arpa", undefined), CTX_FR);
+    expect(both.newPerMonth.total).toEqual({ kind: "uncomputable", missing: ["mkt.rev.take-rate", "mkt.sell.arpa"] });
+    // Each row names what ITS figure reads: the twelve months also need the churn, this month needs neither the cost nor the churn.
+    const noChurn = mktTotal(withEntry(example, "mkt.buy.churn", undefined), CTX_FR);
+    expect(noChurn.now.total.kind).toBe("known");
+    expect(noChurn.newPerMonth.total.kind).toBe("known");
+    expect(noChurn.in12Months.demand).toEqual({ kind: "uncomputable", missing: ["mkt.buy.churn"] });
+    expect(noChurn.in12Months.total).toEqual({ kind: "uncomputable", missing: ["mkt.buy.churn"] });
+    const noPaidChurn = mktTotal(withEntry(example, "mkt.sell.paid-churn", undefined), CTX_FR);
+    expect(noPaidChurn.in12Months.supply).toEqual({ kind: "uncomputable", missing: ["mkt.sell.paid-churn"] });
+    expect(noPaidChurn.in12Months.demand.kind).toBe("known");
+  });
+
+  it("names the first input of the figure when every one is known and the figure still is not: new buyers that cannot be counted", () => {
+    const noN = withEntry(withEntry(example, "mkt.buy.cac", measured({ kind: "amount", amount: 30 }, { kind: "tool", tool: "ga4" })), "mkt.buy.signup-rate", measured({ kind: "rate", percent: 5 }, { kind: "tool", tool: "ga4" }));
+    expect(mktTotal(noN, CTX_FR).newPerMonth.demand).toEqual({ kind: "uncomputable", missing: ["mkt.rev.frequency"] });
+  });
+
+  it("an empty marketplace has a total of nothing known, naming the figure each row lacks", () => {
+    const empty = structuredClone(example);
+    empty.snapshots[0]!.metrics = {};
+    empty.snapshots[0]!.base = {};
+    const none = mktTotal(empty, CTX_FR);
+    expect(none.now.total).toEqual({ kind: "uncomputable", missing: ["mkt.rev.frequency", "mkt.rev.aov", "mkt.rev.take-rate", "mkt.sell.arpa"] });
+    expect(none.in12Months.total.kind).toBe("uncomputable");
   });
 });

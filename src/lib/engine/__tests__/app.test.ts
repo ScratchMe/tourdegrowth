@@ -1167,8 +1167,8 @@ describe("the example, derived (§21.9.2)", () => {
     expect(d.diagnosis).toEqual(diagnose(consumerState(), CTX_FR));
     const plg = d.motions[0]!;
     expect(plg.motion === "plg" && plg.peloton).toBe(d.peloton);
-    expect(plg.diagnosis).toBe(d.diagnosis);
-    expect(plg.unit).toBe(d.unit);
+    expect(plg.motion === "plg" && plg.diagnosis).toBe(d.diagnosis);
+    expect(plg.motion === "plg" && plg.unit).toBe(d.unit);
   });
 
   it("raises one finding per stage named — below its target — and no loss, no missing figure", () => {

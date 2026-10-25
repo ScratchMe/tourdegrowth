@@ -1,7 +1,21 @@
 import { appRules } from "./app";
-import { CANDIDATE_IDS, CLEAR_MARGIN, METRIC_SHAPES, SLG_CANDIDATE_IDS, SLG_METRIC_SHAPES, UNPRICED_CANDIDATES, isPricedAt } from "./catalog-shape";
+import {
+  CANDIDATE_IDS,
+  CLEAR_MARGIN,
+  LOWER_IS_BETTER_CANDIDATES,
+  METRIC_SHAPES,
+  MKT_DEMAND_CANDIDATE_IDS,
+  MKT_SUPPLY_CANDIDATE_IDS,
+  SLG_CANDIDATE_IDS,
+  SLG_METRIC_SHAPES,
+  UNPRICED_CANDIDATES,
+  isPricedAt,
+  shapesOf,
+  type SetupShapes,
+} from "./catalog-shape";
 import { isFlow, rankingImpact } from "./impact";
-import { isApp } from "./setup-type";
+import { SUPPLY_PRICED, mktRankingImpact } from "./mkt-impact";
+import { isApp, mktSetup } from "./setup-type";
 import { isSlgFlow, slgRankingImpact } from "./slg-impact";
 import type {
   CandidateId,
@@ -13,6 +27,8 @@ import type {
   Impact,
   Interval,
   MetricId,
+  MktCandidateId,
+  MktSide,
   Motion,
   PlgCandidateId,
   Position,
@@ -53,10 +69,14 @@ import { currentSnapshot, knownIn, statusOf } from "./values";
  * A consumer app (§21.5.4) follows them too, on the candidates its
  * monetization shows plus its own, the actives' retention, priced in two
  * streams by `app.ts#appRules`.
+ *
+ * A marketplace (§22.5.6) follows them once per SIDE (C70): the demand's
+ * candidates and the supply's are two separate calls, each against its own
+ * targets, so there is no « biggest leak of the two sides » either.
  */
 
 export function directionOf(id: CandidateId): Comparator["direction"] {
-  return id === "ret.logo-churn" ? "lower" : "higher";
+  return LOWER_IS_BETTER_CANDIDATES.includes(id) ? "lower" : "higher";
 }
 
 /** The comparator that may name this stage: the team's target, or none (§6.6, C1). */
@@ -108,6 +128,8 @@ function clearlyAbove(a: number, b: number): boolean {
  */
 export interface MotionRules<C extends CandidateId> {
   motion: EngineMotion;
+  /** A marketplace's rules are one side's (C70); copied into the diagnosis they produce. */
+  side?: MktSide;
   candidates: readonly C[];
   price: (state: EngineState, id: C, target: number, ctx: EngineCalcContext) => { gap?: Interval; mrr?: Interval };
   isFlow: (id: C) => boolean;
@@ -188,7 +210,7 @@ function diagnoseWith<C extends CandidateId>(rules: MotionRules<C>, state: Engin
     if (p.mrr) positions[p.id]!.impact = numericImpact(state, p.id, rules.retentions, positions[p.id]!.comparator!, p.mrr, ctx);
   }
 
-  const base = { motion: rules.motion, blind, positions };
+  const base = { motion: rules.motion, ...(rules.side ? { side: rules.side } : {}), blind, positions };
   if (comparable.length < 2) return { state: "not-enough", named: [], basis: "none", belowUnpriced: [], ...base };
   if (belows.length === 0) return { state: "level", named: [], basis: "none", belowUnpriced: [], ...base };
 
@@ -242,6 +264,63 @@ function numericImpact(state: EngineState, id: CandidateId, retentions: readonly
     mrrPerMonth: mrr,
     lines: [],
   };
+}
+
+// --- The two diagnoses of a marketplace (§22.5.6, A23 MKT-4) -------------------------
+
+/** The demand's four flows: each grows the same N, so each is priced by its relative gap (§22.5.5). */
+const MKT_DEMAND_FLOWS: readonly MktCandidateId[] = ["mkt.buy.signup-rate", "mkt.buy.first-order", "mkt.liq.fill-rate", "mkt.buy.referred-share"];
+
+/**
+ * The candidates one side positions, in canonical order. The supply's subscription ones (the sign-up rate, the paid
+ * conversion, the paid churn) exist only when the sellers pay a subscription (D9): the same filter `shapesOf` applies,
+ * so a side never positions a number its setup does not show.
+ */
+export function mktCandidates(side: MktSide, setup: SetupShapes): MktCandidateId[] {
+  const shown = new Set<MetricId>(shapesOf(setup).map((s) => s.id));
+  const own: readonly MktCandidateId[] = side === "demand" ? MKT_DEMAND_CANDIDATE_IDS : MKT_SUPPLY_CANDIDATE_IDS;
+  return own.filter((id) => shown.has(id));
+}
+
+/**
+ * One side's rules, built per setup like an app's (§21.5.4): its candidates and what it watches for blindness depend
+ * on the sellers' subscriptions box. The demand's four flows are priced by their relative gap, its churn on the active
+ * buyers; the supply's only priced candidates are `SUPPLY_PRICED` (C67, D4), the paid churn on the paid sellers.
+ */
+export function mktRules(side: MktSide, setup: SetupShapes): MotionRules<MktCandidateId> {
+  const candidates = mktCandidates(side, setup);
+  if (side === "demand") {
+    return {
+      motion: "mkt",
+      side,
+      candidates,
+      price: mktRankingImpact,
+      isFlow: (id) => MKT_DEMAND_FLOWS.includes(id),
+      retentions: ["mkt.buy.churn"],
+      // The five ★, then the churn and the fill rate: unknown, any of them may hide the real bottleneck.
+      blindWatch: ["mkt.buy.signup-rate", "mkt.buy.first-order", "mkt.buy.repeat", "mkt.buy.referred-share", "mkt.rev.take-rate", "mkt.buy.churn", "mkt.liq.fill-rate"],
+    };
+  }
+  return {
+    motion: "mkt",
+    side,
+    candidates,
+    price: mktRankingImpact,
+    // The only flow with an amount is the conversion to a paid seller; the paid churn is a base, the other three are unpriced.
+    isFlow: (id) => SUPPLY_PRICED.some((priced) => priced === id) && id !== "mkt.sell.paid-churn",
+    retentions: ["mkt.sell.paid-churn"],
+    blindWatch: mktSetup(setup).sellerSubscriptions
+      ? ["mkt.sell.first-sale", "mkt.sell.churn", "mkt.sell.paid-conversion", "mkt.sell.paid-churn"]
+      : ["mkt.sell.first-sale", "mkt.sell.churn"],
+  };
+}
+
+/**
+ * One side of a marketplace, against its own targets only (C70). The same single function names a stage as for every
+ * other motion (`diagnoseWith`); what differs is the rules, and a side never sees the candidates of the other.
+ */
+export function diagnoseSide(state: EngineState, ctx: EngineCalcContext, side: MktSide): Diagnosis<MktCandidateId> {
+  return diagnoseWith(mktRules(side, state.setup), state, ctx);
 }
 
 /** Never priced in v1 — exported so the screens word "not priced in €" from the same list the diagnosis uses. */

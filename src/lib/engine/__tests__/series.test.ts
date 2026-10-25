@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { shapeOf } from "../catalog-shape";
+import { MKT_METRIC_SHAPES, shapeOf } from "../catalog-shape";
 import { periodRangeOf } from "../cohort";
 import {
   calendarDay,
@@ -17,7 +17,20 @@ import {
 import { MAX_MONTHS, SNAPSHOT_WINDOW_KEYS, type EngineState, type MetricEntry } from "../types";
 import { validateEngine } from "../validate";
 import { currentSnapshot, knownOf } from "../values";
-import { EXAMPLE_TODAY, estimated, exampleState, hybridState, measured, missing, ratio, salesAssistedState, withMonthBefore } from "./fixtures";
+import {
+  EXAMPLE_TODAY,
+  estimated,
+  exampleState,
+  hybridState,
+  marketplaceNoSubscriptionsState,
+  marketplaceState,
+  measured,
+  missing,
+  ratio,
+  salesAssistedState,
+  withMonthBefore,
+  withTarget,
+} from "./fixtures";
 import { CTX_FR } from "./props";
 
 /**
@@ -467,5 +480,72 @@ describe("deriveSeries — the last two months side by side", () => {
     const january = deriveSeries(s, CTX);
     vi.setSystemTime(new Date(2031, 6, 14));
     expect(deriveSeries(s, CTX)).toEqual(january);
+  });
+});
+
+describe("deriveSeries — a marketplace (§22.5.9, A23 MKT-4)", () => {
+  // Non-vacuity, measured on 2026-10-25: see the entry of A23 MKT-4 in `JOURNAL.md`.
+  const ga4 = { kind: "tool", tool: "ga4" } as const;
+  const stripe = { kind: "tool", tool: "stripe" } as const;
+  const mkt = (state: EngineState) => deriveSeries(state, CTX)!.motions[0]!;
+
+  it("compares the marketplace's own motion, its nineteen numbers in catalogue order, both sides together", () => {
+    const series = deriveSeries(withMonthBefore(marketplaceState()), CTX)!;
+    expect(series).toMatchObject({ previousMonth: "2026-07", month: "2026-08", months: 2 });
+    expect(series.motions.map((m) => m.motion)).toEqual(["mkt"]);
+    expect(series.motions[0]!.rows.map((r) => r.metric)).toEqual(MKT_METRIC_SHAPES.map((s) => s.id));
+    // Every number compares with itself but the commissions' margin, which the example only estimates: « estimé en août ».
+    const rows = series.motions[0]!.rows;
+    expect(rows.filter((r) => !r.comparison.comparable).map((r) => [r.metric, r.comparison])).toEqual([["mkt.rev.gross-margin", { comparable: false, why: "estimated", month: "now" }]]);
+    expect(rows.find((r) => r.metric === "mkt.liq.fill-rate")).toMatchObject({ comparison: { comparable: true, before: 9, now: 9 }, delta: { kind: "points", change: 0 } });
+    // Without the sellers' subscriptions the five numbers of the subscriptions are not compared: fourteen.
+    expect(mkt(withMonthBefore(marketplaceNoSubscriptionsState())).rows).toHaveLength(14);
+  });
+
+  it("names each side's leak of the month before, on its own: the same stages in July as in August, nothing changed", () => {
+    expect(mkt(withMonthBefore(marketplaceState()))).toMatchObject({
+      motion: "mkt",
+      previousLeak: [],
+      leakChanged: false,
+      sides: {
+        demand: { previousLeak: ["mkt.liq.fill-rate"], leakChanged: false },
+        supply: { previousLeak: ["mkt.sell.paid-conversion"], leakChanged: false },
+      },
+    });
+  });
+
+  it("says when a side's leak changed stage, and only that side's: the demand's in one month, the supply's in another", () => {
+    // July: the fill rate met its 12 % target, so the demand's leak was the first order — August's is the fill rate.
+    const demand = mkt(withMonthBefore(marketplaceState(), (july) => void (july.metrics["mkt.liq.fill-rate"] = measured(ratio(3_380, 26_000), ga4))));
+    expect(demand.sides!.demand).toEqual({ previousLeak: ["mkt.buy.first-order"], leakChanged: true });
+    expect(demand.sides!.supply).toEqual({ previousLeak: ["mkt.sell.paid-conversion"], leakChanged: false });
+    // July: the conversion to a paid seller met its 20 % target, the paid sellers' churn was the leak — August's is the conversion.
+    const supply = mkt(withMonthBefore(marketplaceState(), (july) => void (july.metrics["mkt.sell.paid-conversion"] = measured(ratio(92, 420), stripe))));
+    expect(supply.sides!.supply).toEqual({ previousLeak: ["mkt.sell.paid-churn"], leakChanged: true });
+    expect(supply.sides!.demand).toEqual({ previousLeak: ["mkt.liq.fill-rate"], leakChanged: false });
+    // The motion's own fields say nothing: the screens read `sides`.
+    expect(demand.previousLeak).toEqual([]);
+    expect(demand.leakChanged).toBe(false);
+  });
+
+  it("a side that names nothing the month before has no previous leak: the supply without the subscriptions", () => {
+    expect(mkt(withMonthBefore(marketplaceNoSubscriptionsState())).sides).toEqual({
+      demand: { previousLeak: ["mkt.liq.fill-rate"], leakChanged: false },
+      supply: { previousLeak: [], leakChanged: false },
+    });
+  });
+
+  it("moves toward a target the right way for the marketplace's churns too: lower is better", () => {
+    // The buyers' churn was 5 % in July and is 4 % in August, against a 3,5 % ceiling: closer to it.
+    const state = withMonthBefore(withTarget(marketplaceState(), "mkt.buy.churn", 3.5), (july) => void (july.metrics["mkt.buy.churn"] = measured(ratio(700, 14_000), stripe)));
+    const row = mkt(state).rows.find((r) => r.metric === "mkt.buy.churn")!;
+    expect(row).toEqual({ metric: "mkt.buy.churn", comparison: { comparable: true, before: 5, now: 4 }, delta: { kind: "points", change: -1 }, towardTarget: true });
+    // A number that is no candidate has no « toward ».
+    expect(mkt(state).rows.find((r) => r.metric === "mkt.rev.aov")?.towardTarget).toBe(false);
+  });
+
+  it("a SaaS and an app have no `sides`: only a marketplace's motion holds one", () => {
+    expect(mkt(withMonthBefore(exampleState()))).not.toHaveProperty("sides");
+    for (const m of deriveSeries(withMonthBefore(hybridState()), CTX)!.motions) expect(m).not.toHaveProperty("sides");
   });
 });

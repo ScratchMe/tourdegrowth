@@ -2,10 +2,12 @@ import { METRIC_SHAPES, SLG_METRIC_SHAPES, shapeOf, shapesOf } from "./catalog-s
 import type { MetricShape } from "./catalog-shape";
 import { formatApproxMoneyInterval, formatInterval, formatNumber, roundDisplay, type UnitWords } from "./format";
 import { point, sub } from "./interval";
+import { mktPaidSellerCac } from "./mkt-economics";
 import { lossCheck } from "./money";
 import type { PelotonMetric } from "./peloton";
+import type { AnyDiagnosis } from "./phrases"; // type only: phrases.ts imports this module
 import { slgNoDecimals, smallestSample } from "./relays";
-import { isApp } from "./setup-type";
+import { isApp, mktSetup } from "./setup-type";
 import type {
   CandidateId,
   Comparator,
@@ -19,6 +21,7 @@ import type {
   Interval,
   MetricId,
   MetricValue,
+  MktSide,
   MotionDerived,
   Position,
 } from "./types";
@@ -50,6 +53,18 @@ export const CHAIN_VERB: Record<PelotonMetric, "activated" | "d30" | "paid"> = {
   "ret.d30": "d30",
   "rev.paid-conversion": "paid",
 };
+
+/**
+ * Which `findings.verbMkt.*` a marketplace's chain break uses — the column's own verb (§22.8.5 j): the buyers'
+ * first and second order, the sellers' first sale and, with subscriptions, their subscription.
+ */
+export const MKT_CHAIN_VERB = {
+  "mkt.buy.first-order": "first",
+  "mkt.buy.repeat": "repeat",
+  "mkt.sell.first-sale": "firstSale",
+  "mkt.sell.paid-conversion": "paid",
+} as const;
+export type MktChainColumn = keyof typeof MKT_CHAIN_VERB;
 
 const RANK: Record<Finding["kind"], Finding["rank"]> = {
   "chain-break": 1,
@@ -87,29 +102,38 @@ export function formatComparator(comparator: Comparator, id: MetricId, state: En
  * then sorted: by rank, by kind, and within a kind in canonical order —
  * self-serve's before sales-assisted's, never by a value. The link makes no
  * finding: it is optional, and its absence says nothing about the company.
+ * A marketplace's findings also say the side of their number (§22.5.8), the
+ * demand's before the supply's within a kind.
  */
 export function findings(state: EngineState, derived: Omit<EngineDerived, "findings">, ctx: EngineCalcContext, words: UnitWords): Finding[] {
   const snapshot = currentSnapshot(state);
   const out: Finding[] = [];
+  // A marketplace's finding also says which side it is about (C70).
   const addFor =
-    (motion: EngineMotion) =>
+    (motion: EngineMotion, side?: MktSide) =>
     (kind: Finding["kind"], metrics: Finding["metrics"], values: Record<string, string> = {}, count?: Interval) =>
-      out.push({ kind, motion, rank: RANK[kind], metrics, values, ...(count ? { count } : {}) });
+      out.push({ kind, motion, ...(side ? { side } : {}), rank: RANK[kind], metrics, values, ...(count ? { count } : {}) });
   const missing = (id: MetricId) => statusOf(entryOf(snapshot, id)) === "missing";
 
   for (const m of derived.motions) {
-    const add = addFor(m.motion);
-    if (m.motion === "plg") selfServeFindings(state, m, derived, ctx, words, add, missing);
-    else salesAssistedFindings(state, m, ctx, words, add, missing);
+    if (m.motion === "mkt") marketplaceFindings(state, m, derived, ctx, words, (side) => addFor("mkt", side), missing);
+    else {
+      const add = addFor(m.motion);
+      if (m.motion === "plg") selfServeFindings(state, m, derived, ctx, words, add, missing);
+      else salesAssistedFindings(state, m, ctx, words, add, missing);
+    }
   }
 
+  // The Tour's four bridges of a marketplace are the buyers' side's (`MKT_ENGINE_BRIDGES`); a sellers' number would be the supply's.
+  const addForRow = (row: { motion: EngineMotion; metric: MetricId | DerivedId }) =>
+    row.motion === "mkt" ? addFor("mkt", row.metric.startsWith("mkt.sell.") ? "supply" : "demand") : addFor(row.motion);
   // 2 — declared tracked at the Tour (20 points), and nobody could pull it.
   for (const row of derived.mirror?.rows ?? []) {
-    if (row.declared === "tracked" && row.found === "unknown") addFor(row.motion)("blind-spot", [row.metric]);
+    if (row.declared === "tracked" && row.found === "unknown") addForRow(row)("blind-spot", [row.metric]);
   }
   // 4 — the positive one: declared unknown at the Tour, and measured here.
   for (const row of derived.mirror?.rows ?? []) {
-    if (row.declared === "unknown" && row.found === "tracked") addFor(row.motion)("hidden-knowledge", [row.metric]);
+    if (row.declared === "unknown" && row.found === "tracked") addForRow(row)("hidden-knowledge", [row.metric]);
   }
 
   // Stable: by rank, then by kind; within a kind, the order above (motions in canonical order, then metrics).
@@ -124,7 +148,7 @@ type Add = (kind: Finding["kind"], metrics: Finding["metrics"], values?: Record<
 /** What a diagnosis named, with its value and the comparator that named it — the same in both motions. */
 function namedFindings(
   state: EngineState,
-  diagnosis: MotionDerived["diagnosis"],
+  diagnosis: AnyDiagnosis,
   ctx: EngineCalcContext,
   words: UnitWords,
   add: Add,
@@ -156,9 +180,15 @@ function conflictFindings(state: EngineState, shapes: readonly MetricShape[], ct
   }
 }
 
-/** The cost an LTV is set against, per type: the customer's CAC, the sales-assisted CAC, an app's cost per install. */
-type CostId = "acq.cac" | "slg.acq.cac" | "app.acq.cpi";
-const LTV_OF: Record<CostId, DerivedId> = { "acq.cac": "rev.ltv", "slg.acq.cac": "slg.rev.ltv", "app.acq.cpi": "app.rev.install-ltv" };
+/** The cost an LTV is set against, per type: the customer's CAC, the sales-assisted CAC, an app's cost per install, a marketplace's buyer CAC and its sellers' cost. */
+type CostId = "acq.cac" | "slg.acq.cac" | "app.acq.cpi" | "mkt.buy.cac" | "mkt.sell.cac";
+const LTV_OF: Record<CostId, DerivedId> = {
+  "acq.cac": "rev.ltv",
+  "slg.acq.cac": "slg.rev.ltv",
+  "app.acq.cpi": "app.rev.install-ltv",
+  "mkt.buy.cac": "mkt.rev.ltv",
+  "mkt.sell.cac": "mkt.sell.ltv",
+};
 
 /**
  * The loss (§20.4, C48), on today's LTV and CAC of one motion — never summed
@@ -166,10 +196,12 @@ const LTV_OF: Record<CostId, DerivedId> = { "acq.cac": "rev.ltv", "slg.acq.cac":
  * it, so it names no stage. The CAC prints as typed (to the unit, or its
  * range), the LTV and the gap as the estimates they are (« ~1 500 € »). An
  * app's pair is its install's 36-month value and its cost per install
- * (§21.5.5, D10).
+ * (§21.5.5, D10). A marketplace's paid seller is set against what a paid
+ * seller costs, which is no number the person typed: `cacValue` stands in for
+ * the read of `cacId` (§22.5.8), and `cacId` still names it in the finding.
  */
-function lossFinding(state: EngineState, ltv: DerivedValue, cacId: CostId, ctx: EngineCalcContext, words: UnitWords, add: Add): void {
-  const cacKnown = knownIn(state, cacId, ctx);
+function lossFinding(state: EngineState, ltv: DerivedValue, cacId: CostId, ctx: EngineCalcContext, words: UnitWords, add: Add, cacValue?: Interval): void {
+  const cacKnown = cacValue ? ({ kind: "known", value: cacValue } as const) : knownIn(state, cacId, ctx);
   if (ltv.kind !== "known" || cacKnown.kind !== "known") return;
   const loss = lossCheck(ltv.value, cacKnown.value);
   if (!loss || loss.verdict === "none") return;
@@ -184,7 +216,12 @@ function lossFinding(state: EngineState, ltv: DerivedValue, cacId: CostId, ctx: 
 }
 
 /** The payback can't be computed, and at least one of its inputs was looked for and not found. */
-function paybackFinding(payback: DerivedValue, id: "rev.cac-payback" | "slg.rev.cac-payback" | "app.rev.install-payback", add: Add, missing: (id: MetricId) => boolean): void {
+function paybackFinding(
+  payback: DerivedValue,
+  id: "rev.cac-payback" | "slg.rev.cac-payback" | "app.rev.install-payback" | "mkt.rev.cac-payback" | "mkt.sell.cac-payback",
+  add: Add,
+  missing: (id: MetricId) => boolean,
+): void {
   if (payback.kind === "uncomputable" && payback.missing.some(missing)) add("unit-econ-uncomputable", [id, ...payback.missing]);
 }
 
@@ -269,4 +306,63 @@ function salesAssistedFindings(
     const p = roundDisplay(sample.points);
     add("small-sample", [sample.metric], { d: formatNumber(sample.denominator, ctx.locale), p: formatInterval(point(sample.points), "ratio", ctx, words) }, point(p));
   }
+}
+
+/**
+ * §22.5.8. The marketplace's findings, the copy of the self-serve ones on its two sides: each finding says the side of
+ * its number (C70), the `match` ones (the fill rate, the take rate, the commissions' margin) the demand's. The two sides
+ * are read one after the other, each on its own diagnosis and its own economics — never one against the other (D2).
+ */
+function marketplaceFindings(
+  state: EngineState,
+  m: Extract<MotionDerived, { motion: "mkt" }>,
+  derived: Omit<EngineDerived, "findings">,
+  ctx: EngineCalcContext,
+  words: UnitWords,
+  addFor: (side: MktSide) => Add,
+  missing: (id: MetricId) => boolean,
+): void {
+  const snapshot = currentSnapshot(state);
+  const demand = addFor("demand");
+  const supply = addFor("supply");
+  const { sellerSubscriptions } = mktSetup(state.setup);
+  const shapes = shapesOf(state.setup);
+  const sellers = (shape: MetricShape) => shape.side === "sell";
+
+  // 1 — a column of a funnel that nobody could pull.
+  for (const column of m.funnel.demand.columns) {
+    if (column.perHundred === null && missing(column.metric)) demand("chain-break", [column.metric]);
+  }
+  for (const column of m.funnel.supply.columns) {
+    if (column.perHundred === null && missing(column.metric)) supply("chain-break", [column.metric]);
+  }
+
+  // 2 — no shared definition.
+  for (const shape of shapes) {
+    if (entryOf(snapshot, shape.id)?.missing?.cause === "no-definition" && missing(shape.id)) (sellers(shape) ? supply : demand)("no-definition", [shape.id]);
+  }
+
+  // 2 — the stages each side's diagnosis named.
+  namedFindings(state, m.sides.demand.diagnosis, ctx, words, demand, () => false);
+  namedFindings(state, m.sides.supply.diagnosis, ctx, words, supply, () => false);
+
+  // 3
+  conflictFindings(state, shapes.filter((s) => !sellers(s)), ctx, words, demand);
+  conflictFindings(state, shapes.filter(sellers), ctx, words, supply);
+  paybackFinding(m.sides.demand.unit.payback, "mkt.rev.cac-payback", demand, missing);
+  lossFinding(state, m.sides.demand.unit.ltv, "mkt.buy.cac", ctx, words, demand);
+  if (sellerSubscriptions) {
+    paybackFinding(m.sides.supply.unit.payback, "mkt.sell.cac-payback", supply, missing);
+    // A paid seller is set against what a paid seller costs, not the cost of an active seller the person typed.
+    const paidCost = mktPaidSellerCac(state, ctx);
+    if (paidCost) lossFinding(state, m.sides.supply.unit.ltv, "mkt.sell.cac", ctx, words, supply, paidCost);
+  }
+
+  // 3 — the chain and the buyer CAC's count don't describe the same population (the demand's own check).
+  const gap = derived.sanity.find((c) => c.id === "reconcile-gap" && c.motion === "mkt");
+  if (gap) demand("reconcile-gap", gap.metrics, gap.values, gap.count);
+
+  // 4 — each sign-up weighs more than a point, on a side's cohort.
+  if (m.funnel.demand.smallCohort) demand("small-cohort", []);
+  if (m.funnel.supply.smallCohort) supply("small-cohort", []);
 }
