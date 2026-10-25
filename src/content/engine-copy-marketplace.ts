@@ -76,20 +76,20 @@ export const ENGINE_COPY_MKT: { common: Overlay; demand: Overlay; supply: Overla
       },
       worthOut: {
         fr: "Un nouvel acheteur : plus de perte. Il rapporte {ltv} pour {cac} : {gap} de plus.",
-        en: "One new buyer: no longer a loss. It brings back {ltv} for {cac}: {gap} more.",
+        en: "One new buyer: no longer a loss. They bring back {ltv} for {cac}: {gap} more.",
       },
       worthMaybe: {
         fr: "Un nouvel acheteur : plus de perte certaine. Il rapporte {ltv} pour {cac} : les deux fourchettes se chevauchent.",
-        en: "One new buyer: no longer a certain loss. It brings back {ltv} for {cac}: the two ranges overlap.",
+        en: "One new buyer: no longer a certain loss. They bring back {ltv} for {cac}: the two ranges overlap.",
       },
       worthLess: { fr: "Un nouvel acheteur : toujours une perte, de {gap} au lieu de {before}.", en: "One new buyer: still a loss, of {gap} instead of {before}." },
       worthStill: {
         fr: "Un nouvel acheteur : toujours une perte de {gap}. Ce levier ne change ni ce que rapporte un acheteur ni ce qu'il coûte.",
-        en: "One new buyer: still a loss of {gap}. This lever changes neither what a buyer brings back nor what it costs.",
+        en: "One new buyer: still a loss of {gap}. This lever changes neither what a buyer brings back nor what they cost.",
       },
       worthStillMany: {
         fr: "Un nouvel acheteur : toujours une perte de {gap}. Tes « Et si » ne changent ni ce que rapporte un acheteur ni ce qu'il coûte.",
-        en: "One new buyer: still a loss of {gap}. Your what-ifs change neither what a buyer brings back nor what it costs.",
+        en: "One new buyer: still a loss of {gap}. Your what-ifs change neither what a buyer brings back nor what they cost.",
       },
     },
     money: {
@@ -98,7 +98,7 @@ export const ENGINE_COPY_MKT: { common: Overlay; demand: Overlay; supply: Overla
       worthTitle: { fr: "Ce que vaut un nouvel acheteur", en: "What one new buyer is worth" },
       healthy: {
         fr: "Chaque nouvel acheteur coûte {cac} et rapporte {ltv} de marge : {gap} de plus que ce qu'il coûte.",
-        en: "Each new buyer costs {cac} and brings back {ltv} of margin: {gap} more than it costs.",
+        en: "Each new buyer costs {cac} and brings back {ltv} of margin: {gap} more than they cost.",
       },
       noLtv: {
         fr: "On ne peut pas encore dire ce que rapporte un nouvel acheteur : il manque {input}.",
@@ -106,7 +106,7 @@ export const ENGINE_COPY_MKT: { common: Overlay; demand: Overlay; supply: Overla
       },
       noCac: {
         fr: "Un nouvel acheteur rapporte {ltv} de marge ; ce qu'il coûte, on ne le sait pas encore : il manque {input}.",
-        en: "A new buyer brings back {ltv} of margin; what it costs isn't known yet. Missing: {input}.",
+        en: "A new buyer brings back {ltv} of margin; what they cost isn't known yet. Missing: {input}.",
       },
       noMarginNote: {
         fr: "Sans elle, pas de LTV, pas de payback, pas de trésorerie : aucune autre marge ne la remplace.",
@@ -114,11 +114,11 @@ export const ENGINE_COPY_MKT: { common: Overlay; demand: Overlay; supply: Overla
       },
       monthsLoss: {
         fr: "Un acheteur reste {life} ; rembourser son coût en prendrait {payback} : il part avant.",
-        en: "A buyer stays {life}; paying back its cost would take {payback}: it leaves before.",
+        en: "A buyer stays {life}; paying back their cost would take {payback}: they leave before.",
       },
       monthsMaybe: {
         fr: "Un acheteur reste {life} ; rembourser son coût en prend {payback} : il peut partir avant.",
-        en: "A buyer stays {life}; paying back its cost takes {payback}: it may leave before.",
+        en: "A buyer stays {life}; paying back their cost takes {payback}: they may leave before.",
       },
       lineLoss: {
         fr: "Et elle ne revient pas toute : les acheteurs partent avant d'avoir remboursé.",
@@ -131,19 +131,19 @@ export const ENGINE_COPY_MKT: { common: Overlay; demand: Overlay; supply: Overla
       lineHealthy: { fr: "Elle revient toute, au fil des remboursements.", en: "It all comes back, as buyers pay back." },
       warnRunway: {
         fr: "Un acheteur met {payback} à rembourser son coût, plus que ton runway ({n}) : tu gagnes de l'argent, mais peut-être après la fin de ta trésorerie.",
-        en: "A buyer takes {payback} to pay back its cost, longer than your runway ({n}): you make money, but maybe after your cash runs out.",
+        en: "A buyer takes {payback} to pay back their cost, longer than your runway ({n}): you make money, but maybe after your cash runs out.",
       },
       warnRunwayMaybe: {
         fr: "Un acheteur met {payback} à rembourser son coût : peut-être plus que ton runway ({n}).",
-        en: "A buyer takes {payback} to pay back its cost: maybe longer than your runway ({n}).",
+        en: "A buyer takes {payback} to pay back their cost: maybe longer than your runway ({n}).",
       },
       warnFloor: {
         fr: "Un acheteur met {payback} à rembourser son coût : {n} ou plus. Tu gagnes de l'argent, mais tard. Saisis ton runway dans les Réglages pour y comparer ton payback.",
-        en: "A buyer takes {payback} to pay back its cost: {n} or more. You make money, but late. Type your runway in Settings to hold your payback against it.",
+        en: "A buyer takes {payback} to pay back their cost: {n} or more. You make money, but late. Type your runway in Settings to hold your payback against it.",
       },
       warnFloorMaybe: {
         fr: "Un acheteur met {payback} à rembourser son coût : peut-être {n} ou plus. Saisis ton runway dans les Réglages pour y comparer ton payback.",
-        en: "A buyer takes {payback} to pay back its cost: maybe {n} or more. Type your runway in Settings to hold your payback against it.",
+        en: "A buyer takes {payback} to pay back their cost: maybe {n} or more. Type your runway in Settings to hold your payback against it.",
       },
     },
     worth: {
@@ -229,19 +229,19 @@ export const ENGINE_COPY_MKT: { common: Overlay; demand: Overlay; supply: Overla
       unitFloor: { fr: "un plancher", en: "a floor" },
       unitWarnRunway: {
         fr: "Un acheteur met {payback} à rembourser son coût, plus que notre runway ({n}) : nous gagnons de l'argent, mais peut-être après la fin de notre trésorerie.",
-        en: "A buyer takes {payback} to pay back its cost, longer than our runway ({n}): we make money, but maybe after our cash runs out.",
+        en: "A buyer takes {payback} to pay back their cost, longer than our runway ({n}): we make money, but maybe after our cash runs out.",
       },
       unitWarnRunwayMaybe: {
         fr: "Un acheteur met {payback} à rembourser son coût : peut-être plus que notre runway ({n}).",
-        en: "A buyer takes {payback} to pay back its cost: maybe longer than our runway ({n}).",
+        en: "A buyer takes {payback} to pay back their cost: maybe longer than our runway ({n}).",
       },
       unitWarnFloor: {
         fr: "Un acheteur met {payback} à rembourser son coût : {n} ou plus. Nous gagnons de l'argent, mais tard.",
-        en: "A buyer takes {payback} to pay back its cost: {n} or more. We make money, but late.",
+        en: "A buyer takes {payback} to pay back their cost: {n} or more. We make money, but late.",
       },
       unitWarnFloorMaybe: {
         fr: "Un acheteur met {payback} à rembourser son coût : peut-être {n} ou plus.",
-        en: "A buyer takes {payback} to pay back its cost: maybe {n} or more.",
+        en: "A buyer takes {payback} to pay back their cost: maybe {n} or more.",
       },
       unitAssume: {
         fr: "Trésorerie immobilisée : la dépense d'acquisition du mois × le payback ÷ 2 — un plancher. La marge est celle des commissions.",
@@ -250,19 +250,19 @@ export const ENGINE_COPY_MKT: { common: Overlay; demand: Overlay; supply: Overla
       chartCost: { fr: "ce que coûte un nouvel acheteur", en: "what a new buyer costs" },
       chartSummaryLoss: {
         fr: "Un acheteur, mois par mois : il rapporte {mm} de marge par mois et part après environ {life}, à {gap} des {cac} qu'il a coûté ; il aurait remboursé à {payback}.",
-        en: "One buyer, month by month: it brings back {mm} of margin a month and leaves after about {life}, {gap} short of the {cac} it cost; it would have paid back at {payback}.",
+        en: "One buyer, month by month: they bring back {mm} of margin a month and leave after about {life}, {gap} short of the {cac} they cost; they would have paid back at {payback}.",
       },
       chartSummaryHealthy: {
         fr: "Un acheteur, mois par mois : il rapporte {mm} de marge par mois, rembourse ses {cac} à {payback} et reste {life}.",
-        en: "One buyer, month by month: it brings back {mm} of margin a month, pays back its {cac} at {payback} and stays {life}.",
+        en: "One buyer, month by month: they bring back {mm} of margin a month, pay back their {cac} at {payback} and stay {life}.",
       },
       chartSummaryMaybe: {
         fr: "Un acheteur, mois par mois : il rapporte {mm} de marge par mois et reste {life} ; rembourser ses {cac} prend {payback} : il peut partir avant.",
-        en: "One buyer, month by month: it brings back {mm} of margin a month and stays {life}; paying back its {cac} takes {payback}: it may leave before.",
+        en: "One buyer, month by month: they bring back {mm} of margin a month and stay {life}; paying back their {cac} takes {payback}: they may leave before.",
       },
       chartSummaryNone: {
         fr: "Un acheteur, mois par mois : son coût est connu ({cac}), ce qu'il rapporte non : il manque {input}.",
-        en: "One buyer, month by month: its cost is known ({cac}), what it brings back is not. Missing: {input}.",
+        en: "One buyer, month by month: their cost is known ({cac}), what they bring back is not. Missing: {input}.",
       },
     },
     slideTitles: {
@@ -330,7 +330,7 @@ export const ENGINE_COPY_MKT: { common: Overlay; demand: Overlay; supply: Overla
       },
       unitEconLossMaybe: {
         fr: "Un nouvel acheteur coûte {cac} et rapporte {ltv} de marge : il ne rembourse peut-être pas ce qu'il coûte.",
-        en: "A new buyer costs {cac} and brings back {ltv} of margin: it may not pay back what it costs.",
+        en: "A new buyer costs {cac} and brings back {ltv} of margin: they may not pay back what they cost.",
       },
       reconcile: {
         fr: "Ta chaîne prédit ~{p} nouveaux acheteurs en {month} ; ton CAC acheteur en compte {n}. Au moins une définition ne porte pas sur la même population.",
@@ -372,11 +372,11 @@ export const ENGINE_COPY_MKT: { common: Overlay; demand: Overlay; supply: Overla
       },
       worthOut: {
         fr: "Un nouveau vendeur abonné : plus de perte. Il rapporte {ltv} pour {cac} : {gap} de plus.",
-        en: "One new paid seller: no longer a loss. It brings back {ltv} for {cac}: {gap} more.",
+        en: "One new paid seller: no longer a loss. They bring back {ltv} for {cac}: {gap} more.",
       },
       worthMaybe: {
         fr: "Un nouveau vendeur abonné : plus de perte certaine. Il rapporte {ltv} pour {cac} : les deux fourchettes se chevauchent.",
-        en: "One new paid seller: no longer a certain loss. It brings back {ltv} for {cac}: the two ranges overlap.",
+        en: "One new paid seller: no longer a certain loss. They bring back {ltv} for {cac}: the two ranges overlap.",
       },
       worthLess: {
         fr: "Un nouveau vendeur abonné : toujours une perte, de {gap} au lieu de {before}.",
@@ -384,11 +384,11 @@ export const ENGINE_COPY_MKT: { common: Overlay; demand: Overlay; supply: Overla
       },
       worthStill: {
         fr: "Un nouveau vendeur abonné : toujours une perte de {gap}. Ce levier ne change ni ce que rapporte un vendeur abonné ni ce qu'il coûte.",
-        en: "One new paid seller: still a loss of {gap}. This lever changes neither what a paid seller brings back nor what it costs.",
+        en: "One new paid seller: still a loss of {gap}. This lever changes neither what a paid seller brings back nor what they cost.",
       },
       worthStillMany: {
         fr: "Un nouveau vendeur abonné : toujours une perte de {gap}. Tes « Et si » ne changent ni ce que rapporte un vendeur abonné ni ce qu'il coûte.",
-        en: "One new paid seller: still a loss of {gap}. Your what-ifs change neither what a paid seller brings back nor what it costs.",
+        en: "One new paid seller: still a loss of {gap}. Your what-ifs change neither what a paid seller brings back nor what they cost.",
       },
     },
     money: {
@@ -397,7 +397,7 @@ export const ENGINE_COPY_MKT: { common: Overlay; demand: Overlay; supply: Overla
       worthTitle: { fr: "Ce que vaut un nouveau vendeur abonné", en: "What one new paid seller is worth" },
       healthy: {
         fr: "Chaque nouveau vendeur abonné coûte {cac} et rapporte {ltv} de marge : {gap} de plus que ce qu'il coûte.",
-        en: "Each new paid seller costs {cac} and brings back {ltv} of margin: {gap} more than it costs.",
+        en: "Each new paid seller costs {cac} and brings back {ltv} of margin: {gap} more than they cost.",
       },
       noLtv: {
         fr: "On ne peut pas encore dire ce que rapporte un nouveau vendeur abonné : il manque {input}.",
@@ -405,7 +405,7 @@ export const ENGINE_COPY_MKT: { common: Overlay; demand: Overlay; supply: Overla
       },
       noCac: {
         fr: "Un nouveau vendeur abonné rapporte {ltv} de marge ; ce qu'il coûte, on ne le sait pas encore : il manque {input}.",
-        en: "A new paid seller brings back {ltv} of margin; what it costs isn't known yet. Missing: {input}.",
+        en: "A new paid seller brings back {ltv} of margin; what they cost isn't known yet. Missing: {input}.",
       },
       noMarginNote: {
         fr: "Sans elle, pas de LTV, pas de payback, pas de trésorerie, et jamais la marge des commissions à sa place : chaque flux a la sienne.",
@@ -413,11 +413,11 @@ export const ENGINE_COPY_MKT: { common: Overlay; demand: Overlay; supply: Overla
       },
       monthsLoss: {
         fr: "Un vendeur abonné reste {life} ; rembourser son coût en prendrait {payback} : il part avant.",
-        en: "A paid seller stays {life}; paying back its cost would take {payback}: it leaves before.",
+        en: "A paid seller stays {life}; paying back their cost would take {payback}: they leave before.",
       },
       monthsMaybe: {
         fr: "Un vendeur abonné reste {life} ; rembourser son coût en prend {payback} : il peut partir avant.",
-        en: "A paid seller stays {life}; paying back its cost takes {payback}: it may leave before.",
+        en: "A paid seller stays {life}; paying back their cost takes {payback}: they may leave before.",
       },
       lineLoss: {
         fr: "Et elle ne revient pas toute : les vendeurs abonnés partent avant d'avoir remboursé.",
@@ -430,19 +430,19 @@ export const ENGINE_COPY_MKT: { common: Overlay; demand: Overlay; supply: Overla
       lineHealthy: { fr: "Elle revient toute, au fil des remboursements.", en: "It all comes back, as paid sellers pay back." },
       warnRunway: {
         fr: "Un vendeur abonné met {payback} à rembourser son coût, plus que ton runway ({n}) : tu gagnes de l'argent, mais peut-être après la fin de ta trésorerie.",
-        en: "A paid seller takes {payback} to pay back its cost, longer than your runway ({n}): you make money, but maybe after your cash runs out.",
+        en: "A paid seller takes {payback} to pay back their cost, longer than your runway ({n}): you make money, but maybe after your cash runs out.",
       },
       warnRunwayMaybe: {
         fr: "Un vendeur abonné met {payback} à rembourser son coût : peut-être plus que ton runway ({n}).",
-        en: "A paid seller takes {payback} to pay back its cost: maybe longer than your runway ({n}).",
+        en: "A paid seller takes {payback} to pay back their cost: maybe longer than your runway ({n}).",
       },
       warnFloor: {
         fr: "Un vendeur abonné met {payback} à rembourser son coût : {n} ou plus. Tu gagnes de l'argent, mais tard. Saisis ton runway dans les Réglages pour y comparer ton payback.",
-        en: "A paid seller takes {payback} to pay back its cost: {n} or more. You make money, but late. Type your runway in Settings to hold your payback against it.",
+        en: "A paid seller takes {payback} to pay back their cost: {n} or more. You make money, but late. Type your runway in Settings to hold your payback against it.",
       },
       warnFloorMaybe: {
         fr: "Un vendeur abonné met {payback} à rembourser son coût : peut-être {n} ou plus. Saisis ton runway dans les Réglages pour y comparer ton payback.",
-        en: "A paid seller takes {payback} to pay back its cost: maybe {n} or more. Type your runway in Settings to hold your payback against it.",
+        en: "A paid seller takes {payback} to pay back their cost: maybe {n} or more. Type your runway in Settings to hold your payback against it.",
       },
     },
     worth: {
@@ -528,7 +528,7 @@ export const ENGINE_COPY_MKT: { common: Overlay; demand: Overlay; supply: Overla
       },
       assumption: {
         "signup-same-visitors": {
-          fr: "Le taux d'inscription s'applique aux mêmes visiteurs de la page vendeurs qu'aujourd'hui.",
+          fr: "Le taux d'inscription des vendeurs s'applique aux mêmes visiteurs de la page vendeurs qu'aujourd'hui.",
           en: "The seller sign-up rate applies to the same seller page visitors as today.",
         },
         "same-spend": {
@@ -582,19 +582,19 @@ export const ENGINE_COPY_MKT: { common: Overlay; demand: Overlay; supply: Overla
       unitFloor: { fr: "un plancher", en: "a floor" },
       unitWarnRunway: {
         fr: "Un vendeur abonné met {payback} à rembourser son coût, plus que notre runway ({n}) : nous gagnons de l'argent, mais peut-être après la fin de notre trésorerie.",
-        en: "A paid seller takes {payback} to pay back its cost, longer than our runway ({n}): we make money, but maybe after our cash runs out.",
+        en: "A paid seller takes {payback} to pay back their cost, longer than our runway ({n}): we make money, but maybe after our cash runs out.",
       },
       unitWarnRunwayMaybe: {
         fr: "Un vendeur abonné met {payback} à rembourser son coût : peut-être plus que notre runway ({n}).",
-        en: "A paid seller takes {payback} to pay back its cost: maybe longer than our runway ({n}).",
+        en: "A paid seller takes {payback} to pay back their cost: maybe longer than our runway ({n}).",
       },
       unitWarnFloor: {
         fr: "Un vendeur abonné met {payback} à rembourser son coût : {n} ou plus. Nous gagnons de l'argent, mais tard.",
-        en: "A paid seller takes {payback} to pay back its cost: {n} or more. We make money, but late.",
+        en: "A paid seller takes {payback} to pay back their cost: {n} or more. We make money, but late.",
       },
       unitWarnFloorMaybe: {
         fr: "Un vendeur abonné met {payback} à rembourser son coût : peut-être {n} ou plus.",
-        en: "A paid seller takes {payback} to pay back its cost: maybe {n} or more.",
+        en: "A paid seller takes {payback} to pay back their cost: maybe {n} or more.",
       },
       unitAssume: {
         fr: "Trésorerie immobilisée : la dépense d'acquisition du mois × le payback ÷ 2 — un plancher. La marge est celle des abonnements, jamais celle des commissions.",
@@ -603,19 +603,19 @@ export const ENGINE_COPY_MKT: { common: Overlay; demand: Overlay; supply: Overla
       chartCost: { fr: "ce que coûte un nouveau vendeur abonné", en: "what a new paid seller costs" },
       chartSummaryLoss: {
         fr: "Un vendeur abonné, mois par mois : il rapporte {mm} de marge par mois et part après environ {life}, à {gap} des {cac} qu'il a coûté ; il aurait remboursé à {payback}.",
-        en: "One paid seller, month by month: it brings back {mm} of margin a month and leaves after about {life}, {gap} short of the {cac} it cost; it would have paid back at {payback}.",
+        en: "One paid seller, month by month: they bring back {mm} of margin a month and leave after about {life}, {gap} short of the {cac} they cost; they would have paid back at {payback}.",
       },
       chartSummaryHealthy: {
         fr: "Un vendeur abonné, mois par mois : il rapporte {mm} de marge par mois, rembourse ses {cac} à {payback} et reste {life}.",
-        en: "One paid seller, month by month: it brings back {mm} of margin a month, pays back its {cac} at {payback} and stays {life}.",
+        en: "One paid seller, month by month: they bring back {mm} of margin a month, pay back their {cac} at {payback} and stay {life}.",
       },
       chartSummaryMaybe: {
         fr: "Un vendeur abonné, mois par mois : il rapporte {mm} de marge par mois et reste {life} ; rembourser ses {cac} prend {payback} : il peut partir avant.",
-        en: "One paid seller, month by month: it brings back {mm} of margin a month and stays {life}; paying back its {cac} takes {payback}: it may leave before.",
+        en: "One paid seller, month by month: they bring back {mm} of margin a month and stay {life}; paying back their {cac} takes {payback}: they may leave before.",
       },
       chartSummaryNone: {
         fr: "Un vendeur abonné, mois par mois : son coût est connu ({cac}), ce qu'il rapporte non : il manque {input}.",
-        en: "One paid seller, month by month: its cost is known ({cac}), what it brings back is not. Missing: {input}.",
+        en: "One paid seller, month by month: their cost is known ({cac}), what they bring back is not. Missing: {input}.",
       },
     },
     slideTitles: {
@@ -690,7 +690,7 @@ export const ENGINE_COPY_MKT: { common: Overlay; demand: Overlay; supply: Overla
       },
       unitEconLossMaybe: {
         fr: "Un nouveau vendeur abonné coûte {cac} et rapporte {ltv} de marge : il ne rembourse peut-être pas ce qu'il coûte.",
-        en: "A new paid seller costs {cac} and brings back {ltv} of margin: it may not pay back what it costs.",
+        en: "A new paid seller costs {cac} and brings back {ltv} of margin: they may not pay back what they cost.",
       },
       reconcile: {
         fr: "Ta chaîne prédit ~{p} nouveaux vendeurs abonnés en {month} ; ta facturation en compte {n}. Au moins une définition ne porte pas sur la même population.",

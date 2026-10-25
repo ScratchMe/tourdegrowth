@@ -37,6 +37,12 @@ import { DEMAND_WORDS, isUnder, MKT_EXCLUDED, MKT_OVERLAY_SKIPPED, SUPPLY_TARGET
  * - exclusion line 8 switched off 6, line 7 switched off 4, line 1 without `mkt` 1, line 3 without the `mkt` prefix 5;
  * - an unbalanced `**` in a supply slide title: 1, in `engine-copy.test.ts` (the contracts of the copy run on the merged
  *   copy of each side);
+ * - « they », never « it » (relance of 2026-10-25, measured the same way): « its cost » put back in the supply's
+ *   `money.monthsLoss` 2; « It brings back » put back in the demand's `lever.worthOut` 3; a buyer called « it » in a leaf
+ *   outside the 21 1; a legitimate « it » (`money.warnFloor`, the runway) taken off the list of things 1; a name on that list
+ *   that no longer holds the word 1; the French of the supply's sign-up assumption back to « Le taux d'inscription
+ *   s'applique » 1; « its cost is known » in the supply's `slide.chartSummaryNone` 2; the supply's
+ *   `findings.unitEconLossMaybe` back to « it may not pay back what it costs » 2;
  * - `resolveEngineProps` handing `{}` for the marketplace's products 3 (two languages, and the neutral set); the content
  *   fan-in budget at 0: 1 (`content-fan-in.test.ts`);
  * - what no test here can see: `EngineWorkbench` reading `stringsFor("marketplace", offering, side)`. Vitest mounts no
@@ -333,6 +339,96 @@ describe("each side's merged copy no longer speaks the SaaS (§22.8.3, point 2)"
     expect(text("demand", "findings.chainBreak", "fr")).toBe("Sur 100 inscrits, on ne sait pas dire combien {verb}.");
     // The neutral set keeps what neither side rewrites.
     expect(MERGED_BY_PATH.demand.get("board.smallCohort")!.copy).toEqual(BASE_BY_PATH.get("board.smallCohort")!.copy);
+  });
+});
+
+// ------------------------------------------------------------------------------------------------ « they », never « it »
+
+/**
+ * A buyer or a paid seller is a person: §22.8.5 c writes "their cost" and "what they cost" for them (`unitEconomics`,
+ * `terms.afterPayback.definition`, `settings.runwayHint`), and a leaf of an overlay that contradicts those is corrected on
+ * them. The SaaS's base says « it » of a customer, and the lexicon does not touch the rest of a sentence (§22.8.2): so the
+ * leaves it rewrote from « it » were put in the plural neutral by hand (the relance of 2026-10-25), and this holds them there.
+ */
+describe("a buyer or a paid seller is « they », never « it » (§22.8.5 c)", () => {
+  /** The leaves of each side the lexicon rewrote from a SaaS « it »: 21 of them, on both sides. */
+  const THEY_LEAVES: readonly string[] = [
+    "lever.worthOut", "lever.worthMaybe", "lever.worthStill", "lever.worthStillMany",
+    "money.healthy", "money.noCac", "money.monthsLoss", "money.monthsMaybe",
+    "money.warnRunway", "money.warnRunwayMaybe", "money.warnFloor", "money.warnFloorMaybe",
+    "slide.unitWarnRunway", "slide.unitWarnRunwayMaybe", "slide.unitWarnFloor", "slide.unitWarnFloorMaybe",
+    "slide.chartSummaryLoss", "slide.chartSummaryHealthy", "slide.chartSummaryMaybe", "slide.chartSummaryNone",
+    "findings.unitEconLossMaybe",
+  ];
+
+  /**
+   * Where « it » and « its » stay in an English sheet, one by one: the word is a thing, never the buyer or the seller.
+   * A leaf not listed holds none. The test below holds each listed leaf to still holding the word.
+   */
+  const IT_IS_A_THING: Record<string, string> = {
+    "terms.window.definition": "\"Change it in Settings\": the window",
+    "settings.windowHint": "\"for it to count\": the action the window bounds",
+    "money.noMarginNote": "\"Without it\", \"stands in for it\": the margin",
+    "money.lineLoss": "\"it does not all come back\": the acquisition cost",
+    "money.lineMaybe": "\"it all comes back\": the acquisition cost",
+    "money.lineHealthy": "\"It all comes back\": the acquisition cost",
+    "money.warnFloor": "\"against it\": the runway",
+    "money.warnFloorMaybe": "\"against it\": the runway",
+    "scenario.assumeCash": "\"which slows it\": the return of the spend",
+    "scenario.aloneTitle": "\"on its own\": the lever",
+    "terms.sharedCount.definition": "\"it changes\", \"its own base\": a count, a number",
+    "terms.arr.definition": "\"It isn't guaranteed revenue\": the ARR",
+  };
+
+  const IT = /\b(it|its)\b/i;
+  /** What the coordinator asked to see gone, in the form it was written. */
+  const ITS_COST = /\bits cost\b/;
+  const IT_BRINGS = /\bIt brings\b/;
+  const english = (layer: "common" | "demand" | "supply") => LAYER[layer].map((l) => ({ path: l.path, en: l.copy.en }));
+
+  it("sees what it looks for: each pattern trips on the wording it forbids, and not on « their cost »", () => {
+    expect(ITS_COST.test("paying back its cost would take")).toBe(true);
+    expect(ITS_COST.test("paying back their cost would take")).toBe(false);
+    expect(IT_BRINGS.test("A new buyer: no longer a loss. It brings back")).toBe(true);
+    expect(IT_BRINGS.test("They bring back")).toBe(false);
+    expect(IT.test("what it costs")).toBe(true);
+    expect(IT.test("Only used to warn you when a buyer takes longer to pay back their cost.")).toBe(false);
+    // « It » in a word is not the pronoun: "item", "gravity".
+    expect(IT.test("one item of the list")).toBe(false);
+  });
+
+  for (const side of SIDES) {
+    it(`says « they » or « their » on each of the ${THEY_LEAVES.length} leaves of the ${side} the lexicon rewrote from « it »`, () => {
+      expect(new Set(THEY_LEAVES).size).toBe(THEY_LEAVES.length);
+      const sheet = new Map(english(side).map((l) => [l.path, l.en]));
+      const missing = THEY_LEAVES.filter((p) => !sheet.has(p));
+      expect(missing, `${side}: not in the sheet`).toEqual([]);
+      const stillIt = THEY_LEAVES.filter((p) => !/\b(they|their)\b/i.test(sheet.get(p)!)).map((p) => `${p}: ${sheet.get(p)}`);
+      expect(stillIt).toEqual([]);
+    });
+  }
+
+  it("holds neither « its cost » nor « It brings » in the demand's or the supply's English", () => {
+    const offenders = (["demand", "supply"] as const).flatMap((layer) =>
+      english(layer).filter((l) => ITS_COST.test(l.en) || IT_BRINGS.test(l.en)).map((l) => `${layer}.${l.path}: ${l.en}`),
+    );
+    expect(offenders).toEqual([]);
+  });
+
+  it("leaves « it » and « its » only where the word is a thing, in any of the three sheets", () => {
+    const offenders = (["common", "demand", "supply"] as const).flatMap((layer) =>
+      english(layer).filter((l) => IT.test(l.en) && !(l.path in IT_IS_A_THING)).map((l) => `${layer}.${l.path}: ${l.en}`),
+    );
+    expect(offenders).toEqual([]);
+    // And every name on the list still holds the word, in at least one sheet: an exception that stopped being one leaves it.
+    const held = new Set((["common", "demand", "supply"] as const).flatMap((layer) => english(layer).filter((l) => IT.test(l.en)).map((l) => l.path)));
+    expect(Object.keys(IT_IS_A_THING).filter((p) => !held.has(p))).toEqual([]);
+  });
+
+  it("keeps the French of the supply's sign-up assumption in step with its English: the sellers' sign-up rate", () => {
+    const text = (path: string, lang: "fr" | "en") => LAYER_BY_PATH.supply.get(path)!.copy[lang];
+    expect(text("scenario.assumption.signup-same-visitors", "fr")).toBe("Le taux d'inscription des vendeurs s'applique aux mêmes visiteurs de la page vendeurs qu'aujourd'hui.");
+    expect(text("scenario.assumption.signup-same-visitors", "en")).toBe("The seller sign-up rate applies to the same seller page visitors as today.");
   });
 });
 
