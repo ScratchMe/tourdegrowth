@@ -3,6 +3,7 @@ import { ENGINE_CATALOG, ENGINE_DERIVED_CATALOG } from "@/content/engine-catalog
 import { ENGINE_CATALOG_CONSUMER, ENGINE_DERIVED_CATALOG_CONSUMER, type ConsumerPlgMetricId } from "@/content/engine-catalog-consumer";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import { ENGINE_COPY_CONSUMER } from "@/content/engine-copy-consumer";
+import { ENGINE_COPY_MKT } from "@/content/engine-copy-marketplace";
 import { displayDerivedShapeOf, displayShapeOf } from "@/lib/engine/business-type";
 import {
   ALL_DERIVED_SHAPES,
@@ -43,7 +44,7 @@ import type { EngineWorkbenchProps } from "./EngineWorkbench";
  * The marketplace has its own too (§22.4.3): its nineteen numbers and six figures.
  * They travel to every visitor, whatever the setup: a static page cannot know
  * which type the browser will hold. A SaaS's `metrics` and `derived` carry none
- * of their ids. `typeStrings` (§21.8.1), the app's overlay on `strings`, travels the same way.
+ * of their ids. `typeStrings` (§21.8.1), the app's overlay on `strings` and the marketplace's three (§22.8.1), travels the same way.
  *
  * Not the `openTypes` prop (§21.3): it comes from the build's environment, which
  * this function does not read — the page adds it (`openTypesAtBuild()`).
@@ -133,7 +134,12 @@ export function resolveEngineProps(locale: Locale): Omit<EngineWorkbenchProps, "
     locale,
     strings: resolveTree(ENGINE_COPY, locale),
     // The app's words over the base's, only the leaves that change (§21.8.1): the island merges them, once, in EngineWorkbench.
-    typeStrings: { "consumer-app": resolveTree(ENGINE_COPY_CONSUMER, locale) },
+    // The marketplace's are three sheets (common, demand, supply) in the words of "products", merged by `marketplaceStrings`
+    // (§22.8.1); the "services" ones are empty until MKT-S writes them.
+    typeStrings: {
+      "consumer-app": resolveTree(ENGINE_COPY_CONSUMER, locale),
+      marketplace: { products: resolveTree(ENGINE_COPY_MKT, locale), services: { common: {}, demand: {}, supply: {} } },
+    },
     metrics,
     derived,
     typeCatalogs: { "consumer-app": { metrics: appMetrics, derived: appDerived }, marketplace: { metrics: marketMetrics, derived: marketDerived } },

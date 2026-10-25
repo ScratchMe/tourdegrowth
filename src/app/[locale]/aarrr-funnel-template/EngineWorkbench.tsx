@@ -6,10 +6,10 @@ import { Card } from "@/components/core/Card";
 import { EngineStart, type StartChoice } from "@/components/engine/EngineStart";
 import { EngineTermScope } from "./_engine/EngineTerm";
 import { motionOfMetric, motionShapes, shapeOf } from "@/lib/engine/catalog-shape";
-import { mergeStrings, type DeepPartial, type EngineStrings, type ResolvedBridge, type ResolvedDerived, type ResolvedMetric } from "@/lib/engine/strings";
+import { marketplaceStrings, mergeStrings, type DeepPartial, type EngineStrings, type MarketplaceLayers, type ResolvedBridge, type ResolvedDerived, type ResolvedMetric } from "@/lib/engine/strings";
 import type { AppMonetization } from "@/lib/engine/app-model";
 import { DEFAULT_APP_MONETIZATION, isSellingMotion } from "@/lib/engine/setup-type";
-import { MAX_ENGINES, MAX_MONTHS, type BusinessType, type EngineCalcContext, type EngineDerived, type EngineMotion, type EngineSetup, type EngineState, type LeverId, type MetricEntry, type MetricId, type Motion, type MotionDerived, type RoleId, type SlideTitle, type Snapshot, type YearMonth } from "@/lib/engine/types";
+import { MAX_ENGINES, MAX_MONTHS, type BusinessType, type EngineCalcContext, type EngineDerived, type EngineMotion, type EngineSetup, type EngineState, type LeverId, type MetricEntry, type MetricId, type MktSide, type Motion, type MotionDerived, type RoleId, type SlideTitle, type Snapshot, type YearMonth } from "@/lib/engine/types";
 import type { Locale } from "@/lib/i18n/locale";
 import { Board } from "./_engine/Board";
 import type { SeriesControls } from "./_engine/BoardHead";
@@ -62,10 +62,11 @@ export interface EngineWorkbenchProps {
   /** `ENGINE_COPY` resolved (§14). */
   strings: EngineStrings;
   /**
-   * The consumer app's overlay on `strings` (§21.8.1): only the leaves whose words change, resolved. Merged ONCE, here, by
-   * `stringsFor`; a screen below receives the merged `strings` and never this field (`engine-boundary.test.ts`).
+   * The consumer app's overlay on `strings` (§21.8.1) and the marketplace's three sheets (§22.8.1: common, demand and
+   * supply, in the words of "products" and of "services"): only the leaves whose words change, resolved. Merged ONCE,
+   * here, by `stringsFor`; a screen below receives the merged `strings` and never this field (`engine-boundary.test.ts`).
    */
-  typeStrings: { "consumer-app": DeepPartial<EngineStrings> };
+  typeStrings: { "consumer-app": DeepPartial<EngineStrings>; marketplace: MarketplaceLayers<EngineStrings> };
   /** The seventeen numbers' prose, in catalogue order (`METRIC_SHAPES`). */
   metrics: ResolvedMetric[];
   /** The three computed figures (§5.7). */
@@ -115,6 +116,26 @@ function mergedStrings(base: EngineStrings, overlay: DeepPartial<EngineStrings>)
   if (known && known.base === base) return known.merged;
   const merged = mergeStrings(base, overlay);
   merges.set(overlay, { base, merged });
+  return merged;
+}
+
+/**
+ * `marketplaceStrings` (§22.8.1) memoised the same way, for the same reason: it builds a new tree at every call, and
+ * `computed` depends on `strings`. One entry per (offering, side) of the same layers and base, keyed `"products:demand"`,
+ * `"services:null"`…; a new base starts a new set.
+ */
+const marketMerges = new WeakMap<object, { base: EngineStrings; byKey: Map<string, EngineStrings> }>();
+function marketStrings(base: EngineStrings, layers: MarketplaceLayers<EngineStrings>, offering: "products" | "services", side: MktSide | null): EngineStrings {
+  let known = marketMerges.get(layers);
+  if (!known || known.base !== base) {
+    known = { base, byKey: new Map() };
+    marketMerges.set(layers, known);
+  }
+  const key = `${offering}:${side}`;
+  const hit = known.byKey.get(key);
+  if (hit) return hit;
+  const merged = marketplaceStrings(base, layers, offering, side);
+  known.byKey.set(key, merged);
   return merged;
 }
 
@@ -245,9 +266,14 @@ function Workbench(props: EngineWorkbenchProps) {
   const engineType = state?.setup.type ?? "b2b-saas";
   // The words of that type (§21.8.1): the base's, or the base's with the type's overlay on top. One merge, here; every
   // screen below gets `strings` and never asks which type it is on.
-  const stringsFor = (type: BusinessType): EngineStrings =>
-    type === "consumer-app" ? mergedStrings(props.strings, props.typeStrings["consumer-app"]) : props.strings;
-  const strings = stringsFor(engineType);
+  // A marketplace's words also depend on its offering ("products" or "services", read from the setup, never from the type)
+  // and on the side a screen speaks for (§22.8.1): `null` is the neutral set, what belongs to neither side.
+  const stringsFor = (type: BusinessType, offering?: "products" | "services", side?: MktSide | null): EngineStrings => {
+    if (type === "consumer-app") return mergedStrings(props.strings, props.typeStrings["consumer-app"]);
+    if (type === "marketplace") return marketStrings(props.strings, props.typeStrings.marketplace, offering ?? "products", side ?? null);
+    return props.strings;
+  };
+  const strings = stringsFor(engineType, state?.setup.offering);
   const metrics = metricsFor(props, engineType);
   const derivedCopy = derivedFor(props, engineType);
   const openedAt = snap?.openedAt ?? null;
@@ -277,7 +303,7 @@ function Workbench(props: EngineWorkbenchProps) {
     // More months than an engine ever holds (§19.2): never written by a build, and a cost with no bound to compute.
     if (candidate.snapshots.length > MAX_MONTHS) return false;
     const type = candidate.setup.type;
-    const input = { today: new Date(openedAt ?? Date.now()), locale, tourResults: tourResults ?? [], bridges, strings: stringsFor(type), metrics: metricsFor(props, type), derivedCopy: derivedFor(props, type) };
+    const input = { today: new Date(openedAt ?? Date.now()), locale, tourResults: tourResults ?? [], bridges, strings: stringsFor(type, candidate.setup.offering), metrics: metricsFor(props, type), derivedCopy: derivedFor(props, type) };
     try {
       candidate.snapshots.forEach((_, monthIndex) => boardOf(candidate, { ...input, monthIndex }));
       return true;
