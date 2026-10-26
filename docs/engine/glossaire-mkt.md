@@ -5,7 +5,11 @@
 l'annexe de §22 et sur le modèle des quatre termes d'A7.3.e (`win-rate`,
 `sales-cycle`, `acv`, `lead-to-opportunity`). **Toute la copie de ce document
 est neuve : chaque chaîne recopiée dans `src/content/` porte « TODO: à
-relire » (convention 6) et passe au bon à tirer A23.d.***
+relire » (convention 6) et passe au bon à tirer A23.d. Relu par le
+relecteur copie le même jour : ses constats (le mot « moteur » sur une page
+publique, la commission affichée, le développé de « GMV » sur la page du take
+rate, le compte des 91 recherches, « un centième du GMV », le revenu net
+nouveau, le maillage tenu à quatre liens entrants) sont repris ci-dessous.***
 
 ## 0. Ce que l'exécutant de MKT-G doit savoir avant de recopier
 
@@ -16,7 +20,12 @@ relire » (convention 6) et passe au bon à tirer A23.d.***
   `glossary-terms.ts` (`term`, `definition`), `glossary.ts` (`updatedAt`,
   `extended`, `related`) et `glossary-deep.ts` (`formula`, `example`,
   `benchmark`, `howToImprove`, `inTheTour`, `faq`). Les espaces insécables se
-  posent selon §23.8 ; ce document écrit des espaces ordinaires.
+  posent selon §23.8 de `docs/engine/executer-un-type.md` ; ce document écrit
+  des espaces ordinaires. **Deux pièges que nul test ne voit** : dans
+  `glossary-deep.ts`, `t` s'appelle `t(en, fr)`, l'anglais d'abord, quand ce
+  document donne le français en premier ; et les « » et "" qui entourent les
+  champs courts (`term`, `symbol`, `title`, les questions) délimitent la
+  chaîne et n'en font pas partie.
 - **Le marqueur** « TODO: à relire » va dans les **commentaires**, comme pour
   A7.3.e : `glossary.test.ts` refuse « TODO » dans les chaînes des pages
   longues.
@@ -35,10 +44,13 @@ relire » (convention 6) et passe au bon à tirer A23.d.***
   [Causo, Marketplace liquidity](https://hub.causo.ai/guides/marketplace-liquidity-seed).
 - **Les acronymes** (`acronyms.test.ts`) : `GMV` se développe dans son titre
   (« Gross Merchandise Value ») ; MKT-G ajoute `gmv: /gross merchandise
-  value/i` à `EXPANSION`. La page `gmv` écrit « LTV » une fois, développé (« lifetime
-  value ») dans la même phrase ; aucune
-  autre abréviation (pas d'« AOV » : « panier moyen » / "average order
-  value").
+  value/i` à `EXPANSION`. La page `gmv` écrit « LTV » trois fois, toutes
+  dans `inTheTour`, développé à la première (« lifetime value ») ; la page
+  `take-rate` développe « GMV » au deuxième terme de sa formule (« gross
+  merchandise value »). MKT-G ajoute à `BORROWED` `["gmv", "LTV",
+  /lifetime value/i]` et `["take-rate", "GMV", /gross merchandise value/i]`.
+  Aucune autre abréviation (pas d'« AOV » : « panier moyen » / "average
+  order value").
 - **Les tests** : la règle « chaque terme est lié depuis au moins deux autres,
   dont deux plus anciens pour un terme neuf » (`glossary.test.ts`) s'étend aux
   trois : MKT-G ajoute une liste `NEW_MARKETPLACE_TERMS` à côté de
@@ -58,22 +70,28 @@ relire » (convention 6) et passe au bon à tirer A23.d.***
 
 Chaque terme neuf reçoit deux liens de termes plus anciens. Comme pour A7.3.e,
 chaque lien neuf est un **échange** contre un lien vers une page qui en reçoit
-plus que deux, et aucune cible ne descend sous deux liens entrants. Aucun lien
-vers un terme d'A7.3.e n'est retiré (leur règle des deux liens plus anciens
-tient toujours).
+beaucoup, et aucune cible ne descend sous quatre liens entrants, sauf
+`upsell-cross-sell` (4 → 3) : `revenue` n'a pas d'autre lien à céder (il garde
+`aarrr`, R2-13, et `win-rate`, que la règle des deux liens plus anciens
+d'A7.3.e retient ; céder `arpu` le ferait tomber à 2). Aucun lien vers un
+terme d'A7.3.e n'est retiré.
 
 | Terme existant | Gagne | Perd | Liens entrants du terme perdu, avant → après |
 |---|---|---|---|
 | `revenue` | `gmv` | `upsell-cross-sell` | 4 → 3 |
-| `north-star-metric` | `gmv` | `cohort-analysis` | 4 → 3 |
-| `arpu` | `take-rate` | `cac-payback` | 5 → 4 |
-| `ltv` | `take-rate` | `cac-payback` | 4 → 3 |
-| `activation` | `marketplace-liquidity` | `retention` | 6 → 5 |
+| `north-star-metric` | `gmv` | `retention` | 6 → 5 |
+| `arpu` | `take-rate` | `ltv` | 5 → 4 |
+| `ltv` | `take-rate` | `cac-payback` | 5 → 4 |
+| `activation` | `marketplace-liquidity` | `retention` | 5 → 4 |
 | `growth-loop` | `marketplace-liquidity` | `acquisition` | 5 → 4 |
 
-`revenue` garde `aarrr` (R2-13). Mesuré le 2026-10-26 sur `main` (`8778e80`) :
-chaque terme existant a de 2 à 6 liens entrants ; après les échanges, le
-minimum reste 2.
+Les comptes se lisent dans l'ordre du tableau (`retention` perd deux liens).
+Après les échanges, `ltv` et `retention` regagnent un lien entrant chacun,
+depuis `take-rate` et `marketplace-liquidity` (5 et 5). Mesuré le 2026-10-26
+sur `main` (`8778e80`), par un script sur `glossary.ts` : chaque terme
+existant a de 2 à 6 liens entrants avant, et après ; `gmv` en reçoit 4 (dont
+`revenue` et `north-star-metric`), `take-rate` 3 (dont `arpu` et `ltv`),
+`marketplace-liquidity` 3 (dont `activation` et `growth-loop`).
 
 ### La question du Tour de chaque terme (`inTheTour.questionId`)
 
@@ -113,7 +131,7 @@ minimum reste 2.
   2. `symbol` : fr « Montant d'une commande » / en "Order value" ; `meaning` :
      - fr : Ce que l'acheteur a payé pour elle. Les taxes, la livraison et les frais de service de l'acheteur y entrent ou non selon l'entreprise : le chiffre n'est comparable qu'à lui-même, mois après mois, à définition constante.
      - en : What the buyer paid for it. Taxes, delivery and the buyer's service fees are in or out depending on the company: the number is only comparable with itself, month after month, under one definition.
-  3. `symbol` : fr « Acheteurs actifs, commandes par acheteur, panier moyen » / en "Active buyers, orders per buyer, average order value" ; `meaning` :
+  3. `symbol` : fr « Acheteurs actifs, commandes par acheteur (la fréquence de commande), panier moyen » / en "Active buyers, orders per buyer (order frequency), average order value" ; `meaning` :
      - fr : Les trois facteurs du GMV. Ils bougent pour des raisons différentes et appellent des leviers différents : un GMV qui monte mérite d'être décomposé avant d'être fêté.
      - en : The three factors GMV breaks into. They move for different reasons and call for different levers, so a GMV that grows is worth splitting before it is celebrated.
 - `note` :
@@ -130,8 +148,8 @@ minimum reste 2.
      en : The same GMV, split into its factors: 14,040 active buyers at the end of the month × 0.3 orders each = 4,212 orders, × an average order value of €65 = €273,780.
   3. fr : La place de marché en garde 12 % : 273 780 € × 0,12 = 32 853,60 € de revenu net. Les 240 926,40 € restants vont aux vendeurs.
      en : The marketplace keeps 12% of it: €273,780 × 0.12 = €32,853.60 of net revenue. The other €240,926.40 goes to the sellers.
-  4. fr : Annualisé, le GMV affiche 3 285 360 € (× 12). Le présenter comme « 3,3 millions de chiffre d'affaires » est la confusion classique : le revenu est de 394 243,20 € par an, un peu plus de huit fois moins.
-     en : Annualised, the GMV reads €3,285,360 (× 12). Presenting it as "€3.3 million of revenue" is the classic confusion: the revenue is €394,243.20 a year, a little over eight times less.
+  4. fr : Annualisé, le GMV affiche 3 285 360 € (× 12). Le présenter comme « 3,3 millions de chiffre d'affaires » est la confusion classique : le revenu net est de 394 243,20 € par an, un peu plus de huit fois moins.
+     en : Annualised, the GMV reads €3,285,360 (× 12). Presenting it as "€3.3 million of revenue" is the classic confusion: the net revenue is €394,243.20 a year, a little over eight times less.
 - `takeaway` :
   - fr : Le GMV mesure la taille du marché que tu héberges ; le revenu, la part que tu en gardes. Publie-les côte à côte, et ne les additionne jamais.
   - en : GMV measures the size of the market you host; revenue, the share of it you keep. Publish them side by side, and never add one to the other.
@@ -151,8 +169,8 @@ minimum reste 2.
    en : Work on one factor at a time. More active buyers, more orders per buyer and a higher average order value are three different problems: acquisition and the first order for the first, repeat purchase for the second, the catalogue and the offer for the third.
 2. fr : Répare les recherches qui ne trouvent rien. Un acheteur qui cherche et repart les mains vides, c'est du GMV qui n'a jamais eu lieu, et le taux de service le compte : chaque point de taux de service gagné, ce sont des commandes qui avaient déjà un acheteur.
    en : Fix the searches that find nothing. A buyer who looks and leaves empty-handed is GMV that never happened, and the fill rate counts it: every point of fill rate gained is orders that already had a buyer.
-3. fr : Fais revenir les acheteurs pour une deuxième commande. Dans l'exemple, 5 inscrits acheteurs sur 100 en passent une deuxième dans les 90 jours : c'est par le réachat que le GMV d'une place de marché cesse de dépendre de la seule acquisition.
-   en : Bring buyers back for a second order. In the example, 5 buyer sign-ups out of 100 place a second order within 90 days: repeat purchase is how a marketplace's GMV stops depending on acquisition alone.
+3. fr : Fais revenir les acheteurs pour une deuxième commande. Sur la même place de marché de mobilier d'occasion, 5 inscrits acheteurs sur 100 en passent une deuxième dans les 90 jours : c'est par le réachat que le GMV d'une place de marché cesse de dépendre de la seule acquisition.
+   en : Bring buyers back for a second order. On the same second-hand furniture marketplace, 5 buyer sign-ups out of 100 place a second order within 90 days: repeat purchase is how a marketplace's GMV stops depending on acquisition alone.
 4. fr : Ne l'achète pas. Les remises et subventions payées par la place de marché font monter le GMV et baisser ce qu'elle garde ; retire-les du revenu net, et lis le take rate à côté du GMV chaque mois.
    en : Don't buy it. Discounts and subsidies paid by the marketplace raise GMV and lower what it keeps; take them out of net revenue, and read the take rate beside the GMV every month.
 
@@ -166,14 +184,14 @@ minimum reste 2.
 #### `faq`
 
 1. Q fr « C'est quoi le GMV ? » / en "What is GMV?"
-   - fr : Le gross merchandise value : la valeur totale des ventes qui passent par une place de marché sur une période, ce que dépensent les acheteurs. Ce n'est pas le revenu de la place de marché, qui n'en est que la part gardée.
+   - fr : Le gross merchandise value, ou volume d'affaires : la valeur totale des ventes qui passent par une place de marché sur une période, ce que dépensent les acheteurs. Ce n'est pas le revenu de la place de marché, qui n'en est que la part gardée.
    - en : Gross merchandise value: the total value of the sales that go through a marketplace over a period, what buyers spend. It is not the marketplace's revenue, which is only the share it keeps.
 2. Q fr « Comment calculer le GMV ? » / en "How do you calculate GMV?"
    - fr : Additionne le montant de toutes les commandes payées sur la place de marché pendant la période. Pour le comprendre, décompose-le : acheteurs actifs × commandes par acheteur × panier moyen. 14 040 acheteurs × 0,3 commande × 65 € = 273 780 €.
    - en : Add up the value of every order paid through the marketplace in the period. To understand it, split it: active buyers × orders per buyer × average order value. 14,040 buyers × 0.3 orders × €65 = €273,780.
 3. Q fr « Quelle différence entre le GMV et le chiffre d'affaires ? » / en "What is the difference between GMV and revenue?"
-   - fr : Le GMV est ce que les acheteurs dépensent sur la place de marché ; le chiffre d'affaires, ce que la place de marché en garde, en commissions et en frais. Le rapport des deux est le take rate : 32 853,60 € gardés sur 273 780 € de GMV, c'est 12 %.
-   - en : GMV is what buyers spend through the marketplace; revenue is what the marketplace keeps of it, in commissions and fees. The ratio of the two is the take rate: €32,853.60 kept on €273,780 of GMV is 12%.
+   - fr : Le GMV est ce que les acheteurs dépensent sur la place de marché ; le chiffre d'affaires (son revenu net), ce que la place de marché en garde, en commissions et en frais. Le rapport des deux est le take rate : 32 853,60 € gardés sur 273 780 € de GMV, c'est 12 %.
+   - en : GMV is what buyers spend through the marketplace; revenue (its net revenue) is what the marketplace keeps of it, in commissions and fees. The ratio of the two is the take rate: €32,853.60 kept on €273,780 of GMV is 12%.
 4. Q fr « Faut-il compter les commandes annulées dans le GMV ? » / en "Should GMV include cancelled orders?"
    - fr : Les deux se défendent, pourvu que ce soit écrit et que ça ne change plus. Les retirer donne un chiffre plus petit et plus juste ; les garder en publiant le taux d'annulation à côté donne la même information. Passer de l'un à l'autre d'un mois sur l'autre ne donne ni l'un ni l'autre.
    - en : Either can be defended, as long as it is written down and never changes. Leaving them out gives a smaller, truer number; keeping them in and publishing the cancellation rate beside it gives the same information. Switching from one to the other between months gives neither.
@@ -191,8 +209,8 @@ minimum reste 2.
 
 - `related` : `["gmv", "revenue", "arpu", "ltv"]`
 - `extended` :
-  - fr : Le take rate est le prix d'une place de marché, exprimé en part de ce qui y passe. C'est le levier le plus direct sur le revenu — un point de plus sur le même GMV, c'est un point de revenu en plus, sans coût d'acquisition — et le plus dangereux, parce que les deux côtés du marché y réagissent. Les vendeurs qui paient trop montent leurs prix, partent, ou font sortir la transaction de la plateforme dès qu'acheteur et vendeur se sont rencontrés ; les acheteurs qui paient des frais visibles les comparent à un achat ailleurs. Ce qu'une place de marché peut garder dépend donc moins de son ambition que de ce qu'elle apporte à chaque transaction : le paiement, la confiance, l'assurance, la logistique, une demande que les vendeurs ne trouveraient pas seuls. La bonne lecture n'est pas le taux seul mais le taux à côté du GMV : un take rate qui monte pendant que le GMV baisse, c'est une hausse de prix que le marché paie en partant.
-  - en : The take rate is a marketplace's price, expressed as a share of what goes through it. It is the most direct lever on revenue — one point more on the same GMV is one point more of revenue, at no acquisition cost — and the most dangerous one, because both sides of the market react to it. Sellers who pay too much raise their prices, leave, or take the transaction off the platform as soon as buyer and seller have met; buyers who pay a visible fee compare it with buying elsewhere. What a marketplace can keep therefore depends less on its ambition than on what it brings to each transaction: payment, trust, insurance, logistics, demand that sellers could not find on their own. The right reading is not the rate alone but the rate beside the GMV: a take rate that rises while GMV falls is a price increase the market pays for by leaving.
+  - fr : Le take rate est le prix d'une place de marché, exprimé en part de ce qui y passe. C'est le levier le plus direct sur le revenu — un point de plus sur le même GMV, c'est un centième du GMV en revenu en plus, sans coût d'acquisition — et le plus dangereux, parce que les deux côtés du marché y réagissent. Les vendeurs qui paient trop montent leurs prix, partent, ou font sortir la transaction de la plateforme dès qu'acheteur et vendeur se sont rencontrés ; les acheteurs qui paient des frais visibles les comparent à un achat ailleurs. Ce qu'une place de marché peut garder dépend donc moins de son ambition que de ce qu'elle apporte à chaque transaction : le paiement, la confiance, l'assurance, la logistique, une demande que les vendeurs ne trouveraient pas seuls. La bonne lecture n'est pas le taux seul mais le taux à côté du GMV : un take rate qui monte pendant que le GMV baisse, c'est une hausse de prix que le marché paie en partant.
+  - en : The take rate is a marketplace's price, expressed as a share of what goes through it. It is the most direct lever on revenue — one point more on the same GMV is one hundredth of the GMV more in revenue, at no acquisition cost — and the most dangerous one, because both sides of the market react to it. Sellers who pay too much raise their prices, leave, or take the transaction off the platform as soon as buyer and seller have met; buyers who pay a visible fee compare it with buying elsewhere. What a marketplace can keep therefore depends less on its ambition than on what it brings to each transaction: payment, trust, insurance, logistics, demand that sellers could not find on their own. The right reading is not the rate alone but the rate beside the GMV: a take rate that rises while GMV falls is a price increase the market pays for by leaving.
 
 ### `glossary-deep.ts`
 
@@ -206,8 +224,8 @@ minimum reste 2.
      - fr : Ce que la place de marché garde de chaque transaction : la commission prélevée aux vendeurs, les frais de service facturés aux acheteurs, les frais de paiement refacturés. Les abonnements des vendeurs, s'il y en a, sont une ligne de revenu à part : ils ne sont pas une part des transactions.
      - en : What the marketplace keeps from each transaction: the commission taken from sellers, the service fees charged to buyers, payment fees passed on. Sellers' subscriptions, if any, are a separate revenue line: they are not a share of transactions.
   2. `symbol` : fr « GMV » / en "GMV" ; `meaning` :
-     - fr : La valeur totale des commandes payées sur la place de marché sur la même période, définie de la même façon : si les commandes remboursées sortent du GMV, les commissions remboursées avec elles sortent aussi du revenu.
-     - en : The total value of the orders paid through the marketplace over the same period, defined the same way: if refunded orders leave the GMV, the commissions refunded with them leave the revenue too.
+     - fr : Le gross merchandise value, la valeur totale des commandes payées sur la place de marché sur la même période, défini de la même façon : si les commandes remboursées sortent du GMV, les commissions remboursées avec elles sortent aussi du revenu.
+     - en : Gross merchandise value, the total value of the orders paid through the marketplace over the same period, defined the same way: if refunded orders leave the GMV, the commissions refunded with them leave the revenue too.
 - `note` :
   - fr : La commission affichée et le take rate ne sont pas le même chiffre : remises, remboursements, livraisons offertes et vendeurs à conditions spéciales tirent tous le taux réalisé sous la grille tarifaire. Mesure le take rate dans la comptabilité, pas sur la page des tarifs.
   - en : The advertised commission and the take rate are not the same number: discounts, refunds, free delivery and sellers on special terms all pull the realised rate below the price list. Measure the take rate from the books, not from the pricing page.
@@ -263,9 +281,9 @@ minimum reste 2.
 2. Q fr « C'est quoi un bon take rate ? » / en "What is a good take rate?"
    - fr : Les taux publiés pour des places de marché connues vont du bas d'un chiffre au milieu des trente pour cent, et l'écart suit ce que chaque plateforme apporte à la transaction. Un bon taux est celui que ton marché continue de payer sans que le GMV baisse ni que les transactions sortent de la plateforme.
    - en : Published rates for well-known marketplaces run from the low single digits to the mid-thirties of percent, and the spread follows what each platform brings to the transaction. A good rate is the one your market keeps paying without GMV falling or transactions leaving the platform.
-3. Q fr « Le take rate, c'est la commission ? » / en "Is the take rate the same as the commission?"
-   - fr : Pas tout à fait. La commission est le prix affiché aux vendeurs ; le take rate, ce que tu gardes vraiment, frais des acheteurs compris, remises et remboursements déduits. Les deux peuvent être loin l'un de l'autre, et c'est le take rate que le revenu suit.
-   - en : Not quite. The commission is the price advertised to sellers; the take rate is what you actually keep, buyer fees included, discounts and refunds deducted. The two can be far apart, and revenue follows the take rate.
+3. Q fr « Le take rate, c'est la commission affichée ? » / en "Is the take rate the same as the advertised commission?"
+   - fr : Pas tout à fait. La commission affichée est le prix annoncé aux vendeurs ; le take rate, ce que tu gardes vraiment, frais des acheteurs compris, remises et remboursements déduits. Les deux peuvent être loin l'un de l'autre, et c'est le take rate que le revenu suit.
+   - en : Not quite. The advertised commission is the price announced to sellers; the take rate is what you actually keep, buyer fees included, discounts and refunds deducted. The two can be far apart, and revenue follows the take rate.
 4. Q fr « Les abonnements des vendeurs comptent-ils dans le take rate ? » / en "Do sellers' subscriptions count in the take rate?"
    - fr : Non. Un abonnement se paie que quelque chose se vende ou non : c'est une ligne de revenu à part, récurrente. L'ajouter aux commissions fait paraître le take rate plus haut que ce que rapportent vraiment les transactions.
    - en : No. A subscription is paid whether or not anything sells: it is a separate, recurring revenue line. Adding it to the commissions makes the take rate look higher than what transactions actually bring in.
@@ -283,8 +301,8 @@ minimum reste 2.
 
 - `related` : `["gmv", "activation", "retention", "growth-loop"]`
 - `extended` :
-  - fr : La liquidité est la promesse qu'une place de marché fait aux deux côtés : qu'un acheteur qui vient chercher trouvera, et qu'un vendeur qui publie vendra, dans un délai raisonnable. C'est elle qui fait revenir, et c'est ce qu'une place de marché vide ne peut pas simuler. Elle n'a pas de formule unique, parce que ce qui compte comme une rencontre dépend du marché : une recherche qui finit en commande, une demande de réservation acceptée, une annonce vendue dans la semaine. Le moteur la mesure par le taux de service, la part des demandes ou des recherches qui aboutissent à une transaction, et Lenny's Newsletter tient cette part pour la mesure ultime de la santé d'une place de marché. Deux choses la rendent difficile à lire : elle dépend de la définition d'une demande, qui ne doit jamais changer d'un mois à l'autre, et c'est une propriété de chaque segment plus que de l'ensemble — une place de marché peut être liquide dans une ville ou une catégorie et vide dans la suivante.
-  - en : Liquidity is the promise a marketplace makes to both sides: that a buyer who comes looking will find, and a seller who lists will sell, within a reasonable time. It is what brings people back, and what an empty marketplace cannot fake. It has no single formula, because what counts as a match depends on the market: a search that ends in an order, a booking request accepted, a listing sold within the week. The engine measures it by the fill rate, the share of requests or searches that end in a transaction, and Lenny's Newsletter calls that share the ultimate measure of a marketplace's health. Two things make it hard to read: it depends on the definition of a request, which must never change from one month to the next, and it is a property of each segment more than of the whole — a marketplace can be liquid in one city or category and empty in the next.
+  - fr : La liquidité est la promesse qu'une place de marché fait aux deux côtés : qu'un acheteur qui vient chercher trouvera, et qu'un vendeur qui publie vendra, dans un délai raisonnable. C'est elle qui fait revenir, et c'est ce qu'une place de marché vide ne peut pas simuler. Elle n'a pas de formule unique, parce que ce qui compte comme une rencontre dépend du marché : une recherche qui finit en commande, une demande de réservation acceptée, une annonce vendue dans la semaine. Elle se mesure le plus souvent par le taux de service, la part des demandes ou des recherches qui aboutissent à une transaction, et Lenny's Newsletter tient cette part pour la mesure ultime de la santé d'une place de marché. Deux choses la rendent difficile à lire : elle dépend de la définition d'une demande, qui ne doit jamais changer d'un mois à l'autre, et c'est une propriété de chaque segment plus que de l'ensemble — une place de marché peut être liquide dans une ville ou une catégorie et vide dans la suivante.
+  - en : Liquidity is the promise a marketplace makes to both sides: that a buyer who comes looking will find, and a seller who lists will sell, within a reasonable time. It is what brings people back, and what an empty marketplace cannot fake. It has no single formula, because what counts as a match depends on the market: a search that ends in an order, a booking request accepted, a listing sold within the week. It is most often measured by the fill rate, the share of requests or searches that end in a transaction, and Lenny's Newsletter calls that share the ultimate measure of a marketplace's health. Two things make it hard to read: it depends on the definition of a request, which must never change from one month to the next, and it is a property of each segment more than of the whole — a marketplace can be liquid in one city or category and empty in the next.
 
 ### `glossary-deep.ts`
 
@@ -301,7 +319,7 @@ minimum reste 2.
      - fr : La demande a mené à une commande, une réservation confirmée ou un devis accepté, dans un délai que tu écris aussi. Une demande servie après que l'acheteur est allé ailleurs n'est pas une rencontre.
      - en : The request led to an order, a confirmed booking or an accepted quote, within a window you also write down. A request served after the buyer has gone elsewhere is not a match.
 - `note` :
-  - fr : On dit aussi « match rate ». La liquidité elle-même est une probabilité — la chance qu'une demande trouve une offre dans un délai raisonnable (Causo, « Marketplace liquidity ») — et le taux de service est la façon dont une place de marché la mesure en pratique. Sa définition dépend de chaque place de marché (a16z, « The marketplace glossary »).
+  - fr : On dit aussi « fill rate » ou « match rate ». La liquidité elle-même est une probabilité — la chance qu'une demande trouve une offre dans un délai raisonnable (Causo, « Marketplace liquidity ») — et le taux de service est la façon dont une place de marché la mesure en pratique. Sa définition dépend de chaque place de marché (a16z, « The marketplace glossary »).
   - en : Also called match rate. Liquidity itself is a probability — the chance that a request finds supply within a reasonable time (Causo, "Marketplace liquidity") — and the fill rate is how a marketplace measures it in practice. Its definition depends on each marketplace (a16z, "The marketplace glossary").
 
 #### `example`
@@ -310,14 +328,14 @@ minimum reste 2.
 - `steps` :
   1. fr : La place de marché de mobilier d'occasion, en août : 26 000 recherches avec une intention, dont 2 340 ont abouti à une commande. Taux de service = 2 340 ÷ 26 000 = 9 %.
      en : The second-hand furniture marketplace, in August: 26,000 searches with intent, 2,340 of which ended in an order. Fill rate = 2,340 ÷ 26,000 = 9%.
-  2. fr : Neuf recherches sur cent trouvent ce que l'acheteur était venu chercher. Les 91 autres sont des acheteurs qui ont cherché et sont repartis sans rien, et chacun d'eux a une raison de ne pas revenir.
-     en : Nine searches out of a hundred find what the buyer came for. The other 91 are buyers who looked and left with nothing, and each of them has a reason not to come back.
-  3. fr : La cible de l'équipe est 12 %. Si les rencontres en plus ne touchaient que les nouveaux acheteurs — l'hypothèse du moteur —, les 600 nouveaux acheteurs du mois deviendraient 800 (600 × 12 ÷ 9), 200 de plus, soit environ 470 € de revenu net par mois à 2,34 € par acheteur.
-     en : The team's target is 12%. If the extra matches reached new buyers only — the engine's assumption — the month's 600 new buyers would become 800 (600 × 12 ÷ 9), 200 more, worth about €470 of net revenue a month at €2.34 per buyer.
+  2. fr : Neuf recherches sur cent trouvent ce que l'acheteur était venu chercher. Les 91 autres sont des recherches qui n'ont rien trouvé, et chaque acheteur derrière elles a une raison de ne pas revenir.
+     en : Nine searches out of a hundred find what the buyer came for. The other 91 are searches that found nothing, and every buyer behind them has a reason not to come back.
+  3. fr : La cible de l'équipe est 12 %. Si les rencontres en plus ne touchaient que les nouveaux acheteurs — une hypothèse prudente, qui donne un minimum —, les 600 nouveaux acheteurs du mois deviendraient 800 (600 × 12 ÷ 9), 200 de plus, soit environ 470 € de revenu net nouveau chaque mois, à 2,34 € par acheteur.
+     en : The team's target is 12%. If the extra matches reached new buyers only — a cautious assumption, which gives a floor — the month's 600 new buyers would become 800 (600 × 12 ÷ 9), 200 more, worth about €470 of new net revenue each month, at €2.34 per buyer.
   4. fr : Découpé par catégorie, le même 9 % peut cacher un marché liquide et un marché vide : une catégorie où beaucoup de recherches aboutissent à côté d'une autre où presque aucune n'aboutit. Le remède n'est pas le même dans les deux.
      en : Split by category, the same 9% can hide a liquid market and an empty one: a category where many searches end in an order beside one where almost none do. The fix is not the same in both.
 - `takeaway` :
-  - fr : La liquidité se lit par segment et sur une définition fixe de la demande. Un taux global dit comment va la place de marché en moyenne ; un taux découpé dit où elle déçoit, et de quel côté manque l'offre.
+  - fr : La liquidité se lit par segment et sur une définition fixe de la demande. Un taux global dit comment va la place de marché en moyenne ; un taux découpé dit où elle déçoit, et où manque l'offre.
   - en : Liquidity is read per segment and over a fixed definition of a request. A blended rate says how the marketplace does on average; a split rate says where it lets buyers down, and where supply is missing.
 
 #### `benchmark`
@@ -331,8 +349,8 @@ minimum reste 2.
 
 #### `howToImprove`
 
-1. fr : Commence étroit. Concentre l'offre sur une ville, une catégorie ou un usage jusqu'à ce que la plupart des demandes y trouvent preneur, puis élargis : un petit marché dense vaut mieux qu'un grand marché clairsemé.
-   en : Start narrow. Concentrate supply on one city, one category or one use until most requests there find a match, then widen: a small dense market beats a large thin one.
+1. fr : Commence étroit. Concentre l'offre sur une ville, une catégorie ou un usage jusqu'à ce que les demandes y trouvent preneur nettement plus souvent qu'ailleurs, puis élargis : un petit marché dense vaut mieux qu'un grand marché clairsemé.
+   en : Start narrow. Concentrate supply on one city, one category or one use until requests there find a match markedly more often than elsewhere, then widen: a small dense market beats a large thin one.
 2. fr : Lis les recherches qui ne trouvent rien. C'est la liste de ce que les acheteurs veulent et que tu n'as pas, et le cahier des charges le plus direct pour recruter des vendeurs.
    en : Read the searches that find nothing. They are the list of what buyers want and you don't have, and the most direct brief for recruiting sellers.
 3. fr : Rends l'offre plus facile à trouver avant d'en ajouter. La recherche, les filtres et la vitesse à laquelle les vendeurs répondent aux demandes font souvent perdre des rencontres que le catalogue pouvait déjà servir.
