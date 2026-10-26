@@ -3695,4 +3695,390 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
       },
     ],
   },
+
+  // ——— A23 MKT-G (2026-10-26) — les trois termes de la place de marché ———
+  // docs/engine/glossaire-mkt.md (C72). Every worked example reuses the
+  // second-hand furniture marketplace of §22.10 of docs/engine/place-de-marche.md
+  // (August 2026: 4,212 orders, €273,780 of GMV, a 12% take rate, 26,000 searches
+  // with intent and a 9% fill rate against a 12% target) — never a new set of
+  // numbers. The only benchmark figure is the take rate's published range,
+  // cited to its two sources.
+  // TODO: à relire (convention 6) — terme neuf, A23 MKT-G (2026-10-26). Sources (docs/engine/glossaire-mkt.md §0) : https://lennysnewsletter.com/p/the-most-important-marketplace-metrics ; https://a16z.com/13-metrics-for-marketplace-companies/ ; https://a16z.com/the-marketplace-glossary/ ; https://hub.causo.ai/guides/marketplace-liquidity-seed
+  gmv: {
+    formula: {
+      expression: t(
+        "GMV = sum of the order values paid by buyers through the marketplace, over the period = active buyers × orders per buyer × average order value",
+        "GMV = somme des montants des commandes payées par les acheteurs sur la place de marché, sur la période = acheteurs actifs × commandes par acheteur × panier moyen",
+      ),
+      terms: [
+        {
+          symbol: t("Orders", "Commandes"),
+          meaning: t(
+            "Every order paid through the marketplace in the period. Decide once whether a cancelled or refunded order leaves the count, and write it down: the same month can be reported gross, before cancellations, or net, after them.",
+            "Toutes les commandes payées sur la place de marché pendant la période. Décide une fois pour toutes si une commande annulée ou remboursée sort du compte, et écris-le : un même mois peut se publier brut, avant annulations, ou net, après.",
+          ),
+        },
+        {
+          symbol: t("Order value", "Montant d'une commande"),
+          meaning: t(
+            "What the buyer paid for it. Taxes, delivery and the buyer's service fees are in or out depending on the company: the number is only comparable with itself, month after month, under one definition.",
+            "Ce que l'acheteur a payé pour elle. Les taxes, la livraison et les frais de service de l'acheteur y entrent ou non selon l'entreprise : le chiffre n'est comparable qu'à lui-même, mois après mois, à définition constante.",
+          ),
+        },
+        {
+          symbol: t("Active buyers, orders per buyer (order frequency), average order value", "Acheteurs actifs, commandes par acheteur (la fréquence de commande), panier moyen"),
+          meaning: t(
+            "The three factors GMV breaks into. They move for different reasons and call for different levers, so a GMV that grows is worth splitting before it is celebrated.",
+            "Les trois facteurs du GMV. Ils bougent pour des raisons différentes et appellent des leviers différents : un GMV qui monte mérite d'être décomposé avant d'être fêté.",
+          ),
+        },
+      ],
+      note: t(
+        "GMV is volume, not revenue: the marketplace keeps only a share of it, its take rate, and the rest goes to the sellers. Lenny's Newsletter and a16z both define it as the total value of the sales transacted through the marketplace over a period.",
+        "Le GMV est un volume, pas un revenu : la place de marché n'en garde qu'une part, son take rate, et le reste va aux vendeurs. Lenny's Newsletter et a16z le définissent tous deux comme la valeur totale des ventes passées par la place de marché sur une période.",
+      ),
+    },
+    example: {
+      title: t("€273,780 of sales, and the €32,853.60 the marketplace keeps", "273 780 € de ventes, et les 32 853,60 € que la place de marché garde"),
+      steps: [
+        t(
+          "A second-hand furniture marketplace, in August: 4,212 orders, €273,780 paid by buyers. That is its GMV for the month.",
+          "Une place de marché de mobilier d'occasion, en août : 4 212 commandes, 273 780 € payés par les acheteurs. C'est son GMV du mois.",
+        ),
+        t(
+          "The same GMV, split into its factors: 14,040 active buyers at the end of the month × 0.3 orders each = 4,212 orders, × an average order value of €65 = €273,780.",
+          "Le même GMV, décomposé : 14 040 acheteurs actifs en fin de mois × 0,3 commande chacun = 4 212 commandes, × un panier moyen de 65 € = 273 780 €.",
+        ),
+        t(
+          "The marketplace keeps 12% of it: €273,780 × 0.12 = €32,853.60 of net revenue. The other €240,926.40 goes to the sellers.",
+          "La place de marché en garde 12 % : 273 780 € × 0,12 = 32 853,60 € de revenu net. Les 240 926,40 € restants vont aux vendeurs.",
+        ),
+        t(
+          "Annualised, the GMV reads €3,285,360 (× 12). Presenting it as \"€3.3 million of revenue\" is the classic confusion: the net revenue is €394,243.20 a year, a little over eight times less.",
+          "Annualisé, le GMV affiche 3 285 360 € (× 12). Le présenter comme « 3,3 millions de chiffre d'affaires » est la confusion classique : le revenu net est de 394 243,20 € par an, un peu plus de huit fois moins.",
+        ),
+      ],
+      takeaway: t(
+        "GMV measures the size of the market you host; revenue, the share of it you keep. Publish them side by side, and never add one to the other.",
+        "Le GMV mesure la taille du marché que tu héberges ; le revenu, la part que tu en gardes. Publie-les côte à côte, et ne les additionne jamais.",
+      ),
+    },
+    benchmark: [
+      t(
+        "There is no good GMV in general: a marketplace of second-hand furniture and one of industrial machines can have the same number of orders and GMVs that have nothing in common. GMV says how big a market is, not how healthy it is.",
+        "Il n'y a pas de bon GMV en général : une place de marché de meubles d'occasion et une autre de machines industrielles peuvent avoir le même nombre de commandes et des GMV qui n'ont rien à voir. Le GMV dit la taille d'un marché, pas sa santé.",
+      ),
+      t(
+        "Published GMV figures are rarely comparable: some include taxes, delivery or cancelled orders, others don't, and a few report the value of listings rather than of sales. Before comparing two GMVs, check what each one counts.",
+        "Les GMV publiés sont rarement comparables : certains comptent les taxes, la livraison ou les commandes annulées, d'autres non, et quelques-uns la valeur des annonces plutôt que celle des ventes. Avant de comparer deux GMV, vérifie ce que chacun compte.",
+      ),
+      t(
+        "The comparison worth making is your own GMV month after month, split into its three factors, with net revenue beside it. A GMV that grows while net revenue stays flat means the take rate is falling: discounts, refunds, or sales shifting towards what earns less.",
+        "La comparaison qui vaut la peine est ton propre GMV mois après mois, décomposé en ses trois facteurs, avec le revenu net à côté. Un GMV qui monte pendant que le revenu net stagne veut dire que le take rate baisse : remises, remboursements, ou des ventes qui se déplacent vers ce qui rapporte moins.",
+      ),
+    ],
+    howToImprove: [
+      t(
+        "Work on one factor at a time. More active buyers, more orders per buyer and a higher average order value are three different problems: acquisition and the first order for the first, repeat purchase for the second, the catalogue and the offer for the third.",
+        "Travaille un facteur à la fois. Plus d'acheteurs actifs, plus de commandes par acheteur et un panier moyen plus élevé sont trois problèmes différents : l'acquisition et la première commande pour le premier, le réachat pour le deuxième, le catalogue et l'offre pour le troisième.",
+      ),
+      t(
+        "Fix the searches that find nothing. A buyer who looks and leaves empty-handed is GMV that never happened, and the fill rate counts it: every point of fill rate gained is orders that already had a buyer.",
+        "Répare les recherches qui ne trouvent rien. Un acheteur qui cherche et repart les mains vides, c'est du GMV qui n'a jamais eu lieu, et le taux de service le compte : chaque point de taux de service gagné, ce sont des commandes qui avaient déjà un acheteur.",
+      ),
+      t(
+        "Bring buyers back for a second order. On the same second-hand furniture marketplace, 5 buyer sign-ups out of 100 place a second order within 90 days: repeat purchase is how a marketplace's GMV stops depending on acquisition alone.",
+        "Fais revenir les acheteurs pour une deuxième commande. Sur la même place de marché de mobilier d'occasion, 5 inscrits acheteurs sur 100 en passent une deuxième dans les 90 jours : c'est par le réachat que le GMV d'une place de marché cesse de dépendre de la seule acquisition.",
+      ),
+      t(
+        "Don't buy it. Discounts and subsidies paid by the marketplace raise GMV and lower what it keeps; take them out of net revenue, and read the take rate beside the GMV every month.",
+        "Ne l'achète pas. Les remises et subventions payées par la place de marché font monter le GMV et baisser ce qu'elle garde ; retire-les du revenu net, et lis le take rate à côté du GMV chaque mois.",
+      ),
+    ],
+    inTheTour: {
+      questionId: "rev-2",
+      body: t(
+        "The Tour asks whether you know your LTV (lifetime value), even roughly — 20 points for a solid estimate, 7 for a very rough guess, 0 for no idea. On a marketplace, the most common error sits right here: an LTV computed on GMV rather than on what the marketplace keeps. In the example, a buyer's average order value is €65, but the marketplace keeps €7.80 of it (65 × 12%): an LTV built on the €65 is more than eight times too high, and so is every acquisition budget derived from it. A solid estimate starts from net revenue per buyer, never from GMV.",
+        "Le Tour demande si tu connais ta LTV (lifetime value), même grossièrement — 20 points pour une estimation solide, 7 pour une estimation très approximative, 0 si tu n'en as aucune idée. Sur une place de marché, l'erreur la plus courante est là : une LTV calculée sur le GMV plutôt que sur ce que la place de marché garde. Dans l'exemple, le panier moyen d'un acheteur est de 65 €, mais la place de marché en garde 7,80 € (65 × 12 %) : une LTV construite sur les 65 € est plus de huit fois trop haute, et chaque budget d'acquisition qu'on en tire l'est aussi. Une estimation solide part du revenu net par acheteur, jamais du GMV.",
+      ),
+    },
+    faq: [
+      {
+        question: t("What is GMV?", "C'est quoi le GMV ?"),
+        answer: t(
+          "Gross merchandise value: the total value of the sales that go through a marketplace over a period, what buyers spend. It is not the marketplace's revenue, which is only the share it keeps.",
+          "Le gross merchandise value, ou volume d'affaires : la valeur totale des ventes qui passent par une place de marché sur une période, ce que dépensent les acheteurs. Ce n'est pas le revenu de la place de marché, qui n'en est que la part gardée.",
+        ),
+      },
+      {
+        question: t("How do you calculate GMV?", "Comment calculer le GMV ?"),
+        answer: t(
+          "Add up the value of every order paid through the marketplace in the period. To understand it, split it: active buyers × orders per buyer × average order value. 14,040 buyers × 0.3 orders × €65 = €273,780.",
+          "Additionne le montant de toutes les commandes payées sur la place de marché pendant la période. Pour le comprendre, décompose-le : acheteurs actifs × commandes par acheteur × panier moyen. 14 040 acheteurs × 0,3 commande × 65 € = 273 780 €.",
+        ),
+      },
+      {
+        question: t("What is the difference between GMV and revenue?", "Quelle différence entre le GMV et le chiffre d'affaires ?"),
+        answer: t(
+          "GMV is what buyers spend through the marketplace; revenue (its net revenue) is what the marketplace keeps of it, in commissions and fees. The ratio of the two is the take rate: €32,853.60 kept on €273,780 of GMV is 12%.",
+          "Le GMV est ce que les acheteurs dépensent sur la place de marché ; le chiffre d'affaires (son revenu net), ce que la place de marché en garde, en commissions et en frais. Le rapport des deux est le take rate : 32 853,60 € gardés sur 273 780 € de GMV, c'est 12 %.",
+        ),
+      },
+      {
+        question: t("Should GMV include cancelled orders?", "Faut-il compter les commandes annulées dans le GMV ?"),
+        answer: t(
+          "Either can be defended, as long as it is written down and never changes. Leaving them out gives a smaller, truer number; keeping them in and publishing the cancellation rate beside it gives the same information. Switching from one to the other between months gives neither.",
+          "Les deux se défendent, pourvu que ce soit écrit et que ça ne change plus. Les retirer donne un chiffre plus petit et plus juste ; les garder en publiant le taux d'annulation à côté donne la même information. Passer de l'un à l'autre d'un mois sur l'autre ne donne ni l'un ni l'autre.",
+        ),
+      },
+    ],
+  },
+
+  // TODO: à relire (convention 6) — terme neuf, A23 MKT-G (2026-10-26). Sources (docs/engine/glossaire-mkt.md §0) : https://lennysnewsletter.com/p/the-most-important-marketplace-metrics ; https://a16z.com/13-metrics-for-marketplace-companies/ ; https://a16z.com/the-marketplace-glossary/ ; https://hub.causo.ai/guides/marketplace-liquidity-seed
+  "take-rate": {
+    formula: {
+      expression: t(
+        "Take rate = the marketplace's net revenue from transactions (commissions and fees) ÷ GMV, over the same period",
+        "Take rate = revenu net de la place de marché sur les transactions (commissions et frais) ÷ GMV, sur la même période",
+      ),
+      terms: [
+        {
+          symbol: t("Net revenue", "Revenu net"),
+          meaning: t(
+            "What the marketplace keeps from each transaction: the commission taken from sellers, the service fees charged to buyers, payment fees passed on. Sellers' subscriptions, if any, are a separate revenue line: they are not a share of transactions.",
+            "Ce que la place de marché garde de chaque transaction : la commission prélevée aux vendeurs, les frais de service facturés aux acheteurs, les frais de paiement refacturés. Les abonnements des vendeurs, s'il y en a, sont une ligne de revenu à part : ils ne sont pas une part des transactions.",
+          ),
+        },
+        {
+          symbol: t("GMV", "GMV"),
+          meaning: t(
+            "Gross merchandise value, the total value of the orders paid through the marketplace over the same period, defined the same way: if refunded orders leave the GMV, the commissions refunded with them leave the revenue too.",
+            "Le gross merchandise value, la valeur totale des commandes payées sur la place de marché sur la même période, défini de la même façon : si les commandes remboursées sortent du GMV, les commissions remboursées avec elles sortent aussi du revenu.",
+          ),
+        },
+      ],
+      note: t(
+        "The advertised commission and the take rate are not the same number: discounts, refunds, free delivery and sellers on special terms all pull the realised rate below the price list. Measure the take rate from the books, not from the pricing page.",
+        "La commission affichée et le take rate ne sont pas le même chiffre : remises, remboursements, livraisons offertes et vendeurs à conditions spéciales tirent tous le taux réalisé sous la grille tarifaire. Mesure le take rate dans la comptabilité, pas sur la page des tarifs.",
+      ),
+    },
+    example: {
+      title: t("12% of €273,780, and what one point is worth", "12 % de 273 780 €, et ce que vaut un point"),
+      steps: [
+        t(
+          "The second-hand furniture marketplace, in August: €273,780 of GMV, €32,853.60 kept in commissions and fees. Take rate = 32,853.60 ÷ 273,780 = 12%.",
+          "La place de marché de mobilier d'occasion, en août : 273 780 € de GMV, 32 853,60 € gardés en commissions et en frais. Take rate = 32 853,60 ÷ 273 780 = 12 %.",
+        ),
+        t(
+          "Per active buyer, it is what makes a sale worth something to the marketplace: 0.3 orders a month × €65 × 12% = €2.34 of net revenue per buyer per month.",
+          "Par acheteur actif, c'est lui qui donne à une vente sa valeur pour la place de marché : 0,3 commande par mois × 65 € × 12 % = 2,34 € de revenu net par acheteur et par mois.",
+        ),
+        t(
+          "At 13%, with the same GMV, the month would bring in €273,780 × 0.13 = €35,591.40, that is €2,737.80 more — and €2.535 per buyer instead of €2.34.",
+          "À 13 %, à GMV égal, le mois rapporterait 273 780 € × 0,13 = 35 591,40 €, soit 2 737,80 € de plus — et 2,535 € par acheteur au lieu de 2,34 €.",
+        ),
+        t(
+          "That \"with the same GMV\" is the whole question. If one more point of commission made sellers raise their prices or leave, and GMV fell by more than one thirteenth (about 7.7%), the marketplace would earn less than before.",
+          "Ce « à GMV égal » est toute la question. Si un point de commission en plus poussait les vendeurs à monter leurs prix ou à partir, et que le GMV baissait de plus d'un treizième (environ 7,7 %), la place de marché gagnerait moins qu'avant.",
+        ),
+      ],
+      takeaway: t(
+        "A take rate is never read alone. One point of commission is only a gain if GMV holds, and the only way to know is to change it on part of the market and watch both numbers.",
+        "Un take rate ne se lit jamais seul. Un point de commission n'est un gain que si le GMV tient, et la seule façon de le savoir est de le changer sur une partie du marché et de regarder les deux chiffres.",
+      ),
+    },
+    benchmark: [
+      t(
+        "The take rates published for well-known marketplaces run from the low single digits to the mid-thirties of percent. The spread is not noise: it follows how fragmented each side is, how easy it is to transact elsewhere, and how much the platform brings to the transaction (Lenny's Newsletter, \"The most important marketplace metrics\"; a16z, \"13 metrics for marketplace companies\").",
+        "Les take rates publiés pour des places de marché connues vont du bas d'un chiffre au milieu des trente pour cent. L'écart n'est pas du bruit : il suit la fragmentation de chaque côté, la facilité de conclure ailleurs, et ce que la plateforme apporte à la transaction (Lenny's Newsletter, « The most important marketplace metrics » ; a16z, « 13 metrics for marketplace companies »).",
+      ),
+      t(
+        "That range says where marketplaces sit, not where yours should: a rate copied from another category ignores what makes that category's sellers pay. The comparison worth making is your own realised rate, month after month, beside your GMV.",
+        "Cette fourchette dit où se trouvent les places de marché, pas où la tienne devrait être : un taux recopié d'une autre catégorie ignore ce qui fait payer les vendeurs de cette catégorie. La comparaison qui vaut la peine est ton propre taux réalisé, mois après mois, à côté de ton GMV.",
+      ),
+      t(
+        "Read the realised rate, not the advertised one. A commission can advertise one rate and realise far less once discounts and refunds have gone through, and the gap between the two is a finding in itself.",
+        "Lis le taux réalisé, pas le taux affiché. Une commission peut afficher un taux et en réaliser bien moins une fois les remises et les remboursements passés, et l'écart entre les deux est en soi une trouvaille.",
+      ),
+    ],
+    howToImprove: [
+      t(
+        "Charge for what you add. Payment protection, insurance, delivery or a guarantee are reasons to pay that sellers and buyers can see; a commission with nothing visible behind it is the first one they try to get around.",
+        "Fais payer ce que tu apportes. La protection du paiement, une assurance, la livraison ou une garantie sont des raisons de payer que vendeurs et acheteurs voient ; une commission sans rien de visible derrière est la première qu'ils cherchent à contourner.",
+      ),
+      t(
+        "Test before you change it everywhere. Move the rate on one category, one region or new sellers only, and watch GMV and the number of active sellers beside revenue, over at least one full cycle of orders.",
+        "Teste avant de changer partout. Bouge le taux sur une catégorie, une région ou les nouveaux vendeurs seulement, et regarde le GMV et le nombre de vendeurs actifs à côté du revenu, sur au moins un cycle complet de commandes.",
+      ),
+      t(
+        "Close the leaks between the advertised and the realised rate: discounts nobody reviews, refunds that return the whole commission, sellers left on launch terms. They cost points without anyone having decided it.",
+        "Ferme les fuites entre le taux affiché et le taux réalisé : remises que personne ne revoit, remboursements qui rendent toute la commission, vendeurs restés aux conditions du lancement. Elles coûtent des points sans que personne l'ait décidé.",
+      ),
+      t(
+        "Watch for transactions leaving the platform. A buyer and a seller who meet once and deal directly the next time are a take rate of zero; repeat orders that stay on the platform are the sign the rate is accepted.",
+        "Surveille les transactions qui sortent de la plateforme. Un acheteur et un vendeur qui se rencontrent une fois et traitent en direct la suivante, c'est un take rate à zéro ; des réachats qui restent sur la plateforme sont le signe que le taux est accepté.",
+      ),
+    ],
+    inTheTour: {
+      questionId: "rev-1",
+      body: t(
+        "The Tour asks whether your pricing has been tested rather than just chosen — 20 points for tested against alternatives, 7 for chosen with some reasoning, 0 for picked arbitrarily. On a marketplace, the take rate is the price, and it is the one most often set once at launch and never touched again: copied from a competitor, or rounded to a number that felt fair. Testing it means changing it on part of the market and watching what both sides do — the GMV, the sellers who stay, the buyers who come back — not only the revenue of the following month.",
+        "Le Tour demande si ton pricing a été testé plutôt que simplement choisi — 20 points s'il a été testé face à des alternatives, 7 s'il a été choisi avec une logique, 0 s'il l'a été un peu arbitrairement. Sur une place de marché, le take rate est le prix, et c'est celui qu'on fixe le plus souvent une fois au lancement pour ne plus jamais y toucher : recopié d'un concurrent, ou arrondi à un chiffre qui semblait juste. Le tester, c'est le changer sur une partie du marché et regarder ce que font les deux côtés — le GMV, les vendeurs qui restent, les acheteurs qui reviennent — pas seulement le revenu du mois suivant.",
+      ),
+    },
+    faq: [
+      {
+        question: t("What is a take rate?", "C'est quoi le take rate ?"),
+        answer: t(
+          "The share of a marketplace's GMV that it keeps as revenue: its commissions and fees divided by what buyers spent through it. €32,853.60 kept on €273,780 of GMV is a 12% take rate.",
+          "La part du GMV qu'une place de marché garde comme revenu : ses commissions et ses frais divisés par ce que les acheteurs y ont dépensé. 32 853,60 € gardés sur 273 780 € de GMV, c'est un take rate de 12 %.",
+        ),
+      },
+      {
+        question: t("What is a good take rate?", "C'est quoi un bon take rate ?"),
+        answer: t(
+          "Published rates for well-known marketplaces run from the low single digits to the mid-thirties of percent, and the spread follows what each platform brings to the transaction. A good rate is the one your market keeps paying without GMV falling or transactions leaving the platform.",
+          "Les taux publiés pour des places de marché connues vont du bas d'un chiffre au milieu des trente pour cent, et l'écart suit ce que chaque plateforme apporte à la transaction. Un bon taux est celui que ton marché continue de payer sans que le GMV baisse ni que les transactions sortent de la plateforme.",
+        ),
+      },
+      {
+        question: t("Is the take rate the same as the advertised commission?", "Le take rate, c'est la commission affichée ?"),
+        answer: t(
+          "Not quite. The advertised commission is the price announced to sellers; the take rate is what you actually keep, buyer fees included, discounts and refunds deducted. The two can be far apart, and revenue follows the take rate.",
+          "Pas tout à fait. La commission affichée est le prix annoncé aux vendeurs ; le take rate, ce que tu gardes vraiment, frais des acheteurs compris, remises et remboursements déduits. Les deux peuvent être loin l'un de l'autre, et c'est le take rate que le revenu suit.",
+        ),
+      },
+      {
+        question: t("Do sellers' subscriptions count in the take rate?", "Les abonnements des vendeurs comptent-ils dans le take rate ?"),
+        answer: t(
+          "No. A subscription is paid whether or not anything sells: it is a separate, recurring revenue line. Adding it to the commissions makes the take rate look higher than what transactions actually bring in.",
+          "Non. Un abonnement se paie que quelque chose se vende ou non : c'est une ligne de revenu à part, récurrente. L'ajouter aux commissions fait paraître le take rate plus haut que ce que rapportent vraiment les transactions.",
+        ),
+      },
+    ],
+  },
+
+  // TODO: à relire (convention 6) — terme neuf, A23 MKT-G (2026-10-26). Sources (docs/engine/glossaire-mkt.md §0) : https://lennysnewsletter.com/p/the-most-important-marketplace-metrics ; https://a16z.com/13-metrics-for-marketplace-companies/ ; https://a16z.com/the-marketplace-glossary/ ; https://hub.causo.ai/guides/marketplace-liquidity-seed
+  "marketplace-liquidity": {
+    formula: {
+      expression: t(
+        "Fill rate = requests (or searches) with intent that end in a transaction ÷ requests (or searches) with intent, over the same period",
+        "Taux de service = demandes (ou recherches) avec une intention qui aboutissent à une transaction ÷ demandes (ou recherches) avec une intention, sur la même période",
+      ),
+      terms: [
+        {
+          symbol: t("Requests with intent", "Demandes avec une intention"),
+          meaning: t(
+            "What a buyer does when they want something: a search, a booking request, a quote request. Write down which one you count and never mix two kinds in the same rate: a search costs nothing and a quote request does, and their rates have nothing in common.",
+            "Ce que fait un acheteur quand il veut quelque chose : une recherche, une demande de réservation, une demande de devis. Écris laquelle tu comptes et ne mélange jamais deux sortes dans un même taux : une recherche ne coûte rien et une demande de devis si, et leurs taux n'ont rien en commun.",
+          ),
+        },
+        {
+          symbol: t("Ending in a transaction", "Qui aboutissent"),
+          meaning: t(
+            "The request led to an order, a confirmed booking or an accepted quote, within a window you also write down. A request served after the buyer has gone elsewhere is not a match.",
+            "La demande a mené à une commande, une réservation confirmée ou un devis accepté, dans un délai que tu écris aussi. Une demande servie après que l'acheteur est allé ailleurs n'est pas une rencontre.",
+          ),
+        },
+      ],
+      note: t(
+        "Also called match rate. Liquidity itself is a probability — the chance that a request finds supply within a reasonable time (Causo, \"Marketplace liquidity\") — and the fill rate is how a marketplace measures it in practice. Its definition depends on each marketplace (a16z, \"The marketplace glossary\").",
+        "On dit aussi « fill rate » ou « match rate ». La liquidité elle-même est une probabilité — la chance qu'une demande trouve une offre dans un délai raisonnable (Causo, « Marketplace liquidity ») — et le taux de service est la façon dont une place de marché la mesure en pratique. Sa définition dépend de chaque place de marché (a16z, « The marketplace glossary »).",
+      ),
+    },
+    example: {
+      title: t("26,000 searches, 2,340 orders", "26 000 recherches, 2 340 commandes"),
+      steps: [
+        t(
+          "The second-hand furniture marketplace, in August: 26,000 searches with intent, 2,340 of which ended in an order. Fill rate = 2,340 ÷ 26,000 = 9%.",
+          "La place de marché de mobilier d'occasion, en août : 26 000 recherches avec une intention, dont 2 340 ont abouti à une commande. Taux de service = 2 340 ÷ 26 000 = 9 %.",
+        ),
+        t(
+          "Nine searches out of a hundred find what the buyer came for. The other 91 are searches that found nothing, and every buyer behind them has a reason not to come back.",
+          "Neuf recherches sur cent trouvent ce que l'acheteur était venu chercher. Les 91 autres sont des recherches qui n'ont rien trouvé, et chaque acheteur derrière elles a une raison de ne pas revenir.",
+        ),
+        t(
+          "The team's target is 12%. If the extra matches reached new buyers only — a cautious assumption, which gives a floor — the month's 600 new buyers would become 800 (600 × 12 ÷ 9), 200 more, worth about €470 of new net revenue each month, at €2.34 per buyer.",
+          "La cible de l'équipe est 12 %. Si les rencontres en plus ne touchaient que les nouveaux acheteurs — une hypothèse prudente, qui donne un minimum —, les 600 nouveaux acheteurs du mois deviendraient 800 (600 × 12 ÷ 9), 200 de plus, soit environ 470 € de revenu net nouveau chaque mois, à 2,34 € par acheteur.",
+        ),
+        t(
+          "Split by category, the same 9% can hide a liquid market and an empty one: a category where many searches end in an order beside one where almost none do. The fix is not the same in both.",
+          "Découpé par catégorie, le même 9 % peut cacher un marché liquide et un marché vide : une catégorie où beaucoup de recherches aboutissent à côté d'une autre où presque aucune n'aboutit. Le remède n'est pas le même dans les deux.",
+        ),
+      ],
+      takeaway: t(
+        "Liquidity is read per segment and over a fixed definition of a request. A blended rate says how the marketplace does on average; a split rate says where it lets buyers down, and where supply is missing.",
+        "La liquidité se lit par segment et sur une définition fixe de la demande. Un taux global dit comment va la place de marché en moyenne ; un taux découpé dit où elle déçoit, et où manque l'offre.",
+      ),
+    },
+    benchmark: [
+      t(
+        "No fill rate travels between marketplaces: a search, a booking request and a quote request are not the same act, and the definition of a request depends on each marketplace (a16z, \"The marketplace glossary\"). A figure without its definition says nothing.",
+        "Aucun taux de service ne voyage d'une place de marché à l'autre : une recherche, une demande de réservation et une demande de devis ne sont pas le même geste, et la définition d'une demande dépend de chaque place de marché (a16z, « The marketplace glossary »). Un chiffre sans sa définition ne dit rien.",
+      ),
+      t(
+        "Lenny's Newsletter calls the share of sessions with intent that convert the ultimate measure of a marketplace's health. Its use is in comparing the marketplace with itself, segment by segment and month after month, with the definition held constant.",
+        "Lenny's Newsletter tient la part des sessions avec une intention qui convertissent pour la mesure ultime de la santé d'une place de marché. Son usage est de comparer la place de marché à elle-même, segment par segment et mois après mois, à définition constante.",
+      ),
+      t(
+        "Liquidity follows density more than size: a marketplace with fewer sellers concentrated in one city can serve its buyers better than a larger one spread thin. Read the rate where buyers actually search, not over the whole market.",
+        "La liquidité suit la densité plus que la taille : une place de marché avec moins de vendeurs concentrés dans une ville peut mieux servir ses acheteurs qu'une plus grande éparpillée. Lis le taux là où les acheteurs cherchent vraiment, pas sur tout le marché.",
+      ),
+    ],
+    howToImprove: [
+      t(
+        "Start narrow. Concentrate supply on one city, one category or one use until requests there find a match markedly more often than elsewhere, then widen: a small dense market beats a large thin one.",
+        "Commence étroit. Concentre l'offre sur une ville, une catégorie ou un usage jusqu'à ce que les demandes y trouvent preneur nettement plus souvent qu'ailleurs, puis élargis : un petit marché dense vaut mieux qu'un grand marché clairsemé.",
+      ),
+      t(
+        "Read the searches that find nothing. They are the list of what buyers want and you don't have, and the most direct brief for recruiting sellers.",
+        "Lis les recherches qui ne trouvent rien. C'est la liste de ce que les acheteurs veulent et que tu n'as pas, et le cahier des charges le plus direct pour recruter des vendeurs.",
+      ),
+      t(
+        "Make supply easier to find before adding more of it. Search, filters and how fast sellers answer requests often lose matches the catalogue could already serve.",
+        "Rends l'offre plus facile à trouver avant d'en ajouter. La recherche, les filtres et la vitesse à laquelle les vendeurs répondent aux demandes font souvent perdre des rencontres que le catalogue pouvait déjà servir.",
+      ),
+      t(
+        "Keep sellers active, not just listed. An out-of-date listing or a seller who no longer answers counts as supply and serves nobody; the churn of active sellers is part of liquidity.",
+        "Garde les vendeurs actifs, pas seulement inscrits. Une annonce périmée ou un vendeur qui ne répond plus compte comme de l'offre et ne sert personne ; le churn des vendeurs actifs fait partie de la liquidité.",
+      ),
+    ],
+    inTheTour: {
+      questionId: "act-2",
+      body: t(
+        "The Tour asks whether you know what share of your users reach their \"aha\" moment — 20 points if it is tracked precisely, 7 for a rough sense of it, 0 for no visibility. On a marketplace, a buyer's first moment of value is a request that finds what they came for: the fill rate is that share, measured on every search rather than once per user. A team that tracks it per segment knows where its buyers are let down; a team that doesn't learns it from the buyers who stopped coming back.",
+        "Le Tour demande si tu sais quelle part de tes utilisateurs atteint son moment « aha » — 20 points si c'est suivi précisément, 7 pour une intuition approximative, 0 sans aucune visibilité. Sur une place de marché, le premier moment de valeur d'un acheteur est une demande qui trouve ce qu'il était venu chercher : le taux de service est cette part, mesurée sur chaque recherche plutôt qu'une fois par utilisateur. Une équipe qui le suit par segment sait où ses acheteurs sont déçus ; une équipe qui ne le suit pas l'apprend par les acheteurs qui ne reviennent plus.",
+      ),
+    },
+    faq: [
+      {
+        question: t("What is marketplace liquidity?", "C'est quoi la liquidité d'une place de marché ?"),
+        answer: t(
+          "The likelihood that a request on one side finds a match on the other within a reasonable time: the buyer finds what they want, the seller sells. It is measured by the fill rate, the share of requests that end in a transaction.",
+          "La probabilité qu'une demande d'un côté trouve preneur de l'autre dans un délai raisonnable : l'acheteur trouve ce qu'il veut, le vendeur vend. Elle se mesure par le taux de service, la part des demandes qui aboutissent à une transaction.",
+        ),
+      },
+      {
+        question: t("How do you measure liquidity?", "Comment mesurer la liquidité ?"),
+        answer: t(
+          "Pick one kind of request — searches, booking requests or quote requests — and count the share that ends in a transaction within a written window. 2,340 orders from 26,000 searches is a 9% fill rate.",
+          "Choisis une sorte de demande — recherches, demandes de réservation ou de devis — et compte la part qui aboutit à une transaction dans un délai écrit. 2 340 commandes sur 26 000 recherches, c'est un taux de service de 9 %.",
+        ),
+      },
+      {
+        question: t("What is the difference between fill rate and conversion rate?", "Quelle différence entre le taux de service et le taux de conversion ?"),
+        answer: t(
+          "A conversion rate counts visitors who buy; the fill rate counts requests that find supply. A visitor who searches three times and finds nothing lowers the fill rate three times, and the conversion rate once.",
+          "Un taux de conversion compte les visiteurs qui achètent ; le taux de service, les demandes qui trouvent une offre. Un visiteur qui cherche trois fois sans rien trouver fait baisser le taux de service trois fois, et le taux de conversion une seule.",
+        ),
+      },
+      {
+        question: t("Why is my marketplace liquid in one city and not in another?", "Pourquoi ma place de marché est-elle liquide dans une ville et pas dans une autre ?"),
+        answer: t(
+          "Because liquidity depends on density, not size: buyers and sellers have to be close enough, in place or in category, to meet. Measure the fill rate per segment, and fill the empty segments one at a time.",
+          "Parce que la liquidité dépend de la densité, pas de la taille : acheteurs et vendeurs doivent être assez proches, par le lieu ou la catégorie, pour se rencontrer. Mesure le taux de service par segment, et remplis les segments vides un à un.",
+        ),
+      },
+    ],
+  },
 };

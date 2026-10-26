@@ -83,7 +83,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
       fr: "La plupart des équipes confondent activation et inscription. Ce sont deux choses différentes : l'inscription est une action administrative, l'activation est le moment où l'utilisateur comprend enfin pourquoi il est là (voir Moment « aha »). Bien définir son activation demande de regarder, parmi les utilisateurs qui reviennent des mois plus tard, quelle action ils ont tous faite tôt — c'est souvent contre-intuitif, rarement la première chose qu'on montre dans l'onboarding. Une activation mal définie fausse tout le reste : on optimise le mauvais moment du parcours.",
       en: "Most teams confuse activation with sign-up. They're two different things: sign-up is an administrative action, activation is the moment the user finally understands why they're there (see Aha moment). Defining activation correctly means looking at users who are still around months later and finding the one early action they all took — it's often counter-intuitive, rarely the first thing shown in onboarding. A poorly defined activation moment skews everything downstream: you end up optimizing the wrong point in the journey.",
     },
-    related: ["aha-moment", "onboarding", "retention", "aarrr"],
+    related: ["aha-moment", "onboarding", "marketplace-liquidity", "aarrr"],
   },
   retention: {
     ...GLOSSARY_TERMS.retention,
@@ -112,7 +112,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
       fr: "Cette étape ne juge pas le montant encaissé, mais si le modèle de revenu a été réellement testé face à de vrais clients — beaucoup de produits ont un plan de monétisation « pour plus tard » qui n'a jamais rencontré une carte bancaire. Une référence souvent citée dans le SaaS est un ratio LTV:CAC autour de 3:1 comme seuil de viabilité (voir LTV et CAC) — à prendre comme repère directionnel, pas comme une règle absolue selon ton marché. L'upsell et le cross-sell sont les deux leviers les plus rapides une fois le modèle de base validé.",
       en: "This stage doesn't judge how much money comes in, but whether the revenue model has actually been tested against real customers — plenty of products have a monetization plan for \"later\" that has never met a credit card. A commonly cited SaaS rule of thumb is an LTV:CAC ratio around 3:1 as a viability threshold (see LTV and CAC) — treat it as a directional benchmark, not an absolute rule for every market. Upsell and cross-sell are the fastest levers once the base model is validated.",
     },
-    related: ["arpu", "win-rate", "upsell-cross-sell", "aarrr"],
+    related: ["arpu", "win-rate", "gmv", "aarrr"],
   },
   "aha-moment": {
     ...GLOSSARY_TERMS["aha-moment"],
@@ -140,7 +140,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
       fr: "Une estimation courante en SaaS : revenu mensuel moyen par client, divisé par le taux de churn mensuel. Un churn de 5 %/mois donne mécaniquement une durée de vie moyenne de 20 mois — ce qui montre à quel point la LTV dépend directement de la retention, pas seulement du prix. Augmenter son prix sans travailler la retention gonfle la LTV sur le papier sans rien changer à la réalité si les clients partent toujours aussi vite. C'est pour ça que cette étape et Retention se lisent toujours ensemble, jamais isolément.",
       en: "A common SaaS estimate: average monthly revenue per customer, divided by the monthly churn rate. A 5%/month churn rate mechanically implies an average 20-month lifetime — which shows how directly LTV depends on retention, not just price. Raising your price without working on retention inflates LTV on paper without changing anything in reality if customers still leave just as fast. That's why this stage and Retention are always read together, never in isolation.",
     },
-    related: ["cac", "arpu", "acv", "cac-payback"],
+    related: ["cac", "arpu", "acv", "take-rate"],
   },
   churn: {
     ...GLOSSARY_TERMS.churn,
@@ -191,7 +191,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
       fr: "Un entonnoir classique se termine à la conversion ; une boucle de croissance, elle, réinjecte la sortie comme entrée du cycle suivant. C'est exactement le mécanisme de ce test : chaque résultat partagé (voir Referral) amène potentiellement un nouveau visiteur, qui complète à son tour son propre test et le partage. On distingue généralement trois familles de boucles : les boucles de contenu (le contenu généré attire du trafic organique), les boucles virales (le partage amène directement de nouveaux utilisateurs) et les boucles payantes (le revenu généré finance l'acquisition suivante).",
       en: "A classic funnel ends at conversion; a growth loop instead feeds its output back in as the next cycle's input. That's exactly this tool's own mechanism: every shared result (see Referral) potentially brings in a new visitor, who in turn completes their own test and shares it. Growth teams generally group loops into three families: content loops (generated content pulls in organic traffic), viral loops (sharing directly brings in new users), and paid loops (revenue generated funds the next round of acquisition).",
     },
-    related: ["referral", "viral-coefficient", "acquisition", "product-led-growth"],
+    related: ["referral", "viral-coefficient", "marketplace-liquidity", "product-led-growth"],
   },
   "north-star-metric": {
     ...GLOSSARY_TERMS["north-star-metric"],
@@ -202,7 +202,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
       fr: "Les exemples les plus connus : Airbnb a longtemps suivi les « nuits réservées » plutôt que le nombre d'inscriptions, Facebook a suivi les utilisateurs actifs mensuels plutôt que le nombre de comptes créés. Le point commun : dans les deux cas, la métrique capture de la valeur réellement délivrée, pas une action facile à gonfler artificiellement. Une bonne North Star Metric doit répondre à une question simple : si elle grimpe sans que rien d'autre ne bouge, est-ce que l'entreprise va vraiment mieux ? Si la réponse n'est pas clairement oui, ce n'est pas la bonne métrique.",
       en: "The best-known examples: Airbnb tracked \"nights booked\" for years rather than sign-ups, Facebook tracked monthly active users rather than accounts created. The common thread: in both cases the metric captures value actually delivered, not an easily-inflated vanity action. A good North Star Metric has to answer one simple question: if it goes up and nothing else changes, is the business actually better off? If the answer isn't a clear yes, it's the wrong metric.",
     },
-    related: ["aarrr", "retention", "dau-mau", "cohort-analysis"],
+    related: ["aarrr", "gmv", "dau-mau", "cohort-analysis"],
   },
   // ——— GROWTH-PLAN.md wave 2.2, lot 1 (2026-09-14) ———
   // Validé au bon à tirer nº5 (2026-09-22), comme les lots 2 et 3.
@@ -288,7 +288,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
       fr: "La confusion à évacuer avant tout le reste est celle avec l'ARPPU, le revenu moyen par utilisateur **payant**. Sur un produit freemium, les deux peuvent être vingt-cinq fois différents — 0,80 € et 20 € le même mois — et les deux se font appeler « ARPU » dans des documents différents la même semaine. Le bon choix dépend de la décision : l'ARPU pour juger une dépense d'acquisition, puisqu'on paie pour des inscriptions dont une partie seulement convertit ; l'ARPPU pour juger un changement de prix, qui ne touche pas les utilisateurs gratuits. La seconde chose à savoir est qu'un ARPU en hausse n'est pas une victoire en soi : perds tes plus petits utilisateurs et la moyenne de ceux qui restent monte sans qu'un euro ait été ajouté. C'est le même piège mécanique que le ratio DAU/MAU, et le même remède — publier le dénominateur à côté.",
       en: "The confusion to clear before anything else is with ARPPU, average revenue per **paying** user. On a freemium product the two can differ twenty-five fold — €0.80 and €20 in the same month — and both get called \"ARPU\", in different decks, in the same week. Which one is right depends on the decision: ARPU for judging acquisition spend, since you pay for sign-ups and only some convert; ARPPU for judging a price change, which free users are unaffected by. The second thing to know is that a rising ARPU is not a win in itself: lose your smallest users and the average of those remaining climbs without a euro being added. It is the same mechanical trap as the DAU/MAU ratio, and it has the same cure — publish the denominator beside it.",
     },
-    related: ["ltv", "acv", "cac-payback", "dau-mau"],
+    related: ["take-rate", "acv", "cac-payback", "dau-mau"],
   },
   nps: {
     ...GLOSSARY_TERMS.nps,
@@ -345,5 +345,43 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
       en: "Lead-to-opportunity rate measures the handover between marketing and sales: of the contacts the company attracted, how many a salesperson judges serious enough to open a deal. It is the most fragile number in the funnel, because both of its terms are internal conventions. \"Lead\" can mean any inbound contact, or only those marketing has qualified — MQLs. \"Opportunity\" can mean a deal anyone created, or one a salesperson accepted. A webinar that fills the database with lukewarm contacts makes the rate fall while nothing changed in sales; a salesperson who opens an opportunity on every call makes it rise while nothing changed among customers. Writing down both definitions, and the window in which a lead is allowed to become an opportunity, is therefore half the job.",
     },
     related: ["acquisition", "pql", "win-rate", "cac"],
+  },
+  // ——— A23 MKT-G (2026-10-26) — les trois termes de la place de marché (C72) ———
+  // Mesh (GROWTH-PLAN.md 2.4, docs/engine/glossaire-mkt.md §1): each new term is
+  // reached from two older pages, and every link is a SWAP against a looser link
+  // to a page that receives many: revenue and north-star-metric lead to gmv,
+  // arpu and ltv to take-rate, activation and growth-loop to
+  // marketplace-liquidity. No target drops below four inbound links except
+  // upsell-cross-sell (4 → 3): revenue had no other link to give up.
+  // The six pages that only gain a link keep their date: a link is not content.
+  gmv: {
+    ...GLOSSARY_TERMS.gmv,
+    updatedAt: "2026-10-26", // A23 MKT-G — created
+    extended: {
+      // TODO: à relire (convention 6) — terme neuf, A23 MKT-G (2026-10-26).
+      fr: "Le GMV est le chiffre dont une place de marché est la plus fière, et celui qu'on lit le plus souvent de travers. Il dit combien les acheteurs ont dépensé sur la plateforme, pas combien la plateforme a gagné : entre les deux se trouve le take rate, souvent une petite fraction, et les confondre gonfle tous les chiffres construits dessus — le chiffre d'affaires annoncé, la valeur d'un acheteur sur sa durée de vie, le budget qu'un canal d'acquisition peut se permettre. Bien lu, le GMV est le produit de trois facteurs, les acheteurs actifs, les commandes par acheteur et le panier moyen, et chacun répond à une question différente sur le marché que tu héberges. Il se gonfle aussi sans le vouloir : compte les commandes annulées, inclus les taxes et la livraison, ou paie des remises de ta poche, et le GMV monte pendant que ce que tu gardes ne bouge pas. C'est pour ça qu'il ne se lit jamais seul : toujours avec le revenu net à côté, et le take rate qui relie les deux.",
+      en: "GMV is the number a marketplace is proudest of, and the one most often misread. It says how much buyers spent through the platform, not how much the platform earned: between the two sits the take rate, often a small fraction, and confusing them inflates every figure built on top — the revenue announced, what a buyer is worth over their lifetime, the budget an acquisition channel can afford. Read properly, GMV is the product of three factors, active buyers, orders per buyer and the average order value, and each answers a different question about the market you host. It is also easy to inflate without meaning to: count cancelled orders, include taxes and delivery, or pay for discounts out of your own pocket, and GMV climbs while what you keep does not move. That is why it is never read alone: always with net revenue beside it, and the take rate that links the two.",
+    },
+    related: ["take-rate", "marketplace-liquidity", "revenue", "north-star-metric"],
+  },
+  "take-rate": {
+    ...GLOSSARY_TERMS["take-rate"],
+    updatedAt: "2026-10-26", // A23 MKT-G — created
+    extended: {
+      // TODO: à relire (convention 6) — terme neuf, A23 MKT-G (2026-10-26).
+      fr: "Le take rate est le prix d'une place de marché, exprimé en part de ce qui y passe. C'est le levier le plus direct sur le revenu — un point de plus sur le même GMV, c'est un centième du GMV en revenu en plus, sans coût d'acquisition — et le plus dangereux, parce que les deux côtés du marché y réagissent. Les vendeurs qui paient trop montent leurs prix, partent, ou font sortir la transaction de la plateforme dès qu'acheteur et vendeur se sont rencontrés ; les acheteurs qui paient des frais visibles les comparent à un achat ailleurs. Ce qu'une place de marché peut garder dépend donc moins de son ambition que de ce qu'elle apporte à chaque transaction : le paiement, la confiance, l'assurance, la logistique, une demande que les vendeurs ne trouveraient pas seuls. La bonne lecture n'est pas le taux seul mais le taux à côté du GMV : un take rate qui monte pendant que le GMV baisse, c'est une hausse de prix que le marché paie en partant.",
+      en: "The take rate is a marketplace's price, expressed as a share of what goes through it. It is the most direct lever on revenue — one point more on the same GMV is one hundredth of the GMV more in revenue, at no acquisition cost — and the most dangerous one, because both sides of the market react to it. Sellers who pay too much raise their prices, leave, or take the transaction off the platform as soon as buyer and seller have met; buyers who pay a visible fee compare it with buying elsewhere. What a marketplace can keep therefore depends less on its ambition than on what it brings to each transaction: payment, trust, insurance, logistics, demand that sellers could not find on their own. The right reading is not the rate alone but the rate beside the GMV: a take rate that rises while GMV falls is a price increase the market pays for by leaving.",
+    },
+    related: ["gmv", "revenue", "arpu", "ltv"],
+  },
+  "marketplace-liquidity": {
+    ...GLOSSARY_TERMS["marketplace-liquidity"],
+    updatedAt: "2026-10-26", // A23 MKT-G — created
+    extended: {
+      // TODO: à relire (convention 6) — terme neuf, A23 MKT-G (2026-10-26).
+      fr: "La liquidité est la promesse qu'une place de marché fait aux deux côtés : qu'un acheteur qui vient chercher trouvera, et qu'un vendeur qui publie vendra, dans un délai raisonnable. C'est elle qui fait revenir, et c'est ce qu'une place de marché vide ne peut pas simuler. Elle n'a pas de formule unique, parce que ce qui compte comme une rencontre dépend du marché : une recherche qui finit en commande, une demande de réservation acceptée, une annonce vendue dans la semaine. Elle se mesure le plus souvent par le taux de service, la part des demandes ou des recherches qui aboutissent à une transaction, et Lenny's Newsletter tient cette part pour la mesure ultime de la santé d'une place de marché. Deux choses la rendent difficile à lire : elle dépend de la définition d'une demande, qui ne doit jamais changer d'un mois à l'autre, et c'est une propriété de chaque segment plus que de l'ensemble — une place de marché peut être liquide dans une ville ou une catégorie et vide dans la suivante.",
+      en: "Liquidity is the promise a marketplace makes to both sides: that a buyer who comes looking will find, and a seller who lists will sell, within a reasonable time. It is what brings people back, and what an empty marketplace cannot fake. It has no single formula, because what counts as a match depends on the market: a search that ends in an order, a booking request accepted, a listing sold within the week. It is most often measured by the fill rate, the share of requests or searches that end in a transaction, and Lenny's Newsletter calls that share the ultimate measure of a marketplace's health. Two things make it hard to read: it depends on the definition of a request, which must never change from one month to the next, and it is a property of each segment more than of the whole — a marketplace can be liquid in one city or category and empty in the next.",
+    },
+    related: ["gmv", "activation", "retention", "growth-loop"],
   },
 };

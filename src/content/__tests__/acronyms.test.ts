@@ -31,6 +31,9 @@ const EXPANSION: Partial<Record<GlossaryTermId, RegExp>> = {
   // A7.3.e (2026-09-30) : le seul des quatre termes de la vente assistée qui
   // soit un sigle.
   acv: /annual contract value/i,
+  // A23 MKT-G (2026-10-26) : le seul des trois termes de la place de marché qui
+  // soit un sigle. « Take rate » et « liquidité » n'en sont pas.
+  gmv: /gross merchandise value/i,
 };
 
 /** Les acronymes empruntés, et où ils doivent être développés. */
@@ -49,6 +52,11 @@ const BORROWED: [GlossaryTermId, string, RegExp][] = [
   ["lead-to-opportunity", "MQL", /marketing.qualified lead|lead qualifié par le marketing/i],
   ["lead-to-opportunity", "SQL", /sales.qualified lead|lead qualifié par les ventes/i],
   ["lead-to-opportunity", "PQL", /product.qualified lead/i],
+  // A23 MKT-G (2026-10-26) — les deux sigles que les trois termes de la place de
+  // marché empruntent : la page du GMV écrit LTV dans « Dans le Tour », la page du
+  // take rate écrit GMV, développé au deuxième terme de sa formule.
+  ["gmv", "LTV", /lifetime value/i],
+  ["take-rate", "GMV", /gross merchandise value/i],
 ];
 
 function textOf(node: unknown, locale: Locale): string {
@@ -77,8 +85,8 @@ const pageOf = (id: GlossaryTermId) => ({ entry: GLOSSARY[id], deep: GLOSSARY_DE
 
 describe("les acronymes du glossaire", () => {
   it("couvre un jeu de termes non vide — sinon ce fichier ne prouve rien", () => {
-    expect(Object.keys(EXPANSION).length).toBeGreaterThanOrEqual(8);
-    expect(BORROWED.length).toBeGreaterThanOrEqual(12);
+    expect(Object.keys(EXPANSION).length).toBeGreaterThanOrEqual(9);
+    expect(BORROWED.length).toBeGreaterThanOrEqual(14);
   });
 
   for (const [id, expansion] of Object.entries(EXPANSION) as [GlossaryTermId, RegExp][]) {

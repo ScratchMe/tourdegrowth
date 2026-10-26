@@ -56,7 +56,13 @@ export type GlossaryTermId =
   | "win-rate"
   | "sales-cycle"
   | "acv"
-  | "lead-to-opportunity";
+  | "lead-to-opportunity"
+  // A23 MKT-G (C72, docs/engine/glossaire-mkt.md) — the three terms of the
+  // marketplace: GMV, take rate and liquidity. Slugs in English in both
+  // languages (R2-16).
+  | "gmv"
+  | "take-rate"
+  | "marketplace-liquidity";
 
 function same(value: string): Translatable {
   return { fr: value, en: value };
@@ -272,6 +278,34 @@ export const GLOSSARY_TERMS: Record<GlossaryTermId, { term: Translatable; defini
       // TODO: à relire (convention 6).
       fr: "La part des leads d'une période qui deviennent une opportunité qualifiée dans un délai fixé. Le chiffre de la vente assistée qui dépend le plus des définitions.",
       en: "The conversion rate of a period's leads into qualified opportunities within a set window. The sales-assisted number that depends most on definitions.",
+    },
+  },
+  // ——— A23 MKT-G (2026-10-26) — les trois termes de la place de marché ———
+  gmv: {
+    // TODO: à relire (convention 6) — terme neuf, A23 MKT-G (2026-10-26). Le sigle développé dans le titre, comme ARPU et NPS (acronyms.test.ts).
+    term: same("GMV — Gross Merchandise Value"),
+    definition: {
+      // TODO: à relire (convention 6).
+      fr: "Le volume total des ventes qui passent par une place de marché sur une période : ce que dépensent les acheteurs, avant que la plateforme ne prenne sa part.",
+      en: "The total value of the sales that go through a marketplace over a period: what buyers spend, before the platform takes its share.",
+    },
+  },
+  "take-rate": {
+    // TODO: à relire (convention 6) — terme neuf, A23 MKT-G (2026-10-26). « Take rate » en tête aux deux langues : c'est le mot du produit (« Commission (take rate) ») et la requête la plus courante ; « Taux de commission — take rate », sur le modèle de « Taux de closing — win rate », est à trancher au bon à tirer A23.d.
+    term: { fr: "Take rate — taux de commission", en: "Take rate" },
+    definition: {
+      // TODO: à relire (convention 6).
+      fr: "La part du volume d'affaires (GMV) qu'une place de marché garde pour elle : son revenu net divisé par ce que les acheteurs y ont dépensé.",
+      en: "The share of the GMV that a marketplace keeps for itself: its net revenue divided by what buyers spent through it.",
+    },
+  },
+  "marketplace-liquidity": {
+    // TODO: à relire (convention 6) — terme neuf, A23 MKT-G (2026-10-26).
+    term: { fr: "Liquidité d'une place de marché", en: "Marketplace liquidity" },
+    definition: {
+      // TODO: à relire (convention 6).
+      fr: "La probabilité qu'une demande trouve une offre dans un délai raisonnable. Elle se mesure par le taux de service : la part des demandes qui aboutissent.",
+      en: "The likelihood that a request finds supply within a reasonable time. It is measured by the fill rate: the share of requests that end in a transaction.",
     },
   },
 };
