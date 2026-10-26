@@ -464,7 +464,7 @@ d'après A22), MKT-1, MKT-4, MKT-6, MKT-7b (le tableau), MKT-8 et MKT-10.
 | MKT-4 | les fuites, les deux diagnostics, la dérivation | MKT-3 | ☑ 2026-10-25 ([#385](https://github.com/ScratchMe/tourdegrowth/pull/385)) |
 | MKT-5 | la copie « produits » : `mkt.*`, les calques des deux côtés | MKT-1 | ☑ 2026-10-25 ([#386](https://github.com/ScratchMe/tourdegrowth/pull/386)) |
 | MKT-S | les mots « services » : trois calques et le catalogue | MKT-5 | ☑ 2026-10-26 ([#387](https://github.com/ScratchMe/tourdegrowth/pull/387)) |
-| MKT-G | trois termes de glossaire (texte écrit d'abord par l'orchestrateur, `docs/engine/glossaire-mkt.md`) | MKT-1 | ☑ 2026-10-26 |
+| MKT-G | trois termes de glossaire (texte écrit d'abord par l'orchestrateur, `docs/engine/glossaire-mkt.md`) | MKT-1 | ☑ 2026-10-26 ([#389](https://github.com/ScratchMe/tourdegrowth/pull/389)) |
 | MKT-6 | la carte de départ, le réglage, les cibles, les Réglages, l'analytique | MKT-4, MKT-5 | ☐ |
 | — | **le retour du brief 10**, recopié, ses questions posées et tranchées, puis les fiches MKT-7a, MKT-7b et MKT-8 écrites (PR de documentation) | MKT-B, Antoine | ☑ 2026-10-05 ([#344](https://github.com/ScratchMe/tourdegrowth/pull/344), puis les fiches : [#346](https://github.com/ScratchMe/tourdegrowth/pull/346)) |
 | MKT-7a | les composants du retour 10 : `SideShown`, `SideFunnel`, `SideNote`, les deltas de `MrrCurve` et `NumberList`, les jetons | MKT-R | ☐ |
