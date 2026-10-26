@@ -97,6 +97,16 @@ const BUDGETS: { module: string; max: number; why: string }[] = [
     why: "Les mots du moteur d'une place de marché (« produits »), posés sur ceux d'engine-copy.ts par côté (A23 MKT-5, §22.8) : seule /{locale}/aarrr-funnel-template le rend, pour `typeStrings.marketplace`. Ni /llms.txt (il ne lit que le titre et la description, que les calques n'ont pas), ni l'image de partage.",
   },
   {
+    module: "content/engine-copy-mkt-services.ts",
+    max: 1,
+    why: "Les mots du moteur d'une place de marché de services (« clients », « prestataires », « réservations »), posés sur ceux d'engine-copy.ts et d'engine-copy-marketplace.ts par côté (A23 MKT-S, §22.8.4) : seule /{locale}/aarrr-funnel-template le rend, pour `typeStrings.marketplace.services`. Ni /llms.txt (il ne lit que le titre et la description, que les calques n'ont pas), ni l'image de partage.",
+  },
+  {
+    module: "content/engine-catalog-mkt-services.ts",
+    max: 1,
+    why: "La prose des dix-neuf chiffres et des six calculés d'une place de marché de services, posée sur celle d'engine-catalog.ts (A23 MKT-S, §22.4.4 et §22.8.4) : seule /{locale}/aarrr-funnel-template la rend, avec engine-catalog.ts, pour `typeCatalogs[\"marketplace-services\"]`.",
+  },
+  {
     module: "content/engine-copy.ts",
     max: 2,
     why: "Toute la copie d'interface du moteur : sa page la résout, et /llms.txt lit son titre et sa description quand le moteur est ouvert au build (C27).",

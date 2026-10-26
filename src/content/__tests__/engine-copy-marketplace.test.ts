@@ -6,13 +6,27 @@ import { LOCALES } from "@/lib/i18n/locale";
 import { resolveTree, type Translatable } from "@/lib/i18n/translatable";
 import { ENGINE_COPY } from "../engine-copy";
 import { ENGINE_COPY_MKT } from "../engine-copy-marketplace";
+import { ENGINE_COPY_MKT_SERVICES } from "../engine-copy-mkt-services";
 import { placeholdersOf } from "./engine-test-helpers";
-import { DEMAND_WORDS, isUnder, MKT_EXCLUDED, MKT_OVERLAY_SKIPPED, SUPPLY_TARGETS, SUPPLY_WORDS, wordsHeld } from "./mkt-words";
+import {
+  DEMAND_WORDS,
+  isUnder,
+  MKT_EXCLUDED,
+  MKT_OVERLAY_SKIPPED,
+  MKT_SERVICES_EXCLUDED,
+  SERVICES_BANNED,
+  SERVICES_NAMED_EXCEPTIONS,
+  servicesWordsHeld,
+  SUPPLY_TARGETS,
+  SUPPLY_WORDS,
+  wordsHeld,
+} from "./mkt-words";
 
 /**
  * The marketplace's overlays on the engine's copy, in the words of "products" (engine spec §22.8, A23 MKT-5): points 1, 2,
- * 3 and 6 of §22.8.3 (point 4 is `engine-copy.test.ts`, which runs its contracts on the two merged copies as well; point 5
- * is MKT-S's, the "services" words).
+ * 3 and 6 of §22.8.3 (point 4 is `engine-copy.test.ts`, which runs its contracts on the merged copies as well), and, in
+ * the words of "services" (A23 MKT-S), point 5, the structure of the three "services" sheets (the orphans, the placeholders,
+ * the whole leaves: point 3 again) and point 6 on them.
  *
  * A marketplace has two sides, and a leaf that says "client" or "MRR" is read by both: `ENGINE_COPY_MKT.demand` and
  * `.supply` rewrite it each its way (§22.8.2), `.common` holds the six leaves read in every set (C105). Two things could go
@@ -47,6 +61,34 @@ import { DEMAND_WORDS, isUnder, MKT_EXCLUDED, MKT_OVERLAY_SKIPPED, SUPPLY_TARGET
  *   fan-in budget at 0: 1 (`content-fan-in.test.ts`);
  * - what no test here can see: `EngineWorkbench` reading `stringsFor("marketplace", offering, side)`. Vitest mounts no
  *   component, and no Playwright spec of this unit opens a marketplace (the barrier is closed until MKT-7b).
+ *
+ * MKT-S (the words of "services"), measured on 2026-10-26 the same way, on a copy of the sources outside the repository, with
+ * the seven test files nearest (this one, `engine-catalog`, `engine-copy`, `engine-props`, `strings`, `content-fan-in` and
+ * `engine-boundary`: 692 tests, green before each sabotage, the file put back and its sha compared after):
+ * - a leaf deleted from the services demand sheet 2, from the supply's 2, from `common` 4; « acheteurs » put back in a French
+ *   supply leaf 1, "buyer" in an English demand one 2;
+ * - `clauseRepeat` deleted 2, put back to « passent » 1, `verbMkt.repeat` back to the "products" text 2;
+ * - an English supply leaf without its `{gap}` 2 (the placeholders of this file and of the contracts of `engine-copy.test.ts`,
+ *   which now run on the two services fusions); an unbalanced `**` in a supply slide title 1 (`engine-copy.test.ts`, on the
+ *   services supply fusion alone);
+ * - `io.unsupportedSetup` rewritten by `common` 2 (a first attempt, which wrote the leaf under a second `io` key that the
+ *   later one overwrote, fell nothing: it had never applied, and was done again inside the one `io` block); the exception
+ *   taken off the list 4;
+ * - a `common` leaf also written by a side 1; a leaf of a side whose "products" text holds no word 1; "contre la demande" /
+ *   "rather than demand" in a services leaf 2;
+ * - `MKT_SERVICES_EXCLUDED` keeping the `mkt` key of line 1 4, keeping the `mkt` prefix of line 3 4; the English list without
+ *   "sold" 1, the French one without « commande(s) » 1;
+ * - the services sheets handed to the island empty 2; the services catalogue built from the "products" entries, or its
+ *   figures only, 3 each (the point 5 on the page's props, both languages, and `engine-props.test.ts`); the services fan-in
+ *   budget at 0: 1 (`content-fan-in.test.ts`).
+ *
+ * Relance of 2026-10-26 (the list widened to the forms of the lexicon, `LEXICON_FORMS`; the review's corrections; 693 tests
+ * before each sabotage, same method): « vendre » put back in the French of `terms.window.definition` 4, "selling" in its
+ * English 4; « commandé » put back in the active-twelve-months assumption 3, "bought" in its English 3; « vendre » taken out
+ * of the widened forms 1, "selling" 1 (the « sees what it looks for » test: the leaves they would catch hold a second form);
+ * an inherited exception (`io.mergeRefused.motions`) taken off the list 5; the levers' sentence back to « un montant de la
+ * réservation » 1; and, in `engine-catalog.test.ts`, « une fiche consultée » put back in the fill rate's place to look 1, the
+ * lexicon's own date of the first booking received 1, "lists without" put back in its trap 1.
  */
 
 type Leaf = { segments: string[]; path: string; copy: Translatable };
@@ -71,10 +113,12 @@ const LAYER_BY_PATH = {
   supply: new Map(LAYER.supply.map((l) => [l.path, l])),
 };
 
-/** The three layers as `marketplaceStrings` takes them: "products" filled, "services" empty until MKT-S. */
-const LAYERS: MarketplaceLayers<unknown> = { products: ENGINE_COPY_MKT, services: { common: {}, demand: {}, supply: {} } };
+/** The six layers as `marketplaceStrings` takes them: the three of "products" and the three of "services". */
+const LAYERS: MarketplaceLayers<unknown> = { products: ENGINE_COPY_MKT, services: ENGINE_COPY_MKT_SERVICES };
+/** The same with "services" empty: what a services marketplace reads before its own words (the "products" fusions only). */
+const PRODUCTS_ONLY: MarketplaceLayers<unknown> = { products: ENGINE_COPY_MKT, services: { common: {}, demand: {}, supply: {} } };
 /** What a side's screens read (§22.8.1). Bilingual: a leaf is a whole { fr, en }, merged key by key. */
-const MERGED = Object.fromEntries(SIDES.map((side) => [side, marketplaceStrings<unknown>(ENGINE_COPY, LAYERS, "products", side) as typeof ENGINE_COPY])) as Record<MktSide, typeof ENGINE_COPY>;
+const MERGED = Object.fromEntries(SIDES.map((side) => [side, marketplaceStrings<unknown>(ENGINE_COPY, PRODUCTS_ONLY, "products", side) as typeof ENGINE_COPY])) as Record<MktSide, typeof ENGINE_COPY>;
 const MERGED_BY_PATH = Object.fromEntries(SIDES.map((side) => [side, new Map(leavesOf(MERGED[side]).map((l) => [l.path, l]))])) as Record<MktSide, Map<string, Leaf>>;
 
 const isExcluded = (leaf: Leaf) => MKT_EXCLUDED.some(({ excludes }) => excludes(leaf.segments, leaf.path));
@@ -525,21 +569,294 @@ describe("never « offre contre demande » (§22.8.3, point 6, D14)", () => {
   });
 });
 
+// ------------------------------------------------------------------------------------------------ the words of "services" (point 5)
+
+/** The three sheets of "services", as leaves. */
+const SERVICES_LAYER = {
+  common: leavesOf(ENGINE_COPY_MKT_SERVICES.common),
+  demand: leavesOf(ENGINE_COPY_MKT_SERVICES.demand),
+  supply: leavesOf(ENGINE_COPY_MKT_SERVICES.supply),
+};
+const SERVICES_LAYER_BY_PATH = {
+  common: new Map(SERVICES_LAYER.common.map((l) => [l.path, l])),
+  demand: new Map(SERVICES_LAYER.demand.map((l) => [l.path, l])),
+  supply: new Map(SERVICES_LAYER.supply.map((l) => [l.path, l])),
+};
+/** What a set of a marketplace reads, in the words of one offering: `side` null is the neutral set (the bar, the list, the total, the setup card). */
+const readSet = (offering: "products" | "services", side: MktSide | null) => leavesOf(marketplaceStrings<unknown>(ENGINE_COPY, LAYERS, offering, side));
+const SERVICES_SETS: readonly (readonly [string, MktSide | null])[] = [["the demand's", "demand"], ["the supply's", "supply"], ["the neutral", null]];
+const servicesExcluded = (leaf: Leaf) => MKT_SERVICES_EXCLUDED.some(({ excludes }) => excludes(leaf.segments, leaf.path));
+const productWords = (copy: Translatable) => LOCALES.flatMap((lang) => servicesWordsHeld(copy[lang], lang).map((word) => `${lang}: ${word}`));
+
+describe("a services marketplace no longer speaks « produits » (§22.8.3, point 5, §22.8.4)", () => {
+  it("sees what it looks for: each word of the list trips it in its language, whole and with its case ignored — and not the letters around it", () => {
+    for (const word of ["acheteur", "acheteurs", "vendeur", "vendeurs", "commande", "commandes", "commander", "annonce", "annonces", "panier", "vente", "ventes", "vend", "vendent", "vendu", "vendue", "vendus", "vendues", "achat", "achats"]) {
+      expect(servicesWordsHeld(`le ${word} ici`, "fr"), word).toEqual([word]);
+      expect(servicesWordsHeld(`LE ${word.toUpperCase()}.`, "fr"), word).toEqual([word.toUpperCase()]);
+    }
+    // The forms the lexicon rewrites that §22.8.3's list does not name (`LEXICON_FORMS`), each tripping the rule on its own.
+    for (const word of ["vendre", "acheter", "achète", "achètent", "acheté", "achetée", "achetés", "achetées", "commandent", "commandé", "commandée", "commandés", "commandées", "paniers"]) {
+      expect(servicesWordsHeld(`il faut ${word} ici`, "fr"), word).toEqual([word]);
+      expect(servicesWordsHeld(`IL FAUT ${word.toUpperCase()}.`, "fr"), word).toEqual([word.toUpperCase()]);
+    }
+    for (const word of ["selling", "bought", "buying", "ordering", "purchased", "purchasing", "baskets"]) {
+      expect(servicesWordsHeld(`we keep ${word} here`, "en"), word).toEqual([word]);
+    }
+    for (const word of ["buyer", "buyers", "seller", "sellers", "order", "orders", "ordered", "listing", "listings", "sale", "sales", "sell", "sells", "sold", "purchase", "purchases", "basket", "buy", "buys"]) {
+      expect(servicesWordsHeld(`the ${word} here`, "en"), word).toEqual([word]);
+    }
+    // An apostrophe and a hyphen are not letters: « l'acheteur », « cinq-vendeurs » hold the word. A letter on either side makes another word.
+    expect(servicesWordsHeld("l'acheteur et le vendeur-conseil", "fr")).toEqual(["acheteur", "vendeur"]);
+    expect(servicesWordsHeld("un invendu, un commandement, la vendeuse, les acheteuses, la ventilation, une venteuse, vendredi, un achèvement", "fr")).toEqual([]);
+    expect(servicesWordsHeld("a reseller, an overorder, in order to sell? no: the seller's, reselling, reordering, a rebought share", "en")).toEqual(["order", "sell", "seller"]);
+    // The words of services.
+    expect(servicesWordsHeld("clients, prestataires, réservations, profils, réserver, montant de la réservation reçue", "fr")).toEqual([]);
+    expect(servicesWordsHeld("clients, providers, bookings, profiles, to book, booking received", "en")).toEqual([]);
+    // « vendre » and « acheter » are in the lexicon of §22.8.4 and, since the review of MKT-S, in the rule.
+    expect(servicesWordsHeld("vendre ou acheter", "fr")).toEqual(["vendre", "acheter"]);
+    expect(servicesWordsHeld("selling or buying", "en")).toEqual(["selling", "buying"]);
+    // « é » is a letter: a « \b » would have read « évendu » as the word « vendu ».
+    expect(SERVICES_BANNED.fr.test("évendu")).toBe(false);
+  });
+
+  it("excludes exactly what `MKT_EXCLUDED` does, but the leaves written for the marketplace — the `mkt` key, the `Mkt` part and the `mkt` prefix", () => {
+    const own = BASE.filter((l) => l.segments[0] === "mkt" || l.segments.some((x) => x.includes("Mkt") || x.startsWith("mkt")));
+    expect(own.length).toBeGreaterThan(80);
+    // Excluded for the words of "products" (they are written in them), read for the words of "services".
+    expect(own.filter((l) => !isExcluded(l)).length).toBe(0);
+    expect(own.filter((l) => servicesExcluded(l) && !MKT_EXCLUDED.slice(3).some(({ excludes }) => excludes(l.segments, l.path)) && !MKT_EXCLUDED[1]!.excludes(l.segments, l.path)).map((l) => l.path)).toEqual([]);
+    // Every other leaf is read as before: the two lists agree outside `own`.
+    const disagree = BASE.filter((l) => !own.includes(l) && isExcluded(l) !== servicesExcluded(l)).map((l) => l.path);
+    expect(disagree).toEqual([]);
+    // The two lines it changes, line for line: 1 and 3 (the others are the very entries of `MKT_EXCLUDED`).
+    expect(MKT_SERVICES_EXCLUDED.map((e) => e.line)).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
+    expect(MKT_SERVICES_EXCLUDED.filter((e, i) => e !== MKT_EXCLUDED[i]).map((e) => e.line)).toEqual([1, 3]);
+  });
+
+  for (const [name, side] of SERVICES_SETS) {
+    it(`reads a lot, and finds a lot in « produits » — ${name} set: otherwise the next test proves nothing`, () => {
+      const read = readSet("services", side).filter((l) => !servicesExcluded(l));
+      expect(read.length).toBeGreaterThan(900);
+      // The same rule on the words of « produits »: the buyers' and the sellers' words are there to find.
+      const found = readSet("products", side).filter((l) => !servicesExcluded(l) && productWords(l.copy).length > 0);
+      expect(found.length).toBeGreaterThan(side === null ? 70 : side === "demand" ? 140 : 160);
+    });
+
+    it(`holds no word of « produits » in any leaf it reads, either language — ${name} set, outside the named exception`, () => {
+      const offenders = readSet("services", side)
+        .filter((l) => !servicesExcluded(l) && !(l.path in SERVICES_NAMED_EXCEPTIONS))
+        .flatMap((l) => (productWords(l.copy).length > 0 ? [`${l.path}: ${productWords(l.copy).join(", ")} — ${l.copy.fr} / ${l.copy.en}`] : []));
+      expect(offenders).toEqual([]);
+    });
+  }
+
+  it("names its exceptions one by one: `io.unsupportedSetup` and the SaaS's two « façons de vendre cochées », in the base, rewritten by no sheet, and still holding the word", () => {
+    expect(Object.keys(SERVICES_NAMED_EXCEPTIONS)).toEqual(["io.unsupportedSetup", "io.mergeRefused.motions", "table.reasons.hidden"]);
+    // The two inherited ones are wrong for every marketplace: they wait for the bon à tirer, which the reason names.
+    for (const path of ["io.mergeRefused.motions", "table.reasons.hidden"]) expect(SERVICES_NAMED_EXCEPTIONS[path], path).toContain("a23d-a-regarder.md");
+    for (const path of Object.keys(SERVICES_NAMED_EXCEPTIONS)) {
+      const base = BASE_BY_PATH.get(path);
+      expect(base, `${path} is not in ENGINE_COPY any more: take it off the list`).toBeDefined();
+      expect(productWords(base!.copy), `${path} holds no word of the rule any more: take it off the list`).not.toEqual([]);
+      for (const layer of ["common", "demand", "supply"] as const) expect(SERVICES_LAYER_BY_PATH[layer].has(path), `${path} is rewritten by the ${layer} sheet: it is no exception`).toBe(false);
+      // The reason is written, and it says why no overlay could reach the leaf.
+      expect(SERVICES_NAMED_EXCEPTIONS[path]!.length).toBeGreaterThan(40);
+    }
+  });
+
+  it.each(LOCALES)("holds no word of « produits » in any text of the services catalogue — a name, a formula, a trap, a request, a place to look, a variant (%s)", (locale) => {
+    const props = resolveEngineProps(locale);
+    /** Every string a screen can print from a catalogue, with its path (the ids, the glossary link and the sources are not prose). */
+    const texts = (node: unknown, path: string, out: { path: string; text: string }[] = []) => {
+      if (typeof node === "string") out.push({ path, text: node });
+      else if (Array.isArray(node)) node.forEach((child, i) => texts(child, `${path}.${i}`, out));
+      else if (node && typeof node === "object") {
+        for (const [key, child] of Object.entries(node)) if (!["id", "glossaryHref", "source"].includes(key)) texts(child, `${path}.${key}`, out);
+      }
+      return out;
+    };
+    const catalog = props.typeCatalogs["marketplace-services"];
+    const all = [...catalog.metrics.flatMap((m) => texts(m, m.id)), ...catalog.derived.flatMap((d) => texts(d, d.id))];
+    expect(all.length).toBeGreaterThan(250);
+    expect(all.filter(({ text }) => servicesWordsHeld(text, locale).length > 0).map(({ path, text }) => `${path}: ${text}`)).toEqual([]);
+    // Not blind: the same walk, on the catalogue of « produits », finds the words in a hundred and more of them.
+    const products = props.typeCatalogs.marketplace;
+    const before = [...products.metrics.flatMap((m) => texts(m, m.id)), ...products.derived.flatMap((d) => texts(d, d.id))];
+    expect(before.filter(({ text }) => servicesWordsHeld(text, locale).length > 0).length).toBeGreaterThan(100);
+  });
+
+  it("writes the words of §22.8.4 on the leaves that carry them: clients, prestataires, réservations, reçue", () => {
+    const text = (side: MktSide | null, path: string, lang: "fr" | "en") => readSet("services", side).find((l) => l.path === path)!.copy[lang];
+    expect(text("demand", "money.worthTitle", "fr")).toBe("Ce que vaut un nouveau client");
+    expect(text("demand", "money.worthTitle", "en")).toBe("What one new client is worth");
+    expect(text("supply", "money.worthTitle", "fr")).toBe("Ce que vaut un nouveau prestataire abonné");
+    expect(text("supply", "scenario.signups", "fr")).toBe("Prestataires inscrits");
+    expect(text("supply", "scenario.visitors", "fr")).toBe("Visiteurs de la page prestataires");
+    expect(text("supply", "scenario.visitors", "en")).toBe("Provider page visitors");
+    expect(text("supply", "findings.chainBreak", "en")).toBe("Out of 100 provider sign-ups, we can't say how many {verb}.");
+    // The marketplace's own leaves, written once for the neutral set and read first by each side.
+    expect(text(null, "mkt.side.buy", "fr")).toBe("Clients");
+    expect(text(null, "mkt.side.sell", "fr")).toBe("Prestataires");
+    expect(text(null, "mkt.side.supplyTitle", "en")).toBe("Supply: the providers");
+    // §22.8.4's own example: « {a} reçoivent une première réservation ».
+    expect(text(null, "mkt.funnel.clauseFirstSale", "fr")).toBe("{a} reçoivent une première réservation");
+    expect(text(null, "mkt.funnel.clauseFirstSaleOne", "fr")).toBe("{a} reçoit une première réservation");
+    expect(text(null, "mkt.funnel.clauseFirstSale", "en")).toBe("{a} receive a first booking");
+    expect(text(null, "mkt.funnel.firstSale", "fr").replace(/ /g, " ")).toBe("Première réservation reçue sous {n} jours");
+    expect(text(null, "mkt.funnel.unmeasured.firstSale", "fr")).toBe("la première réservation reçue");
+    expect(text(null, "findings.verbMkt.firstSale", "fr")).toBe("reçoivent une première réservation");
+    // The levers' sentence names the average booking value as the lever's own subject does (the lever is the average order
+    // value, not a basket): « un montant moyen par réservation », "average booking value".
+    expect(text(null, "mkt.assumption.money-levers-all-buyers", "fr")).toBe("Une fréquence, un montant moyen par réservation ou une commission qui changent jouent sur tous les clients, dès le mois suivant.");
+    expect(text(null, "mkt.assumption.money-levers-all-buyers", "en")).toBe("A change in frequency, average booking value or take rate applies to every client, from the next month.");
+    expect(text(null, "leverSubject.mkt.rev.aov", "fr")).toBe("le montant moyen d'une réservation");
+    expect(text(null, "leverSubject.mkt.rev.aov", "en")).toBe("the average booking value");
+    expect(text(null, "mkt.assumption.money-levers-all-buyers", "en")).toContain(text(null, "leverSubject.mkt.rev.aov", "en").replace(/^the /, ""));
+    expect(text(null, "mkt.assumption.money-levers-all-buyers", "fr")).toContain("montant moyen");
+    expect(text(null, "mkt.assumption.money-levers-all-buyers", "fr")).not.toContain("panier");
+    // « vendre », « vend » : être réservé, reçoit une réservation.
+    expect(text(null, "terms.window.definition", "fr")).toContain("être réservé en 60");
+    expect(text(null, "terms.window.definition", "en")).toContain("get booked within 60");
+  });
+
+  it("says the first order and the second with the same verb: « font une première réservation » and « en font une deuxième » (the lexicon's « passer une commande »)", () => {
+    // `clauseRepeat` and `verbMkt.repeat` hold no word of the rule (« en passent une deuxième »), yet « passer une commande » is
+    // « faire une réservation » (§22.8.4): left alone, a funnel line would say « font une première réservation et en passent une deuxième ».
+    const text = (path: string, lang: "fr" | "en") => readSet("services", null).find((l) => l.path === path)!.copy[lang];
+    expect(text("mkt.funnel.clauseFirst", "fr")).toBe("{a} font une première réservation");
+    expect(text("mkt.funnel.clauseRepeat", "fr")).toBe("{r} en font une deuxième");
+    expect(text("mkt.funnel.clauseFirstOne", "fr")).toBe("{a} fait une première réservation");
+    expect(text("mkt.funnel.clauseRepeatOne", "fr")).toBe("{r} en fait une deuxième");
+    expect(text("findings.verbMkt.first", "fr")).toBe("font une première réservation");
+    expect(text("findings.verbMkt.repeat", "fr")).toBe("en font une deuxième");
+    expect(text("mkt.funnel.clauseFirst", "en")).toBe("{a} make a first booking");
+    expect(text("mkt.funnel.clauseRepeat", "en")).toBe("{r} make a second one");
+    expect(text("findings.verbMkt.repeat", "en")).toBe("make a second one");
+    // None of the six says « passer » or "place" any more.
+    for (const path of ["mkt.funnel.clauseFirst", "mkt.funnel.clauseFirstOne", "mkt.funnel.clauseRepeat", "mkt.funnel.clauseRepeatOne", "findings.verbMkt.first", "findings.verbMkt.repeat"]) {
+      expect(text(path, "fr"), path).not.toMatch(/\bpass/);
+      expect(text(path, "en"), path).not.toMatch(/\bplace/);
+    }
+  });
+
+  it("leaves the named exceptions, and what the setup card reads before a type is known, as « produits » wrote it", () => {
+    for (const side of [...SIDES, null] as const) {
+      const set = new Map(readSet("services", side).map((l) => [l.path, l]));
+      for (const path of Object.keys(SERVICES_NAMED_EXCEPTIONS)) expect(set.get(path)!.copy, path).toEqual(BASE_BY_PATH.get(path)!.copy);
+    }
+    // `start.*` is excluded (the card names both vocabularies and never goes through the services words).
+    for (const side of [...SIDES, null] as const) {
+      const set = new Map(readSet("services", side).map((l) => [l.path, l]));
+      for (const l of BASE.filter((x) => x.segments[0] === "start")) expect(set.get(l.path)!.copy, l.path).toEqual(l.copy);
+    }
+  });
+});
+
+describe("the sheets of \"services\" keep to the structure of the copy (§22.8.3, point 3 on them)", () => {
+  /** What a leaf of each sheet replaces: the text of the same path in the "products" set the sheet lies on — the neutral set for `common`, the side's for the others. */
+  const BEFORE = {
+    common: new Map(readSet("products", null).map((l) => [l.path, l])),
+    demand: new Map(readSet("products", "demand").map((l) => [l.path, l])),
+    supply: new Map(readSet("products", "supply").map((l) => [l.path, l])),
+  };
+
+  for (const layer of ["common", "demand", "supply"] as const) {
+    it(`has every ${layer} leaf in the base, at the same path`, () => {
+      expect(SERVICES_LAYER[layer].length).toBeGreaterThan(70);
+      expect(SERVICES_LAYER[layer].filter((l) => !BASE_BY_PATH.has(l.path)).map((l) => l.path)).toEqual([]);
+    });
+
+    it(`carries, on each ${layer} leaf and in each language, the placeholders of the leaf it replaces`, () => {
+      const mismatched = SERVICES_LAYER[layer].flatMap((l) => {
+        const base = BASE_BY_PATH.get(l.path)!;
+        return LOCALES.flatMap((lang) => {
+          const mine = placeholdersOf(l.copy[lang]).join();
+          const theirs = placeholdersOf(base.copy[lang]).join();
+          return mine === theirs ? [] : [`${l.path}.${lang}: [${mine}] against the base's [${theirs}]`];
+        });
+      });
+      expect(mismatched).toEqual([]);
+    });
+
+    it(`is made of whole { fr, en } leaves and branches, and of nothing else — no bare string, no half leaf (${layer})`, () => {
+      const bare: string[] = [];
+      (function walk(node: unknown, path: string[]) {
+        if (typeof node === "string") bare.push(path.join("."));
+        else if (node && typeof node === "object") {
+          const record = node as Record<string, unknown>;
+          if ("fr" in record || "en" in record) {
+            if (typeof record.fr !== "string" || typeof record.en !== "string") bare.push(`${path.join(".")}: a leaf holds both languages`);
+            return;
+          }
+          for (const [k, v] of Object.entries(record)) walk(v, [...path, k]);
+        }
+      })(ENGINE_COPY_MKT_SERVICES[layer], []);
+      expect(bare).toEqual([]);
+    });
+
+    it(`changes every ${layer} leaf, in one language at least, from the "products" text it lies on — a leaf equal to it is a no-op`, () => {
+      const unchanged = SERVICES_LAYER[layer].filter((l) => {
+        const before = BEFORE[layer].get(l.path)!;
+        return before.copy.fr === l.copy.fr && before.copy.en === l.copy.en;
+      });
+      expect(unchanged.map((l) => l.path)).toEqual([]);
+    });
+  }
+
+  it("writes a leaf once: none is in `common` and in a side's sheet, and none is written alike by both sides (it would be `common`'s)", () => {
+    for (const side of SIDES) {
+      const both = SERVICES_LAYER[side].filter((l) => SERVICES_LAYER_BY_PATH.common.has(l.path)).map((l) => l.path);
+      expect(both, `in common AND in ${side}: the side would overrule it`).toEqual([]);
+    }
+    const alike = SERVICES_LAYER.demand.filter((l) => {
+      const other = SERVICES_LAYER_BY_PATH.supply.get(l.path);
+      return other && other.copy.fr === l.copy.fr && other.copy.en === l.copy.en;
+    });
+    expect(alike.map((l) => l.path), "written alike by both sides: it is common's (§22.8.4)").toEqual([]);
+  });
+
+  it("rewrites, for a side, only a leaf its \"products\" sheet or the base holds a word of « produits » in — never a leaf the rule does not read for that side", () => {
+    for (const side of SIDES) {
+      const stray = SERVICES_LAYER[side].filter((l) => productWords(BEFORE[side].get(l.path)!.copy).length === 0).map((l) => l.path);
+      expect(stray, `${side}: no word of « produits » in the leaf it replaces`).toEqual([]);
+    }
+    // `common` also carries the verbs of the order the rule does not hold (« en passent une deuxième »): named, three leaves.
+    const verbs = SERVICES_LAYER.common.filter((l) => productWords(BEFORE.common.get(l.path)!.copy).length === 0).map((l) => l.path);
+    expect(verbs.sort()).toEqual(["findings.verbMkt.repeat", "mkt.funnel.clauseRepeat", "mkt.funnel.clauseRepeatOne"]);
+  });
+
+  it("never sets the two sides against each other, in the sheets of \"services\" either (§22.8.3, point 6, D14)", () => {
+    const AGAINST: Record<"fr" | "en", RegExp> = {
+      fr: /(?<![\p{L}\p{N}])vs(?![\p{L}\p{N}])|contre l['’]offre|contre la demande|plutôt que|plus que la demande|plus que l['’]offre|offre ou demande|demande ou offre/iu,
+      en: /(?<![\p{L}\p{N}])(vs|versus)(?![\p{L}\p{N}])|rather than|more than supply|more than demand|supply or demand|demand or supply/iu,
+    };
+    const swept = [...SERVICES_LAYER.common, ...SERVICES_LAYER.demand, ...SERVICES_LAYER.supply];
+    expect(swept.length).toBeGreaterThan(240);
+    const offenders = swept.flatMap((l) => LOCALES.flatMap((lang) => (AGAINST[lang].test(l.copy[lang]) ? [`${l.path}.${lang}: ${l.copy[lang]}`] : [])));
+    expect(offenders).toEqual([]);
+  });
+});
+
 // ------------------------------------------------------------------------------------------------ the page (§22.8.1)
 
 describe("the page hands the island the overlays resolved (§22.8.1)", () => {
-  it.each(LOCALES)("`typeStrings.marketplace` is the three sheets of \"products\" resolved to the page's language, and \"services\" empty (%s)", (locale) => {
+  it.each(LOCALES)("`typeStrings.marketplace` is the six sheets, the three of \"products\" and the three of \"services\", resolved to the page's language (%s)", (locale) => {
     const props = resolveEngineProps(locale);
     expect(props.typeStrings.marketplace.products).toEqual(resolveTree(ENGINE_COPY_MKT, locale));
-    expect(props.typeStrings.marketplace.services).toEqual({ common: {}, demand: {}, supply: {} });
+    expect(props.typeStrings.marketplace.services).toEqual(resolveTree(ENGINE_COPY_MKT_SERVICES, locale));
     // The island merges after resolving: the same strings as resolving after merging, for each side and for the neutral set.
     for (const side of [...SIDES, null] as const) {
       const merged = marketplaceStrings(props.strings, props.typeStrings.marketplace, "products", side);
       const expected = side === null ? mergeStrings<unknown>(ENGINE_COPY, ENGINE_COPY_MKT.common) : MERGED[side];
       expect(merged).toEqual(resolveTree(expected, locale));
+      // And in the words of "services": the same, with the three sheets of "services" laid on the "products" ones.
+      expect(marketplaceStrings(props.strings, props.typeStrings.marketplace, "services", side)).toEqual(resolveTree(marketplaceStrings<unknown>(ENGINE_COPY, LAYERS, "services", side), locale));
     }
-    // The sheets are partial trees: a small part of the copy, not a second copy of it.
-    expect(JSON.stringify(props.typeStrings.marketplace).length).toBeLessThan(JSON.stringify(props.strings).length / 2);
+    // Each family of sheets is a partial tree: a small part of the copy, not a second copy of it (a quarter of the base each,
+    // 22 989 and 24 602 characters against 93 339, in French on 2026-10-26; the six together are a little over half).
+    for (const family of [props.typeStrings.marketplace.products, props.typeStrings.marketplace.services]) {
+      expect(JSON.stringify(family).length).toBeLessThan(JSON.stringify(props.strings).length / 2);
+    }
   });
 
   it("serves the neutral set only the common sheet: the setup card and the Settings read the six leaves of C105, no side's wording", () => {

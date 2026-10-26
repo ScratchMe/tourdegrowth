@@ -3,7 +3,8 @@
  * overlay must rewrite, which words it must no longer hold, and which leaves it cannot rewrite. Not a test file
  * (vitest only collects `*.test.ts`): `engine-copy-marketplace.test.ts` reads it today, and the on-screen guard of
  * MKT-10 (`mkt-words-guard.test.ts` and `e2e/engine-marketplace.spec.ts`) reads the same lists, so the copy and what
- * is displayed can never disagree on what a SaaS word is. MKT-S adds `SERVICES_BANNED` and `MKT_SERVICES_EXCLUDED`.
+ * is displayed can never disagree on what a SaaS word is. MKT-S adds `SERVICES_BANNED`, `MKT_SERVICES_EXCLUDED` and
+ * `SERVICES_NAMED_EXCEPTIONS` (rule 5 of §22.8.3: the words of "produits" a services marketplace must no longer show).
  *
  * A leaf is a `{ fr, en }` pair of `ENGINE_COPY`. Its path is dotted for display, and its SEGMENTS are what a rule
  * reads, because some keys hold a dot themselves (`subject["mkt.buy.first-order"]`, `leverSubject["app.ret.active-retention"]`).
@@ -58,6 +59,11 @@ const APP_ONLY_LEAVES: readonly string[] = [
   "faqTypeNote.consumerApp",
 ];
 
+/** Line 1's top-level keys that are not the marketplace's own `mkt` (the services rule reads these, and `mkt` too: it is written in "produits"). */
+const LINE_1_KEYS: readonly string[] = ["hybrid", "total", "relays", "pipeline", "slgChain", "peloton", "faq", "meta", "page", "start", "tools", "role"];
+/** Line 3's parts of a segment: the other motions' and the hybrid's keys (the `Mkt` part and the `mkt` prefix are the marketplace's own, below). */
+const LINE_3_PARTS: readonly string[] = ["slg", "Slg", "plg", "Plg", "hybrid", "Hybrid", "link", "Link", "peloton", "Peloton", "Both"];
+
 /**
  * What a marketplace never displays, line for line and in the order of §22.8.3 "Les chemins exclus" (the app's
  * `APP_EXCLUDED`, plus the marketplace's own). A leaf is excluded as soon as ONE line designates it. A branch named
@@ -70,7 +76,7 @@ export const MKT_EXCLUDED: readonly ExclusionLine[] = [
     // keys by type), the tools' and the roles' names (a job's name, « Customer Success », stays as it is); and `mkt`,
     // written for it.
     line: 1,
-    excludes: (segments) => ["hybrid", "total", "relays", "pipeline", "slgChain", "peloton", "faq", "meta", "page", "start", "tools", "role", "mkt"].includes(segments[0]!),
+    excludes: (segments) => [...LINE_1_KEYS, "mkt"].includes(segments[0]!),
   },
   {
     // 2. In `subject`, `leverSubject` and `unitInput`, every entry whose key does not start with `mkt`: those are the
@@ -83,8 +89,7 @@ export const MKT_EXCLUDED: readonly ExclusionLine[] = [
     // or `Mkt`, or starts with `mkt` (the leaves written for the marketplace: `io.sharedCount.mkt*`, `subject["mkt.…"]`,
     // `sanity.mkt*`, `slideTitles.mkt*`, `example.bannerTitleMkt`, `findings.verbMkt`…).
     line: 3,
-    excludes: (segments) =>
-      segments.some((s) => ["slg", "Slg", "plg", "Plg", "hybrid", "Hybrid", "link", "Link", "peloton", "Peloton", "Both", "Mkt"].some((x) => s.includes(x)) || s.startsWith("mkt")),
+    excludes: (segments) => segments.some((s) => [...LINE_3_PARTS, "Mkt"].some((x) => s.includes(x)) || s.startsWith("mkt")),
   },
   {
     // 4. A segment that is exactly one of these (the start card's entries by type).
@@ -225,4 +230,94 @@ export const MKT_OVERLAY_SKIPPED: { demand: readonly string[]; supply: readonly 
     // Written for the marketplace (§22.8.5 a, MKT-6): « conversion en abonné » is already the supply's word.
     "settings.firstSalePaidReset",
   ],
+};
+
+// ------------------------------------------------------------------------------------------------ "services" (MKT-S, §22.8.3 point 5)
+
+/** A word in the Unicode sense (§22.8.3, point 5): the letter before or after makes it part of another word, accents included (`\b` would read « é » as a separator). */
+const UNICODE_WHOLE = (words: string) => new RegExp(`(^|[^\\p{L}])(${words})(?!\\p{L})`, "iu");
+
+/**
+ * §22.8.3's list of the words of "produits", point 5, as written there (whole words, case ignored): the buyers' and the
+ * sellers' (« acheteur », « vendeur »), the order's and the sale's (« commande », « vente », « vend »), the listing's and the
+ * basket's, the purchase's.
+ */
+const LISTED = {
+  fr: ["acheteurs?", "vendeurs?", "commandes?", "commander", "annonces?", "panier", "ventes?", "vend", "vendent", "vendue?s?", "achats?"],
+  en: ["buyers?", "sellers?", "orders?", "ordered", "listings?", "sales?", "sell", "sells", "sold", "purchases?", "basket", "buy", "buys"],
+};
+
+/**
+ * The forms the lexicon of §22.8.4 rewrites that §22.8.3's list does not name — the infinitive, the other persons, the
+ * participles, the plural basket (added after the review of MKT-S, 2026-10-26: the list is narrower than the lexicon). Each one
+ * is named, with the sentence it would betray; a form that only made absurd false alarms would have been left out.
+ */
+const LEXICON_FORMS = {
+  fr: [
+    "vendre", // « vendre » (to sell) is « être réservé »
+    "acheter", // « acheter » is « réserver »
+    "achète", // « achète » (he buys), « achètent » (they buy): the same verb, rewritten the same way
+    "achètent",
+    "achetée?s?", // « acheté », « achetée », « achetés », « achetées » (bought)
+    "commandent", // « commandent » (they order), as « commande » (he orders) is already listed
+    "commandée?s?", // « commandé », « commandée », « commandés », « commandées » (ordered)
+    "paniers", // the plural of « panier », which the list names in the singular
+  ],
+  en: [
+    "selling", // "selling" (the gerund of "sell")
+    "bought", // "bought" (the past of "buy")
+    "buying", // "buying"
+    "ordering", // "ordering" (the gerund of "order")
+    "purchased", // "purchased" (the past of "purchase")
+    "purchasing", // "purchasing"
+    "baskets", // the plural of "basket"
+  ],
+};
+
+/**
+ * The words of "produits" a services marketplace must no longer print (§22.8.3, point 5): the list of §22.8.3 and the forms of
+ * the lexicon it leaves out (`LEXICON_FORMS`). Read in every leaf of the services fusions that no exclusion line covers, in every
+ * text of the services catalogue, and by the on-screen guard of MKT-10 (§22.11.3).
+ */
+export const SERVICES_BANNED: { fr: RegExp; en: RegExp } = {
+  fr: UNICODE_WHOLE([...LISTED.fr, ...LEXICON_FORMS.fr].join("|")),
+  en: UNICODE_WHOLE([...LISTED.en, ...LEXICON_FORMS.en].join("|")),
+};
+
+/** The banned words a text holds in one language, as written (empty: none). */
+export function servicesWordsHeld(text: string, locale: "fr" | "en"): string[] {
+  const rule = SERVICES_BANNED[locale];
+  const found: string[] = [];
+  let rest = text;
+  for (let m = rule.exec(rest); m; m = rule.exec(rest)) {
+    found.push(m[2]!);
+    rest = rest.slice(m.index + m[0].length);
+  }
+  return found;
+}
+
+/**
+ * What the services rule does not read: `MKT_EXCLUDED` WITHOUT the lines that aim at the leaves written for the marketplace
+ * (§22.8.3, point 5) — the `mkt` key of line 1, the `Mkt` part and the `mkt` prefix of line 3 — because those are written in
+ * "produits" and the services words must rewrite them. Lines 2 (the SaaS's and the app's phrases of the numbers), 4 to 8 are
+ * as they are. Built from the same constants as `MKT_EXCLUDED`, so the two cannot drift.
+ */
+export const MKT_SERVICES_EXCLUDED: readonly ExclusionLine[] = MKT_EXCLUDED.map((entry) => {
+  if (entry.line === 1) return { line: 1, excludes: (segments: readonly string[]) => LINE_1_KEYS.includes(segments[0]!) };
+  if (entry.line === 3) return { line: 3, excludes: (segments: readonly string[]) => segments.some((s) => LINE_3_PARTS.some((x) => s.includes(x))) };
+  return entry;
+});
+
+/**
+ * The leaves that keep a word of `SERVICES_BANNED` on purpose, each with its reason (§22.8.3, point 5: « exception nommée dès
+ * MKT-S »). A path here is read by the services rule as clean; the test holds each to still existing and still holding the word,
+ * so an exception that stops being one must leave the list.
+ */
+export const SERVICES_NAMED_EXCEPTIONS: Readonly<Record<string, string>> = {
+  "io.unsupportedSetup": "« comment l'entreprise vend » is shown when a file does not say its type, so before anyone knows whether it is a services marketplace: no overlay can reach it",
+  // The next two are the SaaS's own wording, inherited, and wrong for EVERY marketplace, « produits » included: « les façons de
+  // vendre cochées » names the SaaS's ticked motions (self-serve, sales-assisted), which a marketplace does not have. Not rewritten
+  // here: what a marketplace should say is a copy decision for the bon à tirer (`docs/engine/a23d-a-regarder.md`).
+  "io.mergeRefused.motions": "the SaaS's « les façons de vendre cochées » (ticked motions), wrong for any marketplace, products included; left as written until the bon à tirer decides (docs/engine/a23d-a-regarder.md)",
+  "table.reasons.hidden": "the SaaS's « ce chiffre n'est pas dans les façons de vendre cochées » (ticked motions), wrong for any marketplace, products included; left as written until the bon à tirer decides (docs/engine/a23d-a-regarder.md)",
 };

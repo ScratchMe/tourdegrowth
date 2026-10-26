@@ -54,16 +54,17 @@ export interface EngineActions {
 
 /**
  * The catalogue a type's screens read (§21.4.7, §22.4.3): the SaaS's `metrics`, a consumer app's own (the fifteen in its
- * words, then its six), or a marketplace's nineteen. The one place that chooses, so no screen asks which type it is
- * showing (D4).
+ * words, then its six), or a marketplace's nineteen, in the words of "products" or, with `offering` "services" (the
+ * setup's, §22.8.4), in those of "services". The one place that chooses, so no screen asks which type it is showing (D4).
+ * `offering` means nothing to another type; absent, a marketplace's is "products" (D10).
  */
-export function metricsFor(p: Pick<EngineWorkbenchProps, "metrics" | "typeCatalogs">, type: BusinessType): ResolvedMetric[] {
-  if (isMarketplace({ type })) return p.typeCatalogs.marketplace.metrics;
+export function metricsFor(p: Pick<EngineWorkbenchProps, "metrics" | "typeCatalogs">, type: BusinessType, offering?: "products" | "services"): ResolvedMetric[] {
+  if (isMarketplace({ type })) return offering === "services" ? p.typeCatalogs["marketplace-services"].metrics : p.typeCatalogs.marketplace.metrics;
   return isApp({ type }) ? p.typeCatalogs["consumer-app"].metrics : p.metrics;
 }
 
 /** Same, for the computed figures (what `EngineWorkbench` passes as `derivedCopy`). */
-export function derivedFor(p: Pick<EngineWorkbenchProps, "derived" | "typeCatalogs">, type: BusinessType): ResolvedDerived[] {
-  if (isMarketplace({ type })) return p.typeCatalogs.marketplace.derived;
+export function derivedFor(p: Pick<EngineWorkbenchProps, "derived" | "typeCatalogs">, type: BusinessType, offering?: "products" | "services"): ResolvedDerived[] {
+  if (isMarketplace({ type })) return offering === "services" ? p.typeCatalogs["marketplace-services"].derived : p.typeCatalogs.marketplace.derived;
   return isApp({ type }) ? p.typeCatalogs["consumer-app"].derived : p.derived;
 }

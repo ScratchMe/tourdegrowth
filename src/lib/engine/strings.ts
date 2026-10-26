@@ -53,7 +53,7 @@ export function mergeStrings<T>(base: T, overlay: DeepPartial<NoInfer<T>> | unde
   return out as T;
 }
 
-/** The marketplace's overlays, resolved in one language, as the page passes them. MKT-5 fills `products`; `services` is { common: {}, demand: {}, supply: {} } until MKT-S. */
+/** The marketplace's overlays, resolved in one language, as the page passes them: the words of "products" (MKT-5) and those of "services" (MKT-S), each a common sheet and one per side. */
 export interface MarketplaceLayers<T> {
   /** `common` (C105): the six sheets a marketplace reads in every set, the neutral one included (§22.8.5 c bis). */
   products: { common: DeepPartial<T>; demand: DeepPartial<T>; supply: DeepPartial<T> };

@@ -1,9 +1,11 @@
 import { QUESTIONS } from "@/content/copy-library";
 import { ENGINE_CATALOG, ENGINE_DERIVED_CATALOG } from "@/content/engine-catalog";
 import { ENGINE_CATALOG_CONSUMER, ENGINE_DERIVED_CATALOG_CONSUMER, type ConsumerPlgMetricId } from "@/content/engine-catalog-consumer";
+import { ENGINE_CATALOG_MKT_SERVICES, ENGINE_DERIVED_CATALOG_MKT_SERVICES } from "@/content/engine-catalog-mkt-services";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import { ENGINE_COPY_CONSUMER } from "@/content/engine-copy-consumer";
 import { ENGINE_COPY_MKT } from "@/content/engine-copy-marketplace";
+import { ENGINE_COPY_MKT_SERVICES } from "@/content/engine-copy-mkt-services";
 import { displayDerivedShapeOf, displayShapeOf } from "@/lib/engine/business-type";
 import {
   ALL_DERIVED_SHAPES,
@@ -20,7 +22,7 @@ import {
   SLG_ENGINE_BRIDGES,
   type MetricShape,
 } from "@/lib/engine/catalog-shape";
-import type { ResolvedBridge, ResolvedDerived, ResolvedMetric } from "@/lib/engine/strings";
+import { mergeStrings, type ResolvedBridge, type ResolvedDerived, type ResolvedMetric } from "@/lib/engine/strings";
 import type { Locale } from "@/lib/i18n/locale";
 import { localePath } from "@/lib/i18n/routes";
 import { resolveTree } from "@/lib/i18n/translatable";
@@ -41,10 +43,11 @@ import type { EngineWorkbenchProps } from "./EngineWorkbench";
  *
  * The consumer app has its own catalogue (`typeCatalogs`, §21.4.7): the fifteen
  * self-serve numbers it shows in its own words, then its six, and its figures.
- * The marketplace has its own too (§22.4.3): its nineteen numbers and six figures.
+ * The marketplace has its own too (§22.4.3): its nineteen numbers and six figures, in the words of "products" and, a
+ * second catalogue, in those of "services" (§22.4.4, §22.8.4).
  * They travel to every visitor, whatever the setup: a static page cannot know
  * which type the browser will hold. A SaaS's `metrics` and `derived` carry none
- * of their ids. `typeStrings` (§21.8.1), the app's overlay on `strings` and the marketplace's three (§22.8.1), travels the same way.
+ * of their ids. `typeStrings` (§21.8.1), the app's overlay on `strings` and the marketplace's six (§22.8.1: three sheets in the words of "products", three in those of "services"), travels the same way.
  *
  * Not the `openTypes` prop (§21.3): it comes from the build's environment, which
  * this function does not read — the page adds it (`openTypesAtBuild()`).
@@ -101,18 +104,21 @@ export function resolveEngineProps(locale: Locale): Omit<EngineWorkbenchProps, "
   ];
 
   // The marketplace's catalogue (§22.4.3): its nineteen numbers in `MKT_METRIC_SHAPES` order, its six figures in
-  // `MKT_DERIVED_SHAPES` order, in the words of "products" (MKT-S adds the "services" ones). The glossary link comes
-  // from the shape the marketplace DISPLAYS, which is its own (no override, as for the SaaS).
-  const marketMetrics: ResolvedMetric[] = MKT_METRIC_SHAPES.map((shape) => ({
-    id: shape.id,
-    ...resolveTree(ENGINE_CATALOG[shape.id], locale),
-    glossaryHref: glossaryHref(displayShapeOf(shape.id, "marketplace").glossary),
-  }));
-  const marketDerived: ResolvedDerived[] = MKT_DERIVED_SHAPES.map((shape) => ({
-    id: shape.id,
-    ...resolveTree(ENGINE_DERIVED_CATALOG[shape.id], locale),
-    glossaryHref: glossaryHref(displayDerivedShapeOf(shape.id, "marketplace").glossary),
-  }));
+  // `MKT_DERIVED_SHAPES` order, in the words of "products", and again in those of "services" (MKT-S): the "products" entry
+  // with the services overlay laid on it, whole (`mergeStrings`, §22.8.1), so a screen reads one catalogue and never asks
+  // which. The glossary link comes from the shape the marketplace DISPLAYS, which is its own (no override, as for the SaaS).
+  const marketMetrics = (services: boolean): ResolvedMetric[] =>
+    MKT_METRIC_SHAPES.map((shape) => ({
+      id: shape.id,
+      ...resolveTree(services ? mergeStrings(ENGINE_CATALOG[shape.id], ENGINE_CATALOG_MKT_SERVICES[shape.id]) : ENGINE_CATALOG[shape.id], locale),
+      glossaryHref: glossaryHref(displayShapeOf(shape.id, "marketplace").glossary),
+    }));
+  const marketDerived = (services: boolean): ResolvedDerived[] =>
+    MKT_DERIVED_SHAPES.map((shape) => ({
+      id: shape.id,
+      ...resolveTree(services ? mergeStrings(ENGINE_DERIVED_CATALOG[shape.id], ENGINE_DERIVED_CATALOG_MKT_SERVICES[shape.id]) : ENGINE_DERIVED_CATALOG[shape.id], locale),
+      glossaryHref: glossaryHref(displayDerivedShapeOf(shape.id, "marketplace").glossary),
+    }));
 
   // Only the bridged questions travel, not the fifteen: the island has no use
   // for the others, and the copy library stays on the server. Self-serve's
@@ -134,15 +140,19 @@ export function resolveEngineProps(locale: Locale): Omit<EngineWorkbenchProps, "
     locale,
     strings: resolveTree(ENGINE_COPY, locale),
     // The app's words over the base's, only the leaves that change (§21.8.1): the island merges them, once, in EngineWorkbench.
-    // The marketplace's are three sheets (common, demand, supply) in the words of "products", merged by `marketplaceStrings`
-    // (§22.8.1); the "services" ones are empty until MKT-S writes them.
+    // The marketplace's are six sheets, three (common, demand, supply) in the words of "products" and three in those of
+    // "services", merged by `marketplaceStrings` (§22.8.1).
     typeStrings: {
       "consumer-app": resolveTree(ENGINE_COPY_CONSUMER, locale),
-      marketplace: { products: resolveTree(ENGINE_COPY_MKT, locale), services: { common: {}, demand: {}, supply: {} } },
+      marketplace: { products: resolveTree(ENGINE_COPY_MKT, locale), services: resolveTree(ENGINE_COPY_MKT_SERVICES, locale) },
     },
     metrics,
     derived,
-    typeCatalogs: { "consumer-app": { metrics: appMetrics, derived: appDerived }, marketplace: { metrics: marketMetrics, derived: marketDerived } },
+    typeCatalogs: {
+      "consumer-app": { metrics: appMetrics, derived: appDerived },
+      marketplace: { metrics: marketMetrics(false), derived: marketDerived(false) },
+      "marketplace-services": { metrics: marketMetrics(true), derived: marketDerived(true) },
+    },
     bridges,
   };
 }
