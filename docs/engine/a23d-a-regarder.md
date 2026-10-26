@@ -68,3 +68,40 @@ dès MKT-5, de ses calques de place de marché.*
   abonné (21 feuilles par côté), quand les feuilles de §22.8.5 c disent
   "their" ; le français de l'hypothèse d'inscription de l'offre ne nommait
   pas les vendeurs.
+
+## Les mots « services » (MKT-S)
+
+- **`io.mergeRefused.motions`** (« Fusion impossible : les façons de vendre
+  cochées ne sont pas les mêmes. ») et **`table.reasons.hidden`** (« ce
+  chiffre n'est pas dans les façons de vendre cochées ») sont faux pour
+  **toute** place de marché, « produits » compris : une place de marché ne
+  coche aucune façon de vendre, et `merge.ts` renvoie la première quand deux
+  fichiers diffèrent sur les abonnements des vendeurs (ou des prestataires).
+  Laissées telles quelles, nommées dans `SERVICES_NAMED_EXCEPTIONS` : leur
+  réécriture pour la place de marché (dans `products.common` et
+  `services.common`) est à trancher ici. Relevé par la relecture de MKT-S.
+- **`mkt.buy.first-order.trap` en « services »** : « Compte une réservation
+  payée, pas une demande envoyée. » La clause « pas un panier » de la version
+  « produits » est retirée (le lexique aurait donné « pas un montant de la
+  réservation »), donc le piège ne nomme plus qu'un état non payé au lieu de
+  deux.
+- **`mkt.sell.gross-margin.noReferenceReason` en « services »** : « logiciel
+  vendu seul » devient « proposé seul » / "offered on its own" ; une variante
+  sans verbe : « portent sur le logiciel seul » / "are for software on its
+  own".
+- **`mkt.rev.take-rate`** (la version « services » et le `noReferenceReason`
+  hérité) parle de « livraison » / "shipping", "delivery" : peu pertinent pour
+  des services.
+- **`mkt.sell.churn.where` en « services »** : « dernière réservation reçue …
+  sans nouvelle réservation reçue », lourd.
+- **`findings.verbMkt.repeat`** et `mkt.funnel.clauseRepeat(One)` en
+  « services » disent « en font une deuxième » / "make a second one" (choix de
+  l'exécutant : « passer une commande » devient « faire une réservation »).
+  Seul dans le constat `chainBreak`, ni « en » ni "one" n'ont d'antécédent :
+  le défaut de MKT-4 (plus haut), dans les deux offres. Proposition de la
+  relecture : « font une deuxième réservation » / "make a second booking", et
+  en « produits » « passent une deuxième commande » / "place a second order".
+- **Le verbe anglais de la première vente en « services »** : "receive a
+  first booking" avec « première réservation », "get booked" employé seul (le
+  verbe que le lexique donne pour « vendre ») ; constant d'une feuille à
+  l'autre, à confirmer.

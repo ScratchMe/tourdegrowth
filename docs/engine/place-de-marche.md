@@ -2070,10 +2070,13 @@ d'acceptation de MKT-5, sur le modèle d'`engine-copy-consumer.test.ts` :
    contient comme mot entier, sans tenir compte de la casse :
    - en français : `acheteur(s)`, `vendeur(s)`, `commande(s)`, `commander`,
      `annonce(s)`, `panier`, `vente(s)`, `vend`, `vendent`, `vendu(e)(s)`,
-     `achat(s)` ;
+     `achat(s)`, et (MKT-S, pour fermer l'écart avec le lexique de §22.8.4,
+     `LEXICON_FORMS`) `vendre`, `acheter`, `achète`, `achètent`,
+     `acheté(e)(s)`, `commandent`, `commandé(e)(s)`, `paniers` ;
    - en anglais : `buyer(s)`, `seller(s)`, `order(s)`, `ordered`, `listing(s)`,
      `sale(s)`, `sell`, `sells`, `sold`, `purchase(s)`, `basket`, `buy`,
-     `buys` ;
+     `buys`, et `selling`, `bought`, `buying`, `ordering`, `purchased`,
+     `purchasing`, `baskets` ;
 
    ni aucun texte d'une entrée de `typeCatalogs["marketplace-services"]`
    (ses noms, formules, pièges, demandes et chemins). Les mots se cherchent en
@@ -2082,10 +2085,16 @@ d'acceptation de MKT-5, sur le modèle d'`engine-copy-consumer.test.ts` :
    `MKT_EXCLUDED` **sans** ses lignes qui visent les feuilles écrites pour la
    place de marché (la clé `mkt` de la ligne 1, les clés `mkt…` de la ligne 2,
    et `Mkt` et le préfixe `mkt` de la ligne 3) : la règle « services » les
-   couvre, puisqu'elles sont écrites avec les mots « produits ». Exception
-   nommée dès MKT-S : `io.unsupportedSetup` (« comment l'entreprise vend »,
-   affiché quand un fichier ne dit pas son type, donc avant qu'on sache si
-   c'est une place de marché de services) ;
+   couvre, puisqu'elles sont écrites avec les mots « produits » (la ligne 2
+   n'a en fait aucune clé `mkt…` à retirer : elle exclut les clés qui ne
+   commencent pas par `mkt`, MKT-S la garde telle quelle). Exceptions
+   nommées dès MKT-S (`SERVICES_NAMED_EXCEPTIONS`) : `io.unsupportedSetup`
+   (« comment l'entreprise vend », affiché quand un fichier ne dit pas son
+   type, donc avant qu'on sache si c'est une place de marché de services) ;
+   `io.mergeRefused.motions` et `table.reasons.hidden` (« façons de vendre
+   cochées »), que la liste élargie attrape : leur texte est faux pour toute
+   place de marché, « produits » compris, et leur réécriture est une décision
+   du bon à tirer A23.d (`docs/engine/a23d-a-regarder.md`) ;
 6. **jamais « offre contre demande »** (D14) : aucune feuille `mkt.*`, aucune
    feuille des calques, aucun titre `mkt*` ne contient `vs`, `contre l'offre`,
    `contre la demande`, `plutôt que`, `plus que la demande`, `plus que l'offre`,
@@ -2693,7 +2702,7 @@ rougit hors de cette liste arrête l'unité (§22.13).
 | `engine-props.test.ts` | les deux filtres de la liste attendue (`:31-33`) excluent aussi `mkt` ; `typeCatalogs.marketplace` : 19 chiffres et 6 calculés, dans l'ordre des formes (§22.4.3) | MKT-1 |
 | `catalog-shape.test.ts` (suite), `bridge.test.ts` | les listes que MKT-1 allonge : `ALL_DERIVED_SHAPES.slice(-4)` devient `slice(-10, -6)`, `UNIT_INPUT_IDS` passe de 16 à 28 ; « every question exists in the Tour » compte les quatre ponts de plus | MKT-1 |
 | `catalog-shape.test.ts` | l'ensemble des portées hors `plg`/`slg` vaut `new Set(["link", "app", "mkt"])` (la ligne qu'A22 a passée en ensemble) ; `shapesOf` d'une place de marché : 19, 14 sans abonnements, dans l'ordre de `MKT_METRIC_SHAPES` ; `derivedShapesOf` : 6 ou 3 ; un ★ par étape côté demande, et côté offre ceux de C95 (trois, deux sans abonnements) ; aucun repère ; les listes de §22.4.3 ; `motionOfMetric("mkt.…") === "mkt"` ; `UNPRICED_CANDIDATES`, `LOWER_IS_BETTER_CANDIDATES` | MKT-1 |
-| `shared-counts.test.ts` | les six comptes partagés de §22.2.4 : la parité des libellés tient d'elle-même (§22.4.4 écrit les mêmes, et aucun libellé de la place de marché ne reprend un libellé du SaaS ou de l'app) ; en MKT-S, la même parité sur le catalogue « services » | MKT-1, MKT-S |
+| `shared-counts.test.ts` | les six comptes partagés de §22.2.4 : la parité des libellés tient d'elle-même (§22.4.4 écrit les mêmes, et aucun libellé de la place de marché ne reprend un libellé du SaaS ou de l'app) ; en MKT-S, la même parité sur le catalogue « services » (MKT-S l'a écrite dans `engine-catalog.test.ts`, que sa fiche liste) | MKT-1, MKT-S |
 | `content/__tests__/engine-catalog.test.ts` | couvre les 19 et les 6 ; aucun `benchmarkCaveat`, un `noReferenceReason` chacun ; en MKT-S, les mêmes plafonds sur le catalogue « services » (§22.8.4) | MKT-1, MKT-S |
 | `content/__tests__/engine-copy.test.ts` | `unitInput` couvre les entrées des six calculés (§22.4.3) ; `subject` couvre les candidats de la place de marché ; `TITLE_CONTRACT` gagne les titres de §22.8.5 e | MKT-1, MKT-4, MKT-8 |
 | `content/__tests__/engine-copy-marketplace.test.ts` (nouveau) | les points 1 à 4 et 6 de §22.8.3 ; le point 5 en MKT-S | MKT-5, MKT-S |
@@ -3316,9 +3325,10 @@ Ton compte rendu, en français : une liste numérotée de constats, rangés par 
      (`mergeStrings` remplace un tableau entier, §22.8.1).
   3. `services.common`, `services.demand`, `services.supply`, par le lexique,
      jusqu'à ce que le point 5 passe (il attrape aussi les six feuilles de
-     `products.common` et les quatre `settings.*Reset` de la place de marché,
-     qui disent « acheteurs », « vendeurs », « commande », « vente » : leur
-     réécriture va dans `services.common`).
+     `products.common`, qui disent « acheteurs », « vendeurs », « commande »,
+     « vente » : leur réécriture va dans `services.common` ; les quatre
+     `settings.*Reset` et les feuilles `setup.*` de §22.8.5 a n'existent qu'à
+     MKT-6, qui écrit leur réécriture « services » avec elles).
   4. Les props, `metricsFor` et `derivedFor` avec `offering`, la fusion dans
      l'îlot qui passe `setup.offering`.
 - **Acceptation** : commune ; `engine-copy-marketplace.test.ts` vert sur ses
@@ -3404,7 +3414,18 @@ Ton compte rendu, en français : une liste numérotée de constats, rangés par 
   `stringsFor(type, offering?, side?)` (§22.8.1), la carte passant l'offre
   qu'on y choisit ; écrire `settings.firstSalePaidReset` (§22.8.5 a) fait
   rougir `NOT_WRITTEN_YET` d'`engine-copy-marketplace.test.ts`, dont MKT-6
-  retire le nom (ce test est dans ses fichiers).
+  retire le nom (ce test est dans ses fichiers). **Ce qu'MKT-S a laissé** :
+  chaque feuille de §22.8.5 a écrite avec un mot « produits » a sa
+  réécriture « services » dans `services.common` d'`engine-copy-mkt-services.ts`
+  (fichier de MKT-6 pour cela), que la règle 5 de §22.8.3 attrape le jour où
+  la feuille existe : les quatre `settings.*Reset` (« commande » →
+  « réservation », « première vente » → « première réservation reçue »),
+  `setup.mktSides` (« Une place de marché a deux côtés : les clients et les
+  prestataires. » / "A marketplace has two sides: clients and providers."),
+  `setup.firstOrderWindow`, `repeatWindow`, `firstSaleWindow` (« Première
+  réservation sous », « Deuxième réservation sous », « Première réservation
+  reçue sous ») et `settings.streamSubject.sellerSubscriptions` (« Les
+  abonnements des prestataires » / "Provider subscriptions").
 - **Acceptation** : commune ; captures de la carte de départ, de la carte de
   réglage et de l'écran des cibles d'une place de marché, en « produits » et en
   « services », FR 1 280 et EN 390, regardées, sur un build
