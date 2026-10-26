@@ -74,13 +74,15 @@ export interface EngineWorkbenchProps {
   /**
    * The consumer app's prose (§21.4.7), resolved like `metrics` and `derived`: its fifteen self-serve numbers in its own
    * words, then its six, and its figures. The marketplace's (§22.4.3): its nineteen numbers and its six figures, in the
-   * order of `MKT_METRIC_SHAPES` and `MKT_DERIVED_SHAPES`, in the words of "products" (MKT-S adds the "services" ones).
+   * order of `MKT_METRIC_SHAPES` and `MKT_DERIVED_SHAPES`, in the words of "products" (`marketplace`) and in those of
+   * "services" (`marketplace-services`, §22.8.4), the same ids in the same order.
    * The SaaS's props carry none of their ids. A screen reads the catalogue of its engine's type through `metricsFor` /
    * `derivedFor` (`_engine/view.ts`), never this field directly.
    */
   typeCatalogs: {
     "consumer-app": { metrics: ResolvedMetric[]; derived: ResolvedDerived[] };
     marketplace: { metrics: ResolvedMetric[]; derived: ResolvedDerived[] };
+    "marketplace-services": { metrics: ResolvedMetric[]; derived: ResolvedDerived[] };
   };
   /** The eight Tour bridges, question text and options in the Tour's order (§6.11). */
   bridges: ResolvedBridge[];
@@ -274,8 +276,8 @@ function Workbench(props: EngineWorkbenchProps) {
     return props.strings;
   };
   const strings = stringsFor(engineType, state?.setup.offering);
-  const metrics = metricsFor(props, engineType);
-  const derivedCopy = derivedFor(props, engineType);
+  const metrics = metricsFor(props, engineType, state?.setup.offering);
+  const derivedCopy = derivedFor(props, engineType, state?.setup.offering);
   const openedAt = snap?.openedAt ?? null;
   const tourResults = snap?.tourResults;
   const computed = useMemo(
@@ -303,7 +305,7 @@ function Workbench(props: EngineWorkbenchProps) {
     // More months than an engine ever holds (§19.2): never written by a build, and a cost with no bound to compute.
     if (candidate.snapshots.length > MAX_MONTHS) return false;
     const type = candidate.setup.type;
-    const input = { today: new Date(openedAt ?? Date.now()), locale, tourResults: tourResults ?? [], bridges, strings: stringsFor(type, candidate.setup.offering), metrics: metricsFor(props, type), derivedCopy: derivedFor(props, type) };
+    const input = { today: new Date(openedAt ?? Date.now()), locale, tourResults: tourResults ?? [], bridges, strings: stringsFor(type, candidate.setup.offering), metrics: metricsFor(props, type, candidate.setup.offering), derivedCopy: derivedFor(props, type, candidate.setup.offering) };
     try {
       candidate.snapshots.forEach((_, monthIndex) => boardOf(candidate, { ...input, monthIndex }));
       return true;

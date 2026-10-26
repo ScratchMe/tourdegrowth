@@ -209,7 +209,8 @@ describe("the shared line of an app's numbers", () => {
 /**
  * The marketplace's own catalogue (engine spec §22.4.3, A23 MKT-1): its nineteen numbers and six figures in the words of
  * "products", in the order of `MKT_METRIC_SHAPES` and `MKT_DERIVED_SHAPES`, resolved like the others and chosen per type by
- * `metricsFor` / `derivedFor`. The "services" words are MKT-S's.
+ * `metricsFor` / `derivedFor`; and, in `typeCatalogs["marketplace-services"]`, the same in the words of "services" (A23
+ * MKT-S, below).
  *
  * Non-vacuity, measured on 2026-10-18 (each sabotage applied alone, the tests of `src/lib/engine`, `src/content`, `src/app`
  * and `src/__tests__` run, then restored): `metricsFor` without its marketplace branch falls 2 (the choice test and the
@@ -298,6 +299,100 @@ describe("the island's marketplace catalogue (`typeCatalogs.marketplace`)", () =
       }
       // Not vacuous: the six groups hold 3 + 2 + 2 + 2 + 2 + 2 places, each naming the others.
       expect(rendered).toBe(3 * 2 + 5 * 1 * 2);
+    }
+  });
+});
+
+/**
+ * The marketplace's catalogue in the words of "services" (engine spec §22.4.4, §22.8.1, A23 MKT-S): the same nineteen numbers
+ * and six figures, the same ids in the same order, the "products" entry with the services overlay laid on it whole, chosen by
+ * `metricsFor` / `derivedFor` when the setup's offering is "services". The words themselves are held by
+ * `content/__tests__/engine-catalog.test.ts` and `engine-copy-marketplace.test.ts` (point 5); here, what the page hands over.
+ *
+ * Non-vacuity, measured on 2026-10-26 (each sabotage alone, on a copy of the sources outside the repository, the seven nearest
+ * test files run, then put back): `metricsFor` ignoring `offering` falls 1 (the choice test), `derivedFor` the same 1; the
+ * services catalogue built from the "products" entries (no merge) falls 3 (the words test here and the catalogue test of
+ * point 5, in both languages), and so does its figures alone; the services sheets handed to the island empty falls 2 (the
+ * page test of `engine-copy-marketplace.test.ts`, in both languages).
+ */
+describe("the island's marketplace catalogue in the words of services (`typeCatalogs[\"marketplace-services\"]`)", () => {
+  it.each([
+    ["fr", FR],
+    ["en", EN],
+  ] as const)("carries the same 19 numbers and 6 figures as the products', the same ids in the same order, in %s", (_locale, props) => {
+    const services = props.typeCatalogs["marketplace-services"];
+    expect(services.metrics).toHaveLength(19);
+    expect(services.derived).toHaveLength(6);
+    expect(services.metrics.map((m) => m.id)).toEqual(props.typeCatalogs.marketplace.metrics.map((m) => m.id));
+    expect(services.derived.map((d) => d.id)).toEqual(props.typeCatalogs.marketplace.derived.map((d) => d.id));
+    expect(services.metrics.map((m) => m.id)).toEqual(MKT_METRIC_SHAPES.map((s) => s.id));
+    expect(services.derived.map((d) => d.id)).toEqual(MKT_DERIVED_SHAPES.map((s) => s.id));
+  });
+
+  it("says the services' words, in both languages — and the products' catalogue, and the SaaS's props, keep theirs", () => {
+    const named = (props: typeof FR, id: MetricId, catalog: "marketplace" | "marketplace-services") => props.typeCatalogs[catalog].metrics.find((m) => m.id === id)?.name;
+    expect(named(FR, "mkt.buy.cac", "marketplace-services")).toBe("CAC client");
+    expect(named(EN, "mkt.buy.cac", "marketplace-services")).toBe("Client CAC");
+    expect(named(FR, "mkt.sell.first-sale", "marketplace-services")).toBe("Première réservation reçue");
+    expect(named(EN, "mkt.sell.paid-conversion", "marketplace-services")).toBe("Provider subscription conversion");
+    expect(named(FR, "mkt.buy.cac", "marketplace")).toBe("CAC acheteur");
+    expect(named(EN, "mkt.sell.paid-conversion", "marketplace")).toBe("Seller subscription conversion");
+    expect(FR.metrics.find((m) => m.id === "acq.cac")?.name).toBe("CAC");
+    // A figure too: its name and its formula, whole.
+    const ltv = FR.typeCatalogs["marketplace-services"].derived.find((d) => d.id === "mkt.sell.ltv");
+    expect(ltv?.name).toBe("LTV prestataire abonné");
+    expect(ltv?.formula).toContain("prestataires abonnés");
+    // What no word of « produits » touches is the products' own, entry by entry: the take rate's name, a figure's cap note.
+    expect(FR.typeCatalogs["marketplace-services"].metrics.find((m) => m.id === "mkt.rev.take-rate")?.name).toBe(FR.typeCatalogs.marketplace.metrics.find((m) => m.id === "mkt.rev.take-rate")?.name);
+    expect(FR.typeCatalogs["marketplace-services"].derived.find((d) => d.id === "mkt.rev.ltv")?.capNote).toBe(FR.typeCatalogs.marketplace.derived.find((d) => d.id === "mkt.rev.ltv")?.capNote);
+  });
+
+  it("keeps, on each entry, everything the words of services do not touch: the glossary link, the places' sources, the variants' ids, the placeholders", () => {
+    for (const [locale, props] of [["fr", FR], ["en", EN]] as const) {
+      const products = props.typeCatalogs.marketplace;
+      const services = props.typeCatalogs["marketplace-services"];
+      services.metrics.forEach((m, i) => {
+        const before = products.metrics[i]!;
+        expect(m.glossaryHref, `${locale} ${m.id}`).toBe(before.glossaryHref);
+        expect(m.where.map((w) => w.source), `${locale} ${m.id}`).toEqual(before.where.map((w) => w.source));
+        expect(m.variants?.map((v) => v.id), `${locale} ${m.id}`).toEqual(before.variants?.map((v) => v.id));
+        expect(m.naReasons, `${locale} ${m.id}`).toEqual(before.naReasons);
+        expect(m.choices, `${locale} ${m.id}`).toEqual(before.choices);
+        expect(m.benchmarkCaveat, `${locale} ${m.id}`).toBe(before.benchmarkCaveat);
+        const holes = (text: string) => [...text.matchAll(/\{(\w+)\}/g)].map((x) => x[1]).sort().join();
+        for (const key of ["name", "oneLiner", "formula", "trap", "request"] as const) expect(holes(m[key]), `${locale} ${m.id}.${key}`).toBe(holes(before[key]));
+      });
+      services.derived.forEach((d, i) => {
+        const before = products.derived[i]!;
+        expect(d.glossaryHref, `${locale} ${d.id}`).toBe(before.glossaryHref);
+        expect(d.uncomputable, `${locale} ${d.id}`).toBe(before.uncomputable);
+        expect(d.caveat, `${locale} ${d.id}`).toBe(before.caveat);
+      });
+    }
+  });
+
+  it("is chosen by the setup's offering: `metricsFor` and `derivedFor` hand the services' arrays for \"services\", the products' for \"products\" or none — and no other type reads it", () => {
+    for (const props of [FR, EN]) {
+      expect(metricsFor(props, "marketplace", "services")).toBe(props.typeCatalogs["marketplace-services"].metrics);
+      expect(derivedFor(props, "marketplace", "services")).toBe(props.typeCatalogs["marketplace-services"].derived);
+      expect(metricsFor(props, "marketplace", "products")).toBe(props.typeCatalogs.marketplace.metrics);
+      expect(derivedFor(props, "marketplace", "products")).toBe(props.typeCatalogs.marketplace.derived);
+      expect(metricsFor(props, "marketplace")).toBe(props.typeCatalogs.marketplace.metrics);
+      expect(derivedFor(props, "marketplace")).toBe(props.typeCatalogs.marketplace.derived);
+      // An offering means nothing to the SaaS or to the app.
+      expect(metricsFor(props, "b2b-saas", "services")).toBe(props.metrics);
+      expect(derivedFor(props, "b2b-saas", "services")).toBe(props.derived);
+      expect(metricsFor(props, "consumer-app", "services")).toBe(props.typeCatalogs["consumer-app"].metrics);
+      expect(derivedFor(props, "consumer-app", "services")).toBe(props.typeCatalogs["consumer-app"].derived);
+    }
+  });
+
+  it("names, on every shared count a marketplace of services holds, each place of the group in its own catalogue — the shared line the sheet prints", () => {
+    for (const props of [FR, EN]) {
+      const named = new Set<MetricId>(metricsFor(props, "marketplace", "services").map((m) => m.id));
+      expect(sharedWith("mkt.buy.first-order", "denominator", named)).toEqual(["mkt.buy.repeat", "mkt.buy.referred-share"]);
+      expect(sharedWith("mkt.rev.aov", "numerator", named)).toEqual(["mkt.rev.take-rate"]);
+      expect(sharedWith("mkt.sell.first-sale", "denominator", named)).toEqual(["mkt.sell.paid-conversion"]);
     }
   });
 });

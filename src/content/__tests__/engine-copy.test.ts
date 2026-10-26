@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { ENGINE_COPY } from "../engine-copy";
 import { ENGINE_COPY_CONSUMER } from "../engine-copy-consumer";
 import { ENGINE_COPY_MKT } from "../engine-copy-marketplace";
+import { ENGINE_COPY_MKT_SERVICES } from "../engine-copy-mkt-services";
 import {
   ALL_LEVER_IDS,
   ALL_METRIC_SHAPES,
@@ -59,12 +60,12 @@ function treeOf(copy: unknown) {
 const { ALL, under } = treeOf(ENGINE_COPY);
 
 /**
- * The trees the copy contract holds for (A22 APP-3, §21.8.3 point 4; A23 MKT-5, §22.8.3 point 4): the base, the base with
- * the consumer app's overlay on top, and the base with each side of a marketplace in the words of "products" — what an
- * app's and a marketplace's screens and slides read. MKT-S adds the two fusions in the words of "services". The blocks
- * that only read keys the overlays exclude (`faq`, `meta`, `stages`, the hybrid's trap) stay on the base alone.
+ * The trees the copy contract holds for (A22 APP-3, §21.8.3 point 4; A23 MKT-5 and MKT-S, §22.8.3 point 4): the base, the
+ * base with the consumer app's overlay on top, and the base with each side of a marketplace in the words of "products" and
+ * in those of "services" — what an app's and a marketplace's screens and slides read. The blocks that only read keys the
+ * overlays exclude (`faq`, `meta`, `stages`, the hybrid's trap) stay on the base alone.
  */
-const MARKETPLACE_LAYERS: MarketplaceLayers<unknown> = { products: ENGINE_COPY_MKT, services: { common: {}, demand: {}, supply: {} } };
+const MARKETPLACE_LAYERS: MarketplaceLayers<unknown> = { products: ENGINE_COPY_MKT, services: ENGINE_COPY_MKT_SERVICES };
 const COPIES: [name: string, copy: typeof ENGINE_COPY][] = [
   ["the SaaS copy", ENGINE_COPY],
   // `unknown`: a bilingual tree's leaves are objects, which `mergeStrings` merges key by key (a leaf of the overlay is a
@@ -72,6 +73,8 @@ const COPIES: [name: string, copy: typeof ENGINE_COPY][] = [
   ["the consumer app's copy", mergeStrings<unknown>(ENGINE_COPY, ENGINE_COPY_CONSUMER) as typeof ENGINE_COPY],
   ["the marketplace's demand copy", marketplaceStrings<unknown>(ENGINE_COPY, MARKETPLACE_LAYERS, "products", "demand") as typeof ENGINE_COPY],
   ["the marketplace's supply copy", marketplaceStrings<unknown>(ENGINE_COPY, MARKETPLACE_LAYERS, "products", "supply") as typeof ENGINE_COPY],
+  ["the services marketplace's demand copy", marketplaceStrings<unknown>(ENGINE_COPY, MARKETPLACE_LAYERS, "services", "demand") as typeof ENGINE_COPY],
+  ["the services marketplace's supply copy", marketplaceStrings<unknown>(ENGINE_COPY, MARKETPLACE_LAYERS, "services", "supply") as typeof ENGINE_COPY],
 ];
 
 describe("keys the code reads by id", () => {
