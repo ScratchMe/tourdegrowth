@@ -27,6 +27,9 @@ const PAGES = [
   // A7.3.e (2026-09-30): the two densest of the four sales-assisted terms.
   "/fr/glossary/acv",
   "/fr/glossary/win-rate",
+  // A23 MKT-G (2026-10-26): the two most numeric of the marketplace's three terms.
+  "/fr/glossary/gmv",
+  "/fr/glossary/take-rate",
 ];
 
 for (const path of PAGES) {

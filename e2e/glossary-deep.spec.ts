@@ -106,17 +106,22 @@ test("the long page does not push a phone sideways", async ({ page }) => {
  * neighbours its entry names, and does not push a phone sideways: the
  * longest title of the glossary, « Conversion lead → opportunité », is the
  * one most likely to.
+ *
+ * A23 MKT-G (2026-10-26) — the marketplace's three terms get the same checks,
+ * from the same loop: `gmv`, `take-rate` and `marketplace-liquidity`.
  */
 const SALES_TERMS: GlossaryTermId[] = ["win-rate", "sales-cycle", "acv", "lead-to-opportunity"];
+const MARKETPLACE_TERMS: GlossaryTermId[] = ["gmv", "take-rate", "marketplace-liquidity"];
 const SECTION_LABELS = {
   en: ["The formula", "Worked example", "Orders of magnitude", "How to improve it", "In the Tour", "Questions people ask"],
   fr: ["La formule", "Exemple chiffré", "Ordres de grandeur", "Comment l'améliorer", "Dans le Tour", "Questions fréquentes"],
 } as const;
 
-for (const id of SALES_TERMS) {
+for (const id of [...SALES_TERMS, ...MARKETPLACE_TERMS]) {
+  const batch = SALES_TERMS.includes(id) ? "A7.3.e" : "A23 MKT-G";
   for (const locale of ["en", "fr"] as const) {
     for (const width of [390, 1280]) {
-      test(`/${locale}/glossary/${id} renders, quotes its Tour question and fits at ${width}px (A7.3.e)`, async ({ page }) => {
+      test(`/${locale}/glossary/${id} renders, quotes its Tour question and fits at ${width}px (${batch})`, async ({ page }) => {
         await page.setViewportSize({ width, height: 900 });
         await page.goto(`/${locale}/glossary/${id}`);
         const main = page.locator("main");
@@ -145,6 +150,18 @@ test("existing term pages link the four sales-assisted terms (A7.3.e)", async ({
   for (const id of SALES_TERMS) {
     const parents = (Object.keys(GLOSSARY) as GlossaryTermId[]).filter(
       (other) => !SALES_TERMS.includes(other) && GLOSSARY[other].related.includes(id),
+    );
+    expect(parents.length, id).toBeGreaterThanOrEqual(2);
+    await page.goto(`/fr/glossary/${parents[0]}`);
+    await expect(page.locator(`main a[href="/fr/glossary/${id}"]`)).toHaveText(GLOSSARY[id].term.fr);
+  }
+});
+
+/** The same for the marketplace's three: reached from the pages that existed before them, through the six swapped `related` lists (A23 MKT-G). */
+test("existing term pages link the three marketplace terms (A23 MKT-G)", async ({ page }) => {
+  for (const id of MARKETPLACE_TERMS) {
+    const parents = (Object.keys(GLOSSARY) as GlossaryTermId[]).filter(
+      (other) => !MARKETPLACE_TERMS.includes(other) && GLOSSARY[other].related.includes(id),
     );
     expect(parents.length, id).toBeGreaterThanOrEqual(2);
     await page.goto(`/fr/glossary/${parents[0]}`);

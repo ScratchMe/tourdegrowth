@@ -952,7 +952,7 @@ export const MKT_METRIC_SHAPES: readonly MetricShape<MktMetricId>[] = ([
     effort: "ask",
     defaultRole: "data",
     sources: ["product-db", "amplitude", "mixpanel"],
-    glossary: "activation",
+    glossary: "marketplace-liquidity",
     defaultRepair: "sprint",
     variants: ["requests", "searches"],
   },
@@ -1050,7 +1050,7 @@ export const MKT_METRIC_SHAPES: readonly MetricShape<MktMetricId>[] = ([
     effort: "self-5min",
     defaultRole: "finance",
     sources: ["stripe", "spreadsheet", "product-db"],
-    glossary: "revenue",
+    glossary: "take-rate",
     defaultRepair: "meeting",
   },
   {

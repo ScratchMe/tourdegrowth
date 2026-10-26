@@ -46,12 +46,23 @@ describe("GLOSSARY (growth-plan Phase 2: extended /glossary/[term] content)", ()
     // only from each other. Non-vacuity (2026-09-30): putting `activation`
     // back in place of `lead-to-opportunity` in `pql.related` fails this test
     // alone ("lead-to-opportunity ← acquisition: expected 1").
+    // A23 MKT-G (2026-10-26) extends the rule to the marketplace's three
+    // terms, six swaps. A term is "older" than a batch when it belongs to no
+    // batch or to an earlier one: the sales terms count for the marketplace's,
+    // never the other way round. Non-vacuity (2026-10-26): putting
+    // `retention` back in place of `marketplace-liquidity` in
+    // `activation.related` fails this test alone ("marketplace-liquidity ←
+    // growth-loop: expected 1"), and the 16 other tests of this file pass.
     const NEW_SALES_TERMS: GlossaryTermId[] = ["win-rate", "sales-cycle", "acv", "lead-to-opportunity"];
+    const NEW_MARKETPLACE_TERMS: GlossaryTermId[] = ["gmv", "take-rate", "marketplace-liquidity"];
+    const BATCHES = [NEW_SALES_TERMS, NEW_MARKETPLACE_TERMS];
+    const batchOf = (id: GlossaryTermId) => BATCHES.findIndex((batch) => batch.includes(id));
     for (const id of ALL_IDS) {
       const from = ALL_IDS.filter((other) => GLOSSARY[other].related.includes(id));
       expect(from.length, `${id} ← ${from.join(", ")}`).toBeGreaterThanOrEqual(2);
-      if (NEW_SALES_TERMS.includes(id)) {
-        const older = from.filter((other) => !NEW_SALES_TERMS.includes(other));
+      const batch = batchOf(id);
+      if (batch >= 0) {
+        const older = from.filter((other) => batchOf(other) < batch);
         expect(older.length, `${id} ← ${older.join(", ")}`).toBeGreaterThanOrEqual(2);
       }
     }

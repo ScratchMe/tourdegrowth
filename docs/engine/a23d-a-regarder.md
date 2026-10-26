@@ -105,3 +105,23 @@ dès MKT-5, de ses calques de place de marché.*
   first booking" avec « première réservation », "get booked" employé seul (le
   verbe que le lexique donne pour « vendre ») ; constant d'une feuille à
   l'autre, à confirmer.
+
+## Les trois termes de glossaire (MKT-G)
+
+Publics dès le merge de MKT-G (C72), recopiés de `docs/engine/glossaire-mkt.md`.
+
+- **Le titre du take rate** : « Take rate — taux de commission » en français
+  (le mot du produit en tête) ; l'alternative « Taux de commission — take
+  rate », sur le modèle de « Taux de closing — win rate », est gardée en
+  commentaire dans `glossary-terms.ts`.
+- **L'exemple partagé entre les pages** : les pages `take-rate` et
+  `marketplace-liquidity` disent « La place de marché de mobilier
+  d'occasion », avec l'article défini, alors que l'exemple est présenté sur la
+  page `gmv` : un lecteur arrivé par une recherche ne l'a pas lu.
+- **La deuxième étape de l'exemple du take rate** se lit mal en français :
+  « Par acheteur actif, c'est lui qui donne à une vente sa valeur pour la place
+  de marché… ».
+- **« jusqu'à ce que les demandes y trouvent preneur nettement plus souvent
+  qu'ailleurs »** (`marketplace-liquidity`, le premier levier) : la relecture
+  du texte a écarté « la plupart des demandes », qui se lisait comme une norme
+  au-dessus de 50 % ; à confirmer.
