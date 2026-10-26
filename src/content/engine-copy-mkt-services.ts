@@ -18,9 +18,12 @@ import type { ENGINE_COPY } from "./engine-copy"; // type only: erased, never a 
  *
  * Each leaf is the "produits" text of the same path with the lexicon of §22.8.4 applied and nothing else: the accords
  * follow (« nouvel acheteur » is « nouveau client », « une annonce consultée » is « un profil consulté »), the rest of
- * the sentence is the "produits" one, typography included. `io.unsupportedSetup` is the one leaf of the neutral set left as
- * it is (its « vend » is shown before anyone knows the offering; a named exception of the test). The test of §22.8.3,
- * point 5, holds that no leaf outside its excluded paths keeps a word of "produits".
+ * the sentence is the "produits" one, typography included; one sentence takes its words from the subject of the lever it
+ * speaks of instead (`mkt.assumption.money-levers-all-buyers`: « le montant moyen d'une réservation »). Three leaves of the
+ * neutral set are left as they are, named exceptions of the test: `io.unsupportedSetup` (its « vend » is shown before anyone
+ * knows the offering), and `io.mergeRefused.motions` and `table.reasons.hidden` (the SaaS's « les façons de vendre cochées »,
+ * wrong for any marketplace, « produits » included: a copy decision for the bon à tirer, `docs/engine/a23d-a-regarder.md`).
+ * The test of §22.8.3, point 5, holds that no other leaf outside its excluded paths keeps a word of "produits".
  *
  * Server only, like `engine-copy.ts`: the page resolves it with `resolveTree` and hands the island
  * `typeStrings.marketplace.services`; the island never imports this file (`engine-boundary.test.ts`).
@@ -138,10 +141,10 @@ export const ENGINE_COPY_MKT_SERVICES: { common: Overlay; demand: Overlay; suppl
           en: "A better fill rate only counts for new clients: the effect on existing clients isn't counted, so this is a minimum.",
         },
         "new-buyer-spends-average": { fr: "Un nouveau client dépense comme le client actif moyen.", en: "A new client spends like the average active client." },
-        // § 22.8.4: « panier seul » reads « montant de la réservation ».
+        // The lever it speaks of is the average booking value (`leverSubject["mkt.rev.aov"]`), not a basket: the sentence takes that subject.
         "money-levers-all-buyers": {
-          fr: "Une fréquence, un montant de la réservation ou une commission qui changent jouent sur tous les clients, dès le mois suivant.",
-          en: "A change in frequency, booking value or take rate applies to every client, from the next month.",
+          fr: "Une fréquence, un montant moyen par réservation ou une commission qui changent jouent sur tous les clients, dès le mois suivant.",
+          en: "A change in frequency, average booking value or take rate applies to every client, from the next month.",
         },
         "price-all-paid-sellers": {
           fr: "Un prix d'abonnement qui change joue sur tous les prestataires abonnés, dès le mois suivant.",

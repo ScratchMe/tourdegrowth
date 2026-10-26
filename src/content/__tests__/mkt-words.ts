@@ -238,15 +238,50 @@ export const MKT_OVERLAY_SKIPPED: { demand: readonly string[]; supply: readonly 
 const UNICODE_WHOLE = (words: string) => new RegExp(`(^|[^\\p{L}])(${words})(?!\\p{L})`, "iu");
 
 /**
- * The words of "produits" a services marketplace must no longer print (§22.8.3, point 5), whole words, case ignored: the
- * buyers' and the sellers' (« acheteur », « vendeur »), the order's and the sale's (« commande », « vente », « vend »), the
- * listing's and the basket's, the purchase's. Read in every leaf of the services fusions that no exclusion line covers, in
- * every text of the services catalogue, and by the on-screen guard of MKT-10 (§22.11.3). The French infinitives « vendre »
- * and « acheter » are in the lexicon of §22.8.4 but not in this list, which is §22.8.3's, word for word.
+ * §22.8.3's list of the words of "produits", point 5, as written there (whole words, case ignored): the buyers' and the
+ * sellers' (« acheteur », « vendeur »), the order's and the sale's (« commande », « vente », « vend »), the listing's and the
+ * basket's, the purchase's.
+ */
+const LISTED = {
+  fr: ["acheteurs?", "vendeurs?", "commandes?", "commander", "annonces?", "panier", "ventes?", "vend", "vendent", "vendue?s?", "achats?"],
+  en: ["buyers?", "sellers?", "orders?", "ordered", "listings?", "sales?", "sell", "sells", "sold", "purchases?", "basket", "buy", "buys"],
+};
+
+/**
+ * The forms the lexicon of §22.8.4 rewrites that §22.8.3's list does not name — the infinitive, the other persons, the
+ * participles, the plural basket (added after the review of MKT-S, 2026-10-26: the list is narrower than the lexicon). Each one
+ * is named, with the sentence it would betray; a form that only made absurd false alarms would have been left out.
+ */
+const LEXICON_FORMS = {
+  fr: [
+    "vendre", // « vendre » (to sell) is « être réservé »
+    "acheter", // « acheter » is « réserver »
+    "achète", // « achète » (he buys), « achètent » (they buy): the same verb, rewritten the same way
+    "achètent",
+    "achetée?s?", // « acheté », « achetée », « achetés », « achetées » (bought)
+    "commandent", // « commandent » (they order), as « commande » (he orders) is already listed
+    "commandée?s?", // « commandé », « commandée », « commandés », « commandées » (ordered)
+    "paniers", // the plural of « panier », which the list names in the singular
+  ],
+  en: [
+    "selling", // "selling" (the gerund of "sell")
+    "bought", // "bought" (the past of "buy")
+    "buying", // "buying"
+    "ordering", // "ordering" (the gerund of "order")
+    "purchased", // "purchased" (the past of "purchase")
+    "purchasing", // "purchasing"
+    "baskets", // the plural of "basket"
+  ],
+};
+
+/**
+ * The words of "produits" a services marketplace must no longer print (§22.8.3, point 5): the list of §22.8.3 and the forms of
+ * the lexicon it leaves out (`LEXICON_FORMS`). Read in every leaf of the services fusions that no exclusion line covers, in every
+ * text of the services catalogue, and by the on-screen guard of MKT-10 (§22.11.3).
  */
 export const SERVICES_BANNED: { fr: RegExp; en: RegExp } = {
-  fr: UNICODE_WHOLE("acheteurs?|vendeurs?|commandes?|commander|annonces?|panier|ventes?|vend|vendent|vendue?s?|achats?"),
-  en: UNICODE_WHOLE("buyers?|sellers?|orders?|ordered|listings?|sales?|sell|sells|sold|purchases?|basket|buy|buys"),
+  fr: UNICODE_WHOLE([...LISTED.fr, ...LEXICON_FORMS.fr].join("|")),
+  en: UNICODE_WHOLE([...LISTED.en, ...LEXICON_FORMS.en].join("|")),
 };
 
 /** The banned words a text holds in one language, as written (empty: none). */
@@ -280,4 +315,9 @@ export const MKT_SERVICES_EXCLUDED: readonly ExclusionLine[] = MKT_EXCLUDED.map(
  */
 export const SERVICES_NAMED_EXCEPTIONS: Readonly<Record<string, string>> = {
   "io.unsupportedSetup": "« comment l'entreprise vend » is shown when a file does not say its type, so before anyone knows whether it is a services marketplace: no overlay can reach it",
+  // The next two are the SaaS's own wording, inherited, and wrong for EVERY marketplace, « produits » included: « les façons de
+  // vendre cochées » names the SaaS's ticked motions (self-serve, sales-assisted), which a marketplace does not have. Not rewritten
+  // here: what a marketplace should say is a copy decision for the bon à tirer (`docs/engine/a23d-a-regarder.md`).
+  "io.mergeRefused.motions": "the SaaS's « les façons de vendre cochées » (ticked motions), wrong for any marketplace, products included; left as written until the bon à tirer decides (docs/engine/a23d-a-regarder.md)",
+  "table.reasons.hidden": "the SaaS's « ce chiffre n'est pas dans les façons de vendre cochées » (ticked motions), wrong for any marketplace, products included; left as written until the bon à tirer decides (docs/engine/a23d-a-regarder.md)",
 };

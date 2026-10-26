@@ -15,8 +15,12 @@ import type { EngineCatalogEntry, EngineDerivedEntry } from "./engine-catalog"; 
  * §22.8.4's, word for word. The rest is the "produits" prose with the lexicon of §22.8.4 applied and nothing else, except
  * three places where the lexicon would change the sense or break the sentence — « un panier » (a paid order is not a basket:
  * the first order's trap), « le logiciel vendu seul » (software sold, not a sale of the marketplace) and « the first sale's »
- * (the window of the first booking received) — which are written out, each marked below. The prose keeps the limits of the
- * SaaS's (`engine-catalog.test.ts`, `catalogRules`): name ≤ 40, one-liner ≤ 110, formula ≤ 140, trap ≤ 200, request ≤ 160.
+ * (the window of the first booking received) — which are written out, each marked below; and four places the review of
+ * 2026-10-26 corrected by hand where the lexicon left an agreement or a word undone: the date of the first booking received
+ * (`mkt.sell.first-sale`, « la première réservation payée qu'ils ont reçue »), that entry's trap (« publie son profil »),
+ * and the fill rate's two places to look (« demandes de réservation, devis ou missions » ; « un profil consulté »). The
+ * prose keeps the limits of the SaaS's (`engine-catalog.test.ts`, `catalogRules`): name ≤ 40, one-liner ≤ 110, formula ≤ 140,
+ * trap ≤ 200, request ≤ 160.
  * Server only, like `engine-catalog.ts`: the page resolves it to one language with the "produits" entry under it.
  */
 const tool = (t: Extract<SourceRef, { kind: "tool" }>["tool"]): SourceRef => ({ kind: "tool", tool: t });
@@ -275,14 +279,14 @@ export const ENGINE_CATALOG_MKT_SERVICES: Record<MktMetricId, DeepPartialTransla
         source: tool("product-db"),
         label: { fr: "Base produit", en: "Product database" },
         path: {
-          fr: "les prestataires inscrits en {cohort} et la date de leur première réservation reçue payée",
-          en: "the providers who signed up in {cohort} and the date of their first paid booking received",
+          fr: "les prestataires inscrits en {cohort} et la date de la première réservation payée qu'ils ont reçue",
+          en: "the providers who signed up in {cohort} and the date of the first paid booking they received",
         },
       },
     ],
     trap: {
-      fr: "Un prestataire qui publie sans être réservé n'est pas activé : c'est la réservation reçue qui compte, pas le profil.",
-      en: "A provider who lists without getting booked isn't activated: the booking received counts, not the profile.",
+      fr: "Un prestataire qui publie son profil sans être réservé n'est pas activé : c'est la réservation reçue qui compte, pas le profil.",
+      en: "A provider who puts up a profile without getting booked isn't activated: the booking received counts, not the profile.",
     },
     request: {
       fr: "pour les prestataires inscrits en {cohort}, combien ont reçu une première réservation payée sous {n} jours, et combien de prestataires inscrits au total",
@@ -303,15 +307,15 @@ export const ENGINE_CATALOG_MKT_SERVICES: Record<MktMetricId, DeepPartialTransla
         source: tool("product-db"),
         label: { fr: "Base produit", en: "Product database" },
         path: {
-          fr: "les demandes, réservations ou missions publiées en {month}, et celles qui ont abouti à une réservation",
-          en: "the requests, bookings or jobs posted in {month}, and those that ended in a booking",
+          fr: "les demandes de réservation, devis ou missions publiées en {month}, et celles qui ont abouti à une réservation",
+          en: "the booking requests, quotes or jobs posted in {month}, and those that ended in a booking",
         },
       },
       {
         source: tool("amplitude"),
         label: { fr: "Amplitude ou Mixpanel", en: "Amplitude or Mixpanel" },
         path: {
-          fr: "les sessions avec une recherche et une fiche consultée, et celles qui se terminent par une réservation",
+          fr: "les sessions avec une recherche et un profil consulté, et celles qui se terminent par une réservation",
           en: "the sessions with a search and a profile viewed, and those that end in a booking",
         },
       },

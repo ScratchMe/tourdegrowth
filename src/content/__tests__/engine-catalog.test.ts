@@ -304,6 +304,23 @@ describe("the marketplace's prose in the words of services (engine spec §22.4.4
     expect(SERVICES_CATALOG["mkt.sell.first-sale"]!.trap.fr).toContain("pas le profil");
   });
 
+  it("carries the four corrections of the review of 2026-10-26: the date of the first booking received, its trap, the fill rate's two places to look", () => {
+    const first = SERVICES_CATALOG["mkt.sell.first-sale"]!;
+    // The participle agrees with the booking they received, not with « la date ».
+    expect(first.where[0]!.path.fr).toBe("les prestataires inscrits en {cohort} et la date de la première réservation payée qu'ils ont reçue");
+    expect(first.where[0]!.path.en).toBe("the providers who signed up in {cohort} and the date of the first paid booking they received");
+    expect(first.trap.fr).toBe("Un prestataire qui publie son profil sans être réservé n'est pas activé\u00a0: c'est la réservation reçue qui compte, pas le profil.");
+    expect(first.trap.en).toBe("A provider who puts up a profile without getting booked isn't activated: the booking received counts, not the profile.");
+    const fill = SERVICES_CATALOG["mkt.liq.fill-rate"]!;
+    // « demandes de réservation, devis ou missions »: the sentence no longer goes round (« réservations » then « une réservation »).
+    expect(fill.where[0]!.path.fr).toBe("les demandes de réservation, devis ou missions publiées en {month}, et celles qui ont abouti à une réservation");
+    expect(fill.where[0]!.path.en).toBe("the booking requests, quotes or jobs posted in {month}, and those that ended in a booking");
+    // « un profil consulté », as the entry's trap and variant say, and the English.
+    expect(fill.where[1]!.path.fr).toBe("les sessions avec une recherche et un profil consulté, et celles qui se terminent par une réservation");
+    expect(fill.where[1]!.path.en).toBe("the sessions with a search and a profile viewed, and those that end in a booking");
+    for (const entry of [first, fill]) for (const w of entry.where) for (const lang of ["fr", "en"] as const) expect(w.path[lang], `${lang}: no « fiche », no "listing"`).not.toMatch(/\bfiche\b|\blisting\b/i);
+  });
+
   it("writes out the three places the lexicon cannot carry (the basket, the software sold, the first booking received's), each marked in the file", () => {
     // « pas un panier » is not « pas un montant de la réservation »: the clause goes, the request sent stays.
     expect(SERVICES_CATALOG["mkt.buy.first-order"]!.trap.fr).toBe("Compte une réservation payée, pas une demande envoyée. Une réservation annulée ou remboursée en entier ne compte pas.");

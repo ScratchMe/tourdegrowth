@@ -81,6 +81,14 @@ import {
  * - the services sheets handed to the island empty 2; the services catalogue built from the "products" entries, or its
  *   figures only, 3 each (the point 5 on the page's props, both languages, and `engine-props.test.ts`); the services fan-in
  *   budget at 0: 1 (`content-fan-in.test.ts`).
+ *
+ * Relance of 2026-10-26 (the list widened to the forms of the lexicon, `LEXICON_FORMS`; the review's corrections; 693 tests
+ * before each sabotage, same method): « vendre » put back in the French of `terms.window.definition` 4, "selling" in its
+ * English 4; « commandé » put back in the active-twelve-months assumption 3, "bought" in its English 3; « vendre » taken out
+ * of the widened forms 1, "selling" 1 (the « sees what it looks for » test: the leaves they would catch hold a second form);
+ * an inherited exception (`io.mergeRefused.motions`) taken off the list 5; the levers' sentence back to « un montant de la
+ * réservation » 1; and, in `engine-catalog.test.ts`, « une fiche consultée » put back in the fill rate's place to look 1, the
+ * lexicon's own date of the first booking received 1, "lists without" put back in its trap 1.
  */
 
 type Leaf = { segments: string[]; path: string; copy: Translatable };
@@ -586,17 +594,27 @@ describe("a services marketplace no longer speaks « produits » (§22.8.3, poin
       expect(servicesWordsHeld(`le ${word} ici`, "fr"), word).toEqual([word]);
       expect(servicesWordsHeld(`LE ${word.toUpperCase()}.`, "fr"), word).toEqual([word.toUpperCase()]);
     }
+    // The forms the lexicon rewrites that §22.8.3's list does not name (`LEXICON_FORMS`), each tripping the rule on its own.
+    for (const word of ["vendre", "acheter", "achète", "achètent", "acheté", "achetée", "achetés", "achetées", "commandent", "commandé", "commandée", "commandés", "commandées", "paniers"]) {
+      expect(servicesWordsHeld(`il faut ${word} ici`, "fr"), word).toEqual([word]);
+      expect(servicesWordsHeld(`IL FAUT ${word.toUpperCase()}.`, "fr"), word).toEqual([word.toUpperCase()]);
+    }
+    for (const word of ["selling", "bought", "buying", "ordering", "purchased", "purchasing", "baskets"]) {
+      expect(servicesWordsHeld(`we keep ${word} here`, "en"), word).toEqual([word]);
+    }
     for (const word of ["buyer", "buyers", "seller", "sellers", "order", "orders", "ordered", "listing", "listings", "sale", "sales", "sell", "sells", "sold", "purchase", "purchases", "basket", "buy", "buys"]) {
       expect(servicesWordsHeld(`the ${word} here`, "en"), word).toEqual([word]);
     }
     // An apostrophe and a hyphen are not letters: « l'acheteur », « cinq-vendeurs » hold the word. A letter on either side makes another word.
     expect(servicesWordsHeld("l'acheteur et le vendeur-conseil", "fr")).toEqual(["acheteur", "vendeur"]);
-    expect(servicesWordsHeld("un invendu, un commandement, la vendeuse, les acheteuses, la ventilation, une venteuse", "fr")).toEqual([]);
-    expect(servicesWordsHeld("a reseller, an overorder, in order to sell? no: the seller's", "en")).toEqual(["order", "sell", "seller"]);
-    // The words of services, and the two French infinitives the lexicon names but §22.8.3's list does not.
+    expect(servicesWordsHeld("un invendu, un commandement, la vendeuse, les acheteuses, la ventilation, une venteuse, vendredi, un achèvement", "fr")).toEqual([]);
+    expect(servicesWordsHeld("a reseller, an overorder, in order to sell? no: the seller's, reselling, reordering, a rebought share", "en")).toEqual(["order", "sell", "seller"]);
+    // The words of services.
     expect(servicesWordsHeld("clients, prestataires, réservations, profils, réserver, montant de la réservation reçue", "fr")).toEqual([]);
     expect(servicesWordsHeld("clients, providers, bookings, profiles, to book, booking received", "en")).toEqual([]);
-    expect(servicesWordsHeld("vendre ou acheter", "fr")).toEqual([]);
+    // « vendre » and « acheter » are in the lexicon of §22.8.4 and, since the review of MKT-S, in the rule.
+    expect(servicesWordsHeld("vendre ou acheter", "fr")).toEqual(["vendre", "acheter"]);
+    expect(servicesWordsHeld("selling or buying", "en")).toEqual(["selling", "buying"]);
     // « é » is a letter: a « \b » would have read « évendu » as the word « vendu ».
     expect(SERVICES_BANNED.fr.test("évendu")).toBe(false);
   });
@@ -632,8 +650,10 @@ describe("a services marketplace no longer speaks « produits » (§22.8.3, poin
     });
   }
 
-  it("names its exception one by one: `io.unsupportedSetup`, in the base, rewritten by no sheet, and still holding the word", () => {
-    expect(Object.keys(SERVICES_NAMED_EXCEPTIONS)).toEqual(["io.unsupportedSetup"]);
+  it("names its exceptions one by one: `io.unsupportedSetup` and the SaaS's two « façons de vendre cochées », in the base, rewritten by no sheet, and still holding the word", () => {
+    expect(Object.keys(SERVICES_NAMED_EXCEPTIONS)).toEqual(["io.unsupportedSetup", "io.mergeRefused.motions", "table.reasons.hidden"]);
+    // The two inherited ones are wrong for every marketplace: they wait for the bon à tirer, which the reason names.
+    for (const path of ["io.mergeRefused.motions", "table.reasons.hidden"]) expect(SERVICES_NAMED_EXCEPTIONS[path], path).toContain("a23d-a-regarder.md");
     for (const path of Object.keys(SERVICES_NAMED_EXCEPTIONS)) {
       const base = BASE_BY_PATH.get(path);
       expect(base, `${path} is not in ENGINE_COPY any more: take it off the list`).toBeDefined();
@@ -685,9 +705,15 @@ describe("a services marketplace no longer speaks « produits » (§22.8.3, poin
     expect(text(null, "mkt.funnel.firstSale", "fr").replace(/ /g, " ")).toBe("Première réservation reçue sous {n} jours");
     expect(text(null, "mkt.funnel.unmeasured.firstSale", "fr")).toBe("la première réservation reçue");
     expect(text(null, "findings.verbMkt.firstSale", "fr")).toBe("reçoivent une première réservation");
-    // « un panier » of the levers' sentence reads « un montant de la réservation » (§22.8.4: « panier seul »).
-    expect(text(null, "mkt.assumption.money-levers-all-buyers", "fr")).toContain("un montant de la réservation");
+    // The levers' sentence names the average booking value as the lever's own subject does (the lever is the average order
+    // value, not a basket): « un montant moyen par réservation », "average booking value".
+    expect(text(null, "mkt.assumption.money-levers-all-buyers", "fr")).toBe("Une fréquence, un montant moyen par réservation ou une commission qui changent jouent sur tous les clients, dès le mois suivant.");
+    expect(text(null, "mkt.assumption.money-levers-all-buyers", "en")).toBe("A change in frequency, average booking value or take rate applies to every client, from the next month.");
     expect(text(null, "leverSubject.mkt.rev.aov", "fr")).toBe("le montant moyen d'une réservation");
+    expect(text(null, "leverSubject.mkt.rev.aov", "en")).toBe("the average booking value");
+    expect(text(null, "mkt.assumption.money-levers-all-buyers", "en")).toContain(text(null, "leverSubject.mkt.rev.aov", "en").replace(/^the /, ""));
+    expect(text(null, "mkt.assumption.money-levers-all-buyers", "fr")).toContain("montant moyen");
+    expect(text(null, "mkt.assumption.money-levers-all-buyers", "fr")).not.toContain("panier");
     // « vendre », « vend » : être réservé, reçoit une réservation.
     expect(text(null, "terms.window.definition", "fr")).toContain("être réservé en 60");
     expect(text(null, "terms.window.definition", "en")).toContain("get booked within 60");
@@ -713,10 +739,10 @@ describe("a services marketplace no longer speaks « produits » (§22.8.3, poin
     }
   });
 
-  it("leaves the named exception, and what the setup card reads before a type is known, as « produits » wrote it", () => {
+  it("leaves the named exceptions, and what the setup card reads before a type is known, as « produits » wrote it", () => {
     for (const side of [...SIDES, null] as const) {
       const set = new Map(readSet("services", side).map((l) => [l.path, l]));
-      expect(set.get("io.unsupportedSetup")!.copy).toEqual(BASE_BY_PATH.get("io.unsupportedSetup")!.copy);
+      for (const path of Object.keys(SERVICES_NAMED_EXCEPTIONS)) expect(set.get(path)!.copy, path).toEqual(BASE_BY_PATH.get(path)!.copy);
     }
     // `start.*` is excluded (the card names both vocabularies and never goes through the services words).
     for (const side of [...SIDES, null] as const) {
