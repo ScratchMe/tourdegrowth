@@ -50,7 +50,7 @@ import { LEVEL_TEASERS } from "../src/content/game/hub";
  * What this file writes down that the spec leaves to the unit tests: the
  * inspection's stamp (« Inspection · €375,000 ») is read on the news screen,
  * where it lands; the pill's coral is read as the class that paints it
- * (`__over` on the pill, `__alert` in the action bar), because the spec says
+ * (`over` on the pill, `alert` in the action bar), because the spec says
  * « en alerte » and the markup says it only there; and « the short form fits on
  * one line at 390 px » (§20.7: « si la capture la montre sur deux lignes,
  * s'arrêter ») is measured as the number of lines the text takes.

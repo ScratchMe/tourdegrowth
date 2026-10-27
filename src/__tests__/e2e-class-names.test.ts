@@ -16,9 +16,10 @@ import { moduleClass, moduleClassRe } from "../../e2e/module-class";
  * gives, through `moduleClass` and `moduleClassRe` (`e2e/module-class.ts`),
  * and no other file knows how that name is written.
  *
- * The three rules below are the shapes that broke. `e2e/module-class.ts` is
- * the only file allowed to hold them: it is the one place that says how a
- * local name becomes a selector.
+ * The rules below are the shapes that broke, and the ones next to them (an
+ * attribute selector with another operator, a name tested by hand in an
+ * `evaluate`). `e2e/module-class.ts` is the only file allowed to hold them: it
+ * is the one place that says how a local name becomes a selector.
  *
  * Non-vacuity (2026-10-27), one sabotage at a time, the file put back after
  * each, of 17 tests: `[class*='__value']` back in a spec fails exactly 1 (the
@@ -40,7 +41,7 @@ function walk(dir: string): string[] {
   return readdirSync(dir).flatMap((name) => {
     const full = join(dir, name);
     if (statSync(full).isDirectory()) return walk(full);
-    return name.endsWith(".ts") ? [full] : [];
+    return /\.[cm]?[jt]sx?$/.test(name) ? [full] : [];
   });
 }
 
@@ -54,8 +55,12 @@ interface Rule {
 
 const RULES: Rule[] = [
   { name: "a module prefix (`-module__`)", pattern: /-module__/ },
-  { name: "an attribute selector on `class` (`class*=`, `class$=`, `class^=`)", pattern: /class[*$^]=/ },
-  { name: "`toHaveClass(/__…/)`, a separator that is the tool's", pattern: /toHaveClass\(\s*\/__/ },
+  // `class*=`, `class$=`, `class^=`, and the ones nobody wrote yet (`class~=`, `class|=`, an exact `[class=…]`), spaces allowed.
+  { name: "an attribute selector on `class` (`class*=`, `class$=`, `class^=`…)", pattern: /class\s*[*$^~|]=|\[\s*class\s*=/ },
+  // A regular expression, or a string, with an underscore in it: `/__secondary/`, `/_secondary/`, `"x_secondary"`.
+  { name: "`toHaveClass` with a pattern that holds an underscore, the tool's separator", pattern: /toHaveClass\(\s*(?:\/[^/\n]*|["'`][^"'`\n]*)_/ },
+  // What an `evaluate` writes when it tests a name by hand: `String(el.className).includes("alert")`.
+  { name: "a test of a name read from `className` or `classList`", pattern: /\b(?:className|classList)\b.*\.(?:includes|contains|match|startsWith|endsWith|indexOf|some|find|test)\(/ },
 ];
 
 /** The lines of `source` that break `rule`, as `file:line: text`. */
@@ -85,6 +90,13 @@ describe("e2e specs and the shape of a CSS-module class name", () => {
       `const QUIET = '[class*="Button-module__"][class*="__quiet"]';`,
       `await expect(retake).toHaveClass(/__secondary/);`,
       `await expect(charge(page)).not.toHaveClass(/__over\\b/);`,
+      `await expect(retake).toHaveClass(/_secondary/);`,
+      `await expect(retake).toHaveClass("G1PnAW_secondary");`,
+      `locator("[class~='tick']")`,
+      `locator('[ class *= "tick" ]')`,
+      `locator('[class="x"]')`,
+      `alert: String(li.className).includes("alert"),`,
+      `const hot = el.classList.contains("alert");`,
     ];
     const letThrough = [
       `locator(moduleClass("value"))`,
@@ -92,6 +104,9 @@ describe("e2e specs and the shape of a CSS-module class name", () => {
       `await expect(status).toHaveClass(/tdg-visually-hidden/);`,
       `page.locator('[data-testid="stage-scores"] > li')`,
       `getAttribute("class")`,
+      `await expect(status).toHaveClass("tdg-visually-hidden");`,
+      `offenders.push(\`\${el.className || el.tagName.toLowerCase()} (\${lines.length} lines)\`);`,
+      `const hot = el.matches(selector);`,
     ];
     for (const line of caught) {
       expect(RULES.some((rule) => findings("x.ts", line, rule).length > 0), line).toBe(true);
