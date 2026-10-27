@@ -2,6 +2,7 @@ import type { Page } from "@playwright/test";
 import type { EngineState } from "../src/lib/engine/types";
 import { exampleState, filmState, hybridLossState, hybridNoMarginState, hybridState, measured as entry, noMarginState, ratio, salesAssistedState, withEntry } from "../src/lib/engine/__tests__/fixtures";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, readEachOnScreen, SKIP_ADMIN_REASON, test } from "./helpers";
+import { moduleClass } from "./module-class";
 import { engineSeed } from "./engine-helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
@@ -112,7 +113,7 @@ for (const locale of ["fr", "en"] as const) {
         const slide = page.locator('[data-slide="unit-economics"]');
         await expect(slide.locator("h3").first()).toContainText(locale === "fr" ? "on perd ~400 € sur chacun" : "we lose ~€400 on each one");
         // Ink, never red (C53): the title carries no accent span.
-        await expect(slide.locator('h3 [class*="accent"]')).toHaveCount(0);
+        await expect(slide.locator(`h3 ${moduleClass("accent")}`)).toHaveCount(0);
         await expect(slide.locator('[data-testid^="slide-figure-"]')).toHaveCount(6);
         await expect(slide.getByTestId("slide-figure-after")).toContainText(locale === "fr" ? "–4 mois" : "–4 months");
         await expect(slide.getByTestId("slide-figure-cash")).toContainText(locale === "fr" ? "ne revient pas toute" : "does not all come back");
@@ -220,7 +221,7 @@ for (const locale of ["fr", "en"] as const) {
         await expect(slide.locator("h3").first()).toHaveText(
           locale === "fr" ? "Libre-service : on perd ~400 € par nouveau client. Assisté : remboursé en 13 mois." : "Self-serve: we lose ~€400 on each new customer. Sales-assisted: paid back in 13 months.",
         );
-        await expect(slide.locator('h3 [class*="accent"]')).toHaveCount(0);
+        await expect(slide.locator(`h3 ${moduleClass("accent")}`)).toHaveCount(0);
         for (const motion of ["plg", "slg"] as const) await expect(slide.getByTestId(`slide-unit-${motion}`).locator('[data-testid^="slide-figure-"]')).toHaveCount(5);
         await expect(slide.getByTestId("slide-payback-chart-plg")).toHaveAttribute("data-story", "loss");
         await expect(slide.getByTestId("slide-payback-chart-slg")).toHaveAttribute("data-story", "pays-back");

@@ -1,5 +1,6 @@
 import type { Page } from "@playwright/test";
 import { expect, test, trackedEvents } from "./helpers";
+import { moduleClass } from "./module-class";
 import {
   LEVEL_PATH,
   acceptResume,
@@ -81,7 +82,7 @@ const C: Fixture = {
 
 /** The figure a tile shows — its value span, not the tile, which also prints targets and deltas. */
 function tileValue(page: Page, testId: string) {
-  return page.getByTestId(testId).locator("[class*='__value']").first();
+  return page.getByTestId(testId).locator(moduleClass("value")).first();
 }
 
 /**

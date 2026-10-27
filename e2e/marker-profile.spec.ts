@@ -1,5 +1,6 @@
 import type { Page } from "@playwright/test";
 import { expect, test } from "./helpers";
+import { moduleClass } from "./module-class";
 
 /**
  * Design I + B, the result's half (retained by Antoine on 2026-09-28): the
@@ -19,15 +20,15 @@ const WIDTHS = [
 
 /** Every meter's track and fill, in page pixels. */
 async function meters(page: Page, scope: string) {
-  return page.evaluate((scope) => {
+  return page.evaluate(({ scope, figure }) => {
     return [...document.querySelectorAll(`${scope} [data-testid="stage-meter"]`)].map((track) => {
       const t = track.getBoundingClientRect();
       const f = track.firstElementChild!.getBoundingClientRect();
       const row = track.closest("li")!;
-      const score = Number(row.querySelector('[class*="figure"]')!.textContent);
+      const score = Number(row.querySelector(figure)!.textContent);
       return { score, track: t.width, fill: f.width, hidden: track.getAttribute("aria-hidden") };
     });
-  }, scope);
+  }, { scope, figure: moduleClass("figure") });
 }
 
 for (const { width, locale } of WIDTHS) {
@@ -47,10 +48,10 @@ for (const { width, locale } of WIDTHS) {
       await expect(marker).toContainText("74");
       await expect(marker).toContainText("/100");
 
-      const geo = await block.evaluate((el) => {
+      const geo = await block.evaluate((el, selectors) => {
         const m = el.querySelector('[data-variant="marker"]')!.getBoundingClientRect();
-        const name = el.querySelector('[class*="pillar"]') as HTMLElement;
-        const head = name.closest('[class*="head"]')!.getBoundingClientRect();
+        const name = el.querySelector(selectors.pillar) as HTMLElement;
+        const head = name.closest(selectors.head)!.getBoundingClientRect();
         const verdict = el.querySelector('[data-testid="score-verdict"]')!.getBoundingClientRect();
         return {
           markerRight: m.right,
@@ -63,7 +64,7 @@ for (const { width, locale } of WIDTHS) {
           verdictWidth: verdict.width,
           blockWidth: el.getBoundingClientRect().width,
         };
-      });
+      }, { pillar: moduleClass("pillar"), head: moduleClass("head") });
       expect(geo.nameLeft, "the name stands beside the marker, not under it").toBeGreaterThan(geo.markerRight);
       expect(geo.nameOverflow).toBeLessThanOrEqual(0);
       expect(geo.nameRight).toBeLessThanOrEqual(geo.headRight + 0.5);
@@ -88,12 +89,12 @@ for (const { width, locale } of WIDTHS) {
 
       // The flag stands over the retention column — the third of five — and
       // that column is the highest climb.
-      const geo = await profile.evaluate((el) => {
+      const geo = await profile.evaluate((el, labelsSelector) => {
         const plot = el.querySelector("svg")!.getBoundingClientRect();
         const flag = el.querySelector('[data-hot="true"]')!.getBoundingClientRect();
-        const labels = [...el.querySelectorAll('[class*="labels"] > span')].map((s) => s.textContent);
+        const labels = [...el.querySelectorAll(labelsSelector)].map((s) => s.textContent);
         return { column: Math.floor(((flag.left + flag.width / 2 - plot.left) / plot.width) * 5), labels };
-      });
+      }, `${moduleClass("labels")} > span`);
       expect(geo.column).toBe(2);
       expect(geo.labels).toEqual(["Acq.", "Act.", "Ret.", "Ref.", "Rev."]);
 

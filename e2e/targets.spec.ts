@@ -1,4 +1,5 @@
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, openFold, seedOwnedResult, SKIP_ADMIN_REASON, test } from "./helpers";
+import { moduleClass } from "./module-class";
 import type { Page } from "@playwright/test";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import { exampleState, hybridState } from "../src/lib/engine/__tests__/fixtures";
@@ -227,7 +228,9 @@ test("a trigger inside question copy takes a 44px tap without covering an answer
  * six others pass. Against main's build (before this change) the hover test
  * fails too — the quiet button had no hover.
  */
-const QUIET = '[class*="Button-module__"][class*="__quiet"]';
+/** A Button, drawn on a link or on a button: the recipe's `button` class (`Button.tsx`), whatever the tool writes around it. */
+const BUTTON = `:is(a, button)${moduleClass("button")}`;
+const QUIET = `${BUTTON}${moduleClass("quiet")}`;
 
 /** Indices of the buttons matching `sel` a person can see (a hidden nav link has no box). */
 async function visibleTargets(page: Page, sel: string): Promise<number[]> {
@@ -444,7 +447,7 @@ test("a quiet link answers the pointer: ink and a heavier underline on hover, th
  * three tests below, on claim 1 (strips of 39.5, 40 and 39.75px); the nine
  * others pass.
  */
-const SMALL = '[class*="Button-module__"][class*="__sm"]:not([class*="__quiet"])';
+const SMALL = `${BUTTON}${moduleClass("sm")}:not(${moduleClass("quiet")})`;
 
 /** Still the compact box: 39px, not grown to 44. */
 const SMALL_LOOK: Look = { what: "the compact box", max: 40, oneLine: 44 };
@@ -503,13 +506,13 @@ test.describe("the small button on the owner's result", () => {
  * falls (« LTV — Lifetime Value », vertical strip), the six others pass.
  */
 const STRIPPED: { where: string; path: string; sel: string; look: Look; minimum: number }[] = [
-  { where: "the space band's pills", path: "/en", sel: 'a[class*="SpaceBand-module__"][class*="__pill"]', look: { what: "a 28px pill", max: 30, oneLine: 44 }, minimum: 1 },
-  { where: "the wordmark", path: "/en", sel: 'a[class*="WordmarkLink-module__"][class*="__link"]', look: { what: "the wordmark", max: 24, oneLine: 44 }, minimum: 1 },
-  { where: "a glossary term's way back", path: "/en/glossary/cac", sel: 'a[class*="__backLink"]', look: { what: "a line of text", max: 24, oneLine: 40 }, minimum: 1 },
-  { where: "a glossary term's related terms", path: "/en/glossary/cac", sel: 'a[class*="__relatedLink"]', look: { what: "a line of text", max: 24, oneLine: 40 }, minimum: 3 },
-  { where: "the stages of « how it works »", path: "/fr/how-it-works", sel: 'a[class*="__pillarLink"]', look: { what: "a heading", max: 26, oneLine: 40 }, minimum: 5 },
-  { where: "the comparisons of « how it works »", path: "/fr/how-it-works", sel: 'a[class*="__comparisonLink"]', look: { what: "a 38px chip", max: 40, oneLine: 44 }, minimum: 4 },
-  { where: "the stages of the checklist", path: "/fr/growth-audit-checklist", sel: 'a[class*="__pillarLink"]', look: { what: "a 41px heading", max: 42, oneLine: 50 }, minimum: 5 },
+  { where: "the space band's pills", path: "/en", sel: `[data-stop] a${moduleClass("pill")}`, look: { what: "a 28px pill", max: 30, oneLine: 44 }, minimum: 1 },
+  { where: "the wordmark", path: "/en", sel: `a[aria-label="Tour de Growth"]${moduleClass("link")}`, look: { what: "the wordmark", max: 24, oneLine: 44 }, minimum: 1 },
+  { where: "a glossary term's way back", path: "/en/glossary/cac", sel: `a${moduleClass("backLink")}`, look: { what: "a line of text", max: 24, oneLine: 40 }, minimum: 1 },
+  { where: "a glossary term's related terms", path: "/en/glossary/cac", sel: `a${moduleClass("relatedLink")}`, look: { what: "a line of text", max: 24, oneLine: 40 }, minimum: 3 },
+  { where: "the stages of « how it works »", path: "/fr/how-it-works", sel: `a${moduleClass("pillarLink")}`, look: { what: "a heading", max: 26, oneLine: 40 }, minimum: 5 },
+  { where: "the comparisons of « how it works »", path: "/fr/how-it-works", sel: `a${moduleClass("comparisonLink")}`, look: { what: "a 38px chip", max: 40, oneLine: 44 }, minimum: 4 },
+  { where: "the stages of the checklist", path: "/fr/growth-audit-checklist", sel: `a${moduleClass("pillarLink")}`, look: { what: "a 41px heading", max: 42, oneLine: 50 }, minimum: 5 },
   // A16 (extension 05): the landing's stage names are the links now, in rows 44px apart.
   { where: "the stage names of the landing's preview", path: "/fr", sel: '[data-testid="preview-scores"] a', look: { what: "a line of mono text", max: 24, oneLine: 40 }, minimum: 5 },
 ];

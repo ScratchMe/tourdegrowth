@@ -2,6 +2,7 @@ import type { Page } from "@playwright/test";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { getSubmissionById } from "@/lib/submissions/repository";
 import { expect, seedOwnedResult, test, trackedEvents } from "./helpers";
+import { moduleClass, moduleClassRe } from "./module-class";
 import { EMULATOR_HOST, REAL_DEEP_DIVE, REAL_RESULTS, SENTINEL, SKIP_EMULATOR_REASON } from "./real-results";
 
 /**
@@ -111,7 +112,7 @@ test.describe("a visitor's view of a clear bottleneck", () => {
     const block = page.getByTestId("bottleneck");
     await expect(block).toBeVisible();
     await expect(block).toContainText("Retention");
-    await expect(page.locator('[class*="slotScore"]')).toContainText(String(clear.total));
+    await expect(page.locator(moduleClass("slotScore"))).toContainText(String(clear.total));
 
     const move = page.getByTestId("priority-move");
     await expect(move).toBeVisible();
@@ -266,7 +267,7 @@ test.describe("the other two states of the bottleneck block", () => {
 
   test("a level board names no stage, and carries no game card", async ({ page }) => {
     await page.goto(`/r/${level.id}?lang=fr`);
-    await expect(page.locator('[class*="slotScore"]')).toContainText(String(level.total));
+    await expect(page.locator(moduleClass("slotScore"))).toContainText(String(level.total));
     const block = page.getByTestId("bottleneck");
     await expect(block).toBeVisible();
     for (const stage of ["Acquisition", "Activation", "Retention", "Referral", "Revenue"]) {
@@ -292,8 +293,10 @@ test.describe("the score sheet's red follows the bottleneck (C34)", () => {
   async function redRows(page: Page) {
     const sheet = page.getByTestId("stage-scores");
     await sheet.waitFor();
-    return sheet.evaluate((ol) =>
-      [...ol.querySelectorAll(':scope > li[class*="alert"] [class*="name"]')].map((n) => (n.firstChild?.textContent ?? "").trim()),
+    // The selector is built here and handed in: the browser's side cannot import `moduleClass`.
+    return sheet.evaluate(
+      (ol, selector) => [...ol.querySelectorAll(selector)].map((n) => (n.firstChild?.textContent ?? "").trim()),
+      `:scope > li${moduleClass("alert")} ${moduleClass("name")}`,
     );
   }
 
@@ -311,7 +314,7 @@ test.describe("the score sheet's red follows the bottleneck (C34)", () => {
 
 /** Every visible filled button — the Button recipe's `primary` class, whatever the element. */
 function visiblePrimaries(page: Page) {
-  return page.locator('a[class*="__primary"]:visible, button[class*="__primary"]:visible');
+  return page.locator(`a${moduleClass("primary")}:visible, button${moduleClass("primary")}:visible`);
 }
 
 /** Cumulative layout shift since navigation, as the browser counts it (`layout-shift` entries, no input). */
@@ -349,7 +352,7 @@ test.describe("the owner's primary is sharing (C16)", () => {
         await page.reload();
         const retake = page.getByTestId("take-again-cta");
         await expect(retake).toBeVisible();
-        await expect(retake).toHaveClass(/__secondary/);
+        await expect(retake).toHaveClass(moduleClassRe("secondary"));
         await expect(retake).toHaveText(tc(UI_STRINGS.result.ctaAgain, locale));
 
         const primaries = visiblePrimaries(page);
@@ -375,7 +378,7 @@ test.describe("the owner's primary is sharing (C16)", () => {
     const primaries = visiblePrimaries(page);
     await expect(primaries).toHaveCount(1);
     await expect(primaries.first()).toHaveAttribute("data-testid", "own-tour-cta");
-    await expect(page.getByTestId("share-button")).toHaveClass(/__secondary/);
+    await expect(page.getByTestId("share-button")).toHaveClass(moduleClassRe("secondary"));
     const share = (await page.getByTestId("share-card").boundingBox())!;
     const cta = (await own.boundingBox())!;
     expect(share.y).toBeGreaterThan(cta.y);
