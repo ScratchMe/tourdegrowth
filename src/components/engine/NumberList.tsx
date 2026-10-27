@@ -7,6 +7,12 @@ import styles from "./NumberList.module.css";
 export interface NumberRow {
   /** The catalogue id. */
   id: string;
+  /**
+   * Extension 10: the row's side, in words (« Acheteurs »), before its name: plain words in a fixed column, never a Tag
+   * (a Tag is a status here) and never a colour (a colour would set the sides apart as rivals). On a phone it sits
+   * on its own line above the name.
+   */
+  side?: ReactNode;
   name: ReactNode;
   /** The figure, the range or the words as the person gave them; omitted when there are none. */
   value?: ReactNode;
@@ -42,6 +48,8 @@ export interface NumberStage {
 export interface NumberListProps {
   /** « Tes chiffres ». */
   title: ReactNode;
+  /** Extension 10: one line under the title (the marketplace says the list holds both sides, and which one its red follows). */
+  lead?: ReactNode;
   /** An EngineProgress (md) under the title. */
   progress?: ReactNode;
   stages: NumberStage[];
@@ -58,6 +66,7 @@ function Row({ row }: { row: NumberRow }) {
   const tone = TAG_TONE[row.status];
   const content = (
     <>
+      {row.side ? <span className={styles.side}>{row.side}</span> : null}
       <span className={styles.name}>{row.name}</span>
       {row.value ? (
         <span className={styles.value} data-kind={row.valueKind ?? "number"} data-testid={testId ? `${testId}-value` : undefined}>
@@ -105,13 +114,19 @@ function Row({ row }: { row: NumberRow }) {
  * the list. A found number shows its value and no tag: the value is the
  * status. Pending states (asked, to do) wear the dashed tag, the others the
  * neutral one.
+ *
+ * Extension 10 (a marketplace): a row may say its side, in words before its
+ * name, and the title may carry one line under it (`lead`). The stages mix
+ * the sides, one list by stage; the one signalled stage follows the side the
+ * board shows. Without `side` and `lead` the list draws exactly as it did.
  */
-export function NumberList({ title, progress, stages, extra, headingId = "engine-numbers", "data-testid": testId }: NumberListProps) {
+export function NumberList({ title, lead, progress, stages, extra, headingId = "engine-numbers", "data-testid": testId }: NumberListProps) {
   return (
     <section className={styles.root} aria-labelledby={headingId} data-testid={testId}>
       <h2 id={headingId} className={styles.title}>
         {title}
       </h2>
+      {lead ? <p className={styles.lead}>{lead}</p> : null}
       {progress ?? null}
       {stages.map((stage) => (
         <section

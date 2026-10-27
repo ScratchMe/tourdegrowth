@@ -1,0 +1,31 @@
+/*
+ * SideShown — design system extension 10 (design/ds-extension-10-return/
+ * components/engine/SideShown), ported by A23 MKT-7a. Tokens only.
+ *
+ * The side selector opens the side's part of the board: a hard rule above it
+ * (the shared part ends), the selector — the label and the Segmented are a
+ * Field group's, as the hybrid's « Moteur affiché » are — then the side's
+ * name.
+ */
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  max-width: var(--engine-measure);
+  padding-top: var(--space-10);
+  border-top: var(--market-side-rule);
+}
+
+.title {
+  margin: var(--space-5) 0 0;
+  font: var(--display-section);
+  letter-spacing: var(--display-letter-spacing);
+  color: var(--text-body);
+}
+
+.note {
+  margin: 0;
+  max-width: var(--measure-read);
+  font: var(--body-sm);
+  color: var(--text-muted);
+}

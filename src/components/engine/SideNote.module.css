@@ -1,0 +1,55 @@
+/*
+ * SideNote — design system extension 10 (design/ds-extension-10-return/
+ * components/engine/SideNote), ported by A23 MKT-7a. Tokens only.
+ *
+ * Absent by design (ink, no frame) or not yet (the system's dashed edge).
+ * Never red, never a « ? » box.
+ */
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  max-width: var(--engine-measure);
+}
+
+.absent {
+  padding-top: var(--space-7);
+  border-top: var(--border-rule);
+}
+
+.pending {
+  padding: var(--space-8) var(--space-9);
+  border: var(--engine-pending-edge);
+  border-radius: var(--radius-panel);
+}
+
+.title {
+  margin: 0;
+  font: var(--title-card);
+  color: var(--text-body);
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-width: var(--measure-read);
+  font: var(--body-md);
+  color: var(--text-body);
+}
+
+.body p {
+  margin: 0;
+}
+
+.action {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+@media (max-width: 760px) {
+  .pending {
+    padding: var(--space-7);
+  }
+}

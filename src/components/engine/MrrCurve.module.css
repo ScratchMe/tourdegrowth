@@ -150,3 +150,48 @@
   font: var(--slide-meta);
   gap: var(--space-2) var(--space-10);
 }
+
+/*
+ * Extension 10 (design/ds-extension-10-return/components/engine/MrrCurve, the
+ * delta; A23 MKT-7a): the jump at month 1 (`step`) and the line that says it
+ * (`note`). Rules added, none changed. No red: the ring is ink.
+ */
+
+.step {
+  fill: var(--surface-card);
+  stroke: var(--money-line-whatif);
+  stroke-width: var(--market-step-ring);
+}
+
+.note {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  max-width: var(--measure-read);
+  margin: 0;
+  font: var(--meta-sm);
+  color: var(--text-body);
+}
+
+/* The note's ring is the plot's: the same mark, said in words. */
+.noteStep::before {
+  content: "";
+  flex: none;
+  box-sizing: border-box;
+  width: 12px;
+  height: 12px;
+  border: var(--market-step-ring) solid var(--money-line-whatif);
+  border-radius: var(--radius-round);
+  background: var(--surface-card);
+  transform: translateY(1px);
+}
+
+.slide .note {
+  font: var(--slide-meta);
+  gap: 12px;
+}
+
+.slide .noteStep::before {
+  width: 18px;
+  height: 18px;
+}
