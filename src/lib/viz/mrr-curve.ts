@@ -52,6 +52,12 @@ export interface MrrCurveGeometry {
   level: { x1: number; x2: number; y: number };
   /** Today's MRR, the curve's only figure: under the start when the MRR grows, over it when it shrinks. */
   start: { x: number; y: number; labelY: number };
+  /**
+   * Month 1 of the what-if line, where a money lever's jump is ringed (extension 10): `x(1)` and the middle of the
+   * what-if's range at month 1 (`y(mid(whatif[1]))`). The point is the line's own, not the drawn path's rounded
+   * vertex. Null without a what-if.
+   */
+  step: { x: number; y: number } | null;
   /** The three months under the axis: today, in six months, in twelve. */
   ticks: [number, number, number];
   tickY: number;
@@ -152,6 +158,7 @@ export function mrrCurveGeometry({ today, whatif, width, height, compact, slide 
     gain,
     level: { x1: L, x2: R, y: y0 },
     start: { x: x(0) + P.startDx, y: y0, labelY: y0 + (rising ? P.startBelow : P.startAbove) },
+    step: whatif ? { x: x(1), y: y(mid(whatif[1]!)) } : null,
     ticks: [x(0), x(6), x(12)],
     tickY: height - P.tickBaseline,
     keys,
