@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useState, type ReactNode } from "react";
 import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
+import type { StartOffering } from "@/components/engine/EngineStart";
 import type { AppMonetization } from "@/lib/engine/app-model";
 import { METRIC_SHAPES, SLG_METRIC_SHAPES, TEXT_LIMITS, shapeOf } from "@/lib/engine/catalog-shape";
-import { DEFAULT_APP_MONETIZATION, isApp, monetizationOf } from "@/lib/engine/setup-type";
+import { DEFAULT_APP_MONETIZATION, isApp, isMarketplace, MKT_DEFAULTS, monetizationOf, mktSetup } from "@/lib/engine/setup-type";
 import type { EngineStrings } from "@/lib/engine/strings";
-import type { BusinessType, Currency, EngineSetup, MetricId, Motion, SharedCount, ToolId, YearMonth } from "@/lib/engine/types";
+import type { BusinessType, Currency, EngineMotion, EngineSetup, MetricId, MktSide, Motion, SharedCount, ToolId, YearMonth } from "@/lib/engine/types";
 import { savedTools, teamTools, toolFamiliesFor } from "@/lib/engine/tools";
 import { SETUP_V2_DEFAULTS } from "@/lib/engine/types";
 import type { StoredResult } from "@/lib/quiz/storage";
@@ -27,8 +28,8 @@ import { TextField } from "@/components/core/TextField";
 import { monthsEndingAt } from "@/lib/forms/date";
 import { isUnreadableNumber } from "@/lib/forms/number";
 import { moneyUnit, percentUnit, wordUnit } from "./sources";
-import { DEFAULT_CURRENCY, DEFAULT_WINDOWS, pickedType, setupOfCard } from "./start";
-import { streamChanges } from "./stream-lines";
+import { cohortWindowOf, DEFAULT_CURRENCY, DEFAULT_WINDOWS, motionsForCard, pickedType, setupOfCard, type MktStart } from "./start";
+import { sellerSubscriptionChange, streamChanges } from "./stream-lines";
 import { EngineTerm } from "./EngineTerm";
 import styles from "./Screens.module.css";
 
@@ -38,6 +39,12 @@ type Window = (typeof WINDOWS)[number];
 const MOTIONS: readonly Motion[] = ["plg", "slg"];
 /** A consumer app sells self-serve only (§21.1 D1): its motions are never a choice. */
 const APP_MOTIONS: Record<Motion, boolean> = { plg: true, slg: false };
+/** A marketplace ticks no motion: its own is derived (§22.1 D1, §22.3), so the card has no such choice either. */
+const MKT_MOTIONS: Record<Motion, boolean> = { plg: false, slg: false };
+/** What a marketplace's three windows offer, and the order they are listed in (§22.2.1). */
+const FIRST_ORDER_WINDOWS = [7, 30, 90] as const;
+const REPEAT_WINDOWS = [60, 90, 180] as const;
+const FIRST_SALE_WINDOWS = [30, 60, 90] as const;
 /** The app's three ways of earning, in the order the card lists them. */
 const STREAMS = ["subscriptions", "purchases", "ads"] as const;
 
@@ -54,10 +61,11 @@ export interface SetupChoice {
 /**
  * What the settings show of the numbers (A18 T3.d), labelled by the caller,
  * which has the catalogue: the targets, one group per motion ticked (`title`
- * only in the hybrid), and the shared counts (`settingsSharedCounts`).
+ * only in the hybrid) or, for a marketplace, one per side (`side`, always
+ * titled: §22.6.1), and the shared counts (`settingsSharedCounts`).
  */
 export interface SettingsNumbers {
-  targets: { motion: Motion; title: string | null; boxes: { id: MetricId; label: string; hint: string; value: number | null }[] }[];
+  targets: { motion: EngineMotion; side?: MktSide; title: string | null; boxes: { id: MetricId; label: string; hint: string; value: number | null }[] }[];
   shared: { count: SharedCount; label: string; hint: string; value: number | null }[];
 }
 
@@ -92,6 +100,7 @@ export function Setup({
   openTypes,
   startType,
   startMonetization,
+  startMkt,
   startMotions,
   initial,
   existing,
@@ -103,10 +112,12 @@ export function Setup({
 }: {
   strings: EngineStrings;
   /**
-   * The words of a type (§21.8.1): the card reads `stringsFor(type)` for every text, the type being the one it shows now, so
-   * choosing the app on the full card puts its words on the card at once. Absent: `strings`, as before the app.
+   * The words of a type (§21.8.1): the card reads `stringsFor(type, offering)` for every text, the type being the one it shows
+   * now, so choosing the app on the full card puts its words on the card at once, and the marketplace's offering, which it
+   * chooses on this very card (§22.8.1), the words of products or of services; the card speaks for neither side, it passes none.
+   * Absent: `strings`, as before the app.
    */
-  stringsFor?: (type: BusinessType) => EngineStrings;
+  stringsFor?: (type: BusinessType, offering?: StartOffering, side?: MktSide | null) => EngineStrings;
   locale: "en" | "fr";
   today: Date;
   tour: StoredResult | null;
@@ -117,6 +128,8 @@ export function Setup({
   startType?: BusinessType;
   /** Before an engine exists: what the app earns from, as the start screen had it (the subscriptions alone absent). */
   startMonetization?: AppMonetization;
+  /** Before an engine exists: what the marketplace asks (its words, whether the sellers pay), as the start screen had it (products, unpaid, absent). */
+  startMkt?: MktStart;
   /** Before an engine exists: the answer the start screen had chosen, which the card opens on. */
   startMotions?: Record<Motion, boolean>;
   /**
@@ -131,6 +144,10 @@ export function Setup({
     paid: boolean;
     qualification: boolean;
     goLive: boolean;
+    /** A marketplace's three windows (§22.6.1): its first order and its second one entered, and its first sale or its sellers' paid conversion. */
+    firstOrder: boolean;
+    repeat: boolean;
+    firstSale: boolean;
     any: boolean;
     entered: Record<Motion, number>;
     /** The numbers entered, anything but « à faire » (§21.6.2): what unticking a way of earning would hide. */
@@ -155,7 +172,11 @@ export function Setup({
   // start screen's choice, changed here. Every text below is its type's.
   const [type, setType] = useState<BusinessType>(initial?.setup.type ?? startType ?? SETUP_V2_DEFAULTS.type);
   const app = isApp({ type });
-  const strings = stringsFor ? stringsFor(type) : baseStrings;
+  const marketplace = isMarketplace({ type });
+  // A marketplace's own settings (§22.6.1): the saved engine's, else the start screen's, else the defaults (D9, D10, D11).
+  const saved = initial ? mktSetup(initial.setup) : null;
+  const [offering, setOffering] = useState<StartOffering>(saved?.offering ?? startMkt?.offering ?? MKT_DEFAULTS.offering);
+  const strings = stringsFor ? stringsFor(type, offering) : baseStrings;
   const s = strings.setup;
   // On arrival: neither changes while the card is on screen, so the person's one move is made once.
   useEffect(() => {
@@ -167,11 +188,15 @@ export function Setup({
   const [activation, setActivation] = useState<EngineSetup["activationWindowDays"]>(initial?.setup.activationWindowDays ?? DEFAULT_WINDOWS.activationWindowDays);
   const [paid, setPaid] = useState<EngineSetup["paidWindowDays"]>(initial?.setup.paidWindowDays ?? DEFAULT_WINDOWS.paidWindowDays);
   // Before an engine exists, the start screen's answer (self-serve by default, C25 Q16: the v1 behaviour).
-  const [chosenMotions, setMotions] = useState<Record<Motion, boolean>>(() => ({ ...(initial?.setup.motions ?? startMotions ?? SETUP_V2_DEFAULTS.motions) }));
+  const [chosenMotions, setMotions] = useState<Record<Motion, boolean>>(() => motionsForCard(initial?.setup.motions ?? startMotions ?? SETUP_V2_DEFAULTS.motions));
   // What the app earns from (§21.6.2): the saved engine's, else the start screen's, else the subscriptions alone.
   const [monetization, setMonetization] = useState<AppMonetization>(() => ({
     ...((initial ? monetizationOf(initial.setup) : null) ?? startMonetization ?? DEFAULT_APP_MONETIZATION),
   }));
+  const [sellerSubscriptions, setSellerSubscriptions] = useState<boolean>(saved?.sellerSubscriptions ?? startMkt?.sellerSubscriptions ?? MKT_DEFAULTS.sellerSubscriptions);
+  const [firstOrder, setFirstOrder] = useState<(typeof FIRST_ORDER_WINDOWS)[number]>(saved?.firstOrderWindowDays ?? MKT_DEFAULTS.firstOrderWindowDays);
+  const [repeat, setRepeat] = useState<(typeof REPEAT_WINDOWS)[number]>(saved?.repeatWindowDays ?? MKT_DEFAULTS.repeatWindowDays);
+  const [firstSale, setFirstSale] = useState<(typeof FIRST_SALE_WINDOWS)[number]>(saved?.firstSaleWindowDays ?? MKT_DEFAULTS.firstSaleWindowDays);
   const [qualification, setQualification] = useState<Window>(initial?.setup.qualificationWindowDays ?? SETUP_V2_DEFAULTS.qualificationWindowDays);
   const [goLive, setGoLive] = useState<Window>(initial?.setup.goLiveWindowDays ?? SETUP_V2_DEFAULTS.goLiveWindowDays);
   const [referenceMonth, setReferenceMonth] = useState<YearMonth>(initial?.referenceMonth ?? lastClosed);
@@ -196,14 +221,15 @@ export function Setup({
   // A shared count typed at zero or below, or erased, stops the save with its message, as a number's own box would (A15.9).
   const [notPositive, setNotPositive] = useState<SharedCount | null>(null);
 
-  const cohortWindow = Math.max(30, paid);
+  // The longest window the followed cohort must have had: the payment window's, or a marketplace's longest of its three (`defaultCohortMonth`'s rule).
+  const cohortWindow = cohortWindowOf({ type, paidWindowDays: paid, firstOrderWindowDays: firstOrder, repeatWindowDays: repeat, firstSaleWindowDays: firstSale });
   const cohortMonth = chosenCohort ?? matureCohortMonth(cohortWindow, today);
   const companyTooLong = company.length > TEXT_LIMITS.companyLabel;
   // validate.ts's guard, said in the box: above 0, up to twenty years.
   const runwayOut = runway !== null && (runway <= 0 || runway > RUNWAY_MAX_MONTHS);
-  // An app's motions are not a choice: it sells self-serve (D1). A SaaS's are the two boxes, at least one.
-  const motions = app ? APP_MOTIONS : chosenMotions;
-  const noMotion = !motions.plg && !motions.slg;
+  // An app's motions are not a choice: it sells self-serve (D1); a marketplace ticks none (§22.3). A SaaS's are the two boxes, at least one.
+  const motions = app ? APP_MOTIONS : marketplace ? MKT_MOTIONS : chosenMotions;
+  const noMotion = !marketplace && !motions.plg && !motions.slg;
   const ticked = MOTIONS.filter((m) => motions[m]);
   const earning = STREAMS.filter((stream) => monetization[stream]);
   const noEarning = app && earning.length === 0;
@@ -270,6 +296,11 @@ export function Setup({
         type,
         motions,
         monetization,
+        offering,
+        sellerSubscriptions,
+        firstOrderWindowDays: firstOrder,
+        repeatWindowDays: repeat,
+        firstSaleWindowDays: firstSale,
         currency,
         activationWindowDays: activation,
         paidWindowDays: paid,
@@ -292,7 +323,7 @@ export function Setup({
   const st = strings.settings;
   // What ticking or unticking a motion does, said BEFORE the save (§18.1.2): nothing is ever lost.
   const motionLines =
-    editing && initial
+    editing && initial && !marketplace
       ? MOTIONS.flatMap((m) => {
           const was = initial.setup.motions[m];
           const is = motions[m];
@@ -305,19 +336,41 @@ export function Setup({
         })
       : [];
   // What ticking or unticking a way of earning does, said BEFORE the save (§21.6.2), on the same pattern: nothing is lost.
+  // `n`: the entered numbers that hide, or the numbers that appear.
+  const streamLine = (stream: string, ticked: boolean, n: number) => {
+    const subject = { stream };
+    if (!ticked) return n === 0 ? fill(st.streamOffNone, subject) : fill(n === 1 ? st.streamOffOne : st.streamOff, { ...subject, n });
+    return n === 1 ? fill(st.streamOnOne, subject) : fill(st.streamOn, { ...subject, n });
+  };
   // Each line counts as if its way changed alone (`streamChanges`), so two ways changed at once say two counts.
   const streamLines =
     editing && initial && app
-      ? streamChanges(type, monetizationOf(initial.setup) ?? DEFAULT_APP_MONETIZATION, monetization, existing?.enteredIds ?? []).map(({ stream, ticked, n }) => {
-          const subject = { stream: st.streamSubject[stream] };
-          if (!ticked) return n === 0 ? fill(st.streamOffNone, subject) : fill(n === 1 ? st.streamOffOne : st.streamOff, { ...subject, n });
-          return n === 1 ? fill(st.streamOnOne, subject) : fill(st.streamOn, { ...subject, n });
-        })
+      ? streamChanges(type, monetizationOf(initial.setup) ?? DEFAULT_APP_MONETIZATION, monetization, existing?.enteredIds ?? []).map(({ stream, ticked, n }) =>
+          streamLine(st.streamSubject[stream], ticked, n),
+        )
+      : [];
+  // The same for the sellers' subscription (§22.6.1): one box, with the phrases of a way of earning.
+  const sellerChange =
+    editing && initial && marketplace
+      ? sellerSubscriptionChange({ type, motions, sellerSubscriptions }, saved?.sellerSubscriptions ?? MKT_DEFAULTS.sellerSubscriptions, sellerSubscriptions, existing?.enteredIds ?? [])
+      : null;
+  const sellerLines = sellerChange ? [streamLine(st.streamSubject.sellerSubscriptions, sellerChange.ticked, sellerChange.n)] : [];
+  // A marketplace's three windows (§22.6.1): changed, each sends back to « à faire » the numbers it defines, said BEFORE the save.
+  const marketLines =
+    editing && initial && marketplace && saved
+      ? [
+          firstOrder !== saved.firstOrderWindowDays && existing?.firstOrder ? fill(st.firstOrderReset, { n: firstOrder }) : null,
+          repeat !== saved.repeatWindowDays && existing?.repeat ? fill(st.repeatReset, { n: repeat }) : null,
+          // The first sale's window is the sellers' paid conversion's too: its warning names both when the sellers pay.
+          firstSale !== saved.firstSaleWindowDays && existing?.firstSale ? fill(sellerSubscriptions ? st.firstSalePaidReset : st.firstSaleReset, { n: firstSale }) : null,
+        ]
       : [];
   const resets = editing && initial
     ? [
         ...motionLines,
         ...streamLines,
+        ...sellerLines,
+        ...marketLines,
         motions.plg && activation !== initial.setup.activationWindowDays && existing?.activation ? fill(st.activationReset, { n: activation }) : null,
         motions.plg && paid !== initial.setup.paidWindowDays && existing?.paid ? fill(st.paidReset, { n: paid }) : null,
         motions.slg && qualification !== initial.setup.qualificationWindowDays && existing?.qualification ? fill(st.qualificationReset, { n: qualification }) : null,
@@ -392,6 +445,23 @@ export function Setup({
     </>
   );
 
+  // A marketplace's three windows (§22.6.1), each the definition of a number: the first order's, the second one's, the first
+  // sale's (and the sellers' paid conversion's). The first carries « fenêtre »'s hint and « ? », as the activation window does.
+  const marketWindow = <W extends number>(label: string, values: readonly W[], value: W, onChange: (next: W) => void, testId: string, hint?: ReactNode) => (
+    <Field group label={label} hint={hint}>
+      {({ labelId }) => (
+        <div data-testid={testId}>
+          <Segmented<`${W}`>
+            labelledBy={labelId}
+            value={`${value}`}
+            options={values.map((n) => ({ id: `${n}` as const, label: fill(s.windowDays, { n }) }))}
+            onChange={(v) => onChange(Number(v) as W)}
+          />
+        </div>
+      )}
+    </Field>
+  );
+
   return (
     <Card elevation="flat" className={styles.setup} data-testid={editing ? "engine-settings" : "engine-setup"}>
       <h2 id="engine-setup-title" className={styles.panelTitle} tabIndex={-1}>
@@ -407,7 +477,7 @@ export function Setup({
         <Field group id={`${id}-type`} label={s.companyType} hint={openTypes.length > 1 ? s.typeFixed : undefined}>
           {() => (
             <p className={styles.typeFixed} data-testid="engine-setup-type-fixed">
-              {app ? s.types.consumerApp : s.types.b2bSaas}
+              {marketplace ? s.types.marketplace : app ? s.types.consumerApp : s.types.b2bSaas}
             </p>
           )}
         </Field>
@@ -427,12 +497,54 @@ export function Setup({
             // their business yet. Dashed and at full contrast, never faded (design system extension 04, Q18).
             // « Plus tard », never « Bientôt » (C25 Q16). The app is open only when this build opens it (§21.3).
             { value: "consumer-app", label: s.types.consumerApp, disabledNote: s.typeLater, disabled: !openTypes.includes("consumer-app") },
-            { value: "marketplace", label: s.types.marketplace, disabledNote: s.typeLater, disabled: true },
+            // Open as the app is, and only in a build that opens it: the guard is `pickedType`, on `openTypes` (§22.6.1).
+            { value: "marketplace", label: s.types.marketplace, disabledNote: s.typeLater, disabled: !openTypes.includes("marketplace") },
           ]}
         />
       )}
 
-      {app ? (
+      {marketplace ? (
+        <>
+          {/* A marketplace has two sides (§22.6.1): one line says so, then the words it is read in and whether the sellers pay,
+              then its three windows. It sells through no motion, so there is no such choice (§22.3). */}
+          <p className={styles.periodsLine} data-testid="engine-setup-mkt-sides">
+            {s.mktSides}
+          </p>
+          <Choices<StartOffering>
+            id={`${id}-offering`}
+            legend={s.mktOfferingLegend}
+            size="sm"
+            value={offering}
+            onChange={setOffering}
+            options={[
+              { value: "products", label: strings.start.mktOfferingProducts },
+              { value: "services", label: strings.start.mktOfferingServices },
+            ]}
+          />
+          <Checkbox
+            id={`${id}-seller-subscriptions`}
+            label={s.mktSellerSubscriptions}
+            checked={sellerSubscriptions}
+            onChange={setSellerSubscriptions}
+            data-testid="engine-setup-mkt-subscriptions"
+          />
+          <div className={styles.motions} data-testid="engine-setup-mkt-windows">
+            {marketWindow(
+              s.firstOrderWindow,
+              FIRST_ORDER_WINDOWS,
+              firstOrder,
+              setFirstOrder,
+              "engine-setup-window-first-order",
+              <>
+                {st.windowHint}
+                <EngineTerm id="window" strings={strings} />
+              </>,
+            )}
+            {marketWindow(s.repeatWindow, REPEAT_WINDOWS, repeat, setRepeat, "engine-setup-window-repeat")}
+            {marketWindow(s.firstSaleWindow, FIRST_SALE_WINDOWS, firstSale, setFirstSale, "engine-setup-window-first-sale")}
+          </div>
+        </>
+      ) : app ? (
         <>
           {/* A consumer app sells self-serve (D1): one line says so, then the two windows, then what it earns from (§21.6.2). */}
           <p className={styles.periodsLine} data-testid="engine-setup-app-sells">
@@ -546,8 +658,8 @@ export function Setup({
           months={monthOptions(lastClosed, referenceMonth, locale).filter((m) => after === undefined || m.value > after)}
           onChange={(m) => m && setReferenceMonth(m)}
         />
-        {/* The cohort followed is self-serve's (D7): sales-assisted reads three months, computed below. */}
-        {motions.plg ? (
+        {/* The cohort followed is self-serve's (D7), or a marketplace's (§22.2.3): sales-assisted reads three months, computed below. */}
+        {motions.plg || marketplace ? (
           <DateField
             precision="month"
             id={`${id}-cohort`}
@@ -575,7 +687,7 @@ export function Setup({
           </h3>
           <p className={styles.periodsLine}>{st.targetsLead}</p>
           {numbers.targets.map((group) => (
-            <div key={group.motion} className={styles.settingsBoxes}>
+            <div key={`${group.motion}-${group.side ?? ""}`} className={styles.settingsBoxes} data-testid={`engine-settings-targets-${group.side ?? group.motion}`}>
               {group.title ? <h4 className={styles.toolFamilyTitle}>{group.title}</h4> : null}
               {group.boxes.map((b) => (
                 <NumberField
@@ -667,7 +779,7 @@ export function Setup({
 
       <TextField
         id={`${id}-company`}
-        label={app ? s.companyLabelApp : s.companyLabel}
+        label={marketplace ? s.companyLabelMkt : app ? s.companyLabelApp : s.companyLabel}
         optional={strings.workbench.optional}
         hint={s.companyHint}
         value={company}

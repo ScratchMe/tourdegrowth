@@ -11,8 +11,8 @@
  * forget for that reason — this module just enforces the same rule.
  */
 
-import { isApp } from "@/lib/engine/setup-type";
-import type { BusinessType } from "@/lib/engine/types";
+import { isApp, isMarketplace } from "@/lib/engine/setup-type";
+import type { BusinessType, EngineMotion } from "@/lib/engine/types";
 
 interface GoatCounterCountArgs {
   path: string;
@@ -323,28 +323,38 @@ export const ENGINE_STAGES = ["acquisition", "activation", "retention", "referra
  */
 export const ENGINE_SALES_STAGES = ["slg-acquisition", "slg-activation", "slg-retention", "slg-referral", "slg-revenue"] as const;
 
-/** Every detail `engine_stage_saved` may carry: self-serve's five, then sales-assisted's. */
-export const ENGINE_STAGE_DETAILS = [...ENGINE_STAGES, ...ENGINE_SALES_STAGES] as const;
+/**
+ * A marketplace's five (§22.9, A23 MKT-6), prefixed `mkt-` for the same reason, in the order of `ENGINE_STAGES`: a stage
+ * saved on a marketplace counts apart, whichever side it is on (the side is never in the path). Spelled out, never built.
+ */
+export const ENGINE_MARKET_STAGES = ["mkt-acquisition", "mkt-activation", "mkt-retention", "mkt-referral", "mkt-revenue"] as const;
+
+/** Every detail `engine_stage_saved` may carry: self-serve's five, then sales-assisted's, then a marketplace's. */
+export const ENGINE_STAGE_DETAILS = [...ENGINE_STAGES, ...ENGINE_SALES_STAGES, ...ENGINE_MARKET_STAGES] as const;
 export type EngineStageDetail = (typeof ENGINE_STAGE_DETAILS)[number];
 
-/** A stage's detail in a motion: self-serve's is the stage itself (the v1 paths), sales-assisted's its prefixed twin. */
-export function engineStageDetail(stage: (typeof ENGINE_STAGES)[number], motion: "plg" | "slg"): EngineStageDetail {
+/** A stage's detail in a motion: self-serve's is the stage itself (the v1 paths), sales-assisted's and a marketplace's their prefixed twins. */
+export function engineStageDetail(stage: (typeof ENGINE_STAGES)[number], motion: EngineMotion): EngineStageDetail {
+  if (motion === "mkt") return ENGINE_MARKET_STAGES[ENGINE_STAGES.indexOf(stage)]!;
   return motion === "slg" ? ENGINE_SALES_STAGES[ENGINE_STAGES.indexOf(stage)]! : stage;
 }
 
 /**
  * `engine_setup/<motions>` — which motions the engine was set up with (C25
  * Q14): a box ticked, never a number nor a word anyone typed (D16). A consumer
- * app is `app` (§21.6.2): its motions are not a choice, its type is.
+ * app is `app` (§21.6.2): its motions are not a choice, its type is; a marketplace
+ * is `mkt` (§22.9), by its type too, never by its offering or its subscriptions.
  */
 export const ENGINE_SETUP_EVENT = "engine_setup";
-export const ENGINE_SETUP_DETAILS = ["plg", "slg", "hybrid", "app"] as const;
+export const ENGINE_SETUP_DETAILS = ["plg", "slg", "hybrid", "app", "mkt"] as const;
 export type EngineSetupDetail = (typeof ENGINE_SETUP_DETAILS)[number];
 
-/** The detail for a setup: its type for an app, else its two motion boxes. */
+/** The detail for a setup: its type for an app or a marketplace, else its two motion boxes. */
 export function engineSetupDetail(setup: { type: BusinessType; motions: { plg: boolean; slg: boolean } }): EngineSetupDetail {
   const { motions } = setup;
   if (isApp(setup)) return "app";
+  // Before the two motion boxes: a marketplace ticks none (§22.3), which would read « plg ».
+  if (isMarketplace(setup)) return "mkt";
   return motions.plg && motions.slg ? "hybrid" : motions.slg ? "slg" : "plg";
 }
 

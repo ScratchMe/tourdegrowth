@@ -42,6 +42,15 @@ export const ENGINE_COPY_MKT_SERVICES: { common: Overlay; demand: Overlay; suppl
         fr: "On suit les clients et les prestataires inscrits en {cohort} : ceux inscrits en {next} n'ont pas encore eu {n} jours.",
         en: "We follow the clients and providers who signed up in {cohort}: those from {next} haven't had {n} days yet.",
       },
+      // TODO: à relire (convention 6) — neuf le 2026-10-27 (A23 MKT-6, §22.8.4, §22.8.5 a) : la carte de réglage en « services ».
+      mktSides: {
+        fr: "Une place de marché a deux côtés : les clients et les prestataires.",
+        en: "A marketplace has two sides: clients and providers.",
+      },
+      mktSellerSubscriptions: { fr: "Les prestataires paient un abonnement", en: "Providers pay a subscription" },
+      firstOrderWindow: { fr: "Première réservation sous", en: "First booking within" },
+      repeatWindow: { fr: "Deuxième réservation sous", en: "Second booking within" },
+      firstSaleWindow: { fr: "Première réservation reçue sous", en: "First booking received within" },
     },
     subject: {
       "mkt.buy.signup-rate": { fr: "le taux d'inscription des clients", en: "the client sign-up rate" },
@@ -195,6 +204,27 @@ export const ENGINE_COPY_MKT_SERVICES: { common: Overlay; demand: Overlay; suppl
       runwayHint: {
         fr: "Sert seulement à te prévenir quand un client ou un prestataire abonné met plus longtemps à rembourser son coût.",
         en: "Only used to warn you when a client or a paid provider takes longer to pay back their cost.",
+      },
+      // TODO: à relire (convention 6) — neuf le 2026-10-27 (A23 MKT-6, §22.8.4, §22.8.5 a) : les Réglages en « services » — le sujet des abonnements,
+      // et les quatre avertissements (« commande » devient « réservation », « première vente » « première réservation reçue »).
+      streamSubject: {
+        sellerSubscriptions: { fr: "Les abonnements des prestataires", en: "Provider subscriptions" },
+      },
+      firstOrderReset: {
+        fr: "La fenêtre de première réservation fait partie de la définition de la première réservation : ton chiffre déjà saisi repassera « à faire », pour que tu le remesures sur {n} jours.",
+        en: "The first-booking window is part of the first booking's definition: the number you already entered will go back to \"to do\", so you can measure it again over {n} days.",
+      },
+      repeatReset: {
+        fr: "La fenêtre de deuxième réservation fait partie de la définition de la deuxième réservation : ton chiffre déjà saisi repassera « à faire », pour que tu le remesures sur {n} jours.",
+        en: "The second-booking window is part of the second booking's definition: the number you already entered will go back to \"to do\", so you can measure it again over {n} days.",
+      },
+      firstSaleReset: {
+        fr: "La fenêtre de première réservation reçue fait partie de la définition de la première réservation reçue : ton chiffre déjà saisi repassera « à faire », pour que tu le remesures sur {n} jours.",
+        en: "The first-booking-received window is part of the definition of the first booking received: the number you already entered will go back to \"to do\", so you can measure it again over {n} days.",
+      },
+      firstSalePaidReset: {
+        fr: "La fenêtre de première réservation reçue fait partie de la définition de la première réservation reçue et de celle de la conversion en abonné : ce que tu as déjà saisi repassera « à faire », pour que tu le remesures sur {n} jours.",
+        en: "The first-booking-received window is part of the definitions of the first booking received and of the subscription conversion: what you already entered will go back to \"to do\", so you can measure it again over {n} days.",
       },
     },
     io: {

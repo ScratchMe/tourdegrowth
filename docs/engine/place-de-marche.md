@@ -1653,6 +1653,34 @@ listes de la carte de réglage) : ils n'attendent pas le retour du brief 10.
   selfserve : …` : la branche `isMarketplace` passe en tête, sinon la barre
   dit « SaaS B2B, libre-service ».
 
+**Ce qu'MKT-6 a fait autrement, ou en plus** (2026-10-27, [#390](https://github.com/ScratchMe/tourdegrowth/pull/390)) :
+- `withSettings` et `settingsExisting` vivent dans `_engine/start.ts`
+  (fonctions pures, testées : sinon rien ne tenait le constat 33), plus dans
+  l'îlot ; `SettingsNumbers.targets[].motion` est un `EngineMotion` (`"mkt"`
+  pour les deux groupes) au lieu d'un `side?` ajouté ;
+- la case des abonnements de la carte de réglage et des Réglages lit
+  `setup.mktSellerSubscriptions` (§22.8.5 a), qui a sa jumelle « services » ;
+  la carte de départ garde `start.mktSellerSubscriptions` ;
+- `startDefaults` n'écrit pas les trois fenêtres (D11) et `setupOfCard` les
+  écrit toujours : les comparaisons de fenêtres (`withSettings`, `Setup`)
+  passent par `mktSetup`, qui pose les défauts, sinon enregistrer des Réglages
+  sans rien toucher effacerait deux chiffres ;
+- `cohortWindowOf` (`start.ts`) donne au champ de la carte et à son aide la
+  règle de `defaultCohortMonth` (un test les tient égales sur 81 combinaisons
+  de fenêtres) ; `motionsForCard` ouvre sur le libre-service une carte passée
+  de la place de marché au SaaS ;
+- la légende et les libellés typés de la carte de départ valent dès qu'un
+  autre type que le SaaS est ouvert, la place de marché seule comprise ;
+- `openExample("mkt")` ouvre l'exemple du SaaS en libre-service jusqu'à MKT-9
+  (le précédent de l'app jusqu'à APP-10) ;
+- les quatre `settings.*Reset` et l'anglais des trois fenêtres en
+  « services » se dérivent par le lexique seul (`engine-copy-mkt-services.ts`) ;
+- les identifiants de test sont listés dans l'entrée « A23, MKT-6 » du
+  journal, pour MKT-10 ;
+- **non vus dans un navigateur** : les Réglages d'une place de marché et leurs
+  avertissements, que seuls des tests tiennent, parce que le tableau ne se
+  dessine qu'à MKT-7b (son acceptation les regarde).
+
 #### 22.6.2 Le tableau et les slides : ce qu'ils montrent (le contrat de données du brief 10)
 
 **La forme est celle du retour du brief 10** (D13), revenu le 2026-10-05
@@ -2170,6 +2198,7 @@ ordre ; « `…Suffixe` » répète la clé qui précède, suivie du suffixe
 | `start.defaultsMkt` | Réglé pour une place de marché, en euros. Mois des chiffres : {month} ; inscrits suivis : {cohort}. | Set for a marketplace, in euros, on {month}'s figures and {cohort}'s sign-ups. |
 | `setup.mktSides` | Une place de marché a deux côtés : les acheteurs et les vendeurs. | A marketplace has two sides: buyers and sellers. |
 | `setup.mktOfferingLegend` | Ce qu'elle met en relation | What it connects |
+| `setup.mktSellerSubscriptions` | Les vendeurs paient un abonnement | Sellers pay a subscription |
 | `setup.firstOrderWindow` · `repeatWindow` · `firstSaleWindow` | Première commande sous · Deuxième commande sous · Première vente sous | First order within · Second order within · First sale within |
 | `setup.companyLabelMkt` | Nom de ta place de marché | Your marketplace's name |
 | `settings.streamSubject.sellerSubscriptions` | Les abonnements des vendeurs | Seller subscriptions |
@@ -2183,7 +2212,9 @@ La carte de départ (`start.*`, un chemin exclu) nomme les deux vocabulaires et
 ne passe jamais par le calque « services ». Les feuilles `setup.*` ci-dessus qui
 portent un mot « produits » ont leur réécriture dans `services.common` (par
 exemple `setup.mktSides` : « Une place de marché a deux côtés : les clients et
-les prestataires. » / "A marketplace has two sides: clients and providers.").
+les prestataires. » / "A marketplace has two sides: clients and providers." ;
+`setup.mktSellerSubscriptions` : « Les prestataires paient un abonnement » /
+"Providers pay a subscription").
 
 **b. Les feuilles `mkt.*`** (MKT-5, `ENGINE_COPY.mkt`) :
 
@@ -3767,7 +3798,10 @@ Ton compte rendu, en français : une liste numérotée de constats, rangés par 
   commission 2 628,29 € ; la fuite de la demande s'imprime « ~470 € » (C97) ;
   la liste n'a qu'une étape signalée, celle du côté affiché ; le build comme
   la CI et les e2e du moteur verts (le type reste fermé en CI) ; les captures
-  ouvertes par l'orchestrateur.
+  ouvertes par l'orchestrateur, dont **les Réglages d'une place de marché**
+  avec l'avertissement d'une fenêtre changée, en « produits » et en
+  « services », FR 1 280 et EN 390 : MKT-6 n'a pu les tenir que par des
+  tests, le tableau ne se dessinant pas encore.
 - **Arrêt** : un chiffre d'`INVENTORY.md` que ni les modèles de §22.5 ni les
   vues de cette fiche ne donnent ; une prop de `TotalBand` ou de `MoneyBlock`
   qui ne reçoit pas ce que §22.6.2 demande sans changer le composant ; un mot
@@ -3967,7 +4001,9 @@ Ton compte rendu, en français : une liste numérotée de constats, rangés par 
   nommées par le même gabarit), `golden-mkt.test.ts`,
   `golden-mkt-inputs.json`, `golden-mkt.json` (nouveaux).
 - **Étapes** : `exampleEngine(…, "marketplace")` ; l'exemple dans
-  `ExampleView` (le rendu du tableau de MKT-7b) ; vérifier §22.10.2 dans les
+  `ExampleView` (le rendu du tableau de MKT-7b) ; `openExample("mkt")`
+  (`EngineWorkbench.tsx`), qui ouvre l'exemple du SaaS en libre-service depuis
+  MKT-6, ouvre celui de la place de marché ; vérifier §22.10.2 dans les
   sorties ; **puis seulement** écrire le golden.
 - **Acceptation** : commune ; le golden écrit une fois.
 - **Arrêt** : un nombre de §22.10.2 absent des sorties.
@@ -3994,7 +4030,13 @@ Ton compte rendu, en français : une liste numérotée de constats, rangés par 
 - **Étapes** : `ci.yml` ; la phrase de la FAQ (§22.8.5 h) ; la garde ; les
   e2e (dont : la FAQ sans JavaScript contient `faqTypeNote.both` quand les
   deux types sont ouverts, et la spec « type fermé ») ; la non-vacuité de
-  §22.11.5 mesurée et écrite au journal ; la documentation.
+  §22.11.5 mesurée et écrite au journal ; la documentation. **Ce qu'MKT-6
+  laisse à la garde** : dans les Réglages en « services », le choix de l'offre
+  affiche `start.mktOfferingProducts` (« Acheteurs et vendeurs de produits »),
+  qui nomme les deux vocabulaires par construction : une exception nommée (ou
+  le groupe d'options hors du texte vérifié), pas une feuille à réécrire ; les
+  identifiants de test de la carte, du réglage et des cibles sont dans l'entrée
+  « A23, MKT-6 » du journal.
 - **Acceptation** : commune ; la suite Playwright verte en CI.
 - **Arrêt** : un e2e existant qui rougit sur le SaaS ou l'app ; `ci.yml` qui
   demande plus qu'une valeur changée.

@@ -2,8 +2,9 @@
 
 import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
-import { candidatesFor } from "@/lib/engine/scenario-of";
+import { isSellingMotion } from "@/lib/engine/setup-type";
 import { isUnreadableNumber } from "@/lib/forms/number";
+import { targetGroups } from "./settings-numbers";
 import { TargetInput } from "./TargetInput";
 import { domId } from "./text";
 import type { EngineActions, EngineView } from "./view";
@@ -21,14 +22,17 @@ import styles from "./TargetsStart.module.css";
  * screen would drop it unseen.
  *
  * One group per motion ticked, self-serve first; the group headings only in
- * the hybrid (§18.7). The heading takes the focus on arrival: the person
- * pressed « Commence » to get here (R-19).
+ * the hybrid (§18.7). A marketplace ticks none: it has one group per side, the
+ * demand's first, each titled, with the candidates that side positions (§22.6.1).
+ * The heading takes the focus on arrival: the person pressed « Commence » to
+ * get here (R-19).
  */
 export function TargetsStart({ view, actions, onNext }: { view: EngineView; actions: EngineActions; onNext: () => void }) {
   const t = view.strings.targetsStart;
   const motions = view.state.setup.motions;
   const hybrid = motions.plg && motions.slg;
-  const ids = (["plg", "slg"] as const).filter((m) => motions[m]).flatMap((m) => candidatesFor(view.state.setup, m));
+  const groups = targetGroups(view.state.setup);
+  const ids = groups.flatMap((group) => group.ids);
 
   function next() {
     const unread = ids
@@ -47,16 +51,18 @@ export function TargetsStart({ view, actions, onNext }: { view: EngineView; acti
         {t.title}
       </h2>
       <p className={styles.lead}>{t.lead}</p>
-      {(["plg", "slg"] as const)
-        .filter((m) => motions[m])
-        .map((m) => (
-          <div key={m} className={styles.targets} data-testid={`engine-targets-start-${m}`}>
-            {hybrid ? <h3 className={styles.groupTitle}>{view.strings.hybrid.motionName[m]}</h3> : null}
-            {candidatesFor(view.state.setup, m).map((id) => (
-              <TargetInput key={id} id={id} view={view} actions={actions} />
-            ))}
-          </div>
-        ))}
+      {groups.map(({ motion, side, ids: boxes }) => (
+        <div key={side ?? motion} className={styles.targets} data-testid={`engine-targets-start-${side ?? motion}`}>
+          {side ? (
+            <h3 className={styles.groupTitle}>{view.strings.mkt.side[`${side}Title`]}</h3>
+          ) : hybrid && isSellingMotion(motion) ? (
+            <h3 className={styles.groupTitle}>{view.strings.hybrid.motionName[motion]}</h3>
+          ) : null}
+          {boxes.map((id) => (
+            <TargetInput key={id} id={id} view={view} actions={actions} />
+          ))}
+        </div>
+      ))}
       <div className={styles.nav}>
         <Button onClick={next} data-testid="engine-targets-next">
           {t.go}

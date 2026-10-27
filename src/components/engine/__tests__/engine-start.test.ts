@@ -132,3 +132,72 @@ describe("EngineStart", () => {
     expect(markup).toMatch(/type="radio"[^>]*value="app"[^>]*checked=""|checked=""[^>]*value="app"/);
   });
 });
+
+/**
+ * The marketplace's two answers (§22.6.1, A23 MKT-6), under the question as the app's boxes are: a two-option choice of
+ * the words it is read in, then one box, whether the sellers pay.
+ *
+ * Non-vacuity, measured on 2026-10-27 (each sabotage alone, the eleven nearest test files run — 405 tests, 406 for the last one measured, green before each —, the file put back and its sha compared; the count is the tests that fall): the marketplace's block never drawn falls 3 (the radios and box, the answers' chosen state, their place before the plan).
+ */
+describe("EngineStart, the marketplace's answers (§22.6.1)", () => {
+  const MKT = {
+    legend: "Elle met en relation",
+    options: [
+      { value: "products" as const, label: "Acheteurs et vendeurs de produits" },
+      { value: "services" as const, label: "Clients et prestataires de services" },
+    ],
+    offering: "products" as const,
+    onOfferingChange: () => {},
+    subscriptionsLabel: "Les vendeurs paient un abonnement",
+    sellerSubscriptions: false,
+    onSellerSubscriptionsChange: () => {},
+  };
+  const withMkt = (props: Partial<EngineStartProps> = {}) =>
+    start({
+      options: [
+        { value: "ss", label: "SaaS B2B, en libre-service" },
+        { value: "sa", label: "SaaS B2B, en vente assistée" },
+        { value: "both", label: "SaaS B2B, les deux" },
+        { value: "app", label: "App grand public" },
+        { value: "mkt", label: "Place de marché", note: "Une commission sur chaque commande." },
+      ],
+      motion: "mkt",
+      mkt: MKT,
+      ...props,
+    });
+
+  it("a fifth radio, the marketplace's, chosen; under it a second group of two radios and one box", () => {
+    const markup = withMkt();
+    expect(markup).toMatch(/type="radio"[^>]*value="mkt"[^>]*checked=""|checked=""[^>]*value="mkt"/);
+    expect(markup).toContain('data-testid="start-mkt"');
+    // Five answers to the question, two words to read it in: seven radios, one checkbox.
+    expect(markup.match(/type="radio"/g)).toHaveLength(7);
+    expect(markup.match(/type="checkbox"/g)).toHaveLength(1);
+    expect(markup).toMatch(/<legend[\s\S]*?Elle met en relation/);
+  });
+
+  it("products are chosen at the start, services are the other word, and the box is unticked (D9, D10)", () => {
+    const markup = withMkt();
+    const radio = (value: string) => markup.match(new RegExp(`<input[^>]*name="engine-offering"[^>]*value="${value}"[^>]*>|<input[^>]*value="${value}"[^>]*name="engine-offering"[^>]*>`))?.[0] ?? "";
+    expect(radio("products")).toMatch(/checked=""/);
+    expect(radio("services")).not.toMatch(/checked=""/);
+    expect(markup.match(/<input[^>]*data-testid="start-mkt-subscriptions"[^>]*>/)?.[0] ?? "").not.toMatch(/checked=""/);
+    const services = withMkt({ mkt: { ...MKT, offering: "services", sellerSubscriptions: true } });
+    expect(services.match(/<input[^>]*name="engine-offering"[^>]*value="services"[^>]*>|<input[^>]*value="services"[^>]*name="engine-offering"[^>]*>/)?.[0] ?? "").toMatch(/checked=""/);
+    expect(services.match(/<input[^>]*data-testid="start-mkt-subscriptions"[^>]*>/)?.[0] ?? "").toMatch(/checked=""/);
+  });
+
+  it("its two answers follow the question and come before the plan, and the app's boxes are not drawn", () => {
+    const markup = withMkt();
+    expect(markup.indexOf("Comment vends-tu")).toBeLessThan(markup.indexOf("start-mkt"));
+    expect(markup.indexOf("start-mkt")).toBeLessThan(markup.indexOf("PLAN"));
+    expect(markup).not.toContain("start-earns");
+  });
+
+  it("without `mkt`, no second group and no box: the card of a SaaS or of the app", () => {
+    const markup = start();
+    expect(markup).not.toContain("start-mkt");
+    expect(markup).not.toContain("engine-offering");
+    expect(markup).not.toContain('type="checkbox"');
+  });
+});

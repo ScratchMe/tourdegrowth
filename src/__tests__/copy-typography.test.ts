@@ -131,6 +131,32 @@ describe("French typography", () => {
     expect(offenders, `use U+00A0 in French copy:\n${offenders.join("\n")}`).toEqual([]);
   });
 
+  /**
+   * A template's number and its unit: « {n} jours », « {n} mois » (`setup.windowDays`, the engine's warnings, the catalogue's
+   * « 12 mois ») hold a no-break space between the closing brace and the unit, as a number does with its unit (A23 MKT-6,
+   * the copy review: `settings.activationReset` and `paidReset` kept a plain space while eighteen other strings had U+00A0).
+   * Only a brace closing a template and a whole word: « {n} jours » yes, « {n} jourSomething » or an English string no.
+   *
+   * It caught six strings on its first run, all fixed with it: `settings.activationReset` and `paidReset`, `notes.series`,
+   * `io.mergeRefused.months`, `series.full` and, in the Tour's dictionary, `retakeNudgeMonths`. Non-vacuity, measured on
+   * 2026-10-27 (a plain space put back in one string at a time, the whole suite run, the file restored and its sha compared):
+   * `retakeNudgeMonths` falls 1, `series.full` 1, `activationReset` 1, `notes.series` 2 (this one and the assertion of
+   * `deck-series.test.ts`, which reads « 2\u00a0mois sont suivis » since).
+   */
+  it("joins a template's number to « jours » or « mois » with a no-break space, never a plain one", async () => {
+    const strings = await frenchStrings();
+    // The scan sees what it looks for: the joined form is written in the corpus (otherwise the check below proves nothing).
+    expect(strings.filter(({ text }) => /\}\u00a0(jours|mois)(?![\p{L}])/u.test(text)).length).toBeGreaterThan(10);
+    const PLAIN = /\} (jours|mois)(?![\p{L}])/u;
+    const offenders = strings
+      .filter(({ text }) => PLAIN.test(text))
+      .map(({ file, text }) => {
+        const at = text.search(PLAIN);
+        return `${file}: …${text.slice(Math.max(0, at - 30), at + 12)}…`;
+      });
+    expect(offenders, `use U+00A0 between a template's number and its unit in French copy:\n${offenders.join("\n")}`).toEqual([]);
+  });
+
   it("writes an ellipsis as one character, not three dots", async () => {
     const offenders = (await frenchStrings()).filter(({ text }) => text.includes("...")).map(({ file, text }) => `${file}: ${text.slice(0, 80)}`);
     expect(offenders, `use … in French copy:\n${offenders.join("\n")}`).toEqual([]);

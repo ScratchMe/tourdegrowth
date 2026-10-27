@@ -14,7 +14,7 @@ import { isApp } from "@/lib/engine/business-type";
 import { candidatesFor } from "@/lib/engine/scenario-of";
 import { knownIn } from "@/lib/engine/values";
 import type { EngineStrings, ResolvedBridge, ResolvedDerived, ResolvedMetric } from "@/lib/engine/strings";
-import type { BusinessType, CandidateId, EngineDeck, Interval, Motion, MotionDerived } from "@/lib/engine/types";
+import type { BusinessType, CandidateId, EngineDeck, Interval, MktSide, Motion, MotionDerived } from "@/lib/engine/types";
 import type { Locale } from "@/lib/i18n/locale";
 import { Coverage } from "./Coverage";
 import { DeckView } from "./deck/DeckView";
@@ -50,8 +50,12 @@ export function ExampleView({
   onBack,
 }: {
   locale: Locale;
-  /** The words of a type (§21.8.1): the example reads those of its own, whatever engine is on screen. */
-  stringsFor: (type: BusinessType) => EngineStrings;
+  /**
+   * The words of a type (§21.8.1): the example reads those of its own, whatever engine is on screen. The marketplace's also
+   * depend on its offering and on a side (§22.8.1, the signature the island's `stringsFor` has): it asks neither before its
+   * example exists (MKT-9).
+   */
+  stringsFor: (type: BusinessType, offering?: "products" | "services", side?: MktSide | null) => EngineStrings;
   /** The type of the example shown (§21.9): the SaaS's §6.0, or the consumer app's §21.9.1. */
   type: BusinessType;
   /** The catalogue of the example's type (`metricsFor`), likewise `derivedCopy`. */

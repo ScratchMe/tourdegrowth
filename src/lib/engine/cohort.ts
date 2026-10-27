@@ -83,11 +83,10 @@ export function isImmature(period: YearMonth, windowDays: number, today: Date): 
 
 /**
  * The window that is part of a metric's definition, in days; 0 for a metric with none. A marketplace's three
- * (§22.2.3) are the setup's own, read through `mktSetup`; the shape names them as plain strings so that the list of
- * windows a shape may carry (`MetricShape.window`) widens with the numbers that use them (MKT-1), not before.
+ * (§22.2.3) are the setup's own, read through `mktSetup`.
  */
 export function windowDaysOf(shape: MetricShape, setup: EngineSetup): number {
-  const window: string | number | undefined = shape.window;
+  const { window } = shape;
   if (window === "activation") return setup.activationWindowDays;
   if (window === "paid") return setup.paidWindowDays;
   if (window === "qualification") return setup.qualificationWindowDays;
