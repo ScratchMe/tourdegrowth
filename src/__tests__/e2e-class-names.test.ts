@@ -22,9 +22,12 @@ import { moduleClass, moduleClassRe } from "../../e2e/module-class";
  * is the one place that says how a local name becomes a selector.
  *
  * Non-vacuity (2026-10-27), one sabotage at a time, the file put back after
- * each, of 17 tests: `[class*='__value']` back in a spec fails exactly 1 (the
- * second rule); `Button-module__` back in a spec, 1 (the first);
- * `toHaveClass(/__secondary/)` back, 1 (the third). In `module-class.ts`, a
+ * each, of 18 tests: `[class*='__value']` back in a spec fails exactly 1 (the
+ * second rule); `Button-module__` alone, 1 (the first), and the old `QUIET`
+ * selector whole, 2 (the first and the second); `toHaveClass(/__secondary/)`
+ * and `toHaveClass(/_secondary/)`, 1 each (the third); `[class$='__tick']`,
+ * `[class~="tick"]` and `[class="x"]`, 1 each (the second);
+ * `li.className.includes("alert")`, 1 (the fourth). In `module-class.ts`, a
  * selector without the space that ends a token (so `valueLarge` matches)
  * fails 3 cases, the same for the regular expression without its end of
  * token, and the identifier check removed fails 1. The old selectors are

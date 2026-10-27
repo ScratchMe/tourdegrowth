@@ -377,8 +377,10 @@ serrée des deux côtés (un écart qui **grandit** est autant une régression q
   `valueLarge` ni `figureValue`. Ces deux fonctions sont les seules à savoir
   comment un nom s'écrit ; une forme de plus ne touche qu'elles.
   `src/__tests__/e2e-class-names.test.ts` refuse, dans `e2e/**/*.ts` hors du
-  helper, tout `-module__`, tout `class*=`, `class$=` ou `class^=`, et tout
-  `toHaveClass(/__`. Dans un `evaluate`, le helper n'est pas disponible : le
+  helper, tout `-module__`, tout `class*=`, `class$=`, `class^=` (et `~=`, `|=`,
+  `[class=`), tout `toHaveClass` dont le motif contient un tiret bas (`/__x/`
+  comme `/_x/`), et tout `className` ou `classList` dont on teste le nom à la
+  main (`.includes(`…). Dans un `evaluate`, le helper n'est pas disponible : le
   sélecteur se construit côté Node et se passe en argument.
   **Ce que la garde ne dit pas** : passer d'une sous-chaîne (`[class*="name"]`)
   à un jeton entier peut changer l'ensemble atteint, quand un autre nom local
