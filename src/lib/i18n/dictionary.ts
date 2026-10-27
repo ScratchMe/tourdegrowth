@@ -193,7 +193,7 @@ export const UI_STRINGS = {
     },
     retakeNudgeMonths: {
       en: "Your last Tour was {n} months ago",
-      fr: "Ton dernier Tour date de {n} mois",
+      fr: "Ton dernier Tour date de {n} mois",
     },
     retakeNudgeCta: { en: "take it again?", fr: "le refaire ?" },
   },

@@ -3066,7 +3066,7 @@ export const ENGINE_COPY = {
     },
     /** TODO: à relire (convention 6) — neuf le 2026-10-01 (A14 T1, §19.2.6) : `seasonal` from the second month on. `{n}`: the months the engine holds. */
     series: {
-      fr: "Et si c'est saisonnier ? — {n} mois sont suivis ; un écart ne se lit qu'entre deux mois mesurés de la même façon.",
+      fr: "Et si c'est saisonnier ? — {n} mois sont suivis ; un écart ne se lit qu'entre deux mois mesurés de la même façon.",
       en: "What if it's seasonal? — {n} months are tracked; a change is only read between two months measured the same way.",
     },
     /** `{stage}`: a subject phrase; `{ranking}`: one of `ranking`, capitalised by the code. */
@@ -3307,11 +3307,11 @@ export const ENGINE_COPY = {
     cancel: { fr: "Annuler", en: "Cancel" },
     // TODO: à relire (convention 6) — retouché le 2026-10-02 (A18 T2.b) : l'anglais des quatre `*Reset` cite l'étiquette que la liste affiche, « To do » (le français disait déjà « à faire »).
     activationReset: {
-      fr: "La fenêtre d'activation fait partie de la définition du taux d'activation : ton chiffre déjà saisi repassera « à faire », pour que tu le remesures sur {n} jours.",
+      fr: "La fenêtre d'activation fait partie de la définition du taux d'activation : ton chiffre déjà saisi repassera « à faire », pour que tu le remesures sur {n} jours.",
       en: "The activation window is part of the activation rate's definition: the number you already entered will go back to \"to do\", so you can measure it again over {n} days.",
     },
     paidReset: {
-      fr: "La fenêtre de paiement fait partie de la définition de la conversion en payant : ton chiffre déjà saisi repassera « à faire », pour que tu le remesures sur {n} jours.",
+      fr: "La fenêtre de paiement fait partie de la définition de la conversion en payant : ton chiffre déjà saisi repassera « à faire », pour que tu le remesures sur {n} jours.",
       en: "The payment window is part of the paid conversion's definition: the number you already entered will go back to \"to do\", so you can measure it again over {n} days.",
     },
     monthsChanged: {
@@ -3643,7 +3643,7 @@ export const ENGINE_COPY = {
       motions: { fr: "Fusion impossible : les façons de vendre cochées ne sont pas les mêmes.", en: "Can't merge: the ways of selling ticked aren't the same." },
       currency: { fr: "Fusion impossible : la devise n'est pas la même.", en: "Can't merge: the currency isn't the same." },
       windows: { fr: "Fusion impossible : les fenêtres ne sont pas les mêmes, donc les chiffres n'ont pas la même définition.", en: "Can't merge: the windows aren't the same, so the numbers don't share a definition." },
-      months: { fr: "Fusion impossible : les deux réunis dépasseraient {max} mois.", en: "Can't merge: together they would hold more than {max} months." },
+      months: { fr: "Fusion impossible : les deux réunis dépasseraient {max} mois.", en: "Can't merge: together they would hold more than {max} months." },
     },
     // TODO: à relire (convention 6) — neuf le 2026-10-01 (A14 T5, §19.7) : le nom d'un compte partagé dans une ligne de fusion (`countFilled`, `{count}`).
     sharedCount: {
@@ -3682,7 +3682,7 @@ export const ENGINE_COPY = {
     /** The flows' month is over (§19.2.1): the next month can start. */
     ready: { fr: "Mois clos : {month}. Ses chiffres peuvent commencer ; les cibles et les définitions suivent, les valeurs jamais.", en: "Month over: {month}. Its numbers can start; targets and definitions carry over, values never do." },
     /** `MAX_MONTHS` reached (§19.1.6). */
-    full: { fr: "Ce moteur suit déjà {max} mois, son plafond : sauvegarde le fichier, puis démarre un nouveau moteur pour la suite.", en: "This engine already tracks {max} months, its limit: save the file, then start a new engine for what comes next." },
+    full: { fr: "Ce moteur suit déjà {max} mois, son plafond : sauvegarde le fichier, puis démarre un nouveau moteur pour la suite.", en: "This engine already tracks {max} months, its limit: save the file, then start a new engine for what comes next." },
     /** On a number's row: how far it moved since the month before (§19.2.5). Signs and words, never a colour. */
     delta: { fr: "{change} depuis {month}", en: "{change} since {month}" },
     deltaToward: { fr: "{change} depuis {month}, vers ta cible", en: "{change} since {month}, toward your target" },

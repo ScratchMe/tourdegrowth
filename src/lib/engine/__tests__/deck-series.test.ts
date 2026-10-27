@@ -128,7 +128,8 @@ describe("notes.series takes over from notes.seasonal from the second month", ()
   it("one month: the seasonal note, as before; two: the series note, on every slide that had it", () => {
     expect(seasonalNote(exampleState(), props.fr.strings)).toBe(props.fr.strings.notes.seasonal);
     const series = seasonalNote(moved(), props.fr.strings);
-    expect(series).toContain("2 mois sont suivis");
+    // « {n} mois » joins its number to its unit with U+00A0 (§23.8, `copy-typography.test.ts`).
+    expect(series).toContain("2\u00a0mois sont suivis");
     const notes = deck(moved()).slides.flatMap((s) => s.notes);
     expect(notes).toContain(series);
     expect(notes).not.toContain(props.fr.strings.notes.seasonal);
