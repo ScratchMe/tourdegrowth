@@ -125,3 +125,27 @@ Publics dès le merge de MKT-G (C72), recopiés de `docs/engine/glossaire-mkt.md
   qu'ailleurs »** (`marketplace-liquidity`, le premier levier) : la relecture
   du texte a écarté « la plupart des demandes », qui se lisait comme une norme
   au-dessus de 50 % ; à confirmer.
+
+## La carte de départ et les Réglages (MKT-6)
+
+- **La case des abonnements de la carte de départ** : avec « Clients et
+  prestataires de services » choisi juste au-dessus, elle dit toujours « Les
+  vendeurs paient un abonnement » (`start.mktSellerSubscriptions`), et la note
+  du type « … un abonnement pour les vendeurs » (`start.mktNote`). C'est la
+  lettre de §22.8.5 a (la carte de départ nomme les deux vocabulaires et ne
+  passe jamais par le calque « services »). La carte de réglage et les
+  Réglages, eux, lisent `setup.mktSellerSubscriptions`, qui suit l'offre
+  (« Les prestataires paient un abonnement »). À trancher : la case de la
+  carte de départ suit-elle l'offre choisie ? Relevé par l'exécutant et la
+  relecture de MKT-6.
+- **`settings.firstSaleReset` et `settings.firstSalePaidReset` en
+  « services », en anglais** : "The first-booking-received window is part of
+  the definition of the first booking received…". Le lexique seul aurait donné
+  "the first booking received's definition", illisible : l'ordre des mots
+  change. Le français, lui, est le lexique seul (« La fenêtre de première
+  réservation reçue fait partie de la définition de la première réservation
+  reçue… »), lourd.
+- Corrigé avant le merge de MKT-6, pour mémoire : `settings.activationReset`
+  et `settings.paidReset` (le SaaS) avaient une espace ordinaire entre `{n}`
+  et « jours », contre l'insécable partout ailleurs ; la garde typographique
+  le vérifie maintenant.
