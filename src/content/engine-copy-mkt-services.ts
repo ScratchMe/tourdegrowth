@@ -47,6 +47,7 @@ export const ENGINE_COPY_MKT_SERVICES: { common: Overlay; demand: Overlay; suppl
         fr: "Une place de marché a deux côtés : les clients et les prestataires.",
         en: "A marketplace has two sides: clients and providers.",
       },
+      mktSellerSubscriptions: { fr: "Les prestataires paient un abonnement", en: "Providers pay a subscription" },
       firstOrderWindow: { fr: "Première réservation sous", en: "First booking within" },
       repeatWindow: { fr: "Deuxième réservation sous", en: "Second booking within" },
       firstSaleWindow: { fr: "Première réservation reçue sous", en: "First booking received within" },

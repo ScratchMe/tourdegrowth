@@ -867,10 +867,10 @@ describe("the page hands the island the overlays resolved (§22.8.1)", () => {
 // ------------------------------------------------------------------------------------------------ the setup card and the Settings (MKT-6)
 
 /**
- * What A23 MKT-6 writes for the start card, the setup card, the Settings and the bar (§22.8.5 a): nineteen leaves in
- * `ENGINE_COPY`, written with the words of "products", and, for the nine a "services" marketplace reads and the rule of
- * point 5 catches (the sides line, the three windows, the sellers' subscription as a subject, the four warnings), their
- * twin in `ENGINE_COPY_MKT_SERVICES.common`. The oracle below is the specification's own table, read by a script from
+ * What A23 MKT-6 writes for the start card, the setup card, the Settings and the bar (§22.8.5 a): twenty leaves in
+ * `ENGINE_COPY`, written with the words of "products", and, for the ten a "services" marketplace reads and the rule of
+ * point 5 catches (the sides line, the sellers' subscription box, the three windows, the sellers' subscription as a subject,
+ * the four warnings), their twin in `ENGINE_COPY_MKT_SERVICES.common`. The oracle below is the specification's own table, read by a script from
  * `docs/engine/place-de-marche.md` §22.8.5 a with the typography of §23.8 posed (U+00A0 written out): the code is compared to
  * it, not to itself.
  *
@@ -886,6 +886,7 @@ const MKT6_PRODUCTS: readonly (readonly [string, string, string])[] = [
   ["start.defaultsMkt", "Réglé pour une place de marché, en euros. Mois des chiffres\u00a0: {month}\u00a0; inscrits suivis\u00a0: {cohort}.", "Set for a marketplace, in euros, on {month}'s figures and {cohort}'s sign-ups."],
   ["setup.mktSides", "Une place de marché a deux côtés\u00a0: les acheteurs et les vendeurs.", "A marketplace has two sides: buyers and sellers."],
   ["setup.mktOfferingLegend", "Ce qu'elle met en relation", "What it connects"],
+  ["setup.mktSellerSubscriptions", "Les vendeurs paient un abonnement", "Sellers pay a subscription"],
   ["setup.firstOrderWindow", "Première commande sous", "First order within"],
   ["setup.repeatWindow", "Deuxième commande sous", "Second order within"],
   ["setup.firstSaleWindow", "Première vente sous", "First sale within"],
@@ -900,6 +901,7 @@ const MKT6_PRODUCTS: readonly (readonly [string, string, string])[] = [
 /** Their twins in the words of "services": the fiche's own texts, and the four warnings by the lexicon of §22.8.4 on the products' text. */
 const MKT6_SERVICES: readonly (readonly [string, string, string])[] = [
   ["setup.mktSides", "Une place de marché a deux côtés\u00a0: les clients et les prestataires.", "A marketplace has two sides: clients and providers."],
+  ["setup.mktSellerSubscriptions", "Les prestataires paient un abonnement", "Providers pay a subscription"],
   ["setup.firstOrderWindow", "Première réservation sous", "First booking within"],
   ["setup.repeatWindow", "Deuxième réservation sous", "Second booking within"],
   ["setup.firstSaleWindow", "Première réservation reçue sous", "First booking received within"],
@@ -911,8 +913,8 @@ const MKT6_SERVICES: readonly (readonly [string, string, string])[] = [
 ];
 
 describe("the start card, the setup card, the Settings and the bar's leaves, in the specification's words (§22.8.5 a)", () => {
-  it("writes the nineteen leaves of the table in ENGINE_COPY, both languages, word for word, typography posed", () => {
-    expect(MKT6_PRODUCTS).toHaveLength(19);
+  it("writes the twenty leaves of the table in ENGINE_COPY, both languages, word for word, typography posed", () => {
+    expect(MKT6_PRODUCTS).toHaveLength(20);
     const wrong = MKT6_PRODUCTS.flatMap(([path, fr, en]) => {
       const leaf = BASE_BY_PATH.get(path);
       if (!leaf) return [`${path}: missing from ENGINE_COPY`];
@@ -932,8 +934,8 @@ describe("the start card, the setup card, the Settings and the bar's leaves, in 
     }
   });
 
-  it("the nine \"services\" twins are in `services.common`, word for word, and in no side's sheet", () => {
-    expect(MKT6_SERVICES).toHaveLength(9);
+  it("the ten \"services\" twins are in `services.common`, word for word, and in no side's sheet", () => {
+    expect(MKT6_SERVICES).toHaveLength(10);
     const common = new Map(leavesOf(ENGINE_COPY_MKT_SERVICES.common).map((l) => [l.path, l]));
     const wrong = MKT6_SERVICES.flatMap(([path, fr, en]) => {
       const leaf = common.get(path);
@@ -965,6 +967,13 @@ describe("the start card, the setup card, the Settings and the bar's leaves, in 
       expect(en, path).toMatch(/booking/);
       expect(en, path).not.toMatch(/\b(order|sale)s?\b/);
     }
+  });
+
+  it("the sellers' box is two leaves with one text: the start card's, never rewritten, and the setup card's, which services rewrites", () => {
+    expect(BASE_BY_PATH.get("setup.mktSellerSubscriptions")!.copy).toEqual(BASE_BY_PATH.get("start.mktSellerSubscriptions")!.copy);
+    const twin = SERVICES_LAYER_BY_PATH.common.get("setup.mktSellerSubscriptions")!.copy;
+    expect(twin.fr).toBe("Les prestataires paient un abonnement");
+    expect(twin.en).toBe("Providers pay a subscription");
   });
 
   it("the start card's leaves and the bar's word are read as written: no overlay rewrites them, for either offering", () => {

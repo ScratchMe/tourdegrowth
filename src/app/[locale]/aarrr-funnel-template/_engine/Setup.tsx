@@ -523,7 +523,7 @@ export function Setup({
           />
           <Checkbox
             id={`${id}-seller-subscriptions`}
-            label={strings.start.mktSellerSubscriptions}
+            label={s.mktSellerSubscriptions}
             checked={sellerSubscriptions}
             onChange={setSellerSubscriptions}
             data-testid="engine-setup-mkt-subscriptions"

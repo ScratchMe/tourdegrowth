@@ -347,6 +347,9 @@ export const ENGINE_COPY = {
     // en « services », `services.common` réécrit `mktSides` et les trois fenêtres (§22.8.4).
     mktSides: { fr: "Une place de marché a deux côtés : les acheteurs et les vendeurs.", en: "A marketplace has two sides: buyers and sellers." },
     mktOfferingLegend: { fr: "Ce qu'elle met en relation", en: "What it connects" },
+    // TODO: à relire (convention 6) — neuf le 2026-10-27 (A23 MKT-6, relance : la relecture de copie) : la case des abonnements de la carte de réglage et des Réglages,
+    // à elle, comme `mktOfferingLegend` l'est de `start.mktOffering` : `start.*` ne passe jamais par le calque « services », `setup.*` si (`services.common` la réécrit).
+    mktSellerSubscriptions: { fr: "Les vendeurs paient un abonnement", en: "Sellers pay a subscription" },
     firstOrderWindow: { fr: "Première commande sous", en: "First order within" },
     repeatWindow: { fr: "Deuxième commande sous", en: "Second order within" },
     firstSaleWindow: { fr: "Première vente sous", en: "First sale within" },

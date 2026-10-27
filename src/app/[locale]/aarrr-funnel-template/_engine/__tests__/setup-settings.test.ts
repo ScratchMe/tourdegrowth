@@ -140,6 +140,8 @@ describe("Settings: a marketplace (§22.6.1)", () => {
   it("holds the words it is read in and the sellers' box as the engine has them", () => {
     const paid = mkt(marketplaceState());
     expect(paid).toContain("Ce qu&#x27;elle met en relation");
+    // In products, the sellers' box says « vendeurs ».
+    expect(text_(paid)).toContain("Les vendeurs paient un abonnement");
     const radio = (markup: string, value: string) => markup.match(new RegExp(`<input[^>]*id="[^"]*-offering-${value}"[^>]*>`))?.[0] ?? "";
     expect(radio(paid, "products")).toMatch(/checked=""/);
     expect(radio(paid, "services")).not.toMatch(/checked=""/);
@@ -218,13 +220,19 @@ describe("Settings: a marketplace (§22.6.1)", () => {
     expect(fr).toContain("Première réservation reçue sous");
     expect(fr).toContain("La demande : les clients");
     expect(fr).toContain("L'offre : les prestataires");
-    expect(fr).not.toMatch(/Première commande|Deuxième commande|Première vente|acheteur/);
+    // The sellers' box has its own leaf, which services rewrites (the start card's does not: it names both vocabularies).
+    expect(fr).toContain("Les prestataires paient un abonnement");
+    // What is left of the words of « produits » on the card: none, once the offering choice is set aside — it names BOTH vocabularies on
+    // purpose, one per option, as the start card does. The search ignores the case (« Acheteurs », « Vendeurs ») and holds the sellers.
+    const bothVocabularies = (card: string) => card.replace(/Acheteurs et vendeurs de produits|Buyers and sellers of products/g, "");
+    expect(bothVocabularies(fr)).not.toMatch(/Première commande|Deuxième commande|Première vente|acheteur|vendeur/i);
     const en = text_(mkt(services, "en"));
     expect(en).toContain("A marketplace has two sides: clients and providers.");
     expect(en).toContain("First booking within");
     expect(en).toContain("Second booking within");
     expect(en).toContain("First booking received within");
-    expect(en).not.toMatch(/First order|Second order|First sale|buyer/);
+    expect(en).toContain("Providers pay a subscription");
+    expect(bothVocabularies(en)).not.toMatch(/First order|Second order|First sale|buyer|seller/i);
   });
 
   it("speaks English: the sides line, the offering, the box and the windows", () => {

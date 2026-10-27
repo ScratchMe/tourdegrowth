@@ -2170,6 +2170,7 @@ ordre ; « `…Suffixe` » répète la clé qui précède, suivie du suffixe
 | `start.defaultsMkt` | Réglé pour une place de marché, en euros. Mois des chiffres : {month} ; inscrits suivis : {cohort}. | Set for a marketplace, in euros, on {month}'s figures and {cohort}'s sign-ups. |
 | `setup.mktSides` | Une place de marché a deux côtés : les acheteurs et les vendeurs. | A marketplace has two sides: buyers and sellers. |
 | `setup.mktOfferingLegend` | Ce qu'elle met en relation | What it connects |
+| `setup.mktSellerSubscriptions` | Les vendeurs paient un abonnement | Sellers pay a subscription |
 | `setup.firstOrderWindow` · `repeatWindow` · `firstSaleWindow` | Première commande sous · Deuxième commande sous · Première vente sous | First order within · Second order within · First sale within |
 | `setup.companyLabelMkt` | Nom de ta place de marché | Your marketplace's name |
 | `settings.streamSubject.sellerSubscriptions` | Les abonnements des vendeurs | Seller subscriptions |
