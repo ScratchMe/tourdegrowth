@@ -373,10 +373,11 @@ describe("fetchFunnelWindow (GoatCounter API — /admin/stats funnel section)", 
       "engine_deck_opened",
       "engine_tour_linked",
       // Which motions (C25 Q14), and sales-assisted's stages apart, prefixed.
-      // A consumer app is `app` (A22 APP-7, §21.6.2).
-      ...["plg", "slg", "hybrid", "app"].map((m) => `engine_setup/${m}`),
+      // A consumer app is `app` (A22 APP-7, §21.6.2), a marketplace `mkt` and its stages `mkt-` (A23 MKT-6, §22.9).
+      ...["plg", "slg", "hybrid", "app", "mkt"].map((m) => `engine_setup/${m}`),
       ...["acquisition", "activation", "retention", "referral", "revenue"].map((s) => `engine_stage_saved/${s}`),
       ...["acquisition", "activation", "retention", "referral", "revenue"].map((s) => `engine_stage_saved/slg-${s}`),
+      ...["acquisition", "activation", "retention", "referral", "revenue"].map((s) => `engine_stage_saved/mkt-${s}`),
       // The deck's three and the backup, then a reminder and the table's template (§19.12).
       ...["png", "pdf", "text", "json", "ics", "csv"].map((f) => `engine_exported/${f}`),
       // The doors into it (A7.9): the landing strip and the space band; then a result's owner and the landing's line (§19.10);
@@ -406,6 +407,9 @@ describe("fetchFunnelWindow (GoatCounter API — /admin/stats funnel section)", 
           { path: "engine_setup/hybrid", count: 2, event: true },
           { path: "engine_setup/app", count: 2, event: true },
           { path: "engine_stage_saved/slg-revenue", count: 1, event: true },
+          { path: "engine_setup/mkt", count: 3, event: true },
+          { path: "engine_stage_saved/mkt-activation", count: 2, event: true },
+          { path: "engine_stage_saved/mkt-revenue", count: 1, event: true },
           { path: "engine_month_started", count: 4, event: true },
           { path: "engine_request_copied", count: 3, event: true },
           { path: "engine_deck_opened", count: 2, event: true },
@@ -422,9 +426,11 @@ describe("fetchFunnelWindow (GoatCounter API — /admin/stats funnel section)", 
     const engine = (await fetchFunnelWindow("2024-01-01T00:00:00Z", "All-time")).stats!.engine;
     expect(engine).toEqual({
       opened: 9,
-      setup: { plg: 0, slg: 0, hybrid: 2, app: 2 },
+      setup: { plg: 0, slg: 0, hybrid: 2, app: 2, mkt: 3 },
       stagesSaved: { acquisition: 0, activation: 4, retention: 0, referral: 0, revenue: 1 },
       stagesSavedSlg: { acquisition: 0, activation: 0, retention: 0, referral: 0, revenue: 1 },
+      // A marketplace's stages are counted apart from the other two's, by their own prefix (§22.9).
+      stagesSavedMkt: { acquisition: 0, activation: 2, retention: 0, referral: 0, revenue: 1 },
       monthStarted: 4,
       requestsCopied: 3,
       deckOpened: 2,

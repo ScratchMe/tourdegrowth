@@ -3,13 +3,13 @@
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
-import { EngineStart, type StartChoice } from "@/components/engine/EngineStart";
+import { EngineStart, type StartChoice, type StartOffering } from "@/components/engine/EngineStart";
 import { EngineTermScope } from "./_engine/EngineTerm";
 import { motionOfMetric, motionShapes, shapeOf } from "@/lib/engine/catalog-shape";
 import { marketplaceStrings, mergeStrings, type DeepPartial, type EngineStrings, type MarketplaceLayers, type ResolvedBridge, type ResolvedDerived, type ResolvedMetric } from "@/lib/engine/strings";
 import type { AppMonetization } from "@/lib/engine/app-model";
 import { DEFAULT_APP_MONETIZATION, isSellingMotion } from "@/lib/engine/setup-type";
-import { MAX_ENGINES, MAX_MONTHS, type BusinessType, type EngineCalcContext, type EngineDerived, type EngineMotion, type EngineSetup, type EngineState, type LeverId, type MetricEntry, type MetricId, type MktSide, type Motion, type MotionDerived, type RoleId, type SlideTitle, type Snapshot, type YearMonth } from "@/lib/engine/types";
+import { MAX_ENGINES, MAX_MONTHS, type BusinessType, type EngineCalcContext, type EngineDerived, type EngineMotion, type EngineState, type LeverId, type MetricEntry, type MetricId, type MktSide, type Motion, type MotionDerived, type RoleId, type SlideTitle, type Snapshot } from "@/lib/engine/types";
 import type { Locale } from "@/lib/i18n/locale";
 import { Board } from "./_engine/Board";
 import type { SeriesControls } from "./_engine/BoardHead";
@@ -43,7 +43,7 @@ import { AskScreen } from "./_engine/AskScreen";
 import { NumberScreen } from "./_engine/NumberScreen";
 import { Setup, type SetupChoice } from "./_engine/Setup";
 import { settingsNumbers } from "./_engine/settings-numbers";
-import { motionsOf, startCopy, typeOf, type StartEarnsCopy } from "./_engine/start";
+import { DEFAULT_MKT_START, motionsOf, settingsExisting, startCopy, typeOf, withSettings, type MktStart, type StartEarnsCopy, type StartMktCopy } from "./_engine/start";
 import { TargetsStart } from "./_engine/TargetsStart";
 import { continueFrom, nextSelfNumber, type Continuation } from "./_engine/next-step";
 import { seedAskDraft } from "./_engine/sheet-drafts";
@@ -148,12 +148,13 @@ const savedStages = new Set<EngineStageDetail>();
 // navigator.storage.persist() asked once, at the first successful write (§4.3).
 let persistenceAsked = false;
 
-/** The first save of a number of its stage in the session (§11.6). Sales-assisted's stages count apart, prefixed (Q14); the link's block sits under its acquisition. */
+/**
+ * The first save of a number of its stage in the session (§11.6). Sales-assisted's stages count apart, prefixed (Q14), and so do a
+ * marketplace's (§22.9, `ENGINE_MARKET_STAGES`), whichever side the number is on: the stage is the detail, never the side or the
+ * number. The link's block sits under its acquisition.
+ */
 function stageSaved(id: MetricId): void {
-  const motion = motionOfMetric(id);
-  // A marketplace's stages are counted by MKT-6 (§22.9, `ENGINE_MARKET_STAGES`): until then, no event for them.
-  if (!isSellingMotion(motion)) return;
-  const stageDetail = engineStageDetail(shapeOf(id).stage, motion);
+  const stageDetail = engineStageDetail(shapeOf(id).stage, motionOfMetric(id));
   if (savedStages.has(stageDetail)) return;
   savedStages.add(stageDetail);
   trackEngine({ name: "engine_stage_saved", detail: stageDetail });
@@ -222,6 +223,8 @@ function Workbench(props: EngineWorkbenchProps) {
   // type open it has a fourth answer, and the app's three ways of earning (§21.6.1) are kept with it.
   const [startChoice, setStartChoice] = useState<StartChoice>("ss");
   const [monetization, setMonetization] = useState<AppMonetization>(DEFAULT_APP_MONETIZATION);
+  // The marketplace's two answers (§22.6.1): its words and whether the sellers pay, kept with the choice as the app's boxes are.
+  const [mktStart, setMktStart] = useState<MktStart>(DEFAULT_MKT_START);
   // « Commence » pressed with the app chosen and nothing ticked: the message shows until the choice or a box changes.
   const [startTried, setStartTried] = useState(false);
   const [writeFailed, setWriteFailed] = useState(false);
@@ -363,8 +366,10 @@ function Workbench(props: EngineWorkbenchProps) {
   }
 
   function openExample(choice: StartChoice) {
-    setExampleMotions(motionsOf(choice));
-    setExampleType(typeOf(choice));
+    // The marketplace's example is MKT-9's (§22.12): until it exists, the card opens the SaaS's self-serve one, as the app's did until APP-10 (§21.6.1).
+    const shown = choice === "mkt" ? "ss" : choice;
+    setExampleMotions(motionsOf(shown));
+    setExampleType(typeOf(shown));
     setScreen("example");
     focus("engine-example-title");
   }
@@ -386,6 +391,16 @@ function Workbench(props: EngineWorkbenchProps) {
         setStartTried(false);
       },
       ...(startTried && startEarnsNothing ? { error: strings.start.appEarnsNone } : {}),
+    };
+  }
+
+  /** The marketplace's two answers (§22.6.1) with their two functions. */
+  function startMktAnswers(copy: StartMktCopy | undefined) {
+    if (!copy) return undefined;
+    return {
+      ...copy,
+      onOfferingChange: (offering: StartOffering) => setMktStart((was) => ({ ...was, offering })),
+      onSellerSubscriptionsChange: (sellerSubscriptions: boolean) => setMktStart((was) => ({ ...was, sellerSubscriptions })),
     };
   }
 
@@ -509,6 +524,7 @@ function Workbench(props: EngineWorkbenchProps) {
           openTypes={props.openTypes}
           startType={typeOf(startChoice)}
           startMonetization={monetization}
+          startMkt={mktStart}
           startMotions={motionsOf(startChoice)}
           onCancel={() => {
             setScreen("board");
@@ -518,12 +534,13 @@ function Workbench(props: EngineWorkbenchProps) {
         />,
       );
     }
-    const start = startCopy(strings, locale, startChoice, new Date(snap.openedAt), props.openTypes, monetization);
+    const start = startCopy(strings, locale, startChoice, new Date(snap.openedAt), props.openTypes, monetization, mktStart);
     return shell(
       <EngineStart
         {...start.props}
         onMotionChange={changeStartChoice}
         earns={startEarns(start.props.earns)}
+        mkt={startMktAnswers(start.props.mkt)}
         onChange={() => {
           setScreen("settings");
           focus("engine-setup-title");
@@ -672,12 +689,13 @@ function Workbench(props: EngineWorkbenchProps) {
 
   if (screen === "new") {
     // Another engine (§19.1.5): the start screen, and « Annuler » back to the engine on screen.
-    const start = startCopy(strings, locale, startChoice, new Date(snap.openedAt), props.openTypes, monetization);
+    const start = startCopy(strings, locale, startChoice, new Date(snap.openedAt), props.openTypes, monetization, mktStart);
     return shell(
       <EngineStart
         {...start.props}
         onMotionChange={changeStartChoice}
         earns={startEarns(start.props.earns)}
+        mkt={startMktAnswers(start.props.mkt)}
         onChange={() => {
           setScreen("new-settings");
           focus("engine-setup-title");
@@ -704,6 +722,7 @@ function Workbench(props: EngineWorkbenchProps) {
         openTypes={props.openTypes}
         startType={typeOf(startChoice)}
         startMonetization={monetization}
+        startMkt={mktStart}
         startMotions={motionsOf(startChoice)}
         onCancel={() => {
           setScreen("new");
@@ -779,15 +798,7 @@ function Workbench(props: EngineWorkbenchProps) {
         linked={current.tourLink !== null}
         after={current.snapshots[current.snapshots.length - 2]?.referenceMonth}
         initial={{ setup: current.setup, referenceMonth: snapshot.referenceMonth, cohortMonth: snapshot.cohortMonth }}
-        existing={{
-          activation: snapshot.metrics["act.rate"] !== undefined,
-          paid: snapshot.metrics["rev.paid-conversion"] !== undefined,
-          qualification: snapshot.metrics["slg.acq.lead-to-opp"] !== undefined,
-          goLive: snapshot.metrics["slg.act.go-live"] !== undefined,
-          any: Object.keys(snapshot.metrics).length > 0,
-          entered: enteredCounts(snapshot),
-          enteredIds: enteredIds(snapshot),
-        }}
+        existing={{ ...settingsExisting(snapshot), entered: enteredCounts(snapshot), enteredIds: enteredIds(snapshot) }}
         focusCompany={renaming}
         numbers={settingsNumbers(current, metrics, strings, locale, view.ctx.today)}
         onCancel={() => {
@@ -1091,34 +1102,6 @@ function boardOf(state: EngineState, { monthIndex, today, locale, tourResults, b
   const tourOnDevice = deviceTour !== null;
   const view: EngineView = { state: lens.state, derived, strings, metrics, derivedCopy, bridges, ctx, tourResult, tourOnDevice, deviceTour };
   return { view, verdict, plan, month };
-}
-
-/**
- * The engine with new settings (Antoine, 2026-09-25: they could not be
- * changed without erasing everything). A window is part of a number's
- * definition — activation within n days, paid within n days — so changing
- * it sends that number back to "to fill in": kept, it would claim a
- * definition it was not measured on. The settings card says so before the
- * save. A month changed keeps every entry: the card asks to reread them.
- */
-function withSettings(state: EngineState, setup: EngineSetup, referenceMonth: YearMonth, cohortMonth: YearMonth): EngineState {
-  const snapshot = lastSnapshot(state);
-  const metrics = { ...snapshot.metrics };
-  if (setup.activationWindowDays !== state.setup.activationWindowDays) delete metrics["act.rate"];
-  if (setup.paidWindowDays !== state.setup.paidWindowDays) delete metrics["rev.paid-conversion"];
-  // The sales-assisted windows are part of their numbers' definitions too (§18.1.2): the same rule.
-  if (setup.qualificationWindowDays !== state.setup.qualificationWindowDays) delete metrics["slg.acq.lead-to-opp"];
-  if (setup.goLiveWindowDays !== state.setup.goLiveWindowDays) delete metrics["slg.act.go-live"];
-  const hadCompany = Boolean(state.setup.companyLabel);
-  return {
-    ...state,
-    // Unticking a motion loses nothing (§18.1.2): its entries, targets, what-ifs and slide boxes stay in
-    // the state, the storage and the file; the board, the coverage, the diagnosis and the deck ignore them.
-    setup,
-    // A name given for the first time goes on the slides, as it does at creation.
-    deck: !hadCompany && setup.companyLabel ? { ...state.deck, showCompany: true } : state.deck,
-    snapshots: [...state.snapshots.slice(0, -1), { ...snapshot, referenceMonth, cohortMonth, metrics }],
-  };
 }
 
 /**

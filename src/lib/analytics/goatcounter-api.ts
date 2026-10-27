@@ -19,6 +19,7 @@ import {
   type EngineEntryDetail,
   ENGINE_EXPORT_FORMATS,
   ENGINE_EXPORTED_EVENT,
+  ENGINE_MARKET_STAGES,
   ENGINE_MONTH_STARTED_EVENT,
   ENGINE_OPENED_EVENT,
   ENGINE_REQUEST_COPIED_EVENT,
@@ -162,6 +163,8 @@ export interface EngineFunnelStats {
   stagesSaved: Record<(typeof ENGINE_STAGES)[number], number>;
   /** `engine_stage_saved/slg-<stage>` — the same, in sales-assisted (Q14). */
   stagesSavedSlg: Record<(typeof ENGINE_STAGES)[number], number>;
+  /** `engine_stage_saved/mkt-<stage>` — the same, in a marketplace, either side (§22.9). */
+  stagesSavedMkt: Record<(typeof ENGINE_STAGES)[number], number>;
   /** `engine_month_started` — the next month was started: the series in use (§19.12). */
   monthStarted: number;
   requestsCopied: number;
@@ -383,6 +386,7 @@ function engineStats(count: (path: string) => number): EngineFunnelStats {
     setup: tally(ENGINE_SETUP_DETAILS, (motions) => count(`${ENGINE_SETUP_EVENT}/${motions}`)),
     stagesSaved: tally(ENGINE_STAGES, (stage) => count(`${ENGINE_STAGE_SAVED_EVENT}/${stage}`)),
     stagesSavedSlg: tally(ENGINE_STAGES, (stage) => count(`${ENGINE_STAGE_SAVED_EVENT}/${ENGINE_SALES_STAGES[ENGINE_STAGES.indexOf(stage)]}`)),
+    stagesSavedMkt: tally(ENGINE_STAGES, (stage) => count(`${ENGINE_STAGE_SAVED_EVENT}/${ENGINE_MARKET_STAGES[ENGINE_STAGES.indexOf(stage)]}`)),
     monthStarted: count(ENGINE_MONTH_STARTED_EVENT),
     requestsCopied: count(ENGINE_REQUEST_COPIED_EVENT),
     deckOpened: count(ENGINE_DECK_OPENED_EVENT),

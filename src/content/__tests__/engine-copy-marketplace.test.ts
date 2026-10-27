@@ -254,17 +254,11 @@ describe("the overlays cover what the rule designates (§22.8.3, point 1)", () =
   });
 
   it("skips only leaves a rule still designates, that the side does not rewrite, and that it says why it skips", () => {
-    // Written by a later unit: absent from the base until then, designated by the rule once there (MKT-6, §22.8.5 a). The day it
-    // is written this test says so, and the name leaves this list.
-    const NOT_WRITTEN_YET = ["settings.firstSalePaidReset"];
+    // `settings.firstSalePaidReset` was absent from the base until MKT-6 wrote it (§22.8.5 a): it is held like the others now.
     for (const side of SIDES) {
       const skipped = MKT_OVERLAY_SKIPPED[side];
       expect(new Set(skipped).size).toBe(skipped.length);
       for (const path of skipped) {
-        if (NOT_WRITTEN_YET.includes(path)) {
-          expect(BASE_BY_PATH.has(path), `${path} now exists: MKT-6 wrote it — take it off NOT_WRITTEN_YET, and check the rule designates it`).toBe(false);
-          continue;
-        }
         // The supply's rule holds the demand's: a leaf skipped on the demand side that only the supply designates is the
         // table's own wording (§22.8.3: `referral-on-top`), and stays harmless.
         expect(DESIGNATED.supply.some((l) => l.path === path), `${path} is no longer designated by the rule: take it off the list`).toBe(true);
@@ -620,7 +614,9 @@ describe("a services marketplace no longer speaks « produits » (§22.8.3, poin
   });
 
   it("excludes exactly what `MKT_EXCLUDED` does, but the leaves written for the marketplace — the `mkt` key, the `Mkt` part and the `mkt` prefix", () => {
-    const own = BASE.filter((l) => l.segments[0] === "mkt" || l.segments.some((x) => x.includes("Mkt") || x.startsWith("mkt")));
+    // Not the start card's (`start.mkt*`, A23 MKT-6, §22.8.5 a): `start` is line 1's own key, which the services list keeps, so those leaves
+    // are excluded in both lists and the card never reaches the services layer (it names both vocabularies).
+    const own = BASE.filter((l) => l.segments[0] !== "start" && (l.segments[0] === "mkt" || l.segments.some((x) => x.includes("Mkt") || x.startsWith("mkt"))));
     expect(own.length).toBeGreaterThan(80);
     // Excluded for the words of "products" (they are written in them), read for the words of "services".
     expect(own.filter((l) => !isExcluded(l)).length).toBe(0);
@@ -865,5 +861,126 @@ describe("the page hands the island the overlays resolved (§22.8.1)", () => {
     expect(neutral.setup.referenceMonthHint).toBe(resolveTree(ENGINE_COPY_MKT.common, "fr").setup!.referenceMonthHint);
     // A leaf only a side rewrites reads the SaaS's in the neutral set (the bar, the list and the total read nothing of it).
     expect(neutral.money.worthTitle).toBe(props.strings.money.worthTitle);
+  });
+});
+
+// ------------------------------------------------------------------------------------------------ the setup card and the Settings (MKT-6)
+
+/**
+ * What A23 MKT-6 writes for the start card, the setup card, the Settings and the bar (§22.8.5 a): nineteen leaves in
+ * `ENGINE_COPY`, written with the words of "products", and, for the nine a "services" marketplace reads and the rule of
+ * point 5 catches (the sides line, the three windows, the sellers' subscription as a subject, the four warnings), their
+ * twin in `ENGINE_COPY_MKT_SERVICES.common`. The oracle below is the specification's own table, read by a script from
+ * `docs/engine/place-de-marche.md` §22.8.5 a with the typography of §23.8 posed (U+00A0 written out): the code is compared to
+ * it, not to itself.
+ *
+ * Non-vacuity, measured on 2026-10-27 (each sabotage alone, the eleven nearest test files run — 405 tests, 406 for the last one measured, green before each —, the file put back and its sha compared; the count is the tests that fall): the services twin of `setup.mktSides` renamed away falls 10 (the rule of point 5 on the three sets, the sheet's orphans and its leaves); the first-sale warning's French back to « première vente reçue » 4; « an subscription » in the start card's English 2.
+ */
+const MKT6_PRODUCTS: readonly (readonly [string, string, string])[] = [
+  ["start.mkt", "Place de marché", "Marketplace"],
+  ["start.mktNote", "Une commission sur chaque commande, et peut-être un abonnement pour les vendeurs.", "A commission on every order, and maybe a subscription for sellers."],
+  ["start.mktOffering", "Elle met en relation", "It connects"],
+  ["start.mktOfferingProducts", "Acheteurs et vendeurs de produits", "Buyers and sellers of products"],
+  ["start.mktOfferingServices", "Clients et prestataires de services", "Clients and service providers"],
+  ["start.mktSellerSubscriptions", "Les vendeurs paient un abonnement", "Sellers pay a subscription"],
+  ["start.defaultsMkt", "Réglé pour une place de marché, en euros. Mois des chiffres\u00a0: {month}\u00a0; inscrits suivis\u00a0: {cohort}.", "Set for a marketplace, in euros, on {month}'s figures and {cohort}'s sign-ups."],
+  ["setup.mktSides", "Une place de marché a deux côtés\u00a0: les acheteurs et les vendeurs.", "A marketplace has two sides: buyers and sellers."],
+  ["setup.mktOfferingLegend", "Ce qu'elle met en relation", "What it connects"],
+  ["setup.firstOrderWindow", "Première commande sous", "First order within"],
+  ["setup.repeatWindow", "Deuxième commande sous", "Second order within"],
+  ["setup.firstSaleWindow", "Première vente sous", "First sale within"],
+  ["setup.companyLabelMkt", "Nom de ta place de marché", "Your marketplace's name"],
+  ["settings.streamSubject.sellerSubscriptions", "Les abonnements des vendeurs", "Seller subscriptions"],
+  ["workbench.modelShort.marketplace", "Place de marché", "Marketplace"],
+  ["settings.firstOrderReset", "La fenêtre de première commande fait partie de la définition de la première commande\u00a0: ton chiffre déjà saisi repassera «\u00a0à faire\u00a0», pour que tu le remesures sur {n}\u00a0jours.", "The first-order window is part of the first order's definition: the number you already entered will go back to \"to do\", so you can measure it again over {n} days."],
+  ["settings.repeatReset", "La fenêtre de deuxième commande fait partie de la définition de la deuxième commande\u00a0: ton chiffre déjà saisi repassera «\u00a0à faire\u00a0», pour que tu le remesures sur {n}\u00a0jours.", "The second-order window is part of the second order's definition: the number you already entered will go back to \"to do\", so you can measure it again over {n} days."],
+  ["settings.firstSaleReset", "La fenêtre de première vente fait partie de la définition de la première vente\u00a0: ton chiffre déjà saisi repassera «\u00a0à faire\u00a0», pour que tu le remesures sur {n}\u00a0jours.", "The first-sale window is part of the first sale's definition: the number you already entered will go back to \"to do\", so you can measure it again over {n} days."],
+  ["settings.firstSalePaidReset", "La fenêtre de première vente fait partie de la définition de la première vente et de celle de la conversion en abonné\u00a0: ce que tu as déjà saisi repassera «\u00a0à faire\u00a0», pour que tu le remesures sur {n}\u00a0jours.", "The first-sale window is part of the definitions of the first sale and of the subscription conversion: what you already entered will go back to \"to do\", so you can measure it again over {n} days."],
+];
+/** Their twins in the words of "services": the fiche's own texts, and the four warnings by the lexicon of §22.8.4 on the products' text. */
+const MKT6_SERVICES: readonly (readonly [string, string, string])[] = [
+  ["setup.mktSides", "Une place de marché a deux côtés\u00a0: les clients et les prestataires.", "A marketplace has two sides: clients and providers."],
+  ["setup.firstOrderWindow", "Première réservation sous", "First booking within"],
+  ["setup.repeatWindow", "Deuxième réservation sous", "Second booking within"],
+  ["setup.firstSaleWindow", "Première réservation reçue sous", "First booking received within"],
+  ["settings.streamSubject.sellerSubscriptions", "Les abonnements des prestataires", "Provider subscriptions"],
+  ["settings.firstOrderReset", "La fenêtre de première réservation fait partie de la définition de la première réservation\u00a0: ton chiffre déjà saisi repassera «\u00a0à faire\u00a0», pour que tu le remesures sur {n}\u00a0jours.", "The first-booking window is part of the first booking's definition: the number you already entered will go back to \"to do\", so you can measure it again over {n} days."],
+  ["settings.repeatReset", "La fenêtre de deuxième réservation fait partie de la définition de la deuxième réservation\u00a0: ton chiffre déjà saisi repassera «\u00a0à faire\u00a0», pour que tu le remesures sur {n}\u00a0jours.", "The second-booking window is part of the second booking's definition: the number you already entered will go back to \"to do\", so you can measure it again over {n} days."],
+  ["settings.firstSaleReset", "La fenêtre de première réservation reçue fait partie de la définition de la première réservation reçue\u00a0: ton chiffre déjà saisi repassera «\u00a0à faire\u00a0», pour que tu le remesures sur {n}\u00a0jours.", "The first-booking-received window is part of the definition of the first booking received: the number you already entered will go back to \"to do\", so you can measure it again over {n} days."],
+  ["settings.firstSalePaidReset", "La fenêtre de première réservation reçue fait partie de la définition de la première réservation reçue et de celle de la conversion en abonné\u00a0: ce que tu as déjà saisi repassera «\u00a0à faire\u00a0», pour que tu le remesures sur {n}\u00a0jours.", "The first-booking-received window is part of the definitions of the first booking received and of the subscription conversion: what you already entered will go back to \"to do\", so you can measure it again over {n} days."],
+];
+
+describe("the start card, the setup card, the Settings and the bar's leaves, in the specification's words (§22.8.5 a)", () => {
+  it("writes the nineteen leaves of the table in ENGINE_COPY, both languages, word for word, typography posed", () => {
+    expect(MKT6_PRODUCTS).toHaveLength(19);
+    const wrong = MKT6_PRODUCTS.flatMap(([path, fr, en]) => {
+      const leaf = BASE_BY_PATH.get(path);
+      if (!leaf) return [`${path}: missing from ENGINE_COPY`];
+      return [...(leaf.copy.fr === fr ? [] : [`${path}.fr: ${leaf.copy.fr}`]), ...(leaf.copy.en === en ? [] : [`${path}.en: ${leaf.copy.en}`])];
+    });
+    expect(wrong).toEqual([]);
+  });
+
+  it("sets the plain space that French does not break at: no leaf of the nineteen holds one before `:` `;` `?` or around a guillemet, and `{n} jours` is joined", () => {
+    for (const [path, fr] of MKT6_PRODUCTS) {
+      expect(fr, path).not.toMatch(/ [:;!?»%€]|« /);
+      expect(fr, path).not.toMatch(/\{n\} (jours|mois)/);
+    }
+    for (const [path, fr] of MKT6_SERVICES) {
+      expect(fr, path).not.toMatch(/ [:;!?»%€]|« /);
+      expect(fr, path).not.toMatch(/\{n\} (jours|mois)/);
+    }
+  });
+
+  it("the nine \"services\" twins are in `services.common`, word for word, and in no side's sheet", () => {
+    expect(MKT6_SERVICES).toHaveLength(9);
+    const common = new Map(leavesOf(ENGINE_COPY_MKT_SERVICES.common).map((l) => [l.path, l]));
+    const wrong = MKT6_SERVICES.flatMap(([path, fr, en]) => {
+      const leaf = common.get(path);
+      if (!leaf) return [`${path}: missing from services.common`];
+      return [...(leaf.copy.fr === fr ? [] : [`${path}.fr: ${leaf.copy.fr}`]), ...(leaf.copy.en === en ? [] : [`${path}.en: ${leaf.copy.en}`])];
+    });
+    expect(wrong).toEqual([]);
+    for (const side of SIDES) {
+      const own = new Set(leavesOf(ENGINE_COPY_MKT_SERVICES[side]).map((l) => l.path));
+      for (const [path] of MKT6_SERVICES) expect(own.has(path), `${path} is in the services ${side} sheet: it would overrule common`).toBe(false);
+    }
+  });
+
+  it("the four warnings in services are the products' text with the lexicon's words and nothing else — « commande » read « réservation », « première vente » « première réservation reçue »", () => {
+    for (const [path, replaced] of [
+      ["settings.firstOrderReset", (fr: string) => fr.replaceAll("commande", "réservation")],
+      ["settings.repeatReset", (fr: string) => fr.replaceAll("commande", "réservation")],
+      ["settings.firstSaleReset", (fr: string) => fr.replaceAll("première vente", "première réservation reçue")],
+      ["settings.firstSalePaidReset", (fr: string) => fr.replaceAll("première vente", "première réservation reçue")],
+    ] as const) {
+      const base = BASE_BY_PATH.get(path)!.copy.fr;
+      const twin = MKT6_SERVICES.find(([p]) => p === path)![1];
+      expect(twin, path).toBe(replaced(base));
+      // The template and everything but the words is the products' text.
+      expect(placeholdersOf(twin), path).toEqual(placeholdersOf(base));
+    }
+    for (const path of ["settings.firstOrderReset", "settings.repeatReset", "settings.firstSaleReset", "settings.firstSalePaidReset"]) {
+      const en = MKT6_SERVICES.find(([p]) => p === path)![2];
+      expect(en, path).toMatch(/booking/);
+      expect(en, path).not.toMatch(/\b(order|sale)s?\b/);
+    }
+  });
+
+  it("the start card's leaves and the bar's word are read as written: no overlay rewrites them, for either offering", () => {
+    const never = ["start.mkt", "start.mktNote", "start.mktOffering", "start.mktOfferingProducts", "start.mktOfferingServices", "start.mktSellerSubscriptions", "start.defaultsMkt", "workbench.modelShort.marketplace"];
+    const layers = [LAYER.common, LAYER.demand, LAYER.supply, SERVICES_LAYER.common, SERVICES_LAYER.demand, SERVICES_LAYER.supply];
+    for (const leaves of layers) for (const path of never) expect(leaves.some((l) => l.path === path), path).toBe(false);
+    // And they are the ones the rule excludes, not ones it forgot: `start` is line 1's, `workbench.modelShort` line 5's.
+    for (const path of never) expect(KEPT.some((l) => l.path === path), path).toBe(false);
+  });
+
+  it("`settings.firstSalePaidReset` is written for the marketplace, so the rule skips it on both sides and the services layer rewrites it", () => {
+    expect(BASE_BY_PATH.has("settings.firstSalePaidReset")).toBe(true);
+    for (const side of SIDES) {
+      expect(MKT_OVERLAY_SKIPPED[side]).toContain("settings.firstSalePaidReset");
+      expect(LAYER_BY_PATH[side].has("settings.firstSalePaidReset")).toBe(false);
+    }
+    expect(SERVICES_LAYER_BY_PATH.common.has("settings.firstSalePaidReset")).toBe(true);
   });
 });

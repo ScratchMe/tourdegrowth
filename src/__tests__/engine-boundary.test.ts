@@ -4,6 +4,7 @@ import {
   ENGINE_ENTRY_DETAILS,
   ENGINE_EXPORT_FORMATS,
   ENGINE_EXPORTED_EVENT,
+  ENGINE_MARKET_STAGES,
   ENGINE_MONTH_STARTED_EVENT,
   ENGINE_OPENED_EVENT,
   ENGINE_REQUEST_COPIED_EVENT,
@@ -12,7 +13,9 @@ import {
   ENGINE_STAGE_DETAILS,
   ENGINE_STAGE_SAVED_EVENT,
   ENGINE_TOUR_LINKED_EVENT,
+  engineStageDetail,
 } from "@/lib/analytics/goatcounter";
+import { ALL_METRIC_SHAPES, motionOfMetric } from "@/lib/engine/catalog-shape";
 import { BY_PATH, FILES, reachable, stripComments, valueImports } from "./helpers/import-graph";
 
 /**
@@ -449,6 +452,35 @@ describe("growth engine boundary (engine spec §11.4)", () => {
     expect(door).toMatch(/detail:\s*\(typeof ENGINE_STAGE_DETAILS\)\[number\]/);
     expect(door).toMatch(/detail:\s*\(typeof ENGINE_EXPORT_FORMATS\)\[number\]/);
     expect(door).not.toMatch(/detail\??:\s*string\b/);
+  });
+
+  /**
+   * A23 MKT-6 (§22.9): a marketplace's analytics are `engine_setup/mkt` and `engine_stage_saved/mkt-<stage>`. The closed lists
+   * hold them (`ENGINE_MARKET_STAGES`, spelled out), and the island EMITS them: every detail of the list is the answer for a
+   * real number — the five `mkt-` ones for the marketplace's — and the island's `stageSaved` asks the door for it without
+   * a way out for a marketplace (until MKT-6 it returned before the door: « no event for them »).
+   *
+   * Non-vacuity, measured on 2026-10-27 (each sabotage alone, the eleven nearest test files run — 405 tests, 406 for the last one measured, green before each —, the file put back and its sha compared; the count is the tests that fall): the island's `stageSaved` returning early for a marketplace again falls 1, this test; `engineStageDetail` without its marketplace branch, and `mkt` left out of the setup list, fall it too.
+   */
+  it("rule 5 — a marketplace's `mkt` setup and its five `mkt-` stages are in the closed lists, and the island emits them", () => {
+    expect(ENGINE_SETUP_DETAILS).toContain("mkt");
+    expect(ENGINE_MARKET_STAGES).toHaveLength(5);
+    for (const stage of ENGINE_MARKET_STAGES) expect(ENGINE_STAGE_DETAILS).toContain(stage);
+
+    // Every detail of the stage list is what some number of the catalogue answers: the fifteen are all reachable.
+    const answered = new Set(ALL_METRIC_SHAPES.map((shape) => engineStageDetail(shape.stage, motionOfMetric(shape.id))));
+    expect([...answered].sort()).toEqual([...ENGINE_STAGE_DETAILS].sort());
+    // The marketplace's numbers answer the marketplace's details, and only those.
+    const market = new Set(ALL_METRIC_SHAPES.filter((shape) => motionOfMetric(shape.id) === "mkt").map((shape) => engineStageDetail(shape.stage, "mkt")));
+    expect([...market].sort()).toEqual([...ENGINE_MARKET_STAGES].sort());
+
+    // The island's one function that counts a stage reads the number's own motion and has no early return for a marketplace.
+    const island = stripComments(BY_PATH.get(ISLAND)!);
+    const body = /function stageSaved\([^)]*\)[^{]*\{([\s\S]*?)\n\}/.exec(island)?.[1] ?? "";
+    expect(body, "the island has a stageSaved").not.toBe("");
+    expect(body).toMatch(/engineStageDetail\(shapeOf\(id\)\.stage,\s*motionOfMetric\(id\)\)/);
+    expect(body).not.toMatch(/isSellingMotion|\bmkt\b|return;\s*\n\s*const stageDetail/);
+    expect(body).toMatch(/trackEngine\(\{ name: "engine_stage_saved", detail: stageDetail \}\)/);
   });
 
   /*

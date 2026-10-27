@@ -224,6 +224,22 @@ export const ENGINE_COPY = {
       fr: "Réglé pour une app grand public, en euros. Mois des chiffres : {month} ; installations suivies : {cohort}.",
       en: "Set for a consumer app, in euros, on {month}'s figures and {cohort}'s installs.",
     },
+    // TODO: à relire (convention 6) — neuf le 2026-10-27 (A23 MKT-6, §22.6.1, §22.8.5 a) : la carte de départ d'une place de marché,
+    // quand son type est ouvert : son choix, ses deux vocabulaires (produits ou services, qui ne passent jamais par le calque « services »)
+    // et la case des abonnements des vendeurs (D9, décochée au départ).
+    mkt: { fr: "Place de marché", en: "Marketplace" },
+    mktNote: {
+      fr: "Une commission sur chaque commande, et peut-être un abonnement pour les vendeurs.",
+      en: "A commission on every order, and maybe a subscription for sellers.",
+    },
+    mktOffering: { fr: "Elle met en relation", en: "It connects" },
+    mktOfferingProducts: { fr: "Acheteurs et vendeurs de produits", en: "Buyers and sellers of products" },
+    mktOfferingServices: { fr: "Clients et prestataires de services", en: "Clients and service providers" },
+    mktSellerSubscriptions: { fr: "Les vendeurs paient un abonnement", en: "Sellers pay a subscription" },
+    defaultsMkt: {
+      fr: "Réglé pour une place de marché, en euros. Mois des chiffres : {month} ; inscrits suivis : {cohort}.",
+      en: "Set for a marketplace, in euros, on {month}'s figures and {cohort}'s sign-ups.",
+    },
     plan: {
       fr: "{n} chiffres : {quick} se lisent en cinq minutes, {hour} demandent environ une heure chacun, {ask} sont à demander à quelqu'un.",
       en: "{n} numbers: {quick} take five minutes, {hour} about an hour each, {ask} come from someone else.",
@@ -326,6 +342,15 @@ export const ENGINE_COPY = {
     /** In the settings, in the type's place: the type is fixed at creation (D7, C61). */
     typeFixed: { fr: "Pour changer de type, crée un nouveau moteur.", en: "To change type, create a new engine." },
     companyLabelApp: { fr: "Nom de ton app", en: "Your app's name" },
+    // TODO: à relire (convention 6) — neuf le 2026-10-27 (A23 MKT-6, §22.6.1, §22.8.5 a) : la carte de réglage d'une place de marché.
+    // Ses trois fenêtres sont les définitions de la première commande, de la deuxième et de la première vente (§22.2.1) ;
+    // en « services », `services.common` réécrit `mktSides` et les trois fenêtres (§22.8.4).
+    mktSides: { fr: "Une place de marché a deux côtés : les acheteurs et les vendeurs.", en: "A marketplace has two sides: buyers and sellers." },
+    mktOfferingLegend: { fr: "Ce qu'elle met en relation", en: "What it connects" },
+    firstOrderWindow: { fr: "Première commande sous", en: "First order within" },
+    repeatWindow: { fr: "Deuxième commande sous", en: "Second order within" },
+    firstSaleWindow: { fr: "Première vente sous", en: "First sale within" },
+    companyLabelMkt: { fr: "Nom de ta place de marché", en: "Your marketplace's name" },
     /**
      * TODO: à relire (convention 6) — neuf le 2026-10-01 (A14 T4, §19.5.1, C32 Q9) : tools, toolsHint, toolFamily.
      * Optional, folded: nothing ticked changes nothing. The tools' own names are `tools`.
@@ -1292,6 +1317,8 @@ export const ENGINE_COPY = {
       hybrid: { fr: "libre-service et assisté", en: "self-serve and sales-assisted" },
       // TODO: à relire (convention 6) — neuf le 2026-10-07 (A22 APP-7, §21.6.2).
       app: { fr: "App grand public", en: "Consumer app" },
+      // TODO: à relire (convention 6) — neuf le 2026-10-27 (A23 MKT-6, §22.6.1).
+      marketplace: { fr: "Place de marché", en: "Marketplace" },
     },
     /** The mark on the comparison strip's target line, written beside the track, never inside it (§8.3). */
     targetMark: { fr: "ta cible", en: "your target" },
@@ -3327,6 +3354,25 @@ export const ENGINE_COPY = {
       fr: "La fenêtre de mise en production fait partie de la définition du taux de mise en production : ton chiffre déjà saisi repassera « à faire », pour que tu le remesures sur {n} jours.",
       en: "The go-live window is part of the go-live rate's definition: the number you already entered will go back to \"to do\", so you can measure it again over {n} days.",
     },
+    // TODO: à relire (convention 6) — neuf le 2026-10-27 (A23 MKT-6, §22.6.1, §22.8.5 a) : les quatre avertissements d'une place de marché, sur le motif
+    // de `activationReset` : une fenêtre fait partie de la définition de son chiffre, qui repasse « à faire ». `firstSalePaidReset` quand les vendeurs
+    // paient un abonnement (la première vente et la conversion en abonné partagent la fenêtre).
+    firstOrderReset: {
+      fr: "La fenêtre de première commande fait partie de la définition de la première commande : ton chiffre déjà saisi repassera « à faire », pour que tu le remesures sur {n} jours.",
+      en: "The first-order window is part of the first order's definition: the number you already entered will go back to \"to do\", so you can measure it again over {n} days.",
+    },
+    repeatReset: {
+      fr: "La fenêtre de deuxième commande fait partie de la définition de la deuxième commande : ton chiffre déjà saisi repassera « à faire », pour que tu le remesures sur {n} jours.",
+      en: "The second-order window is part of the second order's definition: the number you already entered will go back to \"to do\", so you can measure it again over {n} days.",
+    },
+    firstSaleReset: {
+      fr: "La fenêtre de première vente fait partie de la définition de la première vente : ton chiffre déjà saisi repassera « à faire », pour que tu le remesures sur {n} jours.",
+      en: "The first-sale window is part of the first sale's definition: the number you already entered will go back to \"to do\", so you can measure it again over {n} days.",
+    },
+    firstSalePaidReset: {
+      fr: "La fenêtre de première vente fait partie de la définition de la première vente et de celle de la conversion en abonné : ce que tu as déjà saisi repassera « à faire », pour que tu le remesures sur {n} jours.",
+      en: "The first-sale window is part of the definitions of the first sale and of the subscription conversion: what you already entered will go back to \"to do\", so you can measure it again over {n} days.",
+    },
     saved: { fr: "Réglages enregistrés.", en: "Settings saved." },
     /**
      * TODO: à relire (convention 6) — le 2026-10-02 (A18 T3.d, le retour 07, design/ds-extension-07-return/COPY.md) :
@@ -3364,6 +3410,8 @@ export const ENGINE_COPY = {
       subscriptions: { fr: "Les abonnements", en: "Subscriptions" },
       purchases: { fr: "Les achats intégrés", en: "In-app purchases" },
       ads: { fr: "La publicité", en: "Ads" },
+      // TODO: à relire (convention 6) — neuf le 2026-10-27 (A23 MKT-6, §22.6.1) : la case des abonnements des vendeurs, dite comme une façon de gagner de l'argent.
+      sellerSubscriptions: { fr: "Les abonnements des vendeurs", en: "Seller subscriptions" },
     },
     streamOffNone: { fr: "{stream} : rien n'est saisi, rien ne se perd.", en: "{stream}: nothing is entered, nothing is lost." },
     streamOffOne: {

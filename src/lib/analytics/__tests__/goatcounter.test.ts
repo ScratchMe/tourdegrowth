@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { ENGINE_SETUP_DETAILS, engineSetupDetail, resetPendingEventsForTests, trackEvent } from "../goatcounter";
+import { ENGINE_MARKET_STAGES, ENGINE_SALES_STAGES, ENGINE_SETUP_DETAILS, ENGINE_STAGE_DETAILS, ENGINE_STAGES, engineSetupDetail, engineStageDetail, resetPendingEventsForTests, trackEvent } from "../goatcounter";
 
 describe("trackEvent (SPEC.md §8: GoatCounter custom events)", () => {
   const originalWindow = (globalThis as { window?: unknown }).window;
@@ -155,6 +155,9 @@ describe("trackEvent — events fired before the script has loaded", () => {
  * the boxes alone (an app is self-serve, so `plg`) falls 2 here; `app` left out of `ENGINE_SETUP_DETAILS` falls 3, this
  * file's second test, the paths test of `goatcounter-api.test.ts` and the closed-vocabulary rule of
  * `engine-boundary.test.ts` among them.
+ *
+ * A marketplace is `mkt` (A23 MKT-6, §22.9), by its type before its boxes (it ticks none, so the boxes alone would read
+ * `plg`). Non-vacuity, measured on 2026-10-27 (each sabotage alone, the eleven nearest test files run — 405 tests, 406 for the last one measured, green before each —, the file put back and its sha compared; the count is the tests that fall): the marketplace's line left out of `engineSetupDetail` falls 2 here; `mkt` left out of `ENGINE_SETUP_DETAILS` falls 4 (one here, the paths and the engine block of `goatcounter-api.test.ts`, and rule 5 of `engine-boundary.test.ts`).
  */
 describe("engineSetupDetail (engine spec §11.6, §21.6.2)", () => {
   const both = { plg: true, slg: true };
@@ -166,14 +169,50 @@ describe("engineSetupDetail (engine spec §11.6, §21.6.2)", () => {
     expect(engineSetupDetail({ type: "b2b-saas", motions: both })).toBe("hybrid");
   });
 
+  it("is `mkt` for a marketplace: the boxes it stores (both unticked, §22.3) would read `plg`, and none of its fields is in the path", () => {
+    expect(engineSetupDetail({ type: "marketplace", motions: { plg: false, slg: false } })).toBe("mkt");
+    // The type decides before the boxes, whatever they hold (a file brings its errors).
+    expect(engineSetupDetail({ type: "marketplace", motions: { plg: true, slg: false } })).toBe("mkt");
+    expect(engineSetupDetail({ type: "marketplace", motions: both })).toBe("mkt");
+  });
+
   it("every detail it can answer is in the closed list the dashboard asks GoatCounter for", () => {
     const answers = [
       engineSetupDetail({ type: "consumer-app", motions: both }),
+      engineSetupDetail({ type: "marketplace", motions: { plg: false, slg: false } }),
       engineSetupDetail({ type: "b2b-saas", motions: { plg: true, slg: false } }),
       engineSetupDetail({ type: "b2b-saas", motions: { plg: false, slg: true } }),
       engineSetupDetail({ type: "b2b-saas", motions: both }),
     ];
     for (const answer of answers) expect(ENGINE_SETUP_DETAILS).toContain(answer);
     expect(new Set(answers).size).toBe(ENGINE_SETUP_DETAILS.length);
+  });
+});
+
+/**
+ * `engine_stage_saved/<stage>` in a marketplace (engine spec §22.9, A23 MKT-6): `ENGINE_MARKET_STAGES`, spelled out and
+ * in the order of `ENGINE_STAGES`, like sales-assisted's; the detail names the stage and never the side.
+ *
+ * Non-vacuity, measured on 2026-10-27 (each sabotage alone, the eleven nearest test files run — 405 tests, 406 for the last one measured, green before each —, the file put back and its sha compared; the count is the tests that fall): `engineStageDetail` without its marketplace branch falls 3 (two here, rule 5 of `engine-boundary.test.ts`); the five written in another order 2 (here, and the engine block of `goatcounter-api.test.ts`); `ENGINE_STAGE_DETAILS` without them 3; the dashboard reading the sales-assisted paths for the marketplace's 1.
+ */
+describe("engineStageDetail and ENGINE_MARKET_STAGES (engine spec §22.9)", () => {
+  it("spells out the marketplace's five, `mkt-` before the stage, in the order of the stages", () => {
+    expect([...ENGINE_MARKET_STAGES]).toEqual(["mkt-acquisition", "mkt-activation", "mkt-retention", "mkt-referral", "mkt-revenue"]);
+    expect(ENGINE_MARKET_STAGES.map((detail) => detail.replace(/^mkt-/, ""))).toEqual([...ENGINE_STAGES]);
+  });
+
+  it("answers each stage in each motion: its own, the sales-assisted twin, the marketplace's", () => {
+    for (const [index, stage] of ENGINE_STAGES.entries()) {
+      expect(engineStageDetail(stage, "plg")).toBe(stage);
+      expect(engineStageDetail(stage, "slg")).toBe(ENGINE_SALES_STAGES[index]);
+      expect(engineStageDetail(stage, "mkt")).toBe(ENGINE_MARKET_STAGES[index]);
+    }
+  });
+
+  it("every answer is in the closed list, the list holds fifteen paths, and none is shared", () => {
+    const answers = ENGINE_STAGES.flatMap((stage) => (["plg", "slg", "mkt"] as const).map((motion) => engineStageDetail(stage, motion)));
+    for (const answer of answers) expect(ENGINE_STAGE_DETAILS).toContain(answer);
+    expect(new Set(answers).size).toBe(15);
+    expect([...ENGINE_STAGE_DETAILS].sort()).toEqual([...answers].sort());
   });
 });

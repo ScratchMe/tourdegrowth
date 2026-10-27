@@ -8,18 +8,21 @@ import { Choices, type ChoiceOption } from "@/components/core/Choices";
 import { Field } from "@/components/core/Field";
 import styles from "./EngineStart.module.css";
 
-/** The start card's one question: how the company sells, or, once the app type is open, that it is a consumer app. */
-export type StartChoice = "ss" | "sa" | "both" | "app";
+/** The start card's one question: how the company sells, or, once their type is open, that it is a consumer app or a marketplace. */
+export type StartChoice = "ss" | "sa" | "both" | "app" | "mkt";
 
 /** The three ways a consumer app earns; the ticked ones are `AppMonetization`'s three booleans. */
 export type StartEarnsId = "subscriptions" | "purchases" | "ads";
+
+/** The two vocabularies a marketplace is read in (§22.6.1): the words of products, or of services. */
+export type StartOffering = "products" | "services";
 
 export interface EngineStartProps {
   /** « Avant de commencer ». */
   title: ReactNode;
   /** « Comment vends-tu ? » */
   legend: ReactNode;
-  /** Libre-service · Assisté · Les deux, each with its one-line note. « Les deux » sets both motions. With the app type open, a fourth: the app. */
+  /** Libre-service · Assisté · Les deux, each with its one-line note. « Les deux » sets both motions. With the app type open, a fourth: the app; with the marketplace's, a fifth. */
   options: readonly ChoiceOption<StartChoice>[];
   /** Default `ss`: self-serve, the v1 default. */
   motion: StartChoice;
@@ -32,6 +35,19 @@ export interface EngineStartProps {
     onChange: (next: Record<StartEarnsId, boolean>) => void;
     /** `start.appEarnsNone`, set by the caller after a click on « Commencer » with nothing ticked. */
     error?: ReactNode;
+  };
+  /**
+   * §22.6.1: the marketplace's two answers, shown when `motion === "mkt"`: the words it is read in (products or services,
+   * the first chosen at the start) and whether the sellers pay a subscription (unticked at the start, D9). Absent: nothing shows.
+   */
+  mkt?: {
+    legend: ReactNode;
+    options: readonly { value: StartOffering; label: ReactNode }[];
+    offering: StartOffering;
+    onOfferingChange: (next: StartOffering) => void;
+    subscriptionsLabel: ReactNode;
+    sellerSubscriptions: boolean;
+    onSellerSubscriptionsChange: (next: boolean) => void;
   };
   /** The counts by effort for the chosen motion: « 17 chiffres : 5 se lisent en cinq minutes… ». */
   plan: ReactNode;
@@ -62,8 +78,9 @@ export interface EngineStartProps {
  * it decides which numbers exist. Every other default is said in one
  * sentence, with « Modifier ». One primary way in; the example and the
  * import are quiet. With the app type open it is a fourth answer, and
- * choosing it opens its three ways of earning (`earns`, §21.6.1). Flat: on a first visit the page's raised card is the
- * privacy promise above it.
+ * choosing it opens its three ways of earning (`earns`, §21.6.1); with the
+ * marketplace's, a fifth, which opens its two (`mkt`, §22.6.1). Flat: on a
+ * first visit the page's raised card is the privacy promise above it.
  *
  * The heading takes the focus when a person comes here from another screen
  * (R-19): it is focusable, never focused on first paint by this component.
@@ -75,6 +92,7 @@ export function EngineStart({
   motion,
   onMotionChange,
   earns,
+  mkt,
   plan,
   defaults,
   changeLabel,
@@ -119,6 +137,26 @@ export function EngineStart({
             </div>
           )}
         </Field>
+      ) : null}
+      {mkt ? (
+        // Two answers of the marketplace's own, under the question as the app's boxes are: its words, then whether the sellers pay.
+        <div className={styles.mkt} data-testid={testId ? `${testId}-mkt` : undefined}>
+          <Choices<StartOffering>
+            legend={mkt.legend}
+            options={mkt.options}
+            value={mkt.offering}
+            onChange={mkt.onOfferingChange}
+            size="sm"
+            name="engine-offering"
+            id={testId ? `${testId}-mkt-offering` : undefined}
+          />
+          <Checkbox
+            label={mkt.subscriptionsLabel}
+            checked={mkt.sellerSubscriptions}
+            onChange={mkt.onSellerSubscriptionsChange}
+            data-testid={testId ? `${testId}-mkt-subscriptions` : undefined}
+          />
+        </div>
       ) : null}
       <p className={styles.plan} aria-live="polite" data-testid={testId ? `${testId}-plan` : undefined}>
         {plan}

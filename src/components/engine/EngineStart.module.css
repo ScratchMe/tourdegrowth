@@ -26,6 +26,13 @@
   gap: var(--space-5);
 }
 
+/* The marketplace's two answers (§22.6.1): its words, then whether the sellers pay, spaced like the card's own fields. */
+.mkt {
+  display: flex;
+  flex-direction: column;
+  gap: var(--form-gap-md);
+}
+
 .plan {
   font: var(--body-md);
   color: var(--text-body);

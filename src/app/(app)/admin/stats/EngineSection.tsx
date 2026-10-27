@@ -15,7 +15,7 @@ function share(n: number, of: number): string {
  *
  * What it can say is deliberately narrow: how many sessions opened the
  * engine, with which motions (Q14), how far into the five stages they saved
- * something — self-serve's and sales-assisted's apart — how many started a
+ * something — self-serve's, sales-assisted's and a marketplace's apart — how many started a
  * next month (the series in use, §19.12), and what left as a file. Never what anyone found — the page promises that nothing typed
  * leaves the browser, and these counts are the proof that the analytics keep
  * that promise too. Everything reads zero until the engine is opened.
@@ -43,12 +43,12 @@ function EngineCard({ window }: { window: FunnelWindow }) {
         </li>
         <li data-testid="admin-engine-setup">
           Set up — self-serve {engine.setup.plg}, sales-assisted {engine.setup.slg}, both {engine.setup.hybrid}, consumer app{" "}
-          {engine.setup.app}
+          {engine.setup.app}, marketplace {engine.setup.mkt}
         </li>
         {ENGINE_STAGES.map((stage) => (
           <li key={stage}>
             First number saved in {stage} — {engine.stagesSaved[stage]} ({share(engine.stagesSaved[stage], engine.opened)} of
-            openings); sales-assisted {engine.stagesSavedSlg[stage]}
+            openings); sales-assisted {engine.stagesSavedSlg[stage]}; marketplace {engine.stagesSavedMkt[stage]}
           </li>
         ))}
       </ul>

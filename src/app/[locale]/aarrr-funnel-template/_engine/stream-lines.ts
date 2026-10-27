@@ -1,5 +1,5 @@
 import { APP_STREAMS, type AppMonetization, type AppStream } from "@/lib/engine/app-model";
-import { shapesOf } from "@/lib/engine/catalog-shape";
+import { shapesOf, type SetupShapes } from "@/lib/engine/catalog-shape";
 import type { BusinessType, MetricId, Motion } from "@/lib/engine/types";
 
 /** A consumer app sells self-serve only (§21.1 D1): the motions `shapesOf` reads for it. */
@@ -31,4 +31,26 @@ export function streamChanges(type: BusinessType, was: AppMonetization, now: App
       : after.filter((metric) => !before.includes(metric)).length;
     return [{ stream, ticked: now[stream], n }];
   });
+}
+
+/** What ticking or unticking the sellers' subscription does to the numbers (§22.6.1), counted as a way of earning is. */
+export interface SellerSubscriptionChange {
+  /** `true`: the box is now ticked (the subscription's numbers appear); `false`: now unticked (the entered ones hide). */
+  ticked: boolean;
+  /** Unticked: the subscription's numbers already entered, which hide; ticked: the numbers that appear, to fill in. */
+  n: number;
+}
+
+/**
+ * The line the sellers' subscription box says before the save (§22.6.1), on the pattern of `streamChanges` and with the
+ * same phrases (`settings.streamOff*` and `streamOn*`): null when the box does not change. The numbers it counts are
+ * the five of `shapesOf` that carry `sellerSubscription: true`, the ones the box shows (D9); `entered` is the numbers
+ * the engine already holds a value for. Nothing else depends on the box, so there is no total to fear counting twice.
+ */
+export function sellerSubscriptionChange(setup: SetupShapes, was: boolean, now: boolean, entered: readonly MetricId[]): SellerSubscriptionChange | null {
+  if (was === now) return null;
+  const subscription = shapesOf({ ...setup, sellerSubscriptions: true })
+    .filter((shape) => shape.sellerSubscription)
+    .map((shape) => shape.id);
+  return { ticked: now, n: now ? subscription.length : subscription.filter((id) => entered.includes(id)).length };
 }

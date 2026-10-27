@@ -2,10 +2,12 @@ import { describe, expect, it } from "vitest";
 import { shapesOf } from "@/lib/engine/catalog-shape";
 import { EN, FR } from "@/lib/engine/__tests__/props";
 import { openTypesWith } from "@/lib/engine/access";
-import { ALWAYS_OPEN_TYPE, BUSINESS_TYPES, DEFAULT_APP_MONETIZATION } from "@/lib/engine/setup-type";
+import { defaultCohortMonth, matureCohortMonth } from "@/lib/engine/cohort";
+import { ALWAYS_OPEN_TYPE, BUSINESS_TYPES, DEFAULT_APP_MONETIZATION, mktSetup } from "@/lib/engine/setup-type";
 import { savedTools, teamTools } from "@/lib/engine/tools";
-import type { EngineSetup } from "@/lib/engine/types";
-import { motionsOf, pickedType, setupOfCard, startCopy, startDefaults, startMotionOf, startPlan, typeOf } from "../start";
+import type { EngineSetup, EngineState, MetricId } from "@/lib/engine/types";
+import { exampleState, marketplaceState } from "@/lib/engine/__tests__/fixtures";
+import { cohortWindowOf, DEFAULT_MKT_START, motionsForCard, motionsOf, pickedType, settingsExisting, setupOfCard, startCopy, startDefaults, startMotionOf, startPlan, typeOf, withSettings, type SetupCard } from "../start";
 
 /** What the card passes `startPlan` for a SaaS: its two motions, as the card reads them. */
 const saas = (answer: "ss" | "sa" | "both") => ({ type: "b2b-saas" as const, motions: motionsOf(answer) });
@@ -560,5 +562,376 @@ describe("setupOfCard", () => {
     const bare = setupOfCard({ ...opened(SAVED_APP), company: "  ", tools: [], quarterTarget: null, threshold: null, runway: null });
     for (const key of ["companyLabel", "tools", "pipeline", "runwayMonths"]) expect(key in bare, key).toBe(false);
     expect(setupOfCard({ ...opened(SAVED_APP), quarterTarget: 0, threshold: -1 }).pipeline).toBeUndefined();
+  });
+});
+
+/**
+ * The marketplace on the start card (engine spec §22.6.1, A23 MKT-6): a fifth answer when the type is open (after the
+ * app's, whether the app is open or not), its two answers of its own, its plan counted from its own numbers, and the
+ * card of the SaaS and of the app untouched by any of it.
+ *
+ * Non-vacuity, measured on 2026-10-27 (each sabotage alone, the eleven nearest test files run — 405 tests, 406 for the last one measured, green before each —, the file put back and its sha compared; the count is the tests that fall): `typeOf("mkt")` answering the SaaS falls 4; `motionsOf("mkt")` leaving the self-serve box on 2; `startDefaults` writing
+ * neither the offering nor the sellers' box 3; the marketplace's radio left out of `startCopy` 2; the card typed by the app alone (the marketplace open, the
+ * app closed) 1; the marketplace's two answers never handed to the card 1; `motionsForCard` handing the marketplace's empty boxes back 2 (here, and the Settings card's markup).
+ */
+describe("the marketplace on the start card (§22.6.1)", () => {
+  const TODAY = new Date(2026, 8, 24, 12);
+  const BOTH_TYPES = ["b2b-saas", "consumer-app", "marketplace"] as const;
+  const mkt = (sellerSubscriptions: boolean) => ({ type: "marketplace" as const, motions: motionsOf("mkt"), sellerSubscriptions });
+
+  it("a marketplace ticks no selling motion, and its choice makes the marketplace type, never the SaaS's or the app's", () => {
+    expect(motionsOf("mkt")).toEqual({ plg: false, slg: false });
+    expect(typeOf("mkt")).toBe("marketplace");
+    for (const answer of ["ss", "sa", "both"] as const) expect(typeOf(answer)).toBe("b2b-saas");
+    expect(typeOf("app")).toBe("consumer-app");
+    // The other answers keep the motions they had.
+    expect(motionsOf("app")).toEqual({ plg: true, slg: false });
+    expect(motionsOf("ss")).toEqual({ plg: true, slg: false });
+    expect(motionsOf("both")).toEqual({ plg: true, slg: true });
+  });
+
+  it("its plan counts its own numbers: 19 with the sellers' subscription, 14 without (§22.4.1)", () => {
+    for (const [sellerSubscriptions, n] of [[true, 19], [false, 14]] as const) {
+      const plan = startPlan(mkt(sellerSubscriptions));
+      expect(plan.n, `sellerSubscriptions ${sellerSubscriptions}`).toBe(n);
+      expect(plan.n).toBe(shapesOf(mkt(sellerSubscriptions)).length);
+      expect(plan.quick + plan.hour + plan.ask).toBe(plan.n);
+      // The sentence has no singular: every count stays at 2 or more.
+      expect(Math.min(plan.quick, plan.hour, plan.ask)).toBeGreaterThanOrEqual(2);
+    }
+  });
+
+  it("a marketplace starts with its offering, whether the sellers pay, and the cohort matured for its longest window — May on 24 September", () => {
+    const { setup, referenceMonth, cohortMonth } = startDefaults("mkt", DEFAULT_APP_MONETIZATION, TODAY);
+    expect(setup).toMatchObject({ type: "marketplace", motions: { plg: false, slg: false }, currency: "EUR", offering: "products", sellerSubscriptions: false });
+    expect(referenceMonth).toBe("2026-08");
+    // 90 days with the defaults (the longest of 30, 90 and 60), not the SaaS's 30: May, not July.
+    expect(cohortMonth).toBe("2026-05");
+    expect(cohortMonth).toBe(defaultCohortMonth(setup, TODAY));
+    // The windows are read with their defaults (D11): the start writes none, the settings card writes the three.
+    for (const key of ["firstOrderWindowDays", "repeatWindowDays", "firstSaleWindowDays", "monetization"]) expect(key in setup, key).toBe(false);
+  });
+
+  it("what the card chose is what the setup holds, and a SaaS or an app carries none of it", () => {
+    const { setup } = startDefaults("mkt", DEFAULT_APP_MONETIZATION, TODAY, { offering: "services", sellerSubscriptions: true });
+    expect(setup).toMatchObject({ type: "marketplace", offering: "services", sellerSubscriptions: true });
+    for (const answer of ["ss", "sa", "both", "app"] as const) {
+      const other = startDefaults(answer, DEFAULT_APP_MONETIZATION, TODAY, { offering: "services", sellerSubscriptions: true }).setup;
+      for (const key of ["offering", "sellerSubscriptions"]) expect(key in other, `${answer} ${key}`).toBe(false);
+    }
+  });
+
+  it("with the marketplace open: a fifth radio after the app's, the labels typed, and the plan and sentence of the SaaS word for word", () => {
+    for (const [locale, text] of [["fr", FR], ["en", EN]] as const) {
+      const open = startCopy(text.strings, locale, "ss", TODAY, BOTH_TYPES, DEFAULT_APP_MONETIZATION).props;
+      const closed = startCopy(text.strings, locale, "ss", TODAY, ["b2b-saas"], DEFAULT_APP_MONETIZATION).props;
+      const st = text.strings.start;
+      expect(open.legend).toBe(st.legendTypes);
+      expect(open.options.map((o) => o.value)).toEqual(["ss", "sa", "both", "app", "mkt"]);
+      expect(open.options.map((o) => o.label)).toEqual([st.ssTyped, st.saTyped, st.bothTyped, st.app, st.mkt]);
+      expect(open.options.map((o) => o.note)).toEqual([st.ssNote, st.saNote, st.bothNote, st.appNote, st.mktNote]);
+      expect(open.plan).toBe(closed.plan);
+      expect(open.defaults).toBe(closed.defaults);
+      expect("earns" in open).toBe(false);
+      expect("mkt" in open).toBe(false);
+    }
+  });
+
+  it("with the marketplace open and the app closed: the card is typed all the same, and the app has no radio", () => {
+    const props = startCopy(FR.strings, "fr", "ss", TODAY, ["b2b-saas", "marketplace"], DEFAULT_APP_MONETIZATION).props;
+    expect(props.legend).toBe(FR.strings.start.legendTypes);
+    expect(props.options.map((o) => o.value)).toEqual(["ss", "sa", "both", "mkt"]);
+    expect(props.options.map((o) => o.label)).toEqual([FR.strings.start.ssTyped, FR.strings.start.saTyped, FR.strings.start.bothTyped, FR.strings.start.mkt]);
+  });
+
+  it("closed, whatever the choice in progress: no marketplace radio, the SaaS's own card", () => {
+    const props = startCopy(FR.strings, "fr", "ss", TODAY, ["b2b-saas", "consumer-app"], DEFAULT_APP_MONETIZATION).props;
+    expect(props.options.map((o) => o.value)).toEqual(["ss", "sa", "both", "app"]);
+  });
+
+  it("the marketplace chosen: its words and its box as the card holds them, its plan, its sentence of defaults", () => {
+    for (const [locale, text, month, cohort] of [["fr", FR, "août 2026", "mai 2026"], ["en", EN, "August 2026", "May 2026"]] as const) {
+      const st = text.strings.start;
+      const unpaid = startCopy(text.strings, locale, "mkt", TODAY, BOTH_TYPES, DEFAULT_APP_MONETIZATION);
+      expect(unpaid.props.motion).toBe("mkt");
+      expect(unpaid.props.mkt).toEqual({
+        legend: st.mktOffering,
+        options: [
+          { value: "products", label: st.mktOfferingProducts },
+          { value: "services", label: st.mktOfferingServices },
+        ],
+        offering: "products",
+        subscriptionsLabel: st.mktSellerSubscriptions,
+        sellerSubscriptions: false,
+      });
+      expect("earns" in unpaid.props).toBe(false);
+      expect(unpaid.props.defaults).toBe(st.defaultsMkt.replace("{month}", month).replace("{cohort}", cohort));
+      expect(unpaid.props.plan.startsWith("14 ")).toBe(true);
+      expect(unpaid.defaults.setup).toMatchObject({ type: "marketplace", offering: "products", sellerSubscriptions: false });
+      // The sellers paying: nineteen numbers, and the card says what was ticked and chosen.
+      const paid = startCopy(text.strings, locale, "mkt", TODAY, BOTH_TYPES, DEFAULT_APP_MONETIZATION, { offering: "services", sellerSubscriptions: true });
+      expect(paid.props.plan.startsWith("19 ")).toBe(true);
+      expect(paid.props.mkt).toMatchObject({ offering: "services", sellerSubscriptions: true });
+      expect(paid.defaults.setup).toMatchObject({ offering: "services", sellerSubscriptions: true });
+    }
+  });
+
+  it("the SaaS's card opened on the marketplace's answer opens on self-serve, never on two empty boxes; any other answer is kept", () => {
+    expect(motionsForCard(motionsOf("mkt"))).toEqual({ plg: true, slg: false });
+    for (const answer of ["ss", "sa", "both", "app"] as const) expect(motionsForCard(motionsOf(answer)), answer).toEqual(motionsOf(answer));
+    // A copy, never the state's object.
+    const given = motionsOf("both");
+    expect(motionsForCard(given)).not.toBe(given);
+  });
+
+  it("starts from products with the sellers paying nothing (D9, D10)", () => {
+    expect(DEFAULT_MKT_START).toEqual({ offering: "products", sellerSubscriptions: false });
+  });
+});
+
+/**
+ * What the settings card writes for a marketplace (§22.6.1, MKT-R finding 35: « a field it forgets here is erased »). The
+ * card rebuilds the setup from zero, so a marketplace saved without a change must come back with its offering, whether the
+ * sellers pay and its three windows. Vitest mounts no component (§23.8): the rebuilding is `setupOfCard`'s, tested here.
+ *
+ * Non-vacuity, measured on 2026-10-27 (each sabotage alone, the eleven nearest test files run — 405 tests, 406 for the last one measured, green before each —, the file put back and its sha compared; the count is the tests that fall): the marketplace's fields left out of `setupOfCard` falls 4 (three here, and the save that writes the defaults); one window left out of them 4.
+ */
+describe("setupOfCard, a marketplace (§22.6.1)", () => {
+  const SAVED: EngineSetup = {
+    type: "marketplace",
+    motions: { plg: false, slg: false },
+    offering: "services",
+    sellerSubscriptions: true,
+    firstOrderWindowDays: 7,
+    repeatWindowDays: 180,
+    firstSaleWindowDays: 90,
+    currency: "EUR",
+    activationWindowDays: 7,
+    paidWindowDays: 30,
+    qualificationWindowDays: 30,
+    goLiveWindowDays: 90,
+    companyLabel: "Meublix",
+    // In the order the marketplace's families list them (analytics, then billing): the order the card writes.
+    tools: ["ga4", "stripe"],
+    runwayMonths: 18,
+  };
+  /** The card as it opens on a setup: what its state holds before anyone touches it, through the same functions. */
+  const opened = (setup: EngineSetup): SetupCard => {
+    const held = mktSetup(setup);
+    return {
+      type: setup.type,
+      motions: setup.motions,
+      monetization: setup.monetization ?? DEFAULT_APP_MONETIZATION,
+      offering: held.offering,
+      sellerSubscriptions: held.sellerSubscriptions,
+      firstOrderWindowDays: held.firstOrderWindowDays,
+      repeatWindowDays: held.repeatWindowDays,
+      firstSaleWindowDays: held.firstSaleWindowDays,
+      currency: setup.currency,
+      activationWindowDays: setup.activationWindowDays,
+      paidWindowDays: setup.paidWindowDays,
+      qualificationWindowDays: setup.qualificationWindowDays,
+      goLiveWindowDays: setup.goLiveWindowDays,
+      company: setup.companyLabel ?? "",
+      tools: savedTools(teamTools(setup.tools, setup.type), setup.tools, setup.type),
+      quarterTarget: setup.pipeline?.quarterTarget ?? null,
+      threshold: setup.pipeline?.threshold ?? null,
+      runway: setup.runwayMonths ?? null,
+    };
+  };
+
+  it("saved without a change, a marketplace keeps its offering, its sellers' subscription, its three windows and everything else", () => {
+    const saved = setupOfCard(opened(SAVED));
+    expect(saved).toEqual(SAVED);
+    expect(saved.motions).not.toBe(SAVED.motions);
+    expect("monetization" in saved).toBe(false);
+  });
+
+  it("each field changed on the card is the one written", () => {
+    const base = opened(SAVED);
+    expect(setupOfCard({ ...base, offering: "products" })).toMatchObject({ offering: "products", sellerSubscriptions: true, firstOrderWindowDays: 7 });
+    expect(setupOfCard({ ...base, sellerSubscriptions: false })).toMatchObject({ offering: "services", sellerSubscriptions: false, repeatWindowDays: 180 });
+    expect(setupOfCard({ ...base, firstOrderWindowDays: 90 }).firstOrderWindowDays).toBe(90);
+    expect(setupOfCard({ ...base, repeatWindowDays: 60 }).repeatWindowDays).toBe(60);
+    expect(setupOfCard({ ...base, firstSaleWindowDays: 30 }).firstSaleWindowDays).toBe(30);
+  });
+
+  it("a card that holds none of the five (a start that wrote none, D11) writes their defaults, never a hole", () => {
+    const { offering: _o, sellerSubscriptions: _s, firstOrderWindowDays: _f, repeatWindowDays: _r, firstSaleWindowDays: _w, ...bare } = opened(SAVED);
+    expect(setupOfCard(bare)).toMatchObject({ offering: "products", sellerSubscriptions: false, firstOrderWindowDays: 30, repeatWindowDays: 90, firstSaleWindowDays: 60 });
+  });
+
+  it("a SaaS and an app carry none of the marketplace's fields, whatever the card holds", () => {
+    for (const type of ["b2b-saas", "consumer-app"] as const) {
+      const saved = setupOfCard({ ...opened(SAVED), type, motions: { plg: true, slg: false } });
+      for (const key of ["offering", "sellerSubscriptions", "firstOrderWindowDays", "repeatWindowDays", "firstSaleWindowDays"]) expect(key in saved, `${type} ${key}`).toBe(false);
+    }
+  });
+});
+
+/**
+ * The cohort the card follows (§22.2.3, MKT-R finding 34): it reads `cohortWindowOf` where it read `Math.max(30, paid)`,
+ * and `defaultCohortMonth` is the same rule on a whole setup — the two must month alike, or the card would open on July
+ * where the start screen's sentence says May.
+ */
+describe("cohortWindowOf", () => {
+  const TODAY = new Date(2026, 8, 24, 12);
+  const base = { paidWindowDays: 30 as const };
+
+  it("a SaaS and an app: the payment window, 30 days at the least", () => {
+    for (const type of ["b2b-saas", "consumer-app"] as const) {
+      expect(cohortWindowOf({ type, paidWindowDays: 30 })).toBe(30);
+      expect(cohortWindowOf({ type, paidWindowDays: 60 })).toBe(60);
+      expect(cohortWindowOf({ type, paidWindowDays: 90 })).toBe(90);
+      // The marketplace's windows mean nothing to them.
+      expect(cohortWindowOf({ type, ...base, repeatWindowDays: 180 })).toBe(30);
+    }
+  });
+
+  it("a marketplace: the longest of its three, 90 days with the defaults, whatever the payment window", () => {
+    expect(cohortWindowOf({ type: "marketplace", ...base })).toBe(90);
+    expect(cohortWindowOf({ type: "marketplace", paidWindowDays: 90, firstOrderWindowDays: 7, repeatWindowDays: 60, firstSaleWindowDays: 30 })).toBe(60);
+    expect(cohortWindowOf({ type: "marketplace", ...base, repeatWindowDays: 180 })).toBe(180);
+    expect(cohortWindowOf({ type: "marketplace", ...base, firstOrderWindowDays: 90, repeatWindowDays: 60, firstSaleWindowDays: 30 })).toBe(90);
+  });
+
+  it("matures the very month `defaultCohortMonth` does, for every window a card offers", () => {
+    for (const paid of [30, 60, 90] as const) {
+      for (const first of [7, 30, 90] as const) {
+        for (const repeat of [60, 90, 180] as const) {
+          for (const sale of [30, 60, 90] as const) {
+            const setup: EngineSetup = {
+              ...startDefaults("mkt", DEFAULT_APP_MONETIZATION, TODAY).setup,
+              paidWindowDays: paid,
+              firstOrderWindowDays: first,
+              repeatWindowDays: repeat,
+              firstSaleWindowDays: sale,
+            };
+            expect(matureCohortMonth(cohortWindowOf(setup), TODAY), JSON.stringify([paid, first, repeat, sale])).toBe(defaultCohortMonth(setup, TODAY));
+          }
+        }
+      }
+      const saas = { ...startDefaults("ss", DEFAULT_APP_MONETIZATION, TODAY).setup, paidWindowDays: paid };
+      expect(matureCohortMonth(cohortWindowOf(saas), TODAY)).toBe(defaultCohortMonth(saas, TODAY));
+    }
+  });
+});
+
+/**
+ * What a change of window does when the Settings are saved (§22.6.1, MKT-R finding 33, « bloquant »): `withSettings` deletes
+ * the number the window defines, as it does for the SaaS's four, and `settingsExisting` is what the card asks before. A window
+ * is compared as `mktSetup` reads it: the start card writes none (D11), the settings card writes the three, and a card that
+ * writes the default over an absent one changes nothing — or saving the Settings untouched would erase two numbers.
+ *
+ * Non-vacuity, measured on 2026-10-27 (each sabotage alone, the eleven nearest test files run — 405 tests, 406 for the last one measured, green before each —, the file put back and its sha compared; the count is the tests that fall): the first sale's window no longer sending the sellers' paid conversion back falls 2; windows compared raw, without `mktSetup` (an absent one against its default), 1; `settingsExisting` reading the first sale alone 1; and, for `cohortWindowOf`, the marketplace read as 30 days 3 (two here, and the Settings card's hint).
+ */
+describe("withSettings and settingsExisting, a marketplace (§22.6.1)", () => {
+  const MONTHS = { referenceMonth: "2026-08" as const, cohortMonth: "2026-05" as const };
+  const kept = (state: EngineState) => Object.keys(state.snapshots.at(-1)!.metrics).sort() as MetricId[];
+  /** The numbers the three windows define, and the numbers they do not. */
+  const FIRST_ORDER: MetricId[] = ["mkt.buy.first-order"];
+  const REPEAT: MetricId[] = ["mkt.buy.repeat"];
+  const FIRST_SALE: MetricId[] = ["mkt.sell.first-sale", "mkt.sell.paid-conversion"];
+  const settle = (setup: Partial<EngineSetup>) => {
+    const state = marketplaceState();
+    return { state, saved: withSettings(state, { ...state.setup, ...setup }, MONTHS.referenceMonth, MONTHS.cohortMonth) };
+  };
+  const lost = (setup: Partial<EngineSetup>) => {
+    const { state, saved } = settle(setup);
+    return kept(state).filter((id) => !kept(saved).includes(id));
+  };
+
+  it("the example holds all of them before any change", () => {
+    const entered = kept(marketplaceState());
+    for (const id of [...FIRST_ORDER, ...REPEAT, ...FIRST_SALE]) expect(entered, id).toContain(id);
+  });
+
+  it("the first order's window sends the first order back to « à faire », and nothing else", () => {
+    expect(lost({ firstOrderWindowDays: 7 })).toEqual(FIRST_ORDER);
+    expect(lost({ firstOrderWindowDays: 90 })).toEqual(FIRST_ORDER);
+  });
+
+  it("the second order's window sends the second order back, and nothing else", () => {
+    expect(lost({ repeatWindowDays: 180 })).toEqual(REPEAT);
+    expect(lost({ repeatWindowDays: 60 })).toEqual(REPEAT);
+  });
+
+  it("the first sale's window sends back the first sale AND the sellers' paid conversion, and nothing else", () => {
+    expect(lost({ firstSaleWindowDays: 90 })).toEqual([...FIRST_SALE].sort());
+    expect(lost({ firstSaleWindowDays: 30 })).toEqual([...FIRST_SALE].sort());
+  });
+
+  it("two windows changed together send back what each defines", () => {
+    expect(lost({ repeatWindowDays: 180, firstSaleWindowDays: 90 })).toEqual([...REPEAT, ...FIRST_SALE].sort());
+  });
+
+  it("a window written at the value it already had (its default, over an absent one) sends nothing back", () => {
+    // The start card writes none of the three; the settings card writes all three with their defaults on a save.
+    expect(marketplaceState().setup.firstOrderWindowDays).toBeUndefined();
+    expect(lost({ firstOrderWindowDays: 30, repeatWindowDays: 90, firstSaleWindowDays: 60 })).toEqual([]);
+    expect(lost({})).toEqual([]);
+    // And the card's own rebuild of the setup is exactly that.
+    const state = marketplaceState();
+    const card = setupOfCard({
+      type: state.setup.type,
+      motions: state.setup.motions,
+      monetization: DEFAULT_APP_MONETIZATION,
+      currency: state.setup.currency,
+      activationWindowDays: state.setup.activationWindowDays,
+      paidWindowDays: state.setup.paidWindowDays,
+      qualificationWindowDays: state.setup.qualificationWindowDays,
+      goLiveWindowDays: state.setup.goLiveWindowDays,
+      company: "",
+      tools: [],
+      quarterTarget: null,
+      threshold: null,
+      runway: null,
+    });
+    expect(card).toMatchObject({ offering: "products", sellerSubscriptions: false, firstOrderWindowDays: 30, repeatWindowDays: 90, firstSaleWindowDays: 60 });
+    const saved = withSettings(state, { ...card, sellerSubscriptions: true }, MONTHS.referenceMonth, MONTHS.cohortMonth);
+    expect(kept(saved)).toEqual(kept(state));
+  });
+
+  it("the other settings send nothing back: the offering, the sellers' box, the currency, the SaaS's windows", () => {
+    expect(lost({ offering: "services" })).toEqual([]);
+    expect(lost({ sellerSubscriptions: false })).toEqual([]);
+    expect(lost({ currency: "USD" })).toEqual([]);
+    expect(lost({ activationWindowDays: 14, paidWindowDays: 60, qualificationWindowDays: 60, goLiveWindowDays: 30 })).toEqual([]);
+  });
+
+  it("writes the setup and the months it is given, and keeps the targets and the month's other fields", () => {
+    const { state, saved } = settle({ repeatWindowDays: 180, offering: "services" });
+    expect(saved.setup).toMatchObject({ type: "marketplace", offering: "services", repeatWindowDays: 180 });
+    const last = saved.snapshots.at(-1)!;
+    expect(last.referenceMonth).toBe(MONTHS.referenceMonth);
+    expect(last.cohortMonth).toBe(MONTHS.cohortMonth);
+    expect(last.targets).toEqual(state.snapshots.at(-1)!.targets);
+    expect(last.base).toEqual(state.snapshots.at(-1)!.base);
+  });
+
+  it("the SaaS keeps its four windows' rule: activation and payment send their numbers back, a marketplace window means nothing to it", () => {
+    const state = exampleState();
+    const moved = withSettings(state, { ...state.setup, activationWindowDays: 14 }, MONTHS.referenceMonth, MONTHS.cohortMonth);
+    expect(kept(state)).toContain("act.rate");
+    expect(kept(moved)).not.toContain("act.rate");
+    expect(kept(moved)).toContain("rev.paid-conversion");
+    const unchanged = withSettings(state, { ...state.setup }, MONTHS.referenceMonth, MONTHS.cohortMonth);
+    expect(kept(unchanged)).toEqual(kept(state));
+  });
+
+  it("settingsExisting: which of the three a window change would reach, from what is entered — the first sale's by either of its two", () => {
+    const state = marketplaceState();
+    const snapshot = state.snapshots.at(-1)!;
+    expect(settingsExisting(snapshot)).toMatchObject({ firstOrder: true, repeat: true, firstSale: true, any: true });
+    const without = (...ids: MetricId[]) => ({ ...snapshot, metrics: Object.fromEntries(Object.entries(snapshot.metrics).filter(([id]) => !ids.includes(id as MetricId))) });
+    expect(settingsExisting(without(...FIRST_ORDER))).toMatchObject({ firstOrder: false, repeat: true, firstSale: true });
+    expect(settingsExisting(without(...REPEAT))).toMatchObject({ firstOrder: true, repeat: false, firstSale: true });
+    // One of the two is enough: the window defines both.
+    expect(settingsExisting(without("mkt.sell.first-sale"))).toMatchObject({ firstSale: true });
+    expect(settingsExisting(without("mkt.sell.paid-conversion"))).toMatchObject({ firstSale: true });
+    expect(settingsExisting(without(...FIRST_SALE))).toMatchObject({ firstSale: false });
+    expect(settingsExisting({ ...snapshot, metrics: {} })).toEqual({ activation: false, paid: false, qualification: false, goLive: false, firstOrder: false, repeat: false, firstSale: false, any: false });
+    // A SaaS reads the same four it always did.
+    expect(settingsExisting(exampleState().snapshots[0]!)).toMatchObject({ activation: true, paid: true, firstOrder: false, repeat: false, firstSale: false });
   });
 });
