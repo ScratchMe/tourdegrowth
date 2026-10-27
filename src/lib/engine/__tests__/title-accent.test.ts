@@ -12,13 +12,21 @@ const keys = Object.keys(ENGINE_COPY.slideTitles) as SlideTitleKey[];
 const red = keys.filter((k) => titleAccent(k) === "red");
 
 describe("titleAccent", () => {
-  it("red for the verdict and the diagnosis only — sixteen titles", () => {
+  it("red for the verdict and the diagnosis only — twenty-four titles, the marketplace's eight included (A23 MKT-7b)", () => {
     expect(red.sort()).toEqual(
       [
         "leakClearUnpriced",
         "leakLevel",
         "leakNotEnoughBelow",
         "leakShared",
+        "mktFunnelEmpty",
+        "mktFunnelGapOne",
+        "mktFunnelTailBreakOne",
+        "mktSupplyFunnelEmpty",
+        "mktSupplyFunnelGapOne",
+        "mktSupplyFunnelTailBreakOne",
+        "mktTotalUnknown",
+        "mktTotalUnknownBoth",
         "pelotonEmpty",
         "pelotonGap",
         "pelotonGapOne",
@@ -40,7 +48,7 @@ describe("titleAccent", () => {
   });
 
   it("a figure is ink: the funnel's payers, a priced leak, the what-ifs' gain, the unit economics, the total, the ask", () => {
-    for (const k of ["pelotonComplete", "slgPelotonComplete", "leakClearMrrNew", "whatIfLever", "scenario", "unitEconomics", "unitEconomicsBoth", "total", "ask", "visibility", "mirror", "evolution"] as const) {
+    for (const k of ["pelotonComplete", "slgPelotonComplete", "leakClearMrrNew", "whatIfLever", "scenario", "unitEconomics", "unitEconomicsBoth", "total", "ask", "visibility", "mirror", "evolution", "mktTotal", "mktFunnelComplete", "mktSupplyFunnelComplete", "mktSupplyFunnelCompleteOne"] as const) {
       expect(titleAccent(k), k).toBe("ink");
     }
   });

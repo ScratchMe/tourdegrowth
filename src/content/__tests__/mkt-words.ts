@@ -304,7 +304,9 @@ export function servicesWordsHeld(text: string, locale: "fr" | "en"): string[] {
  */
 export const MKT_SERVICES_EXCLUDED: readonly ExclusionLine[] = MKT_EXCLUDED.map((entry) => {
   if (entry.line === 1) return { line: 1, excludes: (segments: readonly string[]) => LINE_1_KEYS.includes(segments[0]!) };
-  if (entry.line === 3) return { line: 3, excludes: (segments: readonly string[]) => segments.some((s) => LINE_3_PARTS.some((x) => s.includes(x))) };
+  // A segment that starts with `mkt` is the marketplace's own, whatever it holds: `slideTitles.mktTotalUnknownBoth` (§22.8.5 e, A23 MKT-7b) holds « Both »,
+  // the hybrid's marker, and must still be read by the services rule.
+  if (entry.line === 3) return { line: 3, excludes: (segments: readonly string[]) => segments.some((s) => !s.startsWith("mkt") && LINE_3_PARTS.some((x) => s.includes(x))) };
   return entry;
 });
 

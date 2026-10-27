@@ -275,6 +275,19 @@ describe.each(COPIES)("%s", (_name, COPY) => {
       evolutionOne: ["leak", "month", "n"],
       evolutionStill: ["leak", "month"],
       evolutionApart: ["before", "now"],
+      // A marketplace's own (A23 MKT-7b, §22.8.5 e): each side's funnel, on its own 100, and the total of the two streams.
+      mktFunnelComplete: ["first", "repeat"],
+      mktFunnelGapOne: ["clauses", "stages"],
+      mktFunnelTailBreakOne: ["clauses", "stages"],
+      mktFunnelEmpty: [],
+      mktSupplyFunnelComplete: ["first", "paid"],
+      mktSupplyFunnelCompleteOne: ["first"],
+      mktSupplyFunnelGapOne: ["clauses", "stages"],
+      mktSupplyFunnelTailBreakOne: ["clauses", "stages"],
+      mktSupplyFunnelEmpty: [],
+      mktTotal: ["demand", "supply", "total"],
+      mktTotalUnknown: ["stream"],
+      mktTotalUnknownBoth: [],
     };
 
     it("gives each slide title exactly the values the slide builder provides (§9.3)", () => {
@@ -306,6 +319,9 @@ describe.each(COPIES)("%s", (_name, COPY) => {
         month: "juillet 2026", leak: "\u00a0; l'activation reste la fuite", before: "juillet 2026", now: "août 2026",
         cac: "1\u00a0900\u00a0€", ltv: "~1\u00a0500\u00a0€", gap: "~400\u00a0€",
         payback: "8\u00a0mois", paybackToday: "11\u00a0mois",
+        // A marketplace's titles (A23 MKT-7b): a side's two clauses, the two streams' amounts, the stream that is not measured.
+        first: "20 passent une première commande", repeat: "5 en passent une deuxième", demand: "~32\u00a0000 à 38\u00a0000\u00a0€", supply: "~26\u00a0000 à 31\u00a0000\u00a0€",
+        stream: "le revenu net des commissions",
       },
       en: {
         activated: "18 reach first value", d30: "9–12 are still active at day 30", paid: "6–9 pay",
@@ -327,6 +343,8 @@ describe.each(COPIES)("%s", (_name, COPY) => {
         month: "July 2026", leak: "; activation is still the leak", before: "July 2026", now: "August 2026",
         cac: "€1,900", ltv: "~€1,500", gap: "~€400",
         payback: "8 months", paybackToday: "11 months",
+        first: "20 place a first order", repeat: "5 place a second one", demand: "~€32,000–38,000", supply: "~€26,000–31,000",
+        stream: "commission net revenue",
       },
     };
 
