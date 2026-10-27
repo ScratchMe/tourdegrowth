@@ -51,22 +51,6 @@ export interface MrrCurveProps {
 const DEFAULT_WIDTH = 720;
 
 /**
- * Month 1 of a drawn line: its second vertex, where the ring of `step` sits. Read from the path the geometry draws
- * (rounded to a tenth of a pixel, like the line itself), so the ring is centred on the vertex a reader sees; a range
- * is drawn as two edges, and its month 1 is the middle of theirs.
- */
-function monthOne(line: CurveLine): { x: number; y: number } {
-  const vertex = (path: string) => {
-    const [x, y] = (path.split(" ")[1] ?? "").split(",").map(Number);
-    return { x: x ?? 0, y: y ?? 0 };
-  };
-  const high = vertex(line.path);
-  if (!line.low) return high;
-  const low = vertex(line.low);
-  return { x: high.x, y: (high.y + low.y) / 2 };
-}
-
-/**
  * The MRR month by month — design system extension 09 (Q8). A line, not
  * bars: thirteen points of one quantity and two of them to compare. Both
  * lines are ink, never red — a projection is not a diagnosis (S-5):
@@ -123,7 +107,7 @@ export function MrrCurve({
   const g = mrrCurveGeometry({ today, whatif, width, height, compact, slide: medium === "slide" });
   const hatch = `${id}-hatch`;
   // The jump's ring: on the what-if line at month 1, and only with a what-if to ring.
-  const ring = g.whatif && step ? monthOne(g.whatif) : null;
+  const ring = step ? g.step : null;
 
   const drawLine = (line: CurveLine, kind: "today" | "whatif") => (
     <g className={kind === "whatif" ? styles.whatif : styles.today} data-range={line.range ? "true" : undefined}>

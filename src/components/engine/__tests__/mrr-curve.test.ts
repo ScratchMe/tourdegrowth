@@ -3,6 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { mrrCurveGeometry } from "@/lib/viz/mrr-curve";
 import { MrrCurve, type MrrCurveProps } from "../MrrCurve";
 
 /**
@@ -16,7 +17,9 @@ import { MrrCurve, type MrrCurveProps } from "../MrrCurve";
  * the plot 1; the default markup perturbed by an attribute 3 (the reference,
  * the ring against it, the « no ring » case); the note's ring given without
  * `step` 1; the slide's radius lost 1; the ring's stroke put on a red token 1
- * (whatif-no-red.test.ts reads this sheet too).
+ * (whatif-no-red.test.ts reads this sheet too). The ring's point is the
+ * geometry's (`step`, relance): its own non-vacuity is in
+ * src/lib/viz/__tests__/mrr-curve.test.ts.
  */
 const pts = (from: number, to: number, spread = 0) =>
   Array.from({ length: 13 }, (_, i) => {
@@ -102,16 +105,20 @@ describe("MrrCurve", () => {
     expect(curve({ whatif: pts(48_000, 94_000), step: false, note: undefined })).toBe(BEFORE_STEP_AND_NOTE.moved);
   });
 
-  it("extension 10: `step` rings the what-if line at month 1 — on its second vertex — after the line and before the start dot", () => {
+  it("extension 10: `step` rings the what-if line at month 1 — the geometry's point — after the line and before the start dot", () => {
     const markup = curve({ whatif: pts(48_000, 94_000), step: true });
     expect(markup.match(/<circle[^>]*class="[^"]*_step_/g)).toHaveLength(1);
     const ring = /<circle cx="([\d.]+)" cy="([\d.]+)" r="6" class="[^"]*_step_/.exec(markup);
     expect(ring).not.toBeNull();
-    // The what-if line is the second polyline: the ring sits on its vertex at month 1.
+    // The ring is the geometry's `step`, exactly; the what-if line is the second polyline, whose drawn vertex at month 1
+    // (rounded to a tenth of a pixel) it sits on.
+    const g = mrrCurveGeometry({ today: pts(48_000, 80_000), whatif: pts(48_000, 94_000), width: 720, height: 200, compact: false });
+    expect(Number(ring![1])).toBe(g.step!.x);
+    expect(Number(ring![2])).toBe(g.step!.y);
     const whatif = [...markup.matchAll(/<polyline points="([^"]+)"/g)][1]![1]!;
     const [x1, y1] = whatif.split(" ")[1]!.split(",").map(Number);
-    expect(Number(ring![1])).toBeCloseTo(x1!, 5);
-    expect(Number(ring![2])).toBeCloseTo(y1!, 5);
+    expect(Math.abs(Number(ring![1]) - x1!)).toBeLessThan(0.1);
+    expect(Math.abs(Number(ring![2]) - y1!)).toBeLessThan(0.1);
     expect(markup.indexOf("_step_")).toBeGreaterThan(markup.lastIndexOf("<polyline"));
     expect(markup.indexOf("_step_")).toBeLessThan(markup.indexOf("_start_"));
     // The ring is one mark more, and nothing else moves.
@@ -122,8 +129,12 @@ describe("MrrCurve", () => {
     expect(curve({ width: 1_520, height: 260, medium: "slide", whatif: pts(48_000, 94_000), step: true })).toMatch(/<circle[^>]* r="9" class="[^"]*_step_/);
     const markup = curve({ today: pts(180_000, 335_000, 3_600), whatif: pts(180_000, 400_000, 3_600), step: true });
     const ring = /<circle cx="([\d.]+)" cy="([\d.]+)" r="6" class="[^"]*_step_/.exec(markup);
+    const g = mrrCurveGeometry({ today: pts(180_000, 335_000, 3_600), whatif: pts(180_000, 400_000, 3_600), width: 720, height: 200, compact: false });
+    expect(Number(ring![1])).toBe(g.step!.x);
+    expect(Number(ring![2])).toBe(g.step!.y);
+    // The middle of the what-if band's two drawn edges, to the tenth of a pixel the edges are drawn at.
     const [high, low] = [...markup.matchAll(/<polyline points="([^"]+)"/g)].slice(2).map((m) => m[1]!.split(" ")[1]!.split(",").map(Number));
-    expect(Number(ring![2])).toBeCloseTo((high![1]! + low![1]!) / 2, 5);
+    expect(Math.abs(Number(ring![2]) - (high![1]! + low![1]!) / 2)).toBeLessThan(0.1);
   });
 
   it("extension 10: no ring without a what-if to ring, nor without `step`", () => {
