@@ -3568,6 +3568,17 @@ Ton compte rendu, en français : une liste numérotée de constats, rangés par 
 - **Relecteurs** : aucun (aucun mot : tout passe par les props).
 - **Pause** : rien de visible ; trois composants neufs attendent MKT-7b et
   MKT-8.
+- **Ce qu'MKT-7a a fait autrement** (2026-10-27, [#391](https://github.com/ScratchMe/tourdegrowth/pull/391)) :
+  `marketplace.css` est en deux blocs (`--market-side-rule` et
+  `--market-ledger-rule` lisent un jeton de monde : `:root, [data-world]`,
+  comme `engine.css`) ; `--market-ledger-name` et `--market-ledger-rule`
+  attendent `SlideStreams` dans `WAITING_FOR_A23` de `dead-tokens.test.ts` ;
+  `sides[].label` et `legend[].label` sont des `string` (les primitives) ;
+  l'anneau de `MrrCurve` lit `step`, un champ neuf de `mrrCurveGeometry`
+  (`x(1)`, `y(mid(whatif[1]))`) ; l'étiquette de `SideShown` est au-dessus du
+  sélecteur à toute largeur (`Field`, comme « Moteur affiché »), quand le
+  retour la posait à côté au-delà de 760 px ; `SideFunnel` et `SideNote`
+  posent `data-holds` et `data-kind`, des crochets de test.
 
 #### MKT-7b — Le tableau
 
@@ -3798,7 +3809,9 @@ Ton compte rendu, en français : une liste numérotée de constats, rangés par 
   commission 2 628,29 € ; la fuite de la demande s'imprime « ~470 € » (C97) ;
   la liste n'a qu'une étape signalée, celle du côté affiché ; le build comme
   la CI et les e2e du moteur verts (le type reste fermé en CI) ; les captures
-  ouvertes par l'orchestrateur, dont **les Réglages d'une place de marché**
+  ouvertes par l'orchestrateur, dont le sélecteur « Côté affiché » à 1 280 px
+  (l'étiquette au-dessus, MKT-7a, contre le retour qui la pose à côté), et
+  **les Réglages d'une place de marché**
   avec l'avertissement d'une fenêtre changée, en « produits » et en
   « services », FR 1 280 et EN 390 : MKT-6 n'a pu les tenir que par des
   tests, le tableau ne se dessinant pas encore.
@@ -3907,7 +3920,9 @@ Ton compte rendu, en français : une liste numérotée de constats, rangés par 
      `mkt.total.sum` ; la note `mkt.total.note` ; le pied
      `mkt.total.footer`. Pas de barre, pas de part, pas de « + » ni de « = ».
      `SlideStreams` se construit comme les composants de MKT-7a (props du
-     `.d.ts`, balisage du `.js`, règles du `.css`, test, épingle).
+     `.d.ts`, balisage du `.js`, règles du `.css`, test, épingle) ; il lit
+     `--market-ledger-name` et `--market-ledger-rule`, que MKT-8 retire de
+     `WAITING_FOR_A23` (`dead-tokens.test.ts`, qui le lui rappelle).
   5. **Le funnel d'un côté** (`SlideSideFunnel.tsx`) : `SideFunnel` en
      `medium="slide"` avec `mktFunnelView(…, "slide")` ; son titre est celui
      de la slide (le verdict du côté).
