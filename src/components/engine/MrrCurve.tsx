@@ -28,6 +28,17 @@ export interface MrrCurveProps {
   xLabels?: readonly [ReactNode, ReactNode, ReactNode];
   /** The curve in words, for a screen reader: the SVG is decoration. */
   summary: ReactNode;
+  /**
+   * Extension 10: the what-ifs include a money lever, which re-prices every unit from next month (a marketplace's
+   * commission, an order's frequency or value). The what-if line then jumps at month 1, a steeper first segment than
+   * any other: a ring on the line at month 1. Drawn only with `whatif`.
+   */
+  step?: boolean;
+  /**
+   * Extension 10: one line under the plot and its keys (the sentence that says the jump). With `step` it starts with
+   * the same ring as the plot's: the mark, said in words. Real text, read in order, unlike the SVG.
+   */
+  note?: ReactNode;
   /** Unique per page: the hatch pattern's id. */
   id: string;
   /** « slide »: the deck's type sizes (18px and up on its 1 920 canvas), the names in a legend under the plot; give it a `width`. */
@@ -52,7 +63,11 @@ const DEFAULT_WIDTH = 720;
  *   paths, hatched as the system hatches an estimate, edged by both;
  * - each line named at its end, or in a legend under the plot on a phone;
  * - one figure on the curve, today's MRR at its origin. The MRR in twelve
- *   months is printed once, under it, by the card — real text.
+ *   months is printed once, under it, by the card — real text;
+ * - extension 10 (a marketplace's money levers): `step` rings the what-if line
+ *   at month 1, where a lever that re-prices every unit makes it jump, and
+ *   `note` says so in a line under the plot. The ring is ink too. Without the
+ *   two, the curve draws exactly as it did.
  *
  * The SVG is `aria-hidden`; `summary` says the curve in words. The labels
  * carry a halo of their ground: the page's, unless the parent sets
@@ -68,6 +83,8 @@ export function MrrCurve({
   start,
   xLabels,
   summary,
+  step = false,
+  note,
   id,
   medium = "screen",
   className,
@@ -89,6 +106,8 @@ export function MrrCurve({
   const compact = medium === "slide" || (fixed === undefined && width < compactBelow);
   const g = mrrCurveGeometry({ today, whatif, width, height, compact, slide: medium === "slide" });
   const hatch = `${id}-hatch`;
+  // The jump's ring: on the what-if line at month 1, and only with a what-if to ring.
+  const ring = step ? g.step : null;
 
   const drawLine = (line: CurveLine, kind: "today" | "whatif") => (
     <g className={kind === "whatif" ? styles.whatif : styles.today} data-range={line.range ? "true" : undefined}>
@@ -125,6 +144,7 @@ export function MrrCurve({
         {g.gain ? <polygon points={g.gain} className={styles.gain} /> : null}
         {drawLine(g.today, "today")}
         {g.whatif ? drawLine(g.whatif, "whatif") : null}
+        {ring ? <circle cx={ring.x} cy={ring.y} r={medium === "slide" ? 9 : 6} className={styles.step} /> : null}
         <circle cx={g.ticks[0]} cy={g.start.y} r={4} className={styles.start} />
         <text x={g.start.x} y={g.start.labelY} className={`${styles.tick} ${styles.startLabel} ${styles.halo}`} textAnchor="start">
           {start}
@@ -159,6 +179,7 @@ export function MrrCurve({
           <li className={styles.legendItem}>{keys.today}</li>
         </ul>
       ) : null}
+      {note ? <p className={[styles.note, step ? styles.noteStep : ""].filter(Boolean).join(" ")}>{note}</p> : null}
       <figcaption className="tdg-visually-hidden">{summary}</figcaption>
     </figure>
   );
