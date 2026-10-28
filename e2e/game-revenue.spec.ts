@@ -1,5 +1,6 @@
 import type { Locator, Page } from "@playwright/test";
 import { expect, test, trackedEvents } from "./helpers";
+import { moduleClass, moduleClassRe } from "./module-class";
 import {
   REVENUE_PATH,
   acceptResume,
@@ -49,7 +50,7 @@ import { LEVEL_TEASERS } from "../src/content/game/hub";
  * What this file writes down that the spec leaves to the unit tests: the
  * inspection's stamp (« Inspection · €375,000 ») is read on the news screen,
  * where it lands; the pill's coral is read as the class that paints it
- * (`__over` on the pill, `__alert` in the action bar), because the spec says
+ * (`over` on the pill, `alert` in the action bar), because the spec says
  * « en alerte » and the markup says it only there; and « the short form fits on
  * one line at 390 px » (§20.7: « si la capture la montre sur deux lignes,
  * s'arrêter ») is measured as the number of lines the text takes.
@@ -123,20 +124,20 @@ const UNIT = /%|\bpts?\b/;
 
 /** The figure a tile shows — its value span, not the tile, which also prints targets and deltas. */
 function tileValue(page: Page, testId: string) {
-  return page.getByTestId(testId).locator("[class*='__value']").first();
+  return page.getByTestId(testId).locator(moduleClass("value")).first();
 }
 
 /** The first figure of a quarter's report — the revenue per user, with its label, its target and its verdict in words. */
 function firstFigure(page: Page, q: number) {
-  return page.getByTestId(`game-report-${q}`).locator("[class*='__figures'] > div").first();
+  return page.getByTestId(`game-report-${q}`).locator(`${moduleClass("figures")} > div`).first();
 }
 
 /** December's curve: its graduations (not the invisible copies that size their column) and its dashed line's label. */
 function chartTicks(page: Page) {
-  return page.getByTestId("game-chart-metric").locator("[class$='__tick']");
+  return page.getByTestId("game-chart-metric").locator(moduleClass("tick"));
 }
 function chartReference(page: Page) {
-  return page.getByTestId("game-chart-metric").locator("[class*='__referenceLabel']");
+  return page.getByTestId("game-chart-metric").locator(moduleClass("referenceLabel"));
 }
 
 /** The pill, as the desk draws it beside the phone. */
@@ -144,12 +145,12 @@ function charge(page: Page) {
   return page.getByTestId("game-charge");
 }
 
-/** The pill in the action bar: coral (`__alert`, which keeps `__pill`) when it flags a problem, the plain `__pill` otherwise. */
+/** The pill in the action bar: coral (the `alert` class, which keeps `pill`) when it flags a problem, the plain `pill` otherwise. */
 function barAlert(page: Page) {
-  return page.getByTestId("game-actionbar").locator("[class*='__alert']");
+  return page.getByTestId("game-actionbar").locator(moduleClass("alert"));
 }
 function barPill(page: Page) {
-  return page.getByTestId("game-actionbar").locator("[class*='__pill']:not([class*='__alert'])");
+  return page.getByTestId("game-actionbar").locator(`${moduleClass("pill")}:not(${moduleClass("alert")})`);
 }
 
 /** The pill as the desk draws it: its sentence and its two flags, in one assertion each. */
@@ -157,8 +158,8 @@ async function expectCharge(page: Page, text: string, flags: { silent: boolean; 
   await expect(charge(page)).toHaveText(text);
   await expect(charge(page)).toHaveAttribute("data-silent", String(flags.silent));
   await expect(charge(page)).toHaveAttribute("data-addon", String(flags.addon));
-  if (flags.silent || flags.addon) await expect(charge(page)).toHaveClass(/__over\b/);
-  else await expect(charge(page)).not.toHaveClass(/__over\b/);
+  if (flags.silent || flags.addon) await expect(charge(page)).toHaveClass(moduleClassRe("over"));
+  else await expect(charge(page)).not.toHaveClass(moduleClassRe("over"));
 }
 
 /** How many lines a text takes: the distinct tops of the rectangles its range covers. */
@@ -398,7 +399,7 @@ test.describe("a whole year of level 5 through the interface", () => {
       await expect(tileValue(page, "game-dash-patience")).toHaveText(A.patience[q - 1]!);
       await expect(page.getByTestId("game-dash-trust")).toHaveAttribute("data-state", "hidden");
       // The report's first figure is the same amount, to the cent, with no unit.
-      await expect(firstFigure(page, q).locator("[class*='__figureValue']")).toHaveText(A.metric[q - 1]!);
+      await expect(firstFigure(page, q).locator(moduleClass("figureValue"))).toHaveText(A.metric[q - 1]!);
       await expect(firstFigure(page, q)).not.toContainText(UNIT);
       await expectCharge(page, "Prélevé à la fin de l'essai\u00a0: 7,99\u00a0€", { silent: false, addon: false });
       if (q === 1) await expect(page.getByTestId("game-report-1")).toContainText("Pourquoi le revenu par utilisateur a bougé");

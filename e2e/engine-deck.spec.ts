@@ -6,6 +6,7 @@ import { METRIC_SHAPES } from "../src/lib/engine/catalog-shape";
 import { consumerState, exampleState, measured, missing, ratio, tourResult, withEntry, withTarget } from "../src/lib/engine/__tests__/fixtures";
 import { ENGINE_COPY } from "../src/content/engine-copy";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, readEachOnScreen, SKIP_ADMIN_REASON, test } from "./helpers";
+import { moduleClass } from "./module-class";
 import { engineSeed } from "./engine-helpers";
 import type { EngineState } from "../src/lib/engine/types";
 
@@ -286,7 +287,8 @@ for (const locale of ["fr", "en"] as const) {
       await expect(page.getByTestId("engine-deck")).toBeVisible();
       await page.evaluate(() => document.fonts.ready.then(() => undefined));
 
-      const pages = await page.locator('[data-slide="annex"], [data-slide^="annex:"]').evaluateAll((slides) =>
+      const pages = await page.locator('[data-slide="annex"], [data-slide^="annex:"]').evaluateAll(
+        (slides, definition) =>
         slides.map((slide) => {
           const box = slide.getBoundingClientRect();
           const scale = box.width / 1920;
@@ -294,8 +296,9 @@ for (const locale of ["fr", "en"] as const) {
           const footTop = (foot.getBoundingClientRect().top - box.top) / scale;
           const rows = [...slide.querySelectorAll("tbody tr")];
           const deepest = Math.max(...rows.map((r) => (r.getBoundingClientRect().bottom - box.top) / scale));
-          return { id: slide.getAttribute("data-slide")!, title: slide.querySelector("h3")!.textContent!.trim(), rows: rows.length, definitions: slide.querySelectorAll('[class*="annexDefinition"]').length, deepest: Math.round(deepest), footTop: Math.round(footTop) };
+          return { id: slide.getAttribute("data-slide")!, title: slide.querySelector("h3")!.textContent!.trim(), rows: rows.length, definitions: slide.querySelectorAll(definition).length, deepest: Math.round(deepest), footTop: Math.round(footTop) };
         }),
+        moduleClass("annexDefinition"),
       );
       // More pages than the example's two, every row still there, each with its definition.
       expect(pages.length).toBeGreaterThan(2);
@@ -553,7 +556,7 @@ for (const locale of ["fr", "en"] as const) {
       await expect(unit.getByTestId("slide-install-payback-chart")).toHaveCount(1);
       await expect(unit.getByTestId("slide-payback-chart")).toHaveCount(0);
       await expect(unit.getByTestId("slide-install-payback-chart-pays-back")).toContainText("13");
-      await expect(unit.locator('svg [class*="reference"]')).toHaveCount(0);
+      await expect(unit.locator(`svg ${moduleClass("reference")}`)).toHaveCount(0);
       // Five tiles, in the app's order; the SaaS's « after payback » and « cash tied up » do not exist for an app (D11).
       const tiles = await unit.locator('[data-testid^="slide-figure-"]').evaluateAll((els) => els.map((el) => el.getAttribute("data-testid")));
       expect(tiles).toEqual(["slide-figure-cac", "slide-figure-value12", "slide-figure-ltv", "slide-figure-ltv-cac", "slide-figure-payback"]);

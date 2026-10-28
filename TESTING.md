@@ -368,3 +368,24 @@ serrée des deux côtés (un écart qui **grandit** est autant une régression q
   (`Sec-Fetch-Mode`). La spec n'a pas été durcie, et ne doit pas l'être : un
   nouvel échec se lit avec `NEXTJS.md` §1.1. La config garde `retries: 1` et
   `trace: "on-first-retry"` en CI.
+- **Une spec ne lit pas la forme d'un nom de classe de module CSS** (2026-10-27,
+  `NEXTJS.md` §2.3 : Next 16.4.0 les a raccourcis, et 51 specs ont rougi d'un
+  coup). Elle demande le nom *local* (`value`, `quiet`, `secondary`) à
+  `moduleClass(local)`, un sélecteur, ou `moduleClassRe(local)`, une expression
+  pour `toHaveClass`, de `e2e/module-class.ts` : un jeton qui se termine par
+  `_local`, dans l'ancienne forme comme dans la nouvelle, sans prendre
+  `valueLarge` ni `figureValue`. Ces deux fonctions sont les seules à savoir
+  comment un nom s'écrit ; une forme de plus ne touche qu'elles.
+  `src/__tests__/e2e-class-names.test.ts` refuse, dans `e2e/**/*.ts` hors du
+  helper, tout `-module__`, tout `class*=`, `class$=`, `class^=` (et `~=`, `|=`,
+  `[class=`), tout `toHaveClass` dont le motif contient un tiret bas (`/__x/`
+  comme `/_x/`), et tout `className` ou `classList` dont on teste le nom à la
+  main (`.includes(`…). Dans un `evaluate`, le helper n'est pas disponible : le
+  sélecteur se construit côté Node et se passe en argument.
+  **Ce que la garde ne dit pas** : passer d'une sous-chaîne (`[class*="name"]`)
+  à un jeton entier peut changer l'ensemble atteint, quand un autre nom local
+  contient le même mot (`pillar` et `pillarName`). Avant de conclure « à
+  assertions égales », comparer les deux sélecteurs sur le DOM d'un build de
+  l'ancienne forme. Et une montée de Next se vérifie sur les deux formes :
+  rejouer les specs réécrites sur un build de `main`, dans une copie de travail
+  temporaire.

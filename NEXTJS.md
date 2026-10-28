@@ -415,3 +415,20 @@ répond alors 404 avant tout rendu. Chez nous : `lib/og/image-metadata.ts`, et
   la page longue jusqu'à ce que l'îlot ait lu l'appareil. Une navigation
   côté client ne lance pas ce script : l'îlot pose l'attribut à sa
   première lecture.
+
+### 2.3 Les noms de classe d'un module CSS sont ceux de l'outil, et ils changent
+
+**Next 16.4.0 raccourcit, en production, les noms de classe que Turbopack
+écrit pour un module CSS** (vercel/next.js#97944, rangée dans « Misc Changes »
+de la note de version, sans mot sur une rupture) : `Button-module__G1PnAW__quiet`
+est devenu `G1PnAW_quiet`, avec le même hash. Le motif est celui de LightningCSS,
+`[hash]_[local]` ; l'ancien est gardé en dev, où aucune spec ne tourne. **Aucun
+réglage ne le rétablit en production** (cherché le 2026-10-27 dans le schéma de
+configuration de la 16.4.2 et dans la PR).
+
+Trouvé en montant 16.3.7 vers 16.4.2 pour fermer deux RCE de `next` : 51 specs
+sur 1 134 rougissent d'un coup, avec pour seul message « element(s) not found »,
+alors que les mêmes fichiers passent 112 sur 112 sur 16.3.7. Le diagnostic le
+plus court : `grep -o 'class="[^"]*"' .next/server/app/en.html` sur un build de
+chaque version, avant de toucher à un test. Seul le nom *local* (`quiet`) est à
+nous : la règle et le helper sont dans `TESTING.md` §5.
