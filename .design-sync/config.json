@@ -133,6 +133,7 @@
     "SideFunnel": "src/components/engine/SideFunnel.tsx",
     "SideNote": "src/components/engine/SideNote.tsx",
     "SideShown": "src/components/engine/SideShown.tsx",
+    "SlideStreams": "src/components/engine/SlideStreams.tsx",
     "TotalBand": "src/components/engine/TotalBand.tsx",
     "TrapNote": "src/components/engine/TrapNote.tsx",
     "WhatIfFigures": "src/components/engine/WhatIfFigures.tsx",

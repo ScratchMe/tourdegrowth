@@ -84,6 +84,18 @@
   color: var(--text-body);
 }
 
+/*
+ * The side a marketplace's slide is about (C70, C103), in ink, above its title: every slide of a side says whose numbers it
+ * holds before anything else. The frame's gap is 36px; the negative margin pulls the title up to 12px under it.
+ */
+.slideSide {
+  margin: 0 0 -24px;
+  font: var(--slide-heading);
+  letter-spacing: var(--slide-tracking);
+  text-transform: uppercase;
+  color: var(--text-body);
+}
+
 .slideTitle {
   margin: 0;
   max-width: 1600px;
@@ -606,7 +618,12 @@
   font: var(--slide-label-xs);
 }
 
-.asideRow[data-tone="below"] .asideStage {
+/*
+ * A stage below its target is the diagnosis's red, on the self-serve and sales-assisted slides. A marketplace's slide (it has a
+ * `data-side`) says it in ink, the stage's name and nothing else (C102): with two sides, every red more would read as one more
+ * leak (C70), and a side has the one — its title's, the funnel's named column.
+ */
+.slide:not([data-side]) .asideRow[data-tone="below"] .asideStage {
   color: var(--text-alert);
 }
 

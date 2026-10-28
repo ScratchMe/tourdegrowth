@@ -1,6 +1,6 @@
 import { LeverSum } from "@/components/engine/LeverSum";
 import { rowOf, rowsOf } from "./deck-rows";
-import { SlideFrame, type SlideProps } from "./SlideFrame";
+import { SlideFrame, slideStrings, type SlideProps } from "./SlideFrame";
 import { ChangeTable, SlideCurveCard } from "./SlideWhatIf";
 import { Arrow, SlideText } from "./slide-text";
 import styles from "./deck.module.css";
@@ -34,12 +34,13 @@ const DENSER_FROM = 9;
  * stay the model's: the lever list is still what the text export writes.
  */
 export function SlideScenario({ slide, context }: SlideProps) {
-  const s = context.strings;
+  const s = slideStrings(slide, context);
   const levers = rowsOf(slide, "lever");
   const together = rowOf(slide, "together")?.text;
   const footer = rowOf(slide, "footer")?.text;
-  // Self-serve's keeps its v1 test ids; sales-assisted's (`slg:scenario`) gets its own, both can be on screen.
-  const prefix = slide.id === "scenario" ? "slide-scenario" : "slide-slg-scenario";
+  // Self-serve's keeps its v1 test ids; sales-assisted's (`slg:scenario`) gets its own, both can be on screen; a marketplace's two
+  // (`mktScenarioDemand`, `mktScenarioSupply`) are told apart by their own id.
+  const prefix = slide.id === "scenario" ? "slide-scenario" : slide.id === "slg:scenario" ? "slide-slg-scenario" : `slide-${slide.id}`;
 
   return (
     <SlideFrame slide={slide} context={context} footer={footer} footerDense>

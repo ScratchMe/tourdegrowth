@@ -2,8 +2,9 @@ import type { ReactNode } from "react";
 import { Wordmark } from "@/components/brand/Wordmark";
 import { fillTemplate } from "@/lib/engine/format";
 import { fillSegments } from "@/lib/engine/phrases";
+import { isSellingMotion } from "@/lib/engine/setup-type";
 import type { EngineStrings, ResolvedBridge, ResolvedDerived, ResolvedMetric } from "@/lib/engine/strings";
-import type { DeckModel, DeckSlide, EngineCalcContext, EngineDerived, EngineState } from "@/lib/engine/types";
+import type { DeckModel, DeckSlide, EngineCalcContext, EngineDerived, EngineState, MktSide } from "@/lib/engine/types";
 import { titleAccent } from "@/lib/engine/title-accent";
 import type { Locale } from "@/lib/i18n/locale";
 import { SlideText } from "./slide-text";
@@ -21,7 +22,13 @@ export const SLIDE_HEIGHT = 1080;
  */
 export interface SlideContext {
   locale: Locale;
+  /** The neutral set: what a slide that belongs to no side reads (the common slides, the marketplace's total). */
   strings: EngineStrings;
+  /**
+   * A marketplace's words for one side (`marketplaceStrings(…, side)`, §22.8.1): a slide about a side reads these, not `strings`
+   * (`slideStrings`). Without a marketplace it is `strings` for both.
+   */
+  stringsForSide: (side: MktSide) => EngineStrings;
   metrics: ResolvedMetric[];
   derivedCopy: ResolvedDerived[];
   bridges: ResolvedBridge[];
@@ -62,6 +69,15 @@ export function slideTitle(slide: DeckSlide, strings: EngineStrings): string {
 }
 
 /**
+ * The words a slide reads (§22.8.1, MKT-R finding 45): a marketplace's side slide reads that side's, because its title is a
+ * template the side's layer rewrites (`leakClearMrrNew` says « revenu net » for the buyers and « MRR des abonnements » for the
+ * sellers) and is resolved here, at render, with one set of strings. Every other slide reads the neutral set.
+ */
+export function slideStrings(slide: DeckSlide, context: SlideContext): EngineStrings {
+  return slide.side ? context.stringsForSide(slide.side) : context.strings;
+}
+
+/**
  * The frame every slide shares — engine spec §9.1: the kicker and the data
  * pill on top, one sentence of title carrying the number, the body, and a
  * footer with the sources on the left and, on the right, the wordmark, the
@@ -80,11 +96,13 @@ export function SlideFrame({
   footerDense = false,
   children,
 }: SlideProps & { footer?: string; footerDense?: boolean; children: ReactNode }) {
-  const { strings, model, locale } = context;
+  const { model, locale } = context;
+  const strings = slideStrings(slide, context);
   const title = slideTitle(slide, strings);
   const total = model.slides.filter((s) => s.included).length;
   // In the hybrid, a motion's slide wears that motion's chrome: its name in the kicker, its own count, its own months (§18.8.1).
-  const own = slide.motion ? model.byMotion?.[slide.motion] : undefined;
+  // A marketplace's has the one kicker and pill of the deck: its side is named above its title, not in its header line.
+  const own = slide.motion && isSellingMotion(slide.motion) ? model.byMotion?.[slide.motion] : undefined;
   const kicker = own?.kicker ?? fillTemplate(strings.slide.kicker, model.kicker);
   const counts = own?.dataPill ?? model.dataPill;
   const pill = fillTemplate(strings.slide.dataPill, {
@@ -102,6 +120,7 @@ export function SlideFrame({
       className={styles.slide}
       data-slide={slide.id}
       data-motion={slide.motion}
+      data-side={slide.side}
       data-testid={`slide-${slide.id}`}
       // A slide is printed on paper whatever world the page around it is in.
       data-world="paper"
@@ -115,6 +134,13 @@ export function SlideFrame({
         <p className={styles.kicker}>{kicker}</p>
         <p className={styles.dataPill}>{pill}</p>
       </header>
+
+      {/* The side a slide is about, in ink, above its title: every slide of a side says whose numbers it holds (C70, C103). */}
+      {slide.side ? (
+        <p className={styles.slideSide} data-testid={`slide-side-${slide.id}`}>
+          {strings.mkt.side[slide.side === "demand" ? "demandTitle" : "supplyTitle"]}
+        </p>
+      ) : null}
 
       <h3 id={titleId} className={[styles.slideTitle, titleClass(title)].filter(Boolean).join(" ")}>
         {/* Red only for the verdict and the diagnosis; every other figure in ink (C53). */}

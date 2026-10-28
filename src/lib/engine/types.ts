@@ -484,7 +484,23 @@ export type SlgSlideId = "slg:peloton" | "slg:leak" | "slg:scenario";
  * one-month engine — every v1 and v2 file — has no such slide at all.
  */
 export type SeriesSlideId = "evolution" | "slg:evolution";
-export type SlideId = FixedSlideId | "total" | SlgSlideId | SeriesSlideId | "scenario" | `whatif:${LeverId}` | AnnexPageId;
+/**
+ * A marketplace's own slides (§22.12 MKT-8, MKT-R finding 46): the total of its two streams, then each side's funnel, leak and
+ * unit economics, and the « Et si » of each side that moved two levers or more. The « Et si » of one lever keeps `whatif:<lever>`
+ * and the monthly series `evolution`. They are in `SlideId` and `validate.ts#EXTRA_SLIDES` and never in `SLIDE_ORDER`, which is
+ * the self-serve deck's seven.
+ */
+export type MktSlideId =
+  | "mktTotal"
+  | "mktFunnelDemand"
+  | "mktLeakDemand"
+  | "mktScenarioDemand"
+  | "mktUnitDemand"
+  | "mktFunnelSupply"
+  | "mktLeakSupply"
+  | "mktScenarioSupply"
+  | "mktUnitSupply";
+export type SlideId = FixedSlideId | "total" | SlgSlideId | SeriesSlideId | "scenario" | `whatif:${LeverId}` | AnnexPageId | MktSlideId;
 
 export const isAnnexPage = (id: SlideId): id is AnnexPageId => id.startsWith("annex:");
 
@@ -1076,9 +1092,16 @@ export interface DeckSlide {
   /**
    * The motion a slide is about (A7.3.c S4), set only when sales-assisted is
    * ticked: self-serve alone prints the v1 deck, whose slides have none. A
-   * common slide (visibility, the ask, the appendix…) has none either.
+   * common slide (visibility, the ask, the appendix…) has none either. A
+   * marketplace's side slide is `"mkt"` (with its `side`); its total and its
+   * common slides have none (§22.12 MKT-8).
    */
-  motion?: Motion;
+  motion?: EngineMotion;
+  /**
+   * A marketplace's slide about one side (C70, C103): it wears that side's title above its own and reads that side's words
+   * (`SlideContext#stringsForSide`). The total, which sums the two streams, and the common slides have none.
+   */
+  side?: MktSide;
   /**
    * A what-if slide's curve (design system extension 09, Q11, A20.d T4.b):
    * the MRR month by month, today's pace and with the what-if(s). Drawn, not
@@ -1108,6 +1131,12 @@ export interface SlideCurve {
   keys: { today: string; whatif: string };
   /** The curve in words, for a screen reader. */
   summary: string;
+  /**
+   * A marketplace's slide, once a money lever moved (§22.8.5 k): the ring on the « Et si » line at month 1, where the lever
+   * re-prices today's whole base, and the sentence that says it (`mkt.curve.step*`). Never set for another type.
+   */
+  step?: boolean;
+  note?: string;
 }
 /**
  * One customer, month by month (`PaybackChart`): [low, high] each, from the

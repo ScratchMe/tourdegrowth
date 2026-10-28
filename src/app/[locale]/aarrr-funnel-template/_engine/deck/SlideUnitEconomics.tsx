@@ -47,6 +47,8 @@ export function SlideUnitEconomics({ slide, context }: SlideProps) {
   const warning = rowOf(slide, "warning");
   const assume = rowOf(slide, "assume");
   const cap = rowOf(slide, "cap");
+  // A marketplace's side cites the sign-ups of its side in its own words: its footer is a row, like the leak's.
+  const footer = rowOf(slide, "footer")?.text;
   const chart = slide.paybackChart;
   const install = slide.installChart;
 
@@ -59,7 +61,7 @@ export function SlideUnitEconomics({ slide, context }: SlideProps) {
   ].filter((tile): tile is Tile => tile !== null);
 
   return (
-    <SlideFrame slide={slide} context={context}>
+    <SlideFrame slide={slide} context={context} footer={footer}>
       <div className={styles.unit}>
         {/* The money's six tiles in one row; an app has five (`--figure-columns`), the SaaS's row doesn't change. */}
         <ul className={`${styles.figureRow} ${styles.figureRowSix}`} style={install ? ({ "--figure-columns": 5 } as CSSProperties) : undefined}>

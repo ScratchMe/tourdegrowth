@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { MrrCurve } from "@/components/engine/MrrCurve";
 import type { SlideCurve } from "@/lib/engine/types";
 import { rowOf, rowsOf, type DeckRows } from "./deck-rows";
-import { SlideFrame, type SlideProps } from "./SlideFrame";
+import { SlideFrame, slideStrings, type SlideProps } from "./SlideFrame";
 import styles from "./deck.module.css";
 
 type ChangeRow = DeckRows["kpi"] | DeckRows["funnelStep"];
@@ -84,6 +84,9 @@ export function SlideCurveCard({ curve, slideId, shared = false, children }: { c
         start={curve.start}
         xLabels={curve.xLabels}
         summary={curve.summary}
+        // A marketplace's money lever re-prices the whole base at month 1: the ring and its sentence (§22.8.5 k).
+        step={curve.step}
+        note={curve.note}
       />
       {children}
     </section>
@@ -109,7 +112,7 @@ export function SlideCurveCard({ curve, slideId, shared = false, children }: { c
  * the cash tied up.
  */
 export function SlideWhatIf({ slide, context }: SlideProps) {
-  const s = context.strings.slide;
+  const s = slideStrings(slide, context).slide;
   const footer = rowOf(slide, "footer")?.text;
   const moved = rowsOf(slide, "funnelStep").filter((r) => r.tone === "moved");
   const stepsMove = moved.length > 0;
