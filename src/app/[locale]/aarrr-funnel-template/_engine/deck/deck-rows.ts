@@ -116,6 +116,19 @@ export interface DeckRows {
   link: { text: string; note: string };
   /** A sum of the two motions, « a + b = c ». */
   sum: { id: string; text: string };
+  /**
+   * A marketplace's total, as a ledger (`SlideStreams`, A23 MKT-8): one row per stream, the commissions then the sellers'
+   * subscriptions, then the total. `side` says where the stream is read on its own (« les acheteurs, slides 2 à 5 », "" on the
+   * total); `month`, `fresh` and `in12` the figures of the three columns, `in12Moved` the fourth ("" until a « Et si » moved, on
+   * either side); `note` the ledger's own, on the total's row only.
+   */
+  streams: { id: string; label: string; side: string; month: string; fresh: string; in12: string; in12Moved: string; note: string; text: string };
+  /**
+   * What a marketplace side's funnel adds to its columns (`SideFunnel`): the buyers' liquidity on its own base of 100 (`id`
+   * `mkt.liq.fill-rate`, `label` the base's heading, `value` its numeral, `text` the fill rate said), the sellers' two churns as
+   * monthly rates (`value` « 3 % », `text` with the team's target), and the sellers' aside when they pay nothing (`id` `aside`).
+   */
+  sideFunnel: { id: string; label: string; value: string; text: string };
   /** One row of the hybrid's unit economics, side by side: `plg` and `slg` the two cells, self-serve first. */
   // Appendix
   // « Ce qui a bougé » (A14 T1, §19.2.6)
@@ -178,6 +191,8 @@ export const ROW_FIELDS: { readonly [K in RowKind]: readonly (keyof DeckRows[K])
   totalBlock: ["id", "label", "mrr", "newMrr", "stage", "text"],
   link: ["text", "note"],
   sum: ["id", "text"],
+  streams: ["id", "label", "side", "month", "fresh", "in12", "in12Moved", "note", "text"],
+  sideFunnel: ["id", "label", "value", "text"],
   evolution: ["id", "label", "tone", "before", "now", "change", "toward", "text"],
   apart: ["id", "label", "text"],
   annex: ["id", "label", "formula", "window", "period", "source", "status", "confidence", "definition", "text"],

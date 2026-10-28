@@ -1,7 +1,8 @@
 import { motionShapes, TEXT_LIMITS } from "@/lib/engine/catalog-shape";
-import { impactTarget } from "@/lib/engine/diagnose";
+import { impactTarget, mktCandidates } from "@/lib/engine/diagnose";
 import { diagnosesOf } from "@/lib/engine/phrases";
 import { candidatesFor } from "@/lib/engine/scenario-of";
+import { isMarketplace } from "@/lib/engine/setup-type";
 import type { CandidateId, EngineAsk, EngineDerived, EngineSetup, EngineState, MetricId, RepairScale, YearMonth } from "@/lib/engine/types";
 import { currentSnapshot } from "@/lib/engine/values";
 
@@ -78,9 +79,12 @@ export function askDefaults(state: EngineState, derived: EngineDerived): EngineA
 /**
  * The success metrics the form offers: the rates a diagnosis can name (§6.6), each ticked motion's —
  * self-serve's six, then sales-assisted's (§18.5.2), in catalogue order, never by value. An app's self-serve are its
- * own (§21.5.4): the ones its monetization shows, then the actives' retention when it has one.
+ * own (§21.5.4): the ones its monetization shows, then the actives' retention when it has one. A marketplace's are its two
+ * sides' lists, the buyers' then the sellers' (C106, §22.12 MKT-8 step 9 bis), in their own order and never sorted by value: a list
+ * of choices, not a diagnosis, so D2 holds — no function ranks one side's stage against the other's.
  */
-export function successMetrics(setup: Pick<EngineSetup, "type" | "motions" | "monetization">): readonly MetricId[] {
+export function successMetrics(setup: Pick<EngineSetup, "type" | "motions" | "monetization" | "sellerSubscriptions">): readonly MetricId[] {
+  if (isMarketplace(setup)) return [...mktCandidates("demand", setup), ...mktCandidates("supply", setup)];
   return (["plg", "slg"] as const).filter((m) => setup.motions[m]).flatMap((m) => candidatesFor(setup, m));
 }
 

@@ -206,18 +206,19 @@ function buildFunnel({ state, motion, metrics, ctx }: Input, side: MktSide, stri
   const settings = mktSetup(state.setup);
   const lines: Row[] = [];
 
-  // The upstream line: the visitors behind 100 sign-ups, two significant digits (« ~2 000 visiteurs… »).
+  // The upstream line: the visitors behind 100 sign-ups, two significant digits (« ~2 000 visiteurs… »). Unknown, the buyers' funnel
+  // says so; the sellers' says nothing (without subscriptions their sign-up rate is not a number the setup shows), as the board does.
   const visitors = funnel.visitorsPerHundred;
-  lines.push({
-    row: "upstream",
-    text: visitors
-      ? fillSegments(side === "demand" ? f.upstream : f.sellerUpstream, {
-          n: formatCountInterval(mapBounds(visitors, (v) => roundSignificant(v, 2)), ctx, strings.units),
-          source: funnel.upstreamSource ? sourceLabel(funnel.upstreamSource, strings) : lowerFirst(strings.status.estimated),
-          month: funnel.upstreamPeriod ? formatMonth(funnel.upstreamPeriod, ctx.locale) : "",
-        })
-      : strings.visual.upstreamUnknown,
-  });
+  if (visitors) {
+    lines.push({
+      row: "upstream",
+      text: fillSegments(side === "demand" ? f.upstream : f.sellerUpstream, {
+        n: formatCountInterval(mapBounds(visitors, (v) => roundSignificant(v, 2)), ctx, strings.units),
+        source: funnel.upstreamSource ? sourceLabel(funnel.upstreamSource, strings) : lowerFirst(strings.status.estimated),
+        month: funnel.upstreamPeriod ? formatMonth(funnel.upstreamPeriod, ctx.locale) : "",
+      }),
+    });
+  } else if (side === "demand") lines.push({ row: "upstream", text: strings.visual.upstreamUnknown });
 
   if (side === "demand") {
     const referred = knownIn(state, "mkt.buy.referred-share", ctx);
@@ -272,7 +273,7 @@ function buildFunnel({ state, motion, metrics, ctx }: Input, side: MktSide, stri
       const comparator = comparatorOf(state, id);
       const value = known.kind === "known" ? formatInterval(known.value, "percent", ctx, strings.units) : "";
       const target = comparator ? fillTemplate(f.rateTarget, { target: formatInterval(point(impactTarget(comparator)), "percent", ctx, strings.units) }) : "";
-      return { row: "sideFunnel", id, label, value, text: [label, value || strings.slide.noNumber, target].filter(Boolean).join(" · ") };
+      return { row: "sideFunnel", id, label, value, text: [value || strings.slide.noNumber, target].filter(Boolean).join(" · ") };
     };
     lines.push(rate("mkt.sell.churn", f.churnLabel, supply.churn));
     if (supply.paidChurn) lines.push(rate("mkt.sell.paid-churn", f.paidChurnLabel, supply.paidChurn));

@@ -1,14 +1,15 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ComponentType, type ReactNode } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ComponentType, type ReactNode } from "react";
 import { Button } from "@/components/core/Button";
 import { Callout } from "@/components/core/Callout";
 import { Checkbox } from "@/components/core/Checkbox";
 import { buildDeck, deckMarkdown } from "@/lib/engine/deck";
 import { fillTemplate } from "@/lib/engine/format";
 import { sanityText } from "@/lib/engine/sentences";
+import { isMarketplace, isSellingMotion } from "@/lib/engine/setup-type";
 import type { EngineStrings, ResolvedBridge, ResolvedDerived, ResolvedMetric } from "@/lib/engine/strings";
-import type { DeckSlide, EngineAsk, EngineCalcContext, EngineDeck, EngineDerived, EngineState, FixedSlideId, LeverId, SanityCheck, SlideId } from "@/lib/engine/types";
+import type { DeckSlide, EngineAsk, EngineCalcContext, EngineDeck, EngineDerived, EngineState, FixedSlideId, LeverId, MktSide, MktSlideId, SanityCheck, SlideId } from "@/lib/engine/types";
 import { includeKeyOf, isAnnexPage } from "@/lib/engine/types";
 import { currentSnapshot } from "@/lib/engine/values";
 import type { Locale } from "@/lib/i18n/locale";
@@ -24,9 +25,11 @@ import { SlideTotal } from "./SlideTotal";
 import { SlideUnitBoth } from "./SlideUnitBoth";
 import { SlideAsk } from "./SlideAsk";
 import { SlideLeak } from "./SlideLeak";
+import { SlideMarketTotal } from "./SlideMarketTotal";
 import { SlideMirror } from "./SlideMirror";
 import { SlidePeloton } from "./SlidePeloton";
 import { SlideScenario } from "./SlideScenario";
+import { SlideSideFunnel } from "./SlideSideFunnel";
 import { SlideUnitEconomics } from "./SlideUnitEconomics";
 import { SlideVisibility } from "./SlideVisibility";
 import { SlideWhatIf } from "./SlideWhatIf";
@@ -45,6 +48,12 @@ export type DeckExportKind = "png" | "pdf" | "text";
 export interface DeckViewProps {
   locale: Locale;
   strings: EngineStrings;
+  /**
+   * A marketplace's words for each side (`marketplaceStrings(…, side)`, §22.8.1): the deck's side slides are written and titled with
+   * them, and the checks above the thumbnails say each in its own side's words. The sets are the island's memoised ones, so their
+   * identity is stable from one render to the next; absent for any other type, where every slide reads `strings`.
+   */
+  stringsBySide?: Record<MktSide, EngineStrings>;
   metrics: ResolvedMetric[];
   /** The three computed figures' prose (the unit-economics tiles, the mirror's LTV row). */
   derivedCopy: ResolvedDerived[];
@@ -71,6 +80,20 @@ const SLIDES: Record<FixedSlideId, ComponentType<SlideProps>> = {
   annex: SlideAnnex,
 };
 
+/** A marketplace's own slides (§22.12 MKT-8): its total, and each side's funnel, leak, « Et si » together and unit economics. A lever's own « Et si » is `whatif:<lever>`. */
+const MKT_SLIDES: Record<MktSlideId, ComponentType<SlideProps>> = {
+  mktTotal: SlideMarketTotal,
+  mktFunnelDemand: SlideSideFunnel,
+  mktFunnelSupply: SlideSideFunnel,
+  mktLeakDemand: SlideLeak,
+  mktLeakSupply: SlideLeak,
+  mktScenarioDemand: SlideScenario,
+  mktScenarioSupply: SlideScenario,
+  mktUnitDemand: SlideUnitEconomics,
+  mktUnitSupply: SlideUnitEconomics,
+};
+const isMktSlide = (id: SlideId): id is MktSlideId => id in MKT_SLIDES;
+
 /**
  * The what-if slides have no fixed id: one per lever the team moved
  * (`whatif:<lever>`), then `scenario` when two or more moved together
@@ -81,6 +104,7 @@ const isWhatIfSlide = (id: SlideId): id is `whatif:${LeverId}` => id.startsWith(
 
 function slideComponent(slide: DeckSlide): ComponentType<SlideProps> {
   const { id } = slide;
+  if (isMktSlide(id)) return MKT_SLIDES[id];
   if (id === "scenario" || id === "slg:scenario") return SlideScenario;
   if (isWhatIfSlide(id)) return SlideWhatIf;
   // The appendix's next pages (`annex:2`…): the same table, the rows the model put on that page.
@@ -97,9 +121,13 @@ function slideComponent(slide: DeckSlide): ComponentType<SlideProps> {
   return SLIDES[id as FixedSlideId];
 }
 
-/** Where a thumbnail sits in the hybrid's list (§18.7 E5): the total, each motion's slides, then the shared ones. */
-type ThumbGroup = "total" | "plg" | "slg" | "end";
-const groupOfSlide = (slide: DeckSlide): ThumbGroup => (slide.id === "total" ? "total" : (slide.motion ?? "end"));
+/**
+ * Where a thumbnail sits in the hybrid's list (§18.7 E5): the total, each motion's slides, then the shared ones. A marketplace's list
+ * is the same shape with its sides for its motions: the total, the buyers' slides, the sellers', then the shared ones (C103).
+ */
+type ThumbGroup = "total" | "plg" | "slg" | "demand" | "supply" | "end";
+const groupOfSlide = (slide: DeckSlide): ThumbGroup =>
+  slide.id === "total" || slide.id === "mktTotal" ? "total" : (slide.side ?? (slide.motion && isSellingMotion(slide.motion) ? slide.motion : "end"));
 
 /**
  * The print sheet — engine spec §10.2.
@@ -221,6 +249,7 @@ type Status = { text: string; tone: "ok" | "error" } | null;
 export function DeckView({
   locale,
   strings,
+  stringsBySide,
   metrics,
   derivedCopy,
   bridges,
@@ -248,10 +277,14 @@ export function DeckView({
   const [askTouched, setAskTouched] = useState(false);
   const ask = proposal && !askTouched && isPristineAsk(state.deck.ask) ? proposal : state.deck.ask;
   const deck: EngineDeck = useMemo(() => ({ ...state.deck, ask }), [state.deck, ask]);
+  // A side's slides are worded with that side's words (§22.8.1); the other types' every slide reads `strings`.
+  const demandStrings = stringsBySide?.demand ?? strings;
+  const supplyStrings = stringsBySide?.supply ?? strings;
+  const stringsForSide = useCallback((side: MktSide) => (side === "demand" ? demandStrings : supplyStrings), [demandStrings, supplyStrings]);
   const model = useMemo(
     // With the prose: without it the computed figures and the Tour bridges are written with empty labels.
-    () => buildDeck({ ...state, deck }, derived, strings, metrics, ctx, { derived: derivedCopy, bridges }),
-    [state, deck, derived, strings, metrics, ctx, derivedCopy, bridges],
+    () => buildDeck({ ...state, deck }, derived, strings, metrics, ctx, { derived: derivedCopy, bridges, stringsForSide }),
+    [state, deck, derived, strings, metrics, ctx, derivedCopy, bridges, stringsForSide],
   );
 
   // Arriving on this screen is a change of view: focus its heading, so a
@@ -260,7 +293,7 @@ export function DeckView({
     heading.current?.focus();
   }, []);
 
-  const context: SlideContext = { locale, strings, metrics, derivedCopy, bridges, state: { ...state, deck }, derived, model, ctx };
+  const context: SlideContext = { locale, strings, stringsForSide, metrics, derivedCopy, bridges, state: { ...state, deck }, derived, model, ctx };
   const shown = model.slides.filter((s) => s.present);
   const included = shown.filter((s) => s.included);
   const lastIncluded = included[included.length - 1]?.id;
@@ -322,7 +355,8 @@ export function DeckView({
   // than a colon, so the line reads right in both languages without a
   // typography rule here.
   const checkText = (check: SanityCheck) => {
-    const message = sanityText(check, strings, locale);
+    // A marketplace's check says its own side's words (§22.8.3): a `reconcile-gap` of the buyers is « ~12 nouveaux acheteurs », never the SaaS's « payants ».
+    const message = sanityText(check, check.side ? stringsForSide(check.side) : strings, locale);
     const name = check.id === "num-gt-den" || check.id === "two-tools" ? metrics.find((m) => m.id === check.metrics[0])?.name : undefined;
     return name ? `${name} — ${message}` : message;
   };
@@ -394,7 +428,20 @@ export function DeckView({
     );
   };
   const groups = runs(shown);
-  const groupTitle = (id: ThumbGroup) => (id === "total" ? t.groupTotal : id === "end" ? t.groupEnd : strings.hybrid.motionName[id]);
+  // The marketplace's own groups: its total is « Deux flux, un total », its sides the titles every slide of a side wears.
+  const marketplace = isMarketplace(state.setup);
+  const groupTitle = (id: ThumbGroup) =>
+    id === "total"
+      ? marketplace
+        ? strings.mkt.total.title
+        : t.groupTotal
+      : id === "end"
+        ? t.groupEnd
+        : id === "demand"
+          ? strings.mkt.side.demandTitle
+          : id === "supply"
+            ? strings.mkt.side.supplyTitle
+            : strings.hybrid.motionName[id];
 
   return (
     <section id="engine-deck" className={styles.deckView} aria-labelledby="engine-deck-title" data-testid="engine-deck">
@@ -508,8 +555,8 @@ export function DeckView({
         </div>
       ) : null}
 
-      {model.byMotion ? (
-        // The hybrid: four headings over runs of thumbnails, in the deck's own order.
+      {model.byMotion || marketplace ? (
+        // The hybrid: four headings over runs of thumbnails, in the deck's own order; a marketplace's, its total and its two sides.
         <div className={styles.thumbGroups} data-print="groups">
           {groups.map((group, g) => (
             <section key={`${group.id}-${g}`} className={styles.thumbGroup} data-print="group" aria-labelledby={`engine-deck-group-${g}`} data-testid={`deck-group-${group.id}`}>
