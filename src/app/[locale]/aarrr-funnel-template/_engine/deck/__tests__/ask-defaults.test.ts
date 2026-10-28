@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { consumerState, consumerUsageOnlyState } from "@/lib/engine/__tests__/fixtures";
-import { CANDIDATE_IDS } from "@/lib/engine/catalog-shape";
+import { consumerState, consumerUsageOnlyState, marketplaceNoSubscriptionsState, marketplaceState } from "@/lib/engine/__tests__/fixtures";
+import { CANDIDATE_IDS, MKT_DEMAND_CANDIDATE_IDS, MKT_SUPPLY_CANDIDATE_IDS } from "@/lib/engine/catalog-shape";
 import type { Diagnosis, EngineAsk, EngineDerived, EngineState, MetricEntry, MetricId, PlgCandidateId } from "@/lib/engine/types";
 import { SETUP_V2_DEFAULTS } from "@/lib/engine/types";
 import { askDefaults, horizonOptions, isPristineAsk, missingByRepairCost, successMetrics, suggestedSuccess } from "../ask-defaults";
@@ -150,6 +150,10 @@ describe("horizonOptions", () => {
   });
 });
 
+/**
+ * Non-vacuity of the marketplace's two cases (A23 MKT-8, 2026-10-28, one sabotage at a time, restored after; counts measured): the
+ * sides swapped drops 2 tests; no marketplace branch 2; the sellers' subscription numbers forced on 1; the list sorted 2.
+ */
 describe("successMetrics", () => {
   it("offers a SaaS the candidates of its ticked motions, as before", () => {
     expect(successMetrics(exampleState().setup)).toEqual(CANDIDATE_IDS);
@@ -162,5 +166,22 @@ describe("successMetrics", () => {
     expect(usageOnly).toContain("app.ret.active-retention");
     expect(usageOnly).not.toContain("ret.logo-churn");
     expect(usageOnly).not.toContain("rev.paid-conversion");
+  });
+
+  it("offers a marketplace its two sides' lists, the buyers' then the sellers', each in its own order and never sorted by value (C106)", () => {
+    const options = successMetrics(marketplaceState().setup);
+    // The sellers' subscription numbers are shown: both lists whole.
+    expect(options).toEqual([...MKT_DEMAND_CANDIDATE_IDS, ...MKT_SUPPLY_CANDIDATE_IDS]);
+    // Neither list is the other's: nothing from the SaaS's catalogue, and the buyers' six come before the sellers' five.
+    expect(options.slice(0, MKT_DEMAND_CANDIDATE_IDS.length).every((id) => id.startsWith("mkt.buy.") || id === "mkt.liq.fill-rate")).toBe(true);
+    expect(options.slice(MKT_DEMAND_CANDIDATE_IDS.length).every((id) => id.startsWith("mkt.sell."))).toBe(true);
+    expect(options).not.toEqual([...options].sort());
+    expect(options.some((id) => (CANDIDATE_IDS as readonly string[]).includes(id))).toBe(false);
+  });
+
+  it("a marketplace whose sellers pay nothing is not offered their subscription numbers (D9)", () => {
+    const options = successMetrics(marketplaceNoSubscriptionsState().setup);
+    expect(options).toEqual([...MKT_DEMAND_CANDIDATE_IDS, "mkt.sell.first-sale", "mkt.sell.churn"]);
+    for (const id of ["mkt.sell.signup-rate", "mkt.sell.paid-conversion", "mkt.sell.paid-churn"]) expect(options).not.toContain(id);
   });
 });

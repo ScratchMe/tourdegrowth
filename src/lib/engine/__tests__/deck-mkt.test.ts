@@ -13,15 +13,15 @@ import { CTX_EN, CTX_FR, EN, FR } from "./props";
  * its order — the total, the buyers' slides, the sellers', then the slides every type shares, never interleaved —, the side each
  * slide wears, the total as a ledger and the slides it cites, the leaks' amounts (~470, ~350, ~580 and ~130 €, C97), the sellers
  * who pay nothing (no total, a supply with its funnel), the unit economics without any reference (C73), and the independence of
- * the two sides (D2). The words themselves are `engine-copy*.test.ts`'s and the sweep's of `sentences-guard.test.ts`.
+ * the two sides (D2). The words themselves are `engine-copy*.test.ts`'s (the sweep of the deck's sentences in `sentences-guard.test.ts` is held back, JOURNAL 2026-10-28).
  *
  * Non-vacuity, measured at the end of MKT-8 (2026-10-28; each sabotage applied alone to the source, this file run, the source
- * restored; the count is the tests that fall): the order of the two sides swapped 3; the supply's slides tagged with the
- * demand's side 4; the total always present (even without the subscriptions) 2; the total's sides' slide numbers read before
- * the deck is numbered 3; the `One` form never picked 1; the supply's leak kept while it waits for its targets 1; the aside's
- * amount read from the chain instead of the ranking (« ~150 € » for a paid churn worth 130,50 €) 2; the dotted reference left on
- * the payback chart 2; the paid seller's cost tile noted with a variant instead of its computation 1; the side words ignored in
- * the Markdown's titles 1; a side's slide read with the neutral words 2; the demand's slides changing with a supply number 1.
+ * restored; the count is the tests that fall): the order of the two sides swapped 8; every side slide tagged with the demand's side
+ * 8; the total always present (even without the subscriptions) 5; the total's sides' slide numbers read as positions, before the
+ * deck is numbered 3; the `One` form never picked 1; the supply's leak kept while it waits for its targets 1; the « À côté » amount
+ * left out 2, and printed with one digit less 2; the dotted reference left on the payback chart 2; the paid seller's cost tile
+ * noted with a status instead of its computation 1; the side words ignored in the Markdown's titles 1; a side's slides built with
+ * the neutral words 6; the buyers' leak read on the sellers' diagnosis 6.
  */
 
 type Locale = "fr" | "en";

@@ -40,7 +40,8 @@ import { OPTIONAL_FIELDS, ROW_FIELDS, type RowKind } from "../deck-rows";
  * evolution and apart; dropping `app` and `appWhatIf` (A22 APP-9) fails it naming value12 — the
  * consumer app's twelve-month value, the tile between its cost and its 36-month value; dropping `marketplace`,
  * `marketplaceMoved` and `marketplaceNoSubscriptions` (A23 MKT-8) fails it naming streams and sideFunnel — the
- * marketplace's own rows, the ledger of its total and what a side's funnel adds to its columns.
+ * marketplace's own rows, the ledger of its total and what a side's funnel adds to its columns (measured 2026-10-28, with the
+ * four marketplace states dropped: the two « every kind is exercised » tests, fr and en).
  */
 
 const props = { fr: { ...FR, ctx: CTX_FR }, en: { ...EN, ctx: CTX_EN } } as const;

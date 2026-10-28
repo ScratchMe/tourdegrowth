@@ -183,6 +183,7 @@ describe("validateEngine — the v2 setup and the sales-assisted numbers (engine
   });
 
   it("the deck accepts a marketplace's own slides (A23 MKT-8): its total, each side's funnel, leak, « Et si » together and unit economics, and a lever's own slide", () => {
+    // Non-vacuity (2026-10-28, measured): `"mktLeakDemand"` taken out of `EXTRA_SLIDES` makes this test, and only this one, fall.
     const s = fullState();
     const slides = [
       "mktTotal",
