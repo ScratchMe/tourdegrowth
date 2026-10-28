@@ -1750,6 +1750,39 @@ fiches MKT-7a, MKT-7b et MKT-8 (§22.12) disent comment le construire.
   significatifs et « ~ » (C97) : ~470 €, ~350 €, ~580 € et ~130 € pour
   l'exemple (§22.10.2 garde les valeurs exactes).
 
+**Ce qu'MKT-7b a fait autrement, ou en plus** (2026-10-28, [#393](https://github.com/ScratchMe/tourdegrowth/pull/393)) :
+- **la phrase de la fuite** sous l'étape qui freine (`mktLeakLine`,
+  `mkt-view.ts`), que le retour dessine et que l'acceptation demande (« ~470 € ») :
+  les mots de `slideTitles.leakClearMrrNew` ou `…Retained` du côté, la cible
+  nue, le montant en gras à l'encre, seulement pour un diagnostic net et
+  chiffré ; les lignes « À côté » lisent `positions[id].impact.mrrPerMonth` ;
+- `Board` reçoit une quatrième prop, `sideStrings` ; `engine-verdict` est porté
+  par la bande avec les abonnements, sinon par le verdict **du côté affiché**
+  (le focus ne tombe jamais dans le vide) ; `SideShown` reçoit
+  `headingId="engine-side"` (son titre est `engine-side-title`) ;
+- la légende de la colonne des inscrits reprend celle du peloton : côté
+  demande, `peloton.cohortOfCount` avec `mktCohortSignups` (« 2 900 inscrits
+  en mai 2026, ramenés à 100 »), une feuille que la ligne 1 de §22.8.3 exclut
+  (le test des mots ne la lit pas ; la garde de MKT-10 lit le texte rendu) ;
+  côté offre, `visual.cohortOf` de son calque, sans le compte, parce que
+  « inscrits » nu y est un mot du SaaS (A23.d) ;
+- les refontes partagées : `moneyOfKpis` (`money-view.ts`), `figureGroupsOf`
+  (`whatif-figures.ts`), et `scenario-view.ts`, `series-view.ts` ; huit titres
+  « ce qu'on ne voit pas » rouges dans `title-accent.ts` (le trou, la rupture,
+  le vide de chaque côté, les deux « total inconnu »), sur le modèle de
+  `pelotonEmpty` ; « Tout remettre à aujourd'hui » d'un panneau ne remet que
+  les leviers de son côté ; la bande est « bougée » dès qu'un levier a bougé
+  d'un côté ou de l'autre ; le mot de la base de la liquidité sans
+  `fillVariant` est `kindEither` ;
+- les montants s'impriment comme le moteur imprime un montant saisi, au
+  centime quand il y en a (« 58 953,60 € », « 394 243,20 € ») : le retour les
+  arrondissait à l'euro ;
+- la densité, mesurée par `scripts/engine-density.capture.ts` (tests
+  « MKT-7b ») : le tableau de la demande fait 5 104 px à 1 280 (4 871 au
+  retour, +4,8 %), surtout par l'étiquette du sélecteur au-dessus (MKT-7a), la
+  phrase de la fuite et des lignes « À côté » plus longues ; le bouton principal
+  du premier écran tombe à son bord (904 px pour 900).
+
 ### 22.7 Le brief 10 (MKT-B)
 
 Le brief est écrit : [`design/DS-EXTENSION-BRIEF-10.md`](../../design/DS-EXTENSION-BRIEF-10.md),
@@ -2115,7 +2148,10 @@ d'acceptation de MKT-5, sur le modèle d'`engine-copy-consumer.test.ts` :
    et `Mkt` et le préfixe `mkt` de la ligne 3) : la règle « services » les
    couvre, puisqu'elles sont écrites avec les mots « produits » (la ligne 2
    n'a en fait aucune clé `mkt…` à retirer : elle exclut les clés qui ne
-   commencent pas par `mkt`, MKT-S la garde telle quelle). Exceptions
+   commencent pas par `mkt`, MKT-S la garde telle quelle ; depuis MKT-7b, la
+   ligne 3 « services » n'exclut plus un segment qui commence par `mkt`, quoi
+   qu'il contienne : `slideTitles.mktTotalUnknownBoth` porte « Both », la
+   marque de l'hybride, et reste lu par la règle « services »). Exceptions
    nommées dès MKT-S (`SERVICES_NAMED_EXCEPTIONS`) : `io.unsupportedSetup`
    (« comment l'entreprise vend », affiché quand un fichier ne dit pas son
    type, donc avant qu'on sache si c'est une place de marché de services) ;
@@ -3825,6 +3861,9 @@ Ton compte rendu, en français : une liste numérotée de constats, rangés par 
 - **Pause** : en local, le tableau d'une place de marché est complet ; en
   production, le type reste fermé. Le deck d'une place de marché n'a pas
   encore ses slides (MKT-8).
+- **Ce qu'MKT-7b a fait autrement** : voir la fin de §22.6.2 ; les
+  identifiants de test et la mesure de densité sont dans l'entrée « A23,
+  MKT-7b » du journal.
 
 #### MKT-8 — Les slides
 
@@ -4051,7 +4090,13 @@ Ton compte rendu, en français : une liste numérotée de constats, rangés par 
   qui nomme les deux vocabulaires par construction : une exception nommée (ou
   le groupe d'options hors du texte vérifié), pas une feuille à réécrire ; les
   identifiants de test de la carte, du réglage et des cibles sont dans l'entrée
-  « A23, MKT-6 » du journal.
+  « A23, MKT-6 » du journal. **Ce qu'MKT-7b laisse à la garde** : deux
+  définitions de §22.8.5 k, mot pour mot, contredisent §22.11.3, et ne se
+  voient qu'au « ? » ouvert (`EngineTerm.tsx`, la fenêtre n'est montée qu'à
+  l'ouverture) : `mkt.terms.takeRate` dit « SaaS » (« il joue le rôle du MRR
+  d'un SaaS »), et `mkt.terms.netRevenue` dit « MRR », un mot de
+  `DEMAND_WORDS`, dans l'argent de la demande. L'e2e ouvre ces deux « ? » ; tant
+  qu'A23.d ne les a pas réécrites, ce sont deux exceptions nommées.
 - **Acceptation** : commune ; la suite Playwright verte en CI.
 - **Arrêt** : un e2e existant qui rougit sur le SaaS ou l'app ; `ci.yml` qui
   demande plus qu'une valeur changée.
