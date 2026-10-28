@@ -36,6 +36,9 @@ const DENSER_FROM = 9;
 export function SlideScenario({ slide, context }: SlideProps) {
   const s = slideStrings(slide, context);
   const levers = rowsOf(slide, "lever");
+  // A marketplace side's slide is always the dense one: its side's title above the slide's own and its five-line footer (the
+  // assumptions of its money, §22.8.5) leave the curve and the drawn levers no room (measured: 115 to 220px under the footer).
+  const dense = levers.length >= DENSE_FROM || slide.side !== undefined;
   const together = rowOf(slide, "together")?.text;
   const footer = rowOf(slide, "footer")?.text;
   // Self-serve's keeps its v1 test ids; sales-assisted's (`slg:scenario`) gets its own, both can be on screen; a marketplace's two
@@ -44,16 +47,16 @@ export function SlideScenario({ slide, context }: SlideProps) {
 
   return (
     <SlideFrame slide={slide} context={context} footer={footer} footerDense>
-      <div className={[styles.scenario, levers.length >= DENSE_FROM ? styles.scenarioDense : ""].filter(Boolean).join(" ")}>
+      <div className={[styles.scenario, dense ? styles.scenarioDense : ""].filter(Boolean).join(" ")}>
         <div className={styles.whatIfSide}>
-          {slide.curve && levers.length < DENSE_FROM ? <SlideCurveCard curve={slide.curve} slideId={slide.id} shared /> : null}
+          {slide.curve && !dense ? <SlideCurveCard curve={slide.curve} slideId={slide.id} shared /> : null}
           <section
-            className={[styles.leverCard, levers.length >= DENSE_FROM ? styles.leverDense : "", levers.length >= DENSER_FROM ? styles.leverDenser : ""]
+            className={[styles.leverCard, dense ? styles.leverDense : "", levers.length >= DENSER_FROM ? styles.leverDenser : ""]
               .filter(Boolean)
               .join(" ")}
             data-testid={`${prefix}-levers`}
           >
-            {slide.leverSum && levers.length < DENSE_FROM ? (
+            {slide.leverSum && !dense ? (
               <LeverSum
                 medium="slide"
                 title={s.scenario.aloneTitle}

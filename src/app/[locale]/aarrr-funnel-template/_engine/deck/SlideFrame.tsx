@@ -59,8 +59,12 @@ const TITLE_STEPS = [
 ] as const;
 
 // A CSS module's class lookup is `string | undefined` under noUncheckedIndexedAccess.
-function titleClass(title: string): string | undefined {
-  return TITLE_STEPS.find((step) => title.length <= step.upTo)?.className ?? styles.slideTitleXLong;
+// A marketplace side's slide never takes the full size: with its side's title above and its two-line footer it has ~70px less
+// than the SaaS's, and the titles of its twelve slides (short ones, « Sur 100 vendeurs inscrits, 30 font une première vente. »,
+// and long ones) read at one size (A23 MKT-8, measured on the funnels, the leak and the « Et si »).
+function titleClass(title: string, side: boolean): string | undefined {
+  const steps = side ? TITLE_STEPS.slice(1) : TITLE_STEPS;
+  return steps.find((step) => title.length <= step.upTo)?.className ?? styles.slideTitleXLong;
 }
 
 /** The finished title of a slide, from its template key and its finished values (§9.3, D10: never edited). */
@@ -142,7 +146,7 @@ export function SlideFrame({
         </p>
       ) : null}
 
-      <h3 id={titleId} className={[styles.slideTitle, titleClass(title)].filter(Boolean).join(" ")}>
+      <h3 id={titleId} className={[styles.slideTitle, titleClass(title, slide.side !== undefined)].filter(Boolean).join(" ")}>
         {/* Red only for the verdict and the diagnosis; every other figure in ink (C53). */}
         <SlideText text={title} accent={titleAccent(slide.title.key) === "red"} />
       </h3>

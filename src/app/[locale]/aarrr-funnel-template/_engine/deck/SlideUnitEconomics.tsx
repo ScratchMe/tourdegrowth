@@ -12,6 +12,12 @@ type Tile = { id: string; label: string; value: string; note: string };
 
 /** The picture's size on the 1 920 canvas: the lower band's left column, drawn at its real size so its type never scales. */
 export const UNIT_CHART = { width: 900, height: 330 } as const;
+/**
+ * A marketplace side's slide wears its side's title above the slide's own and a two-line footer: the body has ~65px less, so
+ * the picture is drawn 90px lower than the SaaS's, its type unchanged (measured on the example, French and English, products and
+ * services: the tiles run two lines when a label names its side).
+ */
+export const UNIT_CHART_SIDE = { width: 900, height: 240 } as const;
 
 /**
  * Slide 4 — "what a customer brings in" (§9.3), with the money of design
@@ -51,6 +57,7 @@ export function SlideUnitEconomics({ slide, context }: SlideProps) {
   const footer = rowOf(slide, "footer")?.text;
   const chart = slide.paybackChart;
   const install = slide.installChart;
+  const size = slide.side ? UNIT_CHART_SIDE : UNIT_CHART;
 
   const tiles: Tile[] = [
     cac ? { id: "cac", label: cac.label, value: cac.value, note: cac.variant } : null,
@@ -96,8 +103,8 @@ export function SlideUnitEconomics({ slide, context }: SlideProps) {
               lifetime={chart.lifetime}
               payback={chart.payback}
               reference={chart.reference}
-              width={UNIT_CHART.width}
-              height={UNIT_CHART.height}
+              width={size.width}
+              height={size.height}
               labels={chart.labels}
               summary={chart.summary}
               id={`payback-${slide.id}`}

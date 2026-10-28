@@ -1,6 +1,7 @@
 import { SideFunnel } from "@/components/engine/SideFunnel";
 import { mktFunnelView } from "../mkt-view";
 import { rowOf } from "./deck-rows";
+import styles from "./deck.module.css";
 import { SlideFrame, slideStrings, slideTitle, type SlideProps } from "./SlideFrame";
 
 /**
@@ -12,7 +13,10 @@ import { SlideFrame, slideStrings, slideTitle, type SlideProps } from "./SlideFr
  *
  * The funnel is DRAWN from `mktFunnelView`, the function the board's funnel is drawn from: the screen and the slide cannot say one
  * side two ways. The `column` and `sideFunnel` rows of the slide are the same figures as the text export says them. Never a « ? »
- * glossary button on a slide (nothing on it can be clicked in a PDF or a PNG): the liquidity's heading is its words alone.
+ * glossary button on a slide (nothing on it can be clicked in a PDF or a PNG): the liquidity's heading is its words alone. Nor the
+ * cohort sentence of the screen (« Tes inscrits en mai 2026 sont ramenés à 100… »): the funnel's slide sets its legend on the
+ * upstream line's right and shares that row with the note, so the two would sit on one another — the return's slides carry none
+ * (`board.js`, `note: medium === "screen" ? … : null`): the title and the column heads already say « sur 100 ».
  */
 export function SlideSideFunnel({ slide, context }: SlideProps) {
   const { state, derived, ctx, metrics, derivedCopy } = context;
@@ -21,7 +25,7 @@ export function SlideSideFunnel({ slide, context }: SlideProps) {
   const footer = rowOf(slide, "footer")?.text;
   if (!side) return <SlideFrame slide={slide} context={context} footer={footer}>{null}</SlideFrame>;
 
-  const { base, title: _screenTitle, ...funnel } = mktFunnelView({ state, derived, ctx, strings, metrics, derivedCopy }, side, "slide");
+  const { base, title: _screenTitle, note: _screenNote, ...funnel } = mktFunnelView({ state, derived, ctx, strings, metrics, derivedCopy }, side, "slide");
   return (
     <SlideFrame slide={slide} context={context} footer={footer}>
       <SideFunnel
@@ -30,6 +34,7 @@ export function SlideSideFunnel({ slide, context }: SlideProps) {
         title={slideTitle(slide, strings).replace(/\*\*/g, "")}
         base={base ? { title: base.title, column: base.column, line: base.line } : undefined}
         medium="slide"
+        className={styles.sideFunnel}
         headingId={`slide-funnel-${side}`}
         data-testid={`slide-side-funnel-${side}`}
       />

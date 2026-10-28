@@ -65,9 +65,10 @@ export function ChangeTable({
  * The curve's canvas on a slide: the half-column's inner width (1 920
  * canvas). Its height is what the column leaves under a title on two lines
  * (measured on every lever of the example, 2026-10-03): tall alone, lower
- * over the funnel's steps or the drawn levers.
+ * over the funnel's steps or the drawn levers, and lower again when a marketplace's money lever adds the ring's note (three lines
+ * under the legend, A23 MKT-8: measured with a title on three lines and a side's title above it).
  */
-export const SLIDE_CURVE = { width: 650, height: 250, heightShared: 135 } as const;
+export const SLIDE_CURVE = { width: 650, height: 250, heightShared: 135, heightNoted: 190 } as const;
 
 /** A what-if slide's curve (design system extension 09, Q11): drawn at the slide's own size, its words from the model. */
 export function SlideCurveCard({ curve, slideId, shared = false, children }: { curve: SlideCurve; slideId: string; shared?: boolean; children?: ReactNode }) {
@@ -76,7 +77,7 @@ export function SlideCurveCard({ curve, slideId, shared = false, children }: { c
       <MrrCurve
         medium="slide"
         width={SLIDE_CURVE.width}
-        height={shared ? SLIDE_CURVE.heightShared : SLIDE_CURVE.height}
+        height={shared ? SLIDE_CURVE.heightShared : curve.note ? SLIDE_CURVE.heightNoted : SLIDE_CURVE.height}
         id={`slide-curve-${slideId.replace(/[^a-z0-9]/gi, "-")}`}
         today={curve.today}
         whatif={curve.whatif}
