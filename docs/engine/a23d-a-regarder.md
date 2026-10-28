@@ -183,3 +183,32 @@ Publics dès le merge de MKT-G (C72), recopiés de `docs/engine/glossaire-mkt.md
 - **`mkt.terms.gmv.term` en « services »** reste "GMV (gross merchandise
   value)" : le lexique garde le nom du GMV, mais un écran de services affiche
   un mot de marchandise.
+
+## Les slides (MKT-8)
+
+- **La formule de la marge brute** (`mkt.rev.gross-margin`, §22.4, et sa
+  jumelle « services ») dit « remboursements à ta charge » / "refunds you
+  bear" : les pages d'annexe l'impriment, et une slide ne s'adresse jamais au
+  lecteur. Gardée par une exception nommée de `sentences-guard.test.ts` ; à
+  réécrire (par exemple « remboursements à la charge de la place de marché »),
+  ou à garder.
+- **`mkt.total.slide.marginRange`** (la tuile de la LTV) : avec une fourchette,
+  « marge estimée à 55 à 65 % », deux « à » de suite ; l'anglais "margin
+  estimated at 55–65%" va bien. Pistes : « marge estimée : {range} ».
+- **`slide.chartTimeHealthy`** (une feuille du SaaS, relue) : avec une
+  fourchette, « remboursé à 20 à 23 mois, puis ~2 à 5 mois de marge » ;
+  l'anglais pose deux étiquettes. Piste : « remboursé en {payback}, puis
+  {after} de marge ». La place de marché la montre plus souvent, ses montants
+  étant des fourchettes ; le SaaS la montre aussi.
+- **Les slides « Et si » d'ensemble** n'ont pas de courbe (le retour en
+  dessine une) : elle ne tenait pas au-dessus du pied. Une question de mise en
+  page, à regarder avec la re-synchro (A23.e).
+- **La note de cohorte de la slide du funnel** est retirée : `mkt.funnel.slideSameHundred`
+  et `slideSellerSameHundred` n'ont pas de lecteur. À supprimer, ou à placer.
+- **Le montant de la fuite d'un churn** : le titre (la chaîne de la fuite) et
+  la colonne « À côté » (le classement) n'arrondissent pas au même rang ; ils
+  peuvent différer d'un cran.
+- **Les coupures de ligne** : une fourchette se coupe dans un titre (« en 20 /
+  à 23 mois », "20– / 23 months"), et l'anglais coupe "within 60 / days".
+  Des insécables dans le formateur des fourchettes et dans `{n} days`
+  l'éviteraient, pour tout le moteur.

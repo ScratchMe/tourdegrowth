@@ -1783,6 +1783,27 @@ fiches MKT-7a, MKT-7b et MKT-8 (§22.12) disent comment le construire.
   phrase de la fuite et des lignes « À côté » plus longues ; le bouton principal
   du premier écran tombe à son bord (904 px pour 900).
 
+**Ce qu'MKT-8 a fait autrement, ou en plus** (2026-10-28, [#394](https://github.com/ScratchMe/tourdegrowth/pull/394)) :
+- la slide du funnel d'un côté n'a pas de note de cohorte (posée sur la ligne
+  amont, elle la recouvrait ; les slides du retour n'en ont pas) : les feuilles
+  `mkt.funnel.slideSameHundred` et `slideSellerSameHundred` restent sans
+  lecteur ; sur une slide, la flèche de la ligne amont est dessinée en SVG
+  (aucune des polices des slides n'a « → ») ;
+- les deux slides « Et si » d'ensemble prennent le pas dense du libre-service
+  (la liste des leviers, sans courbe ni `LeverSum`) : avec la courbe, elles
+  finissaient sous le pied ; les slides d'un levier gardent courbe et anneau ;
+- les slides d'un côté se resserrent (le titre de côté prend ~42 px) : écart
+  du cadre, titres jamais à la pleine taille, grille du funnel, graphique du
+  remboursement et courbe plus bas ;
+- `engine-copy.test.ts` nomme `mkt.total.sideDemandOne` et `sideSupplyOne`
+  (`OTHER_SHAPE`) : leur forme au singulier porte `{n}`, pas `{from}{to}` ;
+- `sentences-guard.test.ts` balaie le deck d'une place de marché, avec une
+  exception nommée : la formule de `mkt.rev.gross-margin` (« remboursements à
+  ta charge »), que les pages d'annexe impriment (A23.d) ;
+- hors liste : `EngineWorkbench.tsx` passe `stringsBySide` à `DeckView`,
+  `SlideScenario.tsx` prend les mots du côté, `deck.ts` exporte ses aides
+  partagées.
+
 ### 22.7 Le brief 10 (MKT-B)
 
 Le brief est écrit : [`design/DS-EXTENSION-BRIEF-10.md`](../../design/DS-EXTENSION-BRIEF-10.md),
@@ -4039,6 +4060,8 @@ Ton compte rendu, en français : une liste numérotée de constats, rangés par 
 - **Relecteurs** : copie.
 - **Pause** : en local, le deck d'une place de marché est complet ; le type
   reste fermé en production.
+- **Ce qu'MKT-8 a fait autrement** : voir la fin de §22.6.2 ; les captures et
+  la mise en page mesurée sont dans l'entrée « A23, MKT-8 » du journal.
 
 #### MKT-9 — L'exemple et le golden
 
