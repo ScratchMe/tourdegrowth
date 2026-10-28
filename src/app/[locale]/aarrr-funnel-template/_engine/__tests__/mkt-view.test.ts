@@ -6,7 +6,7 @@ import { marketplaceStrings } from "@/lib/engine/strings";
 import type { EngineCalcContext, EngineState, LeverId, MetricId, MktSide } from "@/lib/engine/types";
 import { marketplaceNoSubscriptionsState, marketplaceState, withEntry } from "@/lib/engine/__tests__/fixtures";
 import { CTX_EN, CTX_FR, EN, FR } from "@/lib/engine/__tests__/props";
-import { mktAsideLines, mktAssumptions, mktFunnelView, mktLeverSum, mktLeverView, mktMoneyView, mktTotalView, mktWhatIfGroups, sideOfMetric, type MktViewInput } from "../mkt-view";
+import { mktAsideLines, mktAssumptions, mktFunnelView, mktLeakLine, mktLeverSum, mktLeverView, mktMoneyView, mktTotalView, mktWhatIfGroups, sideOfMetric, type MktViewInput } from "../mkt-view";
 import { candidateValuesOf, listStages, namedStages } from "../number-list";
 import { diagnosisOf } from "../BoardNumbers";
 
@@ -328,6 +328,36 @@ describe("a side's funnel — each stage counted on the side's own 100 sign-ups 
     const repeat = funnel.columns.find((c) => c.id === "mkt.buy.repeat")!;
     expect(repeat.n).not.toBe("0");
     expect(repeat.ariaLabel).toBeTruthy();
+  });
+});
+
+describe("the leak's sentence — the stage the diagnosis names, and what closing its gap is worth (§22.6.2, C97)", () => {
+  it("the buyers: 468 € a month, the ranking's exact amount, printed « ~470 € » — the words of the leak slide", () => {
+    const line = mktLeakLine(inputOf(example, "demand"), "demand");
+    expect(line).toBe(nb("Ramener le taux de service à 12 % vaudrait **~470 € de revenu net nouveau** chaque mois."));
+  });
+
+  it("the sellers: 580 € a month of subscription MRR, printed « ~580 € »", () => {
+    const line = mktLeakLine(inputOf(example, "supply"), "supply");
+    expect(line).toContain(nb("~580 €"));
+    expect(line).toMatch(/^Ramener la conversion/);
+  });
+
+  it("says it in English, and in the services words", () => {
+    expect(mktLeakLine(inputOf(example, "demand", "en"), "demand")).toBe("Bringing the fill rate to 12% would be worth **~€470 of new net revenue** every month.");
+    const services = mktLeakLine(inputOf(example, "demand", "fr", "services"), "demand")!;
+    expect(servicesWordsHeld(services, "fr")).toEqual([]);
+    expect(services).toContain(nb("~470 €"));
+  });
+
+  it("names nothing when the side names no single stage: not enough targets, the sellers who pay nothing", () => {
+    expect(mktLeakLine(inputOf(noSubscriptions, "supply"), "supply")).toBeNull();
+  });
+
+  it("is never the other side's: the sellers' sentence holds none of the buyers' words or amount", () => {
+    const supply = mktLeakLine(inputOf(example, "supply"), "supply")!;
+    expect(supply).not.toContain("470");
+    expect(supply).not.toMatch(/taux de service|acheteur/);
   });
 });
 

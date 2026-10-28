@@ -12,6 +12,7 @@ import {
   unpricedSentence,
 } from "@/lib/engine/phrases";
 import { formatInterval, formatPercent } from "@/lib/engine/format";
+import { accentRuns } from "./text";
 import { fill, stageLabel } from "./visual-model";
 import styles from "./Diagnosis.module.css";
 
@@ -41,6 +42,11 @@ export interface DiagnosisProps {
    * (the caller removes them from `belowUnpriced`).
    */
   aside?: readonly string[];
+  /**
+   * A marketplace side's leak sentence (§22.6.2, `mkt-view.ts#mktLeakLine`): « Ramener le taux de service à 12 % vaudrait
+   * **~470 € de revenu net nouveau** chaque mois. » Its `**…**` is drawn in bold ink: the red is the stage's name alone.
+   */
+  leak?: string | null;
   className?: string;
 }
 
@@ -60,7 +66,7 @@ export interface DiagnosisProps {
  * blind line is always printed when a ★ is unmeasured: an unknown is a
  * finding, and the real bottleneck may be hiding there. A marketplace's side is this same block (`data-side`), with its « À côté » lines.
  */
-export function Diagnosis({ diagnosis, strings, locale, metrics, values, motionName, previous, aside, className }: DiagnosisProps) {
+export function Diagnosis({ diagnosis, strings, locale, metrics, values, motionName, previous, aside, leak, className }: DiagnosisProps) {
   const d = strings.diagnosis;
   // Formatting reads the language only, never the clock: a fixed date keeps
   // this component free of `Date.now()` (the engine's time is injected).
@@ -119,6 +125,12 @@ export function Diagnosis({ diagnosis, strings, locale, metrics, values, motionN
             </li>
           ))}
         </ul>
+      ) : null}
+
+      {leak ? (
+        <p className={styles.leak} data-testid="diagnosis-leak">
+          {accentRuns(leak).map((run, i) => (run.accent ? <strong key={i}>{run.text}</strong> : <span key={i}>{run.text}</span>))}
+        </p>
       ) : null}
 
       {diagnosis.state === "level" ? <p className={styles.body}>{d.levelBody}</p> : null}

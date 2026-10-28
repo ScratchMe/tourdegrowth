@@ -541,6 +541,32 @@ function periodFill(snapshot: EngineState["snapshots"][number], entry: ReturnTyp
   return periodOf({ flow: "month" } as Parameters<typeof periodOf>[0], entry, snapshot);
 }
 
+// --- The leak's sentence and the « À côté » lines of a side's diagnosis ----------------------
+
+/**
+ * The sentence under the stage a side's diagnosis names (§22.6.2 « sa fuite », C97, the return's `diag.worth`): « Ramener le
+ * taux de service à 12 % vaudrait **~470 € de revenu net nouveau** chaque mois. » It is the words of the leak slide
+ * (`slideTitles.leakClearMrrNew` or `…Retained`, MKT-8 says the same with them), with the amount the ranking itself priced (the
+ * exact 468 € a month, never the chain's rounded count × its price), said as every projection: two significant digits and « ~ ».
+ * Its `**…**` is the stressed part, drawn in bold ink, never red (the stage's name is the one red). null when the side names
+ * no single stage (`shared`, `level`, `not-enough`), or the named stage is priced by no amount.
+ */
+export function mktLeakLine(input: MktViewInput, side: MktSide): string | null {
+  const { state, derived, ctx, strings, metrics } = input;
+  const diagnosis = mktMotion(derived).sides[side].diagnosis;
+  if (diagnosis.state !== "clear") return null;
+  const id = diagnosis.named[0];
+  const at = id ? diagnosis.positions[id] : undefined;
+  const amount = at?.impact?.mrrPerMonth ? formatApproxMoneyInterval(at.impact.mrrPerMonth, state.setup.currency, ctx, strings.units) : null;
+  if (!id || !at?.comparator || !at.impact || !amount) return null;
+  return fillTemplate(strings.slideTitles[at.impact.kind === "retained-mrr" ? "leakClearMrrRetained" : "leakClearMrrNew"], {
+    stage: subjectOf(id, strings, metrics),
+    // The bare target, as the line above it says it (« sous ta cible (12 %) »): the slide's « (cible de l'équipe) » would say it twice.
+    target: formatInterval(point(impactTarget(at.comparator)), "percent", ctx, strings.units),
+    amount,
+  });
+}
+
 // --- The « À côté » lines of a side's diagnosis ---------------------------------------
 
 export interface MktAsideLine {

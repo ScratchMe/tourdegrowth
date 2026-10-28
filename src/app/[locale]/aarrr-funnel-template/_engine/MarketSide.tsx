@@ -16,7 +16,7 @@ import type { LeverId, MktSide } from "@/lib/engine/types";
 import { BoardMoney } from "./BoardMoney";
 import { Diagnosis } from "./Diagnosis";
 import { EngineTerm } from "./EngineTerm";
-import { mktAsideLines, mktLeverView, mktMoneyView, mktMotion, mktFunnelView } from "./mkt-view";
+import { mktAsideLines, mktLeakLine, mktLeverView, mktMoneyView, mktMotion, mktFunnelView } from "./mkt-view";
 import { MktWhatIfPanel } from "./MktWhatIfPanel";
 import { candidateValuesOf } from "./number-list";
 import { targetAt, withTarget } from "./scenario-view";
@@ -117,6 +117,7 @@ export function MarketSide({
           values={candidateValuesOf(state, ctx, side)}
           previous={previousLeakLine(view, "mkt", side)}
           aside={asides.map((line) => line.text)}
+          leak={mktLeakLine(view, side)}
         />
       )}
 
