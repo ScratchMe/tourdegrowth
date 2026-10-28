@@ -480,7 +480,7 @@ function MarketBoard({
   onTemplate,
   onApplyTable,
 }: BoardProps) {
-  const { strings, state } = view;
+  const { strings } = view;
   const past = series ? series.shown !== series.months.length - 1 : false;
   const readOnly = past && !series?.correcting;
   const [tableOpen, setTableOpen] = useState(false);

@@ -42,7 +42,7 @@ export { sideOfMetric } from "./number-list";
 import { figureGroupsOf, type FigureGroup, type FigureRow } from "./whatif-figures";
 import { gainText, kpiRows, leverGains, leverRows, roundedMoney, type KpiView } from "./scenario-view";
 import { factMoney, leverMoneyView, moneyOfKpis, MKT_MRR12_INPUTS, type MoneyView } from "./money-view";
-import { columnGrid, columnNumeral, fill, monthLabel, numeralText, signupsGrid } from "./visual-model";
+import { columnGrid, columnNumeral, monthLabel, numeralText, signupsGrid } from "./visual-model";
 import { titleText } from "./Verdict";
 import type { EngineTermId } from "./EngineTerm";
 

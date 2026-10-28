@@ -40,10 +40,13 @@ describe("the start's question", () => {
  * `renderToStaticMarkup` cannot send, and the option is `disabled`, so no e2e can click it either.
  */
 describe("pickedType — the settings card's type guard", () => {
-  it("the marketplace is a type there is and no choice: not while its screens are not ready, even listed in ENGINE_TYPES", () => {
+  it("the marketplace is a type there is and a choice only in a build that lists it in ENGINE_TYPES — its screens exist since MKT-7b", () => {
     expect((BUSINESS_TYPES as readonly string[]).includes("marketplace")).toBe(true);
-    for (const env of [undefined, "", "consumer-app", "marketplace", "consumer-app,marketplace"]) {
+    for (const env of [undefined, "", "consumer-app"]) {
       expect(pickedType("marketplace", openTypesWith(env)), `ENGINE_TYPES=${env}`).toBeNull();
+    }
+    for (const env of ["marketplace", "consumer-app,marketplace"]) {
+      expect(pickedType("marketplace", openTypesWith(env)), `ENGINE_TYPES=${env}`).toBe("marketplace");
     }
   });
 
