@@ -91,8 +91,10 @@ export function mktSetup(setup: Pick<EngineSetup, "type" | "offering" | "sellerS
 }
 
 /**
- * The barrier of the marketplace's screens (§22.3). While it is `false`, no build opens the type, whatever `ENGINE_TYPES`
- * says (`access.ts#openTypesWith`), and no file of that type opens (`io.ts`): no marketplace state reaches the island
- * before the board that shows it exists. MKT-7b lifts it; `business-type.test.ts` holds its value.
+ * The barrier of the marketplace's screens (§22.3). While it was `false`, no build opened the type, whatever `ENGINE_TYPES`
+ * said (`access.ts#openTypesWith`), and no file of that type opened (`io.ts`): no marketplace state reached the island
+ * before the board that shows it existed. MKT-7b lifted it (A23, 2026-10-27: the board, its two sides and a number's screen
+ * exist); `business-type.test.ts` holds its value. The type is still closed everywhere `ENGINE_TYPES` does not list it —
+ * production among them — until the type's opening (§22.0, A22.e).
  */
-export const MARKETPLACE_SCREENS_READY = false;
+export const MARKETPLACE_SCREENS_READY = true;

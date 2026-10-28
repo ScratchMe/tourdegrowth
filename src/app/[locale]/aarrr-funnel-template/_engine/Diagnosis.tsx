@@ -35,6 +35,12 @@ export interface DiagnosisProps {
   motionName?: string;
   /** « En juillet 2026, la fuite était l'activation. » (§19.2.5, A14 T2): only when the leak changed stage since the month before. */
   previous?: string | null;
+  /**
+   * A marketplace side's « À côté » lines (§22.6.2, `mkt-view.ts#mktAsideLines`): one per other stage under its target, in ink — red is
+   * the leak's, one per side. They say what the generic « aussi en retard » note says for these stages, so that note is not printed for them
+   * (the caller removes them from `belowUnpriced`).
+   */
+  aside?: readonly string[];
   className?: string;
 }
 
@@ -52,9 +58,9 @@ export interface DiagnosisProps {
  * red only when the diagnosis names it (`clear`/`shared`); `level` and
  * `not-enough` stay ink — red is a diagnosis, and neither state is one. The
  * blind line is always printed when a ★ is unmeasured: an unknown is a
- * finding, and the real bottleneck may be hiding there.
+ * finding, and the real bottleneck may be hiding there. A marketplace's side is this same block (`data-side`), with its « À côté » lines.
  */
-export function Diagnosis({ diagnosis, strings, locale, metrics, values, motionName, previous, className }: DiagnosisProps) {
+export function Diagnosis({ diagnosis, strings, locale, metrics, values, motionName, previous, aside, className }: DiagnosisProps) {
   const d = strings.diagnosis;
   // Formatting reads the language only, never the clock: a fixed date keeps
   // this component free of `Date.now()` (the engine's time is injected).
@@ -97,6 +103,7 @@ export function Diagnosis({ diagnosis, strings, locale, metrics, values, motionN
       data-testid={diagnosis.motion === "slg" ? "engine-diagnosis-slg" : "engine-diagnosis"}
       data-state={diagnosis.state}
       data-motion={diagnosis.motion}
+      data-side={diagnosis.side}
     >
       <p className={[styles.eyebrow, named.length ? styles.eyebrowNamed : ""].filter(Boolean).join(" ")}>
         {eyebrow}
@@ -125,6 +132,11 @@ export function Diagnosis({ diagnosis, strings, locale, metrics, values, motionN
         </p>
       ) : null}
 
+      {aside?.map((line) => (
+        <p key={line} className={styles.aside} data-testid="diagnosis-aside">
+          {line}
+        </p>
+      ))}
       {unpriced ? <p className={styles.note}>{unpriced}</p> : null}
       {churnWithoutCommonAmount(diagnosis) ? <p className={styles.note}>{d.noArpa}</p> : null}
 

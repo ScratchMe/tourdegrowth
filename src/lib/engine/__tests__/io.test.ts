@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { coverage } from "../coverage";
 import { engineFileName, parseEngineFile, serializeEngine } from "../io";
 import type { EngineState, Snapshot } from "../types";
@@ -161,62 +161,34 @@ describe("a v1 file and the v2 setup (engine spec §18.3.2)", () => {
 });
 
 /**
- * A marketplace's file (engine spec §22.3, A23 MKT-0). Its setup ticks no box: its motion is derived. The barrier
- * (`MARKETPLACE_SCREENS_READY`) keeps such a file from opening until the board that shows it exists — the refusal is the
- * one of a file that sells nothing — so the half that matters once MKT-7b lifts it is measured on a copy of the module
- * graph where `setup-type.ts` says `true`.
- *
- * Non-vacuity, measured on 2026-10-18 (each sabotage applied alone, the whole of `src/lib/engine` run, the file
- * restored; the count is the tests that fall): `sellsSomehow` without the barrier (`ticked.length === 0` alone) falls
- * « is refused while the barrier is down » (1); without its marketplace line, the two lifted-barrier tests (2: a
- * marketplace ticks no box, so the old line refuses it); the barrier constant at `true` falls the first (1, with 3 in
- * the other files); the marketplace's branch of the motions check after « none ticked » falls the two lifted-barrier
- * tests (2); no « only a marketplace has one » falls the last test here (1).
+ * A marketplace's file (engine spec §22.3, A23 MKT-0, opened by MKT-7b). Its setup ticks no box: its motion is derived. Its
+ * file opens now that the board that shows it exists (`MARKETPLACE_SCREENS_READY`); it was refused until then, with the
+ * refusal of a file that sells nothing. Non-vacuity: the counts are in the MKT-7b entry of JOURNAL.md.
  */
-describe("a marketplace's file and the barrier of its screens (§22.3)", () => {
+describe("a marketplace's file (§22.3)", () => {
   const market = (extra: Record<string, unknown> = {}, motions: Record<string, boolean> = { plg: false, slg: false }): EngineState => {
     const s = fullState();
     return { ...s, setup: { ...s.setup, type: "marketplace", motions, ...extra } as never };
   };
   const REFUSED = { state: null, refusal: "unsupported-setup" };
 
-  afterEach(() => {
-    vi.doUnmock("../setup-type");
-    vi.resetModules();
-  });
-
-  /** `io.ts` read on a graph where the marketplace's screens are ready. */
-  async function ioWithBarrierLifted(): Promise<typeof import("../io")> {
-    vi.resetModules();
-    vi.doMock("../setup-type", async (importOriginal) => ({ ...(await importOriginal<typeof import("../setup-type")>()), MARKETPLACE_SCREENS_READY: true }));
-    return import("../io");
-  }
-
-  it("is refused while the barrier is down, as a file that sells nothing is — whatever it carries", () => {
-    for (const file of [market(), market({ sellerSubscriptions: true }), market({ offering: "services", firstOrderWindowDays: 7 })]) {
-      expect(parseEngineFile(serializeEngine(file)), JSON.stringify(file.setup)).toMatchObject(REFUSED);
-    }
-  });
-
-  it("opens, once the barrier is lifted, with its fields and no warning — and round-trips", async () => {
-    const io = await ioWithBarrierLifted();
+  it("opens with its fields and no warning — and round-trips", () => {
     for (const file of [
       market(),
       market({ sellerSubscriptions: true }),
       market({ offering: "services", sellerSubscriptions: true, firstOrderWindowDays: 7, repeatWindowDays: 180, firstSaleWindowDays: 90 }),
     ]) {
-      const parsed = io.parseEngineFile(io.serializeEngine(file));
+      const parsed = parseEngineFile(serializeEngine(file));
       expect(parsed.refusal, JSON.stringify(file.setup)).toBeUndefined();
       expect(parsed.migratedFrom).toBeUndefined();
       expect(parsed).toEqual({ state: file, errors: [] });
     }
   });
 
-  it("opens with the validator's warning when a field is wrong, and is refused when it ticks a selling box", async () => {
-    const io = await ioWithBarrierLifted();
-    expect(io.parseEngineFile(JSON.stringify(market({ repeatWindowDays: 45 })))).toMatchObject({ errors: ["setup.repeatWindowDays: not 60, 90 or 180"] });
+  it("opens with the validator's warning when a field is wrong, and is refused when it ticks a selling box", () => {
+    expect(parseEngineFile(JSON.stringify(market({ repeatWindowDays: 45 })))).toMatchObject({ errors: ["setup.repeatWindowDays: not 60, 90 or 180"] });
     for (const motions of [{ plg: true, slg: false }, { plg: false, slg: true }, { plg: true, slg: true }]) {
-      expect(io.parseEngineFile(JSON.stringify(market({}, motions))), JSON.stringify(motions)).toMatchObject(REFUSED);
+      expect(parseEngineFile(JSON.stringify(market({}, motions))), JSON.stringify(motions)).toMatchObject(REFUSED);
     }
   });
 

@@ -136,8 +136,8 @@ const READABLE_VERSIONS: readonly number[] = [1, 2, ENGINE_SCHEMA_VERSION];
  * at least one way of selling ticked, every ticked one being one the type
  * allows (a consumer app sells self-serve only) — a marketplace is the reverse,
  * it ticks none, its motion being derived, and it opens only once its screens
- * exist (`MARKETPLACE_SCREENS_READY`): until then its file gets the refusal of a
- * file that sells nothing. Refused rather than opened with errors — there would
+ * exist (`MARKETPLACE_SCREENS_READY`, true since A23 MKT-7b; before, its file got the
+ * refusal of a file that sells nothing). Refused rather than opened with errors — there would
  * be nothing to draw, and « Remplacer » would replace an engine with an empty
  * one. The app's monetization is not read here: an app without one opens, and
  * the validator says so.

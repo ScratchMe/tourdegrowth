@@ -8,7 +8,15 @@ import { fill } from "./text";
 import styles from "./EngineTerm.module.css";
 
 /** The engine's own words with a « ? » (A18 T6, the return 07's five glossary entries; A20.d T2 and T5, the return 09's money and runway). */
-export type EngineTermId = "cohort" | "target" | "reference" | "window" | "sharedCount" | "cashTied" | "afterPayback" | "runway" | "arr";
+export type EngineTermId = "cohort" | "target" | "reference" | "window" | "sharedCount" | "cashTied" | "afterPayback" | "runway" | "arr" | MktTermId;
+
+/**
+ * The four words a marketplace teaches (§22.8.5 k, C72 and C101, A23 MKT-7b), read in `strings.mkt.terms`: the GMV, the take
+ * rate, the liquidity and the net revenue. The first three have a page in the site's glossary (A23 MKT-G); the engine's « ? »
+ * never links to it (`engine-boundary`, rule 2), and the net revenue has none.
+ */
+export type MktTermId = "gmv" | "takeRate" | "liquidity" | "netRevenue";
+const MKT_TERMS: readonly string[] = ["gmv", "takeRate", "liquidity", "netRevenue"];
 
 const Scope = createContext<{
   openId: EngineTermId | null;
@@ -50,7 +58,7 @@ export function EngineTerm({ id, strings, tone = "muted" }: { id: EngineTermId; 
   const open = scope ? scope.openId === id : ownOpen;
   const setOpen = (on: boolean) => (scope ? (on ? scope.open(id) : scope.close(id)) : setOwnOpen(on));
   const t = strings.terms;
-  const entry = t[id];
+  const entry = MKT_TERMS.includes(id) ? strings.mkt.terms[id as MktTermId] : t[id as Exclude<EngineTermId, MktTermId>];
   return (
     <span className={open ? `${styles.anchor} ${styles.anchorOpen}` : styles.anchor}>
       <DefinitionTrigger

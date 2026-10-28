@@ -5,21 +5,22 @@ import { NumberList, type NumberRow } from "@/components/engine/NumberList";
 import { LINK_METRIC_SHAPES, metricsOfStageIn, motionOfMetric, shapeOf, type MetricShape } from "@/lib/engine/catalog-shape";
 import type { AnyDiagnosis } from "@/lib/engine/phrases";
 import { isSellingMotion } from "@/lib/engine/setup-type";
-import type { MetricId, Motion } from "@/lib/engine/types";
+import type { EngineMotion, MetricId, MktSide } from "@/lib/engine/types";
 import { knownIn, statusOf } from "@/lib/engine/values";
 import { displayInterval, unknownReason } from "./display";
-import { listProgress, listStages, rowStatusOf, type ListProgress, type RowStatus } from "./number-list";
+import { listProgress, listStages, rowStatusOf, sideOfMetric, type ListProgress, type RowStatus } from "./number-list";
 import { rowDelta } from "./series-view";
 import { domId, fill, joinList, metricById, stageName } from "./text";
 import type { EngineView } from "./view";
 
 /**
- * A motion's diagnosis — the one its list marks and its rows word. Self-serve's is the v1 field. A marketplace's motion
- * holds two (one per side) and no `diagnosis`: it falls to the v1 field here until the board reads it side by side (MKT-7b).
+ * A motion's diagnosis — the one its list marks and its rows word. Self-serve's is the v1 field. A marketplace's motion holds
+ * two, one per side (C70): the list marks the one of the side SHOWN (`side`, the demand's by default), never both.
  */
-export function diagnosisOf(view: EngineView, motion: Motion): AnyDiagnosis {
+export function diagnosisOf(view: EngineView, motion: EngineMotion, side: MktSide = "demand"): AnyDiagnosis {
   const own = view.derived.motions.find((m) => m.motion === motion);
-  return (own && own.motion !== "mkt" ? own.diagnosis : undefined) ?? view.derived.diagnosis;
+  if (own?.motion === "mkt") return own.sides[side].diagnosis;
+  return own?.diagnosis ?? view.derived.diagnosis;
 }
 
 /**
@@ -89,9 +90,9 @@ export function numberRemaining(id: MetricId, view: EngineView): string {
   const snapshot = view.state.snapshots[view.state.snapshots.length - 1]!;
   const { plg, slg } = view.state.setup.motions;
   const own = motionOfMetric(id);
-  // Until MKT-7b gives a marketplace its board, a number of the marketplace has no list of its own to count in.
-  const motions: Motion[] = plg && slg ? ["plg", "slg"] : isSellingMotion(own) ? [own] : [];
-  const remaining = motions.reduce((n, motion) => n + listProgress(listStages(snapshot, diagnosisOf(view, motion), motion, view.state.setup)).remaining, 0);
+  // A marketplace's list is one list, both sides' numbers by stage (C41); which stage is flagged follows the side shown, never what remains.
+  const motions: EngineMotion[] = plg && slg ? ["plg", "slg"] : isSellingMotion(own) || own === "mkt" ? [own] : [];
+  const remaining = motions.reduce((n, motion) => n + listProgress(listStages(snapshot, diagnosisOf(view, motion, sideOfMetric(id)), motion, view.state.setup)).remaining, 0);
   return remainingText(remaining, view);
 }
 
@@ -108,18 +109,21 @@ export function numberRemaining(id: MetricId, view: EngineView): string {
 export function BoardNumbers({
   view,
   motion,
+  side,
   readOnly,
   onOpen,
 }: {
   view: EngineView;
-  motion: Motion;
+  motion: EngineMotion;
+  /** A marketplace's list is shared, and its one flagged stage is the one the side SHOWN names (§22.6.2, C103): the side shown. */
+  side?: MktSide;
   readOnly: boolean;
   onOpen: (id: MetricId) => void;
 }) {
   const { strings, state } = view;
   const l = strings.list;
   const snapshot = state.snapshots[state.snapshots.length - 1]!;
-  const stages = listStages(snapshot, diagnosisOf(view, motion), motion, state.setup);
+  const stages = listStages(snapshot, diagnosisOf(view, motion, side), motion, state.setup);
   const progress = listProgress(stages);
   const word = (status: NumberStatus) => l.status[status];
 
@@ -131,6 +135,8 @@ export function BoardNumbers({
     const note = [value?.kind === "cause" ? value.text : null, delta].filter(Boolean).join(" · ");
     return {
       id,
+      // A marketplace's row says whose number it is, in words and never in colour (§22.6.2): the buyers', the sellers', or the liquidity's.
+      side: motion === "mkt" && shape.side ? strings.mkt.side[shape.side] : undefined,
       name: metricById(view.metrics, id).name,
       value: value && value.kind !== "cause" ? value.text : undefined,
       valueKind: value?.kind === "words" ? "words" : "number",
@@ -149,6 +155,7 @@ export function BoardNumbers({
   return (
     <NumberList
       title={l.title}
+      lead={motion === "mkt" ? strings.mkt.list.lead : undefined}
       progress={
         <EngineProgress
           remaining={remainingText(progress.remaining, view)}

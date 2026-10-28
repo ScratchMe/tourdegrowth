@@ -60,6 +60,13 @@
   max-width: var(--measure-read);
 }
 
+/* A marketplace side's « À côté » line: the other stage under its target, in ink — red is the one leak (§22.6.2). */
+.aside {
+  font: var(--body-sm);
+  color: var(--text-body);
+  max-width: var(--measure-read);
+}
+
 .blind {
   font: var(--body-sm);
   font-weight: 600;

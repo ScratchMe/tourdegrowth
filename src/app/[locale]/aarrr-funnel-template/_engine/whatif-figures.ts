@@ -73,17 +73,57 @@ const signed = (text: string, d: number) => `${d > 0 ? "+" : "−"}${text}`;
 
 export function whatIfFigureGroups(input: Input, motion: Motion, targets: Partial<Record<LeverId, number>>): { moved: boolean; groups: FigureGroup[] } {
   const { state, ctx, strings, metrics } = input;
-  const w = strings.scenario;
-  const u = strings.units;
   const currency = state.setup.currency;
   const plg = motion === "plg" ? scenarioFor(state, targets, ctx) : null;
   const slg = motion === "slg" ? slgScenarioFor(state, targets, ctx) : null;
   const kpis: KpiView[] = plg ? kpiRows(plg, ctx, strings, currency, { state, metrics }) : slgKpiRows(slg!, ctx, strings, currency, { state, metrics });
-  const t: Kpis = plg ? plg.today.kpis : slg!.today;
-  const p: Kpis = plg ? plg.projected.kpis : slg!.projected;
-  const moved = (plg ? plg.moved : slg!.moved).length > 0;
-  const inputs: Partial<Record<string, readonly MetricId[]>> = plg ? selfServeKpiInputs(state.setup) : SLG_KPI_INPUTS;
-  const app = plg !== null && isApp(state.setup);
+  return figureGroupsOf(input, {
+    kpis,
+    t: plg ? plg.today.kpis : slg!.today,
+    p: plg ? plg.projected.kpis : slg!.projected,
+    moved: (plg ? plg.moved : slg!.moved).length > 0,
+    inputs: plg ? selfServeKpiInputs(state.setup) : SLG_KPI_INPUTS,
+    app: plg !== null && isApp(state.setup),
+    growth: (fromKpi) => [fromKpi("newMrr"), fromKpi("nrr"), plg ? fromKpi("grr") : fromKpi("won")],
+  });
+}
+
+/** What the three tables read of a scenario: its kpis as rows, its two columns' money, whether a lever moved, what each figure is computed from. */
+export interface FigureSource {
+  kpis: KpiView[];
+  t: Kpis;
+  p: Kpis;
+  moved: boolean;
+  inputs: Partial<Record<string, readonly MetricId[]>>;
+  app: boolean;
+  /** The growth table's rows: `fromKpi` prints one of the scenario's own kpi rows; a row the money adds is the caller's. */
+  growth: (fromKpi: (id: KpiView["id"]) => FigureRow | null, row: RowBuilder) => (FigureRow | null)[];
+}
+
+/** A row the money adds (`figureGroupsOf`'s `row`): printed by `show`, its change by `delta`. */
+export type RowBuilder = (
+  id: string,
+  label: string,
+  a: Interval | null,
+  b: Interval | null,
+  show: (i: Interval, extra: number) => string,
+  delta: (d: number) => string,
+  higherIsBetter: boolean,
+  missing: readonly MetricId[],
+  round?: (v: number, extra: number) => number,
+  diff?: (a: Interval, b: Interval) => number,
+) => FigureRow;
+
+/**
+ * The three tables of any scenario (§20, and a marketplace side's, §22.6.2): the rules of `whatIfFigureGroups` once, for
+ * the SaaS, the app, sales-assisted and each side of a marketplace.
+ */
+export function figureGroupsOf(input: Input, source: FigureSource): { moved: boolean; groups: FigureGroup[] } {
+  const { state, ctx, strings, metrics } = input;
+  const w = strings.scenario;
+  const u = strings.units;
+  const currency = state.setup.currency;
+  const { kpis, t, p, moved, inputs, app } = source;
 
   const missingFor = (ids: readonly MetricId[]) => {
     const absent = [...new Set(ids)].filter((id) => knownIn(state, id, ctx).kind !== "known");
@@ -156,7 +196,7 @@ export function whatIfFigureGroups(input: Input, motion: Motion, targets: Partia
   const value12Ids = inputs.value12 ?? [];
   const cacIds = inputs.cac ?? [];
   const paybackIds = inputs.payback ?? [];
-  const growth = [fromKpi("newMrr"), fromKpi("nrr"), plg ? fromKpi("grr") : fromKpi("won")].filter((r): r is FigureRow => r !== null);
+  const growth = source.growth(fromKpi, row).filter((r): r is FigureRow => r !== null);
   // Per new customer, each side in its own words: the loss, the margin, or the overlap. Its change is the gap's.
   const gapExtra = moved && t.loss && p.loss ? pairPrecision(middle(abs(t.loss.gap)), middle(abs(p.loss.gap)), approxRounding) : 0;
   const gapRow: FigureRow = {

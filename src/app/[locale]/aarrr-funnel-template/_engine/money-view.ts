@@ -15,9 +15,11 @@ import type { MoneyKpis } from "@/lib/engine/money";
 import { unitInputsPhrase } from "@/lib/engine/phrases";
 import type { AppKpis } from "@/lib/engine/scenario";
 import { findingText } from "@/lib/engine/sentences";
+import { buildMktScenario } from "@/lib/engine/mkt-scenario";
 import { isApp } from "@/lib/engine/setup-type";
 import type { EngineStrings, ResolvedDerived, ResolvedMetric } from "@/lib/engine/strings";
-import type { Currency, EngineCalcContext, EngineDerived, EngineState, Interval, LeverId, MetricId, Motion, YearMonth } from "@/lib/engine/types";
+import type { Currency, EngineCalcContext, EngineDerived, EngineMotion, EngineState, Interval, LeverId, MetricId, MktSide, Motion, YearMonth } from "@/lib/engine/types";
+import type { EngineTermId } from "./EngineTerm";
 import { knownIn } from "@/lib/engine/values";
 import { SLG_KPI_INPUTS, appMissingPhrase, scenarioFor, selfServeKpiInputs, slgScenarioFor } from "./scenario-view";
 
@@ -53,10 +55,14 @@ export interface MoneyBarsView {
 }
 
 export interface MoneyView {
-  motion: Motion;
+  motion: EngineMotion;
   eyebrow: string;
-  /** MRR then ARR — null in the hybrid, whose total band carries them. */
-  figures: { key: "mrr" | "arr"; label: string; value: string }[] | null;
+  /**
+   * MRR then ARR — null in the hybrid, whose total band carries them. A marketplace's side (§22.6.2) has its own: the net
+   * revenue annualised and the GMV (`gmv`), each with the « ? » of the word it teaches (`term`; absent, the board's rule: the
+   * ARR's own).
+   */
+  figures: { key: "mrr" | "arr" | "gmv"; label: string; value: string; term?: EngineTermId }[] | null;
   worth: {
     title: string;
     tag: { label: string; maybe: boolean } | null;
@@ -66,6 +72,8 @@ export interface MoneyView {
     /** The months after payback are said: their « ? » follows the sentence. */
     monthsTerm: boolean;
     note: string | null;
+    /** A marketplace's note ends on the « ? » of the word it teaches (the take rate): its `EngineTerm`. */
+    noteTerm?: EngineTermId;
   };
   cash: {
     title: string;
@@ -78,6 +86,16 @@ export interface MoneyView {
   };
 }
 
+/**
+ * What a marketplace side's revenue in twelve months is computed from — the rows of `mkt-scenario.ts#mktTotal`: the
+ * demand's frequency, basket, take rate, cost of a buyer and churn; the supply's price, sign-up rate, conversion and paid
+ * churn. What « il manque » names when the curve cannot be drawn.
+ */
+export const MKT_MRR12_INPUTS: Record<MktSide, readonly MetricId[]> = {
+  demand: ["mkt.rev.frequency", "mkt.rev.aov", "mkt.rev.take-rate", "mkt.buy.cac", "mkt.buy.churn"],
+  supply: ["mkt.sell.arpa", "mkt.sell.signup-rate", "mkt.sell.paid-conversion", "mkt.sell.paid-churn"],
+};
+
 /** A fact to the unit; a range (an estimate) as one, at two significant digits. */
 export function factMoney(i: Interval, currency: Currency, ctx: EngineCalcContext, strings: EngineStrings): string {
   return i.lo === i.hi ? formatInterval(i, "money", ctx, strings.units, { currency }) : formatApproxMoneyInterval(i, currency, ctx, strings.units);
@@ -86,29 +104,53 @@ export function factMoney(i: Interval, currency: Currency, ctx: EngineCalcContex
 const abs = (i: Interval): Interval => (i.hi <= 0 ? { lo: -i.hi, hi: -i.lo } : i);
 
 /**
+ * What the block reads besides the kpis: the motion it is for (a marketplace's block is one side's, `side`), the inputs
+ * « il manque » names for each figure, the margin it needs, whether it is an app's and whether the total band carries
+ * its MRR and ARR.
+ */
+export interface MoneyConfig {
+  motion: EngineMotion;
+  /** A marketplace's block: the side whose loss finding it says (C70). */
+  side?: MktSide;
+  hybrid: boolean;
+  app: boolean;
+  inputs: { ltv: readonly MetricId[]; cac: readonly MetricId[]; payback: readonly MetricId[] };
+  marginId: MetricId;
+}
+
+type MoneyInput = { state: EngineState; derived: EngineDerived; ctx: EngineCalcContext; strings: EngineStrings; metrics: ResolvedMetric[]; derivedCopy?: ResolvedDerived[] };
+
+/**
  * The block for one motion. `hybrid`: no MRR and ARR of its own — the total
  * band says the sum (TotalBand, A20.d T3).
  */
-export function moneyView(
-  input: { state: EngineState; derived: EngineDerived; ctx: EngineCalcContext; strings: EngineStrings; metrics: ResolvedMetric[]; derivedCopy?: ResolvedDerived[] },
-  motion: Motion,
-  hybrid = false,
-): MoneyView {
+export function moneyView(input: MoneyInput, motion: Motion, hybrid = false): MoneyView {
+  const { state, ctx } = input;
+  const app = motion === "plg" && isApp(state.setup);
+  const k: MoneyKpisWithBase = motion === "plg" ? scenarioFor(state, {}, ctx).today.kpis : slgScenarioFor(state, {}, ctx).today;
+  const inputs = motion === "plg" ? selfServeKpiInputs(state.setup) : SLG_KPI_INPUTS;
+  const marginId: MetricId = motion === "plg" ? (app ? "app.rev.gross-margin" : "rev.gross-margin") : "slg.rev.gross-margin";
+  return moneyOfKpis(input, k, { motion, hybrid, app, inputs, marginId });
+}
+
+/**
+ * The block of any motion, from its kpis (`MoneyKpis` + what the block reads of them): the rules above, once, for the
+ * SaaS, the app, sales-assisted and a marketplace's two sides (§22.6.2, `mkt-view.ts#mktMoneyView`). A marketplace's cash
+ * is always a floor, said by `mkt.money.cashAssume`; its loss finding is its side's.
+ */
+export function moneyOfKpis(input: MoneyInput, k: MoneyKpisWithBase, config: MoneyConfig): MoneyView {
   const { state, derived, ctx, strings, metrics } = input;
+  const { motion, hybrid, app, inputs, marginId } = config;
   const w = strings.money;
   const u = strings.units;
   const currency = state.setup.currency;
-  const app = motion === "plg" && isApp(state.setup);
-  const k: MoneyKpisWithBase = motion === "plg" ? scenarioFor(state, {}, ctx).today.kpis : slgScenarioFor(state, {}, ctx).today;
   const money = (i: Interval) => factMoney(i, currency, ctx, strings);
   const approx = (i: Interval) => formatApproxMoneyInterval(i, currency, ctx, u);
   const months = (i: Interval) => formatDurationInterval(i, "months", ctx, u);
   const approxMonths = (i: Interval) => fillTemplate(u.approx, { n: months(i) });
 
-  const inputs = motion === "plg" ? selfServeKpiInputs(state.setup) : SLG_KPI_INPUTS;
   const absent = (ids: readonly MetricId[]) => ids.filter((id) => knownIn(state, id, ctx).kind !== "known");
   const phrase = (ids: readonly MetricId[]) => unitInputsPhrase(ids, strings, metrics);
-  const marginId: MetricId = motion === "plg" ? (app ? "app.rev.gross-margin" : "rev.gross-margin") : "slg.rev.gross-margin";
 
   const snapshot = state.snapshots[state.snapshots.length - 1]!;
   const eyebrow = fillTemplate(w.eyebrow, { month: formatMonth(snapshot.referenceMonth, ctx.locale) });
@@ -121,7 +163,7 @@ export function moneyView(
         ];
 
   // --- What one new customer is worth -----------------------------------------------
-  const lossFinding = derived.findings.find((f) => f.motion === motion && (f.kind === "unit-econ-loss" || f.kind === "unit-econ-loss-maybe"));
+  const lossFinding = derived.findings.find((f) => f.motion === motion && f.side === config.side && (f.kind === "unit-econ-loss" || f.kind === "unit-econ-loss-maybe"));
   const verdict = k.loss?.verdict ?? null;
   let finding: string;
   let tag: MoneyView["worth"]["tag"] = null;
@@ -184,7 +226,19 @@ export function moneyView(
   const paybackMissing = absent(inputs.payback);
   const missingText = (ids: readonly MetricId[]) => (ids.length > 0 ? fillTemplate(w.missing, { input: phrase(ids) }) : null);
   const line = app ? w.lineApp : !k.cash ? w.lineNone : verdict === "loss" ? w.lineLoss : verdict === "maybe" ? w.lineMaybe : w.lineHealthy;
-  const assumptions = app || !k.cash ? null : motion === "plg" ? (k.cash.floor ? w.assumePlg : w.assumePlgOutpaced) : k.cash.floor ? w.assumeSlg : w.assumeSlgOutpaced;
+  // A marketplace's cash is always a floor (§22.5.3): its own sentence stands in for the SaaS's (§22.8.5 k).
+  const assumptions =
+    app || !k.cash
+      ? null
+      : motion === "mkt"
+        ? strings.mkt.money.cashAssume
+        : motion === "plg"
+          ? k.cash.floor
+            ? w.assumePlg
+            : w.assumePlgOutpaced
+          : k.cash.floor
+            ? w.assumeSlg
+            : w.assumeSlgOutpaced;
   let warning: MoneyView["cash"]["warning"] = null;
   if (k.warning && k.payback) {
     const runway = k.warning.limit.kind === "runway";
@@ -254,10 +308,12 @@ function monthsAfter(month: YearMonth, n: number): YearMonth {
  */
 export function leverMoneyView(
   input: { state: EngineState; derived: EngineDerived; ctx: EngineCalcContext; strings: EngineStrings; metrics: ResolvedMetric[] },
-  motion: Motion,
+  motion: EngineMotion,
   targets: Partial<Record<LeverId, number>>,
   cardLever: LeverId,
   hybrid = false,
+  /** A marketplace's card is one side's (§22.6.2): the side whose scenario and curve it draws. */
+  side?: MktSide,
 ): LeverMoneyView {
   const { state, derived, ctx, strings, metrics } = input;
   const l = strings.lever;
@@ -265,9 +321,10 @@ export function leverMoneyView(
   const currency = state.setup.currency;
   const s = motion === "plg" ? scenarioFor(state, targets, ctx) : null;
   const g = motion === "slg" ? slgScenarioFor(state, targets, ctx) : null;
-  const t: MoneyKpisWithBase & { mrr12: Interval | null } = s ? s.today.kpis : g!.today;
-  const p: MoneyKpisWithBase & { mrr12: Interval | null } = s ? s.projected.kpis : g!.projected;
-  const moved: readonly LeverId[] = s ? s.moved : g!.moved;
+  const m = motion === "mkt" ? buildMktScenario(state, targets, ctx, side ?? "demand") : null;
+  const t: MoneyKpisWithBase & { mrr12: Interval | null } = s ? s.today.kpis : g ? g.today : m!.today.kpis;
+  const p: MoneyKpisWithBase & { mrr12: Interval | null } = s ? s.projected.kpis : g ? g.projected : m!.projected.kpis;
+  const moved: readonly LeverId[] = s ? s.moved : g ? g.moved : m!.moved;
   const isMoved = moved.length > 0;
   const approx = (i: Interval, extra = 0) => formatApproxMoneyInterval(i, currency, ctx, u, extra);
   const money = (i: Interval) => factMoney(i, currency, ctx, strings);
@@ -299,7 +356,7 @@ export function leverMoneyView(
   // --- The ARR in twelve months: the MRR in twelve months × 12, the same inputs, the same « il manque » ---
   const [arrToday, arrWhatif] = pair(t.arr12, isMoved ? p.arr12 : null);
   const value = isMoved ? arrWhatif : arrToday;
-  const inputs = motion === "plg" ? selfServeKpiInputs(state.setup).mrr12 : SLG_KPI_INPUTS.mrr12;
+  const inputs = motion === "plg" ? selfServeKpiInputs(state.setup).mrr12 : motion === "slg" ? SLG_KPI_INPUTS.mrr12 : MKT_MRR12_INPUTS[side ?? "demand"];
   const absent = inputs.filter((id) => knownIn(state, id, ctx).kind !== "known");
   // An app names its actives when the revenue in 12 months lacks them (§21.6.4); an empty list is never « il manque ».
   const ask = motion === "plg" && isApp(state.setup) ? appMissingPhrase(absent, t.app?.activesMissing === true, strings, metrics) : absent.length > 0 ? unitInputsPhrase(absent, strings, metrics) : null;
