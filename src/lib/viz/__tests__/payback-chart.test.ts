@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { PAYBACK_CHART_PX, PAYBACK_MONTHS, SHORT_LABEL_ROOM, estimateLabelWidth, paybackChartGeometry, paysBackLabels, shortLabelY, type PaybackChartInput } from "../payback-chart";
+import { PAYBACK_CHART_PX, PAYBACK_MONTHS, SHORT_LABEL_ROOM, costLabelAtEnd, estimateLabelWidth, paybackChartGeometry, paysBackLabels, shortLabelY, type PaybackChartInput } from "../payback-chart";
 
 // `PaybackChart` (design system extension 09, Q12, A20.d T4.c): one customer, month by month. The rules that make the
 // picture honest are geometry, so they are tested here rather than eyeballed — the loss and its months are one picture.
@@ -8,6 +8,8 @@ const W = 900;
 const H = 380;
 const plot = { L: PAYBACK_CHART_PX.left, R: W - PAYBACK_CHART_PX.right, T: PAYBACK_CHART_PX.top, B: H - PAYBACK_CHART_PX.bottom };
 const xOf = (m: number) => plot.L + (m / PAYBACK_MONTHS) * (plot.R - plot.L);
+/** The same, for another chart width. */
+const plotX = (m: number, width: number) => PAYBACK_CHART_PX.left + (m / PAYBACK_MONTHS) * (width - PAYBACK_CHART_PX.right - PAYBACK_CHART_PX.left);
 
 /** The film's SaaS: ~90 € of margin a month, a CAC of 1 900 €, 16.7 months counted, paid back at 21.1 — it leaves first. */
 const film: PaybackChartInput = { story: "loss", monthlyMargin: [90, 90], cac: [1900, 1900], lifetime: [16.67, 16.67], payback: [21.11, 21.11], width: W, height: H, reference: 12 };
@@ -191,5 +193,74 @@ describe("paysBackLabels — where the pays-back story's words go at full size",
   it("only the pays-back story has these labels", () => {
     expect(paysBackLabels(paybackChartGeometry(film), fr)).toEqual({ crossing: null, after: null });
     expect(paysBackLabels(paybackChartGeometry({ ...film, story: "unknown", monthlyMargin: null, lifetime: null, payback: null }), fr)).toEqual({ crossing: null, after: null });
+  });
+});
+
+/**
+ * A marketplace side's picture (A23 MKT-8): 240px high, the scale may rise to 4.2 times the cost, the bracket's words sit nearer
+ * the cost line, the cost's words move to the right end when the line would strike them through, and the crossing's words keep
+ * 72px from them. The default layout is the SaaS's and the app's, to the pixel.
+ *
+ * Non-vacuity (2026-10-28, one sabotage at a time, restored after; counts measured, the tests that fall): the cap left at 3.4 for
+ * `side` drops 1 test; the bracket's offset 1, and its words' offset 1, left at their default; `costLabelAtEnd` always true 1,
+ * always false 1; the line's reach over the words left unchecked 1. The crossing's gap is the component's: its test is in
+ * `components/engine/__tests__/payback-chart-side.test.ts`.
+ */
+describe("the side layout (A23 MKT-8)", () => {
+  /** A paid seller: 25 € of margin a month for 33 months (4.1 times a 200 € cost), paid back at 8 months. */
+  const seller: PaybackChartInput = { story: "pays-back", monthlyMargin: [25, 25], cac: [200, 200], lifetime: [33, 33], payback: [8, 8], width: 900, height: 240, reference: null };
+  /** A buyer: 1.1 times the cost, paid back at 22 months, gone at 25: the line ends just above the cost line. */
+  const buyer: PaybackChartInput = { story: "pays-back", monthlyMargin: [30 / 22, 30 / 22], cac: [30, 30], lifetime: [25, 25], payback: [22, 22], width: 900, height: 240, reference: null };
+
+  it("the default layout is the one drawn before: naming it changes nothing", () => {
+    for (const input of [film, late, seller, buyer]) expect(paybackChartGeometry({ ...input, layout: "default" })).toEqual(paybackChartGeometry(input));
+  });
+
+  it("a line of 4.1 times the cost ends on the plot with its dot on the side's layout, and leaves it by the top edge on the default", () => {
+    expect(paybackChartGeometry(seller).leaves).toBeNull();
+    const g = paybackChartGeometry({ ...seller, layout: "side" });
+    expect(g.leaves).not.toBeNull();
+    expect(g.leaves!.y).toBeGreaterThanOrEqual(PAYBACK_CHART_PX.top);
+    expect(g.leaves!.x).toBeCloseTo(plotX(33, 900));
+    // The cost line keeps its room: the 4.2 cap, not more.
+    const plotH = 240 - PAYBACK_CHART_PX.top - PAYBACK_CHART_PX.bottom;
+    expect(g.axis.y - g.cost.y).toBeCloseTo(plotH / 4.2);
+  });
+
+  it("the months after sit nearer the cost line, so their words stay above the axis", () => {
+    const d = paybackChartGeometry(seller);
+    const s = paybackChartGeometry({ ...seller, layout: "side" });
+    expect(d.after!.labelY - d.cost.y).toBe(14 + 24);
+    expect(s.after!.labelY - s.cost.y).toBe(10 + 18);
+    // The words (their baseline is 6px under `labelY`) end above the axis with air.
+    expect(s.after!.labelY + 6).toBeLessThan(s.axis.y - 4);
+  });
+
+  it("the crossing's words keep 72px from the cost's: where 16 fit, 72 do not, and the bracket says both", () => {
+    const g = paybackChartGeometry({ ...buyer, layout: "side" });
+    const chars = { paysBack: "paid back: 20–23 months".length, cost: "what a new buyer costs".length, time: "paid back at 20–23 months, then ~2–5 months of margin".length, after: 28 };
+    expect(paysBackLabels(g, chars).crossing).not.toBeNull();
+    const roomy = paysBackLabels(g, chars, 18, 72);
+    expect(roomy.crossing).toBeNull();
+    expect(roomy.after).toMatchObject({ text: "time" });
+  });
+
+  it("the cost's words go to the right end when the line crosses the cost line under them, and the right end is free", () => {
+    const g = paybackChartGeometry({ ...seller, layout: "side" });
+    const width = estimateLabelWidth("ce que coûte un nouveau vendeur abonné".length);
+    expect(g.crossing!.x).toBeLessThan(g.cost.labelX + width);
+    expect(costLabelAtEnd(g, width)).toBe(true);
+  });
+
+  it("they stay at the left when the crossing is past them, and when the line's end would be in their way at the right", () => {
+    // A late crossing: the words end before the line gets there.
+    expect(costLabelAtEnd(paybackChartGeometry({ ...late, layout: "side" }), estimateLabelWidth(25))).toBe(false);
+    // The buyer's line ends just above the cost line, at 25 months: right-aligned words (their span reaches it) would be struck through.
+    const g = paybackChartGeometry({ ...buyer, layout: "side" });
+    const width = estimateLabelWidth(50);
+    expect(g.crossing!.x).toBeLessThan(g.cost.labelX + width);
+    expect(costLabelAtEnd(g, width)).toBe(false);
+    // Only the pays-back story has a crossing at all.
+    expect(costLabelAtEnd(paybackChartGeometry({ ...film, layout: "side" }), width)).toBe(false);
   });
 });

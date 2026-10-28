@@ -105,6 +105,7 @@ export function SlideUnitEconomics({ slide, context }: SlideProps) {
               reference={chart.reference}
               width={size.width}
               height={size.height}
+              layout={slide.side ? "side" : undefined}
               labels={chart.labels}
               summary={chart.summary}
               id={`payback-${slide.id}`}

@@ -16,6 +16,14 @@ export type Range = readonly [number, number];
 
 export type PaybackStory = "unknown" | "loss" | "pays-back";
 
+/**
+ * `side`: a marketplace side's slide (A23 MKT-8). The slide leaves the picture 240px, not 330: the scale may rise to 4.2 times
+ * the cost (a paid seller's 4.1 times, `PAYBACK_SCALE_CAP_SIDE`) so the line ends on the plot with its dot instead of leaving it by
+ * the top edge, and the months-after bracket and its words sit 4 and 6px nearer the cost line, so they stay above the axis.
+ * Everything else, the SaaS's and the app's slides included, is `default`, to the pixel.
+ */
+export type PaybackLayout = "default" | "side";
+
 export interface PaybackChartInput {
   /**
    * What the picture tells, decided by the model's loss verdict (`deck-unit.ts`)
@@ -35,10 +43,15 @@ export interface PaybackChartInput {
   height: number;
   /** The month a reference is drawn at, dotted (12, a commonly cited one): it situates, never judges. */
   reference: number | null;
+  layout?: PaybackLayout;
 }
 
 /** The chart's months: 0 to the lifetime cap. */
 export const PAYBACK_MONTHS = 36;
+
+/** How many times the cost the scale may rise to: more, and the cost line has no room under it for its labels. */
+export const PAYBACK_SCALE_CAP = 3.4;
+export const PAYBACK_SCALE_CAP_SIDE = 4.2;
 
 /** Margins and offsets, on the slide's canvas: its labels are 18px and more (design audit S-8). */
 export const PAYBACK_CHART_PX = {
@@ -81,8 +94,9 @@ export interface PaybackChartGeometry {
 
 const mid = (r: Range) => (r[0] + r[1]) / 2;
 
-export function paybackChartGeometry({ story, monthlyMargin, cac, lifetime, payback, width, height, reference }: PaybackChartInput): PaybackChartGeometry {
+export function paybackChartGeometry({ story, monthlyMargin, cac, lifetime, payback, width, height, reference, layout = "default" }: PaybackChartInput): PaybackChartGeometry {
   const P = PAYBACK_CHART_PX;
+  const side = layout === "side";
   const L = P.left;
   const R = width - P.right;
   const T = P.top;
@@ -90,8 +104,8 @@ export function paybackChartGeometry({ story, monthlyMargin, cac, lifetime, payb
   const known = story !== "unknown" && monthlyMargin !== null && lifetime !== null;
   const lifeHi = lifetime ? Math.min(lifetime[1], PAYBACK_MONTHS) : PAYBACK_MONTHS;
   // The scale: the margin a customer brings back over its life, or the cost, whichever is higher — never more
-  // than 3.4 times the cost, so the cost line keeps room under it for its labels.
-  const top = Math.min(Math.max(cac[1], known ? monthlyMargin[1] * lifeHi : cac[1] * 1.6) * 1.12, cac[1] * 3.4) || 1;
+  // than 3.4 times the cost (4.2 on a marketplace side's slide), so the cost line keeps room under it for its labels.
+  const top = Math.min(Math.max(cac[1], known ? monthlyMargin[1] * lifeHi : cac[1] * 1.6) * 1.12, cac[1] * (side ? PAYBACK_SCALE_CAP_SIDE : PAYBACK_SCALE_CAP)) || 1;
   const x = (m: number) => L + (Math.min(Math.max(m, 0), PAYBACK_MONTHS) / PAYBACK_MONTHS) * (R - L);
   const y = (v: number) => B - (v / top) * (B - T);
   const costY = y(mid(cac));
@@ -159,7 +173,7 @@ export function paybackChartGeometry({ story, monthlyMargin, cac, lifetime, payb
   }
 
   const crossX = pb === null ? x(lifeLo) : x(pb);
-  const byAfter = costY + 14;
+  const byAfter = costY + (side ? 10 : 14);
   // The months after payback, when there are some on the plot: a possible loss drawn as paying back may have none.
   const hasAfter = pb !== null && x(lifeLo) - crossX >= 1;
   return {
@@ -180,7 +194,7 @@ export function paybackChartGeometry({ story, monthlyMargin, cac, lifetime, payb
           x2: x(lifeLo),
           width: x(lifeLo) - crossX,
           labelX: (crossX + x(lifeLo)) / 2,
-          labelY: byAfter + 24,
+          labelY: byAfter + (side ? 18 : 24),
         },
     unknown: null,
   };
@@ -228,9 +242,11 @@ export interface PaysBackLabels {
  * the bracket says both, as the compact chart's line does (`time`), right of
  * the crossing, where the plot is empty under the cost line. In characters,
  * since a label's width is only known once drawn: `estimateLabelWidth` errs
- * wide.
+ * wide. `gap` is the air kept between the cost's words and the crossing's: 16px, and
+ * 72 on a marketplace side's slide, where « what a new buyer costs » and « paid back:
+ * 20–23 months », 16px apart on one row, read as one sentence.
  */
-export function paysBackLabels(g: PaybackChartGeometry, chars: { paysBack: number; cost: number; time: number | null; after?: number }, px = 18): PaysBackLabels {
+export function paysBackLabels(g: PaybackChartGeometry, chars: { paysBack: number; cost: number; time: number | null; after?: number }, px = 18, gap = 16): PaysBackLabels {
   if (g.story !== "pays-back") return { crossing: null, after: null };
   type Placed = { text: "after" | "time"; x: number; y: number; anchor: "middle" | "end" };
   // Under the cost line, left of the crossing, the margin line still climbs: a label wider than the bracket ran into
@@ -256,7 +272,7 @@ export function paysBackLabels(g: PaybackChartGeometry, chars: { paysBack: numbe
     return clearOfLine({ text, x: Math.min(Math.max(a.labelX, a.x1 + width / 2), g.axis.x2 - width / 2), y: a.labelY + 6, anchor: "middle" }, width);
   };
   const crossingFits =
-    g.crossing !== null && g.crossing.x - 12 - estimateLabelWidth(chars.paysBack, px) >= g.cost.labelX + estimateLabelWidth(chars.cost, px) + 16;
+    g.crossing !== null && g.crossing.x - 12 - estimateLabelWidth(chars.paysBack, px) >= g.cost.labelX + estimateLabelWidth(chars.cost, px) + gap;
   if (g.crossing && !crossingFits && g.after && chars.time !== null) {
     return { crossing: null, after: bracket("time", estimateLabelWidth(chars.time, px)) };
   }
@@ -264,4 +280,25 @@ export function paysBackLabels(g: PaybackChartGeometry, chars: { paysBack: numbe
     crossing: g.crossing ? { x: g.crossing.x - 12, y: g.crossing.y - 14 } : null,
     after: g.after ? bracket("after", chars.after === undefined ? 0 : estimateLabelWidth(chars.after, px)) : null,
   };
+}
+
+/**
+ * Where the cost's words go on a marketplace side's slide (`layout="side"`): at the plot's right end, ending there, when the
+ * margin line would strike them through at the left. It does when it crosses the cost line under the words' span — an early
+ * payback and a long label (« ce que coûte un nouveau vendeur abonné », a payback at 8 months) — and the right end is free: the
+ * line has left the plot by then, or its end is not within the words' reach (a line that ends just above the cost line, a customer
+ * who leaves 5 months after paying back, would meet them there; the words stay left and `paysBackLabels`'s gap makes room).
+ */
+export function costLabelAtEnd(g: PaybackChartGeometry, width: number, px = 18): boolean {
+  const crossing = g.crossing;
+  const m = g.margin;
+  if (g.story !== "pays-back" || !crossing || !m) return false;
+  if (crossing.x >= g.cost.labelX + width + 16) return false;
+  const from = Math.max(g.axis.x2 - width - 8, m.x1);
+  const to = Math.min(g.axis.x2, m.x2);
+  if (to <= from) return true;
+  const yAt = (x: number) => (m.x2 === m.x1 ? m.y2 : m.y1 + ((x - m.x1) / (m.x2 - m.x1)) * (m.y2 - m.y1));
+  const [low, high] = [Math.min(yAt(from), yAt(to)), Math.max(yAt(from), yAt(to))];
+  // The words stand over the cost line, a label's height and its halo.
+  return high < g.cost.y - px * 2 || low > g.cost.y;
 }

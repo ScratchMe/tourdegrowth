@@ -2842,8 +2842,8 @@ export const ENGINE_COPY = {
     // TODO: à relire (convention 6) — neuf le 2026-10-01 (A7.3.c S4) : the second table of a sales-assisted what-if slide.
     whatIfQuarter: { fr: "Le trimestre", en: "The quarter" },
     whatIfToday: { fr: "Aujourd'hui", en: "Today" },
-    whatIfWithOne: { fr: "Avec cet « Et si »", en: "With this what-if" },
-    whatIfWithAll: { fr: "Avec les « Et si »", en: "With the what-ifs" },
+    whatIfWithOne: { fr: "Avec cet « Et si »", en: "With this what-if" },
+    whatIfWithAll: { fr: "Avec les « Et si »", en: "With the what-ifs" },
     whatIfChange: { fr: "Écart", en: "Change" },
     /** A figure the what-if leaves where it is: the change column says so in a word, never « 0 ». Gender-free in French. */
     whatIfStable: { fr: "stable", en: "unchanged" },

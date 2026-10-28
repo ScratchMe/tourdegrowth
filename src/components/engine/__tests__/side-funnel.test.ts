@@ -18,7 +18,7 @@ import { SideFunnel, type FunnelColumn, type SideFunnelProps } from "../SideFunn
  * a second alert Tag 3; a grid drawn in the rates 2; the card kept on a slide 1;
  * the base's section without its label 1; the base's grid dropped 5; a word
  * added before the upstream line 1; `ariaLabel` ignored 1; the phone's grid
- * slot lost in the CSS 1; the column head's height lost in the CSS 1.
+ * slot lost in the CSS 1; the column head's height lost in the CSS 1. A23 MKT-8 (2026-10-28): the typed « → » kept on a slide 1.
  */
 const html = (node: ReactNode) => renderToStaticMarkup(node as never);
 const dots = (filled: number): FunnelColumn["grid"] => ({
@@ -186,6 +186,21 @@ describe("SideFunnel", () => {
     // The rates sit at the columns' right, where the slide has room; the legend shares the upstream line's row.
     expect(css).toMatch(/\.slide \.rates \{[^}]*grid-area: rates/);
     expect(css).toMatch(/\.slide \.foot \{[^}]*grid-area: up/);
+  });
+
+  it("a slide draws its upstream arrow and types none (engine spec §10.4): no « → », « ← » or « − » in its markup; a screen keeps the typed one", () => {
+    const slide = funnel(demand({ medium: "slide" }));
+    expect(slide).not.toMatch(/[→←−]/);
+    // Drawn: one inline SVG, on the upstream line, hidden from a screen reader, in the text's colour.
+    const arrow = slide.match(/<span class="[^"]*_arrow_[^"]*" aria-hidden="true"><svg [^>]*>.*?<\/svg><\/span>/);
+    expect(arrow?.[0]).toMatch(/viewBox="0 0 24 12"/);
+    expect(arrow?.[0]).toMatch(/stroke="currentColor"/);
+    expect(slide.match(/<svg[^>]*viewBox="0 0 24 12"/g)).toHaveLength(1);
+    // The upstream line's text is the props', the arrow is not a word.
+    expect(words(slide)).toContain("~2 000 visiteurs par mois pour 100 inscrits");
+    expect(words(slide)).not.toContain("→");
+    expect(funnel(demand())).toContain("→");
+    expect(css).toMatch(/\.arrowDrawn \{[^}]*width: 1em/);
   });
 
   it("on a phone each column is a row — the grid left, its words right — as the peloton's", () => {
