@@ -9,7 +9,7 @@ import { motionShapes, shapeOf } from "@/lib/engine/catalog-shape";
 import { periodRangeOf } from "@/lib/engine/cohort";
 import { formatMonthRange, joinList } from "@/lib/engine/format";
 import { nextMonthOf } from "@/lib/engine/series";
-import { isApp, isMarketplace } from "@/lib/engine/setup-type";
+import { isApp, isMarketplace, mktSetup } from "@/lib/engine/setup-type";
 import type { EngineListing } from "@/lib/engine/storage";
 import { ROLE_KEY } from "@/lib/engine/strings";
 import { MAX_MONTHS, type EngineState, type MetricId, type RoleId } from "@/lib/engine/types";
@@ -363,7 +363,9 @@ export function BoardNextStep({
         lead: choice.waiting.length === 0 ? n.leadAnswered : choice.waiting.length === 1 ? n.leadWaitingOne : fill(n.leadWaiting, { n: choice.waiting.length }),
         primary: { label: strings.actions.deck, onClick: onDeck, "data-testid": "engine-open-deck" },
       };
-      extra.push({ text: n.verdictIsSlide });
+      // « Ton verdict, ci-dessus, est le titre de ta première slide »: a marketplace's first slide is the total of its two streams, or — the sellers
+      // paying nothing, so no total — the buyers' verdict (C94: this step is shared, above the selector, never one side's).
+      extra.push({ text: isMarketplace(state.setup) ? (mktSetup(state.setup).sellerSubscriptions ? strings.mkt.next.totalIsSlide : strings.mkt.next.buyersIsSlide) : n.verdictIsSlide });
       break;
   }
 

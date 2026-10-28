@@ -95,8 +95,8 @@ export function engineTypesFlag(): string | undefined {
  * The business types open in THIS build: always b2b-saas, plus each known
  * type listed in ENGINE_TYPES (comma-separated, spaces ignored, unknown names
  * ignored, duplicates once), in BUSINESS_TYPES order. Pure on its input.
- * The marketplace is never open while its screens are not (`MARKETPLACE_SCREENS_READY`,
- * §22.3), even when ENGINE_TYPES lists it.
+ * The marketplace is open only once its screens are (`MARKETPLACE_SCREENS_READY`, §22.3, true since A23
+ * MKT-7b) and, as the app, only when ENGINE_TYPES lists it.
  */
 export function openTypesWith(env: string | undefined): BusinessType[] {
   const listed = new Set((env ?? "").split(",").map((name) => name.trim()));

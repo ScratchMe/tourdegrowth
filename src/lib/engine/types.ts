@@ -1037,7 +1037,24 @@ export type SlideTitleKey =
   | "evolution"
   | "evolutionOne"
   | "evolutionStill"
-  | "evolutionApart";
+  | "evolutionApart"
+  /**
+   * A marketplace's own (§22.8.5 e, A23 MKT-7b): the buyers' funnel and the sellers' (each on its own 100 sign-ups, the
+   * sellers' with one column when they pay no subscription), and the total of the two streams. Two columns at most, so
+   * only the `One` forms of the unmeasured cases exist (`mkt-titles.ts`).
+   */
+  | "mktFunnelComplete"
+  | "mktFunnelGapOne"
+  | "mktFunnelTailBreakOne"
+  | "mktFunnelEmpty"
+  | "mktSupplyFunnelComplete"
+  | "mktSupplyFunnelCompleteOne"
+  | "mktSupplyFunnelGapOne"
+  | "mktSupplyFunnelTailBreakOne"
+  | "mktSupplyFunnelEmpty"
+  | "mktTotal"
+  | "mktTotalUnknown"
+  | "mktTotalUnknownBoth";
 export interface SlideTitle {
   key: SlideTitleKey;
   /** Placeholders, already formatted; `**…**` in the template marks the red accent. */

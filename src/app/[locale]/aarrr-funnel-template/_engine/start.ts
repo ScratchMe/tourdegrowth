@@ -36,7 +36,7 @@ export const DEFAULT_MKT_START: MktStart = { offering: MKT_DEFAULTS.offering, se
 /**
  * The type a click on the settings card's type choice picks, or null when this build does not open it (§21.3). The
  * guard reads the types the build opens (`openTypes`, the SaaS always among them: `ALWAYS_OPEN_TYPE`), never the whole
- * list of types: a type that exists but is not opened (the marketplace, while `MARKETPLACE_SCREENS_READY` is false) is
+ * list of types: a type that exists but is not opened (the marketplace in a build whose `ENGINE_TYPES` does not list it) is
  * no choice, whatever the dashed option's `disabled` says.
  */
 export function pickedType(next: string, openTypes: readonly BusinessType[]): BusinessType | null {

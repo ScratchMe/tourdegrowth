@@ -509,11 +509,13 @@ describe("no orphan key (§22.8.3, point 3)", () => {
   }
 
   it("agrees with the base on the placeholders of the marketplace's own sheets, and on their count", () => {
-    // §22.8.5 b: 58 leaves, side (8), funnel (34), money (6), total (10) — and the six rules of `mkt.assumption` already there.
+    // §22.8.5 b: 58 leaves, side (8), funnel (34), money (6), total (10) — and the six rules of `mkt.assumption` already there. MKT-7b adds
+    // the 40 of §22.8.5 k it displays (19 in those four groups, and `next` 2, `diag` 2, `note` 5, `curve` 3, `list` 1, `terms` 8: four words,
+    // each a term and its definition); MKT-8 adds the ten that are the slides' (`slide` 2, `total` 8).
     const own = MKT_OWN.filter((l) => l.segments[1] !== "assumption");
-    expect(own.length).toBe(58);
-    const counts = Object.fromEntries(["side", "funnel", "money", "total"].map((group) => [group, own.filter((l) => l.segments[1] === group).length]));
-    expect(counts).toEqual({ side: 8, funnel: 34, money: 6, total: 10 });
+    expect(own.length).toBe(98);
+    const counts = Object.fromEntries(["side", "funnel", "money", "total", "next", "diag", "note", "curve", "list", "terms"].map((group) => [group, own.filter((l) => l.segments[1] === group).length]));
+    expect(counts).toEqual({ side: 9, funnel: 46, money: 10, total: 12, next: 2, diag: 2, note: 5, curve: 3, list: 1, terms: 8 });
     const mismatched = own.filter((l) => placeholdersOf(l.copy.fr).join() !== placeholdersOf(l.copy.en).join()).map((l) => l.path);
     expect(mismatched).toEqual([]);
   });

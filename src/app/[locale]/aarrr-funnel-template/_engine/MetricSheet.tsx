@@ -31,6 +31,8 @@ import { slgBaseNoun } from "@/lib/engine/sentences";
 import { teamTools } from "@/lib/engine/tools";
 import { knownIn } from "@/lib/engine/values";
 import { knownSharedCount, sharedCountAt, sharedWith } from "@/lib/engine/shared-counts";
+import { diagnosisOf } from "./BoardNumbers";
+import { sideOfMetric } from "./number-list";
 import { MissingTriage } from "./MissingTriage";
 import { RequestCopy } from "./RequestCopy";
 import { draftFromEntry, entryFromDraft, isWideRange, withProposals, type DraftProblem, type SheetDraft, type SheetMode } from "./sheet-draft";
@@ -233,9 +235,8 @@ export function MetricSheet({
   const known = knownIn(state, id, ctx);
   const comparator = isCandidate ? comparatorOf(state, id as CandidateId) : undefined;
   // Its own motion's diagnosis: a sales-assisted rate sits against sales-assisted's targets (§18.5.2).
-  // A marketplace's motion holds two diagnoses and no `diagnosis`: it falls to the v1 field until the sheet reads a side (MKT-7b).
-  const ownMotion = view.derived.motions.find((m) => m.motion === motionOfMetric(id));
-  const motionDiagnosis = (ownMotion && ownMotion.motion !== "mkt" ? ownMotion.diagnosis : undefined) ?? view.derived.diagnosis;
+  // A marketplace's motion holds two diagnoses: the number is read against the one of ITS side (§22.8.3), the sellers' for `mkt.sell.*`.
+  const motionDiagnosis = diagnosisOf(view, motionOfMetric(id), sideOfMetric(id));
   const position = isCandidate ? positionIn(motionDiagnosis, id as CandidateId)?.position : undefined;
   const hybrid = state.setup.motions.plg && state.setup.motions.slg;
   // Three months for everything sales-assisted (C25 Q2), « de juin à août 2026 » — and the link, read on the same opportunities.

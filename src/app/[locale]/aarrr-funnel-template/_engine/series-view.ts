@@ -1,7 +1,7 @@
 import { evolutionApartText, evolutionPrinted } from "@/lib/engine/deck-series";
 import { formatMonth, joinList } from "@/lib/engine/format";
 import { subjectOf } from "@/lib/engine/phrases";
-import type { MetricId, Motion } from "@/lib/engine/types";
+import type { EngineMotion, MetricId, MktSide } from "@/lib/engine/types";
 import { fill } from "./text";
 import type { EngineView } from "./view";
 
@@ -38,9 +38,11 @@ export function rowDelta(id: MetricId, view: EngineView): string | null {
 }
 
 /** « En juillet 2026, la fuite était l'activation. » — only when this month names another leak (§19.2.5). */
-export function previousLeakLine(view: EngineView, motion: Motion): string | null {
+export function previousLeakLine(view: EngineView, motion: EngineMotion, side?: MktSide): string | null {
   const { derived, strings, metrics, ctx } = view;
-  const own = derived.series?.motions.find((m) => m.motion === motion);
+  const motionSeries = derived.series?.motions.find((m) => m.motion === motion);
+  // A marketplace's leak is one SIDE's (C70): each side keeps the leak of the month before in `sides`, and the screens read it there.
+  const own = motion === "mkt" && side ? motionSeries?.sides?.[side] : motionSeries;
   if (!derived.series || !own || !own.leakChanged) return null;
   const month = formatMonth(derived.series.previousMonth, ctx.locale);
   const stages = own.previousLeak.map((id) => subjectOf(id, strings, metrics));

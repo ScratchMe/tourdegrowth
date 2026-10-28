@@ -5,7 +5,7 @@ import { twelveMonthFactor } from "../impact";
 import { mul } from "../interval";
 import { mktNetRevenueToday, mktNewBuyersPerMonth, mktNewPaidSellers, mktRevenuePerBuyer, mktSellerMrrToday } from "../mkt-economics";
 import { demandPath, sellerPath } from "../mkt-model";
-import { buildMktScenario, mktLeverAlone, mktTotal, mktTotalPaths, type MktScenario, type MktScenarioAssumption } from "../mkt-scenario";
+import { buildMktScenario, mktLeverAlone, mktSidePaths, mktTotal, mktTotalPaths, type MktScenario, type MktScenarioAssumption } from "../mkt-scenario";
 import { scenarioOf } from "../scenario-of";
 import type { EngineState, Interval, LeverId } from "../types";
 import { knownIn } from "../values";
@@ -581,6 +581,55 @@ describe("the total: the commissions and the subscriptions added, point by point
     expect(mktTotalPaths(unusedSupply, {}, CTX_FR).today).not.toBeNull();
     // And with the demand unknown, there is no total even without subscriptions.
     expect(mktTotalPaths(withEntry(noSubscriptions, "mkt.buy.churn", undefined), {}, CTX_FR)).toEqual({ today: null, projected: null });
+  });
+});
+
+// Non-vacuity of `mktSidePaths`, measured at the end of MKT-7b (2026-10-28; each sabotage alone, this file run, the file
+// restored): `today` and `projected` swapped 4; the buyers' scenario read for both sides 4.
+describe("mktSidePaths — one side's 13 points, today and with the what-ifs (the card's curve, MKT-7b)", () => {
+  const sides = [
+    ["demand", demandToday, demandIf, 33_723.61, 46_351.72],
+    ["supply", supplyToday, supplyIf, 35_866.43, 41_785.48],
+  ] as const;
+
+  it.each(sides)("%s: 13 points whose last is the twelve-month revenue of each column of the scenario — 33 723,61 € then 46 351,72 € (demand), 35 866,43 € then 41 785,48 € (supply)", (side, today, projected, mrr12Today, mrr12Projected) => {
+    const paths = mktSidePaths(example, EXAMPLE_MKT_WHATIF, CTX_FR, side);
+    expect(paths.today).toHaveLength(13);
+    expect(paths.projected).toHaveLength(13);
+    expect(paths.today![12]).toEqual(today.today.kpis.mrr12);
+    expect(paths.projected![12]).toEqual(projected.projected.kpis.mrr12);
+    expect(r2(only(paths.today![12]))).toBe(mrr12Today);
+    expect(r2(only(paths.projected![12]))).toBe(mrr12Projected);
+    // Month 0 is this month's revenue on both curves: the what-ifs move the future, never today.
+    expect(paths.projected![0]).toEqual(paths.today![0]);
+  });
+
+  it("is the very path of the scenario's columns, point for point (the card and the panel cannot disagree)", () => {
+    for (const side of ["demand", "supply"] as const) {
+      const scenario = buildMktScenario(example, EXAMPLE_MKT_WHATIF, CTX_FR, side);
+      expect(mktSidePaths(example, EXAMPLE_MKT_WHATIF, CTX_FR, side)).toEqual({ today: scenario.today.kpis.mrrPath, projected: scenario.projected.kpis.mrrPath });
+    }
+  });
+
+  it("with no lever, the projected path is today's; with the example's, the demand's first step is the whole base re-priced (D6)", () => {
+    for (const side of ["demand", "supply"] as const) {
+      const none = mktSidePaths(example, {}, CTX_FR, side);
+      expect(none.projected).toEqual(none.today);
+    }
+    const demand = mktSidePaths(example, EXAMPLE_MKT_WHATIF, CTX_FR, "demand");
+    expect(demand.projected![1]!.lo).toBeGreaterThan(demand.today![1]!.lo);
+  });
+
+  it("reads the targets of its own side only: the other side's move nothing", () => {
+    expect(mktSidePaths(example, { "mkt.sell.paid-conversion": 20 }, CTX_FR, "demand")).toEqual(mktSidePaths(example, {}, CTX_FR, "demand"));
+    expect(mktSidePaths(example, { "mkt.liq.fill-rate": 12, "mkt.rev.take-rate": 13 }, CTX_FR, "supply")).toEqual(mktSidePaths(example, {}, CTX_FR, "supply"));
+  });
+
+  it("is null where the side's revenue cannot be projected: the sellers who pay nothing, or a missing number", () => {
+    expect(mktSidePaths(noSubscriptions, EXAMPLE_MKT_WHATIF, CTX_FR, "supply")).toEqual({ today: null, projected: null });
+    expect(mktSidePaths(withEntry(example, "mkt.buy.churn", undefined), EXAMPLE_MKT_WHATIF, CTX_FR, "demand")).toEqual({ today: null, projected: null });
+    // The other side is not dragged down by it.
+    expect(mktSidePaths(withEntry(example, "mkt.buy.churn", undefined), EXAMPLE_MKT_WHATIF, CTX_FR, "supply").today).not.toBeNull();
   });
 });
 

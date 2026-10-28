@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 import { isEngineOpenAtBuild, isEnginePath, openTypesWith, resolveEngineAccess } from "../access";
 
 // Engine spec §13.1 "access" — the pure half of the flag. The proxy half is
@@ -51,33 +51,20 @@ describe("isEngineOpenAtBuild", () => {
   });
 });
 
-// The marketplace's barrier (engine spec §22.3, A23 MKT-0): `ENGINE_TYPES` listing the type is not enough while its
-// screens do not exist. The constant is `false` in the code, so the other half — what the flag does once MKT-7b lifts
-// it — is measured on a copy of the module graph where `setup-type.ts` says `true`. Non-vacuity, measured on
-// 2026-10-18 (each sabotage applied alone, the whole of `src/lib/engine` run, the file restored): `openTypesWith`
-// without the barrier falls the first test here (1) and two of `business-type.test.ts`'s; the constant at `true` falls
-// the same three and `io.test.ts`'s. The second test passes in both of those states, as it must: it falls on the
-// other sabotage, a marketplace left out for good (`type !== "marketplace"` without the constant), alone (1) — the
-// proof that the barrier is the only thing keeping the type out.
-describe("openTypesWith — the barrier of the marketplace's screens", () => {
-  afterEach(() => {
-    vi.doUnmock("../setup-type");
-    vi.resetModules();
+// The marketplace's barrier (engine spec §22.3, A23 MKT-0, lifted by MKT-7b): `ENGINE_TYPES` listing the type opens it now
+// that its screens exist, and only when it lists it — the type stays closed in every build whose variable does not name
+// it, production among them. Non-vacuity: see « MKT-7b » in JOURNAL.md for the counts (each sabotage applied alone).
+describe("openTypesWith — the marketplace, its screens ready", () => {
+  it("lists it, in the order of the types, when the variable names it", () => {
+    expect(openTypesWith("consumer-app,marketplace")).toEqual(["b2b-saas", "consumer-app", "marketplace"]);
+    expect(openTypesWith("marketplace,consumer-app")).toEqual(["b2b-saas", "consumer-app", "marketplace"]);
+    expect(openTypesWith("marketplace")).toEqual(["b2b-saas", "marketplace"]);
   });
 
-  it("keeps the marketplace out while the barrier is down, whatever the variable lists", () => {
-    expect(openTypesWith("consumer-app,marketplace")).toEqual(["b2b-saas", "consumer-app"]);
-    expect(openTypesWith("marketplace")).toEqual(["b2b-saas"]);
-  });
-
-  it("lists it, in the order of the types, once the barrier is lifted — and only when the variable names it", async () => {
-    vi.resetModules();
-    vi.doMock("../setup-type", async (importOriginal) => ({ ...(await importOriginal<typeof import("../setup-type")>()), MARKETPLACE_SCREENS_READY: true }));
-    const lifted = await import("../access");
-    expect(lifted.openTypesWith("consumer-app,marketplace")).toEqual(["b2b-saas", "consumer-app", "marketplace"]);
-    expect(lifted.openTypesWith("marketplace,consumer-app")).toEqual(["b2b-saas", "consumer-app", "marketplace"]);
-    expect(lifted.openTypesWith("marketplace")).toEqual(["b2b-saas", "marketplace"]);
-    expect(lifted.openTypesWith("consumer-app")).toEqual(["b2b-saas", "consumer-app"]);
-    expect(lifted.openTypesWith(undefined)).toEqual(["b2b-saas"]);
+  it("keeps it out of every build whose variable does not name it", () => {
+    expect(openTypesWith("consumer-app")).toEqual(["b2b-saas", "consumer-app"]);
+    expect(openTypesWith(undefined)).toEqual(["b2b-saas"]);
+    expect(openTypesWith("")).toEqual(["b2b-saas"]);
+    expect(openTypesWith("marketplaces")).toEqual(["b2b-saas"]);
   });
 });

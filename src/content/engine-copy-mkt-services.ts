@@ -86,6 +86,66 @@ export const ENGINE_COPY_MKT_SERVICES: { common: Overlay; demand: Overlay; suppl
       "mkt.sell.arpa": { fr: "le prix de l'abonnement des prestataires", en: "the provider subscription price" },
     },
     mkt: {
+      // TODO: à relire (convention 6) — neuf le 2026-10-27 (A23 MKT-7b, §22.8.4, §22.8.5 k) : le prochain pas, les notes d'un côté, le saut du mois 1 et les mots appris en « services ».
+      next: {
+        buyersIsSlide: {
+          fr: "Le verdict des clients, plus bas, est le titre de ta première slide.",
+          en: "The clients' verdict, below, is the title of your first slide.",
+        },
+      },
+      note: {
+        targetsDemand: { fr: "Fixe les cibles de tes clients →", en: "Set your clients' targets →" },
+        targetsSupply: { fr: "Fixe les cibles de tes prestataires →", en: "Set your providers' targets →" },
+        moneyBody: {
+          fr: "Tout le revenu de la place de marché, ce sont les commissions, côté demande. Ce que font les prestataires se lit dans le taux de service (plus bas, avec leur funnel).",
+          en: "All of the marketplace's revenue is the commissions, on the demand side. What providers do shows in the fill rate (below, with their funnel).",
+        },
+        moneyWhatIf: {
+          fr: "Pas d'argent de ce côté, donc pas de « Et si » non plus : les leviers des prestataires sont ceux de l'abonnement.",
+          en: "No money on this side, so no what-if either: the providers' levers are the subscription's.",
+        },
+        moneyAction: { fr: "Tes prestataires paient un abonnement ? Coche-le dans les Réglages", en: "Do your providers pay a subscription? Tick it in Settings" },
+      },
+      curve: {
+        stepOne: {
+          fr: "Mois 1 : {subject} passe à {to} dès le mois prochain — {step} de revenu net en plus par mois sur les seuls clients d'aujourd'hui.",
+          en: "Month 1: {subject} goes to {to} from next month — {step} more net revenue a month on today's clients alone.",
+        },
+        stepMany: {
+          fr: "Mois 1 : {n} leviers d'argent jouent dès le mois prochain — {step} de revenu net en plus par mois sur les seuls clients d'aujourd'hui.",
+          en: "Month 1: {n} money levers apply from next month — {step} more net revenue a month on today's clients alone.",
+        },
+        stepSupply: {
+          fr: "Mois 1 : le prix de l'abonnement passe à {to} dès le mois prochain — {step} de MRR des abonnements en plus par mois sur les seuls prestataires abonnés d'aujourd'hui.",
+          en: "Month 1: the subscription price goes to {to} from next month — {step} more subscription MRR a month on today's paid providers alone.",
+        },
+      },
+      terms: {
+        gmv: {
+          definition: {
+            fr: "La valeur totale des réservations faites sur la place de marché dans le mois, avant ta commission. Ce n'est pas ton revenu : ton revenu, c'est la part que tu gardes, le revenu net (volume d'affaires × commission).",
+            en: "The total value of the bookings made on the marketplace in the month, before your commission. It is not your revenue: your revenue is the share you keep, the net revenue (GMV × take rate).",
+          },
+        },
+        takeRate: {
+          definition: {
+            fr: "La part de chaque réservation que la place de marché garde. Volume d'affaires × commission = revenu net : côté demande, il joue le rôle du MRR d'un SaaS.",
+            en: "The share of each booking the marketplace keeps. GMV × take rate = net revenue: on the demand side, it plays the part MRR plays in a SaaS.",
+          },
+        },
+        liquidity: {
+          definition: {
+            fr: "La capacité de ta place de marché à faire se rencontrer les deux côtés. Le moteur la lit en un chiffre, le taux de service : la part des recherches (ou des demandes envoyées) qui aboutissent à une réservation. Elle se compte côté demande et ne se chiffre que sur les nouveaux clients : sa valeur est un minimum.",
+            en: "How well your marketplace brings the two sides together. The engine reads it in one figure, the fill rate: the share of searches (or requests sent) that end in a booking. It is counted on the demand side and priced on new clients only, so its worth is a minimum.",
+          },
+        },
+        netRevenue: {
+          definition: {
+            fr: "Ce que la place de marché garde des réservations : volume d'affaires × commission, ou clients actifs × ce que rapporte un client actif par mois. Le moteur le projette comme un MRR.",
+            en: "What the marketplace keeps from the bookings: GMV × take rate, or active clients × what one active client brings in a month. The engine projects it as it projects an MRR.",
+          },
+        },
+      },
       side: {
         demandTitle: { fr: "La demande : les clients", en: "Demand: the clients" },
         supplyTitle: { fr: "L'offre : les prestataires", en: "Supply: the providers" },
@@ -127,6 +187,15 @@ export const ENGINE_COPY_MKT_SERVICES: { common: Overlay; demand: Overlay; suppl
         paidChurn: { fr: "Churn des prestataires abonnés : {c} par mois", en: "Paid provider churn: {c} a month" },
         newBuyers: { fr: "Nouveaux clients", en: "New clients" },
         newPaidSellers: { fr: "Nouveaux prestataires abonnés", en: "New paid providers" },
+        // TODO: à relire (convention 6) — neuf le 2026-10-27 (A23 MKT-7b, §22.8.4, §22.8.5 k) : le titre du funnel d'un côté, les taux de l'offre et son « à côté », en « services ».
+        title: { fr: "Pour 100 inscrits côté clients", en: "Per 100 client sign-ups" },
+        sellerTitle: { fr: "Pour 100 prestataires inscrits", en: "Per 100 provider sign-ups" },
+        churnLabel: { fr: "Churn des prestataires", en: "Provider churn" },
+        paidChurnLabel: { fr: "Churn des prestataires abonnés", en: "Paid provider churn" },
+        liquidityAside: {
+          fr: "Leur travail se lit dans le taux de service, côté demande : {fill} des {kind} aboutissent à une réservation.",
+          en: "Their work shows in the fill rate, on the demand side: {fill} of {kind} end in a booking.",
+        },
       },
       money: {
         perBuyer: { fr: "Revenu net par client actif et par mois", en: "Net revenue per active client a month" },
@@ -139,6 +208,19 @@ export const ENGINE_COPY_MKT_SERVICES: { common: Overlay; demand: Overlay; suppl
         supplyNone: {
           fr: "Tes prestataires ne paient pas d'abonnement : l'offre ne rapporte rien en direct",
           en: "Your providers pay no subscription: supply brings in nothing directly",
+        },
+        // TODO: à relire (convention 6) — neuf le 2026-10-27 (A23 MKT-7b, §22.8.4, §22.8.5 k) : les notes de l'argent d'un côté, en « services ».
+        perBuyerNote: {
+          fr: "Un client actif rapporte {per} de revenu net par mois : {freq} réservation × {aov} × {take} de commission.",
+          en: "One active client brings in {per} of net revenue a month: booking frequency {freq} × {aov} × {take} take rate.",
+        },
+        perBuyerNoteMany: {
+          fr: "Un client actif rapporte {per} de revenu net par mois : {freq} réservations × {aov} × {take} de commission.",
+          en: "One active client brings in {per} of net revenue a month: booking frequency {freq} × {aov} × {take} take rate.",
+        },
+        sellerCostExplained: {
+          fr: "Le coût d'un prestataire abonné est calculé : {cpa} par prestataire actif × {fs} de première réservation reçue ÷ {conv} de conversion en abonné = {cost}.",
+          en: "The cost per paid provider is computed: {cpa} per active provider × {fs} first booking received ÷ {conv} subscription conversion = {cost}.",
         },
       },
       total: {
@@ -233,6 +315,40 @@ export const ENGINE_COPY_MKT_SERVICES: { common: Overlay; demand: Overlay; suppl
         mktOrders: { fr: "réservations du mois", en: "bookings in the month" },
         mktSellerCohortSignups: { fr: "prestataires inscrits de la cohorte suivie", en: "provider sign-ups in the followed cohort" },
         mktSellerMrrEnd: { fr: "MRR des abonnements prestataires en fin de mois", en: "provider subscription MRR at the month's end" },
+      },
+    },
+    // TODO: à relire (convention 6) — neufs le 2026-10-27 (A23 MKT-7b, §22.8.4, §22.8.5 e) : les titres de la place de marché en « services ».
+    slideTitles: {
+      mktFunnelComplete: { fr: "Sur 100 inscrits côté clients, {first} et **{repeat}**.", en: "Out of 100 client sign-ups, {first} and **{repeat}**." },
+      mktFunnelGapOne: {
+        fr: "Sur 100 inscrits côté clients, {clauses}. **Entre les deux, on ne voit rien : {stages} n'est pas mesurée.**",
+        en: "Out of 100 client sign-ups, {clauses}. **In between, we see nothing: {stages} isn't measured.**",
+      },
+      mktFunnelTailBreakOne: {
+        fr: "Sur 100 inscrits côté clients, {clauses}. **Au-delà, on ne sait pas les suivre : {stages} n'est pas mesurée.**",
+        en: "Out of 100 client sign-ups, {clauses}. **Beyond that, we can't follow them: {stages} isn't measured.**",
+      },
+      mktFunnelEmpty: {
+        fr: "**On ne sait pas encore suivre 100 inscrits jusqu'à leur première réservation.**",
+        en: "**We can't yet follow 100 sign-ups to their first booking.**",
+      },
+      mktSupplyFunnelComplete: { fr: "Sur 100 prestataires inscrits, {first} et **{paid}**.", en: "Out of 100 provider sign-ups, {first} and **{paid}**." },
+      mktSupplyFunnelCompleteOne: { fr: "Sur 100 prestataires inscrits, **{first}**.", en: "Out of 100 provider sign-ups, **{first}**." },
+      mktSupplyFunnelGapOne: {
+        fr: "Sur 100 prestataires inscrits, {clauses}. **Entre les deux, on ne voit rien : {stages} n'est pas mesurée.**",
+        en: "Out of 100 provider sign-ups, {clauses}. **In between, we see nothing: {stages} isn't measured.**",
+      },
+      mktSupplyFunnelTailBreakOne: {
+        fr: "Sur 100 prestataires inscrits, {clauses}. **Au-delà, on ne sait pas les suivre : {stages} n'est pas mesurée.**",
+        en: "Out of 100 provider sign-ups, {clauses}. **Beyond that, we can't follow them: {stages} isn't measured.**",
+      },
+      mktSupplyFunnelEmpty: {
+        fr: "**On ne sait pas encore suivre 100 prestataires inscrits jusqu'à leur première réservation reçue.**",
+        en: "**We can't yet follow 100 provider sign-ups to their first booking received.**",
+      },
+      mktTotal: {
+        fr: "La place de marché rapporte **{total}** par mois : {demand} de commissions, {supply} d'abonnements des prestataires.",
+        en: "The marketplace brings in **{total}** a month: {demand} in commissions, {supply} in provider subscriptions.",
       },
     },
   },

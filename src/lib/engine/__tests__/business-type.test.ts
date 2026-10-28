@@ -94,11 +94,12 @@ describe("openTypesWith — the types a build opens (§21.3)", () => {
     expect(BUSINESS_TYPES).toHaveLength(3);
   });
 
-  it("never opens the marketplace while its screens are not ready (§22.3), even when the variable lists it", () => {
-    expect(MARKETPLACE_SCREENS_READY).toBe(false);
-    expect(openTypesWith("marketplace")).toEqual(["b2b-saas"]);
-    expect(openTypesWith("consumer-app,marketplace")).toEqual(["b2b-saas", "consumer-app"]);
-    expect(openTypesWith("marketplace, consumer-app ,b2b-saas")).toEqual(["b2b-saas", "consumer-app"]);
+  it("opens the marketplace once its screens are ready (§22.3, MKT-7b), and only when the variable lists it", () => {
+    expect(MARKETPLACE_SCREENS_READY).toBe(true);
+    expect(openTypesWith("marketplace")).toEqual(["b2b-saas", "marketplace"]);
+    expect(openTypesWith("consumer-app,marketplace")).toEqual(["b2b-saas", "consumer-app", "marketplace"]);
+    expect(openTypesWith("marketplace, consumer-app ,b2b-saas")).toEqual(["b2b-saas", "consumer-app", "marketplace"]);
+    expect(openTypesWith("consumer-app")).toEqual(["b2b-saas", "consumer-app"]);
   });
 });
 
@@ -116,9 +117,9 @@ describe("openTypesAtBuild — the page's reader", () => {
     expect(openTypesAtBuild()).toEqual(["b2b-saas", "consumer-app"]);
     process.env.ENGINE_TYPES = "unknown-type";
     expect(openTypesAtBuild()).toEqual(["b2b-saas"]);
-    // The barrier holds at the build too: the variable of MKT-10's CI lists the marketplace, and the page still does not offer it.
+    // The variable of MKT-10's CI lists the marketplace: the page offers it, since its screens exist (MKT-7b).
     process.env.ENGINE_TYPES = "consumer-app,marketplace";
-    expect(openTypesAtBuild()).toEqual(["b2b-saas", "consumer-app"]);
+    expect(openTypesAtBuild()).toEqual(["b2b-saas", "consumer-app", "marketplace"]);
   });
 });
 

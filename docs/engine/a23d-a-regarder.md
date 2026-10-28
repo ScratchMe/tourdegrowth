@@ -149,3 +149,37 @@ Publics dès le merge de MKT-G (C72), recopiés de `docs/engine/glossaire-mkt.md
   et `settings.paidReset` (le SaaS) avaient une espace ordinaire entre `{n}`
   et « jours », contre l'insécable partout ailleurs ; la garde typographique
   le vérifie maintenant.
+
+## Le tableau (MKT-7b)
+
+- **`mkt.next.buyersIsSlide`** (sans abonnements) : « Le verdict des
+  acheteurs, plus bas, est le titre de ta première slide. » La phrase ne lit
+  pas le côté affiché (C94 : le prochain pas n'a pas de côté) : avec « Offre »
+  sélectionné, le verdict des acheteurs n'est pas à l'écran. Trois pistes :
+  une variante pour l'offre affichée (une feuille neuve, et le côté passé à
+  cette ligne), une phrase sans lieu, ou la garder. Même nature :
+  `mkt.note.moneyBody` (l'offre sans abonnements) dit « (plus bas, avec leur
+  funnel) », alors que la ligne `liquidityAside` n'existe que si le taux de
+  service est connu. Relevé par l'exécutant et la relecture de MKT-7b.
+- **« SaaS » et « MRR » dans deux définitions** : `mkt.terms.takeRate` (« il
+  joue le rôle du MRR d'un SaaS ») et `mkt.terms.netRevenue` (« Le moteur le
+  projette comme un MRR »), mot pour mot de §22.8.5 k, contredisent la garde
+  de §22.11.3 (« jamais SaaS », et « MRR » dans `DEMAND_WORDS`). À réécrire, ou
+  à garder comme exceptions nommées de la garde (MKT-10 les nomme d'ici là).
+- **La phrase de la fuite sur le tableau** (`mktLeakLine`) réutilise les mots
+  de `slideTitles.leakClearMrrNew` et `…Retained` du côté : « Ramener le taux
+  de service à 12 % vaudrait **~470 € de revenu net nouveau** chaque mois. »
+  Une carte du bon à tirer doit la montrer sur le tableau, pas seulement en
+  titre de slide. Trois points : la cible y est dite deux fois (la ligne de
+  l'étape la dit déjà) ; elle finit sur « chaque mois » quand les lignes « À
+  côté » juste dessous finissent sur « par mois » ; une étape qui est un
+  événement se lit moins bien (« Ramener la première commande à 25 % »).
+- **La légende de la colonne des vendeurs inscrits** dit « vendeurs inscrits
+  en mai 2026 » sans le compte, quand celle des acheteurs dit « 2 900 inscrits
+  en mai 2026, ramenés à 100 » : « inscrits » nu est un mot du SaaS côté
+  offre, et aucune feuille ne porte « {n} vendeurs inscrits en {cohort},
+  ramenés à 100 ». À écrire (une feuille du calque de l'offre, et sa jumelle
+  « services »), ou à laisser.
+- **`mkt.terms.gmv.term` en « services »** reste "GMV (gross merchandise
+  value)" : le lexique garde le nom du GMV, mais un écran de services affiche
+  un mot de marchandise.

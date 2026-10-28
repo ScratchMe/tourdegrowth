@@ -54,9 +54,27 @@
   max-width: var(--measure-read);
 }
 
+/* A marketplace side's leak sentence (§22.6.2): the stressed part in bold ink — the stage's name above it is the one red. */
+.leak {
+  font: var(--body-md);
+  color: var(--text-body);
+  max-width: var(--measure-read);
+}
+
+.leak strong {
+  font-weight: 700;
+}
+
 .note {
   font: var(--body-sm);
   color: var(--text-muted);
+  max-width: var(--measure-read);
+}
+
+/* A marketplace side's « À côté » line: the other stage under its target, in ink — red is the one leak (§22.6.2). */
+.aside {
+  font: var(--body-sm);
+  color: var(--text-body);
   max-width: var(--measure-read);
 }
 
@@ -79,7 +97,8 @@
   }
 
   .sentence,
-  .body {
+  .body,
+  .leak {
     font: var(--body-sm);
   }
 }

@@ -1,8 +1,10 @@
 import type { NumberStatus } from "@/components/engine/EngineProgress";
 import { metricsOfStageIn, shapeOf, type SetupShapes } from "@/lib/engine/catalog-shape";
 import type { AnyDiagnosis } from "@/lib/engine/phrases";
+import { mktCandidates } from "@/lib/engine/diagnose";
 import { candidatesFor } from "@/lib/engine/scenario-of";
-import type { CandidateId, EngineCalcContext, EngineState, Interval, MetricId, MetricStatus, Motion, Snapshot } from "@/lib/engine/types";
+import { isMarketplace } from "@/lib/engine/setup-type";
+import type { CandidateId, EngineCalcContext, EngineMotion, EngineState, Interval, MetricId, MetricStatus, MktSide, Snapshot } from "@/lib/engine/types";
 import { knownIn, statusOf } from "@/lib/engine/values";
 import { PILLARS, type Pillar } from "@/lib/scoring/pillars";
 
@@ -51,6 +53,11 @@ export interface ListStage {
   holdsBack: boolean;
 }
 
+/** The side a number of a marketplace is read on (§22.8.3): the sellers' for `mkt.sell.*`, the buyers' for every other, the fill rate and the take rate included. */
+export function sideOfMetric(id: MetricId): MktSide {
+  return id.startsWith("mkt.sell.") ? "supply" : "demand";
+}
+
 /**
  * The stages the diagnosis names. Only `clear` and `shared` name anything —
  * the rule `Diagnosis` and the peloton's stamp follow: red is a diagnosis,
@@ -68,9 +75,11 @@ export function namedStages(diagnosis: AnyDiagnosis): ReadonlySet<Pillar> {
  * (« 90 %, sous ta cible »). The candidates are the setup's own — an app's include the actives' retention (§21.5.4) —
  * for both motions, as the hybrid shows either.
  */
-export function candidateValuesOf(state: EngineState, ctx: EngineCalcContext): Partial<Record<CandidateId, Interval>> {
+export function candidateValuesOf(state: EngineState, ctx: EngineCalcContext, side?: MktSide): Partial<Record<CandidateId, Interval>> {
   const values: Partial<Record<CandidateId, Interval>> = {};
-  for (const id of [...candidatesFor(state.setup, "plg"), ...candidatesFor(state.setup, "slg")]) {
+  // A marketplace reads the candidates of the side shown (§22.5.4): a table of values is no ranking, but it never melts the two lists into one call (D2).
+  const ids = isMarketplace(state.setup) ? mktCandidates(side ?? "demand", state.setup) : [...candidatesFor(state.setup, "plg"), ...candidatesFor(state.setup, "slg")];
+  for (const id of ids) {
     const known = knownIn(state, id, ctx);
     if (known.kind === "known") values[id] = known.value;
   }
@@ -82,7 +91,7 @@ export function candidateValuesOf(state: EngineState, ctx: EngineCalcContext): P
  * `setup`: an app's self-serve lists its own numbers, the replaced and the hidden ones left out (§21.6.4, D3); absent,
  * the SaaS's, as before.
  */
-export function listStages(snapshot: Snapshot, diagnosis: AnyDiagnosis, motion: Motion = "plg", setup?: SetupShapes): ListStage[] {
+export function listStages(snapshot: Snapshot, diagnosis: AnyDiagnosis, motion: EngineMotion = "plg", setup?: SetupShapes): ListStage[] {
   const named = namedStages(diagnosis);
   return PILLARS.map((stage) => {
     const rows = metricsOfStageIn(stage, motion, setup).map((shape) => ({ id: shape.id, status: rowStatusOf(statusOf(snapshot.metrics[shape.id])) }));

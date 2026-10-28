@@ -340,6 +340,18 @@ export function mktLeverAlone(state: EngineState, id: LeverId, ctx: EngineCalcCo
 }
 
 /**
+ * One side's revenue month by month — the 13 points of `demandPath` (the commissions' net revenue) or `sellerPath` (the
+ * subscriptions' MRR) — today and with the what-ifs: what the side's « Et si » card draws (`MrrCurve`). The very paths of
+ * `buildMktScenario`, read from its two columns, so the card and the panel's figures cannot disagree; each is null when
+ * the side's revenue cannot be projected (a number missing, or a supply whose sellers pay nothing). `projected` is the
+ * path with the targets of THIS side only: the other side's are ignored, as in `buildMktScenario`.
+ */
+export function mktSidePaths(state: EngineState, targets: Partial<Record<LeverId, number>>, ctx: EngineCalcContext, side: MktSide): { today: Interval[] | null; projected: Interval[] | null } {
+  const scenario = buildMktScenario(state, targets, ctx, side);
+  return { today: scenario.today.kpis.mrrPath, projected: scenario.projected.kpis.mrrPath };
+}
+
+/**
  * The total (S9): the marketplace's revenue month by month — the commissions and, when the sellers pay a subscription,
  * their MRR — today and with the what-ifs of both sides together, 13 points each. null when a counted side is unknown,
  * never one passed off as the whole (`mkt-model.ts#marketplaceRevenuePath`).

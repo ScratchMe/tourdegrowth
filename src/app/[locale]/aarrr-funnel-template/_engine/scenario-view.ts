@@ -216,20 +216,31 @@ const LOWER_IS_BETTER: readonly KpiId[] = ["cac", "payback"];
  */
 const APP_ACTIVES_KPIS: readonly KpiId[] = ["mrr12"];
 
+/**
+ * What `kpiRows` reads of a scenario: its two columns' kpis. The SaaS's and the app's carry the NRR and the GRR; a
+ * marketplace side's (`MktScenarioKpis`) has none and its figures are its own (`own`).
+ */
+export interface KpiScenario {
+  today: { kpis: Pick<ScenarioKpis, "mrr12" | "newMrr" | "cac" | "ltv" | "payback"> & Partial<ScenarioKpis> };
+  projected: { kpis: Pick<ScenarioKpis, "mrr12" | "newMrr" | "cac" | "ltv" | "payback"> & Partial<ScenarioKpis> };
+}
+
 /** The growth numbers, today → with the what-ifs. A figure unknown today AND projected is still listed: its absence is information. */
 export function kpiRows(
-  scenario: Scenario,
+  scenario: KpiScenario,
   ctx: EngineCalcContext,
   strings: EngineStrings,
   currency: Currency,
   missing: { state: EngineState; metrics: ResolvedMetric[] },
+  /** A marketplace side's (§22.6.2, `mkt-view.ts`): the figures it has, and what each one is computed from. */
+  own?: { ids: readonly Exclude<KpiId, "won">[]; inputs: Partial<Record<Exclude<KpiId, "won">, readonly MetricId[]>> },
 ): KpiView[] {
   const w = strings.scenario;
-  const inputs = selfServeKpiInputs(missing.state.setup);
-  const app = isApp(missing.state.setup);
-  const activesMissing = scenario.today.kpis.app?.activesMissing === true;
+  const inputs = own?.inputs ?? selfServeKpiInputs(missing.state.setup);
+  const app = own === undefined && isApp(missing.state.setup);
+  const activesMissing = ("app" in scenario.today.kpis ? scenario.today.kpis.app : undefined)?.activesMissing === true;
   const unknownText = (id: KpiId) => {
-    const absent = inputs[id as Exclude<KpiId, "won">].filter((m) => knownIn(missing.state, m, ctx).kind !== "known");
+    const absent = (inputs[id as Exclude<KpiId, "won">] ?? []).filter((m) => knownIn(missing.state, m, ctx).kind !== "known");
     // An app also names its actives when the revenue in 12 months lacks them (§21.6.4); an empty list is never « il manque ».
     if (app) {
       const phrase = appMissingPhrase(absent, activesMissing && APP_ACTIVES_KPIS.includes(id), strings, missing.metrics);
@@ -245,7 +256,7 @@ export function kpiRows(
   type Row = {
     id: KpiId;
     label: string;
-    pick: (k: ScenarioKpis) => Interval | null;
+    pick: (k: KpiScenario["today"]["kpis"]) => Interval | null;
     show: (i: Interval | null, extra?: number) => string | null;
     /** The figure's own rounding, for `pairPrecision`; none (months) keeps the usual precision. */
     round?: (v: number, extra: number) => number;
@@ -256,15 +267,19 @@ export function kpiRows(
   const rows: Row[] = [
     { id: "mrr12", label: w.kpiMrr12, pick: (k) => k.mrr12, ...moneyRow },
     { id: "newMrr", label: w.kpiNewMrr, pick: (k) => k.newMrr, ...moneyRow },
-    { id: "nrr", label: w.kpiNrr, pick: (k) => k.nrr, ...rateRow },
-    { id: "grr", label: w.kpiGrr, pick: (k) => k.grr, ...rateRow },
+    { id: "nrr", label: w.kpiNrr, pick: (k) => k.nrr ?? null, ...rateRow },
+    { id: "grr", label: w.kpiGrr, pick: (k) => k.grr ?? null, ...rateRow },
     { id: "cac", label: w.kpiCac, pick: (k) => k.cac, ...moneyRow },
     { id: "ltv", label: w.kpiLtv, pick: (k) => k.ltv, ...moneyRow },
     { id: "payback", label: w.kpiPayback, pick: (k) => k.payback, show: months, delta: (d) => signed(months({ lo: Math.abs(d), hi: Math.abs(d) }) ?? "", d) },
   ];
   const mid = (i: Interval) => (i.lo + i.hi) / 2;
   // Without subscriptions an app has no NRR and no GRR: the rows go, they are not « unknown » (§21.6.4).
-  const shown = app && !monetizationOf(missing.state.setup)!.subscriptions ? rows.filter((row) => row.id !== "nrr" && row.id !== "grr") : rows;
+  const shown = own
+    ? rows.filter((row) => own.ids.includes(row.id as Exclude<KpiId, "won">))
+    : app && !monetizationOf(missing.state.setup)!.subscriptions
+      ? rows.filter((row) => row.id !== "nrr" && row.id !== "grr")
+      : rows;
   return shown.map((row) => {
     const today = row.pick(scenario.today.kpis);
     const projected = row.pick(scenario.projected.kpis);
@@ -332,12 +347,18 @@ export interface LeverGain {
  * What each moved lever brings alone, and the total together — the line
  * that shows the compounding (the whole is worth more than the sum).
  */
-export function leverGains(state: EngineState, scenario: Scenario, ctx: EngineCalcContext): { alone: LeverGain[]; together: number | null; sumAlone: number | null } {
+export function leverGains(
+  state: EngineState,
+  scenario: Pick<Scenario, "levers" | "moved"> & { today: { kpis: Pick<ScenarioKpis, "mrr12"> }; projected: { kpis: Pick<ScenarioKpis, "mrr12"> } },
+  ctx: EngineCalcContext,
+  /** One lever alone: the SaaS's and the app's (`leverAloneOf`), or a marketplace side's (`mktLeverAlone`, §22.5.4). */
+  aloneOf: (state: EngineState, id: LeverId, ctx: EngineCalcContext) => { projected: { kpis: Pick<ScenarioKpis, "mrr12"> } } | null = leverAloneOf,
+): { alone: LeverGain[]; together: number | null; sumAlone: number | null } {
   const mid = (i: Interval | null) => (i ? (i.lo + i.hi) / 2 : null);
   const base = mid(scenario.today.kpis.mrr12);
   const withTargets: EngineState = { ...state, whatIf: Object.fromEntries(scenario.levers.filter((l) => l.target !== null).map((l) => [l.id, l.target!])) };
   const alone = scenario.moved.map((id) => {
-    const s = leverAloneOf(withTargets, id, ctx);
+    const s = aloneOf(withTargets, id, ctx);
     const projected = s ? mid(s.projected.kpis.mrr12) : null;
     return { id, gain: base !== null && projected !== null ? projected - base : null };
   });
@@ -380,7 +401,7 @@ function leverText(lever: LeverView, v: Interval, ctx: EngineCalcContext, string
 }
 
 /** The sliders, in lever order (the funnel's order, then the money). */
-export function leverRows(scenario: Scenario, ctx: EngineCalcContext, strings: EngineStrings, currency: Currency, metrics: ResolvedMetric[]): LeverRowView[] {
+export function leverRows(scenario: Pick<Scenario, "levers">, ctx: EngineCalcContext, strings: EngineStrings, currency: Currency, metrics: ResolvedMetric[]): LeverRowView[] {
   return scenario.levers.map((lever) => {
     const name = metrics.find((m) => m.id === lever.id)?.name ?? lever.id;
     if (!lever.today) return { id: lever.id, name, today: null, todayValue: null, min: 0, max: 0, step: 1, position: 0, valueText: "", moved: false };

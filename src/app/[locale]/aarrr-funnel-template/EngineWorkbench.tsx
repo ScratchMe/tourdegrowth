@@ -8,7 +8,7 @@ import { EngineTermScope } from "./_engine/EngineTerm";
 import { motionOfMetric, motionShapes, shapeOf } from "@/lib/engine/catalog-shape";
 import { marketplaceStrings, mergeStrings, type DeepPartial, type EngineStrings, type MarketplaceLayers, type ResolvedBridge, type ResolvedDerived, type ResolvedMetric } from "@/lib/engine/strings";
 import type { AppMonetization } from "@/lib/engine/app-model";
-import { DEFAULT_APP_MONETIZATION, isSellingMotion } from "@/lib/engine/setup-type";
+import { DEFAULT_APP_MONETIZATION, isMarketplace, isSellingMotion, mktSetup } from "@/lib/engine/setup-type";
 import { MAX_ENGINES, MAX_MONTHS, type BusinessType, type EngineCalcContext, type EngineDerived, type EngineMotion, type EngineState, type LeverId, type MetricEntry, type MetricId, type MktSide, type Motion, type MotionDerived, type RoleId, type SlideTitle, type Snapshot } from "@/lib/engine/types";
 import type { Locale } from "@/lib/i18n/locale";
 import { Board } from "./_engine/Board";
@@ -19,6 +19,7 @@ import { latestTourWithAnswers } from "@/lib/engine/bridge";
 import type { StoredResult } from "@/lib/quiz/storage";
 import { pelotonTitle } from "@/lib/engine/deck";
 import { relaysTitle, totalTitle } from "@/lib/engine/deck-motions";
+import { mktFunnelTitle, mktTotalTitle } from "@/lib/engine/mkt-titles";
 import { deriveEngine } from "@/lib/engine/derive";
 import { calendarFile, nextMonthStart } from "@/lib/engine/ics";
 import { engineFileName, monthFileName, serializeEngine } from "@/lib/engine/io";
@@ -43,6 +44,7 @@ import { AskScreen } from "./_engine/AskScreen";
 import { NumberScreen } from "./_engine/NumberScreen";
 import { Setup, type SetupChoice } from "./_engine/Setup";
 import { settingsNumbers } from "./_engine/settings-numbers";
+import { sideOfMetric } from "./_engine/number-list";
 import { DEFAULT_MKT_START, motionsOf, settingsExisting, startCopy, typeOf, withSettings, type MktStart, type StartEarnsCopy, type StartMktCopy } from "./_engine/start";
 import { TargetsStart } from "./_engine/TargetsStart";
 import { continueFrom, nextSelfNumber, type Continuation } from "./_engine/next-step";
@@ -215,6 +217,8 @@ function Workbench(props: EngineWorkbenchProps) {
   const [askIds, setAskIds] = useState<readonly MetricId[]>([]);
   // The hybrid's selector (§18.7): the motion of the number opened last in this session, else self-serve.
   const [motionView, setMotionView] = useState<Motion | null>(null);
+  // A marketplace's « Côté affiché » (§22.6.2): the side of the number opened last in this session, else the demand.
+  const [sideView, setSideView] = useState<MktSide>("demand");
   // The choice the start screen had when « Voir un exemple rempli » was pressed (§18.7, §21.9): its motions and its type.
   // An app's example always earns from its three ways (§21.6.1), whatever the start card ticks: nothing to keep.
   const [exampleMotions, setExampleMotions] = useState<Record<Motion, boolean>>({ plg: true, slg: false });
@@ -344,6 +348,7 @@ function Workbench(props: EngineWorkbenchProps) {
     toCurrentMonth();
     setNumberId(null);
     setMotionView(null);
+    setSideView("demand");
     setSkipped([]);
   }
 
@@ -609,7 +614,9 @@ function Workbench(props: EngineWorkbenchProps) {
       // Its own screen, its heading focused: a move between screens the person asked for (R-19).
       // The link is sales-assisted's: its motion, for the selector the way back lands on.
       const motion = motionOfMetric(id);
-      if (isSellingMotion(motion)) setMotionView(motion); // MKT-7b adds the marketplace's selector (`setSideView`)
+      // A marketplace's number is on a side: the selector the way back lands on is its (`sideOfMetric`, §22.8.3).
+      if (isSellingMotion(motion)) setMotionView(motion);
+      else setSideView(sideOfMetric(id));
       setNumberId(id);
       setScreen("number");
       focus("engine-number-title");
@@ -951,7 +958,8 @@ function Workbench(props: EngineWorkbenchProps) {
     return shell(
       <NumberScreen
         id={id}
-        view={view}
+        // A marketplace's number is read in the words of its side (§22.8.3), against its side's diagnosis.
+        view={isMarketplace(current.setup) ? { ...view, strings: stringsFor(current.setup.type, current.setup.offering, sideOfMetric(id)) } : view}
         actions={actions}
         onBack={() => {
           setScreen("board");
@@ -993,6 +1001,14 @@ function Workbench(props: EngineWorkbenchProps) {
       openedAt={snap.openedAt}
       motionView={motionView}
       onMotion={setMotionView}
+      sideView={sideView}
+      onSide={setSideView}
+      onTargets={() => {
+        toCurrentMonth();
+        setScreen("targets");
+        focus("engine-targets-title");
+      }}
+      sideStrings={(side) => stringsFor(current.setup.type, current.setup.offering, side)}
       writeFailed={writeFailed}
       onDeck={() => {
         toCurrentMonth();
@@ -1110,6 +1126,12 @@ function boardOf(state: EngineState, { monthIndex, today, locale, tourResults, b
  * the hybrid, « deux moteurs, un total ». Each is its deck's first slide.
  */
 function verdictOf(state: EngineState, derived: EngineDerived, strings: EngineStrings, metrics: ResolvedMetric[], ctx: EngineCalcContext): SlideTitle {
+  // A marketplace first (§22.6.2): the total of its two streams when the sellers pay, else the buyers' funnel (one stream is not a sum).
+  if (isMarketplace(state.setup)) {
+    const mkt = derived.motions.find((m): m is Extract<MotionDerived, { motion: "mkt" }> => m.motion === "mkt");
+    if (mkt && !mktSetup(state.setup).sellerSubscriptions) return mktFunnelTitle(mkt.funnel.demand, "demand", state, strings, ctx);
+    return mktTotalTitle(derived, state, strings, ctx);
+  }
   const { plg, slg } = state.setup.motions;
   if (plg && slg && derived.total) return totalTitle(derived.total, state, strings, ctx);
   const relays = derived.motions.find((m): m is Extract<MotionDerived, { motion: "slg" }> => m.motion === "slg");

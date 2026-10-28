@@ -7,14 +7,20 @@ import { Card } from "@/components/core/Card";
 import { Disclosure } from "@/components/core/Disclosure";
 import { Field } from "@/components/core/Field";
 import { Segmented } from "@/components/core/Segmented";
+import { SideShown } from "@/components/engine/SideShown";
+import { TotalBand as StreamsBand } from "@/components/engine/TotalBand";
 import { pelotonTitle } from "@/lib/engine/deck";
 import { relaysTitle } from "@/lib/engine/deck-motions";
 import { findingText } from "@/lib/engine/sentences";
-import type { MetricId, Motion, MotionDerived, SlideTitle } from "@/lib/engine/types";
+import { activeMotions } from "@/lib/engine/business-type";
+import type { EngineStrings } from "@/lib/engine/strings";
+import type { MetricId, MktSide, Motion, MotionDerived, SlideTitle } from "@/lib/engine/types";
 import { knownSharedCount } from "@/lib/engine/shared-counts";
 import { BoardBar, BoardNextStep, boardNextStep, type EngineControls, type SeriesControls } from "./BoardHead";
 import type { CollectPlan } from "./collect";
 import { Diagnosis } from "./Diagnosis";
+import { MarketSide } from "./MarketSide";
+import { mktTotalView } from "./mkt-view";
 import { Mirror } from "./Mirror";
 import { Peloton } from "./Peloton";
 import { Relays } from "./Relays";
@@ -69,7 +75,7 @@ type SlgDerived = Extract<MotionDerived, { motion: "slg" }>;
  * slides read (`view.derived`): a diagnosis cannot name a stage its funnel
  * does not stamp.
  */
-export function Board({
+function MotionsBoard({
   view,
   actions,
   verdict,
@@ -327,52 +333,267 @@ export function Board({
         </>
       )}
 
-      {/* Declared × measured (§8.5): the linked Tour's mirror, or "that Tour is gone" when its
-          result left the device; a Tour here and no link — taken after the engine was started, or
-          unticked by mistake — offers to link it (C8, 2026-09-29); with no Tour at all, the
-          invitation to take one. */}
-      {state.tourLink ? (
-        <Mirror
-          mirror={derived.mirror}
-          gone={derived.mirror === null}
-          strings={strings}
-          locale={ctx.locale}
-          bridges={view.bridges}
-          metrics={view.metrics}
-          derived={view.derivedCopy}
-        />
-      ) : view.deviceTour ? (
-        <Mirror
-          mirror={null}
-          unlinked={{
-            takenAt: view.deviceTour.createdAt,
-            total: view.deviceTour.total ?? null,
-            onLink: () => actions.linkTour(view.deviceTour!.id),
-          }}
-          strings={strings}
-          locale={ctx.locale}
-          bridges={view.bridges}
-          metrics={view.metrics}
-          derived={view.derivedCopy}
-        />
-      ) : (
-        <Mirror mirror={null} strings={strings} locale={ctx.locale} bridges={view.bridges} metrics={view.metrics} derived={view.derivedCopy} />
-      )}
+      <BoardFoot
+        view={view}
+        actions={actions}
+        past={past}
+        slidesNext={slidesNext}
+        tableOpen={tableOpen}
+        onTableOpenChange={setTableOpen}
+        onDeck={onDeck}
+        onTemplate={onTemplate}
+        onApplyTable={onApplyTable}
+      />
+    </div>
+  );
+}
 
-      {/* « À aller chercher » left the board with A18 T3.c: the requests are one screen (AskList), the rest is « Tes chiffres ». */}
-      {/* A table also corrects what was typed (§19.6). Opened from the menu. */}
-      {!past && onTemplate && onApplyTable ? (
-        <TableEntry view={view} onTemplate={onTemplate} onApply={onApplyTable} open={tableOpen} onOpenChange={setTableOpen} id="engine-table" />
+/**
+ * What closes every board, whatever its type (§8.5, §19.6): the Tour's mirror, the table entry, and the slides as a quiet link
+ * while they are not the next step. One place, so the marketplace's board closes exactly as the SaaS's does.
+ */
+function BoardFoot({
+  view,
+  actions,
+  past,
+  slidesNext,
+  tableOpen,
+  onTableOpenChange,
+  onDeck,
+  onTemplate,
+  onApplyTable,
+}: {
+  view: EngineView;
+  actions: EngineActions;
+  past: boolean;
+  slidesNext: boolean;
+  tableOpen: boolean;
+  onTableOpenChange: (open: boolean) => void;
+  onDeck: () => void;
+  onTemplate?: () => void;
+  onApplyTable?: (preview: TablePreview) => boolean;
+}) {
+  const { strings, state, ctx, derived } = view;
+  return (
+    <>
+    {/* Declared × measured (§8.5): the linked Tour's mirror, or "that Tour is gone" when its
+        result left the device; a Tour here and no link — taken after the engine was started, or
+        unticked by mistake — offers to link it (C8, 2026-09-29); with no Tour at all, the
+        invitation to take one. */}
+    {state.tourLink ? (
+      <Mirror
+        mirror={derived.mirror}
+        gone={derived.mirror === null}
+        strings={strings}
+        locale={ctx.locale}
+        bridges={view.bridges}
+        metrics={view.metrics}
+        derived={view.derivedCopy}
+      />
+    ) : view.deviceTour ? (
+      <Mirror
+        mirror={null}
+        unlinked={{
+          takenAt: view.deviceTour.createdAt,
+          total: view.deviceTour.total ?? null,
+          onLink: () => actions.linkTour(view.deviceTour!.id),
+        }}
+        strings={strings}
+        locale={ctx.locale}
+        bridges={view.bridges}
+        metrics={view.metrics}
+        derived={view.derivedCopy}
+      />
+    ) : (
+      <Mirror mirror={null} strings={strings} locale={ctx.locale} bridges={view.bridges} metrics={view.metrics} derived={view.derivedCopy} />
+    )}
+
+    {/* « À aller chercher » left the board with A18 T3.c: the requests are one screen (AskList), the rest is « Tes chiffres ». */}
+    {/* A table also corrects what was typed (§19.6). Opened from the menu. */}
+    {!past && onTemplate && onApplyTable ? (
+      <TableEntry view={view} onTemplate={onTemplate} onApply={onApplyTable} open={tableOpen} onOpenChange={onTableOpenChange} id="engine-table" />
+    ) : null}
+
+    {/* The slides, quietly, while they are not the next step: then the next step carries them as its primary. */}
+    {past || slidesNext ? null : (
+      <div className={styles.slidesQuiet}>
+        <Button variant="quiet" onClick={onDeck} data-testid="engine-open-deck">
+          {strings.next.slidesQuiet}
+        </Button>
+      </div>
+    )}
+
+    </>
+  );
+}
+
+/** The board's props, whatever the type: the marketplace's three (and its side words) are the ones the motions' boards do not read. */
+export type BoardProps = Parameters<typeof MotionsBoard>[0] & {
+  /** A marketplace's « Côté affiché » (§22.6.2): which side shows. Ignored by the other types. */
+  sideView: MktSide;
+  onSide: (side: MktSide) => void;
+  /** « Fixe les cibles de tes acheteurs → »: the « Cibles » screen, as after the setup. */
+  onTargets: () => void;
+  /** The words of a side (`marketplaceStrings(…, side)`, §22.8.1): what the selector governs reads them, the rest the neutral set. */
+  sideStrings: (side: MktSide) => EngineStrings;
+};
+
+/**
+ * The board of any engine (spec §7 E2): the motions' (self-serve, sales-assisted, the hybrid — and an app's, self-serve in its
+ * words) or a marketplace's (`MarketBoard`, §22.6.2). A marketplace ticks no motion, so its test comes first: the motions' board
+ * would read it as « slg » and write that in `data-motions`.
+ */
+export function Board(props: BoardProps) {
+  return activeMotions(props.view.state.setup).includes("mkt") ? <MarketBoard {...props} /> : <MotionsBoard {...props} />;
+}
+
+/**
+ * A marketplace's board (design system extension 10, engine spec §22.6.2): the hybrid's order, for two SIDES instead of two
+ * engines (C70). Top to bottom: the engine bar; **the total band** (its title is the board's heading: the two streams, summed,
+ * never a ratio — and no band when the sellers pay nothing, one stream is not a sum); **the next step, shared** (C94: the engine's
+ * one action, a deck, a file, a list — never a side's); **« Côté affiché »** and under it one side at a time (`MarketSide`: its
+ * verdict, diagnosis, money, « Et si » and funnel, in its own words); then the list of the numbers, shared, the one stage it flags
+ * the one the side shown names (C103); the Tour's mirror, the table entry, the slides link.
+ *
+ * What the selector governs reads `sideStrings(side)`; everything outside it — the bar, the band, the list — the neutral set.
+ */
+function MarketBoard({
+  view,
+  actions,
+  plan,
+  returningFrom,
+  openedAt,
+  writeFailed,
+  sideView,
+  onSide,
+  onTargets,
+  sideStrings,
+  onDeck,
+  onSave,
+  onImport,
+  onErase,
+  onSettings,
+  onRename,
+  onRequests,
+  series,
+  engines,
+  onTemplate,
+  onApplyTable,
+}: BoardProps) {
+  const { strings } = view;
+  const past = series ? series.shown !== series.months.length - 1 : false;
+  const readOnly = past && !series?.correcting;
+  const [tableOpen, setTableOpen] = useState(false);
+  const next = boardNextStep(view, plan, writeFailed, past);
+  const reveal = (id: string) =>
+    requestAnimationFrame(() => {
+      const summary = document.querySelector<HTMLElement>(`#${id} > summary`);
+      summary?.focus();
+      summary?.scrollIntoView({ block: "start" });
+    });
+  const band = mktTotalView(view);
+  const side = sideView;
+  // The sellers paying nothing: no band, so the side's own verdict is the board's heading and focus target (`engine-verdict`).
+  const verdictId = band ? "engine-motion-verdict" : "engine-verdict";
+
+  return (
+    <div className={styles.board} data-testid="engine-board" data-motions="mkt" data-side={side}>
+      <header className={styles.head}>
+        <BoardBar
+          view={view}
+          series={series}
+          engines={engines}
+          past={past}
+          correcting={Boolean(series?.correcting)}
+          onSettings={onSettings}
+          onRename={onRename}
+          onSave={onSave}
+          onImport={onImport}
+          onErase={onErase}
+          onTable={
+            !past && onTemplate && onApplyTable
+              ? () => {
+                  setTableOpen(true);
+                  reveal("engine-table");
+                }
+              : undefined
+          }
+        />
+      </header>
+
+      {/* The marketplace's headline: the two streams in the order of the sum, then what adds up. Its title is the first slide's. */}
+      {band ? (
+        <StreamsBand
+          eyebrow={band.eyebrow}
+          title={band.title}
+          headingId="engine-verdict"
+          engines={band.engines.map((e) => ({
+            id: e.id,
+            label: e.label,
+            value: <span data-testid={`engine-total-mrr-${e.id}`}>{e.value}</span>,
+            missing: e.missing,
+            "data-testid": `engine-total-${e.id}`,
+          }))}
+          total={{ label: band.total.label, value: band.total.value, missing: band.total.missing, "data-testid": "engine-total-sum" }}
+          totals={band.totals}
+          link={band.line ? <p data-testid="engine-total-link">{band.line}</p> : null}
+          data-testid="mkt-total"
+        />
       ) : null}
 
-      {/* The slides, quietly, while they are not the next step: then the next step carries them as its primary. */}
-      {past || slidesNext ? null : (
-        <div className={styles.slidesQuiet}>
-          <Button variant="quiet" onClick={onDeck} data-testid="engine-open-deck">
-            {strings.next.slidesQuiet}
-          </Button>
-        </div>
-      )}
+      <BoardNextStep
+        choice={next}
+        view={view}
+        actions={actions}
+        plan={plan}
+        returningFrom={returningFrom}
+        openedAt={openedAt}
+        series={series}
+        past={past}
+        correcting={Boolean(series?.correcting)}
+        onSave={onSave}
+        onDeck={onDeck}
+        onRequests={onRequests}
+      />
+
+      {/* « Côté affiché »: one side's board at a time, never two columns — demand first, the order fixed whatever the values. */}
+      <SideShown
+        label={strings.mkt.side.selector}
+        sides={[
+          { id: "demand", label: strings.mkt.side.demand },
+          { id: "supply", label: strings.mkt.side.supply },
+        ]}
+        value={side}
+        onChange={onSide}
+        title={side === "demand" ? strings.mkt.side.demandTitle : strings.mkt.side.supplyTitle}
+        note={strings.mkt.side.note}
+        headingId="engine-side"
+        data-testid="engine-side-selector"
+      />
+      <MarketSide
+        key={side}
+        view={{ ...view, strings: sideStrings(side) }}
+        side={side}
+        past={past}
+        verdictId={verdictId}
+        onWhatIf={actions.setWhatIf}
+        onTargets={onTargets}
+        onSettings={onSettings}
+      />
+
+      <BoardNumbers view={view} motion="mkt" side={side} readOnly={readOnly} onOpen={actions.openMetric} />
+
+      <BoardFoot
+        view={view}
+        actions={actions}
+        past={past}
+        slidesNext={next.kind === "slides"}
+        tableOpen={tableOpen}
+        onTableOpenChange={setTableOpen}
+        onDeck={onDeck}
+        onTemplate={onTemplate}
+        onApplyTable={onApplyTable}
+      />
     </div>
   );
 }

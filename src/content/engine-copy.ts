@@ -2020,6 +2020,11 @@ export const ENGINE_COPY = {
       selector: { fr: "Côté affiché", en: "Side shown" },
       demand: { fr: "Demande", en: "Demand" },
       supply: { fr: "Offre", en: "Supply" },
+      // TODO: à relire (convention 6) — neuf le 2026-10-27 (A23 MKT-7b, §22.8.5 k, le retour du brief 10) : la phrase sous le sélecteur « Côté affiché ».
+      note: {
+        fr: "Deux côtés, deux lectures : chacun se lit contre ses propres cibles, jamais contre l'autre.",
+        en: "Two sides, two readings: each is read against its own targets, never against the other.",
+      },
     },
     funnel: {
       upstream: { fr: "~{n} visiteurs du mois pour 100 inscrits · {source} · {month}", en: "~{n} visitors a month for 100 sign-ups · {source} · {month}" },
@@ -2067,6 +2072,25 @@ export const ENGINE_COPY = {
       newPaidSellers: { fr: "Nouveaux vendeurs abonnés", en: "New paid sellers" },
       tableCaption: { fr: "La demande, en chiffres", en: "Demand, in numbers" },
       sellerTableCaption: { fr: "L'offre, en chiffres", en: "Supply, in numbers" },
+      // TODO: à relire (convention 6) — neuf le 2026-10-27 (A23 MKT-7b, §22.8.5 k, le retour du brief 10) : le titre du funnel d'un côté, la base de la liquidité, les taux de l'offre et son « à côté » (`SideFunnel`).
+      title: { fr: "Pour 100 inscrits côté acheteurs", en: "Per 100 buyer sign-ups" },
+      sellerTitle: { fr: "Pour 100 vendeurs inscrits", en: "Per 100 seller sign-ups" },
+      liquidity: { fr: "Liquidité · sur 100 {kind}", en: "Liquidity · out of 100 {kind}" },
+      kindSearches: { fr: "recherches", en: "searches" },
+      kindRequests: { fr: "demandes envoyées", en: "requests sent" },
+      kindEither: { fr: "recherches ou demandes envoyées", en: "searches or requests sent" },
+      otherBase: {
+        fr: "Le taux de service se compte sur 100 {kind} : une autre base, pas les mêmes personnes.",
+        en: "The fill rate is counted on 100 {kind}: another base, not the same people.",
+      },
+      ratesTitle: { fr: "Chaque mois", en: "Every month" },
+      churnLabel: { fr: "Churn des vendeurs", en: "Seller churn" },
+      paidChurnLabel: { fr: "Churn des vendeurs abonnés", en: "Paid seller churn" },
+      rateTarget: { fr: "cible {target}", en: "target {target}" },
+      liquidityAside: {
+        fr: "Leur travail se lit dans le taux de service, côté demande : {fill} des {kind} aboutissent à une commande.",
+        en: "Their work shows in the fill rate, on the demand side: {fill} of {kind} end in an order.",
+      },
     },
     money: {
       gmv: { fr: "Volume d'affaires du mois (GMV)", en: "Gross volume this month (GMV)" },
@@ -2080,6 +2104,23 @@ export const ENGINE_COPY = {
       supplyNone: {
         fr: "Tes vendeurs ne paient pas d'abonnement : l'offre ne rapporte rien en direct",
         en: "Your sellers pay no subscription: supply brings in nothing directly",
+      },
+      // TODO: à relire (convention 6) — neuf le 2026-10-27 (A23 MKT-7b, §22.8.5 k, le retour du brief 10) : les notes de l'argent d'un côté (ce que rapporte un acheteur actif, le coût d'un vendeur abonné calculé) et son hypothèse de trésorerie.
+      perBuyerNote: {
+        fr: "Un acheteur actif rapporte {per} de revenu net par mois : {freq} commande × {aov} × {take} de commission.",
+        en: "One active buyer brings in {per} of net revenue a month: order frequency {freq} × {aov} × {take} take rate.",
+      },
+      perBuyerNoteMany: {
+        fr: "Un acheteur actif rapporte {per} de revenu net par mois : {freq} commandes × {aov} × {take} de commission.",
+        en: "One active buyer brings in {per} of net revenue a month: order frequency {freq} × {aov} × {take} take rate.",
+      },
+      sellerCostExplained: {
+        fr: "Le coût d'un vendeur abonné est calculé : {cpa} par vendeur actif × {fs} de première vente ÷ {conv} de conversion en abonné = {cost}.",
+        en: "The cost per paid seller is computed: {cpa} per active seller × {fs} first sale ÷ {conv} subscription conversion = {cost}.",
+      },
+      cashAssume: {
+        fr: "Un plancher : la dépense de chaque mois revient régulièrement sur la durée du payback, la moitié est donc dehors à tout moment ; le churn ralentit le retour et n'est pas compté.",
+        en: "A floor: each month's spend comes back evenly over the payback, so half of it is out at any time; churn slows the return and is not counted.",
       },
     },
     total: {
@@ -2095,6 +2136,94 @@ export const ENGINE_COPY = {
       footer: {
         fr: "Revenu net et MRR des abonnements à fin {month} · sources : {tools}",
         en: "Net revenue and subscription MRR at the end of {month} · sources: {tools}",
+      },
+      // TODO: à relire (convention 6) — neuf le 2026-10-27 (A23 MKT-7b, §22.8.5 k, le retour du brief 10) : la bande du total quand un « Et si » bouge.
+      in12Moved: { fr: "Dans 12 mois avec tes « Et si », des deux côtés", en: "In 12 months with your what-ifs, on both sides" },
+      todayLine: {
+        fr: "Au rythme actuel : {today} dans 12 mois. Les « Et si » des deux côtés s'additionnent ici, et seulement ici.",
+        en: "At the current pace: {today} in 12 months. The what-ifs of both sides add up here, and only here.",
+      },
+    },
+    // TODO: à relire (convention 6) — neuf le 2026-10-27 (A23 MKT-7b, §22.8.5 k, le retour du brief 10) : le prochain pas partagé, les lignes « À côté » du diagnostic,
+    // les notes d'un côté sans argent ou sans cibles, le saut du mois 1, la phrase de la liste et les quatre mots appris (`EngineTerm`, lus dans `strings.mkt.terms`).
+    next: {
+      totalIsSlide: { fr: "Le total, ci-dessus, est le titre de ta première slide.", en: "The total above is the title of your first slide." },
+      buyersIsSlide: {
+        fr: "Le verdict des acheteurs, plus bas, est le titre de ta première slide.",
+        en: "The buyers' verdict, below, is the title of your first slide.",
+      },
+    },
+    diag: {
+      aside: {
+        fr: "À côté : {stage}, {value} pour une cible de {target}, vaudrait {worth}.",
+        en: "Beside it: {stage}, {value} for a target of {target}, would be worth {worth}.",
+      },
+      asideUnpriced: {
+        fr: "À côté : {stage}, {value} pour une cible de {target}, sans montant : l'offre ne se chiffre que par ses abonnements.",
+        en: "Beside it: {stage}, {value} for a target of {target}, with no amount: supply is priced only through its subscriptions.",
+      },
+    },
+    note: {
+      targetsDemand: { fr: "Fixe les cibles de tes acheteurs →", en: "Set your buyers' targets →" },
+      targetsSupply: { fr: "Fixe les cibles de tes vendeurs →", en: "Set your sellers' targets →" },
+      moneyBody: {
+        fr: "Tout le revenu de la place de marché, ce sont les commissions, côté demande. Ce que font les vendeurs se lit dans le taux de service (plus bas, avec leur funnel).",
+        en: "All of the marketplace's revenue is the commissions, on the demand side. What sellers do shows in the fill rate (below, with their funnel).",
+      },
+      moneyWhatIf: {
+        fr: "Pas d'argent de ce côté, donc pas de « Et si » non plus : les leviers des vendeurs sont ceux de l'abonnement.",
+        en: "No money on this side, so no what-if either: the sellers' levers are the subscription's.",
+      },
+      moneyAction: { fr: "Tes vendeurs paient un abonnement ? Coche-le dans les Réglages", en: "Do your sellers pay a subscription? Tick it in Settings" },
+    },
+    curve: {
+      stepOne: {
+        fr: "Mois 1 : {subject} passe à {to} dès le mois prochain — {step} de revenu net en plus par mois sur les seuls acheteurs d'aujourd'hui.",
+        en: "Month 1: {subject} goes to {to} from next month — {step} more net revenue a month on today's buyers alone.",
+      },
+      stepMany: {
+        fr: "Mois 1 : {n} leviers d'argent jouent dès le mois prochain — {step} de revenu net en plus par mois sur les seuls acheteurs d'aujourd'hui.",
+        en: "Month 1: {n} money levers apply from next month — {step} more net revenue a month on today's buyers alone.",
+      },
+      stepSupply: {
+        fr: "Mois 1 : le prix de l'abonnement passe à {to} dès le mois prochain — {step} de MRR des abonnements en plus par mois sur les seuls vendeurs abonnés d'aujourd'hui.",
+        en: "Month 1: the subscription price goes to {to} from next month — {step} more subscription MRR a month on today's paid sellers alone.",
+      },
+    },
+    list: {
+      lead: {
+        fr: "Les deux côtés, une liste par étape. L'étape signalée est celle que nomme le côté affiché.",
+        en: "Both sides, one list by stage. The stage flagged is the one the side shown names.",
+      },
+    },
+    terms: {
+      gmv: {
+        term: { fr: "volume d'affaires (GMV)", en: "GMV (gross merchandise value)" },
+        definition: {
+          fr: "La valeur totale des commandes passées sur la place de marché dans le mois, avant ta commission. Ce n'est pas ton revenu : ton revenu, c'est la part que tu gardes, le revenu net (volume d'affaires × commission).",
+          en: "The total value of the orders placed on the marketplace in the month, before your commission. It is not your revenue: your revenue is the share you keep, the net revenue (GMV × take rate).",
+        },
+      },
+      takeRate: {
+        term: { fr: "commission (take rate)", en: "take rate" },
+        definition: {
+          fr: "La part de chaque commande que la place de marché garde. Volume d'affaires × commission = revenu net : côté demande, il joue le rôle du MRR d'un SaaS.",
+          en: "The share of each order the marketplace keeps. GMV × take rate = net revenue: on the demand side, it plays the part MRR plays in a SaaS.",
+        },
+      },
+      liquidity: {
+        term: { fr: "liquidité", en: "liquidity" },
+        definition: {
+          fr: "La capacité de ta place de marché à faire se rencontrer les deux côtés. Le moteur la lit en un chiffre, le taux de service : la part des recherches (ou des demandes envoyées) qui aboutissent à une commande. Elle se compte côté demande et ne se chiffre que sur les nouveaux acheteurs : sa valeur est un minimum.",
+          en: "How well your marketplace brings the two sides together. The engine reads it in one figure, the fill rate: the share of searches (or requests sent) that end in an order. It is counted on the demand side and priced on new buyers only, so its worth is a minimum.",
+        },
+      },
+      netRevenue: {
+        term: { fr: "revenu net", en: "net revenue" },
+        definition: {
+          fr: "Ce que la place de marché garde des commandes : volume d'affaires × commission, ou acheteurs actifs × ce que rapporte un acheteur actif par mois. Le moteur le projette comme un MRR.",
+          en: "What the marketplace keeps from the orders: GMV × take rate, or active buyers × what one active buyer brings in a month. The engine projects it as it projects an MRR.",
+        },
       },
     },
     assumption: {
@@ -3051,6 +3180,46 @@ export const ENGINE_COPY = {
     evolutionOne: { fr: "**{n} chiffre a bougé** depuis {month}{leak}", en: "**{n} number moved** since {month}{leak}" },
     evolutionStill: { fr: "**Rien n'a bougé** depuis {month}{leak}", en: "**Nothing moved** since {month}{leak}" },
     evolutionApart: { fr: "**{before} et {now} ne se comparent pas encore**", en: "**{before} and {now} don't compare yet**" },
+    // TODO: à relire (convention 6) — neufs le 2026-10-27 (A23 MKT-7b, §22.8.5 e) : le verdict de chaque côté d'une place de marché, et la bande du total.
+    mktFunnelComplete: { fr: "Sur 100 inscrits côté acheteurs, {first} et **{repeat}**.", en: "Out of 100 buyer sign-ups, {first} and **{repeat}**." },
+    mktFunnelGapOne: {
+      fr: "Sur 100 inscrits côté acheteurs, {clauses}. **Entre les deux, on ne voit rien : {stages} n'est pas mesurée.**",
+      en: "Out of 100 buyer sign-ups, {clauses}. **In between, we see nothing: {stages} isn't measured.**",
+    },
+    mktFunnelTailBreakOne: {
+      fr: "Sur 100 inscrits côté acheteurs, {clauses}. **Au-delà, on ne sait pas les suivre : {stages} n'est pas mesurée.**",
+      en: "Out of 100 buyer sign-ups, {clauses}. **Beyond that, we can't follow them: {stages} isn't measured.**",
+    },
+    mktFunnelEmpty: {
+      fr: "**On ne sait pas encore suivre 100 inscrits jusqu'à leur première commande.**",
+      en: "**We can't yet follow 100 sign-ups to their first order.**",
+    },
+    mktSupplyFunnelComplete: { fr: "Sur 100 vendeurs inscrits, {first} et **{paid}**.", en: "Out of 100 seller sign-ups, {first} and **{paid}**." },
+    mktSupplyFunnelCompleteOne: { fr: "Sur 100 vendeurs inscrits, **{first}**.", en: "Out of 100 seller sign-ups, **{first}**." },
+    mktSupplyFunnelGapOne: {
+      fr: "Sur 100 vendeurs inscrits, {clauses}. **Entre les deux, on ne voit rien : {stages} n'est pas mesurée.**",
+      en: "Out of 100 seller sign-ups, {clauses}. **In between, we see nothing: {stages} isn't measured.**",
+    },
+    mktSupplyFunnelTailBreakOne: {
+      fr: "Sur 100 vendeurs inscrits, {clauses}. **Au-delà, on ne sait pas les suivre : {stages} n'est pas mesurée.**",
+      en: "Out of 100 seller sign-ups, {clauses}. **Beyond that, we can't follow them: {stages} isn't measured.**",
+    },
+    mktSupplyFunnelEmpty: {
+      fr: "**On ne sait pas encore suivre 100 vendeurs inscrits jusqu'à leur première vente.**",
+      en: "**We can't yet follow 100 seller sign-ups to their first sale.**",
+    },
+    mktTotal: {
+      fr: "La place de marché rapporte **{total}** par mois : {demand} de commissions, {supply} d'abonnements des vendeurs.",
+      en: "The marketplace brings in **{total}** a month: {demand} in commissions, {supply} in seller subscriptions.",
+    },
+    mktTotalUnknown: {
+      fr: "**On ne peut pas encore additionner les deux flux** : {stream} n'est pas mesuré.",
+      en: "**We can't add the two streams up yet**: {stream} isn't measured.",
+    },
+    mktTotalUnknownBoth: {
+      fr: "**On ne peut pas encore additionner les deux flux** : aucun des deux n'est mesuré.",
+      en: "**We can't add the two streams up yet**: neither is measured.",
+    },
   } satisfies Record<SlideTitleKey, Translatable>,
   /** Speaker notes (§9.4), pre-written against the classic objections. */
   notes: {

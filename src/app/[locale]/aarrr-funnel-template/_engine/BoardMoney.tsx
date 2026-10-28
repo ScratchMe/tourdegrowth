@@ -5,7 +5,7 @@ import { MoneyBlock } from "@/components/engine/MoneyBlock";
 import { WorthBars } from "@/components/engine/WorthBars";
 import type { Motion } from "@/lib/engine/types";
 import { EngineTerm } from "./EngineTerm";
-import { moneyView } from "./money-view";
+import { moneyView, type MoneyView } from "./money-view";
 import type { EngineView } from "./view";
 
 /**
@@ -17,28 +17,49 @@ import type { EngineView } from "./view";
  * (`EngineTerm`): « ARR » (bon à tirer nº10, 2026-10-04), « trésorerie immobilisée », « mois après
  * remboursement ».
  */
-export function BoardMoney({ view, motion, hybrid }: { view: EngineView; motion: Motion; hybrid: boolean }) {
-  const m = moneyView(view, motion, hybrid);
+export function BoardMoney({
+  view,
+  motion,
+  hybrid,
+  model,
+  idKey,
+}: {
+  view: EngineView;
+  /** The SaaS's motions (`moneyView`); absent with a `model`. */
+  motion?: Motion;
+  hybrid?: boolean;
+  /**
+   * A marketplace side's money (§22.6.2, `mkt-view.ts#mktMoneyView`), read from the side's own scenario with its own words: the block
+   * is the same. `view.strings` is then that side's too, and `idKey` the side (« demand »): the ids and test ids follow the side, not the motion.
+   */
+  model?: MoneyView;
+  idKey?: string;
+}) {
+  const m = model ?? moneyView(view, motion ?? "plg", hybrid ?? false);
+  const key = idKey ?? motion ?? "plg";
   const { strings } = view;
   const tied = m.cash.tied;
   return (
     <MoneyBlock
       eyebrow={m.eyebrow}
-      headingId={`engine-money-title-${motion}`}
+      headingId={`engine-money-title-${key}`}
       figures={
-        m.figures?.map((f) =>
-          f.key === "arr"
+        // The « ? » of the word each figure teaches: the ARR's (the board's rule), or the one the figure names — a marketplace's net revenue, GMV (C101, C72).
+        m.figures?.map((f) => {
+          const term = f.term ?? (f.key === "arr" ? "arr" : null);
+          return term
             ? {
-                ...f,
+                key: f.key,
                 label: (
                   <>
                     {f.label}
-                    <EngineTerm id="arr" strings={strings} />
+                    <EngineTerm id={term} strings={strings} />
                   </>
                 ),
+                value: f.value,
               }
-            : f,
-        ) ?? null
+            : f;
+        }) ?? null
       }
       worth={{
         title: m.worth.title,
@@ -51,7 +72,12 @@ export function BoardMoney({ view, motion, hybrid }: { view: EngineView; motion:
             {m.worth.monthsTerm ? <EngineTerm id="afterPayback" strings={strings} /> : null}
           </>
         ) : undefined,
-        note: m.worth.note ?? undefined,
+        note: m.worth.note ? (
+          <>
+            {m.worth.note}
+            {m.worth.noteTerm ? <EngineTerm id={m.worth.noteTerm} strings={strings} /> : null}
+          </>
+        ) : undefined,
       }}
       cash={{
         title: m.cash.title,
@@ -81,7 +107,7 @@ export function BoardMoney({ view, motion, hybrid }: { view: EngineView; motion:
         ) : undefined,
         assumptions: m.cash.assumptions ?? undefined,
       }}
-      data-testid={`engine-money-${motion}`}
+      data-testid={`engine-money-${key}`}
     />
   );
 }

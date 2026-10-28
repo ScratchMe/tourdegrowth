@@ -11,7 +11,7 @@ import type { EngineStrings, ResolvedMetric } from "@/lib/engine/strings";
 import { MAX_ENGINES, MAX_MONTHS, type EngineCalcContext, type EngineState, type Motion, type Snapshot } from "@/lib/engine/types";
 import { coverage, motionCoverage } from "@/lib/engine/coverage";
 import { parseEngineFile } from "@/lib/engine/io";
-import { isApp } from "@/lib/engine/setup-type";
+import { isApp, isMarketplace } from "@/lib/engine/setup-type";
 import { displayInterval, entryText } from "./display";
 import { EngineBoundary } from "./EngineBoundary";
 import { fill, formatDate, formatMonth, metricById } from "./text";
@@ -131,8 +131,8 @@ function ImportPanelBody({
 
   const state = parsed?.state ?? null;
   const snapshot = state?.snapshots[state.snapshots.length - 1];
-  // « n sur 17 » counts the self-serve list; an app counts what its setup shows (§21.5.5).
-  const cov = snapshot ? coverage(snapshot, state && isApp(state.setup) ? shapesOf(state.setup) : METRIC_SHAPES) : null;
+  // « n sur 17 » counts the self-serve list; an app counts what its setup shows (§21.5.5), a marketplace its 19 numbers or its 14 without the sellers' subscriptions (§22.2.5).
+  const cov = snapshot ? coverage(snapshot, state && (isApp(state.setup) || isMarketplace(state.setup)) ? shapesOf(state.setup) : METRIC_SHAPES) : null;
   const refusal = state && device ? mergeRefusal(device.state, state) : null;
   // « Ajouter » by default (§19.7): the choice that loses nothing; then the merge, which only adds; never « Remplacer » unasked.
   const choice: ImportChoice | null = picked ?? (device?.canAdd ? "add" : refusal === null ? "merge" : null);

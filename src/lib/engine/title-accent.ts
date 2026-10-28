@@ -31,6 +31,16 @@ const RED: ReadonlySet<SlideTitleKey> = new Set<SlideTitleKey>([
   "slgPelotonEmpty",
   "totalUnknown",
   "totalUnknownBoth",
+  // A marketplace's, as their peloton and total equivalents (§22.8.5 e, A23 MKT-7b): what a side's funnel does not let us
+  // see, and two streams we cannot add up yet. `mktTotal` and the funnel's complete cases are figures: ink.
+  "mktFunnelGapOne",
+  "mktFunnelTailBreakOne",
+  "mktFunnelEmpty",
+  "mktSupplyFunnelGapOne",
+  "mktSupplyFunnelTailBreakOne",
+  "mktSupplyFunnelEmpty",
+  "mktTotalUnknown",
+  "mktTotalUnknownBoth",
   // The diagnosis: what holds back, among what we see.
   "leakClearUnpriced",
   "leakShared",

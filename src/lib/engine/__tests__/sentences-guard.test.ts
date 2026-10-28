@@ -3,6 +3,7 @@ import { appWhatIf } from "../app";
 import { CANDIDATE_IDS, METRIC_SHAPES, shapeOf, shapesOf } from "../catalog-shape";
 import { mktCandidates } from "../diagnose";
 import { mktWhatIf } from "../mkt-impact";
+import { mktFunnelTitle, mktTotalTitle } from "../mkt-titles";
 import { buildDeck, chainLine, comparatorText, deckMarkdown, renderTitle, targetPhrase } from "../deck";
 import { deriveEngine } from "../derive";
 import { comparatorOf, impactTarget } from "../diagnose";
@@ -155,6 +156,17 @@ interface ScenarioDef {
   name: string;
   build: () => { state: EngineState; result?: ReturnType<typeof tourResult> };
   type?: "consumer-app" | "marketplace";
+}
+
+/** The marketplace without one stream's revenue: its entries and the shared count they would read it from (`shared-counts.ts`), so neither the typed count nor the model can print it. */
+function withoutRevenue(state: EngineState, stream: "demand" | "supply"): EngineState {
+  const ids = stream === "demand" ? (["mkt.rev.take-rate", "mkt.rev.gross-margin"] as const) : (["mkt.sell.arpa", "mkt.sell.gross-margin"] as const);
+  let next = state;
+  for (const id of ids) next = withEntry(next, id, undefined);
+  next = structuredClone(next);
+  const base = next.snapshots[next.snapshots.length - 1]!.base!;
+  delete base[stream === "demand" ? "mktNetRevenue" : "mktSellerMrrEnd"];
+  return next;
 }
 
 const SCENARIOS: ScenarioDef[] = [
@@ -534,6 +546,38 @@ const SCENARIOS: ScenarioDef[] = [
       return { state: withEntry(state, "mkt.sell.paid-conversion", measured(ratio(63, 420), tool("stripe"), { cohortMonth: "2026-04" })) };
     },
   },
+  // The titles of §22.8.5 e (A23 MKT-7b): each side's funnel verdict in each shape of its chain, and the total's two unknowns.
+  {
+    name: "the marketplace, each side's first column missing (a gap in both funnels)",
+    type: "marketplace",
+    build: () => ({ state: withEntry(withEntry(marketplaceState(), "mkt.buy.first-order", missing("not-tracked", "sprint")), "mkt.sell.first-sale", missing("not-tracked", "sprint")) }),
+  },
+  {
+    name: "the marketplace, each side's last column missing (a tail break in both funnels)",
+    type: "marketplace",
+    build: () => ({ state: withEntry(withEntry(marketplaceState(), "mkt.buy.repeat", missing("not-tracked", "sprint")), "mkt.sell.paid-conversion", missing("not-tracked", "sprint")) }),
+  },
+  {
+    name: "the marketplace without the sellers' subscriptions, the first sale missing (nothing to follow)",
+    type: "marketplace",
+    build: () => ({ state: withEntry(marketplaceNoSubscriptionsState(), "mkt.sell.first-sale", missing("not-tracked", "sprint")) }),
+  },
+  {
+    // The shared counts are also written in the base and in the margins' counts: all out, the revenue is the model's alone.
+    name: "the marketplace, the sellers' subscription MRR not measured (the total cannot be added up)",
+    type: "marketplace",
+    build: () => ({ state: withoutRevenue(marketplaceState(), "supply") }),
+  },
+  {
+    name: "the marketplace, the commissions' net revenue not measured (the total cannot be added up)",
+    type: "marketplace",
+    build: () => ({ state: withoutRevenue(marketplaceState(), "demand") }),
+  },
+  {
+    name: "the marketplace, neither stream measured (the total cannot be added up)",
+    type: "marketplace",
+    build: () => ({ state: withoutRevenue(withoutRevenue(marketplaceState(), "demand"), "supply") }),
+  },
   {
     name: "the marketplace, the Tour's buyer CAC question declared tracked and nobody could pull it",
     type: "marketplace",
@@ -590,6 +634,19 @@ function sweep(): Sweep {
 
       if (marketplace) {
         sweepFindingsAndChecks();
+        // The first titles of the board and of the deck (§22.8.5 e, MKT-7b): the total of the two streams, each side's funnel.
+        const motion = derived.motions.find((m) => m.motion === "mkt");
+        if (motion?.motion === "mkt") {
+          const titles = [
+            ...(state.setup.sellerSubscriptions ? [mktTotalTitle(derived, state, strings, p.ctx)] : []),
+            mktFunnelTitle(motion.funnel.demand, "demand", state, strings, p.ctx),
+            mktFunnelTitle(motion.funnel.supply, "supply", state, strings, p.ctx),
+          ];
+          for (const title of titles) {
+            out.titleKeys.add(title.key);
+            add(`mkt title ${title.key}`, renderTitle(title, strings), true);
+          }
+        }
         // The diagnosis block of each side, and the « Et si » chain of each of its candidates that has a target.
         for (const d of derived.motions.flatMap(diagnosesOf)) {
           add(`diagnosis ${d.side} blind`, blindSentence(d.blind, strings, metrics), false);

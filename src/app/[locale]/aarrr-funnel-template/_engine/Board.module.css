@@ -145,6 +145,14 @@
   border-bottom: var(--border-rule);
 }
 
+/* What « Côté affiché » governs (a marketplace, §22.6.2): one side's parts, in the board's own rhythm. */
+.sideBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
+  min-width: 0;
+}
+
 .twoSegments {
   font: var(--body-sm);
   color: var(--text-body);
