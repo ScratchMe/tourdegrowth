@@ -9,6 +9,7 @@ import {
   formatApproxMoneyInterval,
   formatCountInterval,
   formatInterval,
+  formatNumber,
   formatPercent,
   pairPrecision,
   roundSignificant,
@@ -18,6 +19,7 @@ import { buildMktScenario, mktLeverAlone, mktSidePaths, mktTotalPaths, type MktS
 import { streamSum, mktTotalTitle } from "@/lib/engine/mkt-titles";
 import { positionLabel, isSingular, subjectOf, type AnyDiagnosis } from "@/lib/engine/phrases";
 import { mktSetup } from "@/lib/engine/setup-type";
+import { knownSharedCount } from "@/lib/engine/shared-counts";
 import { keptPercentOfChurn } from "@/lib/engine/stream";
 import type { EngineStrings, ResolvedDerived, ResolvedMetric } from "@/lib/engine/strings";
 import type {
@@ -415,6 +417,13 @@ export function mktFunnelView(input: MktViewInput, side: MktSide, medium: "scree
     return label ? { label } : undefined;
   };
   const month = (m: YearMonth | null) => (m ? monthLabel(m, ctx.locale) : null);
+  // Under the sign-ups: the cohort those 100 come from, with its head count when it is known, as the peloton does (`Peloton.tsx`):
+  // « 2 900 inscrits en mai 2026, ramenés à 100 ». That sentence says « inscrits » bare, a word of the SaaS on the supply side
+  // (`mkt-words.ts#SUPPLY_WORDS`: only « vendeurs inscrits » is the sellers'), and the supply layer holds none of its own (the
+  // peloton's leaves are excluded, §22.8.3 line 1): the sellers' legend is their layer's `visual.cohortOf`, without the count.
+  const cohort = monthLabel(snapshot.cohortMonth, ctx.locale);
+  const cohortCount = side === "demand" ? (knownSharedCount(snapshot, "mktCohortSignups")?.value ?? null) : null;
+  const signupsSource = cohortCount ? fillTemplate(w.cohortOfCount, { n: formatNumber(cohortCount, ctx.locale), cohort }) : fillTemplate(strings.visual.cohortOf, { cohort });
 
   const windows: Record<string, number> = {
     "mkt.buy.first-order": settings.firstOrderWindowDays,
@@ -437,6 +446,7 @@ export function mktFunnelView(input: MktViewInput, side: MktSide, medium: "scree
       n: "100",
       label: side === "demand" ? f.signups : f.sellerSignups,
       grid: signupsGrid(side === "demand" ? (funnel as typeof motion.funnel.demand).referredPerHundred : null),
+      source: signupsSource,
     },
     ...funnel.columns.map((col): FunnelColumn => {
       const numeral = columnNumeral(col.perHundred);
@@ -471,7 +481,6 @@ export function mktFunnelView(input: MktViewInput, side: MktSide, medium: "scree
       ? strings.visual.upstreamUnknown
       : undefined;
 
-  const cohort = monthLabel(snapshot.cohortMonth, ctx.locale);
   const referred = side === "demand" ? (funnel as typeof motion.funnel.demand).referredPerHundred : null;
   const referredText = referred ? numeralText(columnNumeral(referred), strings.units, strings.visual.lessThanOne) : null;
 

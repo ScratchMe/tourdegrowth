@@ -187,6 +187,7 @@ export const ENGINE_COPY_MKT_SERVICES: { common: Overlay; demand: Overlay; suppl
         paidChurn: { fr: "Churn des prestataires abonnés : {c} par mois", en: "Paid provider churn: {c} a month" },
         newBuyers: { fr: "Nouveaux clients", en: "New clients" },
         newPaidSellers: { fr: "Nouveaux prestataires abonnés", en: "New paid providers" },
+        // TODO: à relire (convention 6) — neuf le 2026-10-27 (A23 MKT-7b, §22.8.4, §22.8.5 k) : le titre du funnel d'un côté, les taux de l'offre et son « à côté », en « services ».
         title: { fr: "Pour 100 inscrits côté clients", en: "Per 100 client sign-ups" },
         sellerTitle: { fr: "Pour 100 prestataires inscrits", en: "Per 100 provider sign-ups" },
         churnLabel: { fr: "Churn des prestataires", en: "Provider churn" },
@@ -208,6 +209,7 @@ export const ENGINE_COPY_MKT_SERVICES: { common: Overlay; demand: Overlay; suppl
           fr: "Tes prestataires ne paient pas d'abonnement : l'offre ne rapporte rien en direct",
           en: "Your providers pay no subscription: supply brings in nothing directly",
         },
+        // TODO: à relire (convention 6) — neuf le 2026-10-27 (A23 MKT-7b, §22.8.4, §22.8.5 k) : les notes de l'argent d'un côté, en « services ».
         perBuyerNote: {
           fr: "Un client actif rapporte {per} de revenu net par mois : {freq} réservation × {aov} × {take} de commission.",
           en: "One active client brings in {per} of net revenue a month: booking frequency {freq} × {aov} × {take} take rate.",

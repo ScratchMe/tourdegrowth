@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { servicesWordsHeld } from "@/content/__tests__/mkt-words";
+import { DEMAND_WORDS, SUPPLY_TARGETS, SUPPLY_WORDS, readable, servicesWordsHeld } from "@/content/__tests__/mkt-words";
 import { deriveEngine } from "@/lib/engine/derive";
 import { EXAMPLE_MKT_WHATIF } from "@/lib/engine/example";
 import { marketplaceStrings } from "@/lib/engine/strings";
@@ -30,7 +30,9 @@ import { diagnosisOf } from "../BoardNumbers";
  * the list's candidates of both sides melted 1; a number of the sellers read on the buyers 1; the diagnosis of the side shown
  * ignored 1. **Two sabotages first measured 0**: the sellers' aside with subscriptions (no test asked for its absence) and the
  * list's diagnosis ignored (a test compared `diagnosisOf` to itself); both tests now name the stages (activation, revenue) and
- * the absence.
+ * the absence. The legend under the sign-ups (relance, 2026-10-28): its source left out 3; the buyers' count never read 1; the
+ * sellers' count printed as well, with the peloton's sentence, 2 (the side rule sees the bare « inscrits »); the buyers' count read
+ * for the sellers 2.
  */
 
 const NB = " ";
@@ -283,6 +285,43 @@ describe("a side's funnel — each stage counted on the side's own 100 sign-ups 
     expect(funnel.base!.term).toBe("liquidity");
     expect(funnel.base!.column.n).toBe("9");
     expect(funnel.rates).toBeUndefined();
+  });
+
+  it("under the sign-ups, the cohort they come from: the buyers' head count when it is known, the sentence of the peloton", () => {
+    expect(mktFunnelView(inputOf(example, "demand"), "demand").columns[0]!.source).toBe(nb("2 900 inscrits en mai 2026, ramenés à 100"));
+    expect(mktFunnelView(inputOf(example, "demand", "en"), "demand").columns[0]!.source).toBe("2,900 sign-ups in May 2026, scaled to 100");
+    // Without the count (the base and the numbers that carry it are out): the cohort alone, in the side's own words.
+    const noCount = without(example, ["mkt.buy.first-order", "mkt.buy.repeat", "mkt.buy.referred-share"], ["mktCohortSignups"]);
+    expect(mktFunnelView(inputOf(noCount, "demand"), "demand").columns[0]!.source).toBe("inscrits en mai 2026");
+    expect(mktFunnelView(inputOf(noCount, "demand", "en"), "demand").columns[0]!.source).toBe("May 2026 cohort");
+  });
+
+  it("the sellers' legend is their layer's, never the count: « inscrits » bare is a word of the SaaS on their side", () => {
+    expect(mktFunnelView(inputOf(example, "supply"), "supply").columns[0]!.source).toBe("vendeurs inscrits en mai 2026");
+    expect(mktFunnelView(inputOf(example, "supply", "en"), "supply").columns[0]!.source).toBe("May 2026 cohort");
+    expect(mktFunnelView(inputOf(example, "supply", "fr", "services"), "supply").columns[0]!.source).toBe("prestataires inscrits en mai 2026");
+    const noCount = without(example, ["mkt.sell.first-sale", "mkt.sell.paid-conversion"], ["mktSellerCohortSignups"]);
+    expect(mktFunnelView(inputOf(noCount, "supply"), "supply").columns[0]!.source).toBe("vendeurs inscrits en mai 2026");
+  });
+
+  it("the legend holds no word of the other side or of « produits », on either side, with and without the count, in both vocabularies", () => {
+    const noBuyerCount = without(example, ["mkt.buy.first-order", "mkt.buy.repeat", "mkt.buy.referred-share"], ["mktCohortSignups"]);
+    for (const locale of ["fr", "en"] as const) {
+      for (const offering of ["products", "services"] as const) {
+        for (const state of [example, noBuyerCount, noSubscriptions]) {
+          for (const side of ["demand", "supply"] as const) {
+            const source = mktFunnelView(inputOf(state, side, locale, offering), side).columns[0]!.source as string;
+            const label = `${side} ${locale} ${offering}: ${source}`;
+            const rule = side === "demand" ? DEMAND_WORDS : SUPPLY_WORDS;
+            const text = readable(source, locale, side === "supply" ? SUPPLY_TARGETS[locale] : []);
+            // The side rule is the products' (its targets are « vendeurs inscrits »); « services » has the banned words below.
+            if (offering === "products") expect(rule[locale].test(text) || rule.acronyms.test(text), label).toBe(false);
+            // The words of « produits » are the banned ones only in « services ».
+            if (offering === "services") expect(servicesWordsHeld(source, locale), label).toEqual([]);
+          }
+        }
+      }
+    }
   });
 
   it("the buyers: the stage that holds back is the fill rate's — one stamp on the screen, not on the stages beside it", () => {
