@@ -584,6 +584,8 @@ describe("the total: the commissions and the subscriptions added, point by point
   });
 });
 
+// Non-vacuity of `mktSidePaths`, measured at the end of MKT-7b (2026-10-28; each sabotage alone, this file run, the file
+// restored): `today` and `projected` swapped 4; the buyers' scenario read for both sides 4.
 describe("mktSidePaths — one side's 13 points, today and with the what-ifs (the card's curve, MKT-7b)", () => {
   const sides = [
     ["demand", demandToday, demandIf, 33_723.61, 46_351.72],

@@ -7,6 +7,9 @@ import type { SlideTitleKey } from "../types";
  * C53 (Antoine, 2026-10-03): the figures of the slide titles in ink, the red
  * kept for the verdict — what we can't see — and the diagnosis — what holds
  * the engine back (BAT nº9, d-verdict-red).
+ *
+ * Non-vacuity of the marketplace's titles (A23 MKT-7b, measured 2026-10-28): one of the eight left out of the red set falls
+ * « red for the verdict and the diagnosis only » (1).
  */
 const keys = Object.keys(ENGINE_COPY.slideTitles) as SlideTitleKey[];
 const red = keys.filter((k) => titleAccent(k) === "red");

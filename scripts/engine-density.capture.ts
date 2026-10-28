@@ -1,7 +1,8 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
 import { renameSync } from "node:fs";
 import sharp from "sharp";
-import { FILM_LEVERS, exampleState, filmState, hybridState, measured, noMarginState, ratio, withEntry, withMonthBefore } from "../src/lib/engine/__tests__/fixtures";
+import { FILM_LEVERS, exampleState, filmState, hybridState, marketplaceNoSubscriptionsState, marketplaceState, measured, noMarginState, ratio, withEntry, withMonthBefore } from "../src/lib/engine/__tests__/fixtures";
+import { EXAMPLE_MKT_WHATIF } from "../src/lib/engine/example";
 import type { EngineState, PlgLeverId } from "../src/lib/engine/types";
 import { engineSeed, openNumber, skipToAsks } from "../e2e/engine-helpers";
 
@@ -55,6 +56,13 @@ import { engineSeed, openNumber, skipToAsks } from "../e2e/engine-helpers";
  * the hybrid, the self-serve slides). The build is the one above, nothing more.
  *
  *   OUT=design/ds-extension-10 npx playwright test --config scripts/engine-density.config.ts --grep "brief 10"
+ *
+ * Since A23 MKT-7b (2026-10-27) it takes the marketplace's own board, the one `design/ds-extension-10-return/` drew, and
+ * measures it the way the return's « The density » table does: the tests named « MKT-7b », with their MEASURE7B lines
+ * (board height, blocks, controls, controls on the first screen), on a build whose `ENGINE_TYPES` lists the marketplace
+ * (`ENGINE_TYPES=consumer-app,marketplace`) and served with `ENGINE_ENABLED=true`. Their screens are not committed.
+ *
+ *   OUT=/some/dir npx playwright test --config scripts/engine-density.config.ts --grep "MKT-7b"
  */
 const OUT = process.env.OUT ?? "design/ds-extension-07-after";
 /** Every self-serve lever moved, as `e2e/engine-deck-whatif.spec.ts` moves them: the densest « together » slide. */
@@ -674,4 +682,111 @@ test("brief 10: the hybrid's total slide (fr-desktop)", async ({ page }) => {
   await seed(page, "fr", hybridState());
   await openDeck(page);
   await shootRoomy(page, page.getByTestId("slide-total"), "15-slide-total-fr-desktop", DESKTOP);
+});
+
+// --- MKT-7b (A23, 2026-10-27): the marketplace's board ------------------------------------------
+
+/** The marketplace of §22.10.1 with the what-ifs the example carries: both sides moved, so the card, the curve and the panel are at work. */
+const marketWithWhatIfs = (state: EngineState = marketplaceState()): EngineState => ({ ...state, whatIf: { ...EXAMPLE_MKT_WHATIF } });
+/** The same words, "services": a services marketplace is the same engine with the offering changed (§22.8.4). */
+const asServices = (state: EngineState): EngineState => ({ ...state, setup: { ...state.setup, offering: "services" } });
+
+/** The board's own measures, read as the return reads them (`measures.js`): its height, its blocks (the visible direct children of the board), its controls. */
+async function measureBoard(page: Page, label: string): Promise<void> {
+  await page.evaluate(() => window.scrollTo(0, 0));
+  const board = await page.evaluate(probe, '[data-testid="engine-board"]');
+  const blocks = await page.evaluate(() => {
+    const root = document.querySelector('[data-testid="engine-board"]');
+    return root ? Array.from(root.children).filter((el) => el.getBoundingClientRect().height > 0).length : 0;
+  });
+  const total = await page.evaluate(() => document.documentElement.scrollHeight);
+  console.log(`MEASURE7B ${label} ${JSON.stringify({ boardHeight: board.height, blocks, controls: board.controls, controlsFirstScreen: board.controlsFirstScreen, primaryBottom: board.primaryBottom, pageHeight: total })}`);
+}
+
+/** « Côté affiché »: the second option is the supply (the order is fixed: demand, then supply). */
+async function showSupply(page: Page): Promise<void> {
+  await page.getByTestId("engine-side-selector").getByRole("button").nth(1).click();
+  await expect(page.getByTestId("mkt-side")).toHaveAttribute("data-side", "supply");
+}
+
+for (const { locale, size, viewport } of SCREENS) {
+  const tag = `${locale}-${size}`;
+
+  test(`MKT-7b: the board, demand shown (${tag})`, async ({ page }) => {
+    await page.setViewportSize(viewport);
+    await seed(page, locale, marketWithWhatIfs());
+    await expect(page.getByTestId("mkt-side")).toHaveAttribute("data-side", "demand");
+    await measureBoard(page, `demand ${tag}`);
+    await shootRoomy(page, page.getByTestId("engine-board"), `20-board-demand-${tag}`, viewport);
+    await shootRoomy(page, page.getByTestId("engine-side-selector"), `21-selector-${tag}`, viewport);
+  });
+
+  test(`MKT-7b: the board, supply shown (${tag})`, async ({ page }) => {
+    await page.setViewportSize(viewport);
+    await seed(page, locale, marketWithWhatIfs());
+    await showSupply(page);
+    await measureBoard(page, `supply ${tag}`);
+    await shootRoomy(page, page.getByTestId("engine-board"), `22-board-supply-${tag}`, viewport);
+  });
+
+  test(`MKT-7b: the board, no what-if (${tag})`, async ({ page }) => {
+    await page.setViewportSize(viewport);
+    await seed(page, locale, marketplaceState());
+    await expect(page.getByTestId("mkt-side")).toHaveAttribute("data-side", "demand");
+    await measureBoard(page, `demand-today ${tag}`);
+    await shootRoomy(page, page.getByTestId("engine-board"), `23-board-demand-today-${tag}`, viewport);
+  });
+
+  test(`MKT-7b: the supply, the sellers paying nothing (${tag})`, async ({ page }) => {
+    await page.setViewportSize(viewport);
+    await seed(page, locale, marketplaceNoSubscriptionsState());
+    await showSupply(page);
+    await measureBoard(page, `supply-no-subscriptions ${tag}`);
+    await shootRoomy(page, page.getByTestId("engine-board"), `24-board-supply-no-subscriptions-${tag}`, viewport);
+  });
+
+  test(`MKT-7b: the « Et si » panel open, demand (${tag})`, async ({ page }) => {
+    await page.setViewportSize(viewport);
+    await seed(page, locale, marketWithWhatIfs());
+    await expect(page.getByTestId("mkt-side")).toHaveAttribute("data-side", "demand");
+    await page.getByTestId("engine-board-whatif").locator(":scope > summary").click();
+    await expect(page.getByTestId("engine-whatif-mkt-panel")).toBeVisible();
+    await measureBoard(page, `demand-panel-open ${tag}`);
+    await shootRoomy(page, page.getByTestId("engine-whatif-mkt-panel"), `25-whatif-panel-demand-${tag}`, viewport);
+  });
+
+  test(`MKT-7b: a number's own screen, each side (${tag})`, async ({ page }) => {
+    await page.setViewportSize(viewport);
+    await seed(page, locale, marketplaceState());
+    await expect(page.getByTestId("mkt-side")).toHaveAttribute("data-side", "demand");
+    await openNumber(page, "mkt-liq-fill-rate");
+    await shootRoomy(page, page.getByTestId("engine-number"), `26-number-demand-${tag}`, viewport);
+    await openNumber(page, "mkt-sell-paid-conversion");
+    await shootRoomy(page, page.getByTestId("engine-number"), `27-number-supply-${tag}`, viewport);
+  });
+
+  for (const offering of ["products", "services"] as const) {
+    test(`MKT-7b: the settings, a window changed (${offering}, ${tag})`, async ({ page }) => {
+      await page.setViewportSize(viewport);
+      await seed(page, locale, offering === "services" ? asServices(marketplaceState()) : marketplaceState());
+      await expect(page.getByTestId("engine-board")).toBeVisible();
+      await page.getByTestId("engine-bar-settings").click();
+      const settings = page.getByTestId("engine-settings");
+      await expect(settings).toBeVisible();
+      // The first order's window leaves its default (30 days): the numbers it defines go back to « to do », said before the save.
+      await page.getByTestId("engine-setup-window-first-order").getByRole("button").first().click();
+      await shootRoomy(page, settings, `28-settings-window-${offering}-${tag}`, viewport);
+    });
+  }
+}
+
+test("MKT-7b: the board, demand shown, services (fr-desktop)", async ({ page }) => {
+  await page.setViewportSize(DESKTOP);
+  await seed(page, "fr", asServices(marketWithWhatIfs()));
+  await expect(page.getByTestId("mkt-side")).toHaveAttribute("data-side", "demand");
+  await measureBoard(page, "demand-services fr-desktop");
+  await shootRoomy(page, page.getByTestId("engine-board"), "29-board-demand-services-fr-desktop", DESKTOP);
+  await showSupply(page);
+  await measureBoard(page, "supply-services fr-desktop");
+  await shootRoomy(page, page.getByTestId("engine-board"), "30-board-supply-services-fr-desktop", DESKTOP);
 });

@@ -14,11 +14,12 @@ import { CTX_EN, CTX_FR, EN, FR } from "./props";
  * funnel picks, what fills each slot, how a count agrees with its verb, which stream a total says is missing; the words
  * themselves are `engine-copy.test.ts`'s (`TITLE_CONTRACT`) and the sweep's of `sentences-guard.test.ts`.
  *
- * Non-vacuity, measured on 2026-10-27 (each sabotage applied alone, this file and `engine-copy.test.ts` run, the file
- * restored; the count is the tests that fall): the funnel's `chain` ignored (always the complete form) 6; the second column's
- * clause read under the first's slot 2; `numbered` removed (the plural verb for « 1 ») 2; a total built from the demand
- * alone 3; the missing stream swapped for the other 2; the supply's one-column case read as a complete pair 1; the
- * sum's parts unrounded to one unit (`formatSum` bypassed) 1.
+ * Non-vacuity, measured at the end of MKT-7b (2026-10-28; each sabotage applied alone, this file and `engine-copy.test.ts`
+ * run, the file restored; the count is the tests that fall): the funnel's `chain` ignored (always the complete form) 6;
+ * the second column's clause read under the first's slot 4; `numbered` removed (the plural verb for « 1 ») 1; a total
+ * built from the demand alone 3; the missing stream swapped for the other 2; the supply's one-column case read as a
+ * complete pair 1; the sum's parts printed one by one instead of rounded to one common unit (`formatSum` bypassed) 3.
+ * `sentences-guard.test.ts` alone sees two of them: the chain ignored 2 and the one-column case read as a pair 2.
  */
 
 /** The French typography the copy carries (U+00A0 before « : ; ! ? » € % », after « «, in thousands): the expected sentences are written plainly, as the spec has them. */

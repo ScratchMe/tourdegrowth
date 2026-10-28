@@ -18,8 +18,19 @@ import { diagnosisOf } from "../BoardNumbers";
  * says so instead of printing a zero, and that nothing of one side reads the other's. The words themselves are
  * `engine-copy.test.ts`'s and the sweep's of `sentences-guard.test.ts`.
  *
- * Non-vacuity: measured at the end of MKT-7b, each sabotage applied alone, this file run, the file restored; the counts are
- * in the MKT-7b entry of JOURNAL.md.
+ * Non-vacuity, measured at the end of MKT-7b (2026-10-28; each sabotage applied alone, this file run — `number-list.test.ts`
+ * and `board-numbers.test.ts` with it for the list — and the file restored; the count is the tests that fall): the band's
+ * two streams in the other order 2; the annualised total without its x 12 2; « moved » read from the buyers' what-ifs only 1;
+ * a band without subscriptions 1; the buyers' GMV figure left out 2; the net revenue of the month not first without
+ * subscriptions 1; the money of both sides read from the buyers' scenario 2; the net revenue's « ? » left out 1; the curve
+ * of both sides read on the buyers 1; the sellers' price no money lever (no jump) 1; the jump without what the churn keeps 1;
+ * the liquidity base kept on the sellers 2; the sellers' aside printed with subscriptions 1; the paid churn left out of the
+ * sellers' rates 1; the named leak also listed under « À côté » 3; the aside's amount from the chain instead of the ranking's 2;
+ * a stage nobody prices dropped for the sellers 1; the compounding read on the buyers 2; the panel's rows read on the buyers 1;
+ * the list's candidates of both sides melted 1; a number of the sellers read on the buyers 1; the diagnosis of the side shown
+ * ignored 1. **Two sabotages first measured 0**: the sellers' aside with subscriptions (no test asked for its absence) and the
+ * list's diagnosis ignored (a test compared `diagnosisOf` to itself); both tests now name the stages (activation, revenue) and
+ * the absence.
  */
 
 const NB = " ";
@@ -292,6 +303,8 @@ describe("a side's funnel — each stage counted on the side's own 100 sign-ups 
       ["mkt.sell.paid-churn", nb("3 %")],
     ]);
     expect(funnel.base).toBeUndefined();
+    // The sellers paying, their money is their own: the aside on where they show is for the sellers who earn nothing.
+    expect(funnel.aside).toBeUndefined();
     expect(funnel.columns.find((c) => c.id === "mkt.sell.paid-conversion")!.holds).toBeTruthy();
     // The conversion is what holds the sellers back, not a rate: the paid churn is under its target but unpriced behind it.
     expect(funnel.upstream).toContain(nb("~2 000 visiteurs"));
@@ -424,14 +437,12 @@ describe("the shared list of numbers — one flagged stage, the one the side sho
     expect(sideOfMetric("mkt.rev.take-rate")).toBe("demand");
   });
 
-  it("flags the stage the buyers' diagnosis names when the buyers are shown, the sellers' when the sellers are", () => {
+  it("flags the stage the buyers' diagnosis names when the buyers are shown (activation: the fill rate), the sellers' when the sellers are (revenue: the conversion) — one at a time, never both", () => {
+    expect(flagged(example, "demand")).toEqual(["activation"]);
+    expect(flagged(example, "supply")).toEqual(["revenue"]);
     const input = inputOf(example, null);
-    const demandNamed = namedStages(diagnosisOf({ ...input } as never, "mkt", "demand"));
-    const supplyNamed = namedStages(diagnosisOf({ ...input } as never, "mkt", "supply"));
-    expect(demandNamed.size).toBe(1);
-    expect(supplyNamed.size).toBe(1);
-    expect(flagged(example, "demand")).toEqual([...demandNamed]);
-    expect(flagged(example, "supply")).toEqual([...supplyNamed]);
+    expect([...namedStages(diagnosisOf({ ...input } as never, "mkt", "demand"))]).toEqual(["activation"]);
+    expect([...namedStages(diagnosisOf({ ...input } as never, "mkt", "supply"))]).toEqual(["revenue"]);
   });
 
   it("reads the candidates of the side shown, none of the other's (D2)", () => {
