@@ -49,12 +49,10 @@ Object.assign(WAITING, WAITING_FOR_A18);
 // The engine's money (A20.d, 2026-10-03) ported tokens/money.css in T2 and
 // held here the tokens T3 read first; T3.b read the last of them.
 
-// The marketplace (A23 MKT-7a, 2026-10-27) ports tokens/marketplace.css whole with the components that read it: the
-// ledger of the total slide belongs to SlideStreams (MKT-8), which takes these two off this list when it lands.
-const WAITING_FOR_A23: Record<string, string> = {
-  "--market-ledger-name": "SlideStreams' name column: the component arrives with the marketplace's slides (A23 MKT-8)",
-  "--market-ledger-rule": "SlideStreams' total rule: the component arrives with the marketplace's slides (A23 MKT-8)",
-};
+// The marketplace (A23 MKT-7a, 2026-10-27) ported tokens/marketplace.css whole with the components that read it, and held here
+// the two that wait for the total slide's ledger: MKT-8 (2026-10-28) ported SlideStreams, which reads both
+// (--market-ledger-name, --market-ledger-rule), and took them off. The list stays, empty, as A18's did.
+const WAITING_FOR_A23: Record<string, string> = {};
 Object.assign(WAITING, WAITING_FOR_A23);
 
 const sheets = readdirSync(TOKENS).filter((f) => f.endsWith(".css"));

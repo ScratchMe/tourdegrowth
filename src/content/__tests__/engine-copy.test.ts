@@ -196,9 +196,13 @@ describe.each(COPIES)("%s", (_name, COPY) => {
 
     it("never asks a singular form (`xOne`) for a value its general form does not take", () => {
       const strays: string[] = [];
-      // `whatIf.lessThanOne` ends in "One" but is not a singular form: only keys with a general sibling are pairs.
+      // `whatIf.lessThanOne` ends in "One" but is not a singular form: only keys with a general sibling are pairs. Nor are
+      // the two lines of a marketplace's total slide that say where a stream is read on its own (§22.8.5 k, A23 MKT-8): the general
+      // form says a RANGE of slides (« slides {from} à {to} »), `…One` the one slide of a side that has a single one (« slide {n} »);
+      // `deck-mkt.ts#sideLine` fills each with its own values. Named one by one, so a new pair is still held to the rule.
+      const OTHER_SHAPE = ["mkt.total.sideDemandOne", "mkt.total.sideSupplyOne"];
       const singulars = ALL.flatMap(([path, one]) => {
-        const general = path.endsWith("One") ? ALL.find(([p]) => p === path.slice(0, -"One".length)) : undefined;
+        const general = path.endsWith("One") && !OTHER_SHAPE.includes(path) ? ALL.find(([p]) => p === path.slice(0, -"One".length)) : undefined;
         return general ? [[path, one, general[1]] as const] : [];
       });
       expect(singulars.length).toBeGreaterThanOrEqual(10);

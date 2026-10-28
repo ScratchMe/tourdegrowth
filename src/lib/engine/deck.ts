@@ -60,11 +60,12 @@ import {
 } from "./phrases";
 import { annexPages, type AnnexCells } from "./annex-pages";
 import { buildEvolutionSlide, seasonalNote } from "./deck-series";
+import { buildMarketplaceDeck } from "./deck-mkt";
 import { buildRelaysSlide, buildSlgWhatIfSlides, buildTotalSlide, buildUnitBoth, buildUnitSlg, motionOf } from "./deck-slg";
 import { appUnitMoney, unitMoney } from "./deck-unit";
 import { linkSentence } from "./deck-motions";
 import { leverAloneOf, leverIdsOf, scenarioOf } from "./scenario-of";
-import { isApp, isSellingMotion, monetizationOf } from "./setup-type";
+import { activeMotions, isApp, isSellingMotion, monetizationOf } from "./setup-type";
 import { renewalTermOf, slgWhatIf } from "./slg-impact";
 import { slgLeverAlone } from "./slg-scenario";
 import type { MoneyKpis } from "./money";
@@ -90,6 +91,7 @@ import type {
   MetricId,
   MirrorVerdict,
   MissingCause,
+  MktSide,
   Motion,
   Peloton,
   Position,
@@ -139,6 +141,11 @@ export type Row = Record<string, string>;
 export interface DeckProse {
   derived?: ResolvedDerived[];
   bridges?: ResolvedBridge[];
+  /**
+   * A marketplace's deck (§22.8.1, MKT-R finding 45): the words of each side's slides (`marketplaceStrings(…, side)`), which
+   * `buildDeck` hands to `buildMarketplaceDeck`. Without it every side reads `strings`, the neutral set.
+   */
+  stringsForSide?: (side: MktSide) => EngineStrings;
 }
 
 export const DEFAULT_INCLUDE: Record<FixedSlideId, boolean> = {
@@ -525,7 +532,7 @@ export function buildLeak(
 
 // --- Slide 3: visibility -----------------------------------------------------
 
-function buildVisibility(state: EngineState, derived: Omit<EngineDerived, "findings">, strings: Words, metrics: ResolvedMetric[], ctx: EngineCalcContext): { title: SlideTitle; lines: Row[] } {
+export function buildVisibility(state: EngineState, derived: Omit<EngineDerived, "findings">, strings: Words, metrics: ResolvedMetric[], ctx: EngineCalcContext): { title: SlideTitle; lines: Row[] } {
   const snapshot = currentSnapshot(state);
   const { coverage } = derived;
   const n = coverage.found + coverage.approximate;
@@ -739,7 +746,7 @@ function buildAppUnitEconomics(
 
 // --- Slide 6: the ask --------------------------------------------------------
 
-function buildAsk(
+export function buildAsk(
   state: EngineState,
   derived: Omit<EngineDerived, "findings">,
   strings: Words,
@@ -842,7 +849,7 @@ function verdictLabel(verdict: MirrorVerdict, count: number, strings: Words, loc
   return strings.mirror[numbered(VERDICT_KEY[verdict], point(count), locale)];
 }
 
-function mirrorLines(mirror: NonNullable<EngineDerived["mirror"]>, strings: Words, metrics: ResolvedMetric[], ctx: EngineCalcContext, prose: DeckProse, hybrid = false): Row[] {
+export function mirrorLines(mirror: NonNullable<EngineDerived["mirror"]>, strings: Words, metrics: ResolvedMetric[], ctx: EngineCalcContext, prose: DeckProse, hybrid = false): Row[] {
   // Both motions' computed figures: in the hybrid, a Tour question bridges to sales-assisted's LTV too (§18.4.9).
   const isDerived = (id: MetricId | DerivedId): id is DerivedId => ALL_DERIVED_SHAPES.some((s) => s.id === id);
   // The counts lead, blind spots first; a verdict nobody reached is not a line.
@@ -885,7 +892,7 @@ function mirrorLines(mirror: NonNullable<EngineDerived["mirror"]>, strings: Word
 
 // --- Annex -------------------------------------------------------------------
 
-function buildAnnex(state: EngineState, strings: Words, metrics: ResolvedMetric[], ctx: EngineCalcContext): (Row & AnnexCells)[] {
+export function buildAnnex(state: EngineState, strings: Words, metrics: ResolvedMetric[], ctx: EngineCalcContext): (Row & AnnexCells)[] {
   const snapshot = currentSnapshot(state);
   const { motions } = state.setup;
   const hybrid = motions.plg && motions.slg;
@@ -978,6 +985,9 @@ export function whatIfKpi(k: WhatIfKpis, id: WhatIfKpiId): Interval | null {
   return id === "cash" ? (k.cash?.tiedUp ?? null) : k[id];
 }
 
+/** What a what-if slide's curve reads of a scenario's figures: the revenue in twelve months and its path (a marketplace side's has no NRR). */
+export type CurveKpis = Pick<MoneyKpis, "mrrPath"> & { mrr12: Interval | null };
+
 /**
  * A what-if slide's curve (design system extension 09, Q11, A20.d T4.b): the
  * MRR month by month, today's pace against the what-if(s), from the same
@@ -985,8 +995,8 @@ export function whatIfKpi(k: WhatIfKpis, id: WhatIfKpiId): Interval | null {
  * the slide then prints its table alone.
  */
 export function slideCurve(
-  today: WhatIfKpis & { mrr: Interval | null },
-  projected: WhatIfKpis,
+  today: CurveKpis & { mrr: Interval | null },
+  projected: CurveKpis,
   whatifKey: string,
   state: EngineState,
   strings: Words,
@@ -1257,7 +1267,7 @@ export type BuiltSlide = Omit<DeckSlide, "id" | "included" | "index">;
  * shortest, run past one page at 18px (annex-pages.test.ts holds that, so
  * the title's page part never reads « (1/1) » without a test saying so).
  */
-function annexSlides(annex: BuiltSlide, rows: (Row & AnnexCells)[]): { id: SlideId; slide: BuiltSlide; byDefault: boolean }[] {
+export function annexSlides(annex: BuiltSlide, rows: (Row & AnnexCells)[]): { id: SlideId; slide: BuiltSlide; byDefault: boolean }[] {
   const pages = annexPages(rows);
   return pages.map((lines, i) => ({
     id: i === 0 ? "annex" : `annex:${i + 1}`,
@@ -1388,6 +1398,8 @@ export function withDrawings(curve: SlideCurve | null, leverSum: SlideLeverSum |
 // --- The model ----------------------------------------------------------------
 
 export function buildDeck(state: EngineState, derived: EngineDerived, strings: Words, metrics: ResolvedMetric[], ctx: EngineCalcContext, prose: DeckProse = {}): DeckModel {
+  // A marketplace's deck is its own (§22.12 MKT-8): its total, then each side's slides, then the slides every type shares.
+  if (activeMotions(state.setup)[0] === "mkt") return buildMarketplaceDeck(state, derived, strings, prose.stringsForSide ?? (() => strings), metrics, ctx, prose);
   // Sales-assisted ticked, alone or with self-serve: the deck of §18.8. Self-serve alone is the v1 deck below, to the character.
   if (state.setup.motions.slg) return buildMotionsDeck(state, derived, strings, metrics, ctx, prose);
   const snapshot = currentSnapshot(state);
@@ -1501,7 +1513,7 @@ export function buildDeck(state: EngineState, derived: EngineDerived, strings: W
 }
 
 /** The tools the measured numbers of these shapes cite, once each, in catalogue order. */
-function toolsOf(state: EngineState, shapes: readonly { id: MetricId }[], strings: Words): string[] {
+export function toolsOf(state: EngineState, shapes: readonly { id: MetricId }[], strings: Words): string[] {
   const snapshot = currentSnapshot(state);
   return [
     ...new Set(
@@ -1729,7 +1741,7 @@ function lineText(line: Row): string {
  * then the speaker notes as quotes. The `**…**` accent reads as Markdown
  * bold, which is what someone pasting into their own deck wants.
  */
-export function deckMarkdown(model: DeckModel, strings: Words): string {
+export function deckMarkdown(model: DeckModel, strings: Words, stringsForSide?: (side: MktSide) => Words): string {
   const out: string[] = [
     fillTemplate(strings.slide.kicker, model.kicker),
     fillTemplate(strings.slide.dataPill, {
@@ -1745,7 +1757,8 @@ export function deckMarkdown(model: DeckModel, strings: Words): string {
       ...slide.notes.map((note) => `> ${note}`),
     ];
     // A title-only slide gets no empty body: one blank line between slides, never two.
-    out.push("", `## ${slide.index}. ${renderTitle(slide.title, strings)}`);
+    // A marketplace's side slide is worded with that side's words, as on screen (`slideStrings`, §22.8.1).
+    out.push("", `## ${slide.index}. ${renderTitle(slide.title, slide.side && stringsForSide ? stringsForSide(slide.side) : strings)}`);
     if (body.length) out.push("", ...body);
   }
   out.push("", model.footer.text ?? fillSegments(strings.slide.footer, model.footer));

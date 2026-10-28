@@ -31,6 +31,15 @@
   color: var(--text-body);
 }
 
+/* The slide's arrow, drawn (see the component): on the text's own baseline, in its colour, as the deck's `Arrow`. */
+.arrowDrawn {
+  display: inline-block;
+  width: 1em;
+  height: 0.5em;
+  vertical-align: middle;
+  overflow: visible;
+}
+
 /* The columns counted on the same 100, then (demand) the base of its own. */
 .cols {
   display: grid;

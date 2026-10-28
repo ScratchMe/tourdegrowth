@@ -225,6 +225,11 @@ export const ENGINE_COPY_MKT_SERVICES: { common: Overlay; demand: Overlay; suppl
       },
       total: {
         supply: { fr: "Abonnements des prestataires", en: "Provider subscriptions" },
+        // TODO: à relire (convention 6) — neuf le 2026-10-28 (A23 MKT-8, §22.8.4, §22.8.5 k) : le renvoi de chaque flux vers les slides de son côté, sur la slide du total, en « services ».
+        sideDemand: { fr: "les clients, slides {from} à {to}", en: "the clients, slides {from}–{to}" },
+        sideDemandOne: { fr: "les clients, slide {n}", en: "the clients, slide {n}" },
+        sideSupply: { fr: "les prestataires, slides {from} à {to}", en: "the providers, slides {from}–{to}" },
+        sideSupplyOne: { fr: "les prestataires, slide {n}", en: "the providers, slide {n}" },
       },
       assumption: {
         "fill-new-buyers-only": {

@@ -2143,6 +2143,22 @@ export const ENGINE_COPY = {
         fr: "Au rythme actuel : {today} dans 12 mois. Les « Et si » des deux côtés s'additionnent ici, et seulement ici.",
         en: "At the current pace: {today} in 12 months. The what-ifs of both sides add up here, and only here.",
       },
+      // TODO: à relire (convention 6) — neuf le 2026-10-28 (A23 MKT-8, §22.8.5 k) : la slide du total, un registre (`SlideStreams`) : ses colonnes, le renvoi de chaque flux vers les slides de son côté et sa note.
+      colMonth: { fr: "Ce mois-ci", en: "This month" },
+      colIn12Moved: { fr: "Dans 12 mois, avec nos « Et si »", en: "In 12 months, with our what-ifs" },
+      sideDemand: { fr: "les acheteurs, slides {from} à {to}", en: "the buyers, slides {from}–{to}" },
+      sideDemandOne: { fr: "les acheteurs, slide {n}", en: "the buyers, slide {n}" },
+      sideSupply: { fr: "les vendeurs, slides {from} à {to}", en: "the sellers, slides {from}–{to}" },
+      sideSupplyOne: { fr: "les vendeurs, slide {n}", en: "the sellers, slide {n}" },
+      note: {
+        fr: "Une somme, jamais une comparaison : chaque flux se lit sur les slides de son côté, contre ses propres cibles.",
+        en: "A sum, never a comparison: each stream is read on its own side's slides, against its own targets.",
+      },
+    },
+    // TODO: à relire (convention 6) — neuf le 2026-10-28 (A23 MKT-8, §22.8.5 k) : les deux tuiles que la slide d'économie unitaire d'un côté ajoute (le coût d'un vendeur abonné, calculé ; la marge quand c'est une fourchette).
+    slide: {
+      sellerCostTile: { fr: "calculé : {cpa} × {fs} ÷ {conv}", en: "computed: {cpa} × {fs} ÷ {conv}" },
+      marginRange: { fr: "marge estimée à {range}", en: "margin estimated at {range}" },
     },
     // TODO: à relire (convention 6) — neuf le 2026-10-27 (A23 MKT-7b, §22.8.5 k, le retour du brief 10) : le prochain pas partagé, les lignes « À côté » du diagnostic,
     // les notes d'un côté sans argent ou sans cibles, le saut du mois 1, la phrase de la liste et les quatre mots appris (`EngineTerm`, lus dans `strings.mkt.terms`).
@@ -2826,8 +2842,8 @@ export const ENGINE_COPY = {
     // TODO: à relire (convention 6) — neuf le 2026-10-01 (A7.3.c S4) : the second table of a sales-assisted what-if slide.
     whatIfQuarter: { fr: "Le trimestre", en: "The quarter" },
     whatIfToday: { fr: "Aujourd'hui", en: "Today" },
-    whatIfWithOne: { fr: "Avec cet « Et si »", en: "With this what-if" },
-    whatIfWithAll: { fr: "Avec les « Et si »", en: "With the what-ifs" },
+    whatIfWithOne: { fr: "Avec cet « Et si »", en: "With this what-if" },
+    whatIfWithAll: { fr: "Avec les « Et si »", en: "With the what-ifs" },
     whatIfChange: { fr: "Écart", en: "Change" },
     /** A figure the what-if leaves where it is: the change column says so in a word, never « 0 ». Gender-free in French. */
     whatIfStable: { fr: "stable", en: "unchanged" },

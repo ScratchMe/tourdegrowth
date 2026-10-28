@@ -101,8 +101,29 @@ const TOOLS = Object.keys(TOOL_SET);
 
 const CURRENCY_SET = { EUR: true, USD: true, GBP: true, CHF: true } as const satisfies Record<Currency, true>;
 
-/** The slides outside `SLIDE_ORDER` and the what-ifs: the self-serve « scenario », the hybrid's « total », the sales-assisted ones. */
-const EXTRA_SLIDES = ["scenario", "total", "slg:peloton", "slg:leak", "slg:scenario", "evolution", "slg:evolution"] as const satisfies readonly SlideId[];
+/**
+ * The slides outside `SLIDE_ORDER` and the what-ifs: the self-serve « scenario », the hybrid's « total », the sales-assisted ones,
+ * and a marketplace's own (§22.12 MKT-8: without them a state whose `deck.include` carried `mktLeakDemand` would be refused on
+ * reopening or import).
+ */
+const EXTRA_SLIDES = [
+  "scenario",
+  "total",
+  "slg:peloton",
+  "slg:leak",
+  "slg:scenario",
+  "evolution",
+  "slg:evolution",
+  "mktTotal",
+  "mktFunnelDemand",
+  "mktLeakDemand",
+  "mktScenarioDemand",
+  "mktUnitDemand",
+  "mktFunnelSupply",
+  "mktLeakSupply",
+  "mktScenarioSupply",
+  "mktUnitSupply",
+] as const satisfies readonly SlideId[];
 const CURRENCIES = Object.keys(CURRENCY_SET);
 
 /*

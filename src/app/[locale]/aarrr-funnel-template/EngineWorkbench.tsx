@@ -858,6 +858,8 @@ function Workbench(props: EngineWorkbenchProps) {
       <DeckView
         locale={locale}
         strings={strings}
+        // A marketplace's side slides are worded with that side's words (§22.8.1): the two memoised sets, whose identity holds from one render to the next.
+        stringsBySide={isMarketplace(current.setup) ? { demand: stringsFor(current.setup.type, current.setup.offering, "demand"), supply: stringsFor(current.setup.type, current.setup.offering, "supply") } : undefined}
         metrics={metrics}
         derivedCopy={derivedCopy}
         bridges={bridges}

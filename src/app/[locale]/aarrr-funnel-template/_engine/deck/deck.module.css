@@ -84,6 +84,36 @@
   color: var(--text-body);
 }
 
+/*
+ * The side a marketplace's slide is about (C70, C103), in ink, above its title: every slide of a side says whose numbers it
+ * holds before anything else. It costs a line the SaaS's slides don't have, and its footer lists more sources (two lines):
+ * the frame's gap is 20px instead of 36 on a side's slide (measured, A23 MKT-8: a funnel, a leak, a unit slide ran 50 to 65px
+ * under the footer at 36), and the negative margin pulls the title up to 12px under the side's.
+ */
+.slide[data-side] {
+  gap: 20px;
+}
+
+.slideSide {
+  margin: 0 0 -8px;
+  font: var(--slide-heading);
+  letter-spacing: var(--slide-tracking);
+  text-transform: uppercase;
+  color: var(--text-body);
+}
+
+/*
+ * The funnel on a side's slide (`SideFunnel`, medium « slide »): its grid keeps 8px between the upstream line and the columns
+ * instead of 28, and the sellers' labels, two lines at most (a stage and its stamp), leave 28px less under the numerals than the
+ * buyers' three (`--market-slide-head`, 172px: three lines of 26px type under the numeral). Measured on the example, in French and
+ * English, products and services, with and without the sellers' subscriptions: the funnels ran 20 to 65px under the footer.
+ * Qualified by the slide, as `.unitWarning` is: a bare class ties with the component's own and the winner depends on the order
+ * the build emits the two sheets.
+ */
+[data-slide] .sideFunnel {
+  row-gap: 8px;
+}
+
 .slideTitle {
   margin: 0;
   max-width: 1600px;
@@ -606,7 +636,12 @@
   font: var(--slide-label-xs);
 }
 
-.asideRow[data-tone="below"] .asideStage {
+/*
+ * A stage below its target is the diagnosis's red, on the self-serve and sales-assisted slides. A marketplace's slide (it has a
+ * `data-side`) says it in ink, the stage's name and nothing else (C102): with two sides, every red more would read as one more
+ * leak (C70), and a side has the one — its title's, the funnel's named column.
+ */
+.slide:not([data-side]) .asideRow[data-tone="below"] .asideStage {
   color: var(--text-alert);
 }
 

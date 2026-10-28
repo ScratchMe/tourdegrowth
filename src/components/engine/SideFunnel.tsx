@@ -144,7 +144,16 @@ export function SideFunnel({
       {upstream ? (
         <p className={styles.upstream}>
           <span className={styles.arrow} aria-hidden="true">
-            →
+            {slide ? (
+              // On a slide the arrow is drawn, never typed (engine spec §10.4): "→" is in none of the three slide fonts, so a
+              // typed one falls back to a system face on screen and the PDF embeds `DejaVuSans`. The same shape as `Arrow` in
+              // `_engine/deck/slide-text.tsx`, copied because a component in `src/components/` does not import the island.
+              <svg className={styles.arrowDrawn} viewBox="0 0 24 12" focusable="false">
+                <path d="M1 6h19M15 1.5 20.5 6 15 10.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square" />
+              </svg>
+            ) : (
+              "→"
+            )}
           </span>{" "}
           {upstream}
         </p>

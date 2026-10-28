@@ -1,6 +1,6 @@
 import { LeverSum } from "@/components/engine/LeverSum";
 import { rowOf, rowsOf } from "./deck-rows";
-import { SlideFrame, type SlideProps } from "./SlideFrame";
+import { SlideFrame, slideStrings, type SlideProps } from "./SlideFrame";
 import { ChangeTable, SlideCurveCard } from "./SlideWhatIf";
 import { Arrow, SlideText } from "./slide-text";
 import styles from "./deck.module.css";
@@ -34,25 +34,29 @@ const DENSER_FROM = 9;
  * stay the model's: the lever list is still what the text export writes.
  */
 export function SlideScenario({ slide, context }: SlideProps) {
-  const s = context.strings;
+  const s = slideStrings(slide, context);
   const levers = rowsOf(slide, "lever");
+  // A marketplace side's slide is always the dense one: its side's title above the slide's own and its five-line footer (the
+  // assumptions of its money, §22.8.5) leave the curve and the drawn levers no room (measured: 115 to 220px under the footer).
+  const dense = levers.length >= DENSE_FROM || slide.side !== undefined;
   const together = rowOf(slide, "together")?.text;
   const footer = rowOf(slide, "footer")?.text;
-  // Self-serve's keeps its v1 test ids; sales-assisted's (`slg:scenario`) gets its own, both can be on screen.
-  const prefix = slide.id === "scenario" ? "slide-scenario" : "slide-slg-scenario";
+  // Self-serve's keeps its v1 test ids; sales-assisted's (`slg:scenario`) gets its own, both can be on screen; a marketplace's two
+  // (`mktScenarioDemand`, `mktScenarioSupply`) are told apart by their own id.
+  const prefix = slide.id === "scenario" ? "slide-scenario" : slide.id === "slg:scenario" ? "slide-slg-scenario" : `slide-${slide.id}`;
 
   return (
     <SlideFrame slide={slide} context={context} footer={footer} footerDense>
-      <div className={[styles.scenario, levers.length >= DENSE_FROM ? styles.scenarioDense : ""].filter(Boolean).join(" ")}>
+      <div className={[styles.scenario, dense ? styles.scenarioDense : ""].filter(Boolean).join(" ")}>
         <div className={styles.whatIfSide}>
-          {slide.curve && levers.length < DENSE_FROM ? <SlideCurveCard curve={slide.curve} slideId={slide.id} shared /> : null}
+          {slide.curve && !dense ? <SlideCurveCard curve={slide.curve} slideId={slide.id} shared /> : null}
           <section
-            className={[styles.leverCard, levers.length >= DENSE_FROM ? styles.leverDense : "", levers.length >= DENSER_FROM ? styles.leverDenser : ""]
+            className={[styles.leverCard, dense ? styles.leverDense : "", levers.length >= DENSER_FROM ? styles.leverDenser : ""]
               .filter(Boolean)
               .join(" ")}
             data-testid={`${prefix}-levers`}
           >
-            {slide.leverSum && levers.length < DENSE_FROM ? (
+            {slide.leverSum && !dense ? (
               <LeverSum
                 medium="slide"
                 title={s.scenario.aloneTitle}

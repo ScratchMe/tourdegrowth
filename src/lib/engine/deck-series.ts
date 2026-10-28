@@ -4,7 +4,7 @@ import { fillTemplate, formatChange, formatInterval, formatMonth, pairPrecision,
 import { point } from "./interval";
 import { type AnyDiagnosis, numbered, subjectOf } from "./phrases";
 import type { EngineStrings, ResolvedMetric } from "./strings";
-import type { EngineCalcContext, EngineState, Interval, MetricId, Motion, MotionSeries, Series, SeriesRow, SlideTitle } from "./types";
+import type { CandidateId, EngineCalcContext, EngineMotion, EngineState, Interval, MetricId, MktSide, Series, SeriesRow, SlideTitle } from "./types";
 
 /**
  * deck-series.ts — the slides of the monthly series (engine spec §19.2.6,
@@ -77,10 +77,10 @@ export function evolutionApartText(row: SeriesRow, series: Series, strings: Word
 }
 
 /** « ; l'activation reste la fuite » / « ; l'activation devient la fuite », or "" when this month names no single leak. */
-function leakClause(motion: MotionSeries, diagnosis: AnyDiagnosis, strings: Words, metrics: ResolvedMetric[]): string {
+function leakClause(previousLeak: readonly CandidateId[], diagnosis: AnyDiagnosis, strings: Words, metrics: ResolvedMetric[]): string {
   if (diagnosis.state !== "clear") return "";
   const id = diagnosis.named[0]!;
-  const stays = motion.previousLeak.length === 1 && motion.previousLeak[0] === id;
+  const stays = previousLeak.length === 1 && previousLeak[0] === id;
   return fillTemplate(stays ? strings.slide.evolutionLeakStays : strings.slide.evolutionLeakBecomes, { stage: subjectOf(id, strings, metrics) });
 }
 
@@ -91,12 +91,17 @@ function leakClause(motion: MotionSeries, diagnosis: AnyDiagnosis, strings: Word
  * - numbers moved: how many, and up to six of them;
  * - numbers compare but none moved: « Rien n'a bougé », and up to six of them;
  * - nothing compares: « août et septembre ne se comparent pas encore », and why.
+ *
+ * A marketplace's (`motion` `"mkt"`, §22.12 MKT-8 step 8 bis) rows are the 19 (or 14) numbers of `MotionSeries.rows`; its leak is
+ * said once per side, the demand's with the demand's diagnosis, then the supply's with the supply's (`diagnosis` is then both,
+ * and `sides` of the series holds each side's leak of the month before). The slide carries no `side`: it prints the two sides one
+ * after the other, never face to face.
  */
 export function buildEvolutionSlide(
   state: EngineState,
   series: Series | undefined,
-  motion: Motion,
-  diagnosis: AnyDiagnosis,
+  motion: EngineMotion,
+  diagnosis: AnyDiagnosis | Record<MktSide, AnyDiagnosis>,
   strings: Words,
   metrics: ResolvedMetric[],
   ctx: EngineCalcContext,
@@ -137,7 +142,12 @@ export function buildEvolutionSlide(
       text: fillTemplate(template, { before, now, change }),
     };
   });
-  const leak = leakClause(own, diagnosis, strings, metrics);
+  const leak =
+    "state" in diagnosis
+      ? leakClause(own.previousLeak, diagnosis, strings, metrics)
+      : own.sides
+        ? (["demand", "supply"] as const).map((side) => leakClause(own.sides![side].previousLeak, diagnosis[side], strings, metrics)).join("")
+        : "";
   const n = moved.length;
   const title: SlideTitle =
     n === 0 ? { key: "evolutionStill", values: { month, leak } } : { key: numbered("evolution", point(n), ctx.locale), values: { n: String(n), month, leak } };

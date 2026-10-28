@@ -181,6 +181,30 @@ describe("validateEngine — the v2 setup and the sales-assisted numbers (engine
     s.deck.include = { ...s.deck.include, ["slg:unknown" as never]: true };
     expect(validateEngine(s)).toEqual(["deck.include.slg:unknown: unknown slide"]);
   });
+
+  it("the deck accepts a marketplace's own slides (A23 MKT-8): its total, each side's funnel, leak, « Et si » together and unit economics, and a lever's own slide", () => {
+    // Non-vacuity (2026-10-28, measured): `"mktLeakDemand"` taken out of `EXTRA_SLIDES` makes this test, and only this one, fall.
+    const s = fullState();
+    const slides = [
+      "mktTotal",
+      "mktFunnelDemand",
+      "mktLeakDemand",
+      "mktScenarioDemand",
+      "mktUnitDemand",
+      "mktFunnelSupply",
+      "mktLeakSupply",
+      "mktScenarioSupply",
+      "mktUnitSupply",
+    ] as const;
+    // Ticked and unticked alike: the box a person unticks in a marketplace's deck is written to the file.
+    s.deck.include = { ...s.deck.include, ...Object.fromEntries(slides.map((id, i) => [id, i % 2 === 0])), "whatif:mkt.liq.fill-rate": true, "whatif:mkt.sell.arpa": false, evolution: true };
+    expect(validateEngine(s)).toEqual([]);
+    // A slide the engine does not know is refused, a marketplace's name for it included, and a box that is not a boolean is too.
+    s.deck.include = { ...s.deck.include, ["mktLeakBoth" as never]: true };
+    expect(validateEngine(s)).toEqual(["deck.include.mktLeakBoth: unknown slide"]);
+    s.deck.include = { mktLeakSupply: "yes" as never };
+    expect(validateEngine(s)).toEqual(["deck.include.mktLeakSupply: not a boolean"]);
+  });
 });
 
 describe("validateEngine — the v3 fields: the series, the tools, the pipeline, the white deck (§19, A14 T0)", () => {

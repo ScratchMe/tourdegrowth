@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { PAYBACK_CHART_PX, paybackChartGeometry, paysBackLabels, shortLabelY, type PaybackStory, type Range } from "@/lib/viz/payback-chart";
+import { PAYBACK_CHART_PX, costLabelAtEnd, estimateLabelWidth, paybackChartGeometry, paysBackLabels, shortLabelY, type PaybackLayout, type PaybackStory, type Range } from "@/lib/viz/payback-chart";
 import styles from "./PaybackChart.module.css";
 
 export interface PaybackChartProps {
@@ -48,6 +48,12 @@ export interface PaybackChartProps {
    * axis row, the reference explained in the slide's note; the plot keeps only its marks and the money gap.
    */
   size?: "md" | "sm";
+  /**
+   * `side`: a marketplace side's slide, drawn 240px high (A23 MKT-8): the scale may rise higher, so the line ends on the plot, the
+   * bracket's words sit nearer the cost line, the cost's words move to the right end when the line would strike them through, and
+   * the crossing's words keep 72px from them. Default: the SaaS's and the app's picture, unchanged.
+   */
+  layout?: PaybackLayout;
   className?: string;
   "data-testid"?: string;
 }
@@ -94,14 +100,23 @@ export function PaybackChart({
   summary,
   id,
   size = "md",
+  layout = "default",
   className,
   "data-testid": testId,
 }: PaybackChartProps) {
   const compact = size === "sm";
-  const g = paybackChartGeometry({ story, monthlyMargin, cac, lifetime, payback, width, height, reference });
+  const side = layout === "side";
+  const g = paybackChartGeometry({ story, monthlyMargin, cac, lifetime, payback, width, height, reference, layout });
   const chars = (node: ReactNode) => (typeof node === "string" ? node.length : 0);
+  // The cost's words at the right end, ending there, when the margin line would strike them through at the left (`side` only).
+  const costAtEnd = side && !compact && costLabelAtEnd(g, estimateLabelWidth(chars(labels.cost)));
   const shortY = shortLabelY(g, { short: chars(labels.short), cost: chars(labels.cost) }, compact);
-  const placed = paysBackLabels(g, { paysBack: chars(labels.paysBack), cost: chars(labels.cost), time: typeof labels.time === "string" ? labels.time.length : null, after: chars(labels.after) });
+  const placed = paysBackLabels(
+    g,
+    { paysBack: chars(labels.paysBack), cost: costAtEnd ? 0 : chars(labels.cost), time: typeof labels.time === "string" ? labels.time.length : null, after: chars(labels.after) },
+    18,
+    side ? 72 : 16,
+  );
   const hatch = `${id}-hatch`;
   const plotClip = `${id}-plot`;
   return (
@@ -147,7 +162,7 @@ export function PaybackChart({
         {g.cost.band ? <rect x={g.axis.x1} width={g.axis.x2 - g.axis.x1} y={g.cost.band.y} height={g.cost.band.height} fill={`url(#${hatch})`} className={styles.band} /> : null}
         <line x1={g.axis.x1} x2={g.axis.x2} y1={g.cost.y} y2={g.cost.y} className={styles.cost} />
         {!compact ? (
-          <text x={g.cost.labelX} y={g.cost.labelY} className={`${styles.label} ${styles.halo}`} textAnchor="start">
+          <text x={costAtEnd ? g.axis.x2 : g.cost.labelX} y={g.cost.labelY} className={`${styles.label} ${styles.halo}`} textAnchor={costAtEnd ? "end" : "start"}>
             {labels.cost}
           </text>
         ) : null}

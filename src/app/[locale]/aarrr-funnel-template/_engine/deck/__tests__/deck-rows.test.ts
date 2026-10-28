@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { consumerState, consumerUsageOnlyState, exampleState, filmState, hybridState, measured, ratio, salesAssistedState, tourResult, withEntry, withMonthBefore, withTarget } from "@/lib/engine/__tests__/fixtures";
+import { consumerState, consumerUsageOnlyState, exampleState, filmState, hybridState, marketplaceNoSubscriptionsState, marketplaceState, measured, ratio, salesAssistedState, tourResult, withEntry, withMonthBefore, withTarget } from "@/lib/engine/__tests__/fixtures";
 import { CTX_EN, CTX_FR, EN, FR } from "@/lib/engine/__tests__/props";
 import { buildDeck } from "@/lib/engine/deck";
 import { deriveEngine } from "@/lib/engine/derive";
-import { EXAMPLE_CONSUMER_WHATIF } from "@/lib/engine/example";
-import { isApp } from "@/lib/engine/setup-type";
-import { mergeStrings } from "@/lib/engine/strings";
+import { EXAMPLE_CONSUMER_WHATIF, EXAMPLE_MKT_WHATIF } from "@/lib/engine/example";
+import { isApp, isMarketplace } from "@/lib/engine/setup-type";
+import { marketplaceStrings, mergeStrings } from "@/lib/engine/strings";
 import type { DeckModel, EngineState } from "@/lib/engine/types";
 import { OPTIONAL_FIELDS, ROW_FIELDS, type RowKind } from "../deck-rows";
 
@@ -38,7 +38,10 @@ import { OPTIONAL_FIELDS, ROW_FIELDS, type RowKind } from "../deck-rows";
  * single engine's kinds, tagged with their motion (`salesAssisted` still writes the
  * relays); dropping `series` and `seriesApart` (A14 T1) fails it naming
  * evolution and apart; dropping `app` and `appWhatIf` (A22 APP-9) fails it naming value12 — the
- * consumer app's twelve-month value, the tile between its cost and its 36-month value.
+ * consumer app's twelve-month value, the tile between its cost and its 36-month value; dropping `marketplace`,
+ * `marketplaceMoved` and `marketplaceNoSubscriptions` (A23 MKT-8) fails it naming streams and sideFunnel — the
+ * marketplace's own rows, the ledger of its total and what a side's funnel adds to its columns (measured 2026-10-28, with the
+ * four marketplace states dropped: the two « every kind is exercised » tests, fr and en).
  */
 
 const props = { fr: { ...FR, ctx: CTX_FR }, en: { ...EN, ctx: CTX_EN } } as const;
@@ -144,17 +147,62 @@ function appWhatIf(): EngineState {
   return { ...consumerState(), whatIf: EXAMPLE_CONSUMER_WHATIF };
 }
 
-const STATES: Record<string, () => EngineState> = { example: exampleState, linked, filledAsk, teamAsk, margin, whatIf, hybrid, hybridLinked, salesAssisted, series, seriesApart, pipeline, late, app, appUsage, appWhatIf };
+/**
+ * A marketplace (A23 MKT-8, §22.12): its deck writes the ledger of its total (`streams`) and what each side's funnel adds to its
+ * columns (`sideFunnel`); with its « Et si » moved, the fourth column of the ledger and the sides' what-if slides; the sellers
+ * paying nothing, no total and a supply that has its funnel alone; in « services », the same rows in the other words.
+ */
+function marketplace(): EngineState {
+  return marketplaceState();
+}
+function marketplaceMoved(): EngineState {
+  return { ...marketplaceState(), whatIf: { ...EXAMPLE_MKT_WHATIF } };
+}
+function marketplaceNoSubscriptions(): EngineState {
+  return marketplaceNoSubscriptionsState();
+}
+function marketplaceServices(): EngineState {
+  const s = marketplaceState();
+  s.setup = { ...s.setup, offering: "services" };
+  return s;
+}
+
+const STATES: Record<string, () => EngineState> = {
+  example: exampleState,
+  linked,
+  filledAsk,
+  teamAsk,
+  margin,
+  whatIf,
+  hybrid,
+  hybridLinked,
+  salesAssisted,
+  series,
+  seriesApart,
+  pipeline,
+  late,
+  app,
+  appUsage,
+  appWhatIf,
+  marketplace,
+  marketplaceMoved,
+  marketplaceNoSubscriptions,
+  marketplaceServices,
+};
 
 function model(state: EngineState, locale: "fr" | "en"): DeckModel {
   const p = props[locale];
   const result = state.tourLink ? RESULT : null;
   // An app reads the copy as the island resolves it: the overlay over the engine's strings, its own catalogue prose.
   const consumer = isApp(state.setup);
-  const strings = consumer ? mergeStrings(p.strings, p.typeStrings["consumer-app"]) : p.strings;
-  const catalog = consumer ? p.typeCatalogs["consumer-app"] : { metrics: p.metrics, derived: p.derived };
+  // A marketplace reads the neutral set for what belongs to no side and each side's words for the rest (§22.8.1), in its offering's vocabulary.
+  const market = isMarketplace(state.setup);
+  const offering = state.setup.offering ?? "products";
+  const forSide = (side: "demand" | "supply" | null) => marketplaceStrings(p.strings, p.typeStrings.marketplace, offering, side);
+  const strings = market ? forSide(null) : consumer ? mergeStrings(p.strings, p.typeStrings["consumer-app"]) : p.strings;
+  const catalog = market ? p.typeCatalogs[offering === "services" ? "marketplace-services" : "marketplace"] : consumer ? p.typeCatalogs["consumer-app"] : { metrics: p.metrics, derived: p.derived };
   const derived = deriveEngine(state, p.ctx, result, p.bridges, strings.units);
-  return buildDeck(state, derived, strings, catalog.metrics, p.ctx, { derived: catalog.derived, bridges: p.bridges });
+  return buildDeck(state, derived, strings, catalog.metrics, p.ctx, { derived: catalog.derived, bridges: p.bridges, ...(market ? { stringsForSide: forSide } : {}) });
 }
 
 const KINDS = Object.keys(ROW_FIELDS) as RowKind[];

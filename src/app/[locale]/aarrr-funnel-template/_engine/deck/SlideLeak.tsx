@@ -1,5 +1,5 @@
 import { rowOf, rowsOf } from "./deck-rows";
-import { SlideFrame, type SlideProps } from "./SlideFrame";
+import { SlideFrame, slideStrings, type SlideProps } from "./SlideFrame";
 import { SlideText } from "./slide-text";
 import styles from "./deck.module.css";
 
@@ -29,7 +29,8 @@ const CHAIN_STEPS = new Set(["today", "if", "then", "times", "usage-then", "usag
  * `footer` row that replaces this slide's common footer.
  */
 export function SlideLeak({ slide, context }: SlideProps) {
-  const { strings } = context;
+  // A marketplace's side slide reads that side's words (§22.8.1); every other slide, the neutral set.
+  const strings = slideStrings(slide, context);
   const calc = rowsOf(slide, "calc");
   const chain = calc.filter((row) => CHAIN_STEPS.has(row.key));
   const after = calc.filter((row) => !CHAIN_STEPS.has(row.key));
