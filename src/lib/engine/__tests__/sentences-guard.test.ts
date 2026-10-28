@@ -4,10 +4,10 @@ import { CANDIDATE_IDS, METRIC_SHAPES, shapeOf, shapesOf } from "../catalog-shap
 import { mktCandidates } from "../diagnose";
 import { mktWhatIf } from "../mkt-impact";
 import { mktFunnelTitle, mktTotalTitle } from "../mkt-titles";
-import { buildDeck, chainLine, comparatorText, deckMarkdown, renderTitle, targetPhrase } from "../deck";
+import { buildDeck, chainLine, comparatorText, deckMarkdown, renderTitle, slideGlyphs, targetPhrase } from "../deck";
 import { deriveEngine } from "../derive";
 import { comparatorOf, impactTarget } from "../diagnose";
-import { EXAMPLE_CONSUMER_WHATIF } from "../example";
+import { EXAMPLE_CONSUMER_WHATIF, EXAMPLE_MKT_WHATIF } from "../example";
 import { fillTemplate, formatInterval } from "../format";
 import { whatIf } from "../impact";
 import { behindSentence, blindSentence, catalogueValues, diagnosesOf, notEnoughBelowSentence, staticCatalogueValues, subjectOf, unpricedSentence } from "../phrases";
@@ -15,8 +15,8 @@ import { buildRequest } from "../request";
 import { findingText, sanityText } from "../sentences";
 import { candidatesFor } from "../scenario-of";
 import { SLIDE_ORDER } from "../types";
-import type { EngineState, FindingKind, MetricEntry, PlgCandidateId, SanityId, SelfServeCandidateId, SlideTitleKey, SourceRef, ToolId } from "../types";
-import { mergeStrings } from "../strings";
+import type { EngineState, FindingKind, MetricEntry, MktSide, PlgCandidateId, SanityId, SelfServeCandidateId, SlideTitleKey, SourceRef, ToolId } from "../types";
+import { marketplaceStrings, mergeStrings } from "../strings";
 import { knownIn } from "../values";
 import { CTX_EN, CTX_FR, EN, FR } from "./props";
 import {
@@ -670,6 +670,33 @@ function sweep(): Sweep {
             for (const line of impact.lines) add(`what-if ${id} ${line.key}`, chainLine(line, impact, subjectOf(id, strings, metrics), target, strings, locale).text, false);
           }
         }
+        // The deck, in both vocabularies and with the what-ifs the example carries (A23 MKT-8): every slide of every side, read with ITS
+        // side's words (a title is resolved at render with one set, `slideStrings`), the total with the neutral set, then the text export.
+        for (const offering of ["products", "services"] as const) {
+          const tag = offering === "services" ? " [services]" : "";
+          const moved = { ...state, setup: { ...state.setup, offering }, whatIf: { ...EXAMPLE_MKT_WHATIF, "mkt.sell.arpa": 55, "mkt.sell.paid-churn": 2 } } as EngineState;
+          const catalog = p.typeCatalogs[offering === "services" ? "marketplace-services" : "marketplace"];
+          const forSide = (side: MktSide | null) => marketplaceStrings(p.strings, p.typeStrings.marketplace, offering, side);
+          const neutral = forSide(null);
+          for (const [label, deckState] of [["", { ...state, setup: { ...state.setup, offering } } as EngineState], [" with the what-ifs", moved]] as const) {
+            const deckDerived = deriveEngine(deckState, p.ctx, result ?? null, p.bridges, neutral.units);
+            const deck = buildDeck(deckState, deckDerived, neutral, catalog.metrics, p.ctx, { derived: catalog.derived, bridges: p.bridges, stringsForSide: forSide });
+            const at = (where: string) => `${where}${tag}${label}`;
+            for (const slide of deck.slides) {
+              if (!slide.present) continue;
+              out.titleKeys.add(slide.title.key);
+              add(at(`${slide.id} title`), renderTitle(slide.title, slide.side ? forSide(slide.side) : neutral), true);
+              slide.lines.forEach((line, i) => {
+                for (const [key, value] of Object.entries(line)) if (!MACHINE_KEYS.has(key) && value !== "") add(at(`${slide.id} line ${i} ${line.row}.${key}`), value, true);
+              });
+              slide.notes.forEach((note, i) => add(at(`${slide.id} note ${i}`), note, true));
+              if (slide.curve?.note) add(at(`${slide.id} curve.note`), slide.curve.note, true);
+              if (slide.curve) add(at(`${slide.id} curve.summary`), slide.curve.summary, true);
+            }
+            add(at("footer"), deck.footer.text, true);
+            add(at("markdown"), deckMarkdown(deck, neutral, forSide), true);
+          }
+        }
         continue;
       }
 
@@ -745,6 +772,29 @@ function sweep(): Sweep {
 }
 
 const SWEEP = sweep();
+
+/**
+ * The one named exemption of the rule « a slide never addresses the reader » (A23 MKT-8, relance 2026-10-28). The marketplace's
+ * gross-margin number says, in its catalogue formula, « remboursements à ta charge » / "refunds you bear" (`mkt.rev.gross-margin`,
+ * `formula`, in the products' catalogue and in its « services » twin): it is §22.4's text word for word, and the appendix pages of
+ * the deck print every formula. Whether to rewrite it or to keep this exemption is a question of the bon à tirer A23.d
+ * (`docs/engine/a23d-a-regarder.md`); the copy is not changed here.
+ *
+ * As narrow as it can be: it recognises the whole formula string (read from the two catalogues by id and field, through the
+ * slide glyphs the appendix applies), and only on an appendix page's formula or text line or in the text export that carries
+ * them. A « ta » or a "you" anywhere else on a marketplace slide, or in another sentence of the appendix, still fails.
+ * `the exemption is still needed` below fails once the formula is rewritten, which is the cue to delete this block.
+ *
+ * Non-vacuity (2026-10-28, one sabotage at a time, restored after; counts measured, the tests that fall): « ta cible » put back in
+ * another string of a marketplace slide (the total's note) drops 1 test, « ton côté » 1, "your side's slides" in English 1; the
+ * exemption removed 2 (the rule, which then finds the formula, and the check that nothing else is exempt); the formula rewritten
+ * without « ta » 1 (`the exemption is still needed`).
+ */
+const MARGIN_FORMULAS: readonly string[] = (["fr", "en"] as const).flatMap((locale) =>
+  (["marketplace", "marketplace-services"] as const).map((kind) => slideGlyphs((locale === "fr" ? FR : EN).typeCatalogs[kind].metrics.find((m) => m.id === "mkt.rev.gross-margin")!.formula)),
+);
+const isAnnexFormulaSample = (where: string) => /^annex(?::\d+)? line \d+ annex\.(?:formula|text)/.test(where) || where.startsWith("markdown");
+const withoutMarginFormula = (s: Sample) => (isAnnexFormulaSample(s.where) ? MARGIN_FORMULAS.reduce((text, formula) => text.split(formula).join(""), s.text) : s.text);
 
 // --- The rules ---------------------------------------------------------------
 
@@ -856,7 +906,7 @@ const RULES: Rule[] = [
     name: "a slide never addresses the reader (« ta cible », \"your\")",
     applies: (s) => s.slide,
     check: (s) => {
-      const t = unquoted(s.text);
+      const t = unquoted(withoutMarginFormula(s));
       const m = s.locale === "fr" ? t.match(/.{0,20}(?<!\p{L})(?:tu|te|toi|ton|ta|tes)(?!\p{L}).{0,20}/iu) : t.match(/.{0,20}\b(?:you|your)\b.{0,20}/i);
       return m?.[0] ?? null;
     },
@@ -944,6 +994,19 @@ describe("the sweep reaches every sentence it claims to", () => {
       expect(all, needle).toContain(needle);
     for (const where of ["finding below-comparator", "finding unit-econ-loss", "diagnosis supply unpriced", "diagnosis demand named", "what-if mkt.liq.fill-rate then", "what-if mkt.sell.paid-conversion times", "what-if mkt.buy.churn then", "what-if mkt.sell.paid-churn today"])
       expect(SWEEP.samples.some((s) => s.where.startsWith(where)), where).toBe(true);
+  });
+
+  it("the exemption of « a slide never addresses the reader » is still needed, and the sweep does reach it: the four margin formulas still say « ta » or \"you\", on the appendix", () => {
+    expect(MARGIN_FORMULAS).toHaveLength(4);
+    for (const formula of MARGIN_FORMULAS) {
+      expect(formula, "the formula was rewritten: delete the exemption").toMatch(/(?<!\p{L})ta(?!\p{L})|\byou\b/u);
+      expect(SWEEP.samples.some((s) => isAnnexFormulaSample(s.where) && s.text.includes(formula)), formula).toBe(true);
+    }
+    // Only the formulas are exempt: what is left of those samples says nothing to the reader, in either language.
+    const exempted = SWEEP.samples.filter((s) => isAnnexFormulaSample(s.where) && MARGIN_FORMULAS.some((f) => s.text.includes(f)));
+    expect(exempted.length).toBeGreaterThan(50);
+    const addressed = (s: (typeof exempted)[number]) => (s.locale === "fr" ? /(?<!\p{L})(?:tu|te|toi|ton|ta|tes)(?!\p{L})/iu : /\b(?:you|your)\b/i).test(unquoted(withoutMarginFormula(s)));
+    expect(exempted.filter(addressed).map((s) => `${s.scenario} — ${s.where}`)).toEqual([]);
   });
 
   it("and reaches the forms the rules are about", () => {

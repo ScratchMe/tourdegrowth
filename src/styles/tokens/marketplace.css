@@ -14,8 +14,9 @@
  * `[data-world]`, as engine.css's and money.css's colour blocks are (a var()
  * resolves where it is declared; token-sources.test.ts holds the rule).
  *
- * Ported with its components: --market-ledger-name and --market-ledger-rule
- * wait in dead-tokens.test.ts for SlideStreams (A23 MKT-8).
+ * Ported with its components. Every token has its reader: SlideStreams reads
+ * --market-ledger-name and --market-ledger-rule since A23 MKT-8, and
+ * dead-tokens.test.ts holds no list of waiting tokens for them any more.
  */
 
 :root {
