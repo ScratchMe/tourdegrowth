@@ -1,5 +1,6 @@
 import type { Page } from "@playwright/test";
 import { expect, test, trackedEvents } from "./helpers";
+import { moduleClass } from "./module-class";
 import {
   REFERRAL_PATH,
   acceptResume,
@@ -119,20 +120,20 @@ const UNIT = /%|\bpts?\b/;
 
 /** The figure a tile shows — its value span, not the tile, which also prints targets and deltas. */
 function tileValue(page: Page, testId: string) {
-  return page.getByTestId(testId).locator("[class*='__value']").first();
+  return page.getByTestId(testId).locator(moduleClass("value")).first();
 }
 
 /** The first figure of a quarter's report — the coefficient, with its label, its note and its verdict in words. */
 function firstFigure(page: Page, q: number) {
-  return page.getByTestId(`game-report-${q}`).locator("[class*='__figures'] > div").first();
+  return page.getByTestId(`game-report-${q}`).locator(`${moduleClass("figures")} > div`).first();
 }
 
 /** December's curve: its graduations (not the invisible copies that size their column) and its dashed line's label. */
 function chartTicks(page: Page) {
-  return page.getByTestId("game-chart-metric").locator("[class$='__tick']");
+  return page.getByTestId("game-chart-metric").locator(moduleClass("tick"));
 }
 function chartReference(page: Page) {
-  return page.getByTestId("game-chart-metric").locator("[class*='__referenceLabel']");
+  return page.getByTestId("game-chart-metric").locator(moduleClass("referenceLabel"));
 }
 
 /** The card the CEO asks for heads the hand, with its badge; none in the first quarter. */
@@ -343,7 +344,7 @@ test.describe("a whole year of level 4 through the interface", () => {
       await expect(tileValue(page, "game-dash-patience")).toHaveText(A.patience[q - 1]!);
       await expect(page.getByTestId("game-dash-trust")).toHaveAttribute("data-state", "hidden");
       // The report's first figure is the same coefficient, to the hundredth, with no unit.
-      await expect(firstFigure(page, q).locator("[class*='__figureValue']")).toHaveText(A.metric[q - 1]!);
+      await expect(firstFigure(page, q).locator(moduleClass("figureValue"))).toHaveText(A.metric[q - 1]!);
       await expect(firstFigure(page, q)).not.toContainText(UNIT);
       // An honest year sent no message in anyone's name: the pill never moves.
       await expect(page.getByTestId("game-sent")).toHaveText("0 message envoyé au nom de Thomas");

@@ -4,6 +4,7 @@ import { ENGINE_COPY } from "@/content/engine-copy";
 import { consumerState, exampleState } from "../src/lib/engine/__tests__/fixtures";
 import type { EngineState } from "../src/lib/engine/types";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
+import { moduleClass } from "./module-class";
 import { engineSeed, storedEngineEntry } from "./engine-helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
@@ -107,15 +108,16 @@ for (const locale of ["en", "fr"] as const) {
 test("the PNG keeps a chart's lines: under the unit economics' cost line, ink (A21.9)", async ({ page }) => {
   await openDeck(page, "fr");
   const slide = page.getByTestId("slide-unit-economics");
-  const cost = slide.locator('[data-testid="slide-payback-chart"] svg line[class*="cost"]');
+  const costSelector = `[data-testid="slide-payback-chart"] svg line${moduleClass("cost")}`;
+  const cost = slide.locator(costSelector);
   await expect(cost).toHaveCount(1);
   // The cost line's middle, in the 1 920-pixel slide's own coordinates (the slide on screen is scaled down).
-  const at = await slide.evaluate((el) => {
+  const at = await slide.evaluate((el, selector) => {
     const box = el.getBoundingClientRect();
-    const line = el.querySelector('[data-testid="slide-payback-chart"] svg line[class*="cost"]')!.getBoundingClientRect();
+    const line = el.querySelector(selector)!.getBoundingClientRect();
     const k = 1920 / box.width;
     return { x: Math.round((line.left + line.width / 2 - box.left) * k), y: Math.round((line.top + line.height / 2 - box.top) * k) };
-  });
+  }, costSelector);
   const download = page.waitForEvent("download");
   await page.getByTestId("deck-png-unit-economics").click();
   const [r, g, b] = await pngPixel(page, (await (await download).path())!, at.x, at.y);
@@ -136,17 +138,20 @@ test("the PNG keeps an install's curve a line: ink under the cost line, the pape
   await expect(chart).toHaveCount(1);
   await expect(slide.locator('[data-testid="slide-payback-chart"]')).toHaveCount(0);
   // The cost line's middle, and a point a little above the axis, 3/4 along it — in the 1 920-pixel slide's own coordinates.
-  const at = await slide.evaluate((el) => {
-    const box = el.getBoundingClientRect();
-    const k = 1920 / box.width;
-    const rect = (selector: string) => el.querySelector(`[data-testid="slide-install-payback-chart"] svg ${selector}`)!.getBoundingClientRect();
-    const cost = rect('line[class*="cost"]');
-    const axis = rect('line[class*="axis"]');
-    return {
-      cost: { x: Math.round((cost.left + cost.width / 2 - box.left) * k), y: Math.round((cost.top + cost.height / 2 - box.top) * k) },
-      under: { x: Math.round((axis.left + axis.width * 0.75 - box.left) * k), y: Math.round((axis.top - box.top) * k) - 40 },
-    };
-  });
+  const at = await slide.evaluate(
+    (el, lines) => {
+      const box = el.getBoundingClientRect();
+      const k = 1920 / box.width;
+      const rect = (selector: string) => el.querySelector(`[data-testid="slide-install-payback-chart"] svg ${selector}`)!.getBoundingClientRect();
+      const cost = rect(lines.cost);
+      const axis = rect(lines.axis);
+      return {
+        cost: { x: Math.round((cost.left + cost.width / 2 - box.left) * k), y: Math.round((cost.top + cost.height / 2 - box.top) * k) },
+        under: { x: Math.round((axis.left + axis.width * 0.75 - box.left) * k), y: Math.round((axis.top - box.top) * k) - 40 },
+      };
+    },
+    { cost: `line${moduleClass("cost")}`, axis: `line${moduleClass("axis")}` },
+  );
   const download = page.waitForEvent("download");
   await page.getByTestId("deck-png-unit-economics").click();
   const file = (await (await download).path())!;

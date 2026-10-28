@@ -2,6 +2,7 @@ import type { Locator, Page } from "@playwright/test";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import { exampleState } from "../src/lib/engine/__tests__/fixtures";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
+import { moduleClass } from "./module-class";
 import { storedEngineEntry, writeEngineSeed, openEngineMenu, backToBoard, openNumber, expectLeft } from "./engine-helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
@@ -161,10 +162,10 @@ test("the joiner of a pair sits against the first box, however long its label", 
   await page.getByTestId("engine-number-back").click();
   await openNumber(page, "acq-cac");
   const sheet = page.getByTestId("engine-sheet-acq-cac");
-  const measure = await sheet.locator("#engine-acq-cac-num").evaluate((input) => {
+  const measure = await sheet.locator("#engine-acq-cac-num").evaluate((input, selectors) => {
     const box = input.parentElement!;
-    const row = box.closest('[class*="rowGrid"]')!;
-    const joiner = row.querySelector(':scope > [class*="joiner"]')!;
+    const row = box.closest(selectors.rowGrid)!;
+    const joiner = row.querySelector(selectors.joiner)!;
     const label = row.querySelector(":scope > :first-child label")!;
     return {
       gap: joiner.getBoundingClientRect().left - box.getBoundingClientRect().right,
@@ -172,7 +173,7 @@ test("the joiner of a pair sits against the first box, however long its label", 
       labelWider: label.getBoundingClientRect().width > box.getBoundingClientRect().width,
       joiner: joiner.textContent,
     };
-  });
+  }, { rowGrid: moduleClass("rowGrid"), joiner: `:scope > ${moduleClass("joiner")}` });
   expect(measure.joiner).toBe("sur");
   // The case under test: a label wider than its box (it wraps now, over the box and the joiner).
   expect(measure.labelWider).toBe(true);

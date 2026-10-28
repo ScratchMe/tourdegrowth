@@ -1,5 +1,6 @@
 import type { Page } from "@playwright/test";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
+import { moduleClass } from "./module-class";
 
 /**
  * Design I + B, the spaces' half (retained by Antoine on 2026-09-28): the
@@ -43,7 +44,8 @@ test.describe("the landing's strip: the race in three cards", () => {
         locale === "fr" ? ["Le diagnostic", "Le moteur", "Le côté obscur"] : ["The check-up", "The engine", "The dark side"],
       );
 
-      const cards = await strip.locator("li").evaluateAll((els) =>
+      const cards = await strip.locator("li").evaluateAll(
+        (els, selectors) =>
         els.map((el) => {
           const box = el.getBoundingClientRect();
           return {
@@ -51,13 +53,14 @@ test.describe("the landing's strip: the race in three cards", () => {
             state: el.getAttribute("data-state"),
             world: el.getAttribute("data-world"),
             border: getComputedStyle(el).borderTopStyle,
-            when: el.querySelector('[class*="when"]')!.textContent,
-            chipHidden: el.querySelector('[class*="chip"]')!.getAttribute("aria-hidden"),
+            when: el.querySelector(selectors.when)!.textContent,
+            chipHidden: el.querySelector(selectors.chip)!.getAttribute("aria-hidden"),
             top: box.top,
             bottom: box.bottom,
             right: box.right,
           };
         }),
+        { when: moduleClass("when"), chip: moduleClass("chip") },
       );
       expect(cards.map((c) => c.space)).toEqual(["tour", "engine", "game"]);
 
@@ -160,17 +163,17 @@ test.describe("the engine in its colour", () => {
     }) => {
       await page.setViewportSize({ width, height: 900 });
       await page.goto(`/${locale}/aarrr-funnel-template`);
-      const colours = await page.evaluate(() => {
+      const colours = await page.evaluate((eyebrowSelector) => {
         const color = (sel: string) => getComputedStyle(document.querySelector(sel)!).color;
         const privacy = getComputedStyle(document.querySelector('[data-testid="engine-privacy"]')!);
         return {
-          eyebrow: color("main [class*='eyebrow']"),
+          eyebrow: color(eyebrowSelector),
           privacyEdge: privacy.borderTopColor,
           privacyStyle: privacy.borderTopStyle,
           durationRule: getComputedStyle(document.querySelector('[data-testid="engine-duration"] dl > div')!).borderTopColor,
           toolRule: getComputedStyle(document.querySelector("#engine")!).borderTopColor,
         };
-      });
+      }, `main ${moduleClass("eyebrow")}`);
       expect(colours.eyebrow).toBe(ULTRAMARINE);
       expect(colours.privacyEdge).toBe(ULTRAMARINE);
       expect(colours.privacyStyle).toBe("solid");

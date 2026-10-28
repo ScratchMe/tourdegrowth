@@ -2,6 +2,7 @@ import type { Page } from "@playwright/test";
 import type { EngineState, PlgLeverId } from "../src/lib/engine/types";
 import { exampleState, measured as entry, ratio, withEntry } from "../src/lib/engine/__tests__/fixtures";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, openFold, readEachOnScreen, SKIP_ADMIN_REASON, test } from "./helpers";
+import { moduleClass } from "./module-class";
 import { engineSeed } from "./engine-helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
@@ -88,7 +89,7 @@ for (const locale of ["fr", "en"] as const) {
 
     test("C53: the what-ifs' titles say their gain in ink; the red stays the verdict's (what we can't see)", async ({ page }) => {
       await openDeckWith(page, locale, { "ret.logo-churn": 1.5, "act.rate": 24 });
-      const accents = (id: string) => page.getByTestId(`slide-${id}`).locator('h3 [class*="accent"]');
+      const accents = (id: string) => page.getByTestId(`slide-${id}`).locator(`h3 ${moduleClass("accent")}`);
       for (const id of ["whatif:act.rate", "whatif:ret.logo-churn", "scenario", "visibility"]) await expect(accents(id), id).toHaveCount(0);
       // The example measures no day 30: its first slide says what we can't see, in red.
       await expect(accents("peloton")).toHaveCount(1);

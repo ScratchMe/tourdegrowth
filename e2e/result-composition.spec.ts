@@ -1,4 +1,5 @@
 import { expect, test } from "./helpers";
+import { moduleClass } from "./module-class";
 
 /**
  * Design system extension 03 — the result page recomposed.
@@ -85,9 +86,9 @@ test.describe("the bottleneck block", () => {
     // a second element somewhere else on the page. Measured, because the
     // first version of this assertion looked for a test id on the block
     // itself and could only ever pass.
-    const card = (await page.locator('[class*="slotScore"]').boundingBox())!;
+    const card = (await page.locator(moduleClass("slotScore")).boundingBox())!;
     const box = (await block.boundingBox())!;
-    await expect(page.locator('[class*="slotScore"]')).toContainText("74");
+    await expect(page.locator(moduleClass("slotScore"))).toContainText("74");
     expect(box.y).toBeGreaterThan(card.y);
     expect(box.y + box.height).toBeLessThanOrEqual(card.y + card.height + 1);
   });
@@ -207,18 +208,18 @@ test.describe("what the reading order costs is bounded, and checked", () => {
 
     const blocks = await page.evaluate((slots) => {
       const wanted = slots
-        .map((s) => document.querySelector(`[class*="${s}"]`))
+        .map(({ selector }) => document.querySelector(selector))
         .filter((el): el is Element => el !== null);
       // Document order, taken from the document rather than from the query
       // order, so this measures the sequence a screen reader follows.
       return [...document.querySelectorAll("*")]
         .filter((el) => wanted.includes(el))
         .map((el, dom) => ({
-          slot: slots.find((s) => String(el.className).includes(s))!,
+          slot: slots.find(({ selector }) => el.matches(selector))!.slot,
           dom,
           top: Math.round(el.getBoundingClientRect().top + window.scrollY),
         }));
-    }, SLOTS);
+    }, SLOTS.map((slot) => ({ slot, selector: moduleClass(slot) })));
 
     expect(blocks.length, "the slot class names moved — this measures nothing now").toBeGreaterThan(6);
 
@@ -258,15 +259,16 @@ test.describe("the score sheet", () => {
       await sheet.waitFor();
       await expect(sheet).toHaveAttribute("aria-label", locale === "fr" ? "Score par étape, sur 20" : "Score per stage, out of 20");
 
-      const rows = await sheet.evaluate((ol) =>
+      const rows = await sheet.evaluate(
+        (ol, selectors) =>
         [...ol.querySelectorAll(":scope > li")].map((li) => {
           const css = getComputedStyle(li);
           const r = li.getBoundingClientRect();
-          const score = li.querySelector('[class*="score"]')!.getBoundingClientRect();
-          const name = li.querySelector('[class*="name"]')!.getBoundingClientRect();
+          const score = li.querySelector(selectors.score)!.getBoundingClientRect();
+          const name = li.querySelector(selectors.name)!.getBoundingClientRect();
           return {
             text: (li.textContent ?? "").replace(/\s+/g, " ").trim(),
-            alert: li.className.includes("alert"),
+            alert: li.matches(selectors.alert),
             top: r.top,
             height: r.height,
             width: r.width,
@@ -277,6 +279,7 @@ test.describe("the score sheet", () => {
             nameLeft: Math.round(name.left),
           };
         }),
+        { score: moduleClass("score"), name: moduleClass("name"), alert: moduleClass("alert") },
       );
 
       expect(rows.length, "the score sheet moved — this measures nothing now").toBe(5);
