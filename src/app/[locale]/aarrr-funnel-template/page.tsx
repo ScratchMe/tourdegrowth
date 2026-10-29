@@ -110,6 +110,10 @@ export default async function EnginePage({ params }: PageProps) {
   const { strings } = props;
   // The business types this build opens (§21.3): read once, for the island and for the FAQ's sentence about them.
   const openTypes = openTypesAtBuild();
+  // The sentence the FAQ's fifth answer adds (§22.8.5 h): one for the app, one for the marketplace, one for both, none for neither.
+  const appOpen = openTypes.includes("consumer-app");
+  const marketplaceOpen = openTypes.includes("marketplace");
+  const typeNote = appOpen && marketplaceOpen ? strings.faqTypeNote.both : appOpen ? strings.faqTypeNote.consumerApp : marketplaceOpen ? strings.faqTypeNote.marketplace : null;
   const t = strings.page;
   // No setup here: no event named, no window chosen. Generic words and bracketed slots fill the catalogue
   // (« … ayant déclenché l'événement d'activation sous n jours », « inscrits en [mois de cohorte] »), from the
@@ -356,7 +360,7 @@ export default async function EnginePage({ params }: PageProps) {
                   {item.a}
                   {/* D15, C63: the fifth answer (« How is this different from the Tour? ») also says which other types the
                       engine serves, once the build opens one. The count of six questions stays; the answer stays under 400. */}
-                  {index === FAQ_TYPES_ANSWER && openTypes.includes("consumer-app") ? ` ${strings.faqTypeNote.consumerApp}` : null}
+                  {index === FAQ_TYPES_ANSWER && typeNote ? ` ${typeNote}` : null}
                 </p>
               </Disclosure>
             ))}
