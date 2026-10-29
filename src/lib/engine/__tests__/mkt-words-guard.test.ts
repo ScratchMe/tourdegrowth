@@ -36,8 +36,13 @@ import { CTX_EN, CTX_FR, EN, FR } from "./props";
  * English verb "paying back"; and « client » on the demand side in « services » (§22.8.4: acheteur → client), which
  * `DEMAND_WORDS_SERVICES` leaves out of the rule.
  *
- * Non-vacuity, measured on 2026-10-29 (each break alone, this file run, the file restored): see the entry « A23, MKT-10 » of
- * `JOURNAL.md` for the counts.
+ * Non-vacuity, measured on 2026-10-29 (each break alone, this file and `src/content` run — 737 tests, green before each —, the file
+ * put back with `git checkout`; the count is the tests that fall): « MRR » put in the French title of the demand's funnel slide 4,
+ * « client » put in the supply funnel's French column 4 (the two products-French variants with and without the what-ifs, with and
+ * without the subscriptions); the named phrase « Abonnés sous » made dead 6 (four decks, two self-tests); `refusedIn` without its
+ * « SaaS » check 2; the demand rule without its « MRR » acronym 5 (three of the copy test's). **One break measured 0 and said
+ * something**: « SaaS » put in `mkt.total.note`, the note under the total slide's register — the note is drawn on the slide and
+ * is not in the text export this test reads, so only `e2e/engine-marketplace.spec.ts` (the slides on screen) sees it: 1 spec.
  */
 
 type Locale = "fr" | "en";

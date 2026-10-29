@@ -435,7 +435,7 @@ APP-6, APP-9 et APP-11.
 | A22.d | **Le bon à tirer** de la copie neuve (`/bon-a-tirer`) ; ce que les relectures d'A22 ont relevé pour lui est dans [`docs/engine/a22d-a-regarder.md`](docs/engine/a22d-a-regarder.md), à mettre sous les yeux d'Antoine avec les cartes du grep | Agent des bons à tirer, puis Antoine | **Construit le 2026-10-19** : le [nº13](https://claude.ai/artifact/DniaePcxr2vTe8jAtzZvp7), 45 cartes, les relevés de `a22d-a-regarder.md` sur leurs cartes et trois décisions en tête. Reste : les réponses d'Antoine, puis les appliquer. **L'ouverture du moteur l'attend** (C104) |
 | A22.e | **L'ouverture, avec celle du moteur** (C104, 2026-10-12 : l'app et le SaaS ouvrent ensemble) : `ENGINE_TYPES=consumer-app` posé dans Vercel dans le même geste qu'`ENGINE_ENABLED`, puis redéployer ; dans le même geste, avancer `CONTENT_UPDATED_AT["/aarrr-funnel-template"]` (`src/content/updated-at.ts`), que rien d'A22 n'a bougé puisque le type était fermé (relevé par la relecture d'APP-11) | Antoine (D2) | Après A22.d |
 
-### A23 — La place de marché (spécifiée le 2026-10-04, prête à exécuter)
+### A23 — La place de marché (spécifiée le 2026-10-04, codée le 2026-10-29, type fermé)
 
 **La spécification est `ENGINE.md` §22, dans
 [`docs/engine/place-de-marche.md`](docs/engine/place-de-marche.md)**,
@@ -471,14 +471,14 @@ d'après A22), MKT-1, MKT-4, MKT-6, MKT-7b (le tableau), MKT-8 et MKT-10.
 | MKT-7b | le tableau : le total, le prochain pas partagé, le sélecteur, le côté affiché, la liste commune ; la barrière levée | MKT-6, MKT-S, MKT-7a | ☑ 2026-10-28 ([#393](https://github.com/ScratchMe/tourdegrowth/pull/393)) |
 | MKT-8 | les slides : le total en registre, les quatre slides de chaque côté | MKT-7b | ☑ 2026-10-28 ([#394](https://github.com/ScratchMe/tourdegrowth/pull/394)) |
 | MKT-9 | l'exemple et le golden | MKT-8 | ☑ 2026-10-29 ([#395](https://github.com/ScratchMe/tourdegrowth/pull/395)) |
-| MKT-10 | la garde à l'écran, les e2e, `ci.yml`, la documentation | MKT-9 | ☐ |
+| MKT-10 | la garde à l'écran, les e2e, `ci.yml`, la documentation | MKT-9 | ☑ 2026-10-29 |
 
 | # | Quoi | Qui | État |
 |---|---|---|---|
 | A23.a | **La spécification**, puis les décisions C64 à C74 et C93, puis **sa réécriture** en guide d'exécution, et le brief 10 écrit (`design/DS-EXTENSION-BRIEF-10.md`) | Session, Antoine | **Fait le 2026-10-04** ([#333](https://github.com/ScratchMe/tourdegrowth/pull/333)) |
 | A23.b | **Le modèle pur** (`mkt-model.ts`, ses tests) | Session | **Livré le 2026-10-04** ([#329](https://github.com/ScratchMe/tourdegrowth/pull/329)) |
-| A23.c | **Le code** : les quinze unités ci-dessus, une PR chacune, le type fermé | Orchestrateur et sous-agents (prompt H) | MKT-B livrée le 2026-10-04 ; le reste après A22.c, MKT-7a dès MKT-R. ~32,5 jours-agent |
-| A23.d | **Le bon à tirer** de la copie neuve, en « produits » et en « services », avec ce que les relectures d'A23 ont gardé pour lui (`docs/engine/a23d-a-regarder.md`) | Agent des bons à tirer, puis Antoine | Après MKT-10 |
+| A23.c | **Le code** : les quinze unités ci-dessus, une PR chacune, le type fermé | Orchestrateur et sous-agents (prompt H) | **Livré le 2026-10-29** (MKT-B à MKT-10) ; la CI ouvre le type (`ENGINE_TYPES: "consumer-app,marketplace"`), la production non |
+| A23.d | **Le bon à tirer** de la copie neuve, en « produits » et en « services », avec ce que les relectures d'A23 ont gardé pour lui (`docs/engine/a23d-a-regarder.md`) | Agent des bons à tirer, puis Antoine | **À construire** (MKT-10 est livrée le 2026-10-29). S'y ajoutent ce que MKT-10 lui laisse : les deux définitions de la commission et du revenu net, dont l'une dit « SaaS » et l'autre « MRR » (`mkt.terms.takeRate`, `mkt.terms.netRevenue` : deux exceptions nommées de la garde), et les trois tournures du côté de l'offre que la garde laisse passer une à une (`NAMED_PHRASES`, `src/content/__tests__/mkt-words.ts`) |
 | A23.e | **L'ouverture** (`ENGINE_TYPES=consumer-app,marketplace`) puis la re-synchro avec Claude Design (`/design-sync`), qui emporte les composants neufs ; dans le même geste, avancer `CONTENT_UPDATED_AT["/aarrr-funnel-template"]` (`src/content/updated-at.ts`), que rien d'A23 ne bouge tant que le type est fermé (relevé par la relecture de MKT-3, comme pour A22.e). **Probablement avec celle du moteur** (C104, à confirmer par Antoine quand A23 approchera : l'ouverture du moteur attendrait alors tout A23) | Antoine (D2, prompt B) | Après A23.d |
 
 ### A24 — Les trois derniers niveaux du jeu (ouvert le 2026-10-04)

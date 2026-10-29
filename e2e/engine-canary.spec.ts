@@ -523,6 +523,9 @@ test.describe("the consumer app keeps everything in the browser too (D16, §21.1
  *
  * Needs a build whose `ENGINE_TYPES` opens the marketplace (CI's): without it the start card has no such answer, and the spec
  * skips with its reason.
+ *
+ * Non-vacuity, measured on 2026-10-29: the island's `persist` sending the engine away (`fetch("/api/engine-leak", { method: "POST",
+ * body: JSON.stringify(next) })`) falls this spec and the three above it (4), on the canaries and on the non-GET assertion; put back, green.
  */
 test.describe("the marketplace keeps everything in the browser too (D16, §22.11.4)", () => {
   test.skip(!MARKETPLACE_OPEN, 'ENGINE_TYPES does not hold "marketplace" for this build — the start card has no marketplace to choose.');

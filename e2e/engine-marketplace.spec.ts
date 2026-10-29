@@ -30,6 +30,14 @@ test.beforeEach(async ({ context }) => {
  * definitions are mounted only when open) — and the whole island for « SaaS » alone. `main` itself carries the landing page's
  * and the catalogue's SaaS words: the island, `engine-workbench`, is the scope.
  *
+ * Non-vacuity, measured on 2026-10-29 (each break alone, a build of the CI's environment, this spec run — 18 specs open, 2 closed): « MRR » put
+ * in the net revenue's sentence of the demand's money (`mkt.money.perBuyerNote`, a leaf the copy test does not read, so only this spec sees
+ * it) falls 8 — the typed board, the levers, the unticked subscriptions and the example, in both languages; the marketplace never open
+ * (`openTypesWith` ignoring the list) falls 6 — the start card and the example in both languages, the FAQ's sentence twice — and always open,
+ * on a build whose variable lacks it, falls both « type fermé » specs (18 skip); « SaaS » in the note under the total slide falls the
+ * slides spec (1, in French — the French leaf only). The FAQ's sentence of the app, with both types open, is `engine-consumer.spec.ts`'s too:
+ * the page naming the app's sentence for both falls 4 specs (two here, two there).
+ *
  * CI builds with `ENGINE_TYPES=consumer-app,marketplace`: the type is open, and the last block (« type fermé ») skips. Run
  * locally on a build WITHOUT `marketplace` in the variable, it is the other way round: the open half skips, the closed half
  * runs — the motive of `engine-consumer.spec.ts`. CI never runs the closed half; its guards there are unit tests
