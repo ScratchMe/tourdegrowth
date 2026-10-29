@@ -103,6 +103,9 @@ describe("golden marketplace — the marketplace reads the same after the change
     expect(inputs["example-whatif"]!.whatIf).toEqual(EXAMPLE_MKT_WHATIF);
     expect(inputs.example!.whatIf).toBeUndefined();
     expect(Object.keys(inputs.empty!.snapshots[0]!.metrics)).toEqual([]);
+    // The example the golden freezes is the one the page builds: the fixtures read `exampleEngine`, as `ExampleView` does.
+    expect(inputs.example).toEqual(marketplaceState());
+    expect(inputs["no-subscriptions"]).toEqual(marketplaceNoSubscriptionsState());
   });
 
   for (const name of Object.keys(inputs)) {

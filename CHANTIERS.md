@@ -470,7 +470,7 @@ d'après A22), MKT-1, MKT-4, MKT-6, MKT-7b (le tableau), MKT-8 et MKT-10.
 | MKT-7a | les composants du retour 10 : `SideShown`, `SideFunnel`, `SideNote`, les deltas de `MrrCurve` et `NumberList`, les jetons | MKT-R | ☑ 2026-10-27 ([#391](https://github.com/ScratchMe/tourdegrowth/pull/391)) |
 | MKT-7b | le tableau : le total, le prochain pas partagé, le sélecteur, le côté affiché, la liste commune ; la barrière levée | MKT-6, MKT-S, MKT-7a | ☑ 2026-10-28 ([#393](https://github.com/ScratchMe/tourdegrowth/pull/393)) |
 | MKT-8 | les slides : le total en registre, les quatre slides de chaque côté | MKT-7b | ☑ 2026-10-28 ([#394](https://github.com/ScratchMe/tourdegrowth/pull/394)) |
-| MKT-9 | l'exemple et le golden | MKT-8 | ☐ |
+| MKT-9 | l'exemple et le golden | MKT-8 | ☑ 2026-10-29 |
 | MKT-10 | la garde à l'écran, les e2e, `ci.yml`, la documentation | MKT-9 | ☐ |
 
 | # | Quoi | Qui | État |
