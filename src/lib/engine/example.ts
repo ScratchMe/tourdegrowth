@@ -231,6 +231,12 @@ export function exampleMarketplaceMetrics(): Partial<Record<MetricId, MetricEntr
   };
 }
 
+/** What a marketplace's example reads from its setup (§22.10.1): the words it is shown in, and whether the sellers pay a subscription. */
+export interface ExampleMarketplace {
+  offering?: "products" | "services";
+  sellerSubscriptions?: boolean;
+}
+
 /**
  * A fresh copy each call: callers may change it (the example's own slide
  * choices live in memory only). `motions` shows the example in the motions
@@ -238,24 +244,38 @@ export function exampleMarketplaceMetrics(): Partial<Record<MetricId, MetricEntr
  *
  * `type` "consumer-app" (§21.9.1) builds the app of `exampleConsumerMetrics` instead, earning from `monetization`
  * (the example's three ways when absent): it is self-serve only, and sales-assisted is refused.
+ *
+ * `type` "marketplace" (§22.10.1) builds the marketplace of `exampleMarketplaceMetrics`, in the words of `mkt.offering`
+ * (products when absent) and with the sellers paying a subscription unless `mkt.sellerSubscriptions` says they don't
+ * (they do when absent). A marketplace ticks no motion box (§22.3): a ticked one is refused. `words.event` and
+ * `words.channel` are read by no entry of it; only `words.company` is.
  */
 export function exampleEngine(
   words: ExampleWords,
   motions: Record<Motion, boolean> = { plg: true, slg: false },
   type: BusinessType = "b2b-saas",
   monetization?: AppMonetization,
+  mkt?: ExampleMarketplace,
 ): EngineState {
   const app = type === "consumer-app";
+  const marketplace = type === "marketplace";
   if (app && motions.slg) throw new Error("The consumer app example has no sales-assisted motion");
+  if (marketplace && (motions.plg || motions.slg)) throw new Error("The marketplace example ticks no motion");
   const hybrid = motions.plg && motions.slg;
-  const metrics = app
-    ? exampleConsumerMetrics(words)
-    : {
-        ...(motions.plg ? exampleMetrics(words) : {}),
-        ...(motions.slg ? exampleSlgMetrics(words) : {}),
-        ...(hybrid ? exampleLinkMetrics(words) : {}),
-      };
-  const targets = app ? { ...EXAMPLE_CONSUMER_TARGETS } : { ...(motions.plg ? EXAMPLE_TARGETS : {}), ...(motions.slg ? EXAMPLE_SLG_TARGETS : {}) };
+  const metrics = marketplace
+    ? exampleMarketplaceMetrics()
+    : app
+      ? exampleConsumerMetrics(words)
+      : {
+          ...(motions.plg ? exampleMetrics(words) : {}),
+          ...(motions.slg ? exampleSlgMetrics(words) : {}),
+          ...(hybrid ? exampleLinkMetrics(words) : {}),
+        };
+  const targets = marketplace
+    ? { ...EXAMPLE_MKT_TARGETS }
+    : app
+      ? { ...EXAMPLE_CONSUMER_TARGETS }
+      : { ...(motions.plg ? EXAMPLE_TARGETS : {}), ...(motions.slg ? EXAMPLE_SLG_TARGETS : {}) };
   return structuredClone({
     schemaVersion: ENGINE_SCHEMA_VERSION,
     id: "00000000-0000-4000-8000-000000000060",
@@ -270,17 +290,19 @@ export function exampleEngine(
       qualificationWindowDays: 30,
       goLiveWindowDays: 90,
       ...(app ? { monetization: { ...(monetization ?? { subscriptions: true, purchases: true, ads: true }) } } : {}),
+      ...(marketplace ? { offering: mkt?.offering ?? "products", sellerSubscriptions: mkt?.sellerSubscriptions ?? true } : {}),
       ...(words.company ? { companyLabel: words.company } : {}),
     },
     snapshots: [
       {
         id: "00000000-0000-4000-8000-000000000061",
         referenceMonth: "2026-08",
-        cohortMonth: "2026-07",
+        // The marketplace follows May's sign-ups: mature for its longest window on the example's 24 September (§22.10.1).
+        cohortMonth: marketplace ? "2026-05" : "2026-07",
         createdAt: "2026-09-24T08:00:00.000Z",
         metrics,
         targets,
-        ...(app ? { base: { ...EXAMPLE_CONSUMER_BASE } } : motions.slg ? { base: { ...EXAMPLE_SLG_BASE } } : {}),
+        ...(marketplace ? { base: { ...EXAMPLE_MKT_BASE } } : app ? { base: { ...EXAMPLE_CONSUMER_BASE } } : motions.slg ? { base: { ...EXAMPLE_SLG_BASE } } : {}),
       },
     ],
     tourLink: null,
