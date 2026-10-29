@@ -4086,6 +4086,17 @@ Ton compte rendu, en français : une liste numérotée de constats, rangés par 
 - **Arrêt** : un nombre de §22.10.2 absent des sorties.
 - **Relecteurs** : copie.
 - **Pause** : l'exemple de la place de marché est visible derrière le drapeau.
+- **Ce qu'MKT-9 a fait autrement** (2026-10-29, [#395](https://github.com/ScratchMe/tourdegrowth/pull/395)) : l'exemple est
+  toujours la place de marché « produits » avec abonnements, quoi que dise la
+  carte de départ (le précédent d'APP-10) ; son tableau
+  (`MarketExample`, dans `ExampleView.tsx`) montre la bande, la couverture, le
+  sélecteur et le côté affiché, sans prochain pas ni liste, et ses « Et si »
+  bougent en mémoire seulement ; les deux fixtures (`marketplaceState()`,
+  `marketplaceNoSubscriptionsState()`) lisent `exampleEngine`, à l'octet près
+  de leur ancien corps ; `example.bannerBodyMkt` garde le cadre
+  d'`example.bannerBody` et nomme les cinq cibles de l'exemple ; le golden
+  (`golden-mkt.json`) fige six états aux deux langues, et un second bloc relit
+  chaque ligne de §22.10.2 dans le fichier écrit.
 
 #### MKT-10 — La garde à l'écran, les e2e, la documentation
 
