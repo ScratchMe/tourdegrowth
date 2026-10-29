@@ -184,6 +184,61 @@ export const SUPPLY_TARGETS = {
   en: ["subscription MRR", "subscription ARR", "seller sign-up", "seller sign-ups", "seller page visitors", "LTV:CAC"],
 } as const;
 
+/**
+ * What the on-screen guard of MKT-10 (§22.11.3) holds a "services" marketplace to, derived from the lists above so the three
+ * can never drift: « client » is the services word for the buyer (§22.8.4, acheteur → client), so the DEMAND side may say it
+ * ("DEMAND_WORDS ne s'applique qu'en « produits »" for that word alone — every other word of the rule, and the acronyms, still
+ * apply); the SUPPLY side keeps « client » in its rule, and the one sentence where it speaks of the other side's people is a named
+ * phrase (`NAMED_PHRASES`); and the supply's own expressions are its "produits" ones with the services lexicon applied (vendeur →
+ * prestataire, seller → provider), because « prestataire abonné » holds « abonné » exactly as « vendeur abonné » does.
+ */
+export const DEMAND_WORDS_SERVICES: WordRule = { ...DEMAND_WORDS, fr: new RegExp(DEMAND_WORDS.fr.source.replace("client|", ""), DEMAND_WORDS.fr.flags) };
+export const SERVICES_SUPPLY_TARGETS = {
+  fr: SUPPLY_TARGETS.fr.map((t) => t.replace("vendeur", "prestataire")),
+  en: SUPPLY_TARGETS.en.map((t) => t.replace("seller", "provider")),
+} as const;
+
+/**
+ * The phrases a side says on purpose that the rule would refuse, named one by one (§22.11.3, "exceptions nommées"; A23 MKT-10).
+ * Each has the leaf that carries it and why it stays; the guard takes exactly these phrases out of that side's text and no word
+ * more. Each is held by the guard's own test to still be in its leaf: an exception that stops being one must leave the list.
+ *
+ * - The SUPPLY's bare « abonné » (« Abonnés sous 60 jours », « garder un abonné », « conversion en abonné »), « leur MRR » and
+ *   "their MRR" (the subscriptions' own, as the copy test names `money.arr`): the marketplace's own leaves (`mkt.*`, written for
+ *   it, §22.8.5) use the noun for a seller who pays, which `SUPPLY_TARGETS` only retires in the two-word expressions « vendeur
+ *   abonné ». The text is the specification's word for word; changing it is a copy decision for the bon à tirer A23.d (and would
+ *   move `golden-mkt.json`).
+ * - The English verb "paying back" on BOTH sides (the rule reads « paying » as a word of the SaaS's): the false positive the copy
+ *   test names for `money.monthsLoss`, `money.monthsMaybe`, `slide.chartSummaryMaybe` and `terms.afterPayback.definition`.
+ */
+export interface NamedPhrase {
+  /** The leaf's dotted path in `ENGINE_COPY`, or in the side's sheet of the marketplace's overlay (`ENGINE_COPY_MKT[layer]`) when `layer` says so. */
+  path: string;
+  layer?: "demand" | "supply" | "common";
+  /** The vocabulary the phrase belongs to, when only one: the leaf is then read in that vocabulary's overlay (`ENGINE_COPY_MKT_SERVICES`). Absent: both. */
+  offering?: "products" | "services";
+  locale: "fr" | "en";
+  phrase: string;
+  sides: readonly ("demand" | "supply")[];
+  why: string;
+}
+export const NAMED_PHRASES: readonly NamedPhrase[] = [
+  { path: "mkt.funnel.paid", locale: "fr", phrase: "Abonnés sous", sides: ["supply"], why: "the supply funnel's third column (« Abonnés sous 60 jours »), §22.8.5 funnel table, word for word: the paid sellers, out of the same 100 sign-ups" },
+  { path: "mkt.assumption.supply-priced-by-subscriptions", locale: "fr", phrase: "garder un abonné", sides: ["supply"], why: "§22.8.5 d, word for word: « convertir un vendeur, garder un abonné » — a paid seller, the subscription being all the supply is priced by" },
+  { path: "mkt.assumption.supply-priced-by-subscriptions", locale: "en", phrase: "keeping a subscriber", sides: ["supply"], why: "§22.8.5 d, word for word: \"converting a seller, keeping a subscriber\" — a paid seller, the subscription being all the supply is priced by" },
+  { path: "mkt.money.sellerCostExplained", locale: "fr", phrase: "conversion en abonné", sides: ["supply"], why: "§22.8.5 k, word for word: « {conv} de conversion en abonné » — the supply's own name for the number, as « conversion en abonné » is the word of `settings.firstSalePaidReset`" },
+  { path: "money.arr", layer: "supply", locale: "fr", phrase: "leur MRR", sides: ["supply"], why: "§22.8.5 c, word for word: « ARR des abonnements, leur MRR × 12 » — the bare MRR is the subscriptions' own (the copy test names the same exception)" },
+  { path: "money.arr", layer: "supply", locale: "en", phrase: "their MRR", sides: ["supply"], why: "§22.8.5 c, word for word: \"Subscription ARR, their MRR × 12\" — the bare MRR is the subscriptions' own (the copy test names the same exception)" },
+  { path: "scenario.intro", layer: "supply", offering: "services", locale: "fr", phrase: "Les leviers des clients sont de leur côté", sides: ["supply"], why: "the supply's « Et si » panel, in « services »: « clients » is the services word for the buyers (§22.8.4), whose levers are on the other side — the sentence names the other side's people, as « acheteurs » does in « produits »" },
+  { path: "terms.afterPayback.definition", locale: "en", phrase: "paying back", sides: ["demand", "supply"], why: "the English verb, not a customer who pays: \"before paying back\", §22.8.5 c word for word (the copy test names the same false positive on four leaves)" },
+];
+
+/** The expressions the guard takes out of a SIDE's text before looking for the rule's words: the lexicon's targets for the vocabulary (supply only), and the named phrases. */
+export function targetsFor(side: "demand" | "supply", locale: "fr" | "en", offering: "products" | "services"): string[] {
+  const lexicon = side === "supply" ? (offering === "services" ? SERVICES_SUPPLY_TARGETS : SUPPLY_TARGETS)[locale] : [];
+  return [...lexicon, ...NAMED_PHRASES.filter((p) => p.locale === locale && p.sides.includes(side) && (p.offering === undefined || p.offering === offering)).map((p) => p.phrase)];
+}
+
 /** The text a rule reads: its `{…}` placeholders out (`{arpa}` and `{cac}` are not the words), and, with `targets`, those expressions out. */
 export function readable(text: string, locale: "fr" | "en", targets: readonly string[] = []): string {
   let out = text.replace(/\{[^}]*\}/g, "");
@@ -323,3 +378,34 @@ export const SERVICES_NAMED_EXCEPTIONS: Readonly<Record<string, string>> = {
   "io.mergeRefused.motions": "the SaaS's « les façons de vendre cochées » (ticked motions), wrong for any marketplace, products included; left as written until the bon à tirer decides (docs/engine/a23d-a-regarder.md)",
   "table.reasons.hidden": "the SaaS's « ce chiffre n'est pas dans les façons de vendre cochées » (ticked motions), wrong for any marketplace, products included; left as written until the bon à tirer decides (docs/engine/a23d-a-regarder.md)",
 };
+
+// ------------------------------------------------------------------------------------------------ the on-screen guard (MKT-10, §22.11.3)
+
+/**
+ * Which family of words a text is held to: a demand-side text, a supply-side text, a slide of neither side (the total, the
+ * appendix…: never « SaaS », and, in "products", neither « client » nor « customer »), or any text of the tool (`anywhere`: never
+ * « SaaS » — a number's screen, the settings, the bar read as a whole).
+ */
+export type Kind = "demand" | "supply" | "common" | "anywhere";
+
+/** The vocabulary of a marketplace (`setup.offering`). */
+export type Offering = "products" | "services";
+
+/**
+ * The words a text holds that its kind refuses (§22.11.3), as the rule reads them. Empty: none. THE guard of MKT-10, one function for
+ * the deck (`mkt-words-guard.test.ts`) and the browser (`e2e/engine-marketplace.spec.ts`): a text on a screen and a line of the
+ * export are held to the same lists. `locale` is the language of the text.
+ */
+export function refusedIn(text: string, locale: "fr" | "en", kind: Kind, offering: Offering): string[] {
+  const found: string[] = [];
+  const held = (rule: WordRule, targets: readonly string[] = []): string[] => {
+    const readableText = readable(text, locale, targets);
+    return [...(readableText.match(new RegExp(rule[locale].source, `${rule[locale].flags.replace("g", "")}g`)) ?? []), ...(readableText.match(new RegExp(rule.acronyms.source, "gu")) ?? [])];
+  };
+  if (kind === "demand") found.push(...held(offering === "services" ? DEMAND_WORDS_SERVICES : DEMAND_WORDS, targetsFor("demand", locale, offering)));
+  if (kind === "supply") found.push(...held(SUPPLY_WORDS, targetsFor("supply", locale, offering)));
+  if (kind === "common" || kind === "anywhere") found.push(...(readable(text, locale).match(/SaaS/gi) ?? []));
+  if (kind === "common" && offering === "products") found.push(...(readable(text, locale).match(locale === "fr" ? /client/gi : /customer/gi) ?? []));
+  if (offering === "services") found.push(...servicesWordsHeld(text, locale));
+  return found;
+}

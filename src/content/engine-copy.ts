@@ -3960,14 +3960,24 @@ export const ENGINE_COPY = {
   ],
 
   /**
-   * A sentence added to the FAQ's fifth answer (« En quoi est-ce différent du Tour ? ») when the build opens the consumer
-   * app (`ENGINE_TYPES`, §21.3), and only then (D15, C63). One leaf per type: the marketplace's comes with its own unit.
-   * TODO: à relire (convention 6) — copie neuve, neuf le 2026-10-11, §21.8.4 b (A22 APP-11).
+   * A sentence added to the FAQ's fifth answer (« En quoi est-ce différent du Tour ? ») when the build opens a type other
+   * than the B2B SaaS (`ENGINE_TYPES`, §21.3), and only then (D15, C63). One leaf per case: the consumer app alone, the
+   * marketplace alone, both (`page.tsx` picks from the open types).
+   * TODO: à relire (convention 6) — copie neuve, `consumerApp` neuf le 2026-10-11, §21.8.4 b (A22 APP-11); `marketplace` et
+   * `both` neufs le 2026-10-29, §22.8.5 h (A23 MKT-10).
    */
   faqTypeNote: {
     consumerApp: {
       fr: "Il sert aussi les apps grand public : choisis-la sur la carte de départ.",
       en: "It also works for consumer apps: pick one on the start card.",
+    },
+    marketplace: {
+      fr: "Il sert aussi les places de marché : choisis-la sur la carte de départ.",
+      en: "It also works for marketplaces: pick one on the start card.",
+    },
+    both: {
+      fr: "Il sert aussi les apps grand public et les places de marché : choisis ton type sur la carte de départ.",
+      en: "It also works for consumer apps and marketplaces: pick your type on the start card.",
     },
   },
 };

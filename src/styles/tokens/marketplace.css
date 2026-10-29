@@ -34,7 +34,7 @@
 
   /* The same on a slide (the deck's 1 920 canvas): a column, its head. */
   --market-slide-col: 300px;
-  --market-slide-head: 172px;
+  --market-slide-head: 174px;
 
   /* The liquidity base on a slide: wide enough for its sentence in two
    * lines. */

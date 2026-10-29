@@ -1,9 +1,9 @@
 import AxeBuilder from "@axe-core/playwright";
 import type { Page } from "@playwright/test";
-import { consumerState, exampleState, hybridState, withEntry } from "../src/lib/engine/__tests__/fixtures";
+import { consumerState, exampleState, hybridState, marketplaceState, withEntry } from "../src/lib/engine/__tests__/fixtures";
 import type { EngineState } from "../src/lib/engine/types";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
-import { openEngineMenu, skipToAsks, writeEngineSeed } from "./engine-helpers";
+import { openEngineMenu, openNumber, skipToAsks, writeEngineSeed } from "./engine-helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
 // owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
@@ -37,6 +37,11 @@ test.beforeEach(async ({ context }) => {
  * the type: CI's does), the app's board — its two streams, its money — and its
  * settings, with the type fixed and the ways of earning.
  *
+ * A23 MKT-10 (§22.11.4) adds the marketplace's the same way (when the build
+ * opens it: CI's does): the start card with its offering and the sellers'
+ * subscriptions, the board of each side under its total, a number's screen and
+ * the settings with the offering, the subscriptions and the three windows.
+ *
  * Non-vacuity, measured on 2026-10-03: the first run failed for real, at
  * every width and in both languages — the setup's company field took 42.5px
  * down, the number fields 38: the field's box is drawn 48px (44 small), but
@@ -50,6 +55,8 @@ const CLOCK = new Date(2026, 8, 24, 12);
 
 /** The consumer app's start card exists only in a build whose `ENGINE_TYPES` holds it (CI's does). */
 const TYPE_OPEN = (process.env.ENGINE_TYPES ?? "").split(",").some((name) => name.trim() === "consumer-app");
+/** The same for the marketplace's (A23 MKT-10). */
+const MARKETPLACE_OPEN = (process.env.ENGINE_TYPES ?? "").split(",").some((name) => name.trim() === "marketplace");
 
 /** The §6.0 example with four numbers back to « to do », last touched twelve days before the clock. */
 function returning(base: EngineState = exampleState()): EngineState {
@@ -133,6 +140,13 @@ async function walk(page: Page, locale: "fr" | "en", check: (name: string, scope
     await check("start, app", '[data-testid="engine-start"]');
     await page.locator("#engine-start-motion-ss").check();
   }
+  if (MARKETPLACE_OPEN) {
+    // The marketplace's answer, its offering and the sellers' subscriptions, then back to the SaaS the walk goes on with.
+    await page.locator("#engine-start-motion-mkt").check();
+    await expect(page.getByTestId("engine-start-mkt")).toBeVisible();
+    await check("start, marketplace", '[data-testid="engine-start"]');
+    await page.locator("#engine-start-motion-ss").check();
+  }
   await page.getByTestId("engine-start-change").click();
   await expect(page.getByTestId("engine-setup")).toBeVisible();
   await check("setup", '[data-testid="engine-setup"]');
@@ -165,6 +179,21 @@ async function walk(page: Page, locale: "fr" | "en", check: (name: string, scope
   await page.getByTestId("engine-bar-settings").click();
   await expect(page.getByTestId("engine-setup-earns")).toBeVisible();
   await check("app settings", '[data-testid="engine-settings"]');
+  if (MARKETPLACE_OPEN) {
+    // The marketplace: its board under the total, one side at a time, a number's own screen, then its settings.
+    await seed(page, returning(marketplaceState()));
+    await check("marketplace board, demand", '[data-testid="engine-board"]');
+    await page.getByTestId("engine-side-selector").getByRole("button").nth(1).click();
+    await expect(page.getByTestId("mkt-side")).toHaveAttribute("data-side", "supply");
+    await check("marketplace board, supply", '[data-testid="engine-board"]');
+    await openNumber(page, "mkt-rev-take-rate");
+    await expect(page.getByTestId("engine-number")).toBeVisible();
+    await check("marketplace number", '[data-testid="engine-number"]');
+    await page.getByTestId("engine-number-back").click();
+    await page.getByTestId("engine-bar-settings").click();
+    await expect(page.getByTestId("engine-setup-mkt-windows")).toBeVisible();
+    await check("marketplace settings", '[data-testid="engine-settings"]');
+  }
 }
 
 for (const locale of ["fr", "en"] as const) {
@@ -186,7 +215,7 @@ for (const locale of ["fr", "en"] as const) {
         expect(await overflow(page), `${name}: sideways`).toBe(0);
         seen.push(name);
       });
-      expect(seen).toHaveLength(TYPE_OPEN ? 13 : 12);
+      expect(seen).toHaveLength(12 + (TYPE_OPEN ? 1 : 0) + (MARKETPLACE_OPEN ? 5 : 0));
     });
   }
 

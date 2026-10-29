@@ -4137,6 +4137,20 @@ Ton compte rendu, en français : une liste numérotée de constats, rangés par 
 - **Relecteurs** : copie, sécurité.
 - **Pause** : **A23 est fini** ; reste le bon à tirer d'Antoine (A23.d) et
   l'ouverture (A23.e).
+- **Ce qu'MKT-10 a fait autrement** (2026-10-29, [#396](https://github.com/ScratchMe/tourdegrowth/pull/396)) : « jamais SaaS »
+  se lit sur l'îlot (`engine-workbench`), pas sur tout `main`, qui porte la
+  landing et le catalogue ; les listes de la garde vivent dans
+  `src/content/__tests__/mkt-words.ts` (`refusedIn`, les règles « services »
+  des deux côtés, `SERVICES_SUPPLY_TARGETS`), et `NAMED_PHRASES` nomme une à
+  une les phrases que la garde attrape et qu'aucune feuille ne règle sans
+  décision de copie (« abonné » nu côté offre, « leur MRR », "paying back",
+  et « Les leviers des clients sont de leur côté » en « services ») ; en
+  « services », « client » n'est permis que côté demande ; l'e2e ouvre chaque
+  « ? » d'un côté ; le tag « Sous la cible » d'une slide de funnel prend la
+  taille d'une slide (il faisait 11 px) ; le canari saisit une cible de chaque
+  côté. La CI ne voit plus de bout en bout la place de marché fermée (la spec
+  « type fermé » tourne sur un build sans elle, à la main), comme l'app depuis
+  APP-7.
 
 ---
 
