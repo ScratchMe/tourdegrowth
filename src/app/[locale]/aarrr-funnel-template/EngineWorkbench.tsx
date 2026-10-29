@@ -371,10 +371,10 @@ function Workbench(props: EngineWorkbenchProps) {
   }
 
   function openExample(choice: StartChoice) {
-    // The marketplace's example is MKT-9's (§22.12): until it exists, the card opens the SaaS's self-serve one, as the app's did until APP-10 (§21.6.1).
-    const shown = choice === "mkt" ? "ss" : choice;
-    setExampleMotions(motionsOf(shown));
-    setExampleType(typeOf(shown));
+    // Each answer of the card opens the example of its own type (§22.12 MKT-9 for the marketplace's), in its words and its fixed shape:
+    // the app earns from its three ways and the marketplace's sellers pay a subscription, whatever the card ticks (§21.6.1, §22.10.1).
+    setExampleMotions(motionsOf(choice));
+    setExampleType(typeOf(choice));
     setScreen("example");
     focus("engine-example-title");
   }
@@ -837,13 +837,14 @@ function Workbench(props: EngineWorkbenchProps) {
 
   if (screen === "example") {
     return shell(
-      // The example of the engine on screen's type (§21.9); an app's earns from its three ways, whatever the engine earns from (§21.6.1).
+      // The example of the engine on screen's type (§21.9); an app's earns from its three ways, whatever the engine earns from (§21.6.1),
+      // and a marketplace's is in "products" whatever the engine is in: its catalogues are those of the example, not the engine's (§22.10.1).
       <ExampleView
         locale={locale}
         stringsFor={stringsFor}
         type={current.setup.type}
-        metrics={metrics}
-        derivedCopy={derivedCopy}
+        metrics={metricsFor(props, current.setup.type)}
+        derivedCopy={derivedFor(props, current.setup.type)}
         bridges={bridges}
         motions={current.setup.motions}
         onBack={openBoard}
