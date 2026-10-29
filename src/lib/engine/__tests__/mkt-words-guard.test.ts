@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { SUPPLY_NAMED_PHRASES, SUPPLY_WORDS, refusedIn, type Kind, type Offering } from "@/content/__tests__/mkt-words";
+import { DEMAND_WORDS, NAMED_PHRASES, SUPPLY_WORDS, refusedIn, type Kind, type Offering } from "@/content/__tests__/mkt-words";
 import { ENGINE_COPY } from "@/content/engine-copy";
+import { ENGINE_COPY_MKT } from "@/content/engine-copy-marketplace";
 import { buildDeck, deckMarkdown } from "../deck";
 import { deriveEngine } from "../derive";
 import { EXAMPLE_MKT_WHATIF } from "../example";
@@ -30,9 +31,10 @@ import { CTX_EN, CTX_FR, EN, FR } from "./props";
  *   - in « services », no slide holds a word of `SERVICES_BANNED`.
  *
  * Read for both languages, both vocabularies, with and without the sellers' subscriptions, with the example's « Et si »
- * moved and not, every slide ticked. **Exceptions are named one by one, each with its reason**: the supply's bare « abonné »
- * in two leaves of the marketplace's own (`SUPPLY_NAMED_PHRASES`, `mkt-words.ts`, held below to still be there); « client » on
- * the demand side in « services » (§22.8.4: acheteur → client), which `DEMAND_WORDS_SERVICES` leaves out of the rule.
+ * moved and not, every slide ticked. **Exceptions are named one by one, each with its reason** (`NAMED_PHRASES`,
+ * `mkt-words.ts`, held below to still be in their leaf): the supply's bare « abonné » in the marketplace's own leaves, the
+ * English verb "paying back"; and « client » on the demand side in « services » (§22.8.4: acheteur → client), which
+ * `DEMAND_WORDS_SERVICES` leaves out of the rule.
  *
  * Non-vacuity, measured on 2026-10-29 (each break alone, this file run, the file restored): see the entry « A23, MKT-10 » of
  * `JOURNAL.md` for the counts.
@@ -160,6 +162,10 @@ describe("the guard itself — the words it refuses, the ones it lets through", 
     // « client » is the buyer's word in « services »; the rest of the demand's rule still applies there.
     expect(refusedIn("Les clients réservent", "fr", "demand", "services")).toEqual([]);
     expect(refusedIn("Les clients payants, ton MRR", "fr", "demand", "services")).toEqual(["payant", "MRR"]);
+    // The supply may speak of the other side's people the same way — and keeps every other word of its rule.
+    expect(refusedIn("Les leviers des clients sont de leur côté", "fr", "supply", "services")).toEqual([]);
+    expect(refusedIn("Les leviers des clients sont de leur côté", "fr", "supply", "products")).toEqual(["client"]);
+    expect(refusedIn("Les clients inscrits", "fr", "supply", "services")).toEqual(["inscrit"]);
   });
 
   it("takes out of a supply text the named phrases and no word more", () => {
@@ -172,11 +178,17 @@ describe("the guard itself — the words it refuses, the ones it lets through", 
     expect(refusedIn("Les abonnés restent", "fr", "demand", "products")).toEqual(["abonné"]);
   });
 
-  it("names phrases that are all still in their leaf, in their language (an exception that stops being one leaves the list)", () => {
-    const leaf = (path: string) => path.split(".").reduce<unknown>((node, key) => (node as Record<string, unknown>)[key], ENGINE_COPY) as { fr: string; en: string };
-    for (const { path, locale, phrase } of SUPPLY_NAMED_PHRASES) expect(leaf(path)[locale], `${path} ${locale}`).toContain(phrase);
-    // Each one holds a word of the rule, or it would be a dead entry.
-    for (const { phrase, locale } of SUPPLY_NAMED_PHRASES) expect(SUPPLY_WORDS[locale].test(phrase), `${phrase} holds no word of the rule: drop it from the list`).toBe(true);
+  it("names phrases that are all still in their leaf, in their language, and that each holds a word the rule refuses (an exception that stops being one leaves the list)", () => {
+    const leaf = (path: string, layer?: "demand" | "supply" | "common") =>
+      path.split(".").reduce<unknown>((node, key) => (node as Record<string, unknown>)[key], layer ? ENGINE_COPY_MKT[layer] : ENGINE_COPY) as { fr: string; en: string };
+    for (const { path, layer, locale, phrase } of NAMED_PHRASES) expect(leaf(path, layer)[locale], `${layer ?? "base"} ${path} ${locale}`).toContain(phrase);
+    // A phrase holds a word of the rule of every side it excuses, or it would be a dead entry.
+    for (const { phrase, locale, sides } of NAMED_PHRASES) {
+      for (const side of sides) {
+        const rule = side === "supply" ? SUPPLY_WORDS : DEMAND_WORDS;
+        expect(rule[locale].test(phrase) || rule.acronyms.test(phrase), `${phrase} (${side}) holds no word of the rule: drop it from the list`).toBe(true);
+      }
+    }
   });
 
   it("holds any other text of the tool to « SaaS » alone, and, in « services », to the words of « produits »", () => {
