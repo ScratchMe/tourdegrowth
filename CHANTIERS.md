@@ -561,6 +561,18 @@ PR. La leçon portable est dans `NEXTJS.md` §1.1.
 |---|---|---|---|
 | A26.b | **La défense en profondeur de `/admin`** (relecture sécurité, non bloquant, antérieur) : les pages et la route JSON de `/admin` font entièrement confiance au proxy, et le moindre désaccord entre le proxy et le routeur expose les chiffres Firestore. Vérifier aussi `isAuthorizedForAdmin` côté serveur, dans un `admin/layout.tsx` et dans `admin/stats/json/route.ts` | Session | À faire |
 
+### A27 — Le moteur plus lisible, et ce que le relevé du 2026-10-29 propose
+
+Antoine, le 2026-10-29 : le moteur est « encore lourd à lire », et ses barres
+de séparation n'ont pas la même taille. Le même jour, le relevé Search Console
+(`stats.yml`, portée `gsc`) montre que la page « Activation » sort déjà sur la
+question ajoutée le 2026-10-19 : répondre à une vraie requête marche.
+
+| # | Quoi | Qui | État |
+|---|---|---|---|
+| A27.a | **Une colonne, une largeur de liste, et le moteur seul une fois commencé** : le tableau ne déborde plus de la colonne, la FAQ prend la largeur des autres listes, « Combien de temps ça prend » perd ses quatre barres pour le trait des autres sections, et un moteur commencé replie ce qui le présente (journal, 2026-10-29) | Session | Fait le 2026-10-29 |
+| A27.b | **Une question de FAQ par page proche de la première page**, comme celle d'Activation : `/aarrr-vs-rarra`, `/glossary/time-to-value`, `/glossary/nrr-grr`, chacune sur une requête du prochain relevé (aucun chiffre dans le dépôt) ; et relire le titre de `/aarrr-vs-heart`, en tête des résultats sans un clic. Copie neuve « à relire » | Session | À faire |
+
 ---
 
 ## B. Design sync

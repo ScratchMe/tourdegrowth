@@ -73,6 +73,18 @@
   display: none;
 }
 
+/*
+ * Once an engine is on this device, the page is the tool (Antoine, 2026-10-29): what presents the engine —
+ * how long it takes, the catalogue, the FAQ, the way to the Tour, which the board carries itself — folds with
+ * the introduction. Hidden, never removed: a search engine, which has no storage, reads the first visit's page.
+ */
+[data-engine="known"] .duration,
+[data-engine="known"] .catalogue,
+[data-engine="known"] .faq,
+[data-engine="known"] .tour {
+  display: none;
+}
+
 @media (max-width: 760px) {
   [data-engine="known"] .reserve {
     min-height: var(--engine-reserve-mobile);
@@ -230,10 +242,12 @@
   padding-top: var(--space-12);
 }
 
+/* The engine's list width, like « Tes chiffres » and the cards: on this page, a
+   rule is either a section's (the whole column) or a list's (this width). */
 .faqList {
   display: flex;
   flex-direction: column;
-  max-width: var(--measure-read);
+  max-width: var(--engine-measure);
 }
 
 /*
@@ -286,10 +300,15 @@
 
 /* ---- How long it takes: before the tool, so the cost is known first ---- */
 
+/* The same section rule as the catalogue and the FAQ. Its four items carried
+   one bar each, as thick as the tool's own and a quarter of its width: they
+   read as four more sections. */
 .duration {
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
+  border-top: var(--border-rule);
+  padding-top: var(--space-12);
 }
 
 .durationTitle {
@@ -307,8 +326,6 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  border-top: var(--border-width-stamp) solid var(--space-engine-accent);
-  padding-top: var(--space-4);
 }
 
 .durationItem dt {

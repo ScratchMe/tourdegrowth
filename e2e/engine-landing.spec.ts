@@ -107,3 +107,51 @@ test("what a search engine reads: the first visit's page, the script that reads 
   // The engine's key, not a value: nothing in the HTML carries what someone typed.
   expect(html).toContain("tdg.engines.v3");
 });
+
+/**
+ * Antoine, 2026-10-29: « encore lourd à lire », and rules of four widths on one page. Two things hold since.
+ *
+ * Starting an engine folds what presents it — the introduction above the tool, how long it takes, the catalogue,
+ * the FAQ and the way to the Tour under it — and brings the tool back to the top of the screen, the person's place
+ * having moved up under them. Non-vacuity, measured on 2026-10-29: against the build before the change, the
+ * introduction and the four blocks stay visible and this spec fails on the first of them.
+ */
+test("starting an engine folds what presents it, and the tool comes back to the top of the screen", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto(PATH);
+  await page.getByTestId("engine-start-go").click();
+  await expect(page.locator("#engine-targets-title")).toBeFocused();
+  await expect(page.getByText(ENGINE_COPY.page.positioning.en)).toBeHidden();
+  for (const id of ["engine-duration", "engine-catalogue", "engine-faq", "engine-tour-link"]) {
+    await expect(page.getByTestId(id), id).toBeHidden();
+  }
+  await expect(page.getByTestId("engine-privacy-line")).toBeVisible();
+  const top = (await page.locator("#engine").boundingBox())!.y;
+  expect(top).toBeGreaterThanOrEqual(-1);
+  expect(top).toBeLessThan(900);
+});
+
+/**
+ * One column, one list width. The board broke out of the page's column by 40px on each side from a 960px
+ * window, and the FAQ's rules stopped at 576px where « Tes chiffres » stops at 720. Non-vacuity, measured on
+ * 2026-10-29: against the build before the change, the board's edges sit 40px outside the tool's and the FAQ
+ * row measures 576px.
+ */
+test("the board keeps to the page's column, and the FAQ's rows to the engine's list width", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto(PATH);
+  const measure = await page.evaluate(() => parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--engine-measure")));
+  expect((await page.getByTestId("engine-faq-item").first().boundingBox())!.width).toBeCloseTo(measure, 0);
+  const column = (await page.locator("#engine").boundingBox())!;
+  for (const id of ["engine-duration", "engine-catalogue", "engine-faq"]) {
+    const box = (await page.getByTestId(id).boundingBox())!;
+    expect([box.x, box.width], id).toEqual([column.x, column.width]);
+  }
+
+  await seed(page);
+  await page.goto(PATH);
+  await expect(page.getByTestId("engine-board")).toBeVisible();
+  const board = (await page.getByTestId("engine-board").boundingBox())!;
+  const tool = (await page.locator("#engine").boundingBox())!;
+  expect([board.x, board.width]).toEqual([tool.x, tool.width]);
+});

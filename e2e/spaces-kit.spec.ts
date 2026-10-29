@@ -170,14 +170,15 @@ test.describe("the engine in its colour", () => {
           eyebrow: color(eyebrowSelector),
           privacyEdge: privacy.borderTopColor,
           privacyStyle: privacy.borderTopStyle,
-          durationRule: getComputedStyle(document.querySelector('[data-testid="engine-duration"] dl > div')!).borderTopColor,
+          // The four labels, since their bars went (2026-10-29): one rule per section on this page.
+          durationLabel: getComputedStyle(document.querySelector('[data-testid="engine-duration"] dt')!).color,
           toolRule: getComputedStyle(document.querySelector("#engine")!).borderTopColor,
         };
       }, `main ${moduleClass("eyebrow")}`);
       expect(colours.eyebrow).toBe(ULTRAMARINE);
       expect(colours.privacyEdge).toBe(ULTRAMARINE);
       expect(colours.privacyStyle).toBe("solid");
-      expect(colours.durationRule).toBe(ULTRAMARINE);
+      expect(colours.durationLabel).toBe(ULTRAMARINE);
       expect(colours.toolRule).toBe(ULTRAMARINE);
 
       const watch = page.getByTestId("engine-stopwatch");

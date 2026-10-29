@@ -1,18 +1,13 @@
 /*
  * The board (spec §7 E2) — semantic tokens only (no-primitives.test.ts).
  *
- * From a 960px window the board BREAKS OUT of the page's column to the app
- * width. The breakout is written to be a no-op once the page itself is that
- * wide: margin = (container − board) / 2 is zero when they match, so a wider
- * page layout (P5) needs no change here. What lays out INSIDE the board (the
- * hybrid's two columns, the « what if » panel's two columns) follows the
- * board's and the panel's own widths, by container queries (design audit
- * S-18), so the same panel lays out right in the steps as on the board.
- */
-/*
- * The board is a container: what lays out inside it (the hybrid's columns) follows
- * the board's own width, not the window's (design audit S-18). The breakout
- * below stays a viewport rule — it is the page's layout, not the board's.
+ * The board keeps to the page's column. It used to break out of it, 40px on
+ * each side from a 960px window, so its rules and cards stopped where nothing
+ * else on the page did (Antoine, 2026-10-29: « on peine à comprendre comment
+ * tout est articulé »). What lays out INSIDE the board (the hybrid's two
+ * columns, the « what if » panel's two columns) follows the board's and the
+ * panel's own widths, by container queries (design audit S-18), so the same
+ * panel lays out right in the steps as on the board.
  */
 .board {
   container: board / inline-size;
@@ -26,14 +21,6 @@
    column instead of pushing the board wider than the phone. */
 .pelotonCard {
   min-width: 0;
-}
-
-@media (min-width: 960px) {
-  .board {
-    --board-width: min(var(--width-desktop), calc(100vw - 2 * var(--gutter-desktop)));
-    width: var(--board-width);
-    margin-inline: calc((100% - var(--board-width)) / 2);
-  }
 }
 
 .head {

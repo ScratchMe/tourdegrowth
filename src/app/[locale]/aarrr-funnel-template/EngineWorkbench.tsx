@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
 import { EngineStart, type StartChoice, type StartOffering } from "@/components/engine/EngineStart";
@@ -255,17 +255,22 @@ function Workbench(props: EngineWorkbenchProps) {
     }
   }, [snap]);
 
-  // The page's short version (A18 T4, `EngineLanding`): the inline script marks <html> before the first paint on
-  // a full load, but a client-side navigation to this page runs no script — so the island marks it too, from what
-  // the device held when it was first read. Only then: an engine started, imported or erased here leaves the page
-  // as it is, rather than folding or unfolding the introduction above the person; the next visit reads anew. An
-  // unreadable engine counts as known: its board says what went wrong, never the first visit again.
+  // The page's short version (A18 T4, `EngineLanding`), which also folds what presents the engine under the tool
+  // (page.module.css): the inline script marks <html> before the first paint on a full load, but a client-side
+  // navigation to this page runs no script — so the island marks it too. And it follows the device from then on
+  // (Antoine, 2026-10-29: the page was too heavy to read around the tool): an engine started or imported here
+  // folds the introduction, an erased one unfolds it. The tool moved under the person, so it comes back to the
+  // top of the screen — in a layout effect, before the paint, and before the screen's heading takes the focus.
+  // An unreadable engine counts as known: its board says what went wrong, never the first visit again.
   const known = snap ? snap.result.kind !== "empty" : null;
-  const knownOnArrival = useRef<boolean | null>(null);
-  useEffect(() => {
-    if (known === null || knownOnArrival.current !== null) return;
-    knownOnArrival.current = known;
+  const knownBefore = useRef<boolean | null>(null);
+  useLayoutEffect(() => {
+    if (known === null || knownBefore.current === known) return;
+    const arriving = knownBefore.current === null;
+    knownBefore.current = known;
     if (known) document.documentElement.setAttribute("data-engine", "known");
+    else document.documentElement.removeAttribute("data-engine");
+    if (!arriving) document.getElementById("engine")?.scrollIntoView({ block: "start" });
   }, [known]);
 
   const state = snap?.result.kind === "ok" ? snap.result.state : null;
