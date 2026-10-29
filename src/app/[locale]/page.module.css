@@ -113,11 +113,13 @@
   display: none;
 }
 
+/* The rule spans the page's column, like the strip's above (Antoine,
+   2026-10-29: two rules of two lengths read as a draft); the quote keeps its
+   own measure. */
 .founder {
   margin-top: var(--space-14);
   padding-top: 26px;
   border-top: var(--border-rule);
-  max-width: 720px;
 }
 
 .founderQuote {
@@ -125,6 +127,7 @@
   letter-spacing: -0.01em;
   color: var(--text-body);
   margin: 0 0 10px;
+  max-width: 720px;
 }
 
 .founderMeta {

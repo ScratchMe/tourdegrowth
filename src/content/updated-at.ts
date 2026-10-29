@@ -11,9 +11,9 @@
  * (`content/legal.ts`, `updatedAt`), and the sitemap reads that one.
  */
 export const CONTENT_UPDATED_AT: Record<string, string> = {
-  "/": "2026-09-29", // bande « Le Tour en trois parties » (design I + B)
+  "/": "2026-10-29", // la citation d'Antoine réécrite (A27.c) ; avant, la bande « Le Tour en trois parties » (design I + B)
   "/how-it-works": "2026-09-24", // « étape », intro et CTA (revue de copie v1)
-  "/about": "2026-09-24", // questions, calcul et CTA (revue de copie v1)
+  "/about": "2026-10-29", // l'intro : pourquoi l'outil existe, plutôt que le « miroir » (A27.c) ; avant, questions, calcul et CTA (revue de copie v1)
   "/glossary": "2026-10-26", // les trois termes de la place de marché (A23 MKT-G) ; avant, les quatre termes de la vente assistée (A7.3.e)
   "/growth-audit-checklist": "2026-09-24", // intro, section et CTA (revue de copie v1)
   "/startup-growth-diagnostic": "2026-09-24", // intro et CTA (revue de copie v1)

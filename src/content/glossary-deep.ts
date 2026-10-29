@@ -2257,6 +2257,14 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
           "Non — ça peut aussi vouloir dire que les poteaux ont bougé. Redéfinis l'événement d'activation comme quelque chose de plus superficiel et le chiffre chute du jour au lendemain sans qu'un seul utilisateur soit mieux servi. Fige l'événement, publie le taux d'activation à côté, et l'amélioration est réelle ou bien elle se voit.",
         ),
       },
+      {
+        // TODO: à relire (convention 6) — question neuve, 2026-10-29 (A27.b), sur deux requêtes Search Console : « optimiser le time to value », « shorter time to value ».
+        question: t("How do you shorten time to value?", "Comment optimiser le time to value ?"),
+        answer: t(
+          "Start from the median, not from the onboarding flow: list what stands between sign-up and the activation event — screens, fields, waits on someone else — and time each step from your own timestamps. The biggest gains are rarely in the interface. They come from removing a wait (a data import, an admin's approval, a sales call) or moving it after the first value: show the result on sample or partial data, then connect the real thing. Then cut what remains one step at a time, with the activation event frozen and its rate beside the median, so that a shorter time to value means users reached the same moment sooner, not that the moment got easier.",
+          "Pars de la médiane, pas du parcours d'onboarding : liste ce qui sépare l'inscription de l'événement d'activation — écrans, champs, attentes d'un tiers — et chronomètre chaque étape avec tes propres horodatages. Les plus gros gains sont rarement dans l'interface. Ils viennent d'une attente qu'on retire (un import de données, la validation d'un administrateur, un appel commercial) ou qu'on déplace après la première valeur : montre le résultat sur des données d'exemple ou partielles, puis branche les vraies. Retire ensuite le reste étape par étape, avec l'événement d'activation figé et son taux à côté de la médiane : un time to value plus court doit vouloir dire que les utilisateurs atteignent plus tôt le même moment, pas que le moment est devenu plus facile.",
+        ),
+      },
     ],
   },
 
