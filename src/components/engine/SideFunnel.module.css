@@ -299,6 +299,14 @@
 
 .slide .text {
   min-height: var(--market-slide-head);
+  /* 4px, not the card's 10: the liquidity column's kicker, numeral and label (with its alert tag on a line of its own, at the slide's
+   * 18px) fit one head, and the grids under all the columns start on one line without the slide growing. */
+  gap: 4px;
+}
+
+/* The base's heading sits in the column's head, whose gap already separates it from the numeral: no margin of the card's under it. */
+.slide .baseTitle {
+  margin-bottom: 0;
 }
 
 .slide .n {
@@ -307,6 +315,19 @@
 
 .slide .label {
   font: var(--slide-label-sm);
+}
+
+/* The alert tag on the named column, at the slide's size: the Tag's own 11px is a screen size, and nothing on a slide is set under
+ * 18px (design audit S-8). The red fill and the tag's shape are the Tag's; only its type and its padding are the slide's. Its box is one
+ * label line high, so the column's head (and the grid under it) is the height of its neighbours'. */
+.slide .tag {
+  display: inline-block;
+  vertical-align: baseline;
+  font: var(--slide-meta);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.06em;
+  padding: 0 12px;
 }
 
 .slide .source,

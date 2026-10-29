@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { DEMAND_WORDS, NAMED_PHRASES, SUPPLY_WORDS, refusedIn, type Kind, type Offering } from "@/content/__tests__/mkt-words";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import { ENGINE_COPY_MKT } from "@/content/engine-copy-marketplace";
+import { ENGINE_COPY_MKT_SERVICES } from "@/content/engine-copy-mkt-services";
 import { buildDeck, deckMarkdown } from "../deck";
 import { deriveEngine } from "../derive";
 import { EXAMPLE_MKT_WHATIF } from "../example";
@@ -33,8 +34,8 @@ import { CTX_EN, CTX_FR, EN, FR } from "./props";
  * Read for both languages, both vocabularies, with and without the sellers' subscriptions, with the example's « Et si »
  * moved and not, every slide ticked. **Exceptions are named one by one, each with its reason** (`NAMED_PHRASES`,
  * `mkt-words.ts`, held below to still be in their leaf): the supply's bare « abonné » in the marketplace's own leaves, the
- * English verb "paying back"; and « client » on the demand side in « services » (§22.8.4: acheteur → client), which
- * `DEMAND_WORDS_SERVICES` leaves out of the rule.
+ * English verb "paying back", and in « services » the supply's one sentence that names the buyers (« Les leviers des clients… »);
+ * and « client » on the demand side in « services » (§22.8.4: acheteur → client), which `DEMAND_WORDS_SERVICES` leaves out of the rule.
  *
  * Non-vacuity, measured on 2026-10-29 (each break alone, this file and `src/content` run — 737 tests, green before each —, the file
  * put back with `git checkout`; the count is the tests that fall): « MRR » put in the French title of the demand's funnel slide 4,
@@ -43,6 +44,9 @@ import { CTX_EN, CTX_FR, EN, FR } from "./props";
  * « SaaS » check 2; the demand rule without its « MRR » acronym 5 (three of the copy test's). **One break measured 0 and said
  * something**: « SaaS » put in `mkt.total.note`, the note under the total slide's register — the note is drawn on the slide and
  * is not in the text export this test reads, so only `e2e/engine-marketplace.spec.ts` (the slides on screen) sees it: 1 spec.
+ * Relance: « client » put back in a services supply leaf (the supply keeps it in its rule in « services »; one sentence is named): in
+ * `scenario.visitors`, printed on the what-if slide, 1 test here (and 1 of the copy test) and 0 specs; in `diagnosis.clear`, the
+ * board's eyebrow, 0 tests here and 1 spec — each layer sees what the other cannot.
  */
 
 type Locale = "fr" | "en";
@@ -167,10 +171,11 @@ describe("the guard itself — the words it refuses, the ones it lets through", 
     // « client » is the buyer's word in « services »; the rest of the demand's rule still applies there.
     expect(refusedIn("Les clients réservent", "fr", "demand", "services")).toEqual([]);
     expect(refusedIn("Les clients payants, ton MRR", "fr", "demand", "services")).toEqual(["payant", "MRR"]);
-    // The supply may speak of the other side's people the same way — and keeps every other word of its rule.
+    // The supply keeps « client » in its rule in « services » too: only the one sentence that names the other side's people is a named phrase.
     expect(refusedIn("Les leviers des clients sont de leur côté", "fr", "supply", "services")).toEqual([]);
     expect(refusedIn("Les leviers des clients sont de leur côté", "fr", "supply", "products")).toEqual(["client"]);
-    expect(refusedIn("Les clients inscrits", "fr", "supply", "services")).toEqual(["inscrit"]);
+    expect(refusedIn("Les clients inscrits", "fr", "supply", "services")).toEqual(["client", "inscrit"]);
+    expect(refusedIn("Les clients de la page prestataires", "fr", "supply", "services")).toEqual(["client"]);
   });
 
   it("takes out of a supply text the named phrases and no word more", () => {
@@ -184,9 +189,9 @@ describe("the guard itself — the words it refuses, the ones it lets through", 
   });
 
   it("names phrases that are all still in their leaf, in their language, and that each holds a word the rule refuses (an exception that stops being one leaves the list)", () => {
-    const leaf = (path: string, layer?: "demand" | "supply" | "common") =>
-      path.split(".").reduce<unknown>((node, key) => (node as Record<string, unknown>)[key], layer ? ENGINE_COPY_MKT[layer] : ENGINE_COPY) as { fr: string; en: string };
-    for (const { path, layer, locale, phrase } of NAMED_PHRASES) expect(leaf(path, layer)[locale], `${layer ?? "base"} ${path} ${locale}`).toContain(phrase);
+    const leaf = (path: string, layer?: "demand" | "supply" | "common", offering?: "products" | "services") =>
+      path.split(".").reduce<unknown>((node, key) => (node as Record<string, unknown>)[key], layer ? (offering === "services" ? ENGINE_COPY_MKT_SERVICES : ENGINE_COPY_MKT)[layer] : ENGINE_COPY) as { fr: string; en: string };
+    for (const { path, layer, offering, locale, phrase } of NAMED_PHRASES) expect(leaf(path, layer, offering)[locale], `${offering ?? "any"} ${layer ?? "base"} ${path} ${locale}`).toContain(phrase);
     // A phrase holds a word of the rule of every side it excuses, or it would be a dead entry.
     for (const { phrase, locale, sides } of NAMED_PHRASES) {
       for (const side of sides) {

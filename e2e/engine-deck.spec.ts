@@ -635,13 +635,9 @@ for (const locale of ["fr", "en"] as const) {
         ),
       );
       expect(sizes.length).toBeGreaterThan(300);
-      // The one thing under 18px, found by MKT-10 and left for a fix (`SideFunnel`'s slide medium, A23 MKT-7a, a file outside this
-      // unit's): the funnel's alert tag (« Sous la cible ») is set at 11px on the two side-funnel slides. Named, not hidden: the
-      // exception is held to still be there, so the day the tag is set right this test says to take it off the list.
-      const small = sizes.filter((s) => s.px < 18);
-      const tag = small.filter((s) => /^(Sous la cible|Below the target)$/i.test(s.text) && s.slide.startsWith("mktFunnel"));
-      expect(tag.map((s) => `${s.slide} (${s.px}px)`)).toEqual(["mktFunnelDemand (11px)", "mktFunnelSupply (11px)"]);
-      expect(small.filter((s) => !tag.includes(s)).map((s) => `${s.slide}: ${s.text} (${s.px}px)`)).toEqual([]);
+      // The funnel's alert tag (« Sous la cible ») was set at 11px on the two side-funnel slides until MKT-10 found it: it is the
+      // slide's size now (`SideFunnel.module.css`, `.slide .tag`), and nothing here is under 18px.
+      expect(sizes.filter((s) => s.px < 18).map((s) => `${s.slide}: ${s.text} (${s.px}px)`)).toEqual([]);
     });
 
     /** Without the sellers' subscriptions there is no total to add and the supply has its funnel alone (C103): the deck says it by what it leaves out. */

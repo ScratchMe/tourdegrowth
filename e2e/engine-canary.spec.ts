@@ -515,7 +515,7 @@ test.describe("the consumer app keeps everything in the browser too (D16, §21.1
 /**
  * The same promise for the marketplace (engine spec §22.11.4, A23 MKT-10): every free text it has — its name, a definition and a
  * note on the commission, the repair comment of a triage, the definition a copied request carries, a count pasted through
- * « Saisie en tableau », the slides' ask and its three bullets — and a nine-digit count, typed through the real screens after the
+ * « Saisie en tableau », the slides' ask and its three bullets, a target on each side of the « Cibles » screen — and a nine-digit count, typed through the real screens after the
  * start card chose the marketplace and its sellers' subscriptions; then the subscriptions unticked and ticked again, the slides'
  * text, the PNG of a side's slide (its funnel is drawn, and the PNG export redraws it) and the file. Every canary is in the
  * `.json`, the request's definition and the slides' ask and bullets in the copied text, none in any request, and not one request of
@@ -544,7 +544,12 @@ test.describe("the marketplace keeps everything in the browser too (D16, §22.11
     const COUNT = `7${Date.now().toString().slice(-8)}`;
     // A count pasted through « Saisie en tableau », the other way a number comes in (seven digits: see the SaaS test).
     const PASTED = `6${Date.now().toString().slice(-6)}`;
-    const canaries = [NAME, DEFINITION, NOTE, REPAIR, ASKED, ASK, ...BULLETS, COUNT, PASTED];
+    // The two targets of the « Cibles » screen, one per side: a percentage with five decimals, which no request, hash or
+    // other number of the page can hold by chance (a target is stored as typed).
+    // The last decimal is never a zero: a number is stored without its trailing zeros, so « 41.05060 » would be kept as 41.0506.
+    const TARGET_DEMAND = `41.${Date.now().toString().slice(-4)}7`;
+    const TARGET_SUPPLY = `58.${(Date.now() + 7).toString().slice(-4)}3`;
+    const canaries = [NAME, DEFINITION, NOTE, REPAIR, ASKED, ASK, ...BULLETS, COUNT, PASTED, TARGET_DEMAND, TARGET_SUPPLY];
 
     const seen: Request[] = [];
     page.on("request", (request) => seen.push(request));
@@ -557,6 +562,9 @@ test.describe("the marketplace keeps everything in the browser too (D16, §22.11
     await page.getByTestId("engine-start-change").click();
     await page.getByLabel(ENGINE_COPY.setup.companyLabelMkt.en).fill(NAME);
     await page.getByTestId("engine-setup-start").click();
+    // « Cibles »: a target on each side's group — the first order's (buyers) and the first sale's (sellers).
+    await page.getByTestId("engine-targets-start-demand").locator("#engine-step-target-mkt-buy-first-order").fill(TARGET_DEMAND);
+    await page.getByTestId("engine-targets-start-supply").locator("#engine-step-target-mkt-sell-first-sale").fill(TARGET_SUPPLY);
     await page.getByTestId("engine-targets-next").click();
     await page.getByTestId("engine-number-back").click();
     await expect(page.getByTestId("engine-board")).toBeVisible();
