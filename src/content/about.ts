@@ -20,8 +20,9 @@ export const ABOUT = {
     en: "Who built Tour de Growth and why, what the fifteen AARRR questions measure, and exactly how the score is calculated — with no AI touching the number.",
   },
   intro: {
-    fr: "Je m'appelle Antoine Berthaud. Je suis Senior Growth PM, dix ans de produit et de croissance (AB Tasty, SNCF Connect & Tech…). J'ai construit Tour de Growth parce que la façon la plus rapide d'expliquer ce qu'est le travail de growth, c'est de tendre un miroir : quinze questions honnêtes et un score qu'on peut contester. C'est aussi une étude de cas grandeur nature — l'outil doit croître comme il conseille aux autres de le faire.",
-    en: "I'm Antoine Berthaud, a Senior Growth PM with ten years in product and growth (AB Tasty, SNCF Connect & Tech…). I built Tour de Growth because the fastest way to explain what growth work actually is, is to hand someone a mirror: fifteen honest questions and a score they can argue with. It is also a live case study — the tool has to grow the way it tells others to.",
+    // TODO: à relire — 2026-10-29, Antoine : le « miroir » expliquait le growth d'en haut ; la phrase dit maintenant pourquoi l'outil existe, la même que la citation de la page d'accueil (LANDING_PULL).
+    fr: "Je m'appelle Antoine Berthaud. Je suis Senior Growth PM, dix ans de produit et de croissance (AB Tasty, SNCF Connect & Tech…). J'ai construit l'outil que j'aurais voulu ouvrir en arrivant dans chaque équipe : voir en trois minutes où le funnel coince, avec quinze questions honnêtes et un score qu'on peut contester. C'est aussi une étude de cas grandeur nature — l'outil doit croître comme il conseille aux autres de le faire.",
+    en: "I'm Antoine Berthaud, a Senior Growth PM with ten years in product and growth (AB Tasty, SNCF Connect & Tech…). I built the tool I wish I'd had on my first day in every team: three minutes to see where the funnel gets stuck, with fifteen honest questions and a score you can argue with. It is also a live case study — the tool has to grow the way it tells others to.",
   },
 
   questionsSection: {
@@ -114,12 +115,13 @@ export const ABOUT = {
  * Berthaud — Senior Growth PM", which sits a few centimetres below: the
  * footer says who made it, this says why.
  *
- * Relu et validé par Antoine (2026-09-11).
+ * Relu et validé par Antoine (2026-09-11), sauf la citation, réécrite le 2026-10-29 (voir `ABOUT.intro`).
  */
 export const LANDING_PULL = {
   quote: {
-    fr: "La façon la plus rapide d'expliquer ce qu'est le travail de growth, c'est de tendre un miroir.",
-    en: "The fastest way to explain what growth work actually is, is to hand someone a mirror.",
+    // TODO: à relire — 2026-10-29, choisie par Antoine parmi trois : l'outil qu'il aurait voulu, plutôt que le « miroir ».
+    fr: "J'ai construit l'outil que j'aurais voulu ouvrir en arrivant dans chaque équipe : voir en trois minutes où le funnel coince.",
+    en: "I built the tool I wish I'd had on my first day in every team: three minutes to see where the funnel gets stuck.",
   },
   attribution: {
     fr: "Antoine Berthaud, Senior Growth PM",

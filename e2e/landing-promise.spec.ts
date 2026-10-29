@@ -52,6 +52,9 @@ for (const locale of ["en", "fr"] as const) {
     // already left above, so this must not compete with the primary CTA.
     expect(box.y).toBeGreaterThan(cta.y + cta.height);
     expect(box.y).toBeGreaterThan(card.y + card.height);
+    // Its rule runs the strip's whole width, as the strip's own does (2026-10-29: it stopped at 720px).
+    const strip = (await page.getByTestId("space-strip").boundingBox())!;
+    expect([box.x, box.width]).toEqual([strip.x, strip.width]);
 
     const link = founder.getByRole("link");
     await expect(link).toHaveAttribute("href", `/${locale}/about`);

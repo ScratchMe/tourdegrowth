@@ -572,6 +572,7 @@ question ajoutée le 2026-10-19 : répondre à une vraie requête marche.
 |---|---|---|---|
 | A27.a | **Une colonne, une largeur de liste, et le moteur seul une fois commencé** : le tableau ne déborde plus de la colonne, la FAQ prend la largeur des autres listes, « Combien de temps ça prend » perd ses quatre barres pour le trait des autres sections, et un moteur commencé replie ce qui le présente (journal, 2026-10-29) | Session | Fait le 2026-10-29 |
 | A27.b | **Une question de FAQ par page proche de la première page**, comme celle d'Activation : `/aarrr-vs-rarra`, `/glossary/time-to-value`, `/glossary/nrr-grr`, chacune sur une requête du prochain relevé (aucun chiffre dans le dépôt) ; et relire le titre de `/aarrr-vs-heart`, en tête des résultats sans un clic. Copie neuve « à relire » | Session | À faire |
+| A27.c | **La citation de la page d'accueil et son trait** (Antoine, 2026-10-29 : le « miroir » expliquait le growth d'en haut, et le trait au-dessus s'arrêtait à 720 px sous une bande pleine largeur) : la phrase devient l'outil qu'il aurait voulu, choisie parmi trois, la même dans l'intro de `/about` ; le trait prend la largeur de la bande. Copie neuve « à relire » | Session | Fait le 2026-10-29 |
 
 ---
 
