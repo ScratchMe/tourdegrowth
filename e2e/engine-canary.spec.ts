@@ -14,6 +14,8 @@ test.beforeEach(async ({ context }) => {
 
 /** The consumer app's start card exists only in a build whose `ENGINE_TYPES` holds it (CI's does). */
 const TYPE_OPEN = (process.env.ENGINE_TYPES ?? "").split(",").some((name) => name.trim() === "consumer-app");
+/** The marketplace's, the same way (A23 MKT-10: CI's holds it too). */
+const MARKETPLACE_OPEN = (process.env.ENGINE_TYPES ?? "").split(",").some((name) => name.trim() === "marketplace");
 
 /**
  * Engine spec §13.3 and D16 — the canary. Modelled on `audit-canary.spec.ts`.
@@ -504,6 +506,144 @@ test.describe("the consumer app keeps everything in the browser too (D16, §21.1
     const events = await trackedEvents(page);
     expect(events.filter((e) => !engineEventPaths().includes(e))).toEqual([]);
     for (const expected of ["engine_setup/app", "engine_stage_saved/activation", "engine_stage_saved/acquisition", "engine_stage_saved/retention", "engine_stage_saved/revenue", "engine_request_copied", "engine_exported/png"]) {
+      expect(events).toContain(expected);
+    }
+    expect(seen.length).toBeGreaterThan(5);
+  });
+});
+
+/**
+ * The same promise for the marketplace (engine spec §22.11.4, A23 MKT-10): every free text it has — its name, a definition and a
+ * note on the commission, the repair comment of a triage, the definition a copied request carries, a count pasted through
+ * « Saisie en tableau », the slides' ask and its three bullets — and a nine-digit count, typed through the real screens after the
+ * start card chose the marketplace and its sellers' subscriptions; then the subscriptions unticked and ticked again, the slides'
+ * text, the PNG of a side's slide (its funnel is drawn, and the PNG export redraws it) and the file. Every canary is in the
+ * `.json`, the request's definition and the slides' ask and bullets in the copied text, none in any request, and not one request of
+ * the session is anything but a GET.
+ *
+ * Needs a build whose `ENGINE_TYPES` opens the marketplace (CI's): without it the start card has no such answer, and the spec
+ * skips with its reason.
+ */
+test.describe("the marketplace keeps everything in the browser too (D16, §22.11.4)", () => {
+  test.skip(!MARKETPLACE_OPEN, 'ENGINE_TYPES does not hold "marketplace" for this build — the start card has no marketplace to choose.');
+  test.use({ permissions: ["clipboard-read", "clipboard-write"] });
+
+  test("its texts and its counts never leave, and changing the sellers' subscriptions sends nothing", async ({ page }) => {
+    const stamp = Date.now().toString(36);
+    const NAME = `TDG-CANARY-MKT-${stamp}`;
+    const DEFINITION = `TDG-CANARY-TAKEDEF-${stamp}`;
+    const NOTE = `TDG-CANARY-TAKENOTE-${stamp}`;
+    const REPAIR = `TDG-CANARY-MKTREPAIR-${stamp}`;
+    const ASKED = `TDG-CANARY-MKTASKED-${stamp}`;
+    const ASK = `TDG-CANARY-MKTASK-${stamp}`;
+    const BULLETS = [1, 2, 3].map((n) => `TDG-CANARY-MKTBULLET${n}-${stamp}`);
+    // Nine digits, the numerator of an amount: stored exactly as typed.
+    const COUNT = `7${Date.now().toString().slice(-8)}`;
+    // A count pasted through « Saisie en tableau », the other way a number comes in (seven digits: see the SaaS test).
+    const PASTED = `6${Date.now().toString().slice(-6)}`;
+    const canaries = [NAME, DEFINITION, NOTE, REPAIR, ASKED, ASK, ...BULLETS, COUNT, PASTED];
+
+    const seen: Request[] = [];
+    page.on("request", (request) => seen.push(request));
+
+    await page.goto("/en/aarrr-funnel-template");
+    await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
+    // The marketplace and the sellers' subscriptions, then the full card for the engine's name (« Change »).
+    await page.locator("#engine-start-motion-mkt").check();
+    await page.getByTestId("engine-start-mkt-subscriptions").check();
+    await page.getByTestId("engine-start-change").click();
+    await page.getByLabel(ENGINE_COPY.setup.companyLabelMkt.en).fill(NAME);
+    await page.getByTestId("engine-setup-start").click();
+    await page.getByTestId("engine-targets-next").click();
+    await page.getByTestId("engine-number-back").click();
+    await expect(page.getByTestId("engine-board")).toBeVisible();
+
+    // The commission: a nine-digit amount over a larger one, its definition and a note.
+    const commission = await openSheet(page, "revenue", "mkt-rev-take-rate");
+    await commission.locator("#engine-mkt-rev-take-rate-num").fill(COUNT);
+    await commission.locator("#engine-mkt-rev-take-rate-den").fill("999999999");
+    await commission.locator("#engine-mkt-rev-take-rate-source").selectOption({ index: 1 });
+    await openWords(commission);
+    await commission.locator("#engine-mkt-rev-take-rate-definition").fill(DEFINITION);
+    await commission.locator("#engine-mkt-rev-take-rate-note").fill(NOTE);
+    await saveSheet(commission, "mkt-rev-take-rate");
+
+    // « I can't find it » on the first order: the triage and its free repair comment.
+    const triage = await openSheet(page, "activation", "mkt-buy-first-order");
+    await triage.getByRole("button", { name: ENGINE_COPY.sheet.cantFind.en }).click();
+    await triage.getByTestId("engine-triage").getByRole("radio", { name: ENGINE_COPY.cause.notTracked.en }).check();
+    await triage.getByTestId("engine-triage").getByRole("radio", { name: ENGINE_COPY.repair.sprint.en }).check();
+    await triage.locator("#engine-mkt-buy-first-order-repair-comment").fill(REPAIR);
+    await saveSheet(triage, "mkt-buy-first-order");
+
+    // « I'll ask for it » on the buyers' CAC: a definition that travels in the copied request.
+    const asked = await openSheet(page, "acquisition", "mkt-buy-cac");
+    await asked.getByRole("button", { name: ENGINE_COPY.sheet.willAsk.en }).click();
+    await openWords(asked);
+    await asked.locator("#engine-mkt-buy-cac-definition").fill(ASKED);
+    await asked.getByTestId("engine-request-copy").click();
+    await expect(asked.getByText(ENGINE_COPY.request.copied.en)).toBeVisible();
+    // The copy is a way out the person chose: the definition IS in it.
+    expect(await clipboard(page)).toContain(ASKED);
+
+    // « Saisie en tableau »: a count pasted, read and applied.
+    await backToBoard(page);
+    await openEngineMenu(page);
+    await page.getByTestId("engine-table").locator("summary").click();
+    await page.getByTestId("engine-table-paste").fill(`mkt.buy.referred-share,,,${PASTED},99999999,,,\n`);
+    await page.getByTestId("engine-table-read").click();
+    await page.getByTestId("engine-table-apply").click();
+    await expect(page.getByTestId("engine-table-applied")).toBeVisible();
+
+    // The sellers' subscriptions changed after the fact: unticked, saved, ticked again — on the device only.
+    await page.getByTestId("engine-bar-settings").click();
+    await page.getByTestId("engine-setup-mkt-subscriptions").uncheck();
+    await expect(page.getByTestId("engine-settings-resets")).not.toBeEmpty();
+    await page.getByTestId("engine-settings-save").click();
+    await expect(page.getByTestId("engine-board")).toBeVisible();
+    await page.getByTestId("engine-bar-settings").click();
+    await page.getByTestId("engine-setup-mkt-subscriptions").check();
+    await page.getByTestId("engine-settings-save").click();
+    await expect(page.getByTestId("engine-board")).toBeVisible();
+
+    // The slides' ask and text, a side's slide as a PNG, then the file.
+    await page.getByTestId("engine-open-deck").click();
+    await expect(page.getByTestId("engine-deck")).toBeVisible();
+    const what = page.getByTestId("deck-ask-what");
+    await what.fill(ASK);
+    await what.blur();
+    for (const [i, bullet] of BULLETS.entries()) {
+      const field = page.getByTestId(`deck-ask-bullet-${i + 1}`);
+      await field.fill(bullet);
+      await field.blur();
+    }
+    await page.getByTestId("deck-copy-text").click();
+    await expect.poll(() => clipboard(page)).toContain(ASK);
+    for (const bullet of BULLETS) expect(await clipboard(page)).toContain(bullet);
+    // The funnel of a side is a picture the PNG export redraws: it is exported too.
+    await expect(page.getByTestId("slide-mktFunnelDemand").getByTestId("slide-side-funnel-demand")).toHaveCount(1);
+    const funnel = page.waitForEvent("download");
+    await page.getByTestId("deck-png-mktFunnelDemand").click();
+    expect((await funnel).suggestedFilename()).toMatch(/\.png$/);
+    const json = page.waitForEvent("download");
+    await page.getByTestId("deck-save-json").click();
+    const exported = await readFile((await (await json).path())!, "utf8");
+    // The canaries ARE in the engine, which is a marketplace's: a spec that typed nothing would prove nothing.
+    expect(JSON.parse(exported).setup.type).toBe("marketplace");
+    for (const canary of canaries) expect(exported, canary).toContain(canary);
+
+    const leaks: string[] = [];
+    for (const request of seen) {
+      const carried = `${request.url()}\n${request.postData() ?? ""}\n${JSON.stringify(await request.allHeaders())}`;
+      for (const canary of canaries) if (carried.includes(canary)) leaks.push(`${request.method()} ${request.url()} ← ${canary}`);
+    }
+    expect(leaks).toEqual([]);
+    expect(seen.filter((r) => r.method() !== "GET").map((r) => `${r.method()} ${r.url()}`)).toEqual([]);
+
+    // The type counted as a choice (Q14) — never its offering or its subscriptions — and the stages of the marketplace's numbers apart.
+    const events = await trackedEvents(page);
+    expect(events.filter((e) => !engineEventPaths().includes(e))).toEqual([]);
+    for (const expected of ["engine_setup/mkt", "engine_stage_saved/mkt-revenue", "engine_stage_saved/mkt-activation", "engine_request_copied", "engine_deck_opened", "engine_exported/text", "engine_exported/png", "engine_exported/json"]) {
       expect(events).toContain(expected);
     }
     expect(seen.length).toBeGreaterThan(5);

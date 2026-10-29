@@ -32,6 +32,8 @@ test.beforeEach(async ({ context }) => {
  * `openTypesWith("")` in `business-type.test.ts`).
  */
 const TYPE_OPEN = (process.env.ENGINE_TYPES ?? "").split(",").some((name) => name.trim() === "consumer-app");
+/** CI opens the marketplace too (A23 MKT-10): the page's sentence then names both types (`faqTypeNote.both`, §22.8.5 h). */
+const MARKETPLACE_OPEN = (process.env.ENGINE_TYPES ?? "").split(",").some((name) => name.trim() === "marketplace");
 
 const CLOCK = new Date(2026, 8, 24, 12);
 const NB = " ";
@@ -260,7 +262,8 @@ test.describe("the consumer app, type open", () => {
 /**
  * 7 — the public page's sentence (D15, C63), read without JavaScript: the
  * fifth answer of the FAQ, and only that one, says the engine also serves the
- * consumer apps — when the build opens the type.
+ * consumer apps — when the build opens the type — and the marketplaces too when
+ * the build opens that one as well (the sentence for both, A23 MKT-10).
  */
 test.describe("the FAQ's sentence, without JavaScript", () => {
   test.skip(!TYPE_OPEN, 'ENGINE_TYPES does not hold "consumer-app" for this build — the sentence is absent by design; see the closed half below.');
@@ -271,9 +274,10 @@ test.describe("the FAQ's sentence, without JavaScript", () => {
       await page.goto(`/${locale}/aarrr-funnel-template`);
       const items = page.getByTestId("engine-faq-item");
       await expect(items).toHaveCount(6);
-      await expect(items.nth(4)).toContainText(ENGINE_COPY.faqTypeNote.consumerApp[locale]);
-      if (locale === "fr") await expect(items.nth(4)).toContainText("Il sert aussi les apps grand public");
-      for (const index of [0, 1, 2, 3, 5]) await expect(items.nth(index)).not.toContainText(ENGINE_COPY.faqTypeNote.consumerApp[locale]);
+      const sentence = MARKETPLACE_OPEN ? ENGINE_COPY.faqTypeNote.both : ENGINE_COPY.faqTypeNote.consumerApp;
+      await expect(items.nth(4)).toContainText(sentence[locale]);
+      if (locale === "fr") await expect(items.nth(4)).toContainText(MARKETPLACE_OPEN ? "Il sert aussi les apps grand public et les places de marché" : "Il sert aussi les apps grand public");
+      for (const index of [0, 1, 2, 3, 5]) await expect(items.nth(index)).not.toContainText(sentence[locale]);
       // A paragraph, not a page: the answer with its sentence stays under the 400 characters the copy contract holds.
       const answer = (await items.nth(4).locator("p").textContent())!;
       expect(answer.length).toBeLessThanOrEqual(400);
