@@ -5,7 +5,7 @@ import { ENGINE_CATALOG } from "@/content/engine-catalog";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import { fillTemplate, formatMoney, roundSignificant } from "@/lib/engine/format";
 import { EXAMPLE_MKT_WHATIF } from "../src/lib/engine/example";
-import { exampleState, marketplaceNoSubscriptionsState, marketplaceState } from "../src/lib/engine/__tests__/fixtures";
+import { exampleState, marketplaceState } from "../src/lib/engine/__tests__/fixtures";
 import type { EngineState, MetricId } from "../src/lib/engine/types";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, openFold, SKIP_ADMIN_REASON, test, trackedEvents } from "./helpers";
 import { backToBoard, engineSeed, expectFound, expectLeft, openEngineMenu, openNumber, storedEngineEntry } from "./engine-helpers";
