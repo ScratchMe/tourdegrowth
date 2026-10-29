@@ -226,3 +226,18 @@ Publics dès le merge de MKT-G (C72), recopiés de `docs/engine/glossaire-mkt.md
   précédent de l'app). À garder, ou à faire suivre la carte.
 - **Les « Et si » de l'exemple bougent** (en mémoire, rien n'est enregistré),
   alors que celui du SaaS n'a rien d'équivalent sur son tableau d'exemple.
+
+## La garde et les e2e (MKT-10)
+
+- **« abonné » nu côté offre**, dans trois feuilles écrites mot pour mot par
+  §22.8.5 (« Abonnés sous 60 jours », « garder un abonné » / "keeping a
+  subscriber", « conversion en abonné ») : la garde les nomme
+  (`NAMED_PHRASES`) ; « vendeur abonné » serait la forme de l'offre, mais le
+  golden bougerait. À trancher.
+- **Les Réglages en « services », avant l'enregistrement** : la carte suit le
+  choix de l'offre à l'instant, mais les noms des cibles et les comptes
+  partagés gardent le vocabulaire enregistré jusqu'à « Enregistrer ».
+- **La phrase de la FAQ** (`faqTypeNote.marketplace` et `both`, §22.8.5 h) :
+  [`a22d-a-regarder.md`](a22d-a-regarder.md) demande de changer les trois
+  variantes ensemble (« la » qui renvoie à un pluriel, « Il » qui peut
+  désigner le Tour).

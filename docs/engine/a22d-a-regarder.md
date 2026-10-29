@@ -21,7 +21,7 @@ d'`ENGINE_COPY` (`src/content/engine-copy.ts`), de son calque
   apps grand public : choisis-la sur la carte de départ. » « la » renvoie à
   un pluriel (« les apps ») ; et « Il », collé après « …si tu as fait le Tour
   sur cet appareil. », peut se rapporter au Tour plutôt qu'au moteur (FR et
-  EN). Les deux variantes de la place de marché (MKT-10, §22.8.4 h) ont la
+  EN). Les deux variantes de la place de marché (MKT-10, §22.8.5 h) ont la
   même tournure : les changer ensemble.
 
 ## 2. Des chaînes que le calque de l'app n'a pas réécrites (APP-3)
