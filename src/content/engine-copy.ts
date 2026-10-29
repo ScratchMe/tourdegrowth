@@ -3685,6 +3685,19 @@ export const ENGINE_COPY = {
     eventApp: { fr: "a terminé une première séance", en: "completed a first session" },
     channelApp: { fr: "Recherche App Store", en: "App Store search" },
     churnCauseApp: { fr: "l'essai se termine avant la troisième séance", en: "the trial ends before the third session" },
+    /**
+     * The marketplace's example (§22.10, A23 MKT-9): its banner, its company label (printed on its slides) and the five
+     * targets of the fictional team, named by the same frame as `bannerBody` with the catalogue's names (§22.4.4) and
+     * formatted from `lib/engine/example.ts` (`EXAMPLE_MKT_TARGETS`): `{firstOrder}` and `{fillRate}` are the buyers',
+     * `{firstSale}`, `{paidConversion}` and `{paidChurn}` the sellers'. No word is typed in this example (no free text).
+     * TODO: à relire — copie neuve (convention 6), neuf le 2026-10-29, §22.12 (A23 MKT-9).
+     */
+    bannerTitleMkt: { fr: "Exemple : une place de marché fictive", en: "Example: a fictional marketplace" },
+    bannerBodyMkt: {
+      fr: "Chiffres et cibles inventés, pour montrer le funnel et les slides une fois remplis : l'équipe fictive vise {firstOrder} de première commande, {fillRate} de taux de service, {firstSale} de première vente, {paidConversion} de conversion en vendeur abonné et {paidChurn} de churn des vendeurs abonnés par mois. Rien n'est enregistré, et ça ne touche pas à ton moteur.",
+      en: "Made-up numbers and targets, to show the funnel and the slides once filled in: the fictional team aims for {firstOrder} first order, {fillRate} fill rate, {firstSale} first sale, {paidConversion} seller subscription conversion and {paidChurn} monthly paid seller churn. Nothing is saved, and it doesn't touch your engine.",
+    },
+    companyMkt: { fr: "Exemple de place de marché", en: "Example marketplace" },
   },
 
   storage: {

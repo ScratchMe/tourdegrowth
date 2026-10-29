@@ -356,6 +356,13 @@ export const ENGINE_COPY_MKT_SERVICES: { common: Overlay; demand: Overlay; suppl
         en: "The marketplace brings in **{total}** a month: {demand} in commissions, {supply} in provider subscriptions.",
       },
     },
+    // TODO: à relire (convention 6) — neuf le 2026-10-29 (A23 MKT-9, §22.8.4) : la phrase de l'exemple de la place de marché, par le lexique seul.
+    example: {
+      bannerBodyMkt: {
+        fr: "Chiffres et cibles inventés, pour montrer le funnel et les slides une fois remplis : l'équipe fictive vise {firstOrder} de première réservation, {fillRate} de taux de service, {firstSale} de première réservation reçue, {paidConversion} de conversion en prestataire abonné et {paidChurn} de churn des prestataires abonnés par mois. Rien n'est enregistré, et ça ne touche pas à ton moteur.",
+        en: "Made-up numbers and targets, to show the funnel and the slides once filled in: the fictional team aims for {firstOrder} first booking, {fillRate} fill rate, {firstSale} first booking received, {paidConversion} provider subscription conversion and {paidChurn} monthly paid provider churn. Nothing is saved, and it doesn't touch your engine.",
+      },
+    },
   },
   /** The clients: the demand side's leaves of §22.8.4, `acheteur` read « client ». */
   demand: {

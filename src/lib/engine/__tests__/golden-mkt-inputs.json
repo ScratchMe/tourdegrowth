@@ -1,0 +1,1553 @@
+{
+  "example": {
+    "schemaVersion": 3,
+    "id": "00000000-0000-4000-8000-000000000060",
+    "createdAt": "2026-09-24T08:00:00.000Z",
+    "updatedAt": "2026-09-24T09:00:00.000Z",
+    "setup": {
+      "type": "marketplace",
+      "motions": {
+        "plg": false,
+        "slg": false
+      },
+      "currency": "EUR",
+      "activationWindowDays": 7,
+      "paidWindowDays": 30,
+      "qualificationWindowDays": 30,
+      "goLiveWindowDays": 90,
+      "offering": "products",
+      "sellerSubscriptions": true
+    },
+    "snapshots": [
+      {
+        "id": "00000000-0000-4000-8000-000000000061",
+        "referenceMonth": "2026-08",
+        "cohortMonth": "2026-05",
+        "createdAt": "2026-09-24T08:00:00.000Z",
+        "metrics": {
+          "mkt.buy.signup-rate": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 3000,
+              "denominator": 60000
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "ga4"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.buy.cac": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 18000,
+              "denominator": 600
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "google-ads"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z",
+            "variant": "media-only"
+          },
+          "mkt.sell.cac": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 12000,
+              "denominator": 120
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "spreadsheet"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z",
+            "variant": "media-only"
+          },
+          "mkt.sell.signup-rate": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 400,
+              "denominator": 8000
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "ga4"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.buy.first-order": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 580,
+              "denominator": 2900
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "product-db"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.sell.first-sale": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 126,
+              "denominator": 420
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "product-db"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.liq.fill-rate": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 2340,
+              "denominator": 26000
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "amplitude"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z",
+            "variant": "searches"
+          },
+          "mkt.buy.repeat": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 145,
+              "denominator": 2900
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "product-db"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.buy.churn": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 560,
+              "denominator": 14000
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "product-db"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.sell.churn": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 96,
+              "denominator": 3200
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "product-db"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.sell.paid-churn": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 27,
+              "denominator": 900
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "stripe"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.buy.referred-share": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 232,
+              "denominator": 2900
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "product-db"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.rev.take-rate": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 32853.6,
+              "denominator": 273780
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "stripe"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.rev.aov": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 273780,
+              "denominator": 4212
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "product-db"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.rev.frequency": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 4212,
+              "denominator": 14040
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "product-db"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.rev.gross-margin": {
+            "status": "estimated",
+            "estimate": {
+              "low": 55,
+              "high": 65,
+              "basis": "old-number"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.sell.paid-conversion": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 63,
+              "denominator": 420
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "stripe"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.sell.arpa": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 26100,
+              "denominator": 900
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "stripe"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.sell.gross-margin": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 22185,
+              "denominator": 26100
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "spreadsheet"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          }
+        },
+        "targets": {
+          "mkt.buy.first-order": 25,
+          "mkt.liq.fill-rate": 12,
+          "mkt.sell.first-sale": 40,
+          "mkt.sell.paid-conversion": 20,
+          "mkt.sell.paid-churn": 2.5
+        },
+        "base": {
+          "mktCohortSignups": 2900,
+          "mktOrders": 4212,
+          "mktGmv": 273780,
+          "mktNetRevenue": 32853.6,
+          "mktSellerCohortSignups": 420,
+          "mktSellerMrrEnd": 26100
+        }
+      }
+    ],
+    "tourLink": null,
+    "deck": {
+      "include": {},
+      "showCompany": false,
+      "showSiteCredit": true,
+      "ask": {
+        "what": "",
+        "bullets": [],
+        "measureFirst": []
+      }
+    }
+  },
+  "example-no-targets": {
+    "schemaVersion": 3,
+    "id": "00000000-0000-4000-8000-000000000060",
+    "createdAt": "2026-09-24T08:00:00.000Z",
+    "updatedAt": "2026-09-24T09:00:00.000Z",
+    "setup": {
+      "type": "marketplace",
+      "motions": {
+        "plg": false,
+        "slg": false
+      },
+      "currency": "EUR",
+      "activationWindowDays": 7,
+      "paidWindowDays": 30,
+      "qualificationWindowDays": 30,
+      "goLiveWindowDays": 90,
+      "offering": "products",
+      "sellerSubscriptions": true
+    },
+    "snapshots": [
+      {
+        "id": "00000000-0000-4000-8000-000000000061",
+        "referenceMonth": "2026-08",
+        "cohortMonth": "2026-05",
+        "createdAt": "2026-09-24T08:00:00.000Z",
+        "metrics": {
+          "mkt.buy.signup-rate": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 3000,
+              "denominator": 60000
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "ga4"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.buy.cac": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 18000,
+              "denominator": 600
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "google-ads"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z",
+            "variant": "media-only"
+          },
+          "mkt.sell.cac": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 12000,
+              "denominator": 120
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "spreadsheet"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z",
+            "variant": "media-only"
+          },
+          "mkt.sell.signup-rate": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 400,
+              "denominator": 8000
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "ga4"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.buy.first-order": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 580,
+              "denominator": 2900
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "product-db"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.sell.first-sale": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 126,
+              "denominator": 420
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "product-db"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.liq.fill-rate": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 2340,
+              "denominator": 26000
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "amplitude"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z",
+            "variant": "searches"
+          },
+          "mkt.buy.repeat": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 145,
+              "denominator": 2900
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "product-db"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.buy.churn": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 560,
+              "denominator": 14000
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "product-db"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.sell.churn": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 96,
+              "denominator": 3200
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "product-db"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.sell.paid-churn": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 27,
+              "denominator": 900
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "stripe"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.buy.referred-share": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 232,
+              "denominator": 2900
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "product-db"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.rev.take-rate": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 32853.6,
+              "denominator": 273780
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "stripe"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.rev.aov": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 273780,
+              "denominator": 4212
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "product-db"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.rev.frequency": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 4212,
+              "denominator": 14040
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "product-db"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.rev.gross-margin": {
+            "status": "estimated",
+            "estimate": {
+              "low": 55,
+              "high": 65,
+              "basis": "old-number"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.sell.paid-conversion": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 63,
+              "denominator": 420
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "stripe"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.sell.arpa": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 26100,
+              "denominator": 900
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "stripe"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.sell.gross-margin": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 22185,
+              "denominator": 26100
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "spreadsheet"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          }
+        },
+        "targets": {},
+        "base": {
+          "mktCohortSignups": 2900,
+          "mktOrders": 4212,
+          "mktGmv": 273780,
+          "mktNetRevenue": 32853.6,
+          "mktSellerCohortSignups": 420,
+          "mktSellerMrrEnd": 26100
+        }
+      }
+    ],
+    "tourLink": null,
+    "deck": {
+      "include": {},
+      "showCompany": false,
+      "showSiteCredit": true,
+      "ask": {
+        "what": "",
+        "bullets": [],
+        "measureFirst": []
+      }
+    }
+  },
+  "example-whatif": {
+    "schemaVersion": 3,
+    "id": "00000000-0000-4000-8000-000000000060",
+    "createdAt": "2026-09-24T08:00:00.000Z",
+    "updatedAt": "2026-09-24T09:00:00.000Z",
+    "setup": {
+      "type": "marketplace",
+      "motions": {
+        "plg": false,
+        "slg": false
+      },
+      "currency": "EUR",
+      "activationWindowDays": 7,
+      "paidWindowDays": 30,
+      "qualificationWindowDays": 30,
+      "goLiveWindowDays": 90,
+      "offering": "products",
+      "sellerSubscriptions": true
+    },
+    "snapshots": [
+      {
+        "id": "00000000-0000-4000-8000-000000000061",
+        "referenceMonth": "2026-08",
+        "cohortMonth": "2026-05",
+        "createdAt": "2026-09-24T08:00:00.000Z",
+        "metrics": {
+          "mkt.buy.signup-rate": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 3000,
+              "denominator": 60000
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "ga4"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.buy.cac": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 18000,
+              "denominator": 600
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "google-ads"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z",
+            "variant": "media-only"
+          },
+          "mkt.sell.cac": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 12000,
+              "denominator": 120
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "spreadsheet"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z",
+            "variant": "media-only"
+          },
+          "mkt.sell.signup-rate": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 400,
+              "denominator": 8000
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "ga4"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.buy.first-order": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 580,
+              "denominator": 2900
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "product-db"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.sell.first-sale": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 126,
+              "denominator": 420
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "product-db"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.liq.fill-rate": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 2340,
+              "denominator": 26000
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "amplitude"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z",
+            "variant": "searches"
+          },
+          "mkt.buy.repeat": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 145,
+              "denominator": 2900
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "product-db"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.buy.churn": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 560,
+              "denominator": 14000
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "product-db"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.sell.churn": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 96,
+              "denominator": 3200
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "product-db"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.sell.paid-churn": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 27,
+              "denominator": 900
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "stripe"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.buy.referred-share": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 232,
+              "denominator": 2900
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "product-db"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.rev.take-rate": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 32853.6,
+              "denominator": 273780
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "stripe"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.rev.aov": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 273780,
+              "denominator": 4212
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "product-db"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.rev.frequency": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 4212,
+              "denominator": 14040
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "product-db"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.rev.gross-margin": {
+            "status": "estimated",
+            "estimate": {
+              "low": 55,
+              "high": 65,
+              "basis": "old-number"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.sell.paid-conversion": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 63,
+              "denominator": 420
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "stripe"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.sell.arpa": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 26100,
+              "denominator": 900
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "stripe"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.sell.gross-margin": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 22185,
+              "denominator": 26100
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "spreadsheet"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          }
+        },
+        "targets": {
+          "mkt.buy.first-order": 25,
+          "mkt.liq.fill-rate": 12,
+          "mkt.sell.first-sale": 40,
+          "mkt.sell.paid-conversion": 20,
+          "mkt.sell.paid-churn": 2.5
+        },
+        "base": {
+          "mktCohortSignups": 2900,
+          "mktOrders": 4212,
+          "mktGmv": 273780,
+          "mktNetRevenue": 32853.6,
+          "mktSellerCohortSignups": 420,
+          "mktSellerMrrEnd": 26100
+        }
+      }
+    ],
+    "tourLink": null,
+    "deck": {
+      "include": {},
+      "showCompany": false,
+      "showSiteCredit": true,
+      "ask": {
+        "what": "",
+        "bullets": [],
+        "measureFirst": []
+      }
+    },
+    "whatIf": {
+      "mkt.liq.fill-rate": 12,
+      "mkt.buy.first-order": 25,
+      "mkt.rev.take-rate": 13,
+      "mkt.sell.paid-conversion": 20
+    }
+  },
+  "no-subscriptions": {
+    "schemaVersion": 3,
+    "id": "00000000-0000-4000-8000-000000000060",
+    "createdAt": "2026-09-24T08:00:00.000Z",
+    "updatedAt": "2026-09-24T09:00:00.000Z",
+    "setup": {
+      "type": "marketplace",
+      "motions": {
+        "plg": false,
+        "slg": false
+      },
+      "currency": "EUR",
+      "activationWindowDays": 7,
+      "paidWindowDays": 30,
+      "qualificationWindowDays": 30,
+      "goLiveWindowDays": 90,
+      "offering": "products",
+      "sellerSubscriptions": false
+    },
+    "snapshots": [
+      {
+        "id": "00000000-0000-4000-8000-000000000061",
+        "referenceMonth": "2026-08",
+        "cohortMonth": "2026-05",
+        "createdAt": "2026-09-24T08:00:00.000Z",
+        "metrics": {
+          "mkt.buy.signup-rate": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 3000,
+              "denominator": 60000
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "ga4"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.buy.cac": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 18000,
+              "denominator": 600
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "google-ads"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z",
+            "variant": "media-only"
+          },
+          "mkt.sell.cac": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 12000,
+              "denominator": 120
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "spreadsheet"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z",
+            "variant": "media-only"
+          },
+          "mkt.sell.signup-rate": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 400,
+              "denominator": 8000
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "ga4"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.buy.first-order": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 580,
+              "denominator": 2900
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "product-db"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.sell.first-sale": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 126,
+              "denominator": 420
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "product-db"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.liq.fill-rate": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 2340,
+              "denominator": 26000
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "amplitude"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z",
+            "variant": "searches"
+          },
+          "mkt.buy.repeat": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 145,
+              "denominator": 2900
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "product-db"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.buy.churn": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 560,
+              "denominator": 14000
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "product-db"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.sell.churn": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 96,
+              "denominator": 3200
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "product-db"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.sell.paid-churn": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 27,
+              "denominator": 900
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "stripe"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.buy.referred-share": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 232,
+              "denominator": 2900
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "product-db"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.rev.take-rate": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 32853.6,
+              "denominator": 273780
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "stripe"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.rev.aov": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 273780,
+              "denominator": 4212
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "product-db"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.rev.frequency": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 4212,
+              "denominator": 14040
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "product-db"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.rev.gross-margin": {
+            "status": "estimated",
+            "estimate": {
+              "low": 55,
+              "high": 65,
+              "basis": "old-number"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.sell.paid-conversion": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 63,
+              "denominator": 420
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "stripe"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.sell.arpa": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 26100,
+              "denominator": 900
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "stripe"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.sell.gross-margin": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 22185,
+              "denominator": 26100
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "spreadsheet"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          }
+        },
+        "targets": {
+          "mkt.buy.first-order": 25,
+          "mkt.liq.fill-rate": 12,
+          "mkt.sell.first-sale": 40,
+          "mkt.sell.paid-conversion": 20,
+          "mkt.sell.paid-churn": 2.5
+        },
+        "base": {
+          "mktCohortSignups": 2900,
+          "mktOrders": 4212,
+          "mktGmv": 273780,
+          "mktNetRevenue": 32853.6,
+          "mktSellerCohortSignups": 420,
+          "mktSellerMrrEnd": 26100
+        }
+      }
+    ],
+    "tourLink": null,
+    "deck": {
+      "include": {},
+      "showCompany": false,
+      "showSiteCredit": true,
+      "ask": {
+        "what": "",
+        "bullets": [],
+        "measureFirst": []
+      }
+    }
+  },
+  "services": {
+    "schemaVersion": 3,
+    "id": "00000000-0000-4000-8000-000000000060",
+    "createdAt": "2026-09-24T08:00:00.000Z",
+    "updatedAt": "2026-09-24T09:00:00.000Z",
+    "setup": {
+      "type": "marketplace",
+      "motions": {
+        "plg": false,
+        "slg": false
+      },
+      "currency": "EUR",
+      "activationWindowDays": 7,
+      "paidWindowDays": 30,
+      "qualificationWindowDays": 30,
+      "goLiveWindowDays": 90,
+      "offering": "services",
+      "sellerSubscriptions": true
+    },
+    "snapshots": [
+      {
+        "id": "00000000-0000-4000-8000-000000000061",
+        "referenceMonth": "2026-08",
+        "cohortMonth": "2026-05",
+        "createdAt": "2026-09-24T08:00:00.000Z",
+        "metrics": {
+          "mkt.buy.signup-rate": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 3000,
+              "denominator": 60000
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "ga4"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.buy.cac": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 18000,
+              "denominator": 600
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "google-ads"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z",
+            "variant": "media-only"
+          },
+          "mkt.sell.cac": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 12000,
+              "denominator": 120
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "spreadsheet"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z",
+            "variant": "media-only"
+          },
+          "mkt.sell.signup-rate": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 400,
+              "denominator": 8000
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "ga4"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.buy.first-order": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 580,
+              "denominator": 2900
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "product-db"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.sell.first-sale": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 126,
+              "denominator": 420
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "product-db"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.liq.fill-rate": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 2340,
+              "denominator": 26000
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "amplitude"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z",
+            "variant": "searches"
+          },
+          "mkt.buy.repeat": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 145,
+              "denominator": 2900
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "product-db"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.buy.churn": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 560,
+              "denominator": 14000
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "product-db"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.sell.churn": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 96,
+              "denominator": 3200
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "product-db"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.sell.paid-churn": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 27,
+              "denominator": 900
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "stripe"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.buy.referred-share": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 232,
+              "denominator": 2900
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "product-db"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.rev.take-rate": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 32853.6,
+              "denominator": 273780
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "stripe"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.rev.aov": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 273780,
+              "denominator": 4212
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "product-db"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.rev.frequency": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 4212,
+              "denominator": 14040
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "product-db"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.rev.gross-margin": {
+            "status": "estimated",
+            "estimate": {
+              "low": 55,
+              "high": 65,
+              "basis": "old-number"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.sell.paid-conversion": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 63,
+              "denominator": 420
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "stripe"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.sell.arpa": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 26100,
+              "denominator": 900
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "stripe"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          },
+          "mkt.sell.gross-margin": {
+            "status": "measured",
+            "value": {
+              "kind": "ratio",
+              "numerator": 22185,
+              "denominator": 26100
+            },
+            "source": {
+              "kind": "tool",
+              "tool": "spreadsheet"
+            },
+            "updatedAt": "2026-09-20T10:00:00.000Z"
+          }
+        },
+        "targets": {
+          "mkt.buy.first-order": 25,
+          "mkt.liq.fill-rate": 12,
+          "mkt.sell.first-sale": 40,
+          "mkt.sell.paid-conversion": 20,
+          "mkt.sell.paid-churn": 2.5
+        },
+        "base": {
+          "mktCohortSignups": 2900,
+          "mktOrders": 4212,
+          "mktGmv": 273780,
+          "mktNetRevenue": 32853.6,
+          "mktSellerCohortSignups": 420,
+          "mktSellerMrrEnd": 26100
+        }
+      }
+    ],
+    "tourLink": null,
+    "deck": {
+      "include": {},
+      "showCompany": false,
+      "showSiteCredit": true,
+      "ask": {
+        "what": "",
+        "bullets": [],
+        "measureFirst": []
+      }
+    }
+  },
+  "empty": {
+    "schemaVersion": 3,
+    "id": "00000000-0000-4000-8000-000000000060",
+    "createdAt": "2026-09-24T08:00:00.000Z",
+    "updatedAt": "2026-09-24T09:00:00.000Z",
+    "setup": {
+      "type": "marketplace",
+      "motions": {
+        "plg": false,
+        "slg": false
+      },
+      "currency": "EUR",
+      "activationWindowDays": 7,
+      "paidWindowDays": 30,
+      "qualificationWindowDays": 30,
+      "goLiveWindowDays": 90,
+      "offering": "products",
+      "sellerSubscriptions": true
+    },
+    "snapshots": [
+      {
+        "id": "00000000-0000-4000-8000-000000000061",
+        "referenceMonth": "2026-08",
+        "cohortMonth": "2026-05",
+        "createdAt": "2026-09-24T08:00:00.000Z",
+        "metrics": {},
+        "targets": {}
+      }
+    ],
+    "tourLink": null,
+    "deck": {
+      "include": {},
+      "showCompany": false,
+      "showSiteCredit": true,
+      "ask": {
+        "what": "",
+        "bullets": [],
+        "measureFirst": []
+      }
+    }
+  }
+}

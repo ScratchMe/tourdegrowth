@@ -212,3 +212,17 @@ Publics dès le merge de MKT-G (C72), recopiés de `docs/engine/glossaire-mkt.md
   à 23 mois », "20– / 23 months"), et l'anglais coupe "within 60 / days".
   Des insécables dans le formateur des fourchettes et dans `{n} days`
   l'éviteraient, pour tout le moteur.
+
+## L'exemple (MKT-9)
+
+- **Le bandeau de l'exemple** (`example.bannerBodyMkt`) garde le cadre de
+  celui du SaaS et nomme les cinq cibles de l'exemple (~330 caractères) :
+  « … vise 25 % de première commande, 12 % de taux de service, 40 % de
+  première vente, 20 % de conversion en vendeur abonné et 2,5 % de churn des
+  vendeurs abonnés par mois. » Une version plus courte nommerait les deux
+  cibles de la demande, ou trois.
+- **L'exemple est toujours « produits » avec abonnements**, même quand la
+  carte de départ a choisi « services » ou décoché les abonnements (le
+  précédent de l'app). À garder, ou à faire suivre la carte.
+- **Les « Et si » de l'exemple bougent** (en mémoire, rien n'est enregistré),
+  alors que celui du SaaS n'a rien d'équivalent sur son tableau d'exemple.
