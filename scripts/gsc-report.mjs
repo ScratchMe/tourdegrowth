@@ -15,6 +15,14 @@
  * only); its key never leaves the workflow's environment, and this script
  * never prints it.
  *
+ * Since 2026-10-31 (A27.e) it also inspects every address of the live
+ * sitemap with the URL Inspection API: whether Google indexed it, and if not
+ * why (`coverageState`), when it last crawled it, and which canonical it
+ * chose. That is the « Indexation des pages » report, which until then only
+ * an export by hand could give. A refusal there (the API answers 403 to an
+ * account whose permission is too low) is written into the report and ends
+ * the inspection, never the report: the search figures still arrive.
+ *
  * Env: GSC_SERVICE_ACCOUNT_JSON (the key file's contents), optional
  * GSC_SITE (a property name, e.g. `sc-domain:tourdegrowth.com`; otherwise
  * the first property containing "tourdegrowth" is used, domain property
@@ -25,6 +33,8 @@ import { pathToFileURL } from "node:url";
 
 const TOKEN_URL = "https://oauth2.googleapis.com/token";
 const API = "https://www.googleapis.com/webmasters/v3";
+const INSPECT_URL = "https://searchconsole.googleapis.com/v1/urlInspection/index:inspect";
+const SITEMAP_URL = "https://www.tourdegrowth.com/sitemap.xml";
 const SCOPE = "https://www.googleapis.com/auth/webmasters.readonly";
 /** Search Console data is final about three days behind today. */
 const DATA_LAG_DAYS = 3;
@@ -135,8 +145,72 @@ async function query(fetchImpl, token, site, body) {
   }));
 }
 
+/** Every `<loc>` of a sitemap, in order. */
+export function sitemapUrls(xml) {
+  return [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1].trim());
+}
+
+/** Requests in flight at once: well under the API's 600 a minute, and three times faster than one by one. */
+const INSPECT_CONCURRENCY = 3;
+/** One answer may take this long; a slower one counts as a refusal of that URL. */
+const INSPECT_TIMEOUT_MS = 20_000;
+/** The inspection stops starting new URLs after this, so the workflow's ten minutes always leave room to encrypt. */
+const INSPECT_BUDGET_MS = 5 * 60_000;
+
+/**
+ * Google's index status for each URL, three at a time. The first refusal is
+ * kept as `error` and stops the inspection: every other URL would be refused
+ * the same way, and the report must still be written. The time budget does
+ * the same for a slow day (`truncated`), so the workflow never times out
+ * with the whole report lost — the first run, on 2026-10-31, took minutes.
+ */
+export async function inspectUrls(fetchImpl, token, site, urls, { budgetMs = INSPECT_BUDGET_MS, now = Date.now } = {}) {
+  const started = now();
+  const results = [];
+  let error = null;
+  let truncated = false;
+  let next = 0;
+  async function worker() {
+    while (error === null && next < urls.length) {
+      if (now() - started > budgetMs) {
+        truncated = true;
+        return;
+      }
+      const index = next++;
+      const url = urls[index];
+      let res;
+      try {
+        res = await fetchImpl(INSPECT_URL, {
+          method: "POST",
+          headers: { authorization: `Bearer ${token}`, "content-type": "application/json" },
+          body: JSON.stringify({ inspectionUrl: url, siteUrl: site }),
+          signal: AbortSignal.timeout(INSPECT_TIMEOUT_MS),
+        });
+      } catch (err) {
+        error ??= `urlInspection failed on ${url}: ${err instanceof Error ? err.name : "network error"}`;
+        return;
+      }
+      if (!res.ok) {
+        error ??= `urlInspection failed on ${url}: ${await describeFailure(res)}`;
+        return;
+      }
+      const status = (await res.json()).inspectionResult?.indexStatusResult ?? {};
+      results[index] = {
+        url,
+        verdict: status.verdict ?? null,
+        coverageState: status.coverageState ?? null,
+        lastCrawlTime: status.lastCrawlTime ?? null,
+        googleCanonical: status.googleCanonical ?? null,
+        userCanonical: status.userCanonical ?? null,
+      };
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(INSPECT_CONCURRENCY, urls.length) }, worker));
+  return { error, truncated, results: results.filter(Boolean) };
+}
+
 /** The whole report. `fetchImpl` is injectable so the shape can be tested without Google. */
-export async function buildReport(account, { fetchImpl = fetch, preferredSite = "", today = new Date() } = {}) {
+export async function buildReport(account, { fetchImpl = fetch, preferredSite = "", today = new Date(), inspect = [] } = {}) {
   const token = await getToken(account, fetchImpl);
   const sitesRes = await fetchImpl(`${API}/sites`, { headers: { authorization: `Bearer ${token}` } });
   if (!sitesRes.ok) throw new Error(`sites.list failed: ${await describeFailure(sitesRes)}`);
@@ -164,7 +238,8 @@ export async function buildReport(account, { fetchImpl = fetch, preferredSite = 
   const pairs = await query(fetchImpl, token, site, { startDate: long.start, endDate: long.end, dimensions: ["query", "page"], rowLimit: 250 });
   windows.last90.queriesByPage = pairs.map((r) => ({ query: r.keys[0], page: r.keys[1], clicks: r.clicks, impressions: r.impressions, ctr: r.ctr, position: r.position }));
 
-  return { generatedAt: today.toISOString(), site, windows };
+  const inspection = inspect.length ? await inspectUrls(fetchImpl, token, site, inspect) : null;
+  return { generatedAt: today.toISOString(), site, windows, inspection };
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
@@ -180,7 +255,11 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     console.error("GSC_SERVICE_ACCOUNT_JSON is not valid JSON");
     process.exit(2);
   }
-  buildReport(account, { preferredSite: process.env.GSC_SITE ?? "" })
+  // The live sitemap names what to inspect; an unreachable one skips the inspection, never the report.
+  fetch(SITEMAP_URL)
+    .then((res) => (res.ok ? res.text() : ""))
+    .catch(() => "")
+    .then((xml) => buildReport(account, { preferredSite: process.env.GSC_SITE ?? "", inspect: sitemapUrls(xml) }))
     .then((report) => process.stdout.write(JSON.stringify(report)))
     .catch((err) => {
       // The message never contains the key; it names an endpoint, a status
