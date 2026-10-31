@@ -4,18 +4,21 @@ import { describe, expect, it } from "vitest";
 type Account = { client_email: string; private_key: string };
 type Row = { clicks: number; impressions: number; ctr: number; position: number; query?: string; page?: string };
 type Window = { start: string; end: string; totals: Row | null; queries: Row[]; pages: Row[]; queriesByPage?: Row[] };
-type Report = { generatedAt: string; site: string; windows: { last28: Window; last90: Window } };
+type Inspected = { url: string; verdict: string | null; coverageState: string | null; lastCrawlTime: string | null; googleCanonical: string | null; userCanonical: string | null };
+type Inspection = { error: string | null; results: Inspected[] } | null;
+type Report = { generatedAt: string; site: string; windows: { last28: Window; last90: Window }; inspection: Inspection };
 
 // A JS module in an `allowJs: false` project — same trick as
 // utm-channels.test.ts: widen the specifier so the import is untyped.
-const { buildJwt, buildReport, describeFailure, pickSite, windowDates } = (await import("../../scripts/gsc-report.mjs" as string)) as {
+const { buildJwt, buildReport, describeFailure, pickSite, sitemapUrls, windowDates } = (await import("../../scripts/gsc-report.mjs" as string)) as {
   buildJwt: (account: Account, nowSeconds?: number) => string;
+  sitemapUrls: (xml: string) => string[];
   describeFailure: (res: Response) => Promise<string>;
   pickSite: (entries: { siteUrl: string }[], preferred?: string) => string;
   windowDates: (days: number, today?: Date) => { start: string; end: string };
   buildReport: (
     account: Account,
-    opts?: { fetchImpl?: typeof fetch; preferredSite?: string; today?: Date },
+    opts?: { fetchImpl?: typeof fetch; preferredSite?: string; today?: Date; inspect?: string[] },
   ) => Promise<Report>;
 };
 
@@ -157,5 +160,92 @@ describe("describeFailure", () => {
     const described = await describeFailure(res);
     expect(described.length).toBe(300);
     expect(described.startsWith("HTTP 403 PERMISSION_DENIED: xxx")).toBe(true);
+  });
+});
+
+/**
+ * A27.e (2026-10-31): the index status of every sitemap address, which only
+ * an export by hand gave until then. What can be pinned offline: the URLs
+ * read from the sitemap, the request per URL, the fields kept, and that a
+ * refusal (403 for an account whose permission is too low) is reported and
+ * ends the inspection without costing the search figures.
+ */
+describe("the URL inspection", () => {
+  const searchOk = (url: string) => {
+    if (url.endsWith("/token")) return new Response(JSON.stringify({ access_token: "tok" }));
+    if (url.endsWith("/sites")) return new Response(JSON.stringify({ siteEntry: [{ siteUrl: "sc-domain:tourdegrowth.com" }] }));
+    return null;
+  };
+
+  it("reads every <loc> of a sitemap, alternates aside", () => {
+    const xml = `<urlset><url><loc>https://www.tourdegrowth.com/en</loc><xhtml:link rel="alternate" hreflang="fr" href="https://www.tourdegrowth.com/fr" /></url><url><loc> https://www.tourdegrowth.com/fr </loc></url></urlset>`;
+    expect(sitemapUrls(xml)).toEqual(["https://www.tourdegrowth.com/en", "https://www.tourdegrowth.com/fr"]);
+    expect(sitemapUrls("")).toEqual([]);
+  });
+
+  it("asks Google once per URL, on the property, and keeps the verdict, the coverage, the crawl and both canonicals", async () => {
+    const inspected: unknown[] = [];
+    const fetchImpl = (async (url: string, init?: RequestInit) => {
+      const early = searchOk(url);
+      if (early) return early;
+      if (url.includes("urlInspection")) {
+        inspected.push(JSON.parse(String(init?.body)));
+        return new Response(
+          JSON.stringify({
+            inspectionResult: {
+              indexStatusResult: {
+                verdict: "NEUTRAL",
+                coverageState: "Discovered - currently not indexed",
+                lastCrawlTime: "2026-10-20T08:00:00Z",
+                googleCanonical: "https://www.tourdegrowth.com/en/glossary/acv",
+                userCanonical: "https://www.tourdegrowth.com/en/glossary/acv",
+                referringUrls: ["https://elsewhere.example/"],
+              },
+            },
+          }),
+        );
+      }
+      return new Response(JSON.stringify({ rows: [] }));
+    }) as unknown as typeof fetch;
+
+    const urls = ["https://www.tourdegrowth.com/en/glossary/acv", "https://www.tourdegrowth.com/fr/glossary/acv"];
+    const report = await buildReport(account, { fetchImpl, inspect: urls });
+
+    expect(inspected).toEqual(urls.map((inspectionUrl) => ({ inspectionUrl, siteUrl: "sc-domain:tourdegrowth.com" })));
+    expect(report.inspection!.error).toBeNull();
+    expect(report.inspection!.results).toHaveLength(2);
+    expect(report.inspection!.results[0]).toEqual({
+      url: urls[0],
+      verdict: "NEUTRAL",
+      coverageState: "Discovered - currently not indexed",
+      lastCrawlTime: "2026-10-20T08:00:00Z",
+      googleCanonical: urls[0],
+      userCanonical: urls[0],
+    });
+  });
+
+  it("writes a refusal into the report, stops there, and still returns the search figures", async () => {
+    let inspections = 0;
+    const fetchImpl = (async (url: string) => {
+      const early = searchOk(url);
+      if (early) return early;
+      if (url.includes("urlInspection")) {
+        inspections += 1;
+        return new Response(JSON.stringify({ error: { code: 403, message: "User does not have sufficient permission.", status: "PERMISSION_DENIED" } }), { status: 403 });
+      }
+      return new Response(JSON.stringify({ rows: [{ keys: [], clicks: 1, impressions: 10, ctr: 0.1, position: 9 }] }));
+    }) as unknown as typeof fetch;
+
+    const report = await buildReport(account, { fetchImpl, inspect: ["https://www.tourdegrowth.com/en", "https://www.tourdegrowth.com/fr"] });
+
+    expect(inspections).toBe(1);
+    expect(report.inspection!.error).toMatch(/urlInspection failed on https:\/\/www\.tourdegrowth\.com\/en: HTTP 403 PERMISSION_DENIED: User does not have sufficient permission/);
+    expect(report.inspection!.results).toEqual([]);
+    expect(report.windows.last28.totals).toMatchObject({ impressions: 10 });
+  });
+
+  it("inspects nothing when given nothing", async () => {
+    const fetchImpl = (async (url: string) => searchOk(url) ?? new Response(JSON.stringify({ rows: [] }))) as unknown as typeof fetch;
+    expect((await buildReport(account, { fetchImpl })).inspection).toBeNull();
   });
 });
