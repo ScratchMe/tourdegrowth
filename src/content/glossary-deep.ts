@@ -1227,6 +1227,14 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
           "Assez grande pour que perdre un membre ne déplace pas la courbe de façon visible — une centaine est le plancher habituel. En dessous, élargis la fenêtre plutôt que de chercher la précision : deux mois d'inscriptions lus ensemble valent mieux que quatre cohortes hebdomadaires qui oscillent chacune de dix points sur du bruit.",
         ),
       },
+      {
+        // TODO: à relire (convention 6) — question neuve, 2026-10-31 (A27.d), sur une requête Search Console : « how to interpret cohort analysis ».
+        question: t("How do you read a cohort analysis?", "Comment lire une analyse de cohortes ?"),
+        answer: t(
+          "A cohort table has one row per arrival period and one column per period since arrival, so it reads three ways. Across a row: how one cohort decays over time, where the shape matters more than the height. Down a column: different cohorts at the same age, which says whether the product is getting better at keeping people. Along a diagonal: the same calendar month across every cohort, where a launch, an outage or a seasonal dip shows up as a line cutting through all of them. Compare cohorts only at the same age, and read the column before the row: a newer cohort that holds more at month two is the clearest sign a change worked.",
+          "Un tableau de cohortes a une ligne par période d'arrivée et une colonne par période écoulée depuis l'arrivée, il se lit donc de trois façons. Le long d'une ligne : comment une cohorte s'érode avec le temps, où la forme compte plus que la hauteur. Le long d'une colonne : des cohortes différentes au même âge, ce qui dit si le produit retient de mieux en mieux. Le long d'une diagonale : le même mois calendaire pour toutes les cohortes, où un lancement, une panne ou un creux saisonnier apparaît comme une ligne qui les traverse toutes. Ne compare des cohortes qu'au même âge, et lis la colonne avant la ligne : une cohorte récente qui retient davantage au deuxième mois est le signe le plus net qu'un changement a marché.",
+        ),
+      },
     ],
   },
 
