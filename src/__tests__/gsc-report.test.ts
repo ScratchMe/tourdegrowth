@@ -5,7 +5,7 @@ type Account = { client_email: string; private_key: string };
 type Row = { clicks: number; impressions: number; ctr: number; position: number; query?: string; page?: string };
 type Window = { start: string; end: string; totals: Row | null; queries: Row[]; pages: Row[]; queriesByPage?: Row[] };
 type Inspected = { url: string; verdict: string | null; coverageState: string | null; lastCrawlTime: string | null; googleCanonical: string | null; userCanonical: string | null };
-type Inspection = { error: string | null; results: Inspected[] } | null;
+type Inspection = { error: string | null; truncated: boolean; results: Inspected[] } | null;
 type Report = { generatedAt: string; site: string; windows: { last28: Window; last90: Window }; inspection: Inspection };
 
 // A JS module in an `allowJs: false` project — same trick as
@@ -238,10 +238,27 @@ describe("the URL inspection", () => {
 
     const report = await buildReport(account, { fetchImpl, inspect: ["https://www.tourdegrowth.com/en", "https://www.tourdegrowth.com/fr"] });
 
-    expect(inspections).toBe(1);
-    expect(report.inspection!.error).toMatch(/urlInspection failed on https:\/\/www\.tourdegrowth\.com\/en: HTTP 403 PERMISSION_DENIED: User does not have sufficient permission/);
+    expect(inspections).toBeLessThanOrEqual(2);
+    expect(report.inspection!.error).toMatch(/urlInspection failed on https:\/\/www\.tourdegrowth\.com\/(en|fr): HTTP 403 PERMISSION_DENIED: User does not have sufficient permission/);
     expect(report.inspection!.results).toEqual([]);
     expect(report.windows.last28.totals).toMatchObject({ impressions: 10 });
+  });
+
+  it("stops starting new URLs once the time budget is spent, and says so", async () => {
+    const { inspectUrls } = (await import("../../scripts/gsc-report.mjs" as string)) as {
+      inspectUrls: (f: typeof fetch, token: string, site: string, urls: string[], o?: { budgetMs?: number; now?: () => number }) => Promise<NonNullable<Inspection>>;
+    };
+    let clock = 0;
+    const fetchImpl = (async () => {
+      clock += 1000;
+      return new Response(JSON.stringify({ inspectionResult: { indexStatusResult: { verdict: "PASS" } } }));
+    }) as unknown as typeof fetch;
+    const urls = Array.from({ length: 20 }, (_, i) => `https://www.tourdegrowth.com/en/p${i}`);
+    const out = await inspectUrls(fetchImpl, "tok", "sc-domain:tourdegrowth.com", urls, { budgetMs: 4500, now: () => clock });
+    expect(out.truncated).toBe(true);
+    expect(out.error).toBeNull();
+    expect(out.results.length).toBeGreaterThan(0);
+    expect(out.results.length).toBeLessThan(urls.length);
   });
 
   it("inspects nothing when given nothing", async () => {

@@ -150,32 +150,63 @@ export function sitemapUrls(xml) {
   return [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1].trim());
 }
 
+/** Requests in flight at once: well under the API's 600 a minute, and three times faster than one by one. */
+const INSPECT_CONCURRENCY = 3;
+/** One answer may take this long; a slower one counts as a refusal of that URL. */
+const INSPECT_TIMEOUT_MS = 20_000;
+/** The inspection stops starting new URLs after this, so the workflow's ten minutes always leave room to encrypt. */
+const INSPECT_BUDGET_MS = 5 * 60_000;
+
 /**
- * Google's index status for each URL, one request at a time (the API allows
- * 600 a minute; the sitemap holds under a hundred). The first refusal is
- * kept as `error` and stops the loop: every other URL would be refused the
- * same way, and the report must still be written.
+ * Google's index status for each URL, three at a time. The first refusal is
+ * kept as `error` and stops the inspection: every other URL would be refused
+ * the same way, and the report must still be written. The time budget does
+ * the same for a slow day (`truncated`), so the workflow never times out
+ * with the whole report lost — the first run, on 2026-10-31, took minutes.
  */
-export async function inspectUrls(fetchImpl, token, site, urls) {
+export async function inspectUrls(fetchImpl, token, site, urls, { budgetMs = INSPECT_BUDGET_MS, now = Date.now } = {}) {
+  const started = now();
   const results = [];
-  for (const url of urls) {
-    const res = await fetchImpl(INSPECT_URL, {
-      method: "POST",
-      headers: { authorization: `Bearer ${token}`, "content-type": "application/json" },
-      body: JSON.stringify({ inspectionUrl: url, siteUrl: site }),
-    });
-    if (!res.ok) return { error: `urlInspection failed on ${url}: ${await describeFailure(res)}`, results };
-    const status = (await res.json()).inspectionResult?.indexStatusResult ?? {};
-    results.push({
-      url,
-      verdict: status.verdict ?? null,
-      coverageState: status.coverageState ?? null,
-      lastCrawlTime: status.lastCrawlTime ?? null,
-      googleCanonical: status.googleCanonical ?? null,
-      userCanonical: status.userCanonical ?? null,
-    });
+  let error = null;
+  let truncated = false;
+  let next = 0;
+  async function worker() {
+    while (error === null && next < urls.length) {
+      if (now() - started > budgetMs) {
+        truncated = true;
+        return;
+      }
+      const index = next++;
+      const url = urls[index];
+      let res;
+      try {
+        res = await fetchImpl(INSPECT_URL, {
+          method: "POST",
+          headers: { authorization: `Bearer ${token}`, "content-type": "application/json" },
+          body: JSON.stringify({ inspectionUrl: url, siteUrl: site }),
+          signal: AbortSignal.timeout(INSPECT_TIMEOUT_MS),
+        });
+      } catch (err) {
+        error ??= `urlInspection failed on ${url}: ${err instanceof Error ? err.name : "network error"}`;
+        return;
+      }
+      if (!res.ok) {
+        error ??= `urlInspection failed on ${url}: ${await describeFailure(res)}`;
+        return;
+      }
+      const status = (await res.json()).inspectionResult?.indexStatusResult ?? {};
+      results[index] = {
+        url,
+        verdict: status.verdict ?? null,
+        coverageState: status.coverageState ?? null,
+        lastCrawlTime: status.lastCrawlTime ?? null,
+        googleCanonical: status.googleCanonical ?? null,
+        userCanonical: status.userCanonical ?? null,
+      };
+    }
   }
-  return { error: null, results };
+  await Promise.all(Array.from({ length: Math.min(INSPECT_CONCURRENCY, urls.length) }, worker));
+  return { error, truncated, results: results.filter(Boolean) };
 }
 
 /** The whole report. `fetchImpl` is injectable so the shape can be tested without Google. */
